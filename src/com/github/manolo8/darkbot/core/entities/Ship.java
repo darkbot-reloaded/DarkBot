@@ -14,22 +14,12 @@ public class Ship extends Entity {
     public ShipInfo shipInfo;
     public boolean invisible;
 
-    public Ship() {
+    public Ship(int id) {
+        super(id);
+
         this.health = new Health();
         this.playerInfo = new PlayerInfo();
         this.shipInfo = new ShipInfo();
-    }
-
-    public Ship(long address, int id) {
-        super(address, id);
-
-        this.health = new Health(API.readMemoryLong(address + 184));
-        this.playerInfo = new PlayerInfo(API.readMemoryLong(address + 248));
-        this.shipInfo = new ShipInfo(API.readMemoryLong(address + 232));
-    }
-
-    public boolean isEnemy() {
-        return playerInfo.factionId != instance.playerInfo.factionId && playerInfo.clanDiplomacy != 1 && playerInfo.clanDiplomacy != 2 || playerInfo.clanDiplomacy == 3;
     }
 
     public boolean isAttacking(Ship other) {
@@ -42,10 +32,9 @@ public class Ship extends Entity {
 
         health.update();
         shipInfo.update();
+        playerInfo.update();
 
         invisible = API.readMemoryBoolean(API.readMemoryLong(address + 160) + 32);
-
-        //playerInfo unique update!
     }
 
     @Override
@@ -55,7 +44,5 @@ public class Ship extends Entity {
         playerInfo.update(API.readMemoryLong(address + 248));
         health.update(API.readMemoryLong(address + 184));
         shipInfo.update(API.readMemoryLong(address + 232));
-
-//        System.out.println(getClass().getSimpleName() + " -> " + (address + 248));
     }
 }

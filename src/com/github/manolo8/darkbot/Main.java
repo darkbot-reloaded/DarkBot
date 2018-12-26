@@ -1,63 +1,64 @@
 package com.github.manolo8.darkbot;
 
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.core.def.Module;
-import com.github.manolo8.darkbot.core.def.WindowsAPI;
+import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.DarkBotAPI;
+import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.*;
 import com.github.manolo8.darkbot.gui.MainForm;
 import com.github.manolo8.darkbot.modules.CollectorModule;
 import com.github.manolo8.darkbot.modules.LootModule;
+import com.google.gson.GsonBuilder;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class Main extends Thread {
 
     public static final Object UPDATE_LOCKER = new Object();
 
-    public static WindowsAPI API;
+    public static DarkBotAPI API;
 
-    public final Config config;
     public final MapManager mapManager;
     public final StarManager starManager;
     public final HeroManager hero;
     public final GuiManager guiManager;
+    public final StatsManager statsManager;
 
+    public Config config;
     public Module module;
 
-    private final BotManager botManager;
+    private final BotInstaller botInstaller;
     private final MainForm form;
 
     private volatile boolean running;
 
-    public Main() throws IOException {
-        API = new WindowsAPI();
-        config = new Config();
+    public Main() {
+        API = new DarkBotAPI();
+        this.config = new Config();
 
-        botManager = new BotManager();
+        loadConfig();
+
+        botInstaller = new BotInstaller();
 
         guiManager = new GuiManager(this);
         starManager = new StarManager();
         mapManager = new MapManager(this);
         hero = new HeroManager(this);
+        statsManager = new StatsManager();
 
-        botManager.add(guiManager);
-        botManager.add(mapManager);
-        botManager.add(hero);
+        botInstaller.add(guiManager);
+        botInstaller.add(mapManager);
+        botInstaller.add(hero);
+        botInstaller.add(statsManager);
+
+        botInstaller.init();
 
         form = new MainForm(this);
 
-        JFrame frame = new JFrame("DarkBOT");
-
-        frame.setContentPane(form.content);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(480, 480);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-        frame.setIconImage(ImageIO.read(getClass().getResource("/resources/icon.png")));
-
-        setModule(new LootModule(this));
+        updateConfig();
 
         start();
     }
@@ -67,21 +68,22 @@ public class Main extends Thread {
         long time;
 
         while (true) {
+
             time = System.currentTimeMillis();
 
-
-            if (botManager.isInvalid()) {
-                botManager.install();
+            if (botInstaller.isInvalid()) {
+                botInstaller.verify();
                 sleepMax(time, 5000);
             } else {
 
                 hero.tick();
                 mapManager.tick();
+                guiManager.tick();
 
                 if (running && guiManager.canTickModule()) {
-                    guiManager.tick();
                     hero.checkMove();
                     module.tick();
+                    statsManager.tick();
                 }
 
                 form.tick();
@@ -94,16 +96,65 @@ public class Main extends Thread {
 
     public <A extends Module> A setModule(A module) {
         this.module = module;
-        this.module.install();
+        this.module.install(this);
         return module;
     }
 
     public void setRunning(boolean running) {
         if (this.running != running) {
 
-            hero.statistics.toggle(running);
+            statsManager.toggle(running);
 
             this.running = running;
+        }
+    }
+
+    private void loadConfig() {
+        try {
+
+            File file = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+
+
+            File config = new File(file, "config.json");
+
+            if (config.exists()) {
+
+                FileReader reader = new FileReader(config);
+
+                this.config = new GsonBuilder().create().fromJson(reader, Config.class);
+
+                if (this.config == null) this.config = new Config();
+
+                reader.close();
+
+            } else {
+                saveConfig();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveConfig() {
+        try {
+
+            File file = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+
+            File config = new File(file, "config.json");
+
+            if (config.exists()) {
+                config.delete();
+            }
+
+            FileWriter writer = new FileWriter(config);
+
+            new GsonBuilder().create().toJson(this.config, writer);
+
+            writer.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -114,16 +165,17 @@ public class Main extends Thread {
     public void updateConfig() {
         switch (config.CURRENT_MODULE) {
             case 0:
-                if (isModule(CollectorModule.class)) {
-                    setModule(new CollectorModule(this));
+                if (!isModule(CollectorModule.class)) {
+                    setModule(new CollectorModule());
                 }
                 break;
             case 1:
-                if (isModule(LootModule.class)) {
-                    setModule(new LootModule(this));
+                if (!isModule(LootModule.class)) {
+                    setModule(new LootModule());
                 }
                 break;
         }
+//        setModule(new GateModule());
     }
 
     private boolean isModule(Class clazz) {

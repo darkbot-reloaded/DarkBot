@@ -1,7 +1,9 @@
 package com.github.manolo8.darkbot.core.entities;
 
-import com.github.manolo8.darkbot.core.def.Updatable;
+import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.objects.swf.Array;
+import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.Location;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -10,16 +12,23 @@ public class Entity implements Updatable {
 
     public long address;
     public int id;
+
     public Location location;
+    public Clickable clickable;
+
+    public boolean removed;
+
+    public Array traits;
 
     public Entity() {
         this.location = new Location(0);
+        this.clickable = new Clickable();
+        this.traits = new Array(0);
     }
 
-    public Entity(long address, int id) {
-        this.address = address;
+    public Entity(int id) {
+        this();
         this.id = id;
-        this.location = new Location(API.readMemoryLong(address + 64));
     }
 
     public int getId() {
@@ -50,6 +59,23 @@ public class Entity implements Updatable {
     @Override
     public void update(long address) {
         this.address = address;
+
         this.location.update(API.readMemoryLong(address + 64));
+        this.traits.update(API.readMemoryLong(address + 48));
+
+        traits.update();
+
+        for (int c = 0; c < traits.size; c++) {
+            long adr = traits.elements[c];
+
+            int radius = API.readMemoryInt(adr + 40);
+            int priority = API.readMemoryInt(adr + 44);
+            int enabled = API.readMemoryInt(adr + 48);
+
+            if (radius >= 0 && radius < 4000 && priority > -4 && priority < 1000 && (enabled == 1 || enabled == 0)) {
+                clickable.update(adr);
+                break;
+            }
+        }
     }
 }

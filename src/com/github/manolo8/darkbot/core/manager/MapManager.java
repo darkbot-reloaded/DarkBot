@@ -1,15 +1,15 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.def.Manager;
-import com.github.manolo8.darkbot.core.def.MapChange;
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.*;
-import com.github.manolo8.darkbot.core.objects.ArrayDO;
-import com.github.manolo8.darkbot.core.objects.Map;
+import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.core.itf.MapChange;
+import com.github.manolo8.darkbot.core.objects.swf.Array;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -22,26 +22,21 @@ public class MapManager implements Manager {
     private long viewAddress;
     private long boundsAddress;
 
-    private long bonusBoxConfirm;
-    private long cargoBoxConfirm;
-
     private Main main;
-    private ArrayDO entities;
+    private Array entities;
 
     private HashSet<Integer> ids;
 
-    public List<Box> bonusBoxes;
-    public List<Box> cargoBoxes;
+    public List<Box> boxes;
 
     public List<Npc> npcs;
     public List<Portal> portals;
     public List<Ship> ships;
+    public List<BattleStation> battleStations;
 
-    public List<Box> unknownBoxes;
     public List<Entity> unknown;
 
     public static int id;
-    public Map map;
 
     public int internalWidth;
     public int internalHeight;
@@ -57,34 +52,31 @@ public class MapManager implements Manager {
     public MapManager(Main main) {
         this.main = main;
 
+        this.entities = new Array(0);
+
         this.ids = new HashSet<>();
 
-        this.entities = new ArrayDO(0);
-
-        this.bonusBoxes = new ArrayList<>();
-        this.cargoBoxes = new ArrayList<>();
+        this.boxes = new ArrayList<>();
         this.npcs = new ArrayList<>();
         this.portals = new ArrayList<>();
         this.ships = new ArrayList<>();
-        this.unknownBoxes = new ArrayList<>();
         this.unknown = new ArrayList<>();
-
-        this.map = main.starManager.fromId(id);
+        this.battleStations = new ArrayList<>();
     }
 
 
     @Override
-    public void install(BotManager botManager) {
-        mapAddressStatic = botManager.screenManagerAddress + 256;
-        viewAddressStatic = mapAddressStatic - 40;
+    public void install(BotInstaller botInstaller) {
 
-        bonusBoxConfirm = API.readMemoryLong(botManager.settingsAddress + 452);
-        cargoBoxConfirm = API.readMemoryLong(botManager.settingsAddress + 460);
+        botInstaller.screenManagerAddress.add(value -> {
+            mapAddressStatic = value + 256;
+            viewAddressStatic = mapAddressStatic - 40;
+        });
+
     }
 
     @Override
     public void stop() {
-        ids.clear();
         cleanup();
     }
 
@@ -110,6 +102,7 @@ public class MapManager implements Manager {
         }
 
         updateBounds();
+
     }
 
     private void update(long address) {
@@ -119,11 +112,12 @@ public class MapManager implements Manager {
         internalWidth = API.readMemoryInt(address + 68);
         internalHeight = API.readMemoryInt(address + 72);
         entities.update(API.readMemoryLong(address + 40));
+        System.out.println(API.readMemoryLong(address + 40));
         int tempId = API.readMemoryInt(address + 76);
 
         if (tempId != id) {
             id = tempId;
-            map = main.starManager.fromId(id);
+            main.hero.map = main.starManager.fromId(id);
 
             if (main.module instanceof MapChange) {
                 ((MapChange) main.module).onMapChange();
@@ -151,103 +145,82 @@ public class MapManager implements Manager {
         for (int i = 0; i < entities.size; i++) {
 
             long found = entities.elements[i];
+
             int id = API.readMemoryInt(found + 56);
 
-            if (!ids.contains(id)) {
+            if (!ids.add(id)) continue;
 
-                ids.add(id);
+            if (API.readMemoryInt(found + 112) == 3) {
+                boxes.add(defs(new Box(id), found));
+            } else if (id <= 150000499 && id >= 150000156) {
+                portals.add(defs(main.starManager.fromIdPortal(id), found));
+            } else if (id <= 150000950 && id >= 150000500) {
+                battleStations.add(defs(new BattleStation(id), found));
+            } else {
 
-                if (API.readMemoryInt(found + 112) == 3) {
+                int npc = API.readMemoryInt(found + 112);
+                int visible = API.readMemoryInt(found + 116);
+                int c = API.readMemoryInt(found + 120);
+                int d = API.readMemoryInt(found + 124);
 
-                    long confirm = API.readMemoryLong(found + 144);
-
-                    //Needs to find an way to search the box name
-
-                    if (confirm == bonusBoxConfirm) {
-                        bonusBoxes.add(new Box(found, id));
-                    } else if (confirm == cargoBoxConfirm) {
-                        cargoBoxes.add(new Box(found, id));
-                    } else {
-                        unknownBoxes.add(new Box(found, id));
+                if ((visible == 1 || visible == 0) && (c == 1 || c == 0) && d == 0) {
+                    if (npc == 1) {
+                        npcs.add(defs(new Npc(id), found));
+                    } else if (npc == 0 && found != main.hero.address && found != main.hero.pet.address) {
+                        ships.add(defs(new Ship(id), found));
                     }
-
-                } else if (id <= 150000400 && id >= 150000156) {
-                    Portal portal = main.starManager.fromIdPortal(id);
-
-                    portal.update(found);
-                    portal.update();
-
-                    portals.add(portal);
                 } else {
-                    int npc = API.readMemoryInt(found + 112);
-                    int visible = API.readMemoryInt(found + 116);
-                    int c = API.readMemoryInt(found + 120);
-                    int d = API.readMemoryInt(found + 124);
-
-                    if ((visible == 1 || visible == 0) && (c == 1 || c == 0) && d == 0) {
-                        if (npc == 1) {
-                            npcs.add(new Npc(found, id));
-                        } else if (npc == 0 && found != main.hero.address && found != main.hero.pet.address) {
-                            ships.add(new Ship(found, id));
-                        }
-                    } else {
-                        unknown.add(new Entity(found, id));
-                    }
+                    unknown.add(defs(new Entity(id), found));
                 }
 
             }
+
         }
 
-        iterate(bonusBoxes);
-        iterate(cargoBoxes);
+        iterate(boxes);
         iterate(portals);
         iterate(npcs);
         iterate(ships);
-        iterate(unknownBoxes);
         iterate(unknown);
+        iterate(battleStations);
+    }
+
+    private <E extends Entity> E defs(E entity, long address) {
+        entity.update(address);
+
+        entity.clickable.setRadius(0);
+
+        return entity;
     }
 
     private void iterate(List<? extends Entity> entities) {
-
-        Iterator<? extends Entity> iterator = entities.iterator();
-
-        while (iterator.hasNext()) {
-            Entity entity = iterator.next();
+        for (int i = 0; i < entities.size(); i++) {
+            Entity entity = entities.get(i);
 
             if (entity.isInvalid()) {
-                iterator.remove();
-                ids.remove(entity.getId());
+                entities.remove(i);
+                entity.removed = true;
+                ids.remove(entity.id);
+                i--;
             } else {
                 entity.update();
             }
         }
-
     }
 
     private void cleanup() {
         ids.clear();
-        bonusBoxes.clear();
-        cargoBoxes.clear();
+
+        boxes.clear();
         npcs.clear();
         portals.clear();
         ships.clear();
-        unknownBoxes.clear();
         unknown.clear();
+        battleStations.clear();
     }
 
     public boolean isOutOfMap(double x, double y) {
         return x < 0 || y < 0 || x > internalWidth || y > internalHeight;
-    }
-
-    public boolean canClick(double x, double y) {
-
-        for (Npc npc : npcs) {
-            if (npc.location.distance(x, y) < 300) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public Portal closestByType(int... types) {
@@ -265,22 +238,29 @@ public class MapManager implements Manager {
 
     public void translateMouseMove(double x, double y) {
         API.mouseMove(
-                ((x - boundX) / (boundMaxX - boundX) * clientWidth),
-                ((y - boundY) / (boundMaxY - boundY) * clientHeight)
+                (int) ((x - boundX) / (boundMaxX - boundX) * clientWidth),
+                (int) ((y - boundY) / (boundMaxY - boundY) * clientHeight)
         );
     }
 
     public void translateMousePress(double x, double y) {
         API.mousePress(
-                ((x - boundX) / (boundMaxX - boundX) * clientWidth),
-                ((y - boundY) / (boundMaxY - boundY) * clientHeight)
+                (int) ((x - boundX) / (boundMaxX - boundX) * clientWidth),
+                (int) ((y - boundY) / (boundMaxY - boundY) * clientHeight)
         );
     }
 
     public void translateMouseClick(double x, double y) {
         API.mouseClick(
-                ((x - boundX) / (boundMaxX - boundX) * clientWidth),
-                ((y - boundY) / (boundMaxY - boundY) * clientHeight)
+                (int) ((x - boundX) / (boundMaxX - boundX) * clientWidth),
+                (int) ((y - boundY) / (boundMaxY - boundY) * clientHeight)
+        );
+    }
+
+    public void translateMouseMoveRelease(double x, double y) {
+        API.mouseRelease(
+                (int) ((x - boundX) / (boundMaxX - boundX) * clientWidth),
+                (int) ((y - boundY) / (boundMaxY - boundY) * clientHeight)
         );
     }
 }

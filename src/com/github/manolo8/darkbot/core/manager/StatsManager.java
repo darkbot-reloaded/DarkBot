@@ -1,10 +1,11 @@
-package com.github.manolo8.darkbot.core.objects;
+package com.github.manolo8.darkbot.core.manager;
 
-import com.github.manolo8.darkbot.core.def.Updatable;
+import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.itf.Manager;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Statistics implements Updatable {
+public class StatsManager implements Manager {
 
     private long address;
 
@@ -22,25 +23,36 @@ public class Statistics implements Updatable {
     public double earnedExperience;
     public double earnedHonor;
 
+    public String sid;
+
     private StringBuilder builder;
 
-    public Statistics(long address) {
-        this.address = address;
+    public StatsManager() {
         builder = new StringBuilder();
     }
 
     @Override
-    public void update() {
-        updateCredits(API.readMemoryDouble(address + 280));
-        updateUridium(API.readMemoryDouble(address + 288));
-        updateExperience(API.readMemoryDouble(address + 304));
-        updateHonor(API.readMemoryDouble(address + 312));
+    public void install(BotInstaller botInstaller) {
+        botInstaller.userDataAddress.add(value -> {
+            address = value;
+            sid = API.readMemoryString(API.readMemoryLong(address + 168));
+        });
     }
 
     @Override
-    public void update(long address) {
-        this.address = address;
+    public void stop() {
+
     }
+
+    public void tick() {
+        if (address != 0) {
+            updateCredits(API.readMemoryDouble(address + 288));
+            updateUridium(API.readMemoryDouble(address + 296));
+            updateExperience(API.readMemoryDouble(address + 312));
+            updateHonor(API.readMemoryDouble(address + 320));
+        }
+    }
+
 
     public void toggle(boolean running) {
         lastStatus = running;

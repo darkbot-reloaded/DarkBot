@@ -1,8 +1,9 @@
 package com.github.manolo8.darkbot.core.objects;
 
-import com.github.manolo8.darkbot.core.def.Updatable;
+import com.github.manolo8.darkbot.core.itf.Updatable;
 
 import static com.github.manolo8.darkbot.Main.API;
+import static com.github.manolo8.darkbot.core.manager.HeroManager.instance;
 
 public class PlayerInfo implements Updatable {
 
@@ -16,42 +17,36 @@ public class PlayerInfo implements Updatable {
     public int rank;
     public int gg;
 
-    public PlayerInfo() {
-    }
-
-    public PlayerInfo(long address) {
-        update(address);
+    public boolean isEnemy() {
+        return (clanDiplomacy != 0 || clanId != 0 || factionId != 0) && (factionId != instance.playerInfo.factionId && clanDiplomacy != 1 && clanDiplomacy != 2 || clanDiplomacy == 3);
     }
 
     @Override
     public void update() {
 
-        clanId = API.readMemoryInt(API.readMemoryLong(address + 40) + 40);
-        clanDiplomacy = API.readMemoryInt(API.readMemoryLong(address + 48) + 40);
-        clanTag = API.readMemoryString(API.readMemoryLong(API.readMemoryLong(address + 56) + 40));
-        username = API.readMemoryString(API.readMemoryLong(API.readMemoryLong(address + 64) + 40));
-        factionId = API.readMemoryInt(API.readMemoryLong(address + 72) + 40);
-        rank = API.readMemoryInt(API.readMemoryLong(address + 80) + 40);
-        gg = API.readMemoryInt(API.readMemoryLong(address + 88) + 40);
+        clanId = readIntFromIntHolder(40);
+        clanDiplomacy = readIntFromIntHolder(48);
+        factionId = readIntFromIntHolder(72);
+        rank = readIntFromIntHolder(80);
+        gg = readIntFromIntHolder(88);
+
+        if (username == null) {
+            clanTag = readStringFromStringHolder(56);
+            username = readStringFromStringHolder(64);
+        }
+
+    }
+
+    private int readIntFromIntHolder(int holderOffset) {
+        return API.readMemoryInt(API.readMemoryLong(address + holderOffset) + 40);
+    }
+
+    private String readStringFromStringHolder(int holderOffset) {
+        return API.readMemoryString(API.readMemoryLong(API.readMemoryLong(address + holderOffset) + 40));
     }
 
     @Override
     public void update(long address) {
         this.address = address;
-        update();
-    }
-
-    @Override
-    public String toString() {
-        return "PlayerInfo{" +
-                "address=" + address +
-                ", clanId=" + clanId +
-                ", clanDiplomacy=" + clanDiplomacy +
-                ", clanTag='" + clanTag + '\'' +
-                ", username='" + username + '\'' +
-                ", factionId=" + factionId +
-                ", rank=" + rank +
-                ", gg=" + gg +
-                '}';
     }
 }

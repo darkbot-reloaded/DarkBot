@@ -1,43 +1,47 @@
 package com.github.manolo8.darkbot.modules;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.def.Do;
-import com.github.manolo8.darkbot.core.def.MapChange;
-import com.github.manolo8.darkbot.core.def.Module;
 import com.github.manolo8.darkbot.core.entities.Portal;
+import com.github.manolo8.darkbot.core.itf.MapChange;
+import com.github.manolo8.darkbot.core.itf.Module;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class MapModule extends Module implements MapChange {
+public class MapModule implements Module, MapChange {
 
-    private Map target;
-    private Do run;
 
+    private Main main;
+    private HeroManager hero;
+    private StarManager star;
+
+    private Module back;
     private Portal current;
+    private Map target;
     private long time;
-    private double lastDistance;
-
-    public MapModule(Main main) {
-        super(main);
-    }
 
     @Override
-    public void install() {
+    public void install(Main main) {
         main.guiManager.module = null;
         main.guiManager.nullPetModuleOnActivate = false;
+
+        this.hero = main.hero;
+        this.star = main.starManager;
+        this.main = main;
     }
 
     public void setTarget(Map target) {
         this.target = target;
 
-        current = main.starManager.next(main.mapManager.map, main.hero.location, target);
+        current = star.next(hero.map, hero.location, target);
 
     }
 
-    public void setTarget(Map target, Do run) {
+    public void setTargetAndBack(Map target, Module back) {
         setTarget(target);
-        this.run = run;
+        this.back = back;
     }
 
     @Override
@@ -45,36 +49,34 @@ public class MapModule extends Module implements MapChange {
 
         if (current != null) {
 
-            double distance = current.location.distance(main.hero);
+            double distance = current.location.distance(hero);
 
-            main.hero.runMode();
+            hero.runMode();
 
-            if (distance < 250) {
+            if (distance < 100 && !hero.isMoving()) {
 
-                if (main.hero.nextMap() != current.target.id && System.currentTimeMillis() - time > 5000) {
-                    API.button('J');
+                if (hero.nextMap() != current.target.id && System.currentTimeMillis() - time > 9000) {
+                    API.keyboardClick('J');
                     time = System.currentTimeMillis();
                 }
 
-            } else if ((!main.hero.isMoving() || lastDistance < distance) && current.location.isLoaded()) {
-                main.hero.move(current);
+            } else if (current.location.isLoaded()) {
+                hero.move(current);
             }
-
-            lastDistance = distance;
         }
 
     }
 
     @Override
     public void onMapChange() {
-        if (main.mapManager.map == target) {
-            if (run != null) {
-                run.run();
-                run = null;
+        if (hero.map == target) {
+            if (back != null) {
+                main.setModule(back);
+                back = null;
             }
             current = null;
         } else {
-            current = main.starManager.next(main.mapManager.map, main.hero.location, target);
+            current = star.next(hero.map, hero.location, target);
         }
     }
 }

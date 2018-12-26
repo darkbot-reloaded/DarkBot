@@ -15,8 +15,8 @@ public class Portal extends Entity {
 
     public int targetId;
 
-    public Portal(long address, int id, int targetId) {
-        super(address, id);
+    public Portal(int id, int targetId) {
+        super(id);
 
         this.targetId = targetId;
         this.iconLocation = new Location(0, 0);

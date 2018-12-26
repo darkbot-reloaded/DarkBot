@@ -1,150 +1,155 @@
 package com.github.manolo8.darkbot.modules;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.def.Module;
+import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.entities.Npc;
-import com.github.manolo8.darkbot.core.entities.Portal;
-import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.manager.GuiManager;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.Location;
+
+import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static java.lang.Math.cos;
-import static java.lang.Math.sin;
+import static java.lang.StrictMath.sin;
 
 
-public class GateModule extends Module {
+public class GateModule implements Module {
+
+    private HeroManager hero;
+    private GuiManager gui;
+
+    private List<Npc> npcs;
+
+    private long clickDelay;
+    private long laserTime;
+    private long locker;
 
     private Npc current;
-    private long laserTime;
+
+    private boolean direction;
     private boolean repairing;
-    private long portalWait;
 
-    private Location zero;
+    private Location safe;
 
-    public GateModule(Main main) {
-        super(main);
-
-        this.zero = new Location(11000, 6000);
+    public GateModule() {
+        safe = new Location(8000, 5500);
     }
 
     @Override
-    public void install() {
-        main.guiManager.module = null;
-        main.guiManager.nullPetModuleOnActivate = false;
+    public void install(Main main) {
+        npcs = main.mapManager.npcs;
+        hero = main.hero;
+        gui = main.guiManager;
     }
 
     @Override
     public void tick() {
 
+        if (isGGMap()) {
+            Npc closest = closest(hero.location);
 
-        if ((MapManager.id == 51 || MapManager.id == 52 || MapManager.id == 53) && hasNPC()) {
+            if (closest != null) {
 
-            Npc closest = closest(main.hero.location);
+                Location locationHero = hero.location;
+                Location locationNpc = closest.location;
 
-            double distance = closest.location.distance(main.hero);
+                if (hero.health.hpPercent() < 0.5 || repairing) {
 
-            if (repairing || main.hero.health.healthPercent() < 0.6) {
+                    if (!repairing) repairing = true;
+                    else repairing = (hero.health.hpPercent() < 0.8);
 
-                main.hero.runMode();
 
-                move(zero, 5000, 1000);
+                    hero.runMode();
+                    move(safe, 500, 1000);
 
-                repairing = main.hero.health.healthPercent() < 0.9;
+                } else {
 
-                return;
+                    hero.attackMode();
 
-            } else if (closest.location.x == 0 && closest.location.y == 0) {
-                main.hero.move(395, 395);
-            } else if (closest.location.x == 21000 && closest.location.y == 13500) {
-                main.hero.move(20605, 13105);
-            } else if (distance < closest.type.radius) {
-                move(zero, 5000, closest.type.radius);
-            } else {
-                move(closest.location, closest.type.radius, closest.type.radius - distance);
-            }
-
-            if (current == null || current.isInvalid()) {
-                current = closest;
-            } else {
-                double distanceCurrent = current.location.distance(main.hero);
-
-                if (distanceCurrent - 120 > distance || current.health.healthPercent() < 0.25) {
-                    current = closest;
-                }
-            }
-
-            if (main.hero.isTarget(current)) {
-
-                main.hero.attackMode();
-
-                long laser = System.currentTimeMillis() - laserTime;
-
-                if ((!main.hero.isAttacking(current) && laser > 1000)
-                        || (!current.health.isDecreasedIn(4000) && laser > 4000)) {
-
-                    API.button('Z');
-                    laserTime = System.currentTimeMillis();
-
-                }
-
-            } else if (main.hero.location.distance(current) < 800) {
-                main.hero.setTarget(current);
-            }
-
-        } else {
-
-            if (!main.hero.isMoving()) {
-
-                Portal portal = main.mapManager.closestByType(2, 3, 4);
-
-                if (portal != null && portal.location.isLoaded()) {
-                    main.hero.move(portal.location);
-
-                    if (portal.location.distance(main.hero) < 200 && System.currentTimeMillis() - portalWait > 3000) {
-                        API.button('J');
-                        portalWait = System.currentTimeMillis();
+                    if (closest.health.hpPercent() < 0.25 && System.currentTimeMillis() - locker > 5000) {
+                        direction = !direction;
+                        locker = System.currentTimeMillis();
                     }
 
+                    if (locationNpc.isMoving() || locationNpc.distance(locationHero) > 800) {
+                        move(locationNpc, hero.shipInfo.speed * 0.625, closest.type.radius + locationNpc.measureSpeed() * 0.625);
+                    }
+
+                    if (current == null
+                            || current.isInvalid()
+                            || locationHero.distance(current) - locationHero.distance(locationNpc) > 150) {
+                        current = closest;
+                    }
+
+                    tickNormalMode();
                 }
 
+            } else {
+                hero.move(9000, 6500);
+            }
+        }
+    }
+
+    private boolean isGGMap() {
+        int id = hero.map.id;
+        return id == 51 || id == 52 || id == 53;
+    }
+
+    private void tickNormalMode() {
+        if (hero.isTarget(current)) {
+
+            if (!hero.isAttacking(current) && System.currentTimeMillis() - laserTime > 1000) {
+                API.keyboardClick('Z');
+
+                laserTime = System.currentTimeMillis();
             }
 
+        } else if (hero.location.distance(current) < 800 && System.currentTimeMillis() - clickDelay > 500) {
+            hero.setTarget(current);
+
+            current.clickable.setRadius(800);
+            hero.clickCenter();
+            current.clickable.setRadius(0);
+            API.keyboardClick('Z');
+
+            clickDelay = System.currentTimeMillis();
         }
-
     }
 
-    private void tickAttackMode() {
+    private void move(Location location, double distance, double radius) {
 
-    }
+        Location current = hero.location;
 
-    private void tickKamikazeMode() {
+        double angle = location.angle(current);
 
-    }
-
-    private void move(Location base, double radius, double distance) {
-        Location hero = main.hero.location;
-
-        double angle = base.angle(hero) + distance / radius;
 
         Location target = new Location(
-                base.x - cos(angle) * radius,
-                base.y - sin(angle) * radius
+                location.x - cos(angle) * radius,
+                location.y - sin(angle) * radius
         );
 
-        main.hero.move(target);
+        if (distance - target.distance(current) > 0) {
+            double move = distance / radius;
+            angle += direction ? move : -move;
+            target.x = location.x - cos(angle) * radius;
+            target.y = location.y - sin(angle) * radius;
+        }
+
+        hero.move(target);
     }
 
     private boolean hasNPC() {
-        return main.mapManager.npcs.size() != 0;
+        return !npcs.isEmpty();
     }
 
     private Npc closest(Location location) {
-        double distance = 40000;
+        double distance = -1;
         Npc closest = null;
 
-        for (Npc npc : main.mapManager.npcs) {
+        for (Npc npc : npcs) {
             double distanceCurrent = location.distance(npc.location);
-            if (distanceCurrent < distance) {
+            if (distance == -1 || distanceCurrent < distance) {
                 distance = distanceCurrent;
                 closest = npc;
             }

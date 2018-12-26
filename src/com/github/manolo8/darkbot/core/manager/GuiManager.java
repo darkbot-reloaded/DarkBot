@@ -1,9 +1,10 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.def.Manager;
+import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.core.objects.swf.Dictionary;
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.Vector;
 import com.github.manolo8.darkbot.core.utils.pet.PetModule;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class GuiManager implements Manager {
 
     private final Main main;
-    private final Vector guiReader;
+    private final Dictionary guis;
 
     private long reconnectTime;
     private long repairTime;
@@ -26,105 +27,97 @@ public class GuiManager implements Manager {
     private long guiAddress;
     private long mainAddress;
 
-    private Gui petGui;
-    private Gui lostConnection;
-    private Gui connecting;
+    private final Gui pet;
+    private final Gui lostConnection;
+    private final Gui connecting;
 
     private boolean temp;
     private long timeTemp;
+    private long petTemp;
 
-    private boolean check;
+    public boolean check;
 
     public int revives;
-    public int maxRevives = 30;
     public int petRevives;
-    public int maxPetRevives = 1000;
 
     public boolean nullPetModuleOnActivate;
     public PetModule module;
 
     public GuiManager(Main main) {
         this.main = main;
-        this.guiReader = new Vector(0);
+
+        this.guis = new Dictionary(0);
+
+        pet = new Gui(0);
+        lostConnection = new Gui(0);
+        connecting = new Gui(0);
     }
 
     @Override
-    public void install(BotManager botManager) {
+    public void install(BotInstaller botInstaller) {
 
-        screenAddress = botManager.screenManagerAddress;
-        guiAddress = botManager.guiManagerAddress;
-        mainAddress = botManager.mainAddress;
+        this.guis.addLazy("lost_connection", lostConnection::update);
+        this.guis.addLazy("connecting", connecting::update);
+        this.guis.addLazy("pet", pet::update);
 
-        guiReader.update(API.readMemoryLong(guiAddress + 112));
+        botInstaller.screenManagerAddress.add(value -> screenAddress = value);
+        botInstaller.mainAddress.add(value -> mainAddress = value);
 
-        //reset
+        botInstaller.guiManagerAddress.add(value -> {
+            guiAddress = value;
+            guis.update(API.readMemoryLong(guiAddress + 112));
 
-        check = true;
-        petGui = null;
+            repairAddress = 0;
+            pet.reset();
+            lostConnection.reset();
+            connecting.reset();
+
+            check = true;
+        });
     }
 
     @Override
     public void stop() {
-        repairAddress = 0;
     }
 
     public void tick() {
 
-        if (lostConnection == null || connecting == null || petGui == null) {
-            guiReader.update();
-        }
+        guis.update();
 
-        if (lostConnection == null) {
-            lostConnection = tempGui("lost_connection");
-        } else {
-            lostConnection.update();
-        }
+        lostConnection.update();
+        connecting.update();
+        pet.update();
 
-        if (connecting == null) {
-            connecting = tempGui("connecting");
-        } else {
-            connecting.update();
-        }
-
-//        if (petGui == null) {
-//            petGui = tempGui("pet");
-//        } else {
-//            petGui.update();
+//        if (main.hero.pet.isInvalid()) {
 //
-//            if (main.hero.pet.isInvalid()) {
-//
-//                if (petRevives < maxPetRevives) {
-//                    tryActivatePet();
-//                }
-//
-//                temp = true;
-//                timeTemp = System.currentTimeMillis();
-//
-//                check = true;
-//
-//            } else if (check && module != null) {
-//
-//                module.update(petGui);
-//
-//                if (!module.isEnabled() && module.enable()) {
-//
-//                    check = false;
-//
-//                    if (nullPetModuleOnActivate) module = null;
-//
-//                    petGui.show(false);
-//                }
-//            } else if (temp && System.currentTimeMillis() - timeTemp > 4000) {
-//                API.button('R');
-//                temp = false;
+//            if (petRevives < 100) {
+//                tryActivatePet();
 //            }
 //
+//            temp = true;
+//            timeTemp = System.currentTimeMillis();
+//
+//            check = true;
+//
+//        } else if (check && module != null) {
+//
+//            module.update(pet);
+//
+//            if (System.currentTimeMillis() - petTemp > 500 && !module.isEnabled() && module.enable()) {
+//
+//                check = false;
+//
+//                if (nullPetModuleOnActivate) module = null;
+//
+//                pet.show(false);
+//
+//                petTemp = System.currentTimeMillis();
+//            }
+//
+////        } else if (module == null && temp && System.currentTimeMillis() - timeTemp > 4000) {
+////            API.button('R');
+////            temp = false;
 //        }
-    }
-
-    private Gui tempGui(String key) {
-        Vector.Entry entry = guiReader.get(key);
-        return entry != null ? new Gui(API.readMemoryLong(entry.value + 488), entry.key) : null;
     }
 
     private void tryReconnect(Gui gui) {
@@ -143,15 +136,13 @@ public class GuiManager implements Manager {
         }
     }
 
-    boolean b;
-
     private void tryActivatePet() {
-        if (System.currentTimeMillis() - repairTimePet > 1000) {
+        if (System.currentTimeMillis() - repairTimePet > 20000) {
 
-            if (petGui != null && petGui.show(true)) {
+            if (pet != null && pet.show(true)) {
 
 
-                Gui.PixelHelper helper = petGui.createHelper(0, 100);
+                Gui.PixelHelper helper = pet.createHelper(0, 100);
 
                 for (int i = 0; i < helper.size; i++) {
 
@@ -190,44 +181,59 @@ public class GuiManager implements Manager {
             return API.readMemoryBoolean(repairAddress + 40);
         } else {
             if (isInvalidShip()) {
-                List<Long> values = API.queryMemory(guiAddress);
+                long[] values = API.queryMemoryLong(guiAddress, 1000);
                 for (long result : values) {
-                    if (API.readMemoryLong(result + 8) == mainAddress) {
-                        repairAddress = result - 56;
-                        return true;
+                    result -= 56;
+
+                    long address = API.readMemoryLong(result + 64);
+                    int type = API.readMemoryInt(result + 32);
+                    int dead = API.readMemoryInt(result + 40);
+
+                    if (address == mainAddress && type >= 0 && type <= 3 && (dead == 0 || dead == 1)) {
+                        repairAddress = result;
+                        return dead == 1;
                     }
                 }
-                return true;
+                return false;
             } else {
                 return false;
             }
         }
     }
 
+    private void checkInvalid() {
+        if (System.currentTimeMillis() - validTime > 90 * 1000 + (main.hero.map.id == -1 ? 180 * 1000 : 0)) {
+//            API.refresh();
+            validTime = System.currentTimeMillis();
+        }
+    }
+
     public boolean canTickModule() {
 
-        if (lostConnection != null && lostConnection.visible) {
+        if (lostConnection.visible) {
+
             tryReconnect(lostConnection);
+
+            checkInvalid();
+
             return false;
-        } else if (connecting != null && connecting.visible) {
+        } else if (connecting.visible) {
+
+            checkInvalid();
+
             return false;
         } else if (isDead()) {
             tryRevive();
 
             if (revives > main.config.MAX_DEATHS) {
                 main.setRunning(false);
+            } else {
+                checkInvalid();
             }
 
             return false;
         } else if (isInvalidShip()) {
-
-            if (System.currentTimeMillis() - validTime > 90 * 1000) {
-                API.refresh();
-                validTime = System.currentTimeMillis();
-            }
-
-            System.out.println("Is invalid!");
-
+            checkInvalid();
         } else {
             validTime = System.currentTimeMillis();
         }

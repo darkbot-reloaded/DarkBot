@@ -1,9 +1,8 @@
 package com.github.manolo8.darkbot.gui;
 
-import com.github.manolo8.darkbot.Bot;
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.*;
+import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.Location;
 
@@ -34,8 +33,6 @@ public class Mapping extends JPanel {
     private Color PET_IN = Color.decode("#c56000");
     private Color HEALTH = Color.decode("#388e3c");
     private Color SHIELD = Color.decode("#0288d1");
-    private Color UNKNOWN = Color.MAGENTA;
-    private Color UNKNOWN_BOX = Color.PINK;
 
 
     private double[][] lastPositions = new double[150][4];
@@ -55,6 +52,7 @@ public class Mapping extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
+
             }
         });
     }
@@ -77,12 +75,12 @@ public class Mapping extends JPanel {
 
         g2.setColor(TEXT_DARK);
 
-        String running = "RUNNING " + main.hero.statistics.runningTimeStr();
+        String running = "RUNNING " + main.statsManager.runningTimeStr();
         int width = g2.getFontMetrics().stringWidth(running);
         g2.drawString(running, (getWidth() / 2) - (width / 2), (getHeight() / 2) + 35);
         g2.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 32));
-        width = g2.getFontMetrics().stringWidth(main.mapManager.map.name);
-        g2.drawString(main.mapManager.map.name, (getWidth() / 2) - (width / 2), (getHeight() / 2) - 5);
+        width = g2.getFontMetrics().stringWidth(main.hero.map.name);
+        g2.drawString(main.hero.map.name, (getWidth() / 2) - (width / 2), (getHeight() / 2) - 5);
 
         g2.setColor(TEXT);
         g2.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
@@ -90,23 +88,23 @@ public class Mapping extends JPanel {
 
         int center = (getHeight() / 2) - 30;
 
-        g2.drawString("+" + formatter.format(main.hero.statistics.earnedCredits()) + " cre/h", 0, center);
-        g2.drawString("+" + formatter.format(main.hero.statistics.earnedUridium()) + " uri/h", 0, center + 15);
-        g2.drawString("+" + formatter.format(main.hero.statistics.earnedExperience()) + " exp/h", 0, center + 30);
-        g2.drawString("+" + formatter.format(main.hero.statistics.earnedHonor()) + " hon/h", 0, center + 45);
+        g2.drawString("+" + formatter.format(main.statsManager.earnedCredits()) + " cre/h", 0, center);
+        g2.drawString("+" + formatter.format(main.statsManager.earnedUridium()) + " uri/h", 0, center + 15);
+        g2.drawString("+" + formatter.format(main.statsManager.earnedExperience()) + " exp/h", 0, center + 30);
+        g2.drawString("+" + formatter.format(main.statsManager.earnedHonor()) + " hon/h", 0, center + 45);
 
-        if (main.hero.target != null && !main.hero.target.isInvalid()) {
+        if (main.hero.target != null && !main.hero.target.removed) {
 
             Ship ship = main.hero.target;
 
             g2.setColor(TEXT);
             g2.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 18));
             if (ship instanceof Npc) {
-                g2.drawString(((Npc) ship).type.name, 0, getHeight() - 40);
+                g2.drawString(((Npc) ship).playerInfo.username, 0, getHeight() - 40);
             }
 
             g2.setColor(HEALTH);
-            g2.fillRect(0, getHeight() - 30, (int) (ship.health.healthPercent() * (getWidth())), 15);
+            g2.fillRect(0, getHeight() - 30, (int) (ship.health.hpPercent() * (getWidth())), 15);
 
             g2.setColor(SHIELD);
             g2.fillRect(0, getHeight() - 15, (int) (ship.health.shieldPercent() * (getWidth())), 15);
@@ -126,17 +124,7 @@ public class Mapping extends JPanel {
             }
 
             g2.setColor(BONUS_BOX);
-            for (Box box : main.mapManager.bonusBoxes) {
-                g2.drawRect(
-                        translateX(box.location.x) - 1,
-                        translateY(box.location.y) - 1,
-                        3,
-                        3
-                );
-            }
-
-            g2.setColor(CARGO_BOX);
-            for (Box box : main.mapManager.cargoBoxes) {
+            for (Box box : main.mapManager.boxes) {
                 g2.drawRect(
                         translateX(box.location.x) - 1,
                         translateY(box.location.y) - 1,
@@ -155,29 +143,25 @@ public class Mapping extends JPanel {
                 );
             }
 
-            g2.setColor(UNKNOWN);
-            for (Entity entity : main.mapManager.unknown) {
-                g2.drawRect(
-                        translateX(entity.location.x) - 1,
-                        translateY(entity.location.y) - 1,
-                        3,
-                        3
-                );
-            }
+            for (BattleStation station : main.mapManager.battleStations) {
 
-            g2.setColor(UNKNOWN_BOX);
-            for (Box box: main.mapManager.unknownBoxes) {
+                if (station.info.isEnemy()) {
+                    g2.setColor(ENEMIES);
+                } else {
+                    g2.setColor(ALLIES);
+                }
+
                 g2.drawRect(
-                        translateX(box.location.x) - 1,
-                        translateY(box.location.y) - 1,
-                        3,
-                        3
+                        translateX(station.location.x) - 2,
+                        translateY(station.location.y) - 2,
+                        4,
+                        4
                 );
             }
 
             for (Ship ship : main.mapManager.ships) {
 
-                if (ship.isEnemy()) {
+                if (ship.playerInfo.isEnemy()) {
                     g2.setColor(ENEMIES);
                 } else {
                     g2.setColor(ALLIES);
@@ -243,7 +227,7 @@ public class Mapping extends JPanel {
 
         }
 
-        if (!main.hero.pet.isInvalid()) {
+        if (!main.hero.pet.removed) {
             x = translateX(main.hero.pet.location.x);
             y = translateY(main.hero.pet.location.y);
 
