@@ -8,6 +8,8 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -19,16 +21,15 @@ public class MainForm {
     public JPanel content;
     private JButton btnConfig;
     private JButton startButton;
-    private JProgressBar healthBar;
-    private JProgressBar shieldbar;
     private JPanel mapping;
     private JButton btnShow;
     private JButton btnSid;
-
-    private String nick = "";
+    private boolean visible;
 
     public MainForm(Main main) {
         this.main = main;
+
+        this.visible = true;
 
         frame = new JFrame("DarkBOT");
 
@@ -37,6 +38,10 @@ public class MainForm {
         frame.setSize(480, 480);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+        this.main.status.add(value -> {
+            startButton.setText(value ? "Stop" : "Start");
+        });
 
         try {
             frame.setIconImage(ImageIO.read(getClass().getResource("/resources/icon.png")));
@@ -55,37 +60,41 @@ public class MainForm {
 
                 frame.setContentPane(form.content);
                 frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                frame.setSize(360, 480);
+                frame.setSize(640, 480);
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
+                frame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        main.config.changed = true;
+                    }
+                });
+
                 try {
                     frame.setIconImage(ImageIO.read(getClass().getResource("/resources/icon.png")));
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+                } catch (IOException ignored) {
                 }
-
-
             }
         });
         startButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-
                 main.setRunning(!main.isRunning());
-
-                startButton.setText(main.isRunning() ? "Stop" : "Start");
-
             }
         });
         btnShow.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
 
-//                if (API.toggleBrowser()) {
-//                    btnShow.setText("Show");
-//                } else {
-//                    btnShow.setText("Hide");
-//                }
+                if (visible) {
+                    btnShow.setText("Show");
+                    API.setVisible(false);
+                    visible = false;
+                } else {
+                    btnShow.setText("Hide");
+                    API.setVisible(true);
+                    visible = true;
+                }
 
             }
         });
@@ -98,22 +107,12 @@ public class MainForm {
                     StringSelection selection = new StringSelection(value);
                     Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
                 }
+
             }
         });
     }
 
     public void tick() {
-
-        healthBar.setValue(main.hero.health.hp);
-        healthBar.setMaximum(main.hero.health.maxHp);
-        shieldbar.setValue(main.hero.health.shield);
-        shieldbar.setMaximum(main.hero.health.maxShield);
-
-        if (main.hero.playerInfo.username != null && !main.hero.playerInfo.username.equals(nick)) {
-            nick = main.hero.playerInfo.username;
-            frame.setTitle("DarkBOT - " + nick);
-        }
-
         mapping.repaint();
     }
 

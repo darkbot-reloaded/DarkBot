@@ -1,8 +1,12 @@
 package com.github.manolo8.darkbot.core.itf;
 
-public interface Updatable {
+public abstract class Updatable {
 
-    void update();
+    public long address;
 
-    void update(long address);
+    public abstract void update();
+
+    public void update(long address) {
+        this.address = address;
+    }
 }

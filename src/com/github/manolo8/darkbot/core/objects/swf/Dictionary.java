@@ -6,17 +6,18 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Dictionary implements Updatable {
+public class Dictionary extends Updatable {
 
-    private long address;
+    private HashMap<String, Lazy<Long>> lazy;
 
-    private HashMap<String, Lazy<Long>> fast;
+    private Entry[] elements;
 
-    public Entry[] elements;
+
     public int size;
 
     private int lastFix;
@@ -27,13 +28,13 @@ public class Dictionary implements Updatable {
     }
 
     public void addLazy(String key, Consumer<Long> consumer) {
-        if (fast == null) fast = new HashMap<>();
+        if (lazy == null) lazy = new HashMap<>();
 
-        Lazy<Long> lazy = fast.get(key);
+        Lazy<Long> lazy = this.lazy.get(key);
 
         if (lazy == null) {
             lazy = new Lazy<>();
-            fast.put(key, lazy);
+            this.lazy.put(key, lazy);
         }
 
         lazy.add(consumer);
@@ -43,43 +44,23 @@ public class Dictionary implements Updatable {
     public void update() {
 
         long tableInfo = API.readMemoryLong(address + 32);
-        long table = API.readMemoryLong(tableInfo + 8) - 4;
         int size = API.readMemoryInt(tableInfo + 16);
+        long table = API.readMemoryLong(tableInfo + 8) - 4;
         int length = (int) (Math.pow(2, API.readMemoryInt(tableInfo + 20)) * 4) + lastFix + 4;
 
-        if (length > 4096 || length < 0) return;
+        if (length > 4096 || length < 0 || size < 0 || size > 1024) return;
 
         if (elements.length < size) {
-            if (size > 128 || size < 0) {
-                //Informations of the array can change at any time, so, be carefull
-                System.out.println("Array size is wrong: " + size + " ADDRESS: " + address);
-                this.size = 0;
-                return;
-            } else {
-                elements = new Entry[size];
-            }
+            Entry[] temp = new Entry[size];
+            System.arraycopy(elements, 0, temp, 0, elements.length);
+            elements = temp;
         }
 
         byte[] bytes = API.readMemory(table, length);
 
-        int i;
-
-//        Try to fix SWF issues why that???
-        if (lastFix >= 0 && bytes.length > lastFix && ByteUtils.getInt(bytes, lastFix) == BotInstaller.SEP) {
-            i = lastFix + 4;
-        } else {
-            for (i = 0; i < length; i++) {
-                if (ByteUtils.getInt(bytes, lastFix) == BotInstaller.SEP) {
-                    lastFix = i;
-                    //return to redo
-                    return;
-                }
-            }
-        }
-
         int current = 0;
 
-        for (; i < length; i += 16) {
+        for (int i = searchFix(bytes); i < length; i += 16) {
             long valueAddress = ByteUtils.getLong(bytes, i + 8);
 
             if (valueAddress >= 0 && valueAddress <= 10) continue;
@@ -121,10 +102,28 @@ public class Dictionary implements Updatable {
         }
     }
 
+    private int searchFix(byte[] bytes) {
+
+        if (lastFix >= 0 && bytes.length > lastFix && ByteUtils.getInt(bytes, lastFix) == BotInstaller.SEP) {
+            return lastFix + 4;
+        } else {
+            for (int i = 0; i < bytes.length; i++) {
+                if (ByteUtils.getInt(bytes, i) == BotInstaller.SEP) {
+                    lastFix = i;
+                    return bytes.length - 1;
+                }
+            }
+        }
+
+        return bytes.length - 1;
+    }
+
     private void send(String str, long value) {
-        if (fast != null) {
-            Lazy<Long> lazy = fast.get(str);
-            if (lazy != null) lazy.send(value);
+        if (lazy != null) {
+            Lazy<Long> lazy = this.lazy.get(str);
+            if (lazy != null && !(Objects.equals(lazy.value, value))) {
+                lazy.send(value);
+            }
         }
     }
 
@@ -140,12 +139,14 @@ public class Dictionary implements Updatable {
 
     @Override
     public void update(long address) {
-        this.address = address;
+        super.update(address);
+        this.lastFix = 0;
     }
 
-    public class Entry {
-        public String key;
-        public long value;
+    private class Entry {
+
+        String key;
+        long value;
 
         public Entry(String key, long value) {
             this.key = key;

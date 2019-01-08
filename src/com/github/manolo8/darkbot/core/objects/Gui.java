@@ -5,11 +5,9 @@ import com.github.manolo8.darkbot.core.manager.MapManager;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Gui implements Updatable {
+public class Gui extends Updatable {
 
-    public long address;
     public long addressInfo;
-
 
     public boolean visible;
 
@@ -61,7 +59,7 @@ public class Gui implements Updatable {
         if (address == 0) {
             reset();
         } else {
-            this.address = address;
+            super.update(address);
             this.addressInfo = API.readMemoryLong(address + 488);
         }
     }
@@ -86,40 +84,5 @@ public class Gui implements Updatable {
         }
 
         return System.currentTimeMillis() - 1000 > time;
-    }
-
-    public PixelHelper createHelper(int plusWidth, int plusHeight) {
-        return new PixelHelper(width + plusWidth, height + plusHeight);
-    }
-
-    public class PixelHelper {
-
-        public int[] pixels;
-        public int size;
-
-        public int width;
-        public int height;
-
-        PixelHelper(int width, int height) {
-//            this.pixels = API.pixels(x, y, width, height);
-            this.width = width;
-            this.height = height;
-            this.size = width * height;
-        }
-
-        public int add(int pixel, int x, int y) {
-
-            pixel = pixel + x + y * width;
-
-            return pixel < pixels.length && pixel > 0 ? pixels[pixel] : 0;
-        }
-
-        public int at(int x, int y) {
-            return pixels[x + y * width];
-        }
-
-        public void click(int pixel) {
-            API.mouseClick(x + (pixel % width), y + (pixel / width));
-        }
     }
 }

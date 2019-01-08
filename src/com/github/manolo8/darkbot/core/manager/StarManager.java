@@ -6,17 +6,18 @@ import com.github.manolo8.darkbot.core.objects.Map;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 public class StarManager {
 
     private HashMap<Integer, Map> starSystem;
-    private HashMap<String, Map> starSystemName;
+    private TreeMap<String, Map> starSystemName;
     private HashMap<Integer, Portal> portals;
 
     public StarManager() {
 
         starSystem = new HashMap<>();
-        starSystemName = new HashMap<>();
+        starSystemName = new TreeMap<>();
         portals = new HashMap<>();
 
         //MMO --------------------------------------------------------
@@ -273,14 +274,14 @@ public class StarManager {
         Map map = starSystem.get(id);
 
         if (map == null) {
-            map = new Map(id, "Unknown map " + id, new Portal[0]);
+            map = new Map(id, "Unknown map " + id, false, new Portal[0]);
         }
 
         return map;
     }
 
     private void add(int id, String name, Portal... portals) {
-        Map map = new Map(id, name, portals);
+        Map map = new Map(id, name, name.startsWith("4"), portals);
         this.starSystem.put(id, map);
         this.starSystemName.put(map.name, map);
         for (Portal portal : portals) {

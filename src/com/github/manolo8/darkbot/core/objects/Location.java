@@ -8,9 +8,8 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import static java.lang.StrictMath.atan2;
 
-public class Location implements Updatable {
+public class Location extends Updatable {
 
-    private long address;
     public double x;
     public double y;
     public double lastX;
@@ -35,11 +34,6 @@ public class Location implements Updatable {
 
     }
 
-    @Override
-    public void update(long address) {
-        this.address = address;
-    }
-
     public boolean isLoaded() {
         return x != 0 && y != 0;
     }
@@ -56,8 +50,12 @@ public class Location implements Updatable {
         return distance(lastX, lastY) * 10;
     }
 
+    public double angle(double ox, double oy) {
+        return atan2(y - oy, x - ox);
+    }
+
     public double angle(Location other) {
-        return atan2(y - other.y, x - other.x);
+        return angle(other.x, other.y);
     }
 
     public boolean isMoving() {

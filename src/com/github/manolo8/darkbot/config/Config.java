@@ -34,4 +34,6 @@ public class Config {
     public boolean AUTO_CLOACK;
     public char AUTO_CLOACK_KEY;
     //COLLECTOR MODULE
+
+    public transient boolean changed;
 }

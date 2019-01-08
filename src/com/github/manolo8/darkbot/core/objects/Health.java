@@ -4,9 +4,7 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Health implements Updatable {
-
-    private long address;
+public class Health extends Updatable {
 
     public int hp;
     public int maxHp;
@@ -35,11 +33,6 @@ public class Health implements Updatable {
 
     private int readIntFromIntHolder(int holderOffset) {
         return API.readMemoryInt(API.readMemoryLong(address + holderOffset) + 40);
-    }
-
-    @Override
-    public void update(long address) {
-        this.address = address;
     }
 
     public double hpPercent() {

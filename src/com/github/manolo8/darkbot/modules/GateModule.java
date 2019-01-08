@@ -73,7 +73,7 @@ public class GateModule implements Module {
                     }
 
                     if (locationNpc.isMoving() || locationNpc.distance(locationHero) > 800) {
-                        move(locationNpc, hero.shipInfo.speed * 0.625, closest.type.radius + locationNpc.measureSpeed() * 0.625);
+                        move(locationNpc, hero.shipInfo.speed * 0.625, closest.npcInfo.radius + locationNpc.measureSpeed() * 0.625);
                     }
 
                     if (current == null

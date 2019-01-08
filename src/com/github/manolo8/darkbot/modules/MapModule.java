@@ -24,9 +24,6 @@ public class MapModule implements Module, MapChange {
 
     @Override
     public void install(Main main) {
-        main.guiManager.module = null;
-        main.guiManager.nullPetModuleOnActivate = false;
-
         this.hero = main.hero;
         this.star = main.starManager;
         this.main = main;
@@ -36,7 +33,6 @@ public class MapModule implements Module, MapChange {
         this.target = target;
 
         current = star.next(hero.map, hero.location, target);
-
     }
 
     public void setTargetAndBack(Map target, Module back) {

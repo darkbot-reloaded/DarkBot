@@ -7,7 +7,6 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.MapChange;
 import com.github.manolo8.darkbot.core.objects.swf.Array;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +20,7 @@ public class MapManager implements Manager {
     public static long mapAddress;
     private long viewAddress;
     private long boundsAddress;
+    private long eventAddress;
 
     private Main main;
     private Array entities;
@@ -62,6 +62,8 @@ public class MapManager implements Manager {
         this.ships = new ArrayList<>();
         this.unknown = new ArrayList<>();
         this.battleStations = new ArrayList<>();
+
+        this.main.status.add(this::changeRadiusOfAll);
     }
 
 
@@ -70,7 +72,8 @@ public class MapManager implements Manager {
 
         botInstaller.screenManagerAddress.add(value -> {
             mapAddressStatic = value + 256;
-            viewAddressStatic = mapAddressStatic - 40;
+            viewAddressStatic = value + 216;
+            eventAddress = value + 200;
         });
 
     }
@@ -94,15 +97,8 @@ public class MapManager implements Manager {
 
         }
 
-        temp = API.readMemoryLong(viewAddressStatic);
-
-        if (viewAddress != temp) {
-            viewAddress = temp;
-            boundsAddress = API.readMemoryLong(viewAddress + 208);
-        }
-
         updateBounds();
-
+        checkMirror();
     }
 
     private void update(long address) {
@@ -112,7 +108,6 @@ public class MapManager implements Manager {
         internalWidth = API.readMemoryInt(address + 68);
         internalHeight = API.readMemoryInt(address + 72);
         entities.update(API.readMemoryLong(address + 40));
-        System.out.println(API.readMemoryLong(address + 40));
         int tempId = API.readMemoryInt(address + 76);
 
         if (tempId != id) {
@@ -125,7 +120,23 @@ public class MapManager implements Manager {
         }
     }
 
-    private void updateBounds() {
+    void checkMirror() {
+        long temp = API.readMemoryLong(eventAddress) + 4 * 14;
+
+        if (API.readMemoryBoolean(temp)) {
+            API.writeMemoryInt(temp, 0);
+        }
+    }
+
+    void updateBounds() {
+
+        long temp = API.readMemoryLong(viewAddressStatic);
+
+        if (viewAddress != temp) {
+            viewAddress = temp;
+            boundsAddress = API.readMemoryLong(viewAddress + 208);
+        }
+
         clientWidth = API.readMemoryInt(boundsAddress + 168);
         clientHeight = API.readMemoryInt(boundsAddress + 172);
 
@@ -188,7 +199,8 @@ public class MapManager implements Manager {
     private <E extends Entity> E defs(E entity, long address) {
         entity.update(address);
 
-        entity.clickable.setRadius(0);
+        if (main.isRunning())
+            entity.clickable.setRadius(0);
 
         return entity;
     }
@@ -208,6 +220,29 @@ public class MapManager implements Manager {
         }
     }
 
+    private void changeRadiusOfAll(boolean reset) {
+        reset = !reset;
+
+        changeRadius(boxes, reset);
+        changeRadius(portals, reset);
+        changeRadius(npcs, reset);
+        changeRadius(ships, reset);
+        changeRadius(unknown, reset);
+        changeRadius(battleStations, reset);
+
+        if (reset) main.hero.clickable.reset();
+        else main.hero.clickable.setRadius(0);
+    }
+
+    private void changeRadius(List<? extends Entity> entities, boolean reset) {
+
+        for (Entity entity : entities) {
+            if (reset) entity.clickable.reset();
+            else entity.clickable.setRadius(0);
+        }
+
+    }
+
     private void cleanup() {
         ids.clear();
 
@@ -223,17 +258,12 @@ public class MapManager implements Manager {
         return x < 0 || y < 0 || x > internalWidth || y > internalHeight;
     }
 
-    public Portal closestByType(int... types) {
-        for (Portal portal : portals) {
-
-            for (int type : types) {
-                if (portal.type == type) {
-                    return portal;
-                }
-            }
-        }
-
-        return null;
+    public boolean isCurrentTargetOwned() {
+        long temp = API.readMemoryLong(viewAddressStatic);
+        temp = API.readMemoryLong(temp + 216);
+        temp = API.readMemoryLong(temp + 200);
+        temp = API.readMemoryLong(temp + 48);
+        return API.readMemoryInt(temp + 40) == 1;
     }
 
     public void translateMouseMove(double x, double y) {

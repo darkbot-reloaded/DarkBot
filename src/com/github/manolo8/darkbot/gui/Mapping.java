@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.entities.*;
 import com.github.manolo8.darkbot.core.entities.Box;
+import com.github.manolo8.darkbot.core.entities.*;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.Location;
 
@@ -24,16 +24,20 @@ public class Mapping extends JPanel {
     private Color PORTALS = Color.decode("#AEAEAE");
     private Color OWNER = Color.decode("#FFF");
     private Color TRAIL = Color.decode("#E0E0E0");
-    private Color CARGO_BOX = Color.decode("#C77800");
-    private Color BONUS_BOX = Color.decode("#0077C2");
+    private Color BOXES = Color.decode("#C77800");
+    private Color BOXES_COLLECT = Color.decode("#9b0000");
     private Color ALLIES = Color.decode("#29B6F6");
     private Color ENEMIES = Color.decode("#d50000");
     private Color NPCS = Color.decode("#9b0000");
+    private Color NPCS_KILL = Color.decode("#f00000");
     private Color PET = Color.decode("#004c8c");
     private Color PET_IN = Color.decode("#c56000");
     private Color HEALTH = Color.decode("#388e3c");
     private Color SHIELD = Color.decode("#0288d1");
 
+    private Font FONT_BIG = new Font(Font.SANS_SERIF, Font.PLAIN, 32);
+    private Font FONT_MID = new Font(Font.SANS_SERIF, Font.PLAIN, 18);
+    private Font FONT_SMALL = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
 
     private double[][] lastPositions = new double[150][4];
     private Location last;
@@ -65,6 +69,8 @@ public class Mapping extends JPanel {
                 RenderingHints.VALUE_ANTIALIAS_ON
         );
 
+        int mid = getWidth() / 2;
+
         g.setColor(BACKGROUND);
         g.fillRect(0, 0, getWidth(), getHeight());
 
@@ -77,13 +83,13 @@ public class Mapping extends JPanel {
 
         String running = "RUNNING " + main.statsManager.runningTimeStr();
         int width = g2.getFontMetrics().stringWidth(running);
-        g2.drawString(running, (getWidth() / 2) - (width / 2), (getHeight() / 2) + 35);
-        g2.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 32));
+        g2.drawString(running, mid - (width / 2), (getHeight() / 2) + 35);
+        g2.setFont(FONT_BIG);
         width = g2.getFontMetrics().stringWidth(main.hero.map.name);
-        g2.drawString(main.hero.map.name, (getWidth() / 2) - (width / 2), (getHeight() / 2) - 5);
+        g2.drawString(main.hero.map.name, mid - (width / 2), (getHeight() / 2) - 5);
 
         g2.setColor(TEXT);
-        g2.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        g2.setFont(FONT_SMALL);
         g2.drawString("X " + (int) main.hero.location.x + " Y " + (int) main.hero.location.y + " CONF " + main.hero.config + " DEATHS " + main.guiManager.revives, 0, 10);
 
         int center = (getHeight() / 2) - 30;
@@ -93,22 +99,32 @@ public class Mapping extends JPanel {
         g2.drawString("+" + formatter.format(main.statsManager.earnedExperience()) + " exp/h", 0, center + 30);
         g2.drawString("+" + formatter.format(main.statsManager.earnedHonor()) + " hon/h", 0, center + 45);
 
-        if (main.hero.target != null && !main.hero.target.removed) {
+        g2.setColor(TEXT);
+        g2.setFont(FONT_MID);
+        width = g2.getFontMetrics().stringWidth(main.hero.playerInfo.username);
+        g2.drawString(main.hero.playerInfo.username, 10 + (mid - 20) / 2 - width / 2, getHeight() - 40);
 
+        g2.setColor(HEALTH);
+        g2.fillRect(10, getHeight() - 34, (int) (main.hero.health.hpPercent() * mid) - 20, 12);
+        g2.setColor(SHIELD);
+        g2.fillRect(10, getHeight() - 22, (int) (main.hero.health.shieldPercent() * mid) - 20, 12);
+
+
+        if (main.hero.target != null && !main.hero.target.removed) {
             Ship ship = main.hero.target;
 
-            g2.setColor(TEXT);
-            g2.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 18));
             if (ship instanceof Npc) {
-                g2.drawString(((Npc) ship).playerInfo.username, 0, getHeight() - 40);
+                g2.setColor(TEXT);
+                String name = ((Npc) ship).playerInfo.username;
+
+                width = g2.getFontMetrics().stringWidth(name);
+                g2.drawString(name, 10 + mid + (mid - 20) / 2 - width / 2, getHeight() - 40);
             }
 
             g2.setColor(HEALTH);
-            g2.fillRect(0, getHeight() - 30, (int) (ship.health.hpPercent() * (getWidth())), 15);
-
+            g2.fillRect(mid + 10, getHeight() - 34, (int) (ship.health.hpPercent() * mid) - 20, 12);
             g2.setColor(SHIELD);
-            g2.fillRect(0, getHeight() - 15, (int) (ship.health.shieldPercent() * (getWidth())), 15);
-
+            g2.fillRect(mid + 10, getHeight() - 22, (int) (ship.health.shieldPercent() * mid) - 20, 12);
         }
 
         synchronized (Main.UPDATE_LOCKER) {
@@ -123,24 +139,29 @@ public class Mapping extends JPanel {
                 );
             }
 
-            g2.setColor(BONUS_BOX);
+            g2.setColor(BOXES);
             for (Box box : main.mapManager.boxes) {
-                g2.drawRect(
-                        translateX(box.location.x) - 1,
-                        translateY(box.location.y) - 1,
-                        3,
-                        3
-                );
+
+                int x = translateX(box.location.x) - 1;
+                int y = translateY(box.location.y) - 1;
+
+                if (box.boxInfo.collect) {
+                    g2.fillRect(x, y, 4, 4);
+                } else {
+                    g2.drawRect(x, y, 3, 3);
+                }
             }
 
             g2.setColor(NPCS);
             for (Npc npc : main.mapManager.npcs) {
-                g2.drawRect(
-                        translateX(npc.location.x) - 1,
-                        translateY(npc.location.y) - 1,
-                        3,
-                        3
-                );
+                int x = translateX(npc.location.x) - 1;
+                int y = translateY(npc.location.y) - 1;
+
+                if (npc.npcInfo.killOnlyIfIsLast) {
+                    g2.fillRect(x, y, 4, 4);
+                } else {
+                    g2.drawRect(x, y, 3, 3);
+                }
             }
 
             for (BattleStation station : main.mapManager.battleStations) {
@@ -176,19 +197,13 @@ public class Mapping extends JPanel {
             }
         }
 
-        g2.setColor(OWNER);
         HeroManager hero = main.hero;
 
-        g2.fillOval(
-                translateX(main.hero.location.x) - 2,
-                translateY(main.hero.location.y) - 2,
-                5,
-                5
-        );
+        double distance = last.distance(main.hero);
 
-        if (last.distance(main.hero) > 500) {
+        if (distance > 500) {
             last = main.hero.location.add(0, 0);
-        } else {
+        } else if (distance > 60) {
 
             lastPositions[current % lastPositions.length][0] = hero.location.x;
             lastPositions[current % lastPositions.length][1] = hero.location.y;
@@ -222,10 +237,16 @@ public class Mapping extends JPanel {
                     translateX(main.hero.going.x),
                     translateY(main.hero.going.y)
             );
-
-            g2.fillOval(translateX(main.hero.going.x) - 2, translateY(main.hero.going.y) - 2, 5, 5);
-
         }
+
+        g2.setColor(OWNER);
+
+        g2.fillOval(
+                translateX(main.hero.location.x) - 3,
+                translateY(main.hero.location.y) - 3,
+                7,
+                7
+        );
 
         if (!main.hero.pet.removed) {
             x = translateX(main.hero.pet.location.x);

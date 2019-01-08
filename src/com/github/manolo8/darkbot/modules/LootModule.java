@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Ship;
+import com.github.manolo8.darkbot.core.itf.MapChange;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
@@ -18,7 +19,7 @@ import static java.lang.Math.cos;
 import static java.lang.Math.min;
 import static java.lang.StrictMath.sin;
 
-public class LootModule implements Module {
+public class LootModule implements Module, MapChange {
 
     private Main main;
 
@@ -30,7 +31,7 @@ public class LootModule implements Module {
 
     private Config config;
 
-    private Npc current;
+    public Npc current;
     private long laserTime;
     private long clickDelay;
     private boolean sab;
@@ -45,9 +46,6 @@ public class LootModule implements Module {
 
     @Override
     public void install(Main main) {
-        main.guiManager.module = null;
-        main.guiManager.nullPetModuleOnActivate = false;
-
         this.main = main;
 
         this.star = main.starManager;
@@ -63,47 +61,49 @@ public class LootModule implements Module {
 
         if (checkDangerousAndCurrentMap()) {
 
-            findNearestTarget();
-
-            if (current != null) {
-
-                moveToAnSafePosition();
-
-                if (hero.isTarget(current)) {
-
-                    hero.attackMode();
-
-                    if (checkIfIsAttackingAndCanContinue()) {
-                        checkSab();
-                    }
-
-                } else {
-                    setTargetAndTryStartLaserAttack();
-                }
-
+            if (findTarget()) {
+                doKillTargetTick();
             } else if (!hero.isMoving()) {
                 hero.moveRandom();
-
-                if (ignore.size() > 10) {
-                    ignore.clear();
-                }
-
             }
 
         }
 
     }
 
-    private boolean checkDangerousAndCurrentMap() {
+    void doKillTargetTick() {
+        moveToAnSafePosition();
+
+        if (hero.isTarget(current)) {
+
+            if (main.mapManager.isCurrentTargetOwned()) {
+
+                hero.attackMode();
+
+                if (checkIfIsAttackingAndCanContinue()) {
+                    checkSab();
+                }
+
+            } else {
+                ignore.add(current.id);
+                current = null;
+            }
+
+        } else {
+            setTargetAndTryStartLaserAttack();
+        }
+    }
+
+    boolean checkDangerousAndCurrentMap() {
         boolean mapWrong = star.fromId(config.WORKING_MAP) != hero.map;
         boolean cont = current == null || (current.removed || current.health.hp == 0 || current.health.hp > 300000);
-        boolean flee = config.RUN_FROM_ENEMIES && ((hero.health.hpPercent() < 0.5 && cont) || hasEnemies());
+        boolean flee = config.RUN_FROM_ENEMIES && ((hero.health.hpPercent() < config.REPAIR_HP && cont) || hasEnemies());
 
         if (mapWrong || flee) {
 
             hero.runMode();
 
-            if (mapWrong || hero.health.isDecreasedIn(3000)) {
+            if (mapWrong || hero.health.isDecreasedIn(1000)) {
                 main.setModule(new MapModule())
                         .setTargetAndBack(main.starManager.fromId(main.config.WORKING_MAP), this);
             }
@@ -114,10 +114,11 @@ public class LootModule implements Module {
         return true;
     }
 
-    private void findNearestTarget() {
+    boolean findTarget() {
         if (current == null || current.isInvalid()) {
             current = closestNpc(hero.location.x, hero.location.y);
         }
+        return current != null;
     }
 
     private void checkSab() {
@@ -179,15 +180,17 @@ public class LootModule implements Module {
         Location locationCurrent = current.location;
         Location locationHero = hero.location;
 
+        boolean approaching = locationHero.distance(locationCurrent) < locationHero.distance(locationCurrent.lastX, locationCurrent.lastY);
+
         double speed = min(200, locationCurrent.measureSpeed()) * 0.625;
         double moveDistance = hero.shipInfo.speed * 0.625 + speed;
-        double centerDistance = current.type.radius + (current.health.hpPercent() > 0.25 || !locationCurrent.isMoving() ? speed : -speed);
+        double centerDistance = current.npcInfo.radius + (current.health.hpPercent() > 0.25 || approaching || !locationCurrent.isMoving() ? speed : -speed);
         double angle = locationCurrent.angle(locationHero);
 
         double x = locationCurrent.x - cos(angle) * centerDistance;
         double y = locationCurrent.y - sin(angle) * centerDistance;
 
-        if ((moveDistance = (moveDistance - (locationHero.distance(x, y)))) > 0) {
+        if (current.health.hp != 0 && (moveDistance = (moveDistance - (locationHero.distance(x, y)))) > 0) {
 
             double add = moveDistance / centerDistance;
 
@@ -233,20 +236,36 @@ public class LootModule implements Module {
 
     private Npc closestNpc(double x, double y) {
         double distance = 40000;
-        Npc closest = null;
+        int priority = 0;
+
+        Npc maxPriority = null;
+        Npc minDistance = null;
 
         for (Npc npc : npcs) {
 
-            if (!npc.type.name.startsWith("Unknown") && !isAttackedByOthers(npc)) {
+            if (npc.npcInfo.kill && !isAttackedByOthers(npc)) {
+
                 double distanceCurrent = npc.location.distance(x, y);
+                int priorityCurrent = npc.npcInfo.priority;
+
                 if (distanceCurrent < distance) {
                     distance = distanceCurrent;
-                    closest = npc;
+                    minDistance = npc;
+                }
+
+                if (priorityCurrent >= priority) {
+                    priority = priorityCurrent;
+                    maxPriority = npc;
                 }
 
             }
         }
 
-        return closest;
+        return minDistance == null ? null : priority > minDistance.npcInfo.priority ? maxPriority : minDistance;
+    }
+
+    @Override
+    public void onMapChange() {
+        ignore.clear();
     }
 }

@@ -1,33 +1,47 @@
 package com.github.manolo8.darkbot;
 
+import com.github.manolo8.darkbot.core.DarkBotAPI;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
 public class Bot {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        System.out.println("HI");
+       new Main();
 
-        new Main();
-
+//        DarkBotAPI API = new DarkBotAPI();
+//
+//        Main.API = API;
+//
+//        API.attachToWindow();
 
 //
-//        byte[] bytes = API.readMemory(0x14E35A6B8L, 6);
+//        int width = 1246;
+//        int height = 639;
+//
+//        final BufferedImage image = new BufferedImage(width, height, 1);
+////
+//        JPanel jPanel = new JPanel() {
+//            @Override
+//            public void paint(Graphics g) {
+//                g.drawImage(image, 0, 0, null);
+//                image.setRGB(0, 0, width, height, API.pixels(0, 0, width, height), 0, width);
+//            }
+//        };
+//
+//        JFrame frame = new JFrame();
 //
 //
-//        System.out.println(Arrays.toString(bytes));
+//        frame.add(jPanel);
 //
-//4221e2ff268
-//4221e2ff498
+//        frame.setSize(640, 480);
+//        frame.setVisible(true);
+//        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-//        WindowsAPI API2 = new WindowsAPI();
-//        API2.attachToWindow();
-//
-//        API2.readMemoryString(0x539fd079308L);
 
-//        for(int i = 0; i < 10; i++) {
-//            long time = System.nanoTime();
-//            API2.readMemoryString(0x4221e2ff268L);
-//            System.out.println(System.nanoTime() - time);
-//        }
-//
     }
 }

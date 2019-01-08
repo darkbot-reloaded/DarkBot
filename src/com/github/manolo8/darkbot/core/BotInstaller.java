@@ -80,27 +80,26 @@ public class BotInstaller {
     }
 
     private void checkUserData() {
-//        if (userDataAddress.value != 0) return;
-//
-//        int id = API.readMemoryInt(API.readMemoryLong(screenManagerAddress.value + 240) + 56);
-//
-//        if (id == 0) return;
-//
-//        long[] address = API.queryMemoryLong(id, 100);
-//
-//        for (long value : address) {
-//
-//            int level = API.readMemoryInt(value + 4);
-//            int speed = API.readMemoryInt(value + 8);
-//            int bool = API.readMemoryInt(value + 12);
-//
-//
-//            if (level >= 0 && level <= 32 && speed > 50 && speed < 2000 && (bool == 1 || bool == 0)) {
-//                userDataAddress.send(value - 48);
-//                break;
-//            }
-//
-//        }
+        if (userDataAddress.value != 0) return;
+
+        int id = API.readMemoryInt(API.readMemoryLong(screenManagerAddress.value + 240) + 56);
+
+        if (id == 0) return;
+
+        long[] address = API.queryMemoryInt(id, 100);
+
+        for (long value : address) {
+
+            int level = API.readMemoryInt(value + 4);
+            int speed = API.readMemoryInt(value + 8);
+            int bool = API.readMemoryInt(value + 12);
+
+            if (level >= 0 && level <= 32 && speed > 50 && speed < 2000 && (bool == 1 || bool == 2)) {
+                userDataAddress.send(value - 48);
+                break;
+            }
+
+        }
 
     }
 
@@ -109,6 +108,8 @@ public class BotInstaller {
         if (!API.attachToWindow()) {
             return false;
         }
+
+        API.setDrawing(true);
 
         long[] address = API.queryMemory(bytes, 1);
 
@@ -135,6 +136,8 @@ public class BotInstaller {
 
         //reset user data address
         userDataAddress.send(0L);
+
+        API.setDrawing(false);
 
         return true;
     }

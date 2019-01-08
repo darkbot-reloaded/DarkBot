@@ -5,9 +5,8 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Array implements Updatable {
+public class Array extends Updatable {
 
-    private long address;
     public long[] elements;
     public int size;
 
@@ -44,10 +43,5 @@ public class Array implements Updatable {
                 elements[current++] = value;
             }
         }
-    }
-
-    @Override
-    public void update(long address) {
-        this.address = address;
     }
 }

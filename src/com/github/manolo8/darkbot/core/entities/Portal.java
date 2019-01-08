@@ -11,15 +11,12 @@ public class Portal extends Entity {
 
     public int type;
 
-    public Location iconLocation;
-
     public int targetId;
 
     public Portal(int id, int targetId) {
         super(id);
 
         this.targetId = targetId;
-        this.iconLocation = new Location(0, 0);
     }
 
     @Override
@@ -27,8 +24,5 @@ public class Portal extends Entity {
         super.update();
 
         type = API.readMemoryInt(address + 112);
-
-        iconLocation.x = location.x;
-        iconLocation.y = location.y + 250;
     }
 }

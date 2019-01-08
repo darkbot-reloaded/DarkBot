@@ -2,15 +2,14 @@ package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.MapManager;
-import com.github.manolo8.darkbot.core.objects.swf.Array;
 import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.Location;
+import com.github.manolo8.darkbot.core.objects.swf.Array;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Entity implements Updatable {
+public class Entity extends Updatable {
 
-    public long address;
     public int id;
 
     public Location location;
@@ -58,7 +57,7 @@ public class Entity implements Updatable {
 
     @Override
     public void update(long address) {
-        this.address = address;
+        super.update(address);
 
         this.location.update(API.readMemoryLong(address + 64));
         this.traits.update(API.readMemoryLong(address + 48));

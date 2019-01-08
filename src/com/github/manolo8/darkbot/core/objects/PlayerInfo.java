@@ -5,14 +5,12 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.manager.HeroManager.instance;
 
-public class PlayerInfo implements Updatable {
-
-    private long address;
+public class PlayerInfo extends Updatable {
 
     public int clanId;
     public int clanDiplomacy;
-    public String clanTag;
-    public String username;
+    public String clanTag = "";
+    public String username = "";
     public int factionId;
     public int rank;
     public int gg;
@@ -30,7 +28,8 @@ public class PlayerInfo implements Updatable {
         rank = readIntFromIntHolder(80);
         gg = readIntFromIntHolder(88);
 
-        if (username == null) {
+        //noinspection StringEquality
+        if (username.isEmpty() || username == "ERROR") {
             clanTag = readStringFromStringHolder(56);
             username = readStringFromStringHolder(64);
         }
@@ -43,10 +42,5 @@ public class PlayerInfo implements Updatable {
 
     private String readStringFromStringHolder(int holderOffset) {
         return API.readMemoryString(API.readMemoryLong(API.readMemoryLong(address + holderOffset) + 40));
-    }
-
-    @Override
-    public void update(long address) {
-        this.address = address;
     }
 }

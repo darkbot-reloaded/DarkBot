@@ -1,13 +1,16 @@
 package com.github.manolo8.darkbot;
 
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.*;
+import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainForm;
 import com.github.manolo8.darkbot.modules.CollectorModule;
 import com.github.manolo8.darkbot.modules.LootModule;
+import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import com.google.gson.GsonBuilder;
 
 import java.io.File;
@@ -27,6 +30,10 @@ public class Main extends Thread {
     public final GuiManager guiManager;
     public final StatsManager statsManager;
 
+    public final Lazy<Boolean> status;
+
+    public final ConfigEntity configEntity;
+
     public Config config;
     public Module module;
 
@@ -35,19 +42,22 @@ public class Main extends Thread {
 
     private volatile boolean running;
 
-    public Main() {
+    public Main() throws IOException {
         API = new DarkBotAPI();
         this.config = new Config();
 
         loadConfig();
 
+        configEntity = new ConfigEntity(config);
+
         botInstaller = new BotInstaller();
+        status = new Lazy<>();
 
         guiManager = new GuiManager(this);
         starManager = new StarManager();
         mapManager = new MapManager(this);
         hero = new HeroManager(this);
-        statsManager = new StatsManager();
+        statsManager = new StatsManager(this);
 
         botInstaller.add(guiManager);
         botInstaller.add(mapManager);
@@ -56,9 +66,9 @@ public class Main extends Thread {
 
         botInstaller.init();
 
-        form = new MainForm(this);
-
         updateConfig();
+
+        form = new MainForm(this);
 
         start();
     }
@@ -81,12 +91,18 @@ public class Main extends Thread {
                 guiManager.tick();
 
                 if (running && guiManager.canTickModule()) {
-                    hero.checkMove();
                     module.tick();
                     statsManager.tick();
+
+                    if (hero.isTarget(hero.pet)) hero.pet.clickable.setRadius(0);
                 }
 
                 form.tick();
+
+                if (config.changed) {
+                    config.changed = false;
+                    saveConfig();
+                }
 
                 sleepMax(time, 100);
             }
@@ -103,7 +119,7 @@ public class Main extends Thread {
     public void setRunning(boolean running) {
         if (this.running != running) {
 
-            statsManager.toggle(running);
+            status.send(running);
 
             this.running = running;
         }
@@ -112,10 +128,7 @@ public class Main extends Thread {
     private void loadConfig() {
         try {
 
-            File file = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
-
-
-            File config = new File(file, "config.json");
+            File config = new File("config.json");
 
             if (config.exists()) {
 
@@ -139,13 +152,7 @@ public class Main extends Thread {
     public void saveConfig() {
         try {
 
-            File file = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
-
-            File config = new File(file, "config.json");
-
-            if (config.exists()) {
-                config.delete();
-            }
+            File config = new File("config.json");
 
             FileWriter writer = new FileWriter(config);
 
@@ -172,6 +179,11 @@ public class Main extends Thread {
             case 1:
                 if (!isModule(LootModule.class)) {
                     setModule(new LootModule());
+                }
+                break;
+            case 2:
+                if (!isModule(LootModule.class)) {
+                    setModule(new LootNCollectorModule());
                 }
                 break;
         }

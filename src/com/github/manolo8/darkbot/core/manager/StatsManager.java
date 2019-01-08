@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.manager;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 
@@ -27,8 +28,10 @@ public class StatsManager implements Manager {
 
     private StringBuilder builder;
 
-    public StatsManager() {
+    public StatsManager(Main main) {
         builder = new StringBuilder();
+
+        main.status.add(this::toggle);
     }
 
     @Override

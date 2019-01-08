@@ -41,7 +41,7 @@ public class HeroManager extends Ship implements Manager {
         this.main = main;
         this.mapManager = main.mapManager;
         this.pet = new Pet(0);
-        this.map = new Map(0, "LOADING", new Portal[0]);
+        this.map = new Map(0, "LOADING", false, new Portal[0]);
     }
 
     @Override
@@ -66,6 +66,9 @@ public class HeroManager extends Ship implements Manager {
         }
 
         update();
+
+
+        checkMove();
     }
 
     @Override
@@ -99,13 +102,22 @@ public class HeroManager extends Ship implements Manager {
             return;
         }
 
-        double distance = going.distance(location);
+        if (!main.isRunning()) {
+            stop(true);
+            return;
+        }
+
+        //Re-update to be fresh
+        main.hero.mapManager.updateBounds();
+        location.update();
+
+        double distance = location.distance(going);
 
         if (!location.isMoving()) {
             mapManager.translateMousePress(location.x, location.y);
         }
 
-        if (distance > 50) {
+        if (distance > 100) {
 
             distance = min(distance, 200);
 
@@ -115,6 +127,7 @@ public class HeroManager extends Ship implements Manager {
                     cos(angle) * distance + location.x,
                     sin(angle) * distance + location.y
             );
+
 
         } else {
             stop(true);
@@ -169,6 +182,10 @@ public class HeroManager extends Ship implements Manager {
 
     public long timeTo(Location to) {
         return (long) (location.distance(to) * 1000 / shipInfo.speed);
+    }
+
+    public long timeTo(double distance) {
+        return (long) (distance * 1000 / shipInfo.speed);
     }
 
     public boolean isOutOfMap() {

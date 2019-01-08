@@ -1,12 +1,15 @@
 package com.github.manolo8.darkbot.core.entities;
 
+import com.github.manolo8.darkbot.config.BoxInfo;
+import com.github.manolo8.darkbot.config.ConfigEntity;
+
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Box extends Entity {
 
     protected boolean collected;
 
-    public String type;
+    public BoxInfo boxInfo;
 
     public Box(int id) {
         super(id);
@@ -24,25 +27,22 @@ public class Box extends Entity {
     public void update(long address) {
         super.update(address);
 
-        long info = traits.elements[0];
+        long data = traits.elements[0];
 
-//        System.out.println(API.readMemoryLong(API.readMemoryLong(API.readMemoryLong(info + 64) + 32) + 16));
+        data = API.readMemoryLong(data + 64);
+        data = API.readMemoryLong(data + 32);
+        data = API.readMemoryLong(data + 24);
+        data = API.readMemoryLong(data + 8);
+        data = API.readMemoryLong(data + 16);
+        data = API.readMemoryLong(data + 24);
 
-        long xml = API.readMemoryLong(info + 64);
-        xml = API.readMemoryLong(xml + 32);
-        xml = API.readMemoryLong(xml + 24);
-        xml = API.readMemoryLong(xml + 8);
-        xml = API.readMemoryLong(xml + 16);
-        long data = xml = API.readMemoryLong(xml + 24);
-
-        type = API.readMemoryString(data);
+        String type = API.readMemoryString(data);
 
         if (type.length() > 5) {
             int index;
-            this.type = (index = type.indexOf(',')) > 0 ? type.substring(4, index) : type.substring(4);
-        } else {
-            this.type = "";
+            type = (index = type.indexOf(',')) > 0 ? type.substring(4, index) : type.substring(4);
         }
 
+        boxInfo = ConfigEntity.INSTANCE.getOrCreateBoxInfo(type);
     }
 }

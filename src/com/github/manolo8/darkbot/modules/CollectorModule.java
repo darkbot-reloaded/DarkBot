@@ -9,7 +9,6 @@ import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Location;
-import com.github.manolo8.darkbot.core.utils.pet.PetLoot;
 
 import java.util.HashSet;
 import java.util.List;
@@ -33,27 +32,23 @@ public class CollectorModule implements Module {
 
     private Set<Integer> dangerous;
     private long invisibleTime;
-    private Box current;
+
+    public boolean SURE;
+
+    Box current;
+
+    private long waiting;
 
     private int DISTANCE_FROM_DANGEROUS;
 
-    private Set<String> collectibleBoxes;
-
     public CollectorModule() {
         dangerous = new HashSet<>();
-        collectibleBoxes = new HashSet<>();
-
-        collectibleBoxes.add("BONUS_BOX");
-        collectibleBoxes.add("GIFT_BOXES");
 
         DISTANCE_FROM_DANGEROUS = 1500;
     }
 
     @Override
     public void install(Main main) {
-        main.guiManager.module = new PetLoot();
-        main.guiManager.nullPetModuleOnActivate = false;
-
         this.main = main;
 
         this.star = main.starManager;
@@ -68,43 +63,53 @@ public class CollectorModule implements Module {
     @Override
     public void tick() {
 
-        if (star.fromId(config.WORKING_MAP) != hero.map) {
-            gotoRightMap();
-            return;
+        if (isNotWaiting()) {
+
+            checkInvisibility();
+            checkDangerous();
+
+            findBox();
+
+            if (!tryCollectNearestBox() && (!hero.isMoving() || hero.isOutOfMap())) {
+                hero.moveRandom();
+            }
         }
-
-        checkInvisibility();
-        checkDangerous();
-
-        tryCollectNearestBoxOrRandomMove();
     }
 
-    private void tryCollectNearestBoxOrRandomMove() {
-        Box box = findNearestBoxSafe(hero.location);
+    boolean isNotWaiting() {
+        return System.currentTimeMillis() > waiting;
+    }
 
-        if (current == null || box == null || current.isCollected() || isBetter(box)) {
-            current = box;
-        }
+    boolean tryCollectNearestBox() {
 
         if (current != null) {
             collectBox();
-        } else if (!main.hero.isMoving() || main.hero.isOutOfMap()) {
-            hero.moveRandom();
+            return true;
         }
+
+        return false;
     }
 
     private void collectBox() {
-        hero.move(current);
-
         double distance = hero.location.distance(current);
 
-        if (distance < 100) {
+        if (distance == 0 && SURE) {
+            current.setCollected(true);
+        } else if (distance < 100) {
+
             current.clickable.setRadius(200);
-            hero.stop(false);
+            hero.stop(true);
             hero.clickCenter();
             current.clickable.setRadius(0);
 
-            current.setCollected(true);
+            if(!SURE) {
+                current.setCollected(true);
+            }
+
+            waiting = System.currentTimeMillis() + current.boxInfo.waitTime + hero.timeTo(distance);
+
+        } else {
+            hero.move(current);
         }
     }
 
@@ -155,8 +160,9 @@ public class CollectorModule implements Module {
         hero.move(target);
     }
 
-    private Box findNearestBoxSafe(Location location) {
-        double distance = 40000;
+    void findBox() {
+        Location location = hero.location;
+        double distance = 100_000;
         Box closest = null;
 
         for (Box box : boxes) {
@@ -169,11 +175,15 @@ public class CollectorModule implements Module {
             }
         }
 
-        return closest;
+        if (current == null || current.isCollected() || closest != null && isBetter(closest)) {
+            current = closest;
+        } else {
+            current = null;
+        }
     }
 
     private boolean canCollect(Box box) {
-        return collectibleBoxes.contains(box.type)
+        return box.boxInfo.collect
                 && !box.isCollected()
                 && (!config.STAY_AWAY_FROM_ENEMIES || !isDangerousLocation(box.location));
     }
@@ -230,8 +240,6 @@ public class CollectorModule implements Module {
 
         double currentDistance = current.location.distance(hero);
         double newDistance = box.location.distance(hero);
-
-        //if currentDistance < 100, box already marked as collected!
 
         return currentDistance > 100 && currentDistance - 150 > newDistance;
     }

@@ -10,12 +10,14 @@ public class Map {
     public String name;
     public Portal[] portals;
     public HashMap<Map, Integer> distances;
+    public boolean pvp;
 
-    public Map(int id, String name, Portal[] portals) {
+    public Map(int id, String name, boolean pvp, Portal[] portals) {
         this.id = id;
         this.name = name;
         this.portals = portals;
         this.distances = new HashMap<>();
+        this.pvp = pvp;
     }
 
     public void recursiveDistance() {
