@@ -3,57 +3,56 @@ package com.github.manolo8.darkbot.modules;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.entities.Npc;
+import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
-import com.github.manolo8.darkbot.core.itf.MapChange;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
-import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Location;
+import com.github.manolo8.darkbot.core.utils.Drive;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static java.lang.Math.cos;
 import static java.lang.Math.min;
 import static java.lang.StrictMath.sin;
 
-public class LootModule implements Module, MapChange {
+public class LootModule implements Module {
 
     private Main main;
 
     private List<Ship> ships;
     private List<Npc> npcs;
 
-    private StarManager star;
     private HeroManager hero;
+    private Drive drive;
 
     private Config config;
 
-    public Npc current;
+    private long timer;
+
+    public Npc target;
     private long laserTime;
     private long clickDelay;
     private boolean sab;
 
-    private Set<Integer> ignore;
-    private Set<Integer> dangerous;
-
-    public LootModule() {
-        dangerous = new HashSet<>();
-        ignore = new HashSet<>();
-    }
+    private boolean locked;
 
     @Override
     public void install(Main main) {
         this.main = main;
 
-        this.star = main.starManager;
         this.hero = main.hero;
+        this.drive = main.hero.drive;
 
-        this.ships = main.mapManager.ships;
-        this.npcs = main.mapManager.npcs;
+        this.ships = main.mapManager.entities.ships;
+        this.npcs = main.mapManager.entities.npcs;
         this.config = main.config;
+    }
+
+    @Override
+    public boolean canRefresh() {
+        return target == null;
     }
 
     @Override
@@ -62,9 +61,10 @@ public class LootModule implements Module, MapChange {
         if (checkDangerousAndCurrentMap()) {
 
             if (findTarget()) {
+                moveToAnSafePosition();
                 doKillTargetTick();
-            } else if (!hero.isMoving()) {
-                hero.moveRandom();
+            } else if (!drive.isMoving()) {
+                drive.moveRandom();
             }
 
         }
@@ -72,9 +72,7 @@ public class LootModule implements Module, MapChange {
     }
 
     void doKillTargetTick() {
-        moveToAnSafePosition();
-
-        if (hero.isTarget(current)) {
+        if (main.mapManager.isTarget(target)) {
 
             if (main.mapManager.isCurrentTargetOwned()) {
 
@@ -85,8 +83,8 @@ public class LootModule implements Module, MapChange {
                 }
 
             } else {
-                ignore.add(current.id);
-                current = null;
+                target.setTimerTo(90000);
+                target = null;
             }
 
         } else {
@@ -95,17 +93,30 @@ public class LootModule implements Module, MapChange {
     }
 
     boolean checkDangerousAndCurrentMap() {
-        boolean mapWrong = star.fromId(config.WORKING_MAP) != hero.map;
-        boolean cont = current == null || (current.removed || current.health.hp == 0 || current.health.hp > 300000);
+
+        boolean mapWrong = config.WORKING_MAP != hero.map.id;
+        boolean cont = target == null || (target.removed || target.health.hp == 0 || target.health.hp > 300000);
         boolean flee = config.RUN_FROM_ENEMIES && ((hero.health.hpPercent() < config.REPAIR_HP && cont) || hasEnemies());
 
         if (mapWrong || flee) {
 
             hero.runMode();
 
-            if (mapWrong || hero.health.isDecreasedIn(1000)) {
+            if (mapWrong) {
                 main.setModule(new MapModule())
-                        .setTargetAndBack(main.starManager.fromId(main.config.WORKING_MAP), this);
+                        .setTargetAndBack(main.starManager.fromId(main.config.WORKING_MAP));
+            } else {
+                Portal portal = main.starManager.next(hero.map, hero.location, hero.map);
+
+                if (portal.location.distance(hero) < 100) {
+                    if (System.currentTimeMillis() - timer > 10000 && isUnderAttack()) {
+                        timer = System.currentTimeMillis();
+                        API.keyboardClick('J');
+                    }
+                } else {
+                    drive.move(portal);
+                }
+
             }
 
             return false;
@@ -115,14 +126,16 @@ public class LootModule implements Module, MapChange {
     }
 
     boolean findTarget() {
-        if (current == null || current.isInvalid()) {
-            current = closestNpc(hero.location.x, hero.location.y);
+        if (target == null || target.removed) {
+            target = closestNpc(hero.location.x, hero.location.y);
+            locked = false;
         }
-        return current != null;
+
+        return target != null;
     }
 
     private void checkSab() {
-        if (config.AUTO_SAB && hero.health.shieldPercent() < 0.6 && current.health.shield > 12000) {
+        if (config.AUTO_SAB && hero.health.shieldPercent() < 0.6 && target.health.shield > 12000) {
 
             if (!sab) {
                 API.keyboardClick(config.AUTO_SAB_KEY);
@@ -139,79 +152,105 @@ public class LootModule implements Module, MapChange {
 
         long laser = System.currentTimeMillis() - laserTime;
 
-        boolean attacking = hero.isAttacking(current);
-        boolean bugged = (!current.health.isDecreasedIn(12000) && laser > 12000);
+        boolean attacking = hero.isAttacking(target);
+        boolean bugged = (!target.health.isDecreasedIn(1000) && laser > 1000);
 
-        if ((!attacking || bugged) && hero.location.distance(current) < 800 && laser > 500) {
-
-            if (isAttackedByOthers(current)) {
-                current = null;
-                return false;
-            } else {
-
-                API.keyboardClick('Z');
-                laserTime = System.currentTimeMillis();
-
-                return true;
-            }
-
+        if ((!attacking || bugged) && hero.location.distance(target) < 800 && laser > 1500) {
+            setRadiusAndClick(2);
+            laserTime = System.currentTimeMillis();
         }
 
         return true;
     }
 
     private void setTargetAndTryStartLaserAttack() {
-        hero.setTarget(current);
+        if (hero.location.distance(target) <= target.npcInfo.radius && System.currentTimeMillis() - clickDelay > 1000) {
 
-        if (hero.location.distance(current) < 800 && System.currentTimeMillis() - clickDelay > 500) {
-            current.clickable.setRadius(800);
+            hero.setTarget(target);
 
-            hero.clickCenter();
-
-            current.clickable.setRadius(0);
-            API.keyboardClick('Z');
-
+            setRadiusAndClick(1);
+            API.keyboardClick(config.AMMO_KEY);
             clickDelay = System.currentTimeMillis();
+            locked = true;
+
+        } else if (!locked) {
+            target = null;
         }
+
     }
 
-    private void moveToAnSafePosition() {
+    private void setRadiusAndClick(int times) {
+        target.clickable.setRadius(800);
 
-        Location locationCurrent = current.location;
+        drive.clickCenter(times);
+
+        target.clickable.setRadius(0);
+    }
+
+    void moveToAnSafePosition() {
+
+        Location locationCurrent = target.location;
         Location locationHero = hero.location;
 
-        boolean approaching = locationHero.distance(locationCurrent) < locationHero.distance(locationCurrent.lastX, locationCurrent.lastY);
+        double distance = locationHero.distance(locationCurrent);
+        double radius = target.npcInfo.radius;
 
+        boolean approaching = locationHero.distance(locationCurrent) < locationHero.distance(locationCurrent.lastX, locationCurrent.lastY);
         double speed = min(200, locationCurrent.measureSpeed()) * 0.625;
+        boolean closest = distance <= radius + (approaching ? speed : -speed);
+
         double moveDistance = hero.shipInfo.speed * 0.625 + speed;
-        double centerDistance = current.npcInfo.radius + (current.health.hpPercent() > 0.25 || approaching || !locationCurrent.isMoving() ? speed : -speed);
+        double centerDistance = radius;
         double angle = locationCurrent.angle(locationHero);
+        boolean first = target.health.hpPercent() == 1;
+
+        if (first)
+            centerDistance *= 0.75;
+        else if (!closest)
+            centerDistance = centerDistance * 0.70 - speed;
+        else if (approaching)
+            centerDistance += speed;
+        else
+            centerDistance -= speed;
 
         double x = locationCurrent.x - cos(angle) * centerDistance;
         double y = locationCurrent.y - sin(angle) * centerDistance;
 
-        if (current.health.hp != 0 && (moveDistance = (moveDistance - (locationHero.distance(x, y)))) > 0) {
+        boolean circle = !first && closest && (moveDistance = (moveDistance - (locationHero.distance(x, y)))) > 0;
 
+        if (circle) {
             double add = moveDistance / centerDistance;
 
             angle += add;
 
             x = locationCurrent.x - cos(angle) * centerDistance;
             y = locationCurrent.y - sin(angle) * centerDistance;
-
         }
 
-        hero.move(x, y);
+        drive.move(x, y);
+    }
+
+    private boolean isUnderAttack() {
+        for (Ship ship : ships) {
+            if (ship.playerInfo.isEnemy()) {
+
+                if (ship.isAttacking(hero)) {
+                    return true;
+                }
+
+            }
+        }
+        return false;
     }
 
     private boolean hasEnemies() {
         for (Ship ship : ships) {
             if (ship.playerInfo.isEnemy()) {
 
-                if (dangerous.contains(ship.id)) {
+                if (ship.isInTimer()) {
                     return true;
                 } else if (ship.isAttacking(hero)) {
-                    dangerous.add(ship.id);
+                    ship.setTimerTo(400_000);
                     return true;
                 }
 
@@ -222,11 +261,11 @@ public class LootModule implements Module, MapChange {
 
     private boolean isAttackedByOthers(Npc npc) {
 
-        if (ignore.contains(npc.id)) return true;
+        if (npc.isInTimer()) return true;
 
         for (Ship ship : ships) {
             if (ship.isAttacking(npc)) {
-                ignore.add(npc.id);
+                npc.setTimerTo(90000);
                 return true;
             }
         }
@@ -262,10 +301,5 @@ public class LootModule implements Module, MapChange {
         }
 
         return minDistance == null ? null : priority > minDistance.npcInfo.priority ? maxPriority : minDistance;
-    }
-
-    @Override
-    public void onMapChange() {
-        ignore.clear();
     }
 }

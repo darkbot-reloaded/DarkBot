@@ -37,13 +37,17 @@ public class Main extends Thread {
     public Config config;
     public Module module;
 
+    private long lastRefresh;
+
     private final BotInstaller botInstaller;
     private final MainForm form;
 
     private volatile boolean running;
 
-    public Main() throws IOException {
+    public Main() {
         API = new DarkBotAPI();
+        API.createWindow();
+
         this.config = new Config();
 
         loadConfig();
@@ -66,6 +70,10 @@ public class Main extends Thread {
 
         botInstaller.init();
 
+        botInstaller.invalid.add(value -> {
+            if (!value) lastRefresh = System.currentTimeMillis();
+        });
+
         updateConfig();
 
         form = new MainForm(this);
@@ -81,38 +89,76 @@ public class Main extends Thread {
 
             time = System.currentTimeMillis();
 
-            if (botInstaller.isInvalid()) {
-                botInstaller.verify();
-                sleepMax(time, 5000);
-            } else {
+            if (checkInvalid())
+                invalidTick();
+            else
+                validTick();
 
-                hero.tick();
-                mapManager.tick();
-                guiManager.tick();
 
-                if (running && guiManager.canTickModule()) {
-                    module.tick();
-                    statsManager.tick();
+            sleepMax(time, 100);
+        }
+    }
 
-                    if (hero.isTarget(hero.pet)) hero.pet.clickable.setRadius(0);
-                }
+    private boolean checkInvalid() {
+        return botInstaller.isInvalid();
+    }
 
-                form.tick();
+    private void invalidTick() {
+        form.tick();
+        botInstaller.verify();
+    }
 
-                if (config.changed) {
-                    config.changed = false;
-                    saveConfig();
-                }
+    private void validTick() {
+        hero.tick();
+        mapManager.tick();
+        guiManager.tick();
 
-                sleepMax(time, 100);
+        if (running && guiManager.canTickModule()) {
+            tickRunning();
+        }
+
+        form.tick();
+
+        checkConfig();
+    }
+
+    private void tickRunning() {
+
+        module.tick();
+        statsManager.tick();
+
+        checkPetBug();
+
+        checkRefresh();
+    }
+
+    private void checkConfig() {
+        if (config.changed) {
+            config.changed = false;
+            saveConfig();
+        }
+    }
+
+    private void checkPetBug() {
+        if (mapManager.isTarget(hero.pet)) hero.pet.clickable.setRadius(0);
+    }
+
+    private void checkRefresh() {
+        if (config.REFRESH_TIME != 0) {
+
+            boolean refreshTimer = System.currentTimeMillis() - lastRefresh > config.REFRESH_TIME;
+            boolean canRefresh = module.canRefresh();
+
+            if (refreshTimer && canRefresh) {
+                API.refresh();
+                lastRefresh = System.currentTimeMillis();
             }
-
         }
     }
 
     public <A extends Module> A setModule(A module) {
+        module.install(this);
         this.module = module;
-        this.module.install(this);
         return module;
     }
 
@@ -182,12 +228,11 @@ public class Main extends Thread {
                 }
                 break;
             case 2:
-                if (!isModule(LootModule.class)) {
+                if (!isModule(LootNCollectorModule.class)) {
                     setModule(new LootNCollectorModule());
                 }
                 break;
         }
-//        setModule(new GateModule());
     }
 
     private boolean isModule(Class clazz) {
@@ -196,6 +241,7 @@ public class Main extends Thread {
 
     private void sleepMax(long time, int total) {
         time = System.currentTimeMillis() - time;
+
         if (time < total) {
             try {
                 Thread.sleep(total - time);

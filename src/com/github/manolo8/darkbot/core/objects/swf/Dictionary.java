@@ -16,7 +16,7 @@ public class Dictionary extends Updatable {
     private HashMap<String, Lazy<Long>> lazy;
 
     private Entry[] elements;
-
+    private String[] checks;
 
     public int size;
 
@@ -51,6 +51,7 @@ public class Dictionary extends Updatable {
         if (length > 4096 || length < 0 || size < 0 || size > 1024) return;
 
         if (elements.length < size) {
+            checks = new String[size];
             Entry[] temp = new Entry[size];
             System.arraycopy(elements, 0, temp, 0, elements.length);
             elements = temp;
@@ -59,46 +60,52 @@ public class Dictionary extends Updatable {
         byte[] bytes = API.readMemory(table, length);
 
         int current = 0;
+        int check = 0;
 
         for (int i = searchFix(bytes); i < length; i += 16) {
-            long valueAddress = ByteUtils.getLong(bytes, i + 8);
 
-            if (valueAddress >= 0 && valueAddress <= 10) continue;
+            long valueAddress = ByteUtils.getLong(bytes, i + 8) - 1;
 
-            valueAddress--;
+            if (valueAddress >= -1 && valueAddress <= 9) continue;
+
+            Entry entry;
 
             if (current >= size) {
                 break;
             } else if (elements[current] == null) {
-                elements[current] = new Entry(API.readMemoryString(ByteUtils.getLong(bytes, i) - 2), valueAddress);
+                entry = elements[current] = new Entry(API.readMemoryString(ByteUtils.getLong(bytes, i) - 2), valueAddress);
+                send(entry);
+            } else if ((entry = elements[current]).value != valueAddress) {
+                checks[check++] = entry.key;
+
+                entry.key = API.readMemoryString(ByteUtils.getLong(bytes, i) - 2);
+                entry.value = valueAddress;
 
                 //send update
-                send(elements[current].key, valueAddress);
-
-            } else if (elements[current].value != valueAddress) {
-
-                //send reset only if not updated yet
-                sendReset(elements[current].key, current - 1);
-
-                elements[current].key = API.readMemoryString(ByteUtils.getLong(bytes, i) - 2);
-                elements[current].value = valueAddress;
-
-                //send update
-                send(elements[current].key, valueAddress);
+                send(entry);
             }
 
             current++;
         }
 
-        size = current - 1;
-
-        if (this.size > size) {
-            while (size < this.size && this.size > 0) {
-                //send reset only if not updated yet two
-                sendReset(elements[--this.size].key, size);
+        if (this.size > current) {
+            while (this.size != current) {
+                checks[check++] = elements[--this.size].key;
+                elements[this.size] = null;
             }
-        } else {
-            this.size = size;
+        }
+
+        this.size = current;
+
+        if (check > 0) {
+            for (check--; check >= 0; check--) {
+                String str;
+
+                if (!hasKey(str = checks[check]))
+                    send(str, 0);
+
+                checks[check] = null;
+            }
         }
     }
 
@@ -118,23 +125,28 @@ public class Dictionary extends Updatable {
         return bytes.length - 1;
     }
 
-    private void send(String str, long value) {
+    private void send(Entry entry) {
+        send(entry.key, entry.value);
+    }
+
+    private void send(String key, long value) {
         if (lazy != null) {
-            Lazy<Long> lazy = this.lazy.get(str);
+            Lazy<Long> lazy = this.lazy.get(key);
+
             if (lazy != null && !(Objects.equals(lazy.value, value))) {
                 lazy.send(value);
             }
         }
     }
 
-    private void sendReset(String str, int current) {
-        for (int i = 0; i < current; i++) {
-            if (elements[i].key.equals(str)) {
-                return;
-            }
+    private boolean hasKey(String str) {
+        for (int i = 0; i < size; i++) {
+            Entry entry = elements[i];
+            if (entry.key.equals(str))
+                return true;
         }
 
-        send(str, 0);
+        return false;
     }
 
     @Override

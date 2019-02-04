@@ -21,6 +21,7 @@ public class Gui extends Updatable {
     public int height;
 
     private long time;
+    private long update;
 
     public Gui(long address) {
 
@@ -61,6 +62,7 @@ public class Gui extends Updatable {
         } else {
             super.update(address);
             this.addressInfo = API.readMemoryLong(address + 488);
+            this.update = System.currentTimeMillis();
         }
     }
 
@@ -70,6 +72,14 @@ public class Gui extends Updatable {
         this.height = 0;
         this.width = 0;
     }
+
+    public boolean lastUpdatedIn(long time) {
+        return System.currentTimeMillis() - update > time;
+    }
+//
+//    public void click(int plusX, int plusY) {
+//        API.mouseClick(x + plusX, y + plusY);
+//    }
 
     public boolean show(boolean value) {
 

@@ -10,15 +10,19 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class BotInstaller {
 
-    public static final byte[] bytes = new byte[]{
+    public static final byte[] bytesToMainApplication = new byte[]{
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0
     };
 
-    public static int SEP;
+    private static final byte[] bytesToSettings = new byte[]{
+            0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5
+    };
 
     private final List<Manager> managers;
+
+    public static int SEP;
 
     public final Lazy<Boolean> invalid;
 
@@ -32,6 +36,8 @@ public class BotInstaller {
     public final Lazy<Long> userDataAddress;
     public final Lazy<Long> settingsAddress;
 
+    private long timer;
+
     public BotInstaller() {
         this.managers = new ArrayList<>();
 
@@ -43,6 +49,9 @@ public class BotInstaller {
         this.settingsAddress = new Lazy<>();
 
         this.invalid = new Lazy<>(true);
+        this.invalid.add(value -> {
+            if (value) timer = System.currentTimeMillis();
+        });
     }
 
     public void add(Manager manager) {
@@ -70,9 +79,7 @@ public class BotInstaller {
     }
 
     public void verify() {
-        boolean success = install0();
-
-        if (success) {
+        if (install0()) {
             invalid.send(false);
         } else {
             invalid.send(true);
@@ -105,41 +112,57 @@ public class BotInstaller {
 
     private boolean install0() {
 
-        if (!API.attachToWindow()) {
-            return false;
-        }
+        if (!API.isValid()) return false;
 
-        API.setDrawing(true);
+//        API.forceVisible(true);
 
-        long[] address = API.queryMemory(bytes, 1);
+        long[] address = API.queryMemory(bytesToMainApplication, 1);
 
-        if (address.length != 1) {
-            return false;
-        }
+        checkInvalid();
+
+        if (address.length != 1) return false;
 
         mainApplicationAddress.send(address[0] - 228);
 
-        address = API.queryMemory(new byte[]{0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5}, 1);
+        address = API.queryMemory(bytesToSettings, 1);
 
-        if (address.length != 1) {
-            return false;
-        }
+        if (address.length != 1) return false;
 
         settingsAddress.send(address[0] - 237);
 
         SEP = API.readMemoryInt(mainApplicationAddress.value + 4);
 
-        mainAddress.send(API.readMemoryLong(mainApplicationAddress.value + 1344));
+        long temp = API.readMemoryLong(mainApplicationAddress.value + 1344);
 
-        screenManagerAddress.send(API.readMemoryLong(mainAddress.value + 504));
-        guiManagerAddress.send(API.readMemoryLong(mainAddress.value + 512));
+        if (temp == 0) return false;
+
+        mainAddress.send(temp);
+
+        temp = API.readMemoryLong(mainAddress.value + 504);
+
+        if (temp == 0) return false;
+
+        screenManagerAddress.send(temp);
+
+        temp = API.readMemoryLong(mainAddress.value + 512);
+
+        if (temp == 0) return false;
+
+        guiManagerAddress.send(temp);
 
         //reset user data address
         userDataAddress.send(0L);
 
-        API.setDrawing(false);
+//        API.forceVisible(false);
 
         return true;
+    }
+
+    private void checkInvalid() {
+        if (System.currentTimeMillis() - timer > 180000) {
+            API.refresh();
+            timer = System.currentTimeMillis();
+        }
     }
 
 }

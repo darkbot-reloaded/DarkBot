@@ -228,6 +228,10 @@ public class StarManager {
         );
         //PVP --------------------------------------------------------
 
+        //OTHERS
+        add(223, "Devolarium Attack");
+        //OTHERS
+
         fill();
     }
 

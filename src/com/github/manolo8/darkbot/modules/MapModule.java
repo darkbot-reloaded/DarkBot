@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Map;
+import com.github.manolo8.darkbot.core.utils.Drive;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -15,6 +16,7 @@ public class MapModule implements Module, MapChange {
 
     private Main main;
     private HeroManager hero;
+    private Drive drive;
     private StarManager star;
 
     private Module back;
@@ -25,8 +27,15 @@ public class MapModule implements Module, MapChange {
     @Override
     public void install(Main main) {
         this.hero = main.hero;
+        this.drive = main.hero.drive;
         this.star = main.starManager;
         this.main = main;
+        this.back = main.module;
+    }
+
+    @Override
+    public boolean canRefresh() {
+        return false;
     }
 
     public void setTarget(Map target) {
@@ -35,9 +44,8 @@ public class MapModule implements Module, MapChange {
         current = star.next(hero.map, hero.location, target);
     }
 
-    public void setTargetAndBack(Map target, Module back) {
+    public void setTargetAndBack(Map target) {
         setTarget(target);
-        this.back = back;
     }
 
     @Override
@@ -49,7 +57,7 @@ public class MapModule implements Module, MapChange {
 
             hero.runMode();
 
-            if (distance < 100 && !hero.isMoving()) {
+            if (distance < 100 && !drive.isMoving()) {
 
                 if (hero.nextMap() != current.target.id && System.currentTimeMillis() - time > 9000) {
                     API.keyboardClick('J');
@@ -57,7 +65,7 @@ public class MapModule implements Module, MapChange {
                 }
 
             } else if (current.location.isLoaded()) {
-                hero.move(current);
+                drive.move(current);
             }
         }
 

@@ -12,6 +12,8 @@ public class Config {
     public int RUN_CONFIG = 2;
     public char RUN_FORMATION = '9';
 
+    public long REFRESH_TIME = 60 * 60 * 1000;
+
     public int CURRENT_MODULE;
 
     public int MAX_DEATHS = 10;

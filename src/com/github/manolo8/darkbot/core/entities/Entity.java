@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.Location;
 import com.github.manolo8.darkbot.core.objects.swf.Array;
@@ -42,12 +41,12 @@ public class Entity extends Updatable {
         return location;
     }
 
-    public boolean isInvalid() {
+    public boolean isInvalid(long mapAddress) {
 
         int id = API.readMemoryInt(address + 56);
         long container = API.readMemoryLong(address + 96);
 
-        return container != MapManager.mapAddress || this.id != id;
+        return container != mapAddress || this.id != id;
     }
 
     @Override
@@ -76,5 +75,9 @@ public class Entity extends Updatable {
                 break;
             }
         }
+    }
+
+    public void removed() {
+        removed = true;
     }
 }

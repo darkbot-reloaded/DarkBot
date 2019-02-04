@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.modules.LootModule;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 
 import javax.swing.*;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Map.Entry;
@@ -39,6 +40,8 @@ public class ConfigForm {
     private JTextField runFormationKey;
     private JTextField offensiveFormationKey;
     private JRadioButton lootNCollectoSLC;
+    private JTextField refreshTime;
+    private JTextField maxDeaths;
 
     private Config config;
 
@@ -67,6 +70,8 @@ public class ConfigForm {
 
         runFromEnemiesCheckBox.setSelected(config.RUN_FROM_ENEMIES);
         autoCloackCheckBox.setSelected(config.AUTO_CLOACK);
+        refreshTime.setText(String.valueOf(config.REFRESH_TIME / (1000 * 60)));
+        maxDeaths.setText(String.valueOf(config.MAX_DEATHS));
         autoSabCheck.setSelected(config.AUTO_SAB);
         cloackKey.setText(String.valueOf(config.AUTO_CLOACK_KEY));
         ammoKey.setText(String.valueOf(config.AMMO_KEY));
@@ -85,15 +90,52 @@ public class ConfigForm {
 
         workingMap.addItemListener(e -> config.WORKING_MAP = main.starManager.fromName((String) e.getItem()).id);
 
-        runFromEnemiesCheckBox.addChangeListener(e -> config.RUN_FROM_ENEMIES = runFromEnemiesCheckBox.isSelected());
+        runFromEnemiesCheckBox.addItemListener(e -> config.RUN_FROM_ENEMIES = runFromEnemiesCheckBox.isSelected());
 
-        autoCloackCheckBox.addChangeListener(e -> config.AUTO_CLOACK = autoCloackCheckBox.isSelected());
+        autoCloackCheckBox.addItemListener(e -> config.AUTO_CLOACK = autoCloackCheckBox.isSelected());
 
-        autoSabCheck.addChangeListener(e -> config.AUTO_SAB = autoSabCheck.isSelected());
+        autoSabCheck.addItemListener(e -> config.AUTO_SAB = autoSabCheck.isSelected());
 
         runConfig.addItemListener(e -> config.RUN_CONFIG = Integer.parseInt((String) e.getItem()));
 
         offensiveConfig.addItemListener(e -> config.OFFENSIVE_CONFIG = Integer.parseInt((String) e.getItem()));
+
+        refreshTime.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                try {
+                    int value = Integer.parseInt(refreshTime.getText());
+
+                    if (value >= 0) {
+                        config.REFRESH_TIME = value * 1000 * 60;
+                    } else {
+                        config.REFRESH_TIME = 0;
+                    }
+
+                } catch (NumberFormatException ignored) {
+                    config.REFRESH_TIME = 0;
+                    refreshTime.setText("0");
+                }
+
+                config.changed = true;
+            }
+        });
+
+        maxDeaths.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                try {
+
+                    config.MAX_DEATHS = Integer.parseInt(maxDeaths.getText());
+
+                } catch (NumberFormatException ignored) {
+                    config.MAX_DEATHS = 10;
+                    maxDeaths.setText("10");
+                }
+
+                config.changed = true;
+            }
+        });
 
         offensiveFormationKey.addKeyListener(new KeyAdapter() {
             @Override
@@ -135,25 +177,25 @@ public class ConfigForm {
             }
         });
 
-        collectorSLC.addChangeListener(e -> {
-            lootNCollectoSLC.setSelected(false);
-            lootSLC.setSelected(false);
+        collectorSLC.addItemListener(e -> {
+
+            if (e.getStateChange() != ItemEvent.SELECTED) return;
 
             config.CURRENT_MODULE = 0;
             main.setModule(new CollectorModule());
         });
 
-        lootSLC.addChangeListener(e -> {
-            lootNCollectoSLC.setSelected(false);
-            collectorSLC.setSelected(false);
+        lootSLC.addItemListener(e -> {
+
+            if (e.getStateChange() != ItemEvent.SELECTED) return;
 
             config.CURRENT_MODULE = 1;
             main.setModule(new LootModule());
         });
 
-        lootNCollectoSLC.addChangeListener(e -> {
-            lootSLC.setSelected(false);
-            collectorSLC.setSelected(false);
+        lootNCollectoSLC.addItemListener(e -> {
+
+            if (e.getStateChange() != ItemEvent.SELECTED) return;
 
             config.CURRENT_MODULE = 2;
             main.setModule(new LootNCollectorModule());
@@ -174,7 +216,7 @@ public class ConfigForm {
     private void createNpcTable() {
         Set<Entry<String, NpcInfo>> types = config.npcInfos.entrySet();
 
-        String[] header = new String[]{"Name", "Radius", "Priority", "Kill", "Last to kill"};
+        String[] header = new String[]{"Name", "Radius", "Priority", "Kill", "Last to kill" };
         Object[][] content = new Object[types.size()][5];
 
         int index = 0;
@@ -238,7 +280,7 @@ public class ConfigForm {
     private void createBoxTable() {
         Set<Entry<String, BoxInfo>> types = config.boxInfos.entrySet();
 
-        String[] header = new String[]{"Name", "Collect", "Wait"};
+        String[] header = new String[]{"Name", "Collect", "Wait" };
         Object[][] content = new Object[types.size()][3];
 
         int index = 0;

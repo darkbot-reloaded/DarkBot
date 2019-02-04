@@ -2,39 +2,25 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
-import com.github.manolo8.darkbot.core.entities.*;
+import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.MapChange;
-import com.github.manolo8.darkbot.core.objects.swf.Array;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import com.github.manolo8.darkbot.core.utils.EntityList;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class MapManager implements Manager {
 
+    private final Main main;
+
+    public final EntityList entities;
+
     private long mapAddressStatic;
     private long viewAddressStatic;
-    public static long mapAddress;
+    public long mapAddress;
     private long viewAddress;
     private long boundsAddress;
     private long eventAddress;
-
-    private Main main;
-    private Array entities;
-
-    private HashSet<Integer> ids;
-
-    public List<Box> boxes;
-
-    public List<Npc> npcs;
-    public List<Portal> portals;
-    public List<Ship> ships;
-    public List<BattleStation> battleStations;
-
-    public List<Entity> unknown;
 
     public static int id;
 
@@ -52,18 +38,7 @@ public class MapManager implements Manager {
     public MapManager(Main main) {
         this.main = main;
 
-        this.entities = new Array(0);
-
-        this.ids = new HashSet<>();
-
-        this.boxes = new ArrayList<>();
-        this.npcs = new ArrayList<>();
-        this.portals = new ArrayList<>();
-        this.ships = new ArrayList<>();
-        this.unknown = new ArrayList<>();
-        this.battleStations = new ArrayList<>();
-
-        this.main.status.add(this::changeRadiusOfAll);
+        this.entities = new EntityList(main);
     }
 
 
@@ -80,22 +55,17 @@ public class MapManager implements Manager {
 
     @Override
     public void stop() {
-        cleanup();
+
     }
 
     public void tick() {
         long temp = API.readMemoryLong(mapAddressStatic);
 
-        synchronized (Main.UPDATE_LOCKER) {
-
-            if (mapAddress != temp) {
-                cleanup();
-                update(temp);
-            }
-
-            updateEntities();
-
+        if (mapAddress != temp) {
+            update(temp);
         }
+
+        entities.update();
 
         updateBounds();
         checkMirror();
@@ -107,8 +77,8 @@ public class MapManager implements Manager {
 
         internalWidth = API.readMemoryInt(address + 68);
         internalHeight = API.readMemoryInt(address + 72);
-        entities.update(API.readMemoryLong(address + 40));
         int tempId = API.readMemoryInt(address + 76);
+        entities.update(address);
 
         if (tempId != id) {
             id = tempId;
@@ -149,109 +119,8 @@ public class MapManager implements Manager {
         boundMaxY = API.readMemoryDouble(updated + 120);
     }
 
-    private void updateEntities() {
-
-        entities.update();
-
-        for (int i = 0; i < entities.size; i++) {
-
-            long found = entities.elements[i];
-
-            int id = API.readMemoryInt(found + 56);
-
-            if (!ids.add(id)) continue;
-
-            if (API.readMemoryInt(found + 112) == 3) {
-                boxes.add(defs(new Box(id), found));
-            } else if (id <= 150000499 && id >= 150000156) {
-                portals.add(defs(main.starManager.fromIdPortal(id), found));
-            } else if (id <= 150000950 && id >= 150000500) {
-                battleStations.add(defs(new BattleStation(id), found));
-            } else {
-
-                int npc = API.readMemoryInt(found + 112);
-                int visible = API.readMemoryInt(found + 116);
-                int c = API.readMemoryInt(found + 120);
-                int d = API.readMemoryInt(found + 124);
-
-                if ((visible == 1 || visible == 0) && (c == 1 || c == 0) && d == 0) {
-                    if (npc == 1) {
-                        npcs.add(defs(new Npc(id), found));
-                    } else if (npc == 0 && found != main.hero.address && found != main.hero.pet.address) {
-                        ships.add(defs(new Ship(id), found));
-                    }
-                } else {
-                    unknown.add(defs(new Entity(id), found));
-                }
-
-            }
-
-        }
-
-        iterate(boxes);
-        iterate(portals);
-        iterate(npcs);
-        iterate(ships);
-        iterate(unknown);
-        iterate(battleStations);
-    }
-
-    private <E extends Entity> E defs(E entity, long address) {
-        entity.update(address);
-
-        if (main.isRunning())
-            entity.clickable.setRadius(0);
-
-        return entity;
-    }
-
-    private void iterate(List<? extends Entity> entities) {
-        for (int i = 0; i < entities.size(); i++) {
-            Entity entity = entities.get(i);
-
-            if (entity.isInvalid()) {
-                entities.remove(i);
-                entity.removed = true;
-                ids.remove(entity.id);
-                i--;
-            } else {
-                entity.update();
-            }
-        }
-    }
-
-    private void changeRadiusOfAll(boolean reset) {
-        reset = !reset;
-
-        changeRadius(boxes, reset);
-        changeRadius(portals, reset);
-        changeRadius(npcs, reset);
-        changeRadius(ships, reset);
-        changeRadius(unknown, reset);
-        changeRadius(battleStations, reset);
-
-        if (reset) main.hero.clickable.reset();
-        else main.hero.clickable.setRadius(0);
-    }
-
-    private void changeRadius(List<? extends Entity> entities, boolean reset) {
-
-        for (Entity entity : entities) {
-            if (reset) entity.clickable.reset();
-            else entity.clickable.setRadius(0);
-        }
-
-    }
-
-    private void cleanup() {
-        ids.clear();
-
-        boxes.clear();
-        npcs.clear();
-        portals.clear();
-        ships.clear();
-        unknown.clear();
-        battleStations.clear();
+    public boolean isTarget(Entity entity) {
+        return API.readMemoryLong(API.readMemoryLong(mapAddress + 120) + 40) == entity.address;
     }
 
     public boolean isOutOfMap(double x, double y) {

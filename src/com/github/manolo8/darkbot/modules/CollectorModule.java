@@ -2,17 +2,14 @@ package com.github.manolo8.darkbot.modules;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.core.entities.BattleStation;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
-import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Location;
+import com.github.manolo8.darkbot.core.utils.Drive;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static java.lang.Math.cos;
@@ -24,16 +21,12 @@ public class CollectorModule implements Module {
 
     private List<Box> boxes;
     private List<Ship> ships;
-    private List<BattleStation> battleStations;
     private Config config;
 
     private HeroManager hero;
-    private StarManager star;
+    private Drive drive;
 
-    private Set<Integer> dangerous;
     private long invisibleTime;
-
-    public boolean SURE;
 
     Box current;
 
@@ -42,8 +35,6 @@ public class CollectorModule implements Module {
     private int DISTANCE_FROM_DANGEROUS;
 
     public CollectorModule() {
-        dangerous = new HashSet<>();
-
         DISTANCE_FROM_DANGEROUS = 1500;
     }
 
@@ -51,29 +42,50 @@ public class CollectorModule implements Module {
     public void install(Main main) {
         this.main = main;
 
-        this.star = main.starManager;
         this.hero = main.hero;
+        this.drive = main.hero.drive;
 
         this.config = main.config;
-        this.boxes = main.mapManager.boxes;
-        this.ships = main.mapManager.ships;
-        this.battleStations = main.mapManager.battleStations;
+        this.boxes = main.mapManager.entities.boxes;
+        this.ships = main.mapManager.entities.ships;
+    }
+
+    @Override
+    public boolean canRefresh() {
+        return isNotWaiting();
     }
 
     @Override
     public void tick() {
 
-        if (isNotWaiting()) {
+        if (isNotWaiting() && checkCurrentMap()) {
 
             checkInvisibility();
             checkDangerous();
 
             findBox();
 
-            if (!tryCollectNearestBox() && (!hero.isMoving() || hero.isOutOfMap())) {
-                hero.moveRandom();
+            if (!tryCollectNearestBox() && (!drive.isMoving() || drive.isOutOfMap())) {
+                drive.moveRandom();
             }
         }
+    }
+
+
+    boolean checkCurrentMap() {
+        boolean mapWrong = config.WORKING_MAP != hero.map.id;
+
+        if (mapWrong) {
+
+            hero.runMode();
+
+            main.setModule(new MapModule())
+                    .setTargetAndBack(main.starManager.fromId(main.config.WORKING_MAP));
+
+            return false;
+        }
+
+        return true;
     }
 
     boolean isNotWaiting() {
@@ -93,30 +105,26 @@ public class CollectorModule implements Module {
     private void collectBox() {
         double distance = hero.location.distance(current);
 
-        if (distance == 0 && SURE) {
-            current.setCollected(true);
-        } else if (distance < 100) {
+        if (distance < 600) {
 
-            current.clickable.setRadius(200);
-            hero.stop(true);
-            hero.clickCenter();
+            current.clickable.setRadius(1200);
+            drive.stop();
+            drive.clickCenter(1);
             current.clickable.setRadius(0);
 
-            if(!SURE) {
-                current.setCollected(true);
-            }
+            current.setCollected(true);
 
-            waiting = System.currentTimeMillis() + current.boxInfo.waitTime + hero.timeTo(distance);
+            waiting = System.currentTimeMillis() + current.boxInfo.waitTime + hero.timeTo(distance) + 30;
 
         } else {
-            hero.move(current);
+            drive.move(current);
         }
     }
 
     private void checkDangerous() {
         if (config.STAY_AWAY_FROM_ENEMIES) {
 
-            Location dangerous = closestDangerous();
+            Location dangerous = findClosestEnemyAndAddToDangerousList();
 
             if (dangerous != null) stayAwayFromLocation(dangerous);
         }
@@ -130,11 +138,6 @@ public class CollectorModule implements Module {
             invisibleTime = System.currentTimeMillis();
             API.keyboardClick(config.AUTO_CLOACK_KEY);
         }
-    }
-
-    private void gotoRightMap() {
-        main.setModule(new MapModule())
-                .setTargetAndBack(star.fromId(config.WORKING_MAP), this);
     }
 
     private void stayAwayFromLocation(Location location) {
@@ -157,7 +160,7 @@ public class CollectorModule implements Module {
             target.y = location.y - sin(angle) * distance;
         }
 
-        hero.move(target);
+        drive.move(target);
     }
 
     void findBox() {
@@ -185,31 +188,13 @@ public class CollectorModule implements Module {
     private boolean canCollect(Box box) {
         return box.boxInfo.collect
                 && !box.isCollected()
-                && (!config.STAY_AWAY_FROM_ENEMIES || !isDangerousLocation(box.location));
-    }
-
-    private Location closestDangerous() {
-        return hasEnemyBattleStationNear(hero.location) ?
-                battleStations.get(0).location
-                : findClosestEnemyAndAddToDangerousList();
-    }
-
-    private boolean isDangerousLocation(Location location) {
-        return hasEnemyBattleStationNear(location) || hasEnemyNear(location);
-    }
-
-    private boolean hasEnemyBattleStationNear(Location location) {
-        if (!battleStations.isEmpty()) {
-            BattleStation station = battleStations.get(0);
-            return station.info.isEnemy() && station.location.distance(location) < DISTANCE_FROM_DANGEROUS;
-        }
-
-        return false;
+                && (!drive.canMove(box.location));
+        //todo fix
     }
 
     private boolean hasEnemyNear(Location location) {
         for (Ship ship : ships) {
-            if (dangerous.contains(ship.id) && ship.location.distance(location) < DISTANCE_FROM_DANGEROUS) {
+            if (ship.isInTimer() && ship.location.distance(location) < DISTANCE_FROM_DANGEROUS) {
                 return true;
             }
         }
@@ -223,10 +208,10 @@ public class CollectorModule implements Module {
                     && !ship.invisible
                     && ship.location.distance(hero) < DISTANCE_FROM_DANGEROUS) {
 
-                if (dangerous.contains(ship.id)) {
+                if (ship.isInTimer()) {
                     return ship.location;
                 } else if (ship.isAttacking(hero)) {
-                    dangerous.add(ship.id);
+                    ship.setTimerTo(400_000);
                     return ship.location;
                 }
 
