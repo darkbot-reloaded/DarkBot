@@ -552,8 +552,8 @@ public class ConfigGui extends JFrame {
         ammoSabKey.setText(String.valueOf(config.AUTO_SAB_KEY));
         runFormation.setText(String.valueOf(config.RUN_FORMATION));
         offensiveFormation.setText(String.valueOf(config.OFFENSIVE_FORMATION));
-        runConfig.setSelectedItem(String.valueOf(config.RUN_CONFIG));
-        offensiveConfig.setSelectedItem(String.valueOf(config.OFFENSIVE_CONFIG));
+        runConfig.setSelectedItem(config.RUN_CONFIG);
+        offensiveConfig.setSelectedItem(config.OFFENSIVE_CONFIG);
         moduleCollector.setSelected(config.CURRENT_MODULE == 0);
         moduleLoot.setSelected(config.CURRENT_MODULE == 1);
         moduleLootNCollector.setSelected(config.CURRENT_MODULE == 2);

@@ -12,6 +12,9 @@ public class PingManager implements Manager {
     private VectorInt lastPings;
 
     public int ping;
+
+    private int currentIndex;
+    private long lastCheck;
     private long time;
 
     public PingManager() {
@@ -30,11 +33,18 @@ public class PingManager implements Manager {
 
         } else {
 
-            lastPings.update();
+            if (System.currentTimeMillis() - lastCheck >= 1000) {
+                lastPings.update();
 
-            if (lastPings.size > 0)
-                ping = lastPings.elements[lastPings.size - 1];
+                if (currentIndex == lastPings.size)
+                    ping += 1000;
+                else if (lastPings.size > 0)
+                    ping = lastPings.elements[lastPings.size - 1];
 
+                currentIndex = lastPings.size;
+
+                lastCheck = System.currentTimeMillis();
+            }
         }
     }
 

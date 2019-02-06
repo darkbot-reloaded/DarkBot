@@ -72,11 +72,8 @@ public class MainGui extends JFrame {
         container.setLayout(new GridLayout(1, 4));
 
         container.add(openConfig);
-
         container.add(copySid);
-
         container.add(toggleVisibility);
-
         container.add(toggleRunning);
 
         add(container, c);

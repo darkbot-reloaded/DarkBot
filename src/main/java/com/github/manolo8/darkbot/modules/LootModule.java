@@ -200,14 +200,13 @@ public class LootModule implements Module {
             LocationInfo targetInfo = target.locationInfo;
 
             Location locationHero = heroInfo.now;
-            Location locationCurrent = targetInfo.destinationInTime(150);
+            Location locationCurrent = targetInfo.destinationInTime(200);
 
             double radius = target.npcInfo.radius;
 
             double distance = heroInfo.now.distance(targetInfo.now);
             double angle = locationCurrent.angle(locationHero);
 
-            NpcInfo info = target.npcInfo;
             if (distance > radius) {
                 radiusFix -= (distance - radius) / 2;
                 radiusFix = (int) max(radiusFix, -target.npcInfo.radius / 2);

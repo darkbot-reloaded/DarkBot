@@ -14,6 +14,8 @@ public class StatsManager implements Manager {
     public double uridium;
     public double experience;
     public double honor;
+    public int deposit;
+    public int depositTotal;
 
     private long started;
     private long runningTime;
@@ -49,6 +51,9 @@ public class StatsManager implements Manager {
             updateUridium(API.readMemoryDouble(address + 296));
             updateExperience(API.readMemoryDouble(address + 312));
             updateHonor(API.readMemoryDouble(address + 320));
+
+            deposit = API.readMemoryInt(API.readMemoryLong(address + 240) + 40);
+            depositTotal = API.readMemoryInt(API.readMemoryLong(address + 248) + 40);
         }
     }
 
@@ -97,42 +102,34 @@ public class StatsManager implements Manager {
         return runningTime + (lastStatus ? (System.currentTimeMillis() - started) : 0);
     }
 
-    public void reset() {
-        earnedCredits = earnedExperience = earnedHonor = earnedUridium = 0;
-    }
-
     public String runningTimeStr() {
         builder.setLength(0);
 
         int seconds = (int) (runningTime() / 1000);
+        int hours = seconds / 3600;
+        int minutes = seconds / 60;
 
-        if (seconds > 3600) {
 
-            int hours = seconds / 3600;
+        if (hours > 0) {
 
-            if (hours < 10) {
+            if (hours < 10)
                 builder.append('0');
-            }
 
             builder.append(hours).append(':');
         }
 
-        if (seconds > 60) {
+        if (minutes > 0) {
 
-            int minutes = (seconds % 3600) / 60;
-
-            if (minutes < 10) {
+            if (minutes < 10)
                 builder.append('0');
-            }
 
             builder.append(minutes).append(':');
         }
 
         seconds = seconds % 60;
 
-        if (seconds < 10) {
+        if (seconds < 10)
             builder.append('0');
-        }
 
         builder.append(seconds);
 

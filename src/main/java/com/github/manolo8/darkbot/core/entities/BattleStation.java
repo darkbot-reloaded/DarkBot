@@ -11,7 +11,8 @@ public class BattleStation
         implements Obstacle {
 
     public PlayerInfo info;
-    public Area area;
+
+    private Area area;
 
     public BattleStation(int id) {
         super(id);

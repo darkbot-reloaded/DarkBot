@@ -73,7 +73,7 @@ public class CollectorModule implements Module {
     }
 
 
-    boolean checkCurrentMap() {
+    private boolean checkCurrentMap() {
         boolean mapWrong = config.WORKING_MAP != hero.map.id;
 
         if (mapWrong) {
@@ -109,7 +109,6 @@ public class CollectorModule implements Module {
         if (distance < 600) {
 
             current.clickable.setRadius(1200);
-            drive.stop();
             drive.clickCenter(1);
             current.clickable.setRadius(0);
 
@@ -125,7 +124,7 @@ public class CollectorModule implements Module {
     private void checkDangerous() {
         if (config.STAY_AWAY_FROM_ENEMIES) {
 
-            LocationInfo dangerous = findClosestEnemyAndAddToDangerousList();
+            Location dangerous = findClosestEnemyAndAddToDangerousList();
 
             if (dangerous != null) stayAwayFromLocation(dangerous);
         }
@@ -141,10 +140,9 @@ public class CollectorModule implements Module {
         }
     }
 
-    private void stayAwayFromLocation(LocationInfo locationInfo) {
+    private void stayAwayFromLocation(Location awayLocation) {
 
         Location heroLocation = hero.locationInfo.now;
-        Location awayLocation = locationInfo.destinationInTime(150);
 
         double angle = awayLocation.angle(heroLocation);
         double moveDistance = hero.shipInfo.speed;
@@ -196,17 +194,17 @@ public class CollectorModule implements Module {
                 && (drive.canMove(box.locationInfo.now));
     }
 
-    private LocationInfo findClosestEnemyAndAddToDangerousList() {
+    private Location findClosestEnemyAndAddToDangerousList() {
         for (Ship ship : ships) {
             if (ship.playerInfo.isEnemy()
                     && !ship.invisible
                     && ship.locationInfo.distance(hero) < DISTANCE_FROM_DANGEROUS) {
 
                 if (ship.isInTimer()) {
-                    return ship.locationInfo;
+                    return ship.locationInfo.now;
                 } else if (ship.isAttacking(hero)) {
                     ship.setTimerTo(400_000);
-                    return ship.locationInfo;
+                    return ship.locationInfo.now;
                 }
 
             }

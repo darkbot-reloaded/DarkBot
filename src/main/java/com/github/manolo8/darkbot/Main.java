@@ -33,8 +33,6 @@ public class Main extends Thread {
 
     public final Lazy<Boolean> status;
 
-    public final ConfigEntity configEntity;
-
     public Config config;
     public Module module;
 
@@ -53,7 +51,7 @@ public class Main extends Thread {
 
         loadConfig();
 
-        configEntity = new ConfigEntity(config);
+        new ConfigEntity(config);
 
         botInstaller = new BotInstaller();
         status = new Lazy<>();
@@ -89,51 +87,46 @@ public class Main extends Thread {
         long time;
 
         while (true) {
-
             time = System.currentTimeMillis();
 
-            if (checkInvalid())
-                invalidTick();
-            else
-                validTick();
+            tick();
 
             sleepMax(time, 100);
         }
     }
 
-    private boolean checkInvalid() {
+    private void tick() {
+
+        if (isInvalid())
+            invalidTick();
+        else
+            validTick();
+
+        pingManager.tick();
+        form.tick();
+
+        checkConfig();
+    }
+
+    private boolean isInvalid() {
         return botInstaller.isInvalid();
     }
 
     private void invalidTick() {
-
-        pingManager.tick();
-
-        form.tick();
-
         botInstaller.verify();
-
     }
 
     private void validTick() {
 
-        pingManager.tick();
-
+        guiManager.tick();
         hero.tick();
         mapManager.tick();
 
-        if (running && guiManager.canTickModule()) {
+        if (running && guiManager.canTickModule())
             tickRunning();
-        }
-
-        form.tick();
-
-        checkConfig();
-
     }
 
     private void tickRunning() {
-
         module.tick();
         statsManager.tick();
 
@@ -225,28 +218,30 @@ public class Main extends Thread {
         return running;
     }
 
-    public void updateConfig() {
+    private void updateConfig() {
         switch (config.CURRENT_MODULE) {
             case 0:
-                if (!isModule(CollectorModule.class)) {
+                if (isNotModule(CollectorModule.class)) {
                     setModule(new CollectorModule());
                 }
                 break;
             case 1:
-                if (!isModule(LootModule.class)) {
+                if (isNotModule(LootModule.class)) {
                     setModule(new LootModule());
                 }
                 break;
             case 2:
-                if (!isModule(LootNCollectorModule.class)) {
+                if (isNotModule(LootNCollectorModule.class)) {
                     setModule(new LootNCollectorModule());
                 }
                 break;
+            default:
+                setModule(new CollectorModule());
         }
     }
 
-    private boolean isModule(Class clazz) {
-        return module != null && module.getClass() == clazz;
+    private boolean isNotModule(Class clazz) {
+        return module == null || module.getClass() != clazz;
     }
 
     private void sleepMax(long time, int total) {
