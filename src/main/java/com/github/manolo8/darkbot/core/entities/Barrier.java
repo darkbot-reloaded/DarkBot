@@ -7,31 +7,24 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Barrier
-        extends Entity
+        extends Zone
         implements Obstacle {
 
-    private final Area area;
+    private Area area = new Area(0, 0, 0, 0);
 
     public Barrier(int id) {
         super(id);
-        this.area = new Area(0, 0, 0, 0);
     }
 
     @Override
     public void update() {
         super.update();
 
-        Location now = locationInfo.now;
-
-        area.minX = now.x - 60;
-        area.minY = now.y - 60;
-        area.maxX = now.x + API.readMemoryDouble(address + 232) + 60;
-        area.maxY = now.y + API.readMemoryDouble(address + 240) + 60;
-    }
-
-    @Override
-    public void update(long address) {
-        super.update(address);
+        Area zone = getZone();
+        area.minX = zone.minX - 60;
+        area.minY = zone.minY - 60;
+        area.maxX = zone.maxX + 60;
+        area.maxY = zone.maxY + 60;
     }
 
     @Override

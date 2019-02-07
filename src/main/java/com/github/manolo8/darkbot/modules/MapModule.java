@@ -63,8 +63,10 @@ public class MapModule implements Module, MapChange {
             } else if (current.locationInfo.isLoaded()) {
                 drive.move(current);
             }
+        } else if (back != null) {
+            main.setModule(this.back);
+            back = null;
         }
-
     }
 
     @Override

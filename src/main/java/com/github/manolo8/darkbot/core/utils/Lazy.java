@@ -38,4 +38,17 @@ public class Lazy<C> {
             }
         }
     }
+
+    public static class Sync<C> extends Lazy<C> {
+        private C newValue;
+
+        @Override
+        public void send(C value) {
+            newValue = value;
+        }
+
+        public void tick() {
+            super.send(newValue);
+        }
+    }
 }

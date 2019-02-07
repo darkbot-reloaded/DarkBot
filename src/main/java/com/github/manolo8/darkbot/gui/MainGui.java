@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.gui.components.MainButton;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,18 +26,24 @@ public class MainGui extends JFrame {
     private JButton copySid;
     private JButton openConfig;
 
+    protected final Image icon = new ImageIcon(this.getClass().getResource("/icon.png")).getImage();
+
     public MainGui(Main main) throws HeadlessException {
         super("DarkBot");
 
         this.main = main;
 
         this.configGui = new ConfigGui(main);
+        configGui.setAlwaysOnTop(main.config.MISCELLANEOUS.ALWAYS_ON_TOP);
+        configGui.setIconImage(icon);
 
         this.visible = true;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 480);
+        setSize(640, 480);
         setLocationRelativeTo(null);
+        setAlwaysOnTop(main.config.MISCELLANEOUS.ALWAYS_ON_TOP);
+        setIconImage(icon);
         setVisible(true);
 
         initComponents();
@@ -46,10 +53,10 @@ public class MainGui extends JFrame {
 
     private void initComponents() {
         mapDrawer = new MapDrawer(main);
-        toggleRunning = new JButton("START");
-        toggleVisibility = new JButton("HIDE");
-        copySid = new JButton("SID");
-        openConfig = new JButton("CONFIG");
+        toggleRunning = new MainButton("START");
+        toggleVisibility = new MainButton("HIDE");
+        copySid = new MainButton("SID");
+        openConfig = new MainButton("CONFIG");
     }
 
     private void setComponentPosition() {

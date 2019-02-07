@@ -18,7 +18,7 @@ public class StatsManager implements Manager {
     public int depositTotal;
 
     private long started;
-    private long runningTime;
+    private long runningTime = 1;
     private boolean lastStatus;
 
     public double earnedCredits;
@@ -100,40 +100,6 @@ public class StatsManager implements Manager {
 
     public long runningTime() {
         return runningTime + (lastStatus ? (System.currentTimeMillis() - started) : 0);
-    }
-
-    public String runningTimeStr() {
-        builder.setLength(0);
-
-        int seconds = (int) (runningTime() / 1000);
-        int hours = seconds / 3600;
-        int minutes = seconds / 60;
-
-
-        if (hours > 0) {
-
-            if (hours < 10)
-                builder.append('0');
-
-            builder.append(hours).append(':');
-        }
-
-        if (minutes > 0) {
-
-            if (minutes < 10)
-                builder.append('0');
-
-            builder.append(minutes).append(':');
-        }
-
-        seconds = seconds % 60;
-
-        if (seconds < 10)
-            builder.append('0');
-
-        builder.append(seconds);
-
-        return builder.toString();
     }
 
     public double earnedCredits() {

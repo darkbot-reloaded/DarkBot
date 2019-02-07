@@ -23,11 +23,13 @@ public class EntityList extends Updatable {
     public final List<Obstacle> obstacles;
 
     public final List<Barrier> barriers;
+    public final List<NoCloack> noCloack;
     public final List<Box> boxes;
     public final List<Npc> npcs;
     public final List<Portal> portals;
     public final List<Ship> ships;
     public final List<BattleStation> battleStations;
+    public final List<BasePoint> basePoints;
     public final List<Entity> unknown;
 
     public EntityList(Main main) {
@@ -41,19 +43,23 @@ public class EntityList extends Updatable {
         this.obstacles = new ArrayList<>();
 
         this.barriers = new ArrayList<>();
+        this.noCloack = new ArrayList<>();
         this.boxes = new ArrayList<>();
         this.npcs = new ArrayList<>();
         this.portals = new ArrayList<>();
         this.ships = new ArrayList<>();
         this.battleStations = new ArrayList<>();
+        this.basePoints = new ArrayList<>();
         this.unknown = new ArrayList<>();
 
         this.allEntities.add(barriers);
+        this.allEntities.add(noCloack);
         this.allEntities.add(boxes);
         this.allEntities.add(npcs);
         this.allEntities.add(portals);
         this.allEntities.add(ships);
         this.allEntities.add(battleStations);
+        this.allEntities.add(basePoints);
         this.allEntities.add(unknown);
 
         this.main.status.add(this::refreshRadius);
@@ -95,26 +101,31 @@ public class EntityList extends Updatable {
 
             String key = API.readMemoryString(API.readMemoryLong(found + 136));
 
-            if (!key.equals("ERROR") && !key.isEmpty()) {
-                System.out.println(key);
-            }
+            /*if (!key.equals("ERROR") && !key.isEmpty()) {
+                System.out.println(id + ":" + key);
+            }*/
 
             if (key.equals("NOA")) {
                 barriers.add(whenAdd(new Barrier(id), found));
+            } else if (key.equals("DMG")) {
+                noCloack.add(whenAdd(new NoCloack(id), found));
             } else if (id < 0 && rnd == 3) {
                 boxes.add(whenAdd(new Box(id), found));
             } else if (id <= 150000499 && id >= 150000156) {
                 portals.add(whenAdd(main.starManager.fromIdPortal(id), found));
             } else if (id <= 150000950 && id >= 150000500) {
-
                 int hullId = API.readMemoryInt(found + 116);
-
-                if (hullId > 0 && hullId < 255) {
-                    battleStations.add(whenAdd(new BattleStation(id), found));
-                } else {
-                    unknown.add(whenAdd(new Entity(id), found));
-                }
-
+                battleStations.add(whenAdd(new BattleStation(id, hullId), found));
+            // 1-1: 000-022  1-4: 023
+            // 2-1: 024-046  2-4: 047
+            // 3-1: 048-070  3-4: 071
+            // 1-5: 072      1-8: 073-095
+            // 2-5: 096      2-8: 097-119
+            // 3-5: 120      3-8: 121-143
+            // 1-BL: 144  2-BL: 145  3-BL: 146
+            // 5-2: 147
+            } else if (id <= 150000147 && id >= 150000000) {
+                this.basePoints.add(whenAdd(new BasePoint(id), found));
             } else {
 
                 int npc = API.readMemoryInt(found + 112);

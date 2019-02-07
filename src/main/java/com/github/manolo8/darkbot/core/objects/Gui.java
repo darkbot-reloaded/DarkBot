@@ -77,10 +77,10 @@ public class Gui extends Updatable {
     public boolean lastUpdatedIn(long time) {
         return System.currentTimeMillis() - update > time;
     }
-//
-//    public void click(int plusX, int plusY) {
-//        API.mouseClick(x + plusX, y + plusY);
-//    }
+
+    public void click(int plusX, int plusY) {
+        API.mouseClick(x + plusX, y + plusY);
+    }
 
     public boolean show(boolean value) {
 

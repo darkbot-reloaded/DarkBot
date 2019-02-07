@@ -12,4 +12,6 @@ public class NpcInfo {
     public boolean killOnlyIfIsLast;
 
     public double radius;
+    public boolean noCircle;
+    public Character attackKey;
 }

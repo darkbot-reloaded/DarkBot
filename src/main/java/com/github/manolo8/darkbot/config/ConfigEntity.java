@@ -17,7 +17,7 @@ public class ConfigEntity {
 
         int mapId = MapManager.id;
 
-        NpcInfo info = config.npcInfos.get(name);
+        NpcInfo info = config.LOOT.NPC_INFOS.get(name);
 
         if (info == null) {
             info = new NpcInfo();
@@ -26,7 +26,7 @@ public class ConfigEntity {
             info.mapList.add(mapId);
 
             if (!name.equals("ERROR") && !name.isEmpty()) {
-                config.npcInfos.put(name, info);
+                config.LOOT.NPC_INFOS.put(name, info);
 
                 config.addedNpc.send(name);
 
@@ -46,13 +46,13 @@ public class ConfigEntity {
 
     public BoxInfo getOrCreateBoxInfo(String name) {
 
-        BoxInfo info = config.boxInfos.get(name);
+        BoxInfo info = config.COLLECT.BOX_INFOS.get(name);
 
         if (info == null) {
             info = new BoxInfo();
 
             if (!name.equals("ERROR") && !name.isEmpty()) {
-                config.boxInfos.put(name, info);
+                config.COLLECT.BOX_INFOS.put(name, info);
 
                 config.addedBox.send(name);
 

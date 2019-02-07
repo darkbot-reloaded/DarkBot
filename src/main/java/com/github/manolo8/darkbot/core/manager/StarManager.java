@@ -70,7 +70,8 @@ public class StarManager {
         //1-8
         add(20, "1-8",
                 new Portal(150000305, 18),
-                new Portal(150000307, 19)
+                new Portal(150000307, 19),
+                new Portal(150000201, 306)
         );
 
         //MMO --------------------------------------------------------
@@ -125,7 +126,8 @@ public class StarManager {
         //2-8
         add(24, "2-8",
                 new Portal(150000315, 22),
-                new Portal(150000317, 23)
+                new Portal(150000317, 23),
+                new Portal(150000205, 307)
         );
 
         //EIC --------------------------------------------------------
@@ -225,7 +227,7 @@ public class StarManager {
         add(29, "4-5",
                 new Portal(150000329, 17),
                 new Portal(150000331, 21),
-                new Portal(150000333, 15),
+                new Portal(150000333, 25),
                 new Portal(150000428, 91),
                 new Portal(150000432, 91),
                 new Portal(150000430, 91)
@@ -254,12 +256,44 @@ public class StarManager {
 
         //NEW MAPS
 
-        add(308, "*3B-L",
-                new Portal(150000210, 28)
+        add(306, "1-BL",
+                new Portal(150000202, 20),
+                new Portal(150000203, 307),
+                new Portal(150000204, 308)
         );
 
+        add(307, "2-BL",
+                new Portal(150000206, 24),
+                new Portal(150000207, 306),
+                new Portal(150000208, 308)
+        );
+
+        add(308, "3-BL",
+                new Portal(150000210, 28),
+                new Portal(150000211, 306),
+                new Portal(150000212, 307)
+        );
 
         //NEW MAPS
+
+        // GG
+        //add(51, "GG α");         // portal type: 2
+        //add(52, "GG β");         // portal type: 3
+        //add(53, "GG γ");         // portal type: 4
+        //add(55, "GG δ");         // portal type: 5
+        //add(??, "GG ε");         // portal type: 53
+        //add(73, "GG ζ");         // portal type: 54
+        //add(74, "GG κ");         // portal type: 70
+        //add(203, "GG Hades");    // portal type: 74
+        //add(300, "GG Kuiper 1"); // portal type: 82
+        //add(301, "GG Kuiper 2"); // portal type: 82
+        //add(302, "GG Kuiper 3"); // portal type: 82
+        //add(303, "GG Kuiper 4"); // portal type: 82
+        //add(304, "GG Kuiper 5"); // portal type: 82
+
+        //add(200, "LoW");         // portal type: 34
+        //add(??, "QZ");           // portal type: 84
+        // GG
 
         fill();
     }

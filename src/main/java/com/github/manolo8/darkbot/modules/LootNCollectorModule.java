@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.modules;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
@@ -13,6 +14,7 @@ public class LootNCollectorModule implements Module {
 
     private HeroManager hero;
     private Drive drive;
+    private Config config;
 
     public LootNCollectorModule() {
         this.lootModule = new LootModule();
@@ -26,6 +28,7 @@ public class LootNCollectorModule implements Module {
 
         this.hero = main.hero;
         this.drive = main.hero.drive;
+        this.config = main.config;
     }
 
     @Override
@@ -51,7 +54,8 @@ public class LootNCollectorModule implements Module {
 
                     Box box = collectorModule.current;
 
-                    if (box == null || box.locationInfo.distance(hero) > 600 || lootModule.target.health.hpPercent() < 0.25) {
+                    if (box == null || box.locationInfo.distance(hero) > config.LOOT_COLLECT.RADIUS
+                            || lootModule.target.health.hpPercent() < 0.25) {
                         lootModule.moveToAnSafePosition();
                     } else {
                         collectorModule.tryCollectNearestBox();
@@ -60,7 +64,7 @@ public class LootNCollectorModule implements Module {
                     lootModule.doKillTargetTick();
 
                 } else {
-
+                    hero.roamMode();
                     collectorModule.findBox();
 
                     if (!collectorModule.tryCollectNearestBox() && (!drive.isMoving() || drive.isOutOfMap())) {

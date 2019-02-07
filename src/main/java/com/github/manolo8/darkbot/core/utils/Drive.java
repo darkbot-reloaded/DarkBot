@@ -55,13 +55,8 @@ public class Drive {
             );
 
         } else {
-
             pathFinder.currentCompleted();
-
-            map.translateMouseMoveRelease(
-                    destination.x,
-                    destination.y
-            );
+            if (pathFinder.isEmpty()) map.translateMouseMoveRelease(destination.x, destination.y);
         }
 
     }

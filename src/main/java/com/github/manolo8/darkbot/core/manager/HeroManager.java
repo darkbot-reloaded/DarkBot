@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Portal;
@@ -28,6 +29,8 @@ public class HeroManager extends Ship implements Manager {
 
     public int config;
     private long configTime;
+    private char formation = (char) -1;
+    private long formationTime;
     private long portalTime;
 
     public HeroManager(Main main) {
@@ -36,6 +39,7 @@ public class HeroManager extends Ship implements Manager {
 
         this.main = main;
         this.drive = new Drive(this, main.mapManager);
+        main.status.add(b -> drive.move(locationInfo.now));
         this.pet = new Pet(0);
         this.map = new Map(0, "LOADING", false, new Portal[0]);
     }
@@ -104,18 +108,26 @@ public class HeroManager extends Ship implements Manager {
     }
 
     public void attackMode() {
-        if (config != main.config.OFFENSIVE_CONFIG && System.currentTimeMillis() - configTime > 6000) {
-            API.keyboardClick('c');
-            API.keyboardClick(main.config.OFFENSIVE_FORMATION);
-            configTime = System.currentTimeMillis();
-        }
+        setMode(this.main.config.GENERAL.OFFENSIVE);
     }
 
     public void runMode() {
-        if (config != main.config.RUN_CONFIG && System.currentTimeMillis() - configTime > 6000) {
-            API.keyboardClick(main.config.RUN_FORMATION);
-            API.keyboardClick('c');
-            configTime = System.currentTimeMillis();
+        setMode(this.main.config.GENERAL.RUN);
+    }
+
+    public void roamMode() {
+        setMode(main.config.GENERAL.ROAM);
+    }
+
+    private void setMode(Config.ShipConfig config) {
+        if (this.config != config.CONFIG && System.currentTimeMillis() - configTime > 5500L) {
+            Main.API.keyboardClick('c');
+            this.configTime = System.currentTimeMillis();
+        }
+        if (this.formation != config.FORMATION && System.currentTimeMillis() - formationTime > 3500L) {
+            Main.API.keyboardClick(this.formation = config.FORMATION);
+            this.formationTime = System.currentTimeMillis();
         }
     }
+
 }

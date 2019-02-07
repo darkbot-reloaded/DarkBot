@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot;
 
+import com.bulenkov.darcula.DarculaLaf;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.BotInstaller;
@@ -13,6 +14,7 @@ import com.github.manolo8.darkbot.modules.LootModule;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import com.google.gson.GsonBuilder;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -31,15 +33,17 @@ public class Main extends Thread {
     public final StatsManager statsManager;
     public final PingManager pingManager;
 
-    public final Lazy<Boolean> status;
+    public final Lazy.Sync<Boolean> status;
 
     public Config config;
     public Module module;
 
-    private long lastRefresh;
+    public long lastRefresh;
 
     private final BotInstaller botInstaller;
     private final MainGui form;
+
+    public double avgTick;
 
     private volatile boolean running;
 
@@ -50,11 +54,18 @@ public class Main extends Thread {
         this.config = new Config();
 
         loadConfig();
+        if (config.MISCELLANEOUS.USE_DARCULA_THEME) {
+            try {
+                UIManager.setLookAndFeel(new DarculaLaf());
+            } catch (UnsupportedLookAndFeelException e) {
+                e.printStackTrace();
+            }
+        }
 
         new ConfigEntity(config);
 
         botInstaller = new BotInstaller();
-        status = new Lazy<>();
+        status = new Lazy.Sync<>();
 
         guiManager = new GuiManager(this);
         starManager = new StarManager();
@@ -75,6 +86,8 @@ public class Main extends Thread {
             if (!value) lastRefresh = System.currentTimeMillis();
         });
 
+        status.add(r -> lastRefresh = System.currentTimeMillis());
+
         updateConfig();
 
         form = new MainGui(this);
@@ -91,11 +104,14 @@ public class Main extends Thread {
 
             tick();
 
+            double tickTime = System.currentTimeMillis() - time;
+            avgTick = ((avgTick * 9) + tickTime) / 10;
             sleepMax(time, 100);
         }
     }
 
     private void tick() {
+        status.tick();
 
         if (isInvalid())
             invalidTick();
@@ -119,8 +135,10 @@ public class Main extends Thread {
     private void validTick() {
 
         guiManager.tick();
+        guiManager.pet.tickActive();
         hero.tick();
         mapManager.tick();
+        statsManager.tick();
 
         if (running && guiManager.canTickModule())
             tickRunning();
@@ -128,7 +146,6 @@ public class Main extends Thread {
 
     private void tickRunning() {
         module.tick();
-        statsManager.tick();
 
         checkPetBug();
 
@@ -147,9 +164,9 @@ public class Main extends Thread {
     }
 
     private void checkRefresh() {
-        if (config.REFRESH_TIME != 0) {
+        if (config.MISCELLANEOUS.REFRESH_TIME != 0) {
 
-            boolean refreshTimer = System.currentTimeMillis() - lastRefresh > config.REFRESH_TIME;
+            boolean refreshTimer = System.currentTimeMillis() - lastRefresh > config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000;
             boolean canRefresh = module.canRefresh();
 
             if (refreshTimer && canRefresh) {

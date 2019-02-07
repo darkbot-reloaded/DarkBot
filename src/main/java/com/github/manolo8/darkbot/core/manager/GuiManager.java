@@ -26,6 +26,7 @@ public class GuiManager implements Manager {
 
     private final Gui lostConnection;
     private final Gui connecting;
+    public final PetManager pet;
 
     public boolean check;
 
@@ -39,6 +40,7 @@ public class GuiManager implements Manager {
 
         this.lostConnection = new Gui(0);
         this.connecting = new Gui(0);
+        this.pet = new PetManager(main);
 
         this.main.status.add(value -> validTime = System.currentTimeMillis());
     }
@@ -49,6 +51,7 @@ public class GuiManager implements Manager {
         this.guis.addLazy("lost_connection", lostConnection::update);
         this.guis.addLazy("connecting", value -> System.out.println("HAS CONNECTING!"));
         this.guis.addLazy("connection", connecting::update);
+        this.guis.addLazy("pet", this.pet::update);
 
         botInstaller.screenManagerAddress.add(value -> screenAddress = value);
         botInstaller.mainAddress.add(value -> mainAddress = value);
@@ -64,6 +67,7 @@ public class GuiManager implements Manager {
             repairAddress = 0;
             lostConnection.reset();
             connecting.reset();
+            pet.reset();
 
             check = true;
         });
@@ -75,6 +79,7 @@ public class GuiManager implements Manager {
 
         lostConnection.update();
         connecting.update();
+        pet.update();
     }
 
     private void tryReconnect(Gui gui) {

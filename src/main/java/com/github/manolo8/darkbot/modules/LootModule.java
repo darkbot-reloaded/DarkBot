@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -42,6 +43,7 @@ public class LootModule implements Module {
     private boolean sab;
 
     private boolean locked;
+    private boolean circleRight;
     private boolean repairing;
 
     @Override
@@ -87,7 +89,7 @@ public class LootModule implements Module {
                 }
 
             } else {
-                target.setTimerTo(90000);
+                target.setTimerTo(5000);
                 target = null;
             }
 
@@ -134,7 +136,8 @@ public class LootModule implements Module {
     }
 
     private void checkSab() {
-        if (config.AUTO_SAB && hero.health.shieldPercent() < 0.6 && target.health.shield > 12000) {
+        if (config.AUTO_SAB && hero.health.shieldPercent() < config.LOOT.SAB_PERCENT
+                && target.health.shield > config.LOOT.SAB_NPC_AMOUNT) {
 
             if (!sab) {
                 API.keyboardClick(config.AUTO_SAB_KEY);
@@ -142,7 +145,7 @@ public class LootModule implements Module {
             }
 
         } else if (sab) {
-            API.keyboardClick(config.AMMO_KEY);
+            API.keyboardClick(getAttackKey());
             sab = false;
         }
     }
@@ -163,13 +166,18 @@ public class LootModule implements Module {
         return true;
     }
 
+    private char getAttackKey() {
+        return this.target == null || this.target.npcInfo.attackKey == null ?
+                this.config.AMMO_KEY : this.target.npcInfo.attackKey;
+    }
+
     private void setTargetAndTryStartLaserAttack() {
-        if (hero.locationInfo.distance(target) <= target.npcInfo.radius && System.currentTimeMillis() - clickDelay > 1000) {
+        if (hero.locationInfo.distance(target) < 800 && System.currentTimeMillis() - clickDelay > 1000) {
 
             hero.setTarget(target);
 
             setRadiusAndClick(1);
-            API.keyboardClick(config.AMMO_KEY);
+            API.keyboardClick(getAttackKey());
             clickDelay = System.currentTimeMillis();
             locked = true;
             times = 0;
@@ -231,7 +239,7 @@ public class LootModule implements Module {
 
             boolean circle = (moveDistance = (moveDistance - (locationHero.distance(x, y)))) > 0;
 
-            if (circle) {
+            if (circle && !target.npcInfo.noCircle) {
                 double add = moveDistance / radius;
 
                 angle += add;
@@ -265,7 +273,8 @@ public class LootModule implements Module {
             for (Ship ship : ships) {
                 if (ship.playerInfo.isEnemy()) {
 
-                    if (config.RUN_FROM_ENEMIES_IN_SIGHT)
+                    if (config.RUN_FROM_ENEMIES_IN_SIGHT &&
+                            ship.locationInfo.now.distance(hero.locationInfo.now) < config.LOOT.MAX_SIGHT_DISTANCE)
                         return true;
 
                     if (ship.isAttacking(hero)) {
@@ -286,7 +295,7 @@ public class LootModule implements Module {
 
         for (Ship ship : ships) {
             if (ship.isAttacking(npc)) {
-                npc.setTimerTo(90000);
+                npc.setTimerTo(5000);
                 return true;
             }
         }
@@ -295,33 +304,11 @@ public class LootModule implements Module {
     }
 
     private Npc closestNpc(Location location) {
-
-        double distance = 0;
-        int priority = 0;
-
-        Npc maxPriority = null;
-        Npc minDistance = null;
-
-        for (Npc npc : npcs) {
-
-            if (npc.npcInfo.kill && !npc.isInTimer() && !isAttackedByOthers(npc)) {
-
-                double distanceCurrent = npc.locationInfo.now.distance(location);
-                int priorityCurrent = npc.npcInfo.priority;
-
-                if (minDistance == null || distanceCurrent < distance) {
-                    distance = distanceCurrent;
-                    minDistance = npc;
-                }
-
-                if (maxPriority == null || priorityCurrent >= priority) {
-                    priority = priorityCurrent;
-                    maxPriority = npc;
-                }
-
-            }
-        }
-
-        return minDistance == null ? null : priority > minDistance.npcInfo.priority ? maxPriority : minDistance;
+        return this.npcs.stream()
+                .filter(n -> n.npcInfo.kill)
+                .filter(n -> !this.isAttackedByOthers(n))
+                .min(Comparator.<Npc>comparingInt(n -> n.npcInfo.priority)
+                        .thenComparing(n -> n.health.hpPercent())
+                        .thenComparing(n -> n.locationInfo.now.distance(location))).orElse(null);
     }
 }

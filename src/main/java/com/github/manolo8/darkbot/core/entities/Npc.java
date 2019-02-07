@@ -8,8 +8,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class Npc extends Ship {
+    private static final NpcInfo INITIAL_NPC_INFO = new NpcInfo(); // Prevent NPE trying to obtain npc info.
 
-    public NpcInfo npcInfo;
+    public NpcInfo npcInfo = INITIAL_NPC_INFO;
 
     public Npc(int id) {
         super(id);

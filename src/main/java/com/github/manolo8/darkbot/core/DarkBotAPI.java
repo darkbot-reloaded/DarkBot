@@ -11,6 +11,11 @@ public class DarkBotAPI {
     public void createWindow() {
 
         Thread thread = new Thread(() -> {
+            try {
+                // Wait for main bot frame to load before opening the window
+                // This causes bot frames' icon to be the one displayed in the task bar.
+                Thread.sleep(2000);
+            } catch (InterruptedException ignore) {}
             createWindow0();
             System.exit(0);
         });
@@ -31,6 +36,10 @@ public class DarkBotAPI {
     public native void mouseClick(int x, int y);
 
     public native void keyboardClick(char btn);
+
+    public void keyboardClick(Character ch) {
+        if (ch != null) keyboardClick((char) ch);
+    }
 
     public native double readMemoryDouble(long address);
 

@@ -11,11 +11,12 @@ public class BattleStation
         implements Obstacle {
 
     public PlayerInfo info;
+    public Area area;
+    public int hullId;
 
-    private Area area;
-
-    public BattleStation(int id) {
+    public BattleStation(int id, int hullId) {
         super(id);
+        this.hullId = hullId;
 
         this.info = new PlayerInfo();
         this.area = new Area(0, 0, 0, 0);
@@ -49,6 +50,6 @@ public class BattleStation
 
     @Override
     public boolean use() {
-        return info.isEnemy();
+        return hullId > 0 && hullId < 255 && info.isEnemy();
     }
 }

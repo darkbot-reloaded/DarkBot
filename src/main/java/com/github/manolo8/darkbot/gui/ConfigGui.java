@@ -15,6 +15,8 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class ConfigGui extends JFrame {
 
@@ -27,6 +29,7 @@ public class ConfigGui extends JFrame {
     private JPanel collectPane;
     private JPanel lootPane;
     private JPanel ggPane;
+    private AdvancedConfig advancedPane;
 
     //GENERAL
     private JComboBox<String> workingMap;
@@ -82,6 +85,7 @@ public class ConfigGui extends JFrame {
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize(640, 480);
         setLocationRelativeTo(null);
+        setAlwaysOnTop(main.config.MISCELLANEOUS.ALWAYS_ON_TOP);
 
         initComponents();
         setComponentPosition();
@@ -90,6 +94,13 @@ public class ConfigGui extends JFrame {
 
         validate();
         repaint();
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                main.config.changed = true;
+            }
+        });
     }
 
     private void initComponents() {
@@ -99,6 +110,7 @@ public class ConfigGui extends JFrame {
         collectPane = new JPanel();
         lootPane = new JPanel();
         ggPane = new JPanel();
+        advancedPane = new AdvancedConfig();
 
 
         //GENERAL
@@ -159,6 +171,7 @@ public class ConfigGui extends JFrame {
         tabbedPane.addTab("Collect", collectPane);
         tabbedPane.addTab("Loot", lootPane);
         tabbedPane.addTab("GG", ggPane);
+        tabbedPane.addTab("Advanced", advancedPane);
 
         add(tabbedPane);
 
@@ -544,16 +557,16 @@ public class ConfigGui extends JFrame {
         runFromEnemies.setSelected(config.RUN_FROM_ENEMIES);
         runFromEnemiesInSight.setSelected(config.RUN_FROM_ENEMIES_IN_SIGHT);
         autoClock.setSelected(config.AUTO_CLOACK);
-        refreshTime.setText(String.valueOf(config.REFRESH_TIME / (1000 * 60)));
+        refreshTime.setText(String.valueOf(config.MISCELLANEOUS.REFRESH_TIME));
         maxDeaths.setText(String.valueOf(config.MAX_DEATHS));
         autoSab.setSelected(config.AUTO_SAB);
         autoCloackKey.setText(String.valueOf(config.AUTO_CLOACK_KEY));
         ammoKey.setText(String.valueOf(config.AMMO_KEY));
         ammoSabKey.setText(String.valueOf(config.AUTO_SAB_KEY));
-        runFormation.setText(String.valueOf(config.RUN_FORMATION));
-        offensiveFormation.setText(String.valueOf(config.OFFENSIVE_FORMATION));
-        runConfig.setSelectedItem(config.RUN_CONFIG);
-        offensiveConfig.setSelectedItem(config.OFFENSIVE_CONFIG);
+        runFormation.setText(String.valueOf(config.GENERAL.RUN.FORMATION));
+        offensiveFormation.setText(String.valueOf(config.GENERAL.OFFENSIVE.FORMATION));
+        runConfig.setSelectedItem(config.GENERAL.RUN.CONFIG);
+        offensiveConfig.setSelectedItem(config.GENERAL.OFFENSIVE.CONFIG);
         moduleCollector.setSelected(config.CURRENT_MODULE == 0);
         moduleLoot.setSelected(config.CURRENT_MODULE == 1);
         moduleLootNCollector.setSelected(config.CURRENT_MODULE == 2);
@@ -562,7 +575,7 @@ public class ConfigGui extends JFrame {
 
         NpcTableModel npcModel = (NpcTableModel) npcTable.getModel();
 
-        for (java.util.Map.Entry<String, NpcInfo> entry : config.npcInfos.entrySet()) {
+        for (java.util.Map.Entry<String, NpcInfo> entry : config.LOOT.NPC_INFOS.entrySet()) {
 
             String name = entry.getKey();
             NpcInfo info = entry.getValue();
@@ -572,7 +585,7 @@ public class ConfigGui extends JFrame {
 
         BoxTableModel boxModel = (BoxTableModel) boxTable.getModel();
 
-        for (java.util.Map.Entry<String, BoxInfo> entry : config.boxInfos.entrySet()) {
+        for (java.util.Map.Entry<String, BoxInfo> entry : config.COLLECT.BOX_INFOS.entrySet()) {
 
             String name = entry.getKey();
             BoxInfo info = entry.getValue();
@@ -584,8 +597,10 @@ public class ConfigGui extends JFrame {
         boxTable.getColumnModel().getColumn(0).setPreferredWidth(200);
         npcTable.getColumnModel().getColumn(0).setPreferredWidth(200);
 
-        config.addedNpc.add(value -> npcModel.addEntry(value, config.npcInfos.get(value)));
-        config.addedBox.add(value -> boxModel.addEntry(value, config.boxInfos.get(value)));
+        config.addedNpc.add(value -> npcModel.addEntry(value, config.LOOT.NPC_INFOS.get(value)));
+        config.addedBox.add(value -> boxModel.addEntry(value, config.COLLECT.BOX_INFOS.get(value)));
+
+        advancedPane.setEditingConfig(config);
     }
 
     private JSeparator separator() {
@@ -608,9 +623,9 @@ public class ConfigGui extends JFrame {
 
         reviveMethod.addItemListener(e -> config.REPAIR_LOCAL = reviveMethod.getSelectedIndex());
 
-        runConfig.addItemListener(e -> config.RUN_CONFIG = (int) e.getItem());
+        runConfig.addItemListener(e -> config.GENERAL.RUN.CONFIG = (int) e.getItem());
 
-        offensiveConfig.addItemListener(e -> config.OFFENSIVE_CONFIG = (int) e.getItem());
+        offensiveConfig.addItemListener(e -> config.GENERAL.OFFENSIVE.CONFIG = (int) e.getItem());
 
         refreshTime.addKeyListener(new KeyAdapter() {
             @Override
@@ -619,13 +634,13 @@ public class ConfigGui extends JFrame {
                     int value = Integer.parseInt(refreshTime.getText());
 
                     if (value >= 0) {
-                        config.REFRESH_TIME = value * 1000 * 60;
+                        config.MISCELLANEOUS.REFRESH_TIME = value;
                     } else {
-                        config.REFRESH_TIME = 0;
+                        config.MISCELLANEOUS.REFRESH_TIME = 0;
                     }
 
                 } catch (NumberFormatException ignored) {
-                    config.REFRESH_TIME = 0;
+                    config.MISCELLANEOUS.REFRESH_TIME = 0;
                     refreshTime.setText("0");
                 }
 
@@ -653,7 +668,7 @@ public class ConfigGui extends JFrame {
             @Override
             public void keyReleased(KeyEvent e) {
                 offensiveFormation.setText(String.valueOf(e.getKeyChar()));
-                config.OFFENSIVE_FORMATION = e.getKeyChar();
+                config.GENERAL.OFFENSIVE.FORMATION = e.getKeyChar();
             }
         });
 
@@ -661,7 +676,7 @@ public class ConfigGui extends JFrame {
             @Override
             public void keyReleased(KeyEvent e) {
                 runFormation.setText(String.valueOf(e.getKeyChar()));
-                config.RUN_FORMATION = e.getKeyChar();
+                config.GENERAL.RUN.FORMATION = e.getKeyChar();
             }
         });
 
@@ -766,7 +781,7 @@ public class ConfigGui extends JFrame {
 
             String name = (String) getValueAt(row, 0);
 
-            BoxInfo info = config.boxInfos.get(name);
+            BoxInfo info = config.COLLECT.BOX_INFOS.get(name);
 
             switch (column) {
                 case 1:
@@ -810,7 +825,7 @@ public class ConfigGui extends JFrame {
 
             filter = filter.toLowerCase();
 
-            for (java.util.Map.Entry<String, NpcInfo> entry : config.npcInfos.entrySet()) {
+            for (java.util.Map.Entry<String, NpcInfo> entry : config.LOOT.NPC_INFOS.entrySet()) {
 
                 String name = entry.getKey();
 
@@ -837,7 +852,7 @@ public class ConfigGui extends JFrame {
 
             String name = (String) getValueAt(row, 0);
 
-            NpcInfo info = config.npcInfos.get(name);
+            NpcInfo info = config.LOOT.NPC_INFOS.get(name);
 
             switch (column) {
                 case 1:
