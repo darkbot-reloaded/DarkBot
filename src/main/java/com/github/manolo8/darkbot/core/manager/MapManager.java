@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
@@ -24,8 +26,11 @@ public class MapManager implements Manager {
 
     public static int id;
 
-    public static int internalWidth;
-    public static int internalHeight;
+    public ZoneInfo preferred;
+    public ZoneInfo avoided;
+
+    public static int internalWidth = 15000;
+    public static int internalHeight = 10000;
 
     public static int clientWidth;
     public static int clientHeight;
@@ -78,6 +83,8 @@ public class MapManager implements Manager {
         if (tempId != id) {
             id = tempId;
             main.hero.map = main.starManager.fromId(id);
+            preferred = ConfigEntity.INSTANCE.getOrCreatePreferred();
+            avoided = ConfigEntity.INSTANCE.getOrCreateAvoided();
 
             if (main.module instanceof MapChange) {
                 ((MapChange) main.module).onMapChange();

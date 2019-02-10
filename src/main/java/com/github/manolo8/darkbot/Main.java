@@ -12,6 +12,8 @@ import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.modules.CollectorModule;
 import com.github.manolo8.darkbot.modules.LootModule;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
+import com.github.manolo8.darkbot.utils.ByteArrayToBase64TypeAdapter;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import javax.swing.*;
@@ -21,6 +23,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Main extends Thread {
+    public static final String VERSION = "1.13-beta5";
+
+    private static final Gson GSON = new GsonBuilder()
+            .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter()).create();
 
     public static final Object UPDATE_LOCKER = new Object();
 
@@ -200,7 +206,7 @@ public class Main extends Thread {
 
                 FileReader reader = new FileReader(config);
 
-                this.config = new GsonBuilder().create().fromJson(reader, Config.class);
+                this.config = GSON.fromJson(reader, Config.class);
 
                 if (this.config == null) this.config = new Config();
 
@@ -222,7 +228,7 @@ public class Main extends Thread {
 
             FileWriter writer = new FileWriter(config);
 
-            new GsonBuilder().create().toJson(this.config, writer);
+            GSON.toJson(this.config, writer);
 
             writer.close();
 

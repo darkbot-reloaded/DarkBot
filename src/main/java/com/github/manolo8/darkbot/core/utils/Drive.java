@@ -1,15 +1,23 @@
 package com.github.manolo8.darkbot.core.utils;
 
+import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.Zone;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
+import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
+
+import java.util.List;
+import java.util.Random;
 
 import static java.lang.Math.min;
 import static java.lang.Math.random;
 
 public class Drive {
+
+    private static final Random RANDOM = new Random();
 
     private final MapManager map;
 
@@ -91,7 +99,18 @@ public class Drive {
     }
 
     public void moveRandom() {
-        move(random() * MapManager.internalWidth, random() * MapManager.internalHeight);
+        ZoneInfo area = map.preferred;
+        List<ZoneInfo.Zone> zones = area.getZones();
+        if (zones.isEmpty()) {
+            move(random() * MapManager.internalWidth, random() * MapManager.internalHeight);
+        } else {
+            ZoneInfo.Zone zone = zones.get(RANDOM.nextInt(zones.size()));
+            double cellSize = 1d / area.resolution;
+            double xProportion = (zone.x / (double) area.resolution) + random() * cellSize,
+                    yProportion = (zone.y / (double) area.resolution) + random() * cellSize;
+
+            move(xProportion * MapManager.internalWidth, yProportion * MapManager.internalHeight);
+        }
     }
 
     public boolean isMoving() {

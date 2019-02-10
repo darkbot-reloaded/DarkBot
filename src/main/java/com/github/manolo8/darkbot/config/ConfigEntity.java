@@ -62,4 +62,13 @@ public class ConfigEntity {
 
         return info;
     }
+
+    public ZoneInfo getOrCreatePreferred() {
+        return config.PREFERRED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.MISCELLANEOUS.ZONE_RESOLUTION));
+    }
+
+    public ZoneInfo getOrCreateAvoided() {
+        return config.AVOIDED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.MISCELLANEOUS.ZONE_RESOLUTION));
+    }
+
 }

@@ -37,11 +37,6 @@ public class Config {
     public double REPAIR_HP;
     public double WAIT_HP;
 
-    //ENTITIES
-    public HashMap<String, BoxInfo> boxInfos = new HashMap<>();
-    public HashMap<String, NpcInfo> npcInfos = new HashMap<>();
-    //ENTITIES
-
     //LOOT MODULE
     public boolean RUN_FROM_ENEMIES;
     public boolean RUN_FROM_ENEMIES_IN_SIGHT;
@@ -55,6 +50,11 @@ public class Config {
     public boolean AUTO_CLOACK;
     public char AUTO_CLOACK_KEY;
     //COLLECTOR MODULE
+
+    // DEFINED AREAS
+    public Map<Integer, ZoneInfo> AVOIDED = new HashMap<>();
+    public Map<Integer, ZoneInfo> PREFERRED = new HashMap<>();
+    // DEFINED AREAS
 
     public transient boolean changed;
 
@@ -106,6 +106,11 @@ public class Config {
         @Option(value = "Trail length", description = "Amount of time the trail should be in the map in seconds")
         @Num(max = 300, step = 1)
         public int TRAIL_LENGTH = 15;
+        @Option(value = "Zone precision", description = "Amount of map subdivisions when selecting zones")
+        @Num(min = 10, max = 300)
+        public int ZONE_RESOLUTION = 30;
+        @Option(value = "Show zones in main map", description = "Tick to show avoided/preferred zones on map")
+        public boolean SHOW_ZONES = true;
         @Option(value = "Always on top", description = "Should the bot window stay on top of other windows?")
         public boolean ALWAYS_ON_TOP = true;
         @Option("Use darcula theme")

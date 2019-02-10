@@ -30,6 +30,8 @@ public class ConfigGui extends JFrame {
     private JPanel lootPane;
     private JPanel ggPane;
     private AdvancedConfig advancedPane;
+    private ZoneEditor preferredZones;
+    private ZoneEditor avoidedZones;
 
     //GENERAL
     private JComboBox<String> workingMap;
@@ -111,6 +113,8 @@ public class ConfigGui extends JFrame {
         lootPane = new JPanel();
         ggPane = new JPanel();
         advancedPane = new AdvancedConfig();
+        preferredZones = new ZoneEditor();
+        avoidedZones = new ZoneEditor();
 
 
         //GENERAL
@@ -172,6 +176,8 @@ public class ConfigGui extends JFrame {
         tabbedPane.addTab("Loot", lootPane);
         tabbedPane.addTab("GG", ggPane);
         tabbedPane.addTab("Advanced", advancedPane);
+        tabbedPane.addTab("Preferred Zones", preferredZones);
+        tabbedPane.addTab("Avoided Zones (not working yet)", avoidedZones);
 
         add(tabbedPane);
 
@@ -601,6 +607,8 @@ public class ConfigGui extends JFrame {
         config.addedBox.add(value -> boxModel.addEntry(value, config.COLLECT.BOX_INFOS.get(value)));
 
         advancedPane.setEditingConfig(config);
+        preferredZones.setup(main, config.PREFERRED);
+        avoidedZones.setup(main, config.AVOIDED);
     }
 
     private JSeparator separator() {

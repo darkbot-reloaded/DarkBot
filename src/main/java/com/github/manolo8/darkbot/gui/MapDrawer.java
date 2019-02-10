@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.*;
 import com.github.manolo8.darkbot.core.manager.*;
@@ -16,24 +17,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.font.TextLayout;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
 
 public class MapDrawer extends JPanel {
 
-    private final DecimalFormat formatter;
+    private final DecimalFormat formatter = new DecimalFormat("###,###,###");
 
     private Color BACKGROUND = Color.decode("#263238");
     private Color TEXT = Color.decode("#F2F2F2");
-    private Color TEXT_DARK = Color.decode("#CCCCCC");
+    protected Color TEXT_DARK = Color.decode("#BBBBBB");
     private Color GOING = Color.decode("#8F9BFF");
     private Color PORTALS = Color.decode("#AEAEAE");
     private Color OWNER = Color.decode("#22CC22");
@@ -50,24 +47,27 @@ public class MapDrawer extends JPanel {
     private Color BARRIER = new Color(255, 255, 255, 32);
     private Color BARRIER_BORDER = new Color(255, 255, 255, 128);
     private Color NO_CLOACK = new Color(23, 128, 255, 32);
+    private Color PREFER = new Color(0, 255, 128, 32);
+    private Color AVOID = new Color(255, 0, 0, 32);
+
     private Color BASES = Color.decode("#00D14E");
     private Color UNKNOWN = Color.decode("#7C05D1");
     private Color STATS_BACKGROUND = new Color(38, 50, 56, 128);
 
-    private Font FONT_BIG = new Font("Consolas", Font.PLAIN, 32);
+    protected Font FONT_BIG = new Font("Consolas", Font.PLAIN, 32);
     private Font FONT_MID = new Font(Font.SANS_SERIF, Font.PLAIN, 18);
     private Font FONT_SMALL = new Font("Consolas", Font.PLAIN, 12);
 
     private TreeMap<Long, Line> positions = new TreeMap<>();
 
     private Main main;
-    private HeroManager hero;
+    protected HeroManager hero;
     private PathFinder pathFinder;
     private MapManager mapManager;
     private GuiManager guiManager;
     private StatsManager statsManager;
     private PingManager pingManager;
-    private Config config;
+    protected Config config;
 
     private List<Portal> portals;
     private List<Npc> npcs;
@@ -76,9 +76,9 @@ public class MapDrawer extends JPanel {
     private List<BattleStation> battleStations;
     private List<BasePoint> basePoints;
 
-    private RenderingHints hints;
+    private RenderingHints hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-    private Location last;
+    private Location last = new Location(0, 0);
     private class Line {
         double x1, x2, y1, y2;
         Line(Location loc1, Location loc2) {
@@ -92,7 +92,28 @@ public class MapDrawer extends JPanel {
         }
     }
 
+    protected int width, height, mid;
+
+    public MapDrawer() {
+    }
+
     public MapDrawer(Main main) {
+        setup(main);
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                hero.drive.move(undoTranslateX(e.getX()), undoTranslateY(e.getY()));
+            }
+        });
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                hero.drive.move(undoTranslateX(e.getX()), undoTranslateY(e.getY()));
+            }
+        });
+    }
+
+    public void setup(Main main) {
         this.main = main;
         this.hero = main.hero;
         this.pathFinder = main.hero.drive.pathFinder;
@@ -108,42 +129,36 @@ public class MapDrawer extends JPanel {
         this.ships = main.mapManager.entities.ships;
         this.battleStations = main.mapManager.entities.battleStations;
         this.basePoints = main.mapManager.entities.basePoints;
-
-        this.formatter = new DecimalFormat("###,###,###");
-        this.last = new Location(0, 0);
-
-        this.hints = new RenderingHints(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON
-        );
-
-        hints.put(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY
-        );
-
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                hero.drive.move(undoTranslateX(e.getX()), undoTranslateY(e.getY()));
-            }
-        });
-        addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                hero.drive.move(undoTranslateX(e.getX()), undoTranslateY(e.getY()));
-            }
-        });
     }
 
     @Override
     protected void paintComponent(Graphics g) {
+        if (main == null) return;
+        Graphics2D g2 = setupDraw(g);
 
-        int height = getHeight();
-        int width = getWidth();
+        drawZones(g2);
+        if (config.MISCELLANEOUS.SHOW_ZONES) drawCustomZones(g2);
+        drawInfos(g2);
+        drawHealth(g2);
+        drawTrail(g2);
+        drawStaticEntities(g2);
+        drawDynamicEntities(g2);
+        drawHero(g2);
 
-        int fontWidth;
+        drawStats(g2,
+                "cre/h " + formatter.format(statsManager.earnedCredits()),
+                "uri/h " + formatter.format(statsManager.earnedUridium()),
+                "exp/h " + formatter.format(statsManager.earnedExperience()),
+                "hon/h " + formatter.format(statsManager.earnedHonor()),
+                "cargo " + statsManager.deposit + "/" + statsManager.depositTotal,
+                "death " + guiManager.deaths + '/' + config.MAX_DEATHS);
 
-        int mid = width / 2;
+    }
+
+    protected Graphics2D setupDraw(Graphics g) {
+        height = getHeight();
+        width = getWidth();
+        mid = width / 2;
 
         g.setColor(BACKGROUND);
         g.fillRect(0, 0, width, height);
@@ -151,7 +166,10 @@ public class MapDrawer extends JPanel {
         Graphics2D g2 = (Graphics2D) g.create();
 
         g2.setRenderingHints(hints);
+        return g2;
+    }
 
+    protected void drawZones(Graphics2D g2) {
         synchronized (Main.UPDATE_LOCKER) {
             for (Barrier barrier : mapManager.entities.barriers) {
                 Area area = barrier.getZone();
@@ -165,43 +183,53 @@ public class MapDrawer extends JPanel {
                         translateX(area.maxX - area.minX), translateY(area.maxY - area.minY));
             }
 
+            g2.setColor(this.NO_CLOACK);
             for (NoCloack noCloack : mapManager.entities.noCloack) {
                 Area area = noCloack.getZone();
-                g2.setColor(this.NO_CLOACK);
                 g2.fillRect(
                         translateX(area.minX), translateY(area.minY),
                         translateX(area.maxX - area.minX), translateY(area.maxY - area.minY));
             }
         }
+    }
 
+    protected void drawCustomZones(Graphics2D g2) {
+        g2.setColor(PREFER);
+        drawCustomZone(g2, config.PREFERRED.get(hero.map.id));
+        g2.setColor(AVOID);
+        drawCustomZone(g2, config.AVOIDED.get(hero.map.id));
+    }
 
+    private void drawInfos(Graphics2D g2) {
         g2.setColor(TEXT_DARK);
-
-        String ping = pingManager.ping + " ms";
-
-        fontWidth = g2.getFontMetrics().stringWidth(ping);
-        g2.drawString(ping, width - fontWidth - 10, 20);
-
         String running = (main.isRunning() ? "RUNNING " : "WAITING ") + Time.toString(statsManager.runningTime());
-        drawString(g2, running,mid, height / 2 + 35);
+        drawString(g2, running, mid, height / 2 + 35, Align.MID);
 
-        g2.setFont(FONT_BIG);
-        drawString(g2, hero.map.name, mid, (height / 2) - 5);
-
-        g2.setColor(TEXT);
         g2.setFont(FONT_SMALL);
-        g2.drawString(String.format(" v1.13 beta4 - Tick avg: %.1fms", main.avgTick), 0, 12);
-        g2.drawString(" CONF " + this.main.hero.config + " - " +
-                        "Refresh: " + (main.isRunning() ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "-") +
-                        "/" + Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000)
-                , 0, 12 + 15);
+        String info = "v" + Main.VERSION + " - Refresh: " +
+                (main.isRunning() ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00") +
+                "/" + Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000);
 
+        drawString(g2, info, 5, 12, Align.LEFT);
 
+        drawString(g2, pingManager.ping + " ms ping", width - 5, 12, Align.RIGHT);
+        drawString(g2, String.format("%.1f ms tick", main.avgTick), width - 5, 24, Align.RIGHT);
+
+        drawMap(g2);
+    }
+
+    protected void drawMap(Graphics2D g2) {
+        g2.setColor(TEXT_DARK);
+        g2.setFont(FONT_BIG);
+        drawString(g2, hero.map.name, mid, (height / 2) - 5, Align.MID);
+    }
+
+    private void drawHealth(Graphics2D g2) {
         g2.setColor(TEXT);
         g2.setFont(FONT_MID);
         if (!config.MISCELLANEOUS.HIDE_NAME)
-            drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40);
-        drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20, 12);
+            drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40, Align.MID);
+        drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20);
 
         if (hero.target != null && !hero.target.removed) {
             Ship ship = hero.target;
@@ -210,12 +238,14 @@ public class MapDrawer extends JPanel {
                 g2.setColor(ENEMIES);
                 g2.setFont(FONT_MID);
                 String name = ((Npc) ship).playerInfo.username;
-                drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40);
+                drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40, Align.MID);
             }
 
-            drawHealth(g2, hero.target.health, mid + 10, height - 34, mid - 20, 12);
+            drawHealth(g2, hero.target.health, mid + 10, height - 34, mid - 20);
         }
+    }
 
+    private void drawTrail(Graphics2D g2) {
         Location heroLocation = hero.locationInfo.now;
 
         double distance = last.distance(heroLocation);
@@ -232,19 +262,15 @@ public class MapDrawer extends JPanel {
             g2.setColor(TRAIL[(int) (curr++ / max)]);
             line.draw(g2);
         }
+    }
 
+    protected void drawStaticEntities(Graphics2D g2) {
         synchronized (Main.UPDATE_LOCKER) {
-
             g2.setFont(FONT_SMALL);
             g2.setColor(PORTALS);
             for (Portal portal : portals) {
                 Location loc = portal.locationInfo.now;
-                g2.drawOval(
-                        translateX(loc.x) - 5,
-                        translateY(loc.y) - 5,
-                        10,
-                        10
-                );
+                g2.drawOval(translateX(loc.x) - 5, translateY(loc.y) - 5, 10, 10);
             }
 
             for (BattleStation station : this.battleStations) {
@@ -253,10 +279,8 @@ public class MapDrawer extends JPanel {
                 else g2.setColor(this.ALLIES);
 
                 Location loc = station.locationInfo.now;
-                int x = translateX(loc.x);
-                int y = translateY(loc.y);
                 if (station.hullId >= 0 && station.hullId < 255)
-                    g2.fillOval(x - 5, y - 4, 11, 9);
+                    g2.fillOval(translateX(loc.x) - 5, translateY(loc.y) - 4, 11, 9);
                 else drawEntity(g2, loc, false);
             }
 
@@ -265,20 +289,19 @@ public class MapDrawer extends JPanel {
                 Location loc = base.locationInfo.now;
                 g2.fillOval(this.translateX(loc.x) - 2, this.translateY(loc.y) - 2, 4, 4);
             }
+        }
+    }
 
+    private void drawDynamicEntities(Graphics2D g2) {
+        synchronized (Main.UPDATE_LOCKER) {
             g2.setColor(BOXES);
-            for (Box box : boxes) {
-                drawEntity(g2, box.locationInfo.now, box.boxInfo.collect);
-            }
+            for (Box box : boxes) drawEntity(g2, box.locationInfo.now, box.boxInfo.collect);
 
             g2.setColor(NPCS);
-            for (Npc npc : npcs) {
-                drawEntity(g2, npc.locationInfo.now, npc.npcInfo.kill);
-            }
+            for (Npc npc : npcs) drawEntity(g2, npc.locationInfo.now, npc.npcInfo.kill);
 
             for (Ship ship : ships) {
-                if (ship.playerInfo.isEnemy()) g2.setColor(ENEMIES);
-                else g2.setColor(ALLIES);
+                g2.setColor(ship.playerInfo.isEnemy() ? ENEMIES : ALLIES);
                 drawEntity(g2, ship.locationInfo.now, false);
             }
 
@@ -289,6 +312,11 @@ public class MapDrawer extends JPanel {
                 drawEntity(g2, entity.locationInfo.now, false);
             }*/
         }
+    }
+
+    private void drawHero(Graphics2D g2) {
+        g2.setColor(TEXT);
+        drawString(g2, hero.config + "C", 12, height - 12, Align.LEFT);
 
         g2.setColor(GOING);
         PathPoint begin = new PathPoint((int) hero.locationInfo.now.x, (int) hero.locationInfo.now.y);
@@ -299,47 +327,45 @@ public class MapDrawer extends JPanel {
 
         g2.setColor(OWNER);
 
-        g2.fillOval(
-                translateX(heroLocation.x) - 3,
-                translateY(heroLocation.y) - 3,
-                7,
-                7
-        );
+        Location loc = hero.locationInfo.now;
+        g2.fillOval(translateX(loc.x) - 3, translateY(loc.y) - 3, 7, 7);
 
-        if (!hero.pet.removed && this.guiManager.pet.active()) {
-            Location loc = hero.pet.locationInfo.now;
+        if (hero.pet.removed || !guiManager.pet.active()) return;
+        loc = hero.pet.locationInfo.now;
 
-            int x = translateX(loc.x);
-            int y = translateY(loc.y);
+        int x = translateX(loc.x),
+                y = translateY(loc.y);
 
-            g2.setColor(PET);
-            g2.fillRect(x - 3, y - 3, 6, 6);
+        g2.setColor(PET);
+        g2.fillRect(x - 3, y - 3, 6, 6);
 
-            g2.setColor(PET_IN);
-            g2.fillRect(x - 2, y - 2, 4, 4);
-        }
-
-        drawStats(g2,
-                "cre/h " + formatter.format(statsManager.earnedCredits()),
-                "uri/h " + formatter.format(statsManager.earnedUridium()),
-                "exp/h " + formatter.format(statsManager.earnedExperience()),
-                "hon/h " + formatter.format(statsManager.earnedHonor()),
-                "cargo " + statsManager.deposit + "/" + statsManager.depositTotal,
-                "death " + guiManager.deaths + '/' + config.MAX_DEATHS);
-
+        g2.setColor(PET_IN);
+        g2.fillRect(x - 2, y - 2, 4, 4);
     }
 
     private void drawStats(Graphics2D g2, String... stats) {
         int top = this.getHeight() / 2 - (stats.length * 15) / 2,
                 width = Arrays.stream(stats).mapToInt(g2.getFontMetrics()::stringWidth).max().orElse(0);
         g2.setColor(STATS_BACKGROUND);
-        g2.fillRect(0, top, width + 3, stats.length * 15 + 3);
+        g2.fillRect(0, top, width + 5, stats.length * 15 + 3);
         g2.setColor(TEXT);
         g2.setFont(FONT_SMALL);
-        for (String str : stats) g2.drawString(str, 0, top += 15);
+        for (String str : stats) g2.drawString(str, 2, top += 15);
     }
 
-    private void drawHealth(Graphics2D g2, Health health, int x, int y, int width, int height) {
+    protected void drawCustomZone(Graphics2D g2, ZoneInfo zoneInfo) {
+        if (zoneInfo == null) return;
+        for (int x = 0; x < zoneInfo.resolution; x++) {
+            for (int y = 0; y < zoneInfo.resolution; y++) {
+                if (!zoneInfo.get(x, y)) continue;
+                int startX = gridToMapX(x), startY = gridToMapY(y);
+                g2.fillRect(startX, startY, gridToMapX(x + 1) - startX, gridToMapY(y + 1) - startY);
+            }
+        }
+    }
+
+    private void drawHealth(Graphics2D g2, Health health, int x, int y, int width) {
+        int height = 12;
         g2.setColor(HEALTH.darker());
         g2.fillRect(x, y, width, height);
         g2.setColor(SHIELD.darker());
@@ -350,13 +376,19 @@ public class MapDrawer extends JPanel {
         g2.fillRect(x, y + height, (int) (health.shieldPercent() * width), height);
         g2.setColor(TEXT);
         g2.setFont(FONT_SMALL);
-        drawString(g2, health.hp + "/" + health.maxHp, x + width / 2, y + height - 2);
-        drawString(g2, health.shield + "/" + health.maxShield, x + width / 2, y + height + height - 2);
+        drawString(g2, health.hp + "/" + health.maxHp, x + width / 2, y + height - 2, Align.MID);
+        drawString(g2, health.shield + "/" + health.maxShield, x + width / 2, y + height + height - 2, Align.MID);
     }
 
-    private void drawString(Graphics2D g2, String str, int midX, int y) {
-        int strWidth = g2.getFontMetrics().stringWidth(str);
-        g2.drawString(str, midX - (strWidth / 2), y);
+    protected enum Align {
+        LEFT, MID, RIGHT
+    }
+    protected void drawString(Graphics2D g2, String str, int x, int y, Align align) {
+        if (align != Align.LEFT) {
+            int strWidth = g2.getFontMetrics().stringWidth(str);
+            x -= strWidth >> (align == Align.MID ? 1 : 0);
+        }
+        g2.drawString(str, x, y);
     }
 
     private void drawLine(Graphics2D g2, double x1, double y1, double x2, double y2) {
@@ -370,20 +402,20 @@ public class MapDrawer extends JPanel {
         else g2.drawRect(x, y, 3, 3);
     }
 
-    private int translateX(double x) {
+    protected int translateX(double x) {
         return (int) ((x / (double) MapManager.internalWidth) * getWidth());
     }
 
-    private double undoTranslateX(double x) {
-        return ((x / getWidth()) * MapManager.internalWidth);
-    }
-
-    private double undoTranslateY(double y) {
-        return ((y / getHeight()) * MapManager.internalHeight);
-    }
-
-    private int translateY(double y) {
+    protected int translateY(double y) {
         return (int) ((y / (double) MapManager.internalHeight) * getHeight());
+    }
+
+    protected double undoTranslateX(double x) {
+        return ((x / (double) getWidth()) * MapManager.internalWidth);
+    }
+
+    protected double undoTranslateY(double y) {
+        return ((y / (double) getHeight()) * MapManager.internalHeight);
     }
 
     private double translateXd(double x) {
@@ -392,5 +424,21 @@ public class MapDrawer extends JPanel {
 
     private double translateYd(double y) {
         return y / (double) MapManager.internalHeight * (double) this.getHeight();
+    }
+
+    protected int gridToMapX(int x) {
+        return x * width / config.MISCELLANEOUS.ZONE_RESOLUTION;
+    }
+
+    protected int gridToMapY(int y) {
+        return y * height / config.MISCELLANEOUS.ZONE_RESOLUTION;
+    }
+
+    protected int mapToGridX(int x) {
+        return (x + 1) * config.MISCELLANEOUS.ZONE_RESOLUTION / width;
+    }
+
+    protected int mapToGridY(int y) {
+        return (y + 1) * config.MISCELLANEOUS.ZONE_RESOLUTION / height;
     }
 }

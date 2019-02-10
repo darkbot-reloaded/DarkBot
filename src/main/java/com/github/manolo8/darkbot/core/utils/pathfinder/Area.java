@@ -6,20 +6,19 @@ import static java.lang.Math.min;
 
 public class Area {
 
-    public double maxX;
     public double minX;
-    public double maxY;
     public double minY;
+    public double maxX;
+    public double maxY;
 
     public boolean changed;
     public boolean cachedUsing;
 
-    public Area(double maxX, double minX, double maxY, double minY) {
-        this.maxX = maxX;
+    public Area(double minX, double minY, double maxX, double maxY) {
         this.minX = minX;
-        this.maxY = maxY;
         this.minY = minY;
-        this.changed = true;
+        this.maxX = maxX;
+        this.maxY = maxY;
     }
 
     public boolean hasLineOfSight(PathPoint current, PathPoint destination) {
