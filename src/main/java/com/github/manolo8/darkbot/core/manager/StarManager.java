@@ -49,28 +49,28 @@ public class StarManager {
 
         //1-5
         add(17, "1-5",
-                new Portal(150000299, 16),
-                new Portal(150000328, 29),
-                new Portal(150000300, 18),
-                new Portal(150000302, 19)
+                new Portal(150000309, 16),
+                new Portal(150000338, 29),
+                new Portal(150000310, 18),
+                new Portal(150000312, 19)
         );
 
         //1-6
         add(18, "1-6",
-                new Portal(150000301, 17),
-                new Portal(150000304, 20)
+                new Portal(150000311, 17),
+                new Portal(150000314, 20)
         );
 
         //1-7
         add(19, "1-7",
-                new Portal(150000306, 20),
-                new Portal(150000303, 17)
+                new Portal(150000316, 20),
+                new Portal(150000313, 17)
         );
 
         //1-8
         add(20, "1-8",
-                new Portal(150000305, 18),
-                new Portal(150000307, 19),
+                new Portal(150000315, 18),
+                new Portal(150000317, 19),
                 new Portal(150000201, 306)
         );
 
@@ -105,28 +105,28 @@ public class StarManager {
 
         //2-5
         add(21, "2-5",
-                new Portal(150000330, 16),
-                new Portal(150000309, 29),
-                new Portal(150000310, 22),
-                new Portal(150000312, 23)
+                new Portal(150000340, 16),
+                new Portal(150000319, 29),
+                new Portal(150000320, 22),
+                new Portal(150000322, 23)
         );
 
         //2-6
         add(22, "2-6",
-                new Portal(150000311, 21),
-                new Portal(150000314, 24)
+                new Portal(150000321, 21),
+                new Portal(150000324, 24)
         );
 
         //2-7
         add(23, "2-7",
-                new Portal(150000313, 21),
-                new Portal(150000316, 24)
+                new Portal(150000323, 21),
+                new Portal(150000326, 24)
         );
 
         //2-8
         add(24, "2-8",
-                new Portal(150000315, 22),
-                new Portal(150000317, 23),
+                new Portal(150000325, 22),
+                new Portal(150000327, 23),
                 new Portal(150000205, 307)
         );
 
@@ -161,28 +161,28 @@ public class StarManager {
 
         //3-5
         add(25, "3-5",
-                new Portal(150000319, 16),
-                new Portal(150000332, 29),
-                new Portal(150000320, 26),
-                new Portal(150000322, 27)
+                new Portal(150000329, 16),
+                new Portal(150000342, 29),
+                new Portal(150000330, 26),
+                new Portal(150000332, 27)
         );
 
         //3-6
         add(26, "3-6",
-                new Portal(150000321, 25),
-                new Portal(150000324, 28)
+                new Portal(150000331, 25),
+                new Portal(150000334, 28)
         );
 
         //3-7
         add(27, "3-7",
-                new Portal(150000323, 25),
-                new Portal(150000326, 28)
+                new Portal(150000333, 25),
+                new Portal(150000336, 28)
         );
 
         //3-8
         add(28, "3-8",
-                new Portal(150000327, 27),
-                new Portal(150000325, 26),
+                new Portal(150000337, 27),
+                new Portal(150000335, 26),
                 new Portal(150000209, 308)
         );
         //VRU --------------------------------------------------------
@@ -215,19 +215,19 @@ public class StarManager {
 
         //4-4
         add(16, "4-4",
-                new Portal(150000318, 25),
-                new Portal(150000294, 15),
-                new Portal(150000292, 14),
-                new Portal(150000308, 21),
-                new Portal(150000298, 17),
-                new Portal(150000290, 13)
+                new Portal(150000328, 25),
+                new Portal(150000304, 15),
+                new Portal(150000302, 14),
+                new Portal(150000318, 21),
+                new Portal(150000308, 17),
+                new Portal(150000300, 13)
         );
 
         //4-5
         add(29, "4-5",
-                new Portal(150000329, 17),
-                new Portal(150000331, 21),
-                new Portal(150000333, 25),
+                new Portal(150000339, 17),
+                new Portal(150000341, 21),
+                new Portal(150000343, 25),
                 new Portal(150000428, 91),
                 new Portal(150000432, 91),
                 new Portal(150000430, 91)
