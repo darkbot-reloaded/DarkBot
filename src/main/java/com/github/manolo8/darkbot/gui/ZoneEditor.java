@@ -153,6 +153,7 @@ public class ZoneEditor extends MapDrawer {
     }
 
     private void toggleSelection(boolean toggle, boolean def) {
+        if (zoneInfo == null) return;
         area.update(zoneInfo.resolution);
 
         int startX = mapToGridX(area.x1), startY = mapToGridY(area.y1),

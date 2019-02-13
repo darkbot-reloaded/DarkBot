@@ -60,7 +60,7 @@ public class PetManager extends Gui {
     private void activatePet() {
         if (System.currentTimeMillis() - this.activatePetTime > 2000L) {
             click(MAIN_BUTTON_X, MODULE_Y);
-            this.moduleStatus = -1;
+            this.moduleStatus = -2;
             this.activatePetTime = System.currentTimeMillis();
         }
     }

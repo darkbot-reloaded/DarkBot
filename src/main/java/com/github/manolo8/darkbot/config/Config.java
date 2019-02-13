@@ -118,6 +118,9 @@ public class Config {
         @Option(value = "Refresh every", description = "Every how many minutes to refresh")
         @Num(max = 60 * 12, step = 10)
         public int REFRESH_TIME = 0;
+
+        @Option("Developer stuff shown")
+        public boolean DEV_STUFF = false;
     }
 
 

@@ -74,7 +74,6 @@ public class GuiManager implements Manager {
     }
 
     public void tick() {
-
         guis.update();
 
         lostConnection.update();

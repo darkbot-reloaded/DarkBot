@@ -11,7 +11,7 @@ import java.util.Set;
 public class PathFinder {
 
     final LinkedList<PathPoint> paths;
-    final Set<PathPoint> points;
+    public final Set<PathPoint> points;
 
     final List<Obstacle> obstacles;
 

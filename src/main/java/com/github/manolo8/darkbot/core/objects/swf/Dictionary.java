@@ -58,8 +58,6 @@ public class Dictionary extends Updatable {
             elements = temp;
         }
 
-        lastFix = 0;
-
         byte[] bytes = API.readMemory(table, length);
 
         int current = 0;
@@ -87,8 +85,6 @@ public class Dictionary extends Updatable {
                 //send update
                 send(entry);
             }
-
-            System.out.println(entry.key);
 
             current++;
         }

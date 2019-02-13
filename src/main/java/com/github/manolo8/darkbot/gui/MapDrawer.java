@@ -305,12 +305,18 @@ public class MapDrawer extends JPanel {
                 drawEntity(g2, ship.locationInfo.now, false);
             }
 
-            /*g2.setColor(UNKNOWN);
+            if (!config.MISCELLANEOUS.DEV_STUFF) return;
+
+            g2.setColor(UNKNOWN);
             for (Entity entity : mapManager.entities.unknown) {
                 Location loc = entity.locationInfo.now;
-                drawString(g2, entity.id + "", translateX(loc.x), translateY(loc.y));
+                drawString(g2, entity.id + "", translateX(loc.x), translateY(loc.y), Align.MID);
                 drawEntity(g2, entity.locationInfo.now, false);
-            }*/
+            }
+
+            for (PathPoint point : hero.drive.pathFinder.points) {
+                g2.fillRect(translateX(point.x), translateY(point.y), 2, 2);
+            }
         }
     }
 

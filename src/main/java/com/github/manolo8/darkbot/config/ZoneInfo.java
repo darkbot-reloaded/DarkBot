@@ -83,6 +83,10 @@ public class ZoneInfo implements Serializable {
         return x < 0 || y < 0 || x >= resolution || y >= resolution;
     }
 
+    public boolean contains(double x, double y) {
+        return get(Math.min((int) (x * resolution), resolution - 1), Math.min((int) (y * resolution), resolution - 1));
+    }
+
     public List<Zone> getZones() {
         if (changed) {
             zones = new ArrayList<>();

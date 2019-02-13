@@ -35,29 +35,26 @@ public class Gui extends Updatable {
     }
 
     public void update() {
+        if (address != 0) {
+            size.update(API.readMemoryLong(addressInfo + 10 * 8));
+            pos.update(API.readMemoryLong(addressInfo + 9 * 8));
+            minimized.update(API.readMemoryLong(addressInfo + 14 * 8));
 
-//        if (address != 0) {
-//            size.update(API.readMemoryLong(addressInfo + 10 * 8));
-//            pos.update(API.readMemoryLong(addressInfo + 9 * 8));
-//            minimized.update(API.readMemoryLong(addressInfo + 14 * 8));
-//
-//            size.update();
-//            pos.update();
-//            minimized.update();
-//
-//            width = (int) Math.round(size.x);
-//            height = (int) Math.round(size.y);
-//            x = (int) Math.round((MapManager.clientWidth - size.x) * 0.01 * pos.x);
-//            y = (int) Math.round((MapManager.clientHeight - size.y) * 0.01 * pos.y);
-//
-//            visible = API.readMemoryBoolean(addressInfo + 32);
-//        }
+            size.update();
+            pos.update();
+            minimized.update();
 
+            width = (int) Math.round(size.now.x);
+            height = (int) Math.round(size.now.y);
+            x = (int) Math.round((MapManager.clientWidth - size.now.x) * 0.01 * pos.now.x);
+            y = (int) Math.round((MapManager.clientHeight - size.now.y) * 0.01 * pos.now.y);
+
+            visible = API.readMemoryBoolean(addressInfo + 32);
+        }
     }
 
     @Override
     public void update(long address) {
-
         if (address == 0) {
             reset();
         } else {
