@@ -80,11 +80,8 @@ public class DarkBotAPI {
 
     public native long[] queryMemory(byte[] query, int maxQuantity);
 
-    public native void setDrawing(boolean drawing);
-
     public native void setVisible(boolean visible);
 
     public native void refresh();
 
-    public native void forceVisible(boolean value);
 }

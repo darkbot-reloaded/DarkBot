@@ -23,6 +23,7 @@ public class MainGui extends JFrame {
 
     private JButton toggleRunning;
     private JButton toggleVisibility;
+    private JButton reload;
     private JButton copySid;
     private JButton openConfig;
 
@@ -55,6 +56,7 @@ public class MainGui extends JFrame {
         mapDrawer = new MapDrawer(main);
         toggleRunning = new MainButton("START");
         toggleVisibility = new MainButton("HIDE");
+        reload = new MainButton("RELOAD");
         copySid = new MainButton("SID");
         openConfig = new MainButton("CONFIG");
     }
@@ -80,6 +82,7 @@ public class MainGui extends JFrame {
 
         container.add(openConfig);
         container.add(copySid);
+        container.add(reload);
         container.add(toggleVisibility);
         container.add(toggleRunning);
 
@@ -91,6 +94,13 @@ public class MainGui extends JFrame {
         addWindowStateListener(e -> {
             if (e.getNewState() == WindowEvent.WINDOW_CLOSING) {
                 main.saveConfig();
+            }
+        });
+
+        reload.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                API.refresh();
             }
         });
 

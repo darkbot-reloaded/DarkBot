@@ -99,31 +99,26 @@ public class LootModule implements Module {
     }
 
     boolean checkDangerousAndCurrentMap() {
-
-        if (config.WORKING_MAP != hero.map.id) {
-
-            main.setModule(new MapModule())
-                    .setTargetAndBack(main.starManager.fromId(main.config.WORKING_MAP));
-
-        } else if ((repairing = repairing || hero.health.hpPercent() < config.REPAIR_HP) || hasEnemies()) {
-
-            if (repairing)
-                repairing = hero.health.hpPercent() >= config.WAIT_HP;
-
-            Portal portal = main.starManager.next(hero.map, hero.locationInfo, hero.map);
-
-            if (portal.locationInfo.distance(hero) < 100) {
-                if (isUnderAttack())
-                    hero.jumpPortal(portal);
-            } else
-                drive.move(portal);
-
-        } else
-            return true;
-
-        hero.runMode();
-
-        return false;
+        boolean mapWrong = this.config.WORKING_MAP != this.hero.map.id;
+        boolean underAttack = this.isUnderAttack();
+        boolean lowHp = this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_HP &&
+                (this.target == null || this.target.removed || this.target.health.hp == 0 || this.target.health.hp > 300000);
+        if (mapWrong || lowHp || hasEnemies()) {
+            this.hero.runMode();
+            if (mapWrong || underAttack) {
+                if (underAttack) Main.API.keyboardClick(config.GENERAL.SAFETY.SHIP_ABILITY);
+                repairing = true;
+                this.main.setModule(new MapModule()).setTargetAndBack(this.main.starManager.fromId(this.main.config.WORKING_MAP));
+            } else {
+                if (!this.config.LOOT.STOP_RUNNING_NO_SIGHT || lowHp) repairing = true;
+                Portal portal = this.main.starManager.next(this.hero.map, this.hero.locationInfo, this.hero.map);
+                if (portal == null) return true;
+                if (portal.locationInfo.distance(this.hero) > 100.0) this.drive.move(portal);
+            }
+            return false;
+        }
+        repairing = repairing && this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_TO_HP;
+        return !repairing;
     }
 
     boolean findTarget() {
@@ -249,45 +244,33 @@ public class LootModule implements Module {
             }
 
             drive.move(x, y);
-
-
         }
     }
 
     private boolean isUnderAttack() {
+        if (!config.LOOT.RUN_FROM_ENEMIES && config.LOOT.RUN_FROM_ENEMIES_SIGHT) return false;
         for (Ship ship : ships) {
-            if (ship.playerInfo.isEnemy()) {
-
-                if (ship.isAttacking(hero)) {
-                    return true;
-                }
-
-            }
+            if (ship.playerInfo.isEnemy() && ship.isAttacking(hero)) return true;
         }
         return false;
     }
 
     private boolean hasEnemies() {
+        if (!config.LOOT.RUN_FROM_ENEMIES && config.LOOT.RUN_FROM_ENEMIES_SIGHT) return false;
 
-        if (config.RUN_FROM_ENEMIES || config.RUN_FROM_ENEMIES_IN_SIGHT) {
-            for (Ship ship : ships) {
-                if (ship.playerInfo.isEnemy()) {
+        for (Ship ship : ships) {
+            if (!ship.playerInfo.isEnemy()) continue;
 
-                    if (config.RUN_FROM_ENEMIES_IN_SIGHT &&
-                            ship.locationInfo.now.distance(hero.locationInfo.now) < config.LOOT.MAX_SIGHT_DISTANCE)
-                        return true;
+            if (config.LOOT.RUN_FROM_ENEMIES_SIGHT && ship.locationInfo.distance(hero) < config.LOOT.MAX_SIGHT_DISTANCE)
+                return true;
 
-                    if (ship.isAttacking(hero)) {
-                        ship.setTimerTo(400_000);
-                        return true;
-                    } else if (ship.isInTimer()) {
-                        return true;
-                    }
-
-                }
+            if (ship.isAttacking(hero)) {
+                ship.setTimerTo(400_000);
+                return true;
+            } else if (ship.isInTimer()) {
+                return true;
             }
         }
-
         return false;
     }
 

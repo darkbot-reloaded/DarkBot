@@ -549,22 +549,22 @@ public class ConfigGui extends JFrame {
         reviveMethod.addItem("Portal");
         reviveMethod.addItem("Local");
 
-        reviveMethod.setSelectedIndex(Math.min(Math.max(config.REPAIR_LOCAL, 2), 0));
+        reviveMethod.setSelectedIndex(Math.min(Math.max((int) config.GENERAL.SAFETY.REVIVE_LOCATION - 1, 2), 0));
 
         stayAwayFromEnemies.setSelected(config.STAY_AWAY_FROM_ENEMIES);
-        repairHp.setValue((int) (config.REPAIR_HP * 100));
-        waitHp.setValue((int) (config.WAIT_HP * 100));
+        repairHp.setValue((int) (config.GENERAL.SAFETY.REPAIR_HP * 100));
+        waitHp.setValue((int) (config.GENERAL.SAFETY.REPAIR_TO_HP * 100));
 
         Map map = main.starManager.fromId(config.WORKING_MAP);
 
         if (map != null)
             workingMap.setSelectedItem(map.name);
 
-        runFromEnemies.setSelected(config.RUN_FROM_ENEMIES);
-        runFromEnemiesInSight.setSelected(config.RUN_FROM_ENEMIES_IN_SIGHT);
+        runFromEnemies.setSelected(config.LOOT.RUN_FROM_ENEMIES);
+        runFromEnemiesInSight.setSelected(config.LOOT.RUN_FROM_ENEMIES_SIGHT);
         autoClock.setSelected(config.AUTO_CLOACK);
         refreshTime.setText(String.valueOf(config.MISCELLANEOUS.REFRESH_TIME));
-        maxDeaths.setText(String.valueOf(config.MAX_DEATHS));
+        maxDeaths.setText(String.valueOf(config.GENERAL.SAFETY.MAX_DEATHS));
         autoSab.setSelected(config.AUTO_SAB);
         autoCloackKey.setText(String.valueOf(config.AUTO_CLOACK_KEY));
         ammoKey.setText(String.valueOf(config.AMMO_KEY));
@@ -623,13 +623,13 @@ public class ConfigGui extends JFrame {
 
         //GENERAL
 
-        repairHp.addChangeListener(e -> config.REPAIR_HP = ((double) repairHp.getValue() / repairHp.getMaximum()));
+        repairHp.addChangeListener(e -> config.GENERAL.SAFETY.REPAIR_HP = ((double) repairHp.getValue() / repairHp.getMaximum()));
 
-        waitHp.addChangeListener(e -> config.WAIT_HP = ((double) waitHp.getValue() / waitHp.getMaximum()));
+        waitHp.addChangeListener(e -> config.GENERAL.SAFETY.REPAIR_TO_HP = ((double) waitHp.getValue() / waitHp.getMaximum()));
 
         workingMap.addItemListener(e -> config.WORKING_MAP = main.starManager.fromName((String) e.getItem()).id);
 
-        reviveMethod.addItemListener(e -> config.REPAIR_LOCAL = reviveMethod.getSelectedIndex());
+        reviveMethod.addItemListener(e -> config.GENERAL.SAFETY.REVIVE_LOCATION = reviveMethod.getSelectedIndex() + 1);
 
         runConfig.addItemListener(e -> config.GENERAL.RUN.CONFIG = (int) e.getItem());
 
@@ -661,10 +661,10 @@ public class ConfigGui extends JFrame {
             public void keyReleased(KeyEvent e) {
                 try {
 
-                    config.MAX_DEATHS = Integer.parseInt(maxDeaths.getText());
+                    config.GENERAL.SAFETY.MAX_DEATHS = Integer.parseInt(maxDeaths.getText());
 
                 } catch (NumberFormatException ignored) {
-                    config.MAX_DEATHS = 10;
+                    config.GENERAL.SAFETY.MAX_DEATHS = 10;
                     maxDeaths.setText("10");
                 }
 
@@ -733,9 +733,9 @@ public class ConfigGui extends JFrame {
 
         //LOOT
 
-        runFromEnemies.addItemListener(e -> config.RUN_FROM_ENEMIES = runFromEnemies.isSelected());
+        runFromEnemies.addItemListener(e -> config.LOOT.RUN_FROM_ENEMIES = runFromEnemies.isSelected());
 
-        runFromEnemiesInSight.addItemListener(e -> config.RUN_FROM_ENEMIES_IN_SIGHT = runFromEnemiesInSight.isSelected());
+        runFromEnemiesInSight.addItemListener(e -> config.LOOT.RUN_FROM_ENEMIES_SIGHT = runFromEnemiesInSight.isSelected());
 
         autoSab.addItemListener(e -> config.AUTO_SAB = autoSab.isSelected());
 

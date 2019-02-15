@@ -146,12 +146,12 @@ public class MapDrawer extends JPanel {
         drawHero(g2);
 
         drawStats(g2,
-                "cre/h " + formatter.format(statsManager.earnedCredits()),
+                /*"cre/h " + formatter.format(statsManager.earnedCredits()),
                 "uri/h " + formatter.format(statsManager.earnedUridium()),
                 "exp/h " + formatter.format(statsManager.earnedExperience()),
                 "hon/h " + formatter.format(statsManager.earnedHonor()),
-                "cargo " + statsManager.deposit + "/" + statsManager.depositTotal,
-                "death " + guiManager.deaths + '/' + config.MAX_DEATHS);
+                "cargo " + statsManager.deposit + "/" + statsManager.depositTotal,*/
+                "death " + guiManager.deaths + '/' + config.GENERAL.SAFETY.MAX_DEATHS);
 
     }
 

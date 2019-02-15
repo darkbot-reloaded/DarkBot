@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
+import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ShipConfigSupplier;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
@@ -26,20 +27,30 @@ public class Config {
         ShipConfig RUN = new ShipConfig(2, '9');
         public @Option("Roam config")
         ShipConfig ROAM = new ShipConfig(1, '9');
+
+        public @Option("Safety") Safety SAFETY = new Safety();
+        public static class Safety {
+            @Option("Run to repair at")
+            @Editor(JPercentField.class)
+            public double REPAIR_HP = 0.6;
+            @Option("Repair until")
+            @Editor(JPercentField.class)
+            public double REPAIR_TO_HP = 0.95;
+            @Option(value = "Ship ability", description = "Clicked when running away")
+            public Character SHIP_ABILITY;
+            @Option("Max deaths")
+            @Num(min = 1, max = 999)
+            public int MAX_DEATHS = 10;
+            @Option("Revive location")
+            @Editor(JListField.class)
+            @Options(ReviveSpotSupplier.class)
+            public long REVIVE_LOCATION = 1L;
+        }
     }
 
     public int CURRENT_MODULE;
 
-    public int MAX_DEATHS = 10;
-
-    public int REPAIR_LOCAL = 0;
-
-    public double REPAIR_HP;
-    public double WAIT_HP;
-
     //LOOT MODULE
-    public boolean RUN_FROM_ENEMIES;
-    public boolean RUN_FROM_ENEMIES_IN_SIGHT;
     public char AMMO_KEY = '3';
     public boolean AUTO_SAB = true;
     public char AUTO_SAB_KEY = '4';
@@ -70,6 +81,10 @@ public class Config {
 
     public @Option("Loot") Loot LOOT = new Loot();
     public static class Loot {
+        public @Option("Run from enemies") boolean RUN_FROM_ENEMIES = true;
+        public @Option("Run from enemies in sight") boolean RUN_FROM_ENEMIES_SIGHT;
+        @Option(value = "Stop running when out of sight", description = "Will stop running if the enemy isn't attacking and is no longer on sight")
+        public boolean STOP_RUNNING_NO_SIGHT = true;
         @Option(value = "Max sight distance", description = "No longer consider enemies in sight if further away than this")
         @Num(min = 500, max = 20000, step = 500)
         public int MAX_SIGHT_DISTANCE = 4000;
