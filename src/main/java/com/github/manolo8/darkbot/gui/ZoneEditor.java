@@ -107,7 +107,7 @@ public class ZoneEditor extends MapDrawer {
     protected void paintComponent(Graphics g) {
         int res = config.MISCELLANEOUS.ZONE_RESOLUTION;
         if (map == null || hero.map.id != map) {
-            zoneInfo = zonesByMap.get(map = hero.map.id);
+            zoneInfo = zonesByMap.computeIfAbsent(map = hero.map.id, id -> new ZoneInfo(config.MISCELLANEOUS.ZONE_RESOLUTION));
         }
         if (zoneInfo == null) return;
 

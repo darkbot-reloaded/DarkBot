@@ -154,6 +154,9 @@ public class GuiManager implements Manager {
 
 
             return false;
+        } else if (System.currentTimeMillis() - repairTime < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
+            validTime = System.currentTimeMillis();
+            return false;
         } else if (main.hero.locationInfo.isMoving()) {
             validTime = System.currentTimeMillis();
         }

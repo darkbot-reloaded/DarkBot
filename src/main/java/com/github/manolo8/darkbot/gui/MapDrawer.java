@@ -57,6 +57,7 @@ public class MapDrawer extends JPanel {
     protected Font FONT_BIG = new Font("Consolas", Font.PLAIN, 32);
     private Font FONT_MID = new Font(Font.SANS_SERIF, Font.PLAIN, 18);
     private Font FONT_SMALL = new Font("Consolas", Font.PLAIN, 12);
+    private Font FONT_TINY = new Font(Font.SANS_SERIF, Font.PLAIN, 9);
 
     private TreeMap<Long, Line> positions = new TreeMap<>();
 
@@ -266,7 +267,7 @@ public class MapDrawer extends JPanel {
 
     protected void drawStaticEntities(Graphics2D g2) {
         synchronized (Main.UPDATE_LOCKER) {
-            g2.setFont(FONT_SMALL);
+            g2.setFont(FONT_TINY);
             g2.setColor(PORTALS);
             for (Portal portal : portals) {
                 Location loc = portal.locationInfo.now;
@@ -282,6 +283,10 @@ public class MapDrawer extends JPanel {
                 if (station.hullId >= 0 && station.hullId < 255)
                     g2.fillOval(translateX(loc.x) - 5, translateY(loc.y) - 4, 11, 9);
                 else drawEntity(g2, loc, false);
+
+                if (config.MISCELLANEOUS.DEV_STUFF) {
+                    drawString(g2,station.id + "", translateX(loc.x),translateY(loc.y) + 5, Align.MID);
+                }
             }
 
             g2.setColor(this.BASES);
@@ -322,6 +327,7 @@ public class MapDrawer extends JPanel {
 
     private void drawHero(Graphics2D g2) {
         g2.setColor(TEXT);
+        g2.setFont(FONT_SMALL);
         drawString(g2, hero.config + "C", 12, height - 12, Align.LEFT);
 
         g2.setColor(GOING);

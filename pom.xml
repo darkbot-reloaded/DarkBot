@@ -6,7 +6,7 @@
 
     <groupId>com.github.manolo8.darkbot</groupId>
     <artifactId>DarkBOT</artifactId>
-    <version>1.13.beta9-SNAPSHOT</version>
+    <version>1.13.beta10-SNAPSHOT</version>
 
     <dependencies>
 
@@ -82,81 +82,11 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
+                            <finalName>DarkBot</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>com.github.wvengen</groupId>
-                <artifactId>proguard-maven-plugin</artifactId>
-                <version>2.0.13</version>
-                <executions>
-                    <execution>
-                        <id>obfuscation-packaging</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>proguard</goal>
-                        </goals>
-                        <configuration>
-                            <proguardVersion>6.1.0beta2</proguardVersion>
-                            <obfuscate>true</obfuscate>
-                            <attach>true</attach>
-                            <appendClassifier>false</appendClassifier>
-                            <addMavenDescriptor>false</addMavenDescriptor>
-                            <injar>${project.build.finalName}-jar-with-dependencies.jar</injar>
-                            <injarNotExistsSkip>false</injarNotExistsSkip>
-                            <archive>
-                                <manifest>
-                                    <mainClass>com.github.manolo8.darkbot.Bot</mainClass>
-                                </manifest>
-                            </archive>
-                            <libs>
-                                <lib>${java.home}/lib/rt.jar</lib>
-                            </libs>
-
-                            <options>
-                                <option>-keep public class com.github.manolo8.darkbot.Bot
-                                    {*;}
-                                </option>
-                                <option>-keep public class com.github.manolo8.darkbot.config.Config
-                                    {*;}
-                                </option>
-                                <option>-keep public class com.github.manolo8.darkbot.config.BoxInfo
-                                    {*;}
-                                </option>
-                                <option>-keep public class com.github.manolo8.darkbot.config.NpcInfo
-                                    {*;}
-                                </option>
-                                <option>-keep public class com.github.manolo8.darkbot.core.DarkBotAPI
-                                    {*;}
-                                </option>
-                                <option>-keep class com.bulenkov.*</option>
-                                <option>-keep class * implements java.util.function.Supplier</option>
-                                <option>-keepattributes Signature</option>
-                                <option>-keepattributes *Annotation*</option>
-                                <option>-keepattributes InnerClasses</option>
-                                <option>-dontusemixedcaseclassnames</option>
-                                <option>-dontskipnonpubliclibraryclasses</option>
-                                <option>-verbose</option>
-                                <option>-optimizationpasses 5</option>
-                                <option>-overloadaggressively</option>
-                                <option>-repackageclasses ''</option>
-                                <option>-allowaccessmodification</option>
-                                <option>-dontwarn</option>
-                                <option>-target 1.8</option>
-
-                            </options>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>net.sf.proguard</groupId>
-                        <artifactId>proguard-base</artifactId>
-                        <version>6.1.0beta2</version>
-                    </dependency>
-                </dependencies>
             </plugin>
 
         </plugins>

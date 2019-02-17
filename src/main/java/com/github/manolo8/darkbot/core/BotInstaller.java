@@ -102,8 +102,15 @@ public class BotInstaller {
             int speed = API.readMemoryInt(value + 8);
             int bool = API.readMemoryInt(value + 12);
             int val = API.readMemoryInt(value + 16);
+            int cargo = API.readMemoryInt(API.readMemoryLong(value - 48 + 240) + 40);
+            int maxCargo = API.readMemoryInt(API.readMemoryLong(value - 48 + 248) + 40);
 
-            if (level >= 0 && level <= 32 && speed > 50 && speed < 2000 && (bool == 1 || bool == 2) && val == 0) {
+            if (level >= 0 && level <= 32
+                    && speed > 50 && speed < 2000
+                    && (bool == 1 || bool == 2)
+                    && val == 0
+                    && cargo >= 0
+                    && maxCargo >= 100 && maxCargo < 100_000) {
                 userDataAddress.send(value - 48);
                 break;
             }
