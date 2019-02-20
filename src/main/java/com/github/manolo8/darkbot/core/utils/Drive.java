@@ -73,8 +73,10 @@ public class Drive {
         return pathFinder.canMove(location);
     }
 
-    public void stop() {
-        map.translateMouseMoveRelease(heroLocation.now.x, heroLocation.now.y);
+    public void stop(boolean current) {
+        if (current) {
+            map.translateMouseMoveRelease(heroLocation.now.x, heroLocation.now.y);
+        }
 
         if (!pathFinder.isEmpty()) {
             pathFinder.path().clear();

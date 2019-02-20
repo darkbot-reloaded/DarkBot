@@ -46,7 +46,7 @@ public class LocationInfo extends Updatable {
         Location destination = new Location();
 
         if (last.x != 0 && last.y != 0) {
-            double move = speed * (time / 1000);
+            double move = speed * (time / 1000d);
 
             destination.x = now.x + Math.cos(angle) * move;
             destination.y = now.y + Math.sin(angle) * move;

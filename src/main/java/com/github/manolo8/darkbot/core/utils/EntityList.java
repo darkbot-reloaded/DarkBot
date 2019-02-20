@@ -206,21 +206,24 @@ public class EntityList extends Updatable {
     }
 
     private void clear() {
+        synchronized (Main.UPDATE_LOCKER) {
+            ids.clear();
 
-        ids.clear();
+            obstacles.clear();
 
-        obstacles.clear();
-
-        for (List<? extends Entity> entities : allEntities) {
-            for (Entity entity : entities) {
-                entity.removed = true;
+            for (List<? extends Entity> entities : allEntities) {
+                for (Entity entity : entities) {
+                    entity.removed = true;
+                }
+                entities.clear();
             }
-            entities.clear();
         }
     }
 
     private void refreshRadius(boolean value) {
-        if (value) doInEachEntity(entity -> entity.clickable.setRadius(0));
-        else doInEachEntity(entity -> entity.clickable.reset());
+        synchronized (Main.UPDATE_LOCKER) {
+            if (value) doInEachEntity(entity -> entity.clickable.setRadius(0));
+            else doInEachEntity(entity -> entity.clickable.reset());
+        }
     }
 }

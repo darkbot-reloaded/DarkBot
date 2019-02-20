@@ -39,9 +39,9 @@ public class HeroManager extends Ship implements Manager {
 
         this.main = main;
         this.drive = new Drive(this, main.mapManager);
-        main.status.add(b -> drive.move(locationInfo.now));
+        main.status.add(b -> drive.stop(true));
         this.pet = new Pet(0);
-        this.map = new Map(0, "LOADING", false, new Portal[0]);
+        this.map = new Map(-1, "Loading", false, new Portal[0]);
     }
 
     @Override
