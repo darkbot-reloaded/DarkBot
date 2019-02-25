@@ -23,10 +23,7 @@ public class Gui extends Updatable {
     private long time;
     private long update;
 
-    public Gui(long address) {
-
-        this.address = address;
-
+    public Gui() {
         this.size = new LocationInfo(0);
         this.pos = new LocationInfo(0);
         this.minimized = new Point(0);
@@ -35,22 +32,21 @@ public class Gui extends Updatable {
     }
 
     public void update() {
-        if (address != 0) {
-            size.update(API.readMemoryLong(addressInfo + 10 * 8));
-            pos.update(API.readMemoryLong(addressInfo + 9 * 8));
-            minimized.update(API.readMemoryLong(addressInfo + 14 * 8));
+        if (address == 0) return;
+        size.update(API.readMemoryLong(addressInfo + 10 * 8));
+        pos.update(API.readMemoryLong(addressInfo + 9 * 8));
+        minimized.update(API.readMemoryLong(addressInfo + 14 * 8));
 
-            size.update();
-            pos.update();
-            minimized.update();
+        size.update();
+        pos.update();
+        minimized.update();
 
-            width = (int) Math.round(size.now.x);
-            height = (int) Math.round(size.now.y);
-            x = (int) Math.round((MapManager.clientWidth - size.now.x) * 0.01 * pos.now.x);
-            y = (int) Math.round((MapManager.clientHeight - size.now.y) * 0.01 * pos.now.y);
+        width = (int) Math.round(size.now.x);
+        height = (int) Math.round(size.now.y);
+        x = (int) Math.round((MapManager.clientWidth - size.now.x) * 0.01 * pos.now.x);
+        y = (int) Math.round((MapManager.clientHeight - size.now.y) * 0.01 * pos.now.y);
 
-            visible = API.readMemoryBoolean(addressInfo + 32);
-        }
+        visible = API.readMemoryBoolean(addressInfo + 32);
     }
 
     @Override
@@ -72,7 +68,7 @@ public class Gui extends Updatable {
     }
 
     public boolean lastUpdatedIn(long time) {
-        return System.currentTimeMillis() - update > time;
+        return update != 0 && System.currentTimeMillis() - update > time;
     }
 
     public void click(int plusX, int plusY) {

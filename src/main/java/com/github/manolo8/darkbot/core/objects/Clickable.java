@@ -8,8 +8,8 @@ public class Clickable extends Updatable {
 
     private long confirm;
 
-    public int radius;
-    public int priority;
+    public int radius = -1;
+    public int priority = -1;
 
     private int defRadius;
     private int defPriority;
@@ -30,7 +30,7 @@ public class Clickable extends Updatable {
 
         if (this.radius != radius && checkIntegrity()) {
             if (defRadius == 0) defRadius = this.radius;
-            API.writeMemoryInt(address + 40, radius);
+            API.writeMemoryInt(address + 40, this.radius = radius);
         }
     }
 
@@ -39,8 +39,8 @@ public class Clickable extends Updatable {
         update();
 
         if (checkIntegrity()) {
-            if (defRadius != 0 && defRadius != radius) API.writeMemoryInt(address + 40, defRadius);
-            if (defPriority != 0 && defPriority != priority) API.writeMemoryInt(address + 44, defPriority);
+            if (defRadius != 0 && defRadius != radius) API.writeMemoryInt(address + 40, radius = defRadius);
+            if (defPriority != 0 && defPriority != priority) API.writeMemoryInt(address + 44, priority = defPriority);
             defRadius = 0;
             defPriority = 0;
         }
@@ -55,8 +55,12 @@ public class Clickable extends Updatable {
 
     @Override
     public void update() {
+        int oldRad = radius, oldPri = priority;
         this.radius = API.readMemoryInt(address + 40);
         this.priority = API.readMemoryInt(address + 44);
+
+        if (oldRad != -1 && oldRad != radius) setRadius(oldRad);
+        if (oldPri != -1 && oldPri != priority) setPriority(oldPri);
     }
 
     @Override

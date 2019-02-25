@@ -113,13 +113,10 @@ public class EntityList extends Updatable {
                 boxes.add(whenAdd(new Box(id), found));
             } else if (id <= 150000499 && id >= 150000156) {
                 portals.add(whenAdd(main.starManager.fromIdPortal(id), found));
-            } else if (main.hero.map.id == -5 && id >= 150000512 && id <= 150000515) {
+            } else if (main.hero.map.id > 400 && main.hero.map.id < 405 && id >= 150000500 && id <= 150000600) {
                 // Beacons, map ids TBD (experiment zone ids)
-                //EX 2-1 -> 150000514, 150000515
-                //EX 2-2 -> 150000512
-                //EX 2-3 -> 150000513
-                //EX 4-4 -> 150000566
-                unknown.add(whenAdd(new Entity(), found));
+                // EX 2-1 -> 150000514, 150000515 | EX 2-2 -> 150000512 | EX 2-3 -> 150000513 | EX 4-4 -> 150000566
+                npcs.add(whenAdd(new Npc(id), found));
             } else if (id <= 150000950 && id >= 150000500) {
                 int hullId = API.readMemoryInt(found + 116);
                 battleStations.add(whenAdd(new BattleStation(id, hullId), found));

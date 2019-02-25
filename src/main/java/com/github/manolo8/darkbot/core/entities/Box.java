@@ -8,6 +8,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class Box extends Entity {
 
     protected boolean collected;
+    public String type;
 
     public BoxInfo boxInfo;
 
@@ -40,12 +41,9 @@ public class Box extends Entity {
         data = API.readMemoryLong(data + 16);
         data = API.readMemoryLong(data + 24);
 
-        String type = API.readMemoryString(data);
+        type = API.readMemoryString(data);
 
-        if (type.length() > 5) {
-            int index;
-            type = (index = type.indexOf(',')) > 0 ? type.substring(4, index) : type.substring(4);
-        }
+        if (type.length() > 5) type = type.split(",")[0].replace("box_", "").replace("_box", "");
 
         boxInfo = ConfigEntity.INSTANCE.getOrCreateBoxInfo(type);
     }

@@ -8,14 +8,14 @@ public class PetManager extends Gui {
     private static final int MAIN_BUTTON_X = 30, MODULES_X_MAX = 260, MODULE_Y = 120;
 
     private long repairPetTime;
-    private long activatePetTime;
+    private long togglePetTime;
     private long selectModuleTime;
     private int moduleStatus = -2; // -2 no module, -1 selecting module, >= 0 module selected
     private int activity;
     private Main main;
+    private boolean enabled = true;
 
     PetManager(Main main) {
-        super(0);
         this.main = main;
     }
 
@@ -25,12 +25,20 @@ public class PetManager extends Gui {
             if (show(true)) tryRevive();
             return;
         }
-        if (!active()) {
-            if (show(true)) activatePet();
+        if (active() != enabled) {
+            if (show(true)) togglePet();
+            return;
+        }
+        if (!enabled) {
+            show(false);
             return;
         }
         if (moduleStatus != main.config.PET.MODULE && show(true)) this.selectModule();
         else if (moduleSelected()) show(false);
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     private boolean dead() {
@@ -38,7 +46,7 @@ public class PetManager extends Gui {
     }
 
     public void tickActive() {
-        this.activity = dead() ? 0 : main.hero.pet.locationInfo.isMoving() ? 25 : activity;
+        this.activity = dead() ? 0 : System.currentTimeMillis() - this.togglePetTime > 1000 && main.hero.pet.locationInfo.isMoving() ? 25 : activity;
         if (main.hero.locationInfo.isMoving()) activity--;
     }
 
@@ -57,11 +65,12 @@ public class PetManager extends Gui {
         }
     }
 
-    private void activatePet() {
-        if (System.currentTimeMillis() - this.activatePetTime > 2000L) {
+    private void togglePet() {
+        if (System.currentTimeMillis() - this.togglePetTime > 2000L) {
+            activity = activity > 0 ? 0 : 25;
             click(MAIN_BUTTON_X, MODULE_Y);
             this.moduleStatus = -2;
-            this.activatePetTime = System.currentTimeMillis();
+            this.togglePetTime = System.currentTimeMillis();
         }
     }
 

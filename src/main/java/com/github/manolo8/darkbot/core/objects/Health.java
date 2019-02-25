@@ -17,13 +17,14 @@ public class Health extends Updatable {
     @Override
     public void update() {
 
-        int hpLast = hp;
+        int hpLast = hp, maxHpLast = maxHp;
 
         hp = readIntFromIntHolder(48);
         maxHp = readIntFromIntHolder(56);
         shield = readIntFromIntHolder(80);
         maxShield = readIntFromIntHolder(88);
 
+        if (maxHpLast != maxHp) return;
         if (hpLast > hp) {
             lastDecreased = System.currentTimeMillis();
         } else if (hpLast < hp) {

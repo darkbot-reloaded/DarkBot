@@ -26,9 +26,11 @@ public class GuiManager implements Manager {
 
     private final Gui lostConnection;
     private final Gui connecting;
+    private final Gui quests;
+    public final Gui eventProgress;
     public final PetManager pet;
 
-    public boolean check;
+    private boolean runLoadChecks = true;
 
     public int deaths;
 
@@ -38,8 +40,10 @@ public class GuiManager implements Manager {
         this.validTime = System.currentTimeMillis();
         this.guis = new Dictionary(0);
 
-        this.lostConnection = new Gui(0);
-        this.connecting = new Gui(0);
+        this.lostConnection = new Gui();
+        this.connecting = new Gui();
+        this.quests = new Gui();
+        this.eventProgress = new Gui();
         this.pet = new PetManager(main);
 
         this.main.status.add(value -> validTime = System.currentTimeMillis());
@@ -49,15 +53,19 @@ public class GuiManager implements Manager {
     public void install(BotInstaller botInstaller) {
 
         this.guis.addLazy("lost_connection", lostConnection::update);
-        this.guis.addLazy("connecting", value -> System.out.println("HAS CONNECTING!"));
         this.guis.addLazy("connection", connecting::update);
+        this.guis.addLazy("quests", this.quests::update);
+        this.guis.addLazy("eventProgress", this.eventProgress::update);
         this.guis.addLazy("pet", this.pet::update);
 
         botInstaller.screenManagerAddress.add(value -> screenAddress = value);
         botInstaller.mainAddress.add(value -> mainAddress = value);
 
         botInstaller.invalid.add(value -> {
-            if (!value) validTime = System.currentTimeMillis();
+            if (!value) {
+                validTime = System.currentTimeMillis();
+                runLoadChecks = true;
+            }
         });
 
         botInstaller.guiManagerAddress.add(value -> {
@@ -68,8 +76,7 @@ public class GuiManager implements Manager {
             lostConnection.reset();
             connecting.reset();
             pet.reset();
-
-            check = true;
+            eventProgress.reset();
         });
     }
 
@@ -79,6 +86,14 @@ public class GuiManager implements Manager {
         lostConnection.update();
         connecting.update();
         pet.update();
+        eventProgress.update();
+        quests.update();
+
+        if (runLoadChecks && quests.lastUpdatedIn(5000)) {
+            API.keyboardClick(main.config.AMMO_KEY);
+            quests.show(false);
+            runLoadChecks = false;
+        }
     }
 
     private void tryReconnect(Gui gui) {
@@ -130,14 +145,14 @@ public class GuiManager implements Manager {
 
         if (lostConnection.visible) {
             //Wait 15 seconds to reconnect
-            if (lostConnection.lastUpdatedIn(25000)) {
+            if (lostConnection.lastUpdatedIn(5000)) {
                 tryReconnect(lostConnection);
                 checkInvalid();
             }
             return false;
         } else if (connecting.visible) {
 
-            if (connecting.lastUpdatedIn(30000)) {
+            if (connecting.lastUpdatedIn(15000)) {
                 API.refresh();
                 connecting.reset();
             }
@@ -157,13 +172,14 @@ public class GuiManager implements Manager {
         } else if (System.currentTimeMillis() - repairTime < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
             validTime = System.currentTimeMillis();
             return false;
-        } else if (main.hero.locationInfo.isMoving()) {
+        } else if (main.hero.locationInfo.isMoving() ||
+                System.currentTimeMillis() - main.hero.drive.lastMoved > 20 * 1000) {
             validTime = System.currentTimeMillis();
         }
 
         checkInvalid();
 
-        return true;
+        return main.hero.locationInfo.isLoaded();
     }
 
 }

@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.core.manager.*;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.modules.CollectorModule;
+import com.github.manolo8.darkbot.modules.EventModule;
 import com.github.manolo8.darkbot.modules.LootModule;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import com.github.manolo8.darkbot.utils.ByteArrayToBase64TypeAdapter;
@@ -23,7 +24,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Main extends Thread {
-    public static final String VERSION = "1.13-beta10";
+    public static final String VERSION = "1.13-beta13";
 
     private static final Gson GSON = new GsonBuilder()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter()).create();
@@ -254,6 +255,11 @@ public class Main extends Thread {
             case 2:
                 if (isNotModule(LootNCollectorModule.class)) {
                     setModule(new LootNCollectorModule());
+                }
+                break;
+            case 3:
+                if (isNotModule(EventModule.class)) {
+                    setModule(new EventModule());
                 }
                 break;
             default:

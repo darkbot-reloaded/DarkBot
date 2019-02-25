@@ -42,7 +42,8 @@ public class Dictionary extends Updatable {
 
     @Override
     public void update() {
-
+        if (elements != null && elements.length > 0 && elements[0] != null
+                && elements[0].key != null && elements[0].key.isEmpty()) lastFix = 0;
 
         long tableInfo = API.readMemoryLong(address + 32);
         int size = API.readMemoryInt(tableInfo + 16);

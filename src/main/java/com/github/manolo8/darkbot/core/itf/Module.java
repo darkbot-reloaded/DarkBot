@@ -10,4 +10,8 @@ public interface Module {
 
     void tick();
 
+    default String status() {
+        return null;
+    }
+
 }

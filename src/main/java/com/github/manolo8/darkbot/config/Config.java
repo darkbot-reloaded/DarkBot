@@ -107,6 +107,14 @@ public class Config {
         public int RADIUS = 400;
     }
 
+    public @Option("Event") Event EVENT = new Event();
+    public static class Event {
+        @Option(value = "Offensive ship ability")
+        public Character SHIP_ABILITY;
+        @Option(value = "Complete event progress", description = "If the bot should click on the event progress")
+        public boolean PROGRESS = true;
+    }
+
 
     public @Option("Pet") PetSettings PET = new PetSettings();
     public static class PetSettings {

@@ -236,21 +236,21 @@ public class StarManager {
 
         //PIRATES
         add(91, "5-1",
-                new Portal(150000434, 92),
-                new Portal(150000436, 92),
-                new Portal(150000438, 92)
+                new Portal(150000444, 92),
+                new Portal(150000446, 92),
+                new Portal(150000448, 92)
         );
 
         add(92, "5-2",
-                new Portal(150000440, 93),
-                new Portal(150000442, 93),
-                new Portal(150000444, 93)
+                new Portal(150000450, 93),
+                new Portal(150000452, 93),
+                new Portal(150000454, 93)
         );
 
         add(93, "5-3",
-                new Portal(150000446, 16),
-                new Portal(150000448, 16),
-                new Portal(150000450, 16)
+                new Portal(150000456, 16),
+                new Portal(150000458, 16),
+                new Portal(150000460, 16)
         );
         //PIRATES
 
