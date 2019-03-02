@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.modules;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.itf.Module;
@@ -34,7 +33,6 @@ public class EventModule implements Module {
     public Npc target;
     private boolean shooting;
     private long clickDelay;
-    private Long useAbility;
     private long lastNpc = System.currentTimeMillis();
     private long timeSinceNpc;
 
@@ -110,14 +108,6 @@ public class EventModule implements Module {
             if (target.health.maxHp > 0) API.keyboardClick(config.EVENT.SHIP_ABILITY);
             return;
         }
-        /*if (main.mapManager.isTarget(target) && hero.target == target) {
-            if (useAbility != null && System.currentTimeMillis() > useAbility
-                    && target.health.maxHp > 0 && hero.locationInfo.distance(target) < 600) {
-                API.keyboardClick(config.EVENT.SHIP_ABILITY);
-                useAbility = null;
-            }
-            return;
-        }*/
         if (locked) return;
 
         if (hero.locationInfo.distance(target) < 750 && System.currentTimeMillis() - clickDelay > 1000) {
@@ -126,7 +116,6 @@ public class EventModule implements Module {
             clickDelay = System.currentTimeMillis();
 
             shooting = false;
-            //if (config.EVENT.SHIP_ABILITY != null) useAbility = System.currentTimeMillis() + 500;
         }
     }
 

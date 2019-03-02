@@ -13,5 +13,6 @@ public class NpcInfo {
 
     public double radius;
     public boolean noCircle;
+    public boolean ignoreAttacked;
     public Character attackKey;
 }

@@ -284,6 +284,8 @@ public class StarManager {
         //add(??, "GG ε");         // portal type: 53
         //add(73, "GG ζ");         // portal type: 54
         //add(74, "GG κ");         // portal type: 70
+        //add(75, "GG λ");         // portal type: 71
+        //add(??, "GG Kronos");    // portal type: 72
         //add(203, "GG Hades");    // portal type: 74
         //add(300, "GG Kuiper 1"); // portal type: 82
         //add(301, "GG Kuiper 2"); // portal type: 82

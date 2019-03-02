@@ -32,7 +32,10 @@ public class Config {
         public static class Safety {
             @Option("Run to repair at")
             @Editor(JPercentField.class)
-            public double REPAIR_HP = 0.6;
+            public double REPAIR_HP = 0.4;
+            @Option("Run to repair when not killing npcs")
+            @Editor(JPercentField.class)
+            public double REPAIR_HP_NO_NPC = 0.5;
             @Option("Repair until")
             @Editor(JPercentField.class)
             public double REPAIR_TO_HP = 0.95;
@@ -84,13 +87,26 @@ public class Config {
 
     public @Option("Loot") Loot LOOT = new Loot();
     public static class Loot {
-        public @Option("Run from enemies") boolean RUN_FROM_ENEMIES = true;
-        public @Option("Run from enemies in sight") boolean RUN_FROM_ENEMIES_SIGHT;
-        @Option(value = "Stop running when out of sight", description = "Will stop running if the enemy isn't attacking and is no longer on sight")
-        public boolean STOP_RUNNING_NO_SIGHT = true;
-        @Option(value = "Max sight distance", description = "No longer consider enemies in sight if further away than this")
-        @Num(min = 500, max = 20000, step = 500)
-        public int MAX_SIGHT_DISTANCE = 4000;
+        public @Option("Safety") Safety SAFETY = new Safety();
+        public static class Safety {
+            public @Option("Run from enemies")
+            boolean RUN_FROM_ENEMIES = true;
+            public @Option("Run from enemies in sight")
+            boolean RUN_FROM_ENEMIES_SIGHT;
+            @Option(value = "Stop running when out of sight", description = "Will stop running if the enemy isn't attacking and is no longer on sight")
+            public boolean STOP_RUNNING_NO_SIGHT = true;
+            @Option(value = "Max sight distance", description = "No longer consider enemies in sight if further away than this")
+            @Num(min = 500, max = 20000, step = 500)
+            public int MAX_SIGHT_DISTANCE = 4000;
+        }
+
+        @Option(value = "Run config when circling", description = "Use run config to follow escaping npcs")
+        public boolean RUN_CONFIG_IN_CIRCLE = true;
+        @Option(value = "Offensive ability key")
+        public Character SHIP_ABILITY;
+        @Option(value = "Offensive ability min health", description = "Min NPC health to use ability")
+        @Num(min = 50_000, max = 5_000_000, step = 50_000)
+        public int SHIP_ABILITY_MIN = 150_000;
 
         public @Option("Sab when under") @Editor(JPercentField.class) double SAB_PERCENT = 0.8;
         public @Option("Sab NPC min") @Num(min = 500, max = 100000, step = 500) int SAB_NPC_AMOUNT = 12000;

@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -106,9 +107,9 @@ public class CollectorModule implements Module {
     private void collectBox() {
         double distance = hero.locationInfo.distance(current);
 
-        if (distance < 600) {
+        if (distance < 100) {
             drive.stop(false);
-            current.clickable.setRadius(1200);
+            current.clickable.setRadius(800);
             drive.clickCenter(1);
             current.clickable.setRadius(0);
 
@@ -168,24 +169,11 @@ public class CollectorModule implements Module {
 
     void findBox() {
         LocationInfo locationInfo = hero.locationInfo;
-        double distance = 100_000;
-        Box closest = null;
 
-        for (Box box : boxes) {
-            if (canCollect(box)) {
-                double distanceCurrent = locationInfo.distance(box.locationInfo);
-                if (distanceCurrent < distance) {
-                    distance = distanceCurrent;
-                    closest = box;
-                }
-            }
-        }
-
-        if (current == null || current.isCollected() || closest != null && isBetter(closest)) {
-            current = closest;
-        } else {
-            current = null;
-        }
+        Box best = boxes.stream()
+                .filter(this::canCollect)
+                .min(Comparator.comparingDouble(locationInfo::distance)).orElse(null);
+        this.current = current == null || best == null || current.isCollected() || isBetter(best) ? best : current;
     }
 
     private boolean canCollect(Box box) {

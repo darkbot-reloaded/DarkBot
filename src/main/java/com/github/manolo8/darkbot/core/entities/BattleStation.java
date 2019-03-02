@@ -28,7 +28,7 @@ public class BattleStation
 
         info.update();
         if (locationInfo.isMoving())
-            area.set(locationInfo.now, 1000, 800);
+            area.set(locationInfo.now, 1200, 1000);
     }
 
     @Override

@@ -569,8 +569,8 @@ public class ConfigGui extends JFrame {
         if (map != null)
             workingMap.setSelectedItem(map.name);
 
-        runFromEnemies.setSelected(config.LOOT.RUN_FROM_ENEMIES);
-        runFromEnemiesInSight.setSelected(config.LOOT.RUN_FROM_ENEMIES_SIGHT);
+        runFromEnemies.setSelected(config.LOOT.SAFETY.RUN_FROM_ENEMIES);
+        runFromEnemiesInSight.setSelected(config.LOOT.SAFETY.RUN_FROM_ENEMIES_SIGHT);
         autoClock.setSelected(config.AUTO_CLOACK);
         refreshTime.setText(String.valueOf(config.MISCELLANEOUS.REFRESH_TIME));
         maxDeaths.setText(String.valueOf(config.GENERAL.SAFETY.MAX_DEATHS));
@@ -751,9 +751,9 @@ public class ConfigGui extends JFrame {
 
         //LOOT
 
-        runFromEnemies.addItemListener(e -> config.LOOT.RUN_FROM_ENEMIES = runFromEnemies.isSelected());
+        runFromEnemies.addItemListener(e -> config.LOOT.SAFETY.RUN_FROM_ENEMIES = runFromEnemies.isSelected());
 
-        runFromEnemiesInSight.addItemListener(e -> config.LOOT.RUN_FROM_ENEMIES_SIGHT = runFromEnemiesInSight.isSelected());
+        runFromEnemiesInSight.addItemListener(e -> config.LOOT.SAFETY.RUN_FROM_ENEMIES_SIGHT = runFromEnemiesInSight.isSelected());
 
         autoSab.addItemListener(e -> config.AUTO_SAB = autoSab.isSelected());
 
