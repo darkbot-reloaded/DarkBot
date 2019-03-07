@@ -159,6 +159,7 @@ public class GuiManager implements Manager {
 
             return false;
         } else if (isDead()) {
+            main.hero.drive.stop(false);
 
             tryRevive();
 

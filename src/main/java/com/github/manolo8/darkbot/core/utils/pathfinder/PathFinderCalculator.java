@@ -27,7 +27,7 @@ public class PathFinderCalculator {
 
         addDefs();
 
-        build();
+        if (!build()) return;
 
         unfragment(target);
 
@@ -50,7 +50,7 @@ public class PathFinderCalculator {
             temp.lineOfSight.remove(come);
     }
 
-    private void build() {
+    private boolean build() {
 
         PathPoint current = come;
 
@@ -68,8 +68,8 @@ public class PathFinderCalculator {
             closedList.add(current);
 
             update(current);
-        }
-        while ((current = pickupOne()) != destination);
+        } while ((current = pickupOne()) != destination && !openList.isEmpty());
+        return current == destination;
     }
 
     private void update(PathPoint current) {

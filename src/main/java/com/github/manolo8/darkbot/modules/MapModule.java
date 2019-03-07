@@ -31,6 +31,11 @@ public class MapModule implements Module, MapChange {
     }
 
     @Override
+    public String status() {
+        return "Traveling to " + target.name + (current != null ? ", next map: " + current.target.name : "");
+    }
+
+    @Override
     public boolean canRefresh() {
         return false;
     }

@@ -7,7 +7,6 @@ import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
-import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
 
@@ -36,6 +35,7 @@ public class LootModule implements Module {
 
     public Npc target;
     private boolean shooting;
+    private Long ability;
 
     private int radiusFix;
 
@@ -45,6 +45,8 @@ public class LootModule implements Module {
     private boolean sab;
 
     private boolean repairing;
+    private boolean jump;
+    private Portal escaping;
 
     @Override
     public void install(Main main) {
@@ -56,6 +58,12 @@ public class LootModule implements Module {
         this.ships = main.mapManager.entities.ships;
         this.npcs = main.mapManager.entities.npcs;
         this.config = main.config;
+    }
+
+    @Override
+    public String status() {
+        return jump ? "Jumping port" : repairing ? "Repairing" : escaping != null ? "Avoiding enemy" :
+                target != null ? "Killing npc" : "Roaming";
     }
 
     @Override
@@ -79,54 +87,77 @@ public class LootModule implements Module {
 
     }
 
+    boolean checkDangerousAndCurrentMap() {
+        if (this.config.WORKING_MAP != this.hero.map.id) {
+            this.hero.runMode();
+            repairing = true;
+            jump = false;
+            this.main.setModule(new MapModule()).setTargetAndBack(this.main.starManager.fromId(this.main.config.WORKING_MAP));
+            return false;
+        }
+
+        if (jump && escaping != null) {
+            this.hero.runMode();
+            if (escaping.locationInfo.distance(this.hero) < 250.0) hero.jumpPortal(escaping);
+            else this.drive.move(escaping);
+            return false;
+        }
+
+        boolean underAttack = this.isUnderAttack();
+        boolean lowHp = this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_HP ||
+                (this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_HP_NO_NPC &&
+                        (this.target == null || this.target.removed || this.target.health.hp == 0 || this.target.health.hpPercent() > 0.8));
+
+        if (lowHp || hasEnemies()) {
+            escaping = this.main.starManager.next(this.hero.map, this.hero.locationInfo, this.hero.map);
+            if (escaping == null) return true; // No place to run, don't even try.
+
+            this.hero.runMode();
+            if (underAttack && !repairing) Main.API.keyboardClick(config.GENERAL.SAFETY.SHIP_ABILITY);
+
+            jump |= config.LOOT.SAFETY.JUMP_PORTALS && underAttack;
+            repairing |= underAttack || lowHp || !this.config.LOOT.SAFETY.STOP_RUNNING_NO_SIGHT;
+
+            if (escaping.locationInfo.distance(this.hero) > 250.0) this.drive.move(escaping);
+            else if (lowHp && hero.health.hpDecreasedIn(100)) jump |= config.LOOT.SAFETY.JUMP_PORTALS;
+            return false;
+        }
+        repairing &= this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_TO_HP;
+        if (repairing) return false;
+        escaping = null;
+        return true;
+    }
+
     void doKillTargetTick() {
         if (!main.mapManager.isTarget(target)) {
             lockAndSetTarget();
             return;
         }
 
-        if (!target.npcInfo.ignoreAttacked && !main.mapManager.isCurrentTargetOwned()) {
+        if ((!target.npcInfo.ignoreAttacked && !main.mapManager.isCurrentTargetOwned()) ||
+                (drive.closestDistance(target.locationInfo.now) > 400 && !target.locationInfo.isMoving()
+                        && (target.health.shIncreasedIn(1000) || target.health.shieldPercent() > 0.95))) {
             target.setTimerTo(5000);
             target = null;
             return;
         }
 
-        double distance = hero.locationInfo.distance(target);
-        if (!shooting) {
-            if (distance > 575) return;
-            API.keyboardClick(getAttackKey());
-            shooting = true;
-            if (target.health.maxHp > config.LOOT.SHIP_ABILITY_MIN) API.keyboardClick(config.LOOT.SHIP_ABILITY);
+        if (!shooting || ability != null) {
+            if (hero.locationInfo.distance(target) > 575) return;
+            if (!shooting) {
+                API.keyboardClick(getAttackKey());
+                shooting = true;
+            }
+            if (ability != null && ability < System.currentTimeMillis()) {
+                if (target.health.maxHp >= config.LOOT.SHIP_ABILITY_MIN) API.keyboardClick(config.LOOT.SHIP_ABILITY);
+                ability = null;
+            }
             return;
         }
 
         if (checkIfIsAttackingAndCanContinue() && shouldSab() != sab) {
             API.keyboardClick(getAttackKey());
         }
-    }
-
-    boolean checkDangerousAndCurrentMap() {
-        boolean mapWrong = this.config.WORKING_MAP != this.hero.map.id;
-        boolean underAttack = this.isUnderAttack();
-        boolean lowHp = this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_HP ||
-                (this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_HP_NO_NPC &&
-                        (this.target == null || this.target.removed || this.target.health.hp == 0 || this.target.health.hpPercent() > 0.8));
-        if (mapWrong || lowHp || hasEnemies()) {
-            this.hero.runMode();
-            if (mapWrong || underAttack) {
-                if (underAttack) Main.API.keyboardClick(config.GENERAL.SAFETY.SHIP_ABILITY);
-                repairing = true;
-                this.main.setModule(new MapModule()).setTargetAndBack(this.main.starManager.fromId(this.main.config.WORKING_MAP));
-            } else {
-                if (!this.config.LOOT.SAFETY.STOP_RUNNING_NO_SIGHT || lowHp) repairing = true;
-                Portal portal = this.main.starManager.next(this.hero.map, this.hero.locationInfo, this.hero.map);
-                if (portal == null) return true;
-                if (portal.locationInfo.distance(this.hero) > 100.0) this.drive.move(portal);
-            }
-            return false;
-        }
-        repairing = repairing && this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_TO_HP;
-        return !repairing;
     }
 
     boolean findTarget() {
@@ -140,7 +171,7 @@ public class LootModule implements Module {
         long laser = System.currentTimeMillis() - laserTime;
 
         boolean attacking = hero.isAttacking(target);
-        boolean bugged = (!target.health.isDecreasedIn(1000) && laser > 1000);
+        boolean bugged = (!target.health.hpDecreasedIn(1000) && laser > 1000);
 
         if ((!attacking || bugged) && hero.locationInfo.distance(target) < 775 && laser > 1500 + times * 10000) {
             setRadiusAndClick(2);
@@ -167,6 +198,7 @@ public class LootModule implements Module {
         hero.setTarget(target);
         setRadiusAndClick(1);
         clickDelay = System.currentTimeMillis();
+        ability = clickDelay + 400;
         times = 0;
 
         shooting = false;
@@ -188,7 +220,7 @@ public class LootModule implements Module {
         double angle = targetLoc.angle(heroLoc);
         double radius = target.npcInfo.radius;
 
-        if (target != hero.target || !shooting) radius = Math.min(450, radius);
+        if (target != hero.target || !shooting || ability != null) radius = Math.min(500, radius);
 
         if (target.npcInfo.noCircle) {
             if ((direction != null ? targetLoc.distance(direction) : distance) <= radius) return;
@@ -263,9 +295,8 @@ public class LootModule implements Module {
     }
 
     private boolean isAttackedByOthers(Npc npc) {
-        if (npc.isInTimer()) {
-            return true;
-        }
+        if (npc.npcInfo.ignoreAttacked) return false;
+        if (npc.isInTimer()) return true;
         for (Ship ship : this.ships) {
             if (!ship.isAttacking(npc)) continue;
             npc.setTimerTo(5000);
@@ -278,6 +309,7 @@ public class LootModule implements Module {
         return this.npcs.stream()
                 .filter(n -> n.npcInfo.kill)
                 .filter(n -> !this.isAttackedByOthers(n))
+                .filter(n -> drive.closestDistance(location) < 200)
                 .min(Comparator.<Npc>comparingInt(n -> n.npcInfo.priority)
                         .thenComparing(n -> n.health.hpPercent())
                         .thenComparing(n -> n.locationInfo.now.distance(location))).orElse(null);

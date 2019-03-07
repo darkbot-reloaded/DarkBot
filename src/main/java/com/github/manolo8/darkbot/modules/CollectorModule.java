@@ -53,6 +53,14 @@ public class CollectorModule implements Module {
     }
 
     @Override
+    public String status() {
+        if (current == null) return "Roaming";
+
+        return current.isCollected() ? "Collecting " + current.type + " " + (waiting - System.currentTimeMillis()) + "ms"
+                : "Moving to " + current.type;
+    }
+
+    @Override
     public boolean canRefresh() {
         return isNotWaiting();
     }
@@ -107,7 +115,7 @@ public class CollectorModule implements Module {
     private void collectBox() {
         double distance = hero.locationInfo.distance(current);
 
-        if (distance < 100) {
+        if (distance < 200) {
             drive.stop(false);
             current.clickable.setRadius(800);
             drive.clickCenter(1);

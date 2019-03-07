@@ -138,7 +138,7 @@ public class EventModule implements Module {
         boolean npcFollowing = target.locationInfo.isMoving() && (angleDiff < 1.25);
 
         if (target == hero.target && shooting && (hero.health.hpPercent() + hero.health.shieldPercent() < 0.8 ||
-                hero.health.isDecreasedIn(2000) || (hero.health.isDecreasedIn(60000) && npcFollowing))) {
+                hero.health.hpDecreasedIn(2000) || (hero.health.hpDecreasedIn(60000) && npcFollowing))) {
             distance = 800 - (hero.health.shieldPercent() * 300);
             angle += 0.2 + (random() * 0.1);
         } else {

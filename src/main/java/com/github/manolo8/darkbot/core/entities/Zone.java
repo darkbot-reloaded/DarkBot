@@ -20,10 +20,7 @@ public class Zone
 
         Location now = locationInfo.now;
 
-        area.minX = now.x;
-        area.minY = now.y;
-        area.maxX = now.x + API.readMemoryDouble(address + 232);
-        area.maxY = now.y + API.readMemoryDouble(address + 240);
+        area.set(now.x, now.y, now.x + API.readMemoryDouble(address + 232), now.y + API.readMemoryDouble(address + 240));
     }
 
     @Override

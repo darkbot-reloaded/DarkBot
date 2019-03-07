@@ -17,7 +17,7 @@ public class StatsManager implements Manager {
     public int deposit;
     public int depositTotal;
 
-    private long started;
+    private long started = System.currentTimeMillis();
     private long runningTime = 1;
     private boolean lastStatus;
 

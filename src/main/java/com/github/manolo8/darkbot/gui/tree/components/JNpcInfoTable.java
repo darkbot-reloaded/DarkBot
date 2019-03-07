@@ -30,7 +30,7 @@ public class JNpcInfoTable extends JTable implements OptionEditor {
 
         scrollPane = new JScrollPane(this) {
             public void setPreferredSize(Dimension preferredSize) {
-                super.setPreferredSize(new Dimension(360, Math.min(250, 23 + (JNpcInfoTable.this.getRowCount() * 16))));
+                super.setPreferredSize(new Dimension(500, Math.min(250, 23 + (JNpcInfoTable.this.getRowCount() * 16))));
             }
         };
     }

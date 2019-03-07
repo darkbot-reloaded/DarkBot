@@ -11,10 +11,10 @@ public class ZoneInfo implements Serializable {
         for (int i = 0; i < MASKS.length; i++) MASKS[i] = (byte) (1 << i);
     }
 
-    public int resolution;
+    public int resolution = 1;
     private byte[] data;
     private transient List<Zone> zones;
-    private transient boolean changed = true;
+    public transient boolean changed = true;
 
     public ZoneInfo() {}
 

@@ -32,6 +32,11 @@ public class LootNCollectorModule implements Module {
     }
 
     @Override
+    public String status() {
+        return "Loot: " + lootModule.status() + " - Collect: " + collectorModule.status();
+    }
+
+    @Override
     public boolean canRefresh() {
 
         if(collectorModule.isNotWaiting()) {

@@ -212,7 +212,7 @@ public class MapDrawer extends JPanel {
                 (main.isRunning() ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00") +
                 "/" + Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000);
         drawString(g2, info, 5, 12, Align.LEFT);
-        drawString(g2, main.module.status(), 5, 12 + 15, Align.LEFT);
+        if (main.tickingModule) drawString(g2, main.module.status(), 5, 12 + 15, Align.LEFT);
 
         drawString(g2, pingManager.ping + " ms ping", width - 5, 12, Align.RIGHT);
         drawString(g2, String.format("%.1f ms tick", main.avgTick), width - 5, 24, Align.RIGHT);

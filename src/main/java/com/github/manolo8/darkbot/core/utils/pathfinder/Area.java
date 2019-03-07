@@ -20,6 +20,9 @@ public class Area {
         this.maxX = maxX;
         this.maxY = maxY;
     }
+    public static Area ofSize(double minX, double minY, double width, double height) {
+        return new Area(minX, minY, minX + width, minY + height);
+    }
 
     public boolean hasLineOfSight(PathPoint current, PathPoint destination) {
         return !collisionPoint(current.x, current.y, destination.x, destination.y);
@@ -35,7 +38,7 @@ public class Area {
         else return y1 > y2 && lineCollisionLocation(x1, y1, x2, y2, minX, maxY, maxX, maxY);
     }
 
-    public void toSide(PathPoint point) {
+    public PathPoint toSide(PathPoint point) {
 
         int diffLeft = point.x - (int) minX;
         int diffRight = (int) maxX - point.x;
@@ -53,6 +56,7 @@ public class Area {
             point.x = (int) minX - 1;
         else
             point.x = (int) maxX + 1;
+        return point;
     }
 
     private boolean lineCollisionLocation(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
@@ -75,6 +79,16 @@ public class Area {
         this.minX = o.x - addX;
         this.maxY = o.y + addY;
         this.minY = o.y - addY;
+
+        changed = true;
+    }
+
+    public void set(double minX, double minY, double maxX, double maxY) {
+        if (this.minX == minX && this.minY == minY && this.maxX == maxX && this.maxY == maxY) return;
+        this.minX = minX;
+        this.minY = minY;
+        this.maxX = maxX;
+        this.maxY = maxY;
 
         changed = true;
     }

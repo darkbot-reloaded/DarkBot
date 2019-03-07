@@ -228,9 +228,9 @@ public class StarManager {
                 new Portal(150000339, 17),
                 new Portal(150000341, 21),
                 new Portal(150000343, 25),
-                new Portal(150000428, 91),
-                new Portal(150000432, 91),
-                new Portal(150000430, 91)
+                new Portal(150000438, 91),
+                new Portal(150000440, 91),
+                new Portal(150000442, 91)
         );
         //PVP --------------------------------------------------------
 

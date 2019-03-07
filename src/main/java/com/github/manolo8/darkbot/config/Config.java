@@ -98,6 +98,8 @@ public class Config {
             @Option(value = "Max sight distance", description = "No longer consider enemies in sight if further away than this")
             @Num(min = 500, max = 20000, step = 500)
             public int MAX_SIGHT_DISTANCE = 4000;
+            @Option(value = "Jump portals to escape")
+            public boolean JUMP_PORTALS = true;
         }
 
         @Option(value = "Run config when circling", description = "Use run config to follow escaping npcs")

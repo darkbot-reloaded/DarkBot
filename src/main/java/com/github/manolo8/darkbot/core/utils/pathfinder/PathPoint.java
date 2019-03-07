@@ -1,6 +1,9 @@
 package com.github.manolo8.darkbot.core.utils.pathfinder;
 
+import com.github.manolo8.darkbot.core.utils.Location;
+
 import java.util.HashSet;
+import java.util.Locale;
 
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
@@ -33,6 +36,10 @@ public class PathPoint {
             if (point != this)
                 if (finder.hasLineOfSight(point, this))
                     lineOfSight.add(point);
+    }
+
+    public Location toLocation() {
+        return new Location(x, y);
     }
 
     @Override

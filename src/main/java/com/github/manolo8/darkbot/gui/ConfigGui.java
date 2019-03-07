@@ -181,7 +181,7 @@ public class ConfigGui extends JFrame {
         tabbedPane.addTab("GG", ggPane);
         tabbedPane.addTab("Advanced", advancedPane);
         tabbedPane.addTab("Preferred Zones", preferredZones);
-        tabbedPane.addTab("Avoided Zones (not working yet)", avoidedZones);
+        tabbedPane.addTab("Avoided Zones", avoidedZones);
 
         add(tabbedPane);
 

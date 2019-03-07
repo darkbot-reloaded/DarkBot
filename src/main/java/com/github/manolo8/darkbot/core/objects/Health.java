@@ -11,24 +11,25 @@ public class Health extends Updatable {
     public int shield;
     public int maxShield;
 
-    public long lastIncreased;
-    public long lastDecreased;
+    private long hpLastIncreased, hpLastDecreased, shieldLastIncreased, shieldLastDecreased;
 
     @Override
     public void update() {
 
-        int hpLast = hp, maxHpLast = maxHp;
+        int hpLast = hp, maxHpLast = maxHp, shieldLast = shield, maxShieldLast = maxShield;
 
         hp = readIntFromIntHolder(48);
         maxHp = readIntFromIntHolder(56);
         shield = readIntFromIntHolder(80);
         maxShield = readIntFromIntHolder(88);
 
-        if (maxHpLast != maxHp) return;
-        if (hpLast > hp) {
-            lastDecreased = System.currentTimeMillis();
-        } else if (hpLast < hp) {
-            lastIncreased = System.currentTimeMillis();
+        if (maxHpLast == maxHp && hpLast != hp) {
+            if (hpLast > hp) hpLastDecreased = System.currentTimeMillis();
+            else hpLastIncreased = System.currentTimeMillis();
+        }
+        if (maxShieldLast == maxShield && shieldLast != shield) {
+            if (shieldLast > shield) shieldLastDecreased = System.currentTimeMillis();
+            else shieldLastIncreased = System.currentTimeMillis();
         }
     }
 
@@ -44,11 +45,21 @@ public class Health extends Updatable {
         return maxShield == 0 ? 1 : ((double) shield / (double) maxShield);
     }
 
-    public boolean isDecreasedIn(int time) {
-        return System.currentTimeMillis() - lastDecreased < time;
+    public boolean hpDecreasedIn(int time) {
+        return System.currentTimeMillis() - hpLastDecreased < time;
     }
 
-    public boolean isIncreasedIn(int time) {
-        return System.currentTimeMillis() - lastIncreased < time;
+    public boolean hpIncreasedIn(int time) {
+        return System.currentTimeMillis() - hpLastIncreased < time;
     }
+
+
+    public boolean shDecreasedIn(int time) {
+        return System.currentTimeMillis() - shieldLastDecreased < time;
+    }
+
+    public boolean shIncreasedIn(int time) {
+        return System.currentTimeMillis() - shieldLastIncreased < time;
+    }
+
 }

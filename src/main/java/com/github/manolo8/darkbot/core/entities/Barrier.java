@@ -10,6 +10,7 @@ public class Barrier
         extends Zone
         implements Obstacle {
 
+    private static final int BARRIER_RADIUS = 60;
     private Area area = new Area(0, 0, 0, 0);
 
     public Barrier(int id) {
@@ -21,10 +22,10 @@ public class Barrier
         super.update();
 
         Area zone = getZone();
-        area.minX = zone.minX - 60;
-        area.minY = zone.minY - 60;
-        area.maxX = zone.maxX + 60;
-        area.maxY = zone.maxY + 60;
+        area.minX = zone.minX - BARRIER_RADIUS;
+        area.minY = zone.minY - BARRIER_RADIUS;
+        area.maxX = zone.maxX + BARRIER_RADIUS;
+        area.maxY = zone.maxY + BARRIER_RADIUS;
     }
 
     @Override

@@ -24,7 +24,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Main extends Thread {
-    public static final String VERSION = "1.13-beta15";
+    public static final String VERSION = "1.13.2-beta8";
 
     private static final Gson GSON = new GsonBuilder()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter()).create();
@@ -53,6 +53,7 @@ public class Main extends Thread {
     public double avgTick;
 
     private volatile boolean running;
+    public boolean tickingModule;
 
     public Main() {
         API = new DarkBotAPI();
@@ -136,6 +137,7 @@ public class Main extends Thread {
     }
 
     private void invalidTick() {
+        tickingModule = false;
         botInstaller.verify();
     }
 
@@ -146,8 +148,8 @@ public class Main extends Thread {
         mapManager.tick();
         statsManager.tick();
 
-        if (running && guiManager.canTickModule())
-            tickRunning();
+        tickingModule = running && guiManager.canTickModule();
+        if (tickingModule) tickRunning();
     }
 
     private void tickRunning() {

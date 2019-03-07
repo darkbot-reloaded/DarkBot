@@ -2,12 +2,11 @@ package com.github.manolo8.darkbot.core.utils;
 
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.entities.Zone;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
-import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
+import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 
 import java.util.List;
 import java.util.Random;
@@ -25,21 +24,22 @@ public class Drive {
 
     public PathFinder pathFinder;
 
-    private Location destination;
+    private Location moveTo, destination;
 
     public long lastMoved;
 
     public Drive(HeroManager hero, MapManager map) {
         this.map = map;
         this.heroLocation = hero.locationInfo;
-        this.pathFinder = new PathFinder(map.entities.obstacles);
+        this.pathFinder = new PathFinder(map);
     }
 
     public void checkMove() {
+        if (destination != null && pathFinder.changed() && moveTo == null) moveTo = destination;
 
-        if (destination != null) {
-            pathFinder.createRote(heroLocation.now, destination);
-            destination = null;
+        if (moveTo != null) {
+            pathFinder.createRote(heroLocation.now, moveTo);
+            moveTo = null;
         }
 
         if (pathFinder.isEmpty() || !heroLocation.isLoaded())
@@ -68,13 +68,20 @@ public class Drive {
 
         } else {
             pathFinder.currentCompleted();
-            if (pathFinder.isEmpty()) map.translateMouseMoveRelease(destination.x, destination.y);
+            if (pathFinder.isEmpty()) {
+                map.translateMouseMoveRelease(destination.x, destination.y);
+                this.destination = null;
+            }
         }
 
     }
 
     public boolean canMove(Location location) {
-        return pathFinder.canMove(location);
+        return pathFinder.canMove((int) location.x, (int) location.y);
+    }
+
+    public double closestDistance(Location location) {
+        return location.distance(pathFinder.fixToClosest(new PathPoint((int) location.x, (int) location.y)).toLocation());
     }
 
     public void stop(boolean current) {
@@ -82,9 +89,8 @@ public class Drive {
             map.translateMouseMoveRelease(heroLocation.now.x, heroLocation.now.y);
         }
 
-        if (!pathFinder.isEmpty()) {
-            pathFinder.path().clear();
-        }
+        destination = null;
+        if (!pathFinder.isEmpty()) pathFinder.path().clear();
     }
 
     public void clickCenter(int times) {
@@ -101,7 +107,7 @@ public class Drive {
     }
 
     public void move(double x, double y) {
-        destination = new Location(x, y);
+        moveTo = destination = new Location(x, y);
     }
 
     public void moveRandom() {
