@@ -59,14 +59,14 @@ public class PetManager extends Gui {
     }
 
     private void tryRevive() {
-        if (System.currentTimeMillis() - this.repairPetTime > 2000L) {
+        if (System.currentTimeMillis() - this.repairPetTime > 10000L) {
             click(MAIN_BUTTON_X, MODULE_Y);
             this.repairPetTime = System.currentTimeMillis();
         }
     }
 
     private void togglePet() {
-        if (System.currentTimeMillis() - this.togglePetTime > 2000L) {
+        if (System.currentTimeMillis() - this.togglePetTime > 10000L) {
             activity = activity > 0 ? 0 : 25;
             click(MAIN_BUTTON_X, MODULE_Y);
             this.moduleStatus = -2;

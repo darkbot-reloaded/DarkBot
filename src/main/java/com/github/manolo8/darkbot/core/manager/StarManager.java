@@ -105,8 +105,8 @@ public class StarManager {
 
         //2-5
         add(21, "2-5",
-                new Portal(150000340, 16),
-                new Portal(150000319, 29),
+                new Portal(150000319, 16),
+                new Portal(150000340, 29),
                 new Portal(150000320, 22),
                 new Portal(150000322, 23)
         );

@@ -88,7 +88,7 @@ public class LootModule implements Module {
     }
 
     boolean checkDangerousAndCurrentMap() {
-        if (this.config.WORKING_MAP != this.hero.map.id) {
+        if (!this.hero.map.name.startsWith("Unknown") && this.config.WORKING_MAP != this.hero.map.id) {
             this.hero.runMode();
             repairing = true;
             jump = false;
@@ -198,7 +198,7 @@ public class LootModule implements Module {
         hero.setTarget(target);
         setRadiusAndClick(1);
         clickDelay = System.currentTimeMillis();
-        ability = clickDelay + 400;
+        ability = clickDelay + 1000;
         times = 0;
 
         shooting = false;

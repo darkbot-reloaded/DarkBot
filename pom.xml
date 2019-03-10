@@ -6,7 +6,7 @@
 
     <groupId>com.github.manolo8.darkbot</groupId>
     <artifactId>DarkBOT</artifactId>
-    <version>1.13.2-SNAPSHOT</version>
+    <version>1.13.4-SNAPSHOT</version>
 
     <dependencies>
 

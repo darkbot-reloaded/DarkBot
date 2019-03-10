@@ -9,6 +9,8 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.net.URI;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -138,13 +140,20 @@ public class MainGui extends JFrame {
         copySid.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                String value = main.statsManager.sid;
+                String sid = main.statsManager.sid;
 
-                if (value != null) {
-                    StringSelection selection = new StringSelection(value);
-                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+                if (sid == null) return;
+
+                StringSelection selection = new StringSelection(sid);
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+
+                String sv = main.config.MISCELLANEOUS.SERVER_PREFIX;
+                if (sv == null) return;
+                try {
+                    Desktop.getDesktop().browse(URI.create("https://" + sv + ".darkorbit.com?dosid=" + sid));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                 }
-
             }
         });
 

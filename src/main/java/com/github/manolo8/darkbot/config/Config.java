@@ -145,6 +145,8 @@ public class Config {
 
     public @Option("Miscellaneous") Miscellaneous MISCELLANEOUS = new Miscellaneous();
     public static class Miscellaneous {
+        @Option(value = "Server prefix")
+        public String SERVER_PREFIX;
         @Option(value = "Hide name", description = "Hide hero name in the map")
         public boolean HIDE_NAME;
         @Option(value = "Trail length", description = "Amount of time the trail should be in the map in seconds")
