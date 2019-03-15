@@ -82,7 +82,7 @@ public class MapManager implements Manager {
 
         if (tempId != id) {
             id = tempId;
-            main.hero.map = main.starManager.fromId(id);
+            main.hero.map = main.starManager.byId(id);
             preferred = ConfigEntity.INSTANCE.getOrCreatePreferred();
             avoided = ConfigEntity.INSTANCE.getOrCreateAvoided();
 

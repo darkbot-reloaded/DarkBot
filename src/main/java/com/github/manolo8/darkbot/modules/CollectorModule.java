@@ -90,7 +90,7 @@ public class CollectorModule implements Module {
             hero.runMode();
 
             main.setModule(new MapModule())
-                    .setTargetAndBack(main.starManager.fromId(main.config.WORKING_MAP));
+                    .setTargetAndBack(main.starManager.byId(main.config.WORKING_MAP));
 
             return false;
         }

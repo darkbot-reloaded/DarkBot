@@ -4,11 +4,14 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.entities.*;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.manager.StarManager;
+import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.swf.Array;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -112,7 +115,9 @@ public class EntityList extends Updatable {
             } else if (id < 0 && rnd == 3) {
                 boxes.add(whenAdd(new Box(id), found));
             } else if (id <= 150000499 && id >= 150000156) {
-                portals.add(whenAdd(main.starManager.fromIdPortal(id), found));
+                LocationInfo loc = new LocationInfo(API.readMemoryLong(found + 64));
+                loc.update();
+                portals.add(whenAdd(main.starManager.getOrCreate(id, rnd, (int) loc.now.x, (int) loc.now.y), found));
             } else if (main.hero.map.id > 400 && main.hero.map.id < 405 && id >= 150000500 && id <= 150000600) {
                 // Beacons, map ids TBD (experiment zone ids)
                 // EX 2-1 -> 150000514, 150000515 | EX 2-2 -> 150000512 | EX 2-3 -> 150000513 | EX 4-4 -> 150000566

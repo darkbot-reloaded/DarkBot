@@ -41,7 +41,7 @@ public class HeroManager extends Ship implements Manager {
         this.drive = new Drive(this, main.mapManager);
         main.status.add(b -> drive.stop(true));
         this.pet = new Pet(0);
-        this.map = new Map(-1, "Loading", false, new Portal[0]);
+        this.map = new Map(-1, "Loading", false, false);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class HeroManager extends Ship implements Manager {
     }
 
     public void jumpPortal(Portal portal) {
-        if (portal.target.id != nextMap() && System.currentTimeMillis() - portalTime > 10000) {
+        if ((portal.target == null || portal.target.id != nextMap()) && System.currentTimeMillis() - portalTime > 10000) {
             API.keyboardClick('j');
             portalTime = System.currentTimeMillis();
         }

@@ -542,11 +542,13 @@ public class ConfigGui extends JFrame {
         lootPane.add(new JScrollPane(npcTable), c);
         //LOOT
 
+        // GG
+        ggPane.setLayout(new BoxLayout(ggPane, BoxLayout.Y_AXIS));
     }
 
     private void setComponentData() {
 
-        for (String string : main.starManager.getAllMaps())
+        for (String string : main.starManager.getAccessibleMaps())
             workingMap.addItem(string);
 
         runConfig.addItem(1);
@@ -564,7 +566,7 @@ public class ConfigGui extends JFrame {
         repairHp.setValue((int) (config.GENERAL.SAFETY.REPAIR_HP * 100));
         waitHp.setValue((int) (config.GENERAL.SAFETY.REPAIR_TO_HP * 100));
 
-        Map map = main.starManager.fromId(config.WORKING_MAP);
+        Map map = main.starManager.byId(config.WORKING_MAP);
 
         if (map != null)
             workingMap.setSelectedItem(map.name);
@@ -616,6 +618,9 @@ public class ConfigGui extends JFrame {
         config.addedNpc.add(value -> npcModel.addEntry(value, config.LOOT.NPC_INFOS.get(value)));
         config.addedBox.add(value -> boxModel.addEntry(value, config.COLLECT.BOX_INFOS.get(value)));
 
+        for (String string : main.starManager.getGGMaps())
+            ggPane.add(new JCheckBox(string));
+
         advancedPane.setEditingConfig(config);
         preferredZones.setup(main, config.PREFERRED);
         avoidedZones.setup(main, config.AVOIDED);
@@ -637,7 +642,7 @@ public class ConfigGui extends JFrame {
 
         waitHp.addChangeListener(e -> config.GENERAL.SAFETY.REPAIR_TO_HP = ((double) waitHp.getValue() / waitHp.getMaximum()));
 
-        workingMap.addItemListener(e -> config.WORKING_MAP = main.starManager.fromName((String) e.getItem()).id);
+        workingMap.addItemListener(e -> config.WORKING_MAP = main.starManager.byName((String) e.getItem()).id);
 
         reviveMethod.addItemListener(e -> config.GENERAL.SAFETY.REVIVE_LOCATION = reviveMethod.getSelectedIndex() + 1);
 

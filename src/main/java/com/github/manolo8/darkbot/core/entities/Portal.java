@@ -7,21 +7,25 @@ import static com.github.manolo8.darkbot.Main.API;
 public class Portal extends Entity {
 
     public Map target;
-
     public int type;
+    public int x, y;
 
-    public int targetId;
-
-    public Portal(int id, int targetId) {
+    public Portal(int id, int type, int x, int y, Map target) {
         super(id);
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.target = target;
+    }
 
-        this.targetId = targetId;
+    public boolean inLoc(int x, int y) {
+        return this.x == x && this.y == y;
     }
 
     @Override
     public void update() {
         super.update();
 
-        type = API.readMemoryInt(address + 112);
+        //type = API.readMemoryInt(address + 112);
     }
 }

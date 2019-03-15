@@ -29,7 +29,6 @@ public class LootModule implements Module {
 
     private HeroManager hero;
     private Drive drive;
-    private Location direction;
 
     private Config config;
 
@@ -92,7 +91,7 @@ public class LootModule implements Module {
             this.hero.runMode();
             repairing = true;
             jump = false;
-            this.main.setModule(new MapModule()).setTargetAndBack(this.main.starManager.fromId(this.main.config.WORKING_MAP));
+            this.main.setModule(new MapModule()).setTargetAndBack(this.main.starManager.byId(this.main.config.WORKING_MAP));
             return false;
         }
 
@@ -198,7 +197,7 @@ public class LootModule implements Module {
         hero.setTarget(target);
         setRadiusAndClick(1);
         clickDelay = System.currentTimeMillis();
-        ability = clickDelay + 1000;
+        ability = clickDelay + 5000;
         times = 0;
 
         shooting = false;
@@ -211,9 +210,8 @@ public class LootModule implements Module {
     }
 
     void moveToAnSafePosition() {
-        if (!hero.drive.isMoving()) direction = null;
+        Location direction = hero.drive.movingTo();
         Location heroLoc = hero.locationInfo.now;
-        if (target == null || target.locationInfo == null) return;
         Location targetLoc = target.locationInfo.destinationInTime(400);
 
         double distance = heroLoc.distance(target.locationInfo.now);
@@ -221,9 +219,10 @@ public class LootModule implements Module {
         double radius = target.npcInfo.radius;
 
         if (target != hero.target || !shooting || ability != null) radius = Math.min(500, radius);
+        if (!target.locationInfo.isMoving() && target.health.hpPercent() < 0.25) radius = Math.min(radius, 600);
 
         if (target.npcInfo.noCircle) {
-            if ((direction != null ? targetLoc.distance(direction) : distance) <= radius) return;
+            if (targetLoc.distance(direction) <= radius) return;
             distance = 100 + random() * (radius - 110);
             angle += (random() * 0.1) - 0.05;
         } else {
@@ -234,28 +233,16 @@ public class LootModule implements Module {
                 radiusFix += (radius - distance) / 6;
                 radiusFix = (int) min(radiusFix, target.npcInfo.radius / 2);
             }
-
-            radius += radiusFix;
-
-            double speed = min(200, target.locationInfo.speed) * 0.625;
-            double moveDistance = hero.shipInfo.speed * 0.625 + speed;
-
-            distance = radius;
-
-            double x = targetLoc.x - cos(angle) * radius;
-            double y = targetLoc.y - sin(angle) * radius;
-
-            boolean circle = (moveDistance -= heroLoc.distance(x, y)) > 0;
-
-            if (circle) angle += moveDistance / radius;
+            distance = (radius += radiusFix);
+            // Moved distance + speed - distance to chosen radius same angle, divided by radius
+            angle += Math.max((hero.shipInfo.speed * 0.625) + (min(200, target.locationInfo.speed) * 0.625)
+                    - heroLoc.distance(Location.of(targetLoc, angle, radius)), 0) / radius;
         }
+        direction = Location.of(targetLoc, angle, distance);
 
-        do {
-            direction = new Location(targetLoc.x - cos(angle) * distance, targetLoc.y - sin(angle) * distance);
-            angle += 0.3;
-            distance += 2;
-        } while (main.mapManager.isOutOfMap(direction.x, direction.y));
-
+        while (!drive.canMove(direction) && distance < 10000)
+            direction.toAngle(targetLoc, angle += 0.3, distance += 2);
+        if (distance >= 10000) direction.toAngle(targetLoc, angle, 500);
 
         if (config.LOOT.RUN_CONFIG_IN_CIRCLE && target.health.hpPercent() < 0.25 &&
                 heroLoc.distance(direction) > target.npcInfo.radius * 2) {
@@ -264,7 +251,7 @@ public class LootModule implements Module {
             hero.attackMode();
         }
 
-        drive.move(direction.x, direction.y);
+        drive.move(direction);
     }
 
     private boolean isUnderAttack() {

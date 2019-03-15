@@ -129,6 +129,10 @@ public class Drive {
         return !pathFinder.isEmpty() || heroLocation.isMoving();
     }
 
+    public Location movingTo() {
+        return moveTo == null ? heroLocation.now.copy() : moveTo.copy();
+    }
+
     public boolean isOutOfMap() {
         return map.isOutOfMap(heroLocation.now.x, heroLocation.now.y);
     }
