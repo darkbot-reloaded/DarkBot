@@ -119,7 +119,7 @@ public class StarBuilder {
                 graph.addEdge(from, to, new Portal(-1, ggPort.type, -1, -1, gg));
             }
         }
-        return new AsUnmodifiableGraph<>(graph);
+        return graph;
     }
 
 }

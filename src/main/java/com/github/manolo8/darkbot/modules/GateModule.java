@@ -115,7 +115,7 @@
 //            hero.setTarget(current);
 //
 //            current.clickable.setRadius(800);
-//            hero.clickCenter(1);
+//            hero.simpleMouseClick(1);
 //            current.clickable.setRadius(0);
 //            API.keyboardClick('Z');
 //

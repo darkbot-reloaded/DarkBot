@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.utils;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
@@ -11,69 +12,65 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import java.util.List;
 import java.util.Random;
 
-import static java.lang.Math.min;
 import static java.lang.Math.random;
 
 public class Drive {
 
     private static final Random RANDOM = new Random();
+    private boolean force = false;
 
     private final MapManager map;
-
-    private final LocationInfo heroLocation;
+    private final HeroManager hero;
+    private final LocationInfo heroLoc;
 
     public PathFinder pathFinder;
 
-    private Location moveTo, destination;
+    private Location tempDest, endLoc, lastSegment;
 
-    public long lastMoved;
+    public long lastClick, lastMoved;
 
     public Drive(HeroManager hero, MapManager map) {
         this.map = map;
-        this.heroLocation = hero.locationInfo;
+        this.hero = hero;
+        this.heroLoc = hero.locationInfo;
         this.pathFinder = new PathFinder(map);
     }
 
     public void checkMove() {
-        if (destination != null && pathFinder.changed() && moveTo == null) moveTo = destination;
+        if (endLoc != null && pathFinder.changed() && tempDest == null) tempDest = endLoc;
 
-        if (moveTo != null) {
-            pathFinder.createRote(heroLocation.now, moveTo);
-            moveTo = null;
+        boolean newPath = tempDest != null;
+        if (tempDest != null) {
+            pathFinder.createRote(heroLoc.now, tempDest);
+            tempDest = null;
         }
 
-        if (pathFinder.isEmpty() || !heroLocation.isLoaded())
+        if (pathFinder.isEmpty() || !heroLoc.isLoaded())
             return;
 
         lastMoved = System.currentTimeMillis();
 
-        Location now = heroLocation.now;
-        Location destination = pathFinder.current();
+        Location now = heroLoc.now, last = heroLoc.last, next = pathFinder.current();
+        newPath |= !next.equals(lastSegment);
+        lastSegment = next;
 
-        double distance = now.distance(destination);
+        boolean diffAngle = Math.abs(now.angle(next) - last.angle(now)) > 0.08;
+        if (hero.timeTo(now.distance(next)) > 100 || diffAngle) {
+            if (heroLoc.isMoving() && !diffAngle) return;
 
-        if (!heroLocation.isMoving())
-            map.translateMousePress(now.x, now.y);
-
-        if (distance > 100) {
-
-            distance = min(distance, 200);
-
-            double angle = destination.angle(now);
-
-            map.translateMouseMove(
-                    Math.cos(angle) * distance + now.x,
-                    Math.sin(angle) * distance + now.y
-            );
-
+            if (!force && heroLoc.isMoving() && !newPath && System.currentTimeMillis() - lastClick > 500) stop(false);
+            else click(next);
         } else {
             pathFinder.currentCompleted();
-            if (pathFinder.isEmpty()) {
-                map.translateMouseMoveRelease(destination.x, destination.y);
-                this.destination = null;
-            }
+            if (pathFinder.isEmpty()) this.endLoc = null;
         }
+    }
 
+    private void click(Location loc) {
+        if (System.currentTimeMillis() - lastClick > 300) {
+            lastClick = System.currentTimeMillis();
+            map.mouseClick(loc);
+        }
     }
 
     public boolean canMove(Location location) {
@@ -84,18 +81,24 @@ public class Drive {
         return location.distance(pathFinder.fixToClosest(new PathPoint((int) location.x, (int) location.y)).toLocation());
     }
 
+    public void toggleRunning(boolean running) {
+        this.force = running;
+        stop(true);
+    }
+
     public void stop(boolean current) {
-        if (current) {
-            map.translateMouseMoveRelease(heroLocation.now.x, heroLocation.now.y);
+        if (heroLoc.isMoving() && current) {
+            Location stopLoc = heroLoc.now.copy();
+            stopLoc.toAngle(heroLoc.now, heroLoc.last.angle(heroLoc.now), 100);
+            map.mouseClick(stopLoc);
         }
 
-        destination = null;
+        endLoc = null;
         if (!pathFinder.isEmpty()) pathFinder.path().clear();
     }
 
     public void clickCenter(int times) {
-        for (int i = 0; i < times; i++)
-            map.translateMouseClick(heroLocation.now.x, heroLocation.now.y);
+        for (int i = 0; i < times; i++) map.simpleMouseClick(heroLoc.now);
     }
 
     public void move(Entity entity) {
@@ -107,7 +110,7 @@ public class Drive {
     }
 
     public void move(double x, double y) {
-        moveTo = destination = new Location(x, y);
+        tempDest = endLoc = new Location(x, y);
     }
 
     public void moveRandom() {
@@ -126,14 +129,14 @@ public class Drive {
     }
 
     public boolean isMoving() {
-        return !pathFinder.isEmpty() || heroLocation.isMoving();
+        return !pathFinder.isEmpty() || heroLoc.isMoving();
     }
 
     public Location movingTo() {
-        return moveTo == null ? heroLocation.now.copy() : moveTo.copy();
+        return tempDest == null ? heroLoc.now.copy() : tempDest.copy();
     }
 
     public boolean isOutOfMap() {
-        return map.isOutOfMap(heroLocation.now.x, heroLocation.now.y);
+        return map.isOutOfMap(heroLoc.now.x, heroLoc.now.y);
     }
 }

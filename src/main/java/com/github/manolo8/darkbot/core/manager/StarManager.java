@@ -5,15 +5,14 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.Map;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.io.DOTExporter;
 
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
 public class StarManager {
+
+    private static int INVALID_MAP_ID = -999;
 
     private final Graph<Map, Portal> starSystem;
 
@@ -21,6 +20,7 @@ public class StarManager {
         String[] HOME_MAPS = new String[]{"1-1", "2-1", "3-1"};
 
         starSystem = new StarBuilder()
+                .addMap(-1, "Loading")
                 // MMO
                 .addMap(1, "1-1").addPortal(18500, 11500, "1-2")
                 .addMap(2, "1-2").addPortal(2000, 2000, "1-1").addPortal(18500, 2000, "1-3").addPortal(18500, 11500, "1-4")
@@ -125,10 +125,6 @@ public class StarManager {
                 .addMap(156, "R-Zone 7").addMap(157, "R-Zone 8")
                 .addMap(158, "R-Zone 9").addMap(159, "R-Zone 10")
                 .build();
-
-        /*Writer w = new StringWriter();
-        new DOTExporter<Map, Portal>(map -> "M" + map.id, map -> map.name, p -> null).exportGraph(starSystem, w);
-        System.out.println(w.toString());*/
     }
 
     public Portal getOrCreate(int id, int type, int x, int y) {
@@ -149,12 +145,17 @@ public class StarManager {
 
     public Map byName(String name) {
         return starSystem.vertexSet().stream().filter(m -> m.name.equals(name)).findAny()
-                .orElseGet(() -> new Map(-999, "Unknown " + name, false, false));
+                .orElseGet(() -> addMap(new Map(--INVALID_MAP_ID, name, false, false)));
     }
 
     public Map byId(int id) {
         return starSystem.vertexSet().stream().filter(m -> m.id == id).findAny()
-                .orElseGet(() -> new Map(id, "Unknown map " + id, false, false));
+                .orElseGet(() -> addMap(new Map(id, "Unknown map " + id, false, false)));
+    }
+
+    private Map addMap(Map map) {
+        starSystem.addVertex(map);
+        return map;
     }
 
     public Collection<String> getAccessibleMaps() {

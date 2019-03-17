@@ -147,6 +147,11 @@ public class MapDrawer extends JPanel {
         drawDynamicEntities(g2);
         drawHero(g2);
 
+        g2.setColor(BARRIER_BORDER);
+        g2.drawRect(translateX(mapManager.boundX), translateY(mapManager.boundY),
+                translateX(mapManager.boundMaxX - mapManager.boundX),
+                translateY(mapManager.boundMaxY - mapManager.boundY));
+
         drawStats(g2,
                 "cre/h " + formatter.format(statsManager.earnedCredits()),
                 "uri/h " + formatter.format(statsManager.earnedUridium()),

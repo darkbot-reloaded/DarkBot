@@ -26,13 +26,9 @@ public class StatsManager implements Manager {
     public double earnedExperience;
     public double earnedHonor;
 
-    public String sid;
-
-    private StringBuilder builder;
+    public volatile String sid;
 
     public StatsManager(Main main) {
-        builder = new StringBuilder();
-
         main.status.add(this::toggle);
     }
 

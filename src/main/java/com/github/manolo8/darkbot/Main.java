@@ -24,12 +24,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Main extends Thread {
-    public static final String VERSION = "1.13.4 beta3";
+    public static final String VERSION = "1.13.4 beta6";
 
     private static final Gson GSON = new GsonBuilder()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter()).create();
 
     public static final Object UPDATE_LOCKER = new Object();
+    public static int currentTick;
 
     public static DarkBotAPI API;
 
@@ -49,6 +50,7 @@ public class Main extends Thread {
 
     private final BotInstaller botInstaller;
     private final MainGui form;
+    private final BackpageManager backpage;
 
     public double avgTick;
 
@@ -56,8 +58,8 @@ public class Main extends Thread {
     public boolean tickingModule;
 
     public Main() {
+        super("Main");
         API = new DarkBotAPI();
-        API.createWindow();
 
         this.config = new Config();
 
@@ -99,8 +101,10 @@ public class Main extends Thread {
         updateConfig();
 
         form = new MainGui(this);
+        backpage = new BackpageManager(this);
 
         start();
+        API.createWindow();
     }
 
     @Override
@@ -108,6 +112,7 @@ public class Main extends Thread {
         long time;
 
         while (true) {
+            currentTick++;
             time = System.currentTimeMillis();
 
             tick();

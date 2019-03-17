@@ -255,7 +255,7 @@ public class LootModule implements Module {
     }
 
     private boolean isUnderAttack() {
-        if (!config.LOOT.SAFETY.RUN_FROM_ENEMIES && config.LOOT.SAFETY.RUN_FROM_ENEMIES_SIGHT) return false;
+        if (!config.LOOT.SAFETY.RUN_FROM_ENEMIES && !config.LOOT.SAFETY.RUN_FROM_ENEMIES_SIGHT) return false;
         for (Ship ship : ships) {
             if (ship.playerInfo.isEnemy() && ship.isAttacking(hero)) return true;
         }
@@ -263,7 +263,7 @@ public class LootModule implements Module {
     }
 
     private boolean hasEnemies() {
-        if (!config.LOOT.SAFETY.RUN_FROM_ENEMIES && config.LOOT.SAFETY.RUN_FROM_ENEMIES_SIGHT) return false;
+        if (!config.LOOT.SAFETY.RUN_FROM_ENEMIES && !config.LOOT.SAFETY.RUN_FROM_ENEMIES_SIGHT) return false;
 
         for (Ship ship : ships) {
             if (!ship.playerInfo.isEnemy()) continue;

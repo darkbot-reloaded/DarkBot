@@ -2,8 +2,6 @@ package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.core.objects.Map;
 
-import static com.github.manolo8.darkbot.Main.API;
-
 public class Portal extends Entity {
 
     public Map target;

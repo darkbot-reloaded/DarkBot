@@ -7,12 +7,15 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.MapChange;
+import com.github.manolo8.darkbot.core.utils.ClickPoint;
 import com.github.manolo8.darkbot.core.utils.EntityList;
+import com.github.manolo8.darkbot.core.utils.Location;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class MapManager implements Manager {
 
+    private final MouseManager mouseManager;
     private final Main main;
 
     public final EntityList entities;
@@ -22,7 +25,7 @@ public class MapManager implements Manager {
     public long mapAddress;
     private long viewAddress;
     private long boundsAddress;
-    private long eventAddress;
+    protected long eventAddress;
 
     public static int id;
 
@@ -42,6 +45,8 @@ public class MapManager implements Manager {
 
     public MapManager(Main main) {
         this.main = main;
+        this.mouseManager = new MouseManager(this);
+        this.mouseManager.start();
 
         this.entities = new EntityList(main);
     }
@@ -49,7 +54,6 @@ public class MapManager implements Manager {
 
     @Override
     public void install(BotInstaller botInstaller) {
-
         botInstaller.screenManagerAddress.add(value -> {
             mapAddressStatic = value + 256;
             viewAddressStatic = value + 216;
@@ -137,31 +141,18 @@ public class MapManager implements Manager {
         return API.readMemoryInt(temp + 40) == 1;
     }
 
-    public void translateMouseMove(double x, double y) {
-        API.mouseMove(
-                (int) ((x - boundX) / (boundMaxX - boundX) * clientWidth),
-                (int) ((y - boundY) / (boundMaxY - boundY) * clientHeight)
-        );
+    public ClickPoint clickPoint(Location loc) {
+        return new ClickPoint((int) ((loc.x - this.boundX) / (this.boundMaxX - this.boundX) * (double) MapManager.clientWidth),
+                (int) ((loc.y - this.boundY) / (this.boundMaxY - this.boundY) * (double) MapManager.clientHeight));
     }
 
-    public void translateMousePress(double x, double y) {
-        API.mousePress(
-                (int) ((x - boundX) / (boundMaxX - boundX) * clientWidth),
-                (int) ((y - boundY) / (boundMaxY - boundY) * clientHeight)
-        );
+    public void mouseClick(Location loc) {
+        this.mouseManager.click(main.hero.locationInfo.now, loc.copy());
     }
 
-    public void translateMouseClick(double x, double y) {
-        API.mouseClick(
-                (int) ((x - boundX) / (boundMaxX - boundX) * clientWidth),
-                (int) ((y - boundY) / (boundMaxY - boundY) * clientHeight)
-        );
+    public void simpleMouseClick(Location loc) {
+        ClickPoint clickPoint = clickPoint(loc);
+        API.mouseClick(clickPoint.x, clickPoint.y);
     }
 
-    public void translateMouseMoveRelease(double x, double y) {
-        API.mouseRelease(
-                (int) ((x - boundX) / (boundMaxX - boundX) * clientWidth),
-                (int) ((y - boundY) / (boundMaxY - boundY) * clientHeight)
-        );
-    }
 }

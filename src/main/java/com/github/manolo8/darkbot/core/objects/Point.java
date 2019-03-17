@@ -9,8 +9,8 @@ public class Point extends Updatable {
     public double x;
     public double y;
 
-    public Point(long address) {
-        this.address = address;
+    public Point() {
+        this.address = 0;
     }
 
     public void update() {

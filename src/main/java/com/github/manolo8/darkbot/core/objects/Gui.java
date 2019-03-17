@@ -26,7 +26,7 @@ public class Gui extends Updatable {
     public Gui() {
         this.size = new LocationInfo(0);
         this.pos = new LocationInfo(0);
-        this.minimized = new Point(0);
+        this.minimized = new Point();
 
         update();
     }

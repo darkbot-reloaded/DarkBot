@@ -14,4 +14,8 @@ public class Map {
         this.gg = gg;
     }
 
+    @Override
+    public String toString() {
+        return name + "#" + id;
+    }
 }
