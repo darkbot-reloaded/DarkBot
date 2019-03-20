@@ -118,7 +118,7 @@ public class CollectorModule implements Module {
         if (distance < 200) {
             drive.stop(false);
             current.clickable.setRadius(800);
-            drive.clickCenter(1);
+            drive.clickCenter(true);
             current.clickable.setRadius(0);
 
             current.setCollected(true);

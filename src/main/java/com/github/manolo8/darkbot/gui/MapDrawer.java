@@ -221,6 +221,7 @@ public class MapDrawer extends JPanel {
 
         drawString(g2, pingManager.ping + " ms ping", width - 5, 12, Align.RIGHT);
         drawString(g2, String.format("%.1f ms tick", main.avgTick), width - 5, 24, Align.RIGHT);
+        drawString(g2, "SID: " + main.backpage.sidStatus(), width - 5, 36, Align.RIGHT);
 
         drawMap(g2);
     }

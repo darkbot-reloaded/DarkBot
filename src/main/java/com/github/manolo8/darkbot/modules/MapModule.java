@@ -53,7 +53,7 @@ public class MapModule implements Module, MapChange {
     @Override
     public void tick() {
 
-        if (current != null) {
+        if (current != null && !current.removed) {
 
             if (current.target != target) {
                 current = star.next(hero.map, hero.locationInfo, target);

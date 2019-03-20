@@ -87,7 +87,7 @@ public class LootModule implements Module {
     }
 
     boolean checkDangerousAndCurrentMap() {
-        if (!this.hero.map.name.startsWith("Unknown") && this.config.WORKING_MAP != this.hero.map.id) {
+        if (this.config.WORKING_MAP != this.hero.map.id && !main.mapManager.entities.portals.isEmpty()) {
             this.hero.runMode();
             repairing = true;
             jump = false;
@@ -173,7 +173,7 @@ public class LootModule implements Module {
         boolean bugged = (!target.health.hpDecreasedIn(1000) && laser > 1000);
 
         if ((!attacking || bugged) && hero.locationInfo.distance(target) < 775 && laser > 1500 + times * 10000) {
-            setRadiusAndClick(2);
+            setRadiusAndClick(false);
             times++;
             laserTime = System.currentTimeMillis();
         }
@@ -195,7 +195,7 @@ public class LootModule implements Module {
     private void lockAndSetTarget() {
         if (hero.locationInfo.distance(target) > 650 || System.currentTimeMillis() - clickDelay < 500) return;
         hero.setTarget(target);
-        setRadiusAndClick(1);
+        setRadiusAndClick(true);
         clickDelay = System.currentTimeMillis();
         ability = clickDelay + 5000;
         times = 0;
@@ -203,9 +203,9 @@ public class LootModule implements Module {
         shooting = false;
     }
 
-    private void setRadiusAndClick(int times) {
+    private void setRadiusAndClick(boolean single) {
         target.clickable.setRadius(800);
-        drive.clickCenter(times);
+        drive.clickCenter(single);
         target.clickable.setRadius(0);
     }
 

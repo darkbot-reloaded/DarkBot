@@ -138,7 +138,7 @@ public class StarManager {
 
     public Portal next(Map current, LocationInfo locationInfo, Map target) {
         DijkstraShortestPath<Map, Portal> path = new DijkstraShortestPath<>(starSystem);
-        return starSystem.outgoingEdgesOf(current).stream().min(
+        return starSystem.outgoingEdgesOf(current).stream().filter(p -> !p.removed).min(
                 Comparator.<Portal>comparingDouble(p -> path.getPaths(p.target).getWeight(target))
                         .thenComparing(p -> locationInfo.distance(p.locationInfo))).orElse(null);
     }

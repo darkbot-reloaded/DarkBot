@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Location;
 
 import static com.github.manolo8.darkbot.Main.API;
+import static java.lang.Math.random;
 
 public class MapManager implements Manager {
 
@@ -25,7 +26,7 @@ public class MapManager implements Manager {
     public long mapAddress;
     private long viewAddress;
     private long boundsAddress;
-    protected long eventAddress;
+    long eventAddress;
 
     public static int id;
 
@@ -42,6 +43,8 @@ public class MapManager implements Manager {
     public double boundY;
     public double boundMaxX;
     public double boundMaxY;
+    public double width;
+    public double height;
 
     public MapManager(Main main) {
         this.main = main;
@@ -123,6 +126,8 @@ public class MapManager implements Manager {
         boundY = API.readMemoryDouble(updated + 88);
         boundMaxX = API.readMemoryDouble(updated + 112);
         boundMaxY = API.readMemoryDouble(updated + 120);
+        width = boundMaxX - boundX;
+        height = boundMaxY - boundY;
     }
 
     public boolean isTarget(Entity entity) {
@@ -141,18 +146,21 @@ public class MapManager implements Manager {
         return API.readMemoryInt(temp + 40) == 1;
     }
 
-    public ClickPoint clickPoint(Location loc) {
-        return new ClickPoint((int) ((loc.x - this.boundX) / (this.boundMaxX - this.boundX) * (double) MapManager.clientWidth),
-                (int) ((loc.y - this.boundY) / (this.boundMaxY - this.boundY) * (double) MapManager.clientHeight));
-    }
-
     public void mouseClick(Location loc) {
-        this.mouseManager.click(main.hero.locationInfo.now, loc.copy());
+        this.mouseManager.click(loc);
     }
 
-    public void simpleMouseClick(Location loc) {
-        ClickPoint clickPoint = clickPoint(loc);
+    public void clickCenter(boolean single) {
+        ClickPoint clickPoint = clickPoint();
+        //System.out.println("Simple click: " + clickPoint.x + "," + clickPoint.y + (single ? "" : " double"));
         API.mouseClick(clickPoint.x, clickPoint.y);
+        if (!single) API.mouseClick(clickPoint.x, clickPoint.y);
+    }
+
+    ClickPoint clickPoint() {
+        double x = (double) MapManager.clientWidth / 2 + (Math.random() - 0.5 * 40) * clientWidth / width,
+            y = (double) MapManager.clientHeight / 2 + (Math.random() - 0.5 * 40) * clientHeight / height;
+        return new ClickPoint((int) x, (int) y);
     }
 
 }

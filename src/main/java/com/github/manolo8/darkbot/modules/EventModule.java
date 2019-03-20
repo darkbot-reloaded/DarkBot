@@ -121,7 +121,7 @@ public class EventModule implements Module {
 
     private void setRadiusAndClick() {
         target.clickable.setRadius(800);
-        drive.clickCenter(1);
+        drive.clickCenter(true);
         target.clickable.setRadius(0);
     }
 
@@ -171,8 +171,8 @@ public class EventModule implements Module {
             drop.setCollected(true);
 
             drive.stop(false);
-            drop.clickable.setRadius(1200);
-            drive.clickCenter(1);
+            drop.clickable.setRadius(800);
+            drive.clickCenter(true);
             drop.clickable.setRadius(0);
 
             waiting = System.currentTimeMillis() + hero.timeTo(distance) + 30 + 750;

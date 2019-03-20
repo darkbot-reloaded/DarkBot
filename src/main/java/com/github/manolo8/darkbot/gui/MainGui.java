@@ -140,17 +140,17 @@ public class MainGui extends JFrame {
         copySid.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                String sid = main.statsManager.sid;
+                String sid = main.statsManager.sid,
+                        instance = main.statsManager.instance;
 
-                if (sid == null) return;
+                if (sid == null || sid.isEmpty()) return;
 
                 StringSelection selection = new StringSelection(sid);
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
 
-                String sv = main.config.MISCELLANEOUS.SERVER_PREFIX;
-                if (sv == null) return;
+                if (SwingUtilities.isRightMouseButton(e) || instance == null || instance.isEmpty()) return;
                 try {
-                    Desktop.getDesktop().browse(URI.create("https://" + sv + ".darkorbit.com?dosid=" + sid));
+                    Desktop.getDesktop().browse(URI.create(instance + "?dosid=" + sid));
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }

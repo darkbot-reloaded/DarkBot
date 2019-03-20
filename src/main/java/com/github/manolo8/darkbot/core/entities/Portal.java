@@ -10,6 +10,7 @@ public class Portal extends Entity {
 
     public Portal(int id, int type, int x, int y, Map target) {
         super(id);
+        super.removed = true;
         this.type = type;
         this.x = x;
         this.y = y;

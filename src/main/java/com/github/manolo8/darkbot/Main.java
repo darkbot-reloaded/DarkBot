@@ -24,7 +24,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Main extends Thread {
-    public static final String VERSION = "1.13.4 beta6";
+    public static final String VERSION = "1.13.4 beta8";
 
     private static final Gson GSON = new GsonBuilder()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter()).create();
@@ -40,6 +40,7 @@ public class Main extends Thread {
     public final GuiManager guiManager;
     public final StatsManager statsManager;
     public final PingManager pingManager;
+    public final BackpageManager backpage;
 
     public final Lazy.Sync<Boolean> status;
 
@@ -50,7 +51,6 @@ public class Main extends Thread {
 
     private final BotInstaller botInstaller;
     private final MainGui form;
-    private final BackpageManager backpage;
 
     public double avgTick;
 

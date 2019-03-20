@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.core.utils;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
@@ -74,7 +73,7 @@ public class Drive {
     }
 
     public boolean canMove(Location location) {
-        return pathFinder.canMove((int) location.x, (int) location.y);
+        return !map.isOutOfMap(location.x, location.y) && pathFinder.canMove((int) location.x, (int) location.y);
     }
 
     public double closestDistance(Location location) {
@@ -97,8 +96,8 @@ public class Drive {
         if (!pathFinder.isEmpty()) pathFinder.path().clear();
     }
 
-    public void clickCenter(int times) {
-        for (int i = 0; i < times; i++) map.simpleMouseClick(heroLoc.now);
+    public void clickCenter(boolean single) {
+        map.clickCenter(single);
     }
 
     public void move(Entity entity) {

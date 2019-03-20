@@ -162,6 +162,7 @@ public class EntityList extends Updatable {
 
         entity.update(address);
         entity.update();
+        entity.removed = false;
 
         if (entity instanceof Obstacle)
             obstacles.add((Obstacle) entity);
