@@ -10,7 +10,7 @@
 //
 //import java.util.List;
 //
-//import static com.github.manolo8.darkbot.Main.API;
+//import static com.github.manolo8.darkbot.Main.IDarkBotAPI;
 //import static java.lang.Math.cos;
 //import static java.lang.StrictMath.sin;
 //
@@ -106,7 +106,7 @@
 //        if (mapManager.isTarget(current)) {
 //
 //            if (!hero.isAttacking(current) && System.currentTimeMillis() - laserTime > 1000) {
-//                API.keyboardClick('Z');
+//                IDarkBotAPI.keyboardClick('Z');
 //
 //                laserTime = System.currentTimeMillis();
 //            }
@@ -117,7 +117,7 @@
 //            current.clickable.setRadius(800);
 //            hero.clickCenter(1);
 //            current.clickable.setRadius(0);
-//            API.keyboardClick('Z');
+//            IDarkBotAPI.keyboardClick('Z');
 //
 //            clickDelay = System.currentTimeMillis();
 //        }

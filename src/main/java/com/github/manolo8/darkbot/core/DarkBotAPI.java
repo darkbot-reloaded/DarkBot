@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core;
 
 import java.nio.charset.StandardCharsets;
 
-public class DarkBotAPI {
+public class DarkBotAPI implements IDarkBotAPI {
 
     static {
         System.loadLibrary("DarkBot");
@@ -18,6 +18,12 @@ public class DarkBotAPI {
     private native void createWindow0();
 
     public native boolean isValid();
+
+    public native void mousePress(int x, int y);
+
+    public native void mouseMove(int x, int y);
+
+    public native void mouseRelease(int x, int y);
 
     public native void mouseClick(int x, int y);
 

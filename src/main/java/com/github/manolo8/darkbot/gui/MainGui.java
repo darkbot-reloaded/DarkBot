@@ -37,7 +37,7 @@ public class MainGui extends JFrame {
         this.main = main;
 
         this.configGui = new ConfigGui(main);
-        configGui.setAlwaysOnTop(main.config.MISCELLANEOUS.ALWAYS_ON_TOP);
+        configGui.setAlwaysOnTop(main.config.MISCELLANEOUS.DISPLAY.ALWAYS_ON_TOP);
         configGui.setIconImage(icon);
 
         this.visible = true;
@@ -45,7 +45,7 @@ public class MainGui extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(640, 480);
         setLocationRelativeTo(null);
-        setAlwaysOnTop(main.config.MISCELLANEOUS.ALWAYS_ON_TOP);
+        setAlwaysOnTop(main.config.MISCELLANEOUS.DISPLAY.ALWAYS_ON_TOP);
         setIconImage(icon);
         setVisible(true);
 

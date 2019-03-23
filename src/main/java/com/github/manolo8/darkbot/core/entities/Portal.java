@@ -25,6 +25,6 @@ public class Portal extends Entity {
     public void update() {
         super.update();
 
-        //type = API.readMemoryInt(address + 112);
+        //type = IDarkBotAPI.readMemoryInt(address + 112);
     }
 }

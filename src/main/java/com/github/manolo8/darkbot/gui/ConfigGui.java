@@ -89,7 +89,7 @@ public class ConfigGui extends JFrame {
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize(640, 480);
         setLocationRelativeTo(null);
-        setAlwaysOnTop(main.config.MISCELLANEOUS.ALWAYS_ON_TOP);
+        setAlwaysOnTop(main.config.MISCELLANEOUS.DISPLAY.ALWAYS_ON_TOP);
 
         initComponents();
         setComponentPosition();

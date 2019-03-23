@@ -39,21 +39,20 @@ public class StatsManager implements Manager {
             address = value;
             sid = API.readMemoryString(API.readMemoryLong(address + 168));
         });
-        botInstaller.settingsAddress.add(v -> instance = API.readMemoryString(API.readMemoryLong(v + 588)));
+        botInstaller.settingsAddress.add(value -> instance = API.readMemoryString(API.readMemoryLong(value + 588)));
     }
 
 
     public void tick() {
-        if (address != 0) {
-            updateCredits(API.readMemoryDouble(address + 288));
-            updateUridium(API.readMemoryDouble(address + 296));
-            //API.readMemoryDouble(address + 304); // Jackpot
-            updateExperience(API.readMemoryDouble(address + 312));
-            updateHonor(API.readMemoryDouble(address + 320));
+        if (address == 0) return;
+        updateCredits(API.readMemoryDouble(address + 288));
+        updateUridium(API.readMemoryDouble(address + 296));
+        //API.readMemoryDouble(address + 304); // Jackpot
+        updateExperience(API.readMemoryDouble(address + 312));
+        updateHonor(API.readMemoryDouble(address + 320));
 
-            deposit = API.readMemoryInt(API.readMemoryLong(address + 240) + 40);
-            depositTotal = API.readMemoryInt(API.readMemoryLong(address + 248) + 40);
-        }
+        deposit = API.readMemoryInt(API.readMemoryLong(address + 240) + 40);
+        depositTotal = API.readMemoryInt(API.readMemoryLong(address + 248) + 40);
     }
 
 

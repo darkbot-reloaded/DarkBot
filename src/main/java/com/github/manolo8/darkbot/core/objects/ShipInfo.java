@@ -9,13 +9,6 @@ public class ShipInfo extends Updatable {
     public int speed;
     public long target;
 
-    public ShipInfo() {
-    }
-
-    public ShipInfo(long address) {
-        this.address = address;
-    }
-
     @Override
     public void update() {
         target = API.readMemoryLong(address + 112);

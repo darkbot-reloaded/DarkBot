@@ -175,7 +175,7 @@ public class GuiManager implements Manager {
             return false;
         } else if (main.hero.locationInfo.isLoaded() && (main.hero.locationInfo.isMoving() ||
                 System.currentTimeMillis() - main.hero.drive.lastMoved > 20 * 1000)) {
-            validTime = System.currentTimeMillis();
+            validTime = System.currentTimeMillis() - main.pingManager.ping;
         }
 
         checkInvalid();

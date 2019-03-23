@@ -6,4 +6,9 @@ public class ClickPoint {
         this.x = x;
         this.y = y;
     }
+
+    public synchronized void set(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
 }

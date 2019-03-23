@@ -205,7 +205,7 @@ public class LootModule implements Module {
 
     private void setRadiusAndClick(boolean single) {
         target.clickable.setRadius(800);
-        drive.clickCenter(single);
+        drive.clickCenter(single, target.locationInfo.now);
         target.clickable.setRadius(0);
     }
 

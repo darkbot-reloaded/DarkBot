@@ -129,7 +129,7 @@ public class Config {
     public static class Event {
         @Option(value = "Offensive ship ability")
         public Character SHIP_ABILITY;
-        @Option(value = "Complete event progress", description = "If the bot should click on the event progress")
+        @Option(value = "Complete event progress", description = "If the bot should clickLoc on the event progress")
         public boolean PROGRESS = true;
     }
 
@@ -145,29 +145,31 @@ public class Config {
 
     public @Option("Miscellaneous") Miscellaneous MISCELLANEOUS = new Miscellaneous();
     public static class Miscellaneous {
-        @Option(value = "Hide name", description = "Hide hero name in the map")
-        public boolean HIDE_NAME;
-        @Option(value = "Trail length", description = "Amount of time the trail should be in the map in seconds")
-        @Num(max = 300, step = 1)
-        public int TRAIL_LENGTH = 15;
+        public @Option("Display") Display DISPLAY = new Display();
+        public static class Display {
+            @Option(value = "Hide name", description = "Hide hero name in the map")
+            public boolean HIDE_NAME;
+            @Option(value = "Trail length", description = "Amount of time the trail should be in the map in seconds")
+            @Num(max = 300, step = 1)
+            public int TRAIL_LENGTH = 15;
+            @Option(value = "Show zones in main map", description = "Tick to show avoided/preferred zones on map")
+            public boolean SHOW_ZONES = true;
+            @Option(value = "Always on top", description = "Should the bot window stay on top of other windows?")
+            public boolean ALWAYS_ON_TOP = true;
+            @Option("Use darcula theme")
+            public boolean USE_DARCULA_THEME = true;
+        }
         @Option(value = "Zone precision", description = "Amount of map subdivisions when selecting zones")
         @Num(min = 10, max = 300)
         public int ZONE_RESOLUTION = 30;
-        @Option(value = "Show zones in main map", description = "Tick to show avoided/preferred zones on map")
-        public boolean SHOW_ZONES = true;
-        @Option(value = "Always on top", description = "Should the bot window stay on top of other windows?")
-        public boolean ALWAYS_ON_TOP = true;
-        @Option("Use darcula theme")
-        public boolean USE_DARCULA_THEME = true;
         @Option(value = "Refresh every", description = "Every how many minutes to refresh")
         @Num(max = 60 * 12, step = 10)
         public int REFRESH_TIME = 0;
-
         @Option("Developer stuff shown")
         public boolean DEV_STUFF = false;
+        @Option("Full debug & memory trace (Don't enable)")
+        public boolean FULL_DEBUG = false;
     }
-
-
 
     public static class ShipConfig {
         public ShipConfig() {}

@@ -16,7 +16,6 @@ import static java.lang.Math.random;
 
 public class MapManager implements Manager {
 
-    private final MouseManager mouseManager;
     private final Main main;
 
     public final EntityList entities;
@@ -48,8 +47,6 @@ public class MapManager implements Manager {
 
     public MapManager(Main main) {
         this.main = main;
-        this.mouseManager = new MouseManager(this);
-        this.mouseManager.start();
 
         this.entities = new EntityList(main);
     }
@@ -79,7 +76,6 @@ public class MapManager implements Manager {
     }
 
     private void update(long address) {
-
         mapAddress = address;
 
         internalWidth = API.readMemoryInt(address + 68);
@@ -108,7 +104,6 @@ public class MapManager implements Manager {
     }
 
     void updateBounds() {
-
         long temp = API.readMemoryLong(viewAddressStatic);
 
         if (viewAddress != temp) {
@@ -144,23 +139,6 @@ public class MapManager implements Manager {
         temp = API.readMemoryLong(temp + 200);
         temp = API.readMemoryLong(temp + 48);
         return API.readMemoryInt(temp + 40) == 1;
-    }
-
-    public void mouseClick(Location loc) {
-        this.mouseManager.click(loc);
-    }
-
-    public void clickCenter(boolean single) {
-        ClickPoint clickPoint = clickPoint();
-        //System.out.println("Simple click: " + clickPoint.x + "," + clickPoint.y + (single ? "" : " double"));
-        API.mouseClick(clickPoint.x, clickPoint.y);
-        if (!single) API.mouseClick(clickPoint.x, clickPoint.y);
-    }
-
-    ClickPoint clickPoint() {
-        double x = (double) MapManager.clientWidth / 2 + (Math.random() - 0.5 * 40) * clientWidth / width,
-            y = (double) MapManager.clientHeight / 2 + (Math.random() - 0.5 * 40) * clientHeight / height;
-        return new ClickPoint((int) x, (int) y);
     }
 
 }

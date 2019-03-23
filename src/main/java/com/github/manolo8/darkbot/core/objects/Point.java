@@ -9,10 +9,6 @@ public class Point extends Updatable {
     public double x;
     public double y;
 
-    public Point() {
-        this.address = 0;
-    }
-
     public void update() {
         this.x = API.readMemoryDouble(address + 32);
         this.y = API.readMemoryDouble(address + 40);

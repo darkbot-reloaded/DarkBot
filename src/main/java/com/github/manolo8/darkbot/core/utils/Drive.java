@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.manager.MouseManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
@@ -19,6 +20,7 @@ public class Drive {
     private boolean force = false;
 
     private final MapManager map;
+    private final MouseManager mouse;
     private final HeroManager hero;
     private final LocationInfo heroLoc;
 
@@ -30,6 +32,7 @@ public class Drive {
 
     public Drive(HeroManager hero, MapManager map) {
         this.map = map;
+        this.mouse = new MouseManager(map);
         this.hero = hero;
         this.heroLoc = hero.locationInfo;
         this.pathFinder = new PathFinder(map);
@@ -53,7 +56,7 @@ public class Drive {
         newPath |= !next.equals(lastSegment);
         lastSegment = next;
 
-        boolean diffAngle = Math.abs(now.angle(next) - last.angle(now)) > 0.08;
+        boolean diffAngle = Math.abs(now.angle(next) - last.angle(now)) > 0.1;
         if (hero.timeTo(now.distance(next)) > 100 || diffAngle) {
             if (heroLoc.isMoving() && !diffAngle) return;
 
@@ -68,7 +71,7 @@ public class Drive {
     private void click(Location loc) {
         if (System.currentTimeMillis() - lastClick > 300) {
             lastClick = System.currentTimeMillis();
-            map.mouseClick(loc);
+            mouse.clickLoc(loc);
         }
     }
 
@@ -89,15 +92,15 @@ public class Drive {
         if (heroLoc.isMoving() && current) {
             Location stopLoc = heroLoc.now.copy();
             stopLoc.toAngle(heroLoc.now, heroLoc.last.angle(heroLoc.now), 100);
-            map.mouseClick(stopLoc);
+            mouse.clickLoc(stopLoc);
         }
 
         endLoc = null;
         if (!pathFinder.isEmpty()) pathFinder.path().clear();
     }
 
-    public void clickCenter(boolean single) {
-        map.clickCenter(single);
+    public void clickCenter(boolean single, Location aim) {
+        mouse.clickCenter(single, aim);
     }
 
     public void move(Entity entity) {

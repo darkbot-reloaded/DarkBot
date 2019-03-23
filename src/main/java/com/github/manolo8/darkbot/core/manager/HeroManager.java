@@ -65,18 +65,13 @@ public class HeroManager extends Ship implements Manager {
 
     @Override
     public void update() {
-
         super.update();
-
         pet.update();
 
         config = API.readMemoryInt(settingsAddress + 56);
 
         long petAddress = API.readMemoryLong(address + 176);
-
-        if (petAddress != pet.address) {
-            pet.update(petAddress);
-        }
+        if (petAddress != pet.address) pet.update(petAddress);
     }
 
     @Override

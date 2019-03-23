@@ -11,15 +11,23 @@ import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
+import com.github.manolo8.darkbot.gui.trail.Line;
+import com.github.manolo8.darkbot.gui.trail.LineSmoother;
 import com.github.manolo8.darkbot.utils.Time;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.ColorModel;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
@@ -81,7 +89,7 @@ public class MapDrawer extends JPanel {
     private RenderingHints hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
     private Location last = new Location(0, 0);
-    private class Line {
+    /*private class Line {
         double x1, x2, y1, y2;
         Line(Location loc1, Location loc2) {
             this.x1 = loc1.x;
@@ -92,7 +100,7 @@ public class MapDrawer extends JPanel {
         void draw(Graphics2D g2) {
             drawLine(g2, x1, y1, x2, y2);
         }
-    }
+    }*/
 
     protected int width, height, mid;
 
@@ -139,7 +147,7 @@ public class MapDrawer extends JPanel {
         Graphics2D g2 = setupDraw(g);
 
         drawZones(g2);
-        if (config.MISCELLANEOUS.SHOW_ZONES) drawCustomZones(g2);
+        if (config.MISCELLANEOUS.DISPLAY.SHOW_ZONES) drawCustomZones(g2);
         drawInfos(g2);
         drawHealth(g2);
         drawTrail(g2);
@@ -235,7 +243,7 @@ public class MapDrawer extends JPanel {
     private void drawHealth(Graphics2D g2) {
         g2.setColor(TEXT);
         g2.setFont(FONT_MID);
-        if (!config.MISCELLANEOUS.HIDE_NAME)
+        if (!config.MISCELLANEOUS.DISPLAY.HIDE_NAME)
             drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40, Align.MID);
         drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20);
 
@@ -260,16 +268,25 @@ public class MapDrawer extends JPanel {
 
         if (distance > 500) {
             last = hero.locationInfo.now.copy();
-        } else if (distance > 60) {
+        } else if (distance > 40) {
             positions.put(System.currentTimeMillis(), new Line(last, last = heroLocation.copy()));
         }
-        positions.headMap(System.currentTimeMillis() - config.MISCELLANEOUS.TRAIL_LENGTH * 1000).clear();
+        positions.headMap(System.currentTimeMillis() - config.MISCELLANEOUS.DISPLAY.TRAIL_LENGTH * 1000).clear();
 
-        double max = positions.size() / 255d, curr = 0;
-        for (Line line : positions.values()) {
-            g2.setColor(TRAIL[(int) (curr++ / max)]);
-            line.draw(g2);
+        if (positions.isEmpty()) return;
+
+        g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+        List<List<Location>> paths = LineSmoother.getSmoothedPaths(positions.values());
+        double max = paths.stream().mapToInt(Collection::size).sum() / 255d, curr = 0;
+        for (List<Location> points : paths) {
+            Location last = null;
+            for (Location point : points) {
+                g2.setColor(TRAIL[(int) (curr++ / max)]);
+                if (last != null) drawLine(g2, last.x, last.y,point.x, point.y);
+                last = point;
+            }
         }
+        g2.setStroke(new BasicStroke());
     }
 
     protected void drawStaticEntities(Graphics2D g2) {
