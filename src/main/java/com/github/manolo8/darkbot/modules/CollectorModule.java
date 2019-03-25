@@ -131,7 +131,7 @@ public class CollectorModule implements Module {
     }
 
     private void checkDangerous() {
-        if (config.STAY_AWAY_FROM_ENEMIES) {
+        if (config.COLLECT.STAY_AWAY_FROM_ENEMIES) {
 
             Location dangerous = findClosestEnemyAndAddToDangerousList();
 
@@ -140,12 +140,12 @@ public class CollectorModule implements Module {
     }
 
     private void checkInvisibility() {
-        if (config.AUTO_CLOACK
+        if (config.COLLECT.AUTO_CLOACK
                 && !hero.invisible
                 && System.currentTimeMillis() - invisibleTime > 60000
         ) {
             invisibleTime = System.currentTimeMillis();
-            API.keyboardClick(config.AUTO_CLOACK_KEY);
+            API.keyboardClick(config.COLLECT.AUTO_CLOACK_KEY);
         }
     }
 

@@ -16,9 +16,7 @@ import java.util.List;
 import static com.github.manolo8.darkbot.Main.API;
 import static java.lang.Double.max;
 import static java.lang.Double.min;
-import static java.lang.Math.cos;
 import static java.lang.Math.random;
-import static java.lang.Math.sin;
 
 public class LootModule implements Module {
 
@@ -182,14 +180,14 @@ public class LootModule implements Module {
     }
 
     private boolean shouldSab() {
-        return config.AUTO_SAB && hero.health.shieldPercent() < config.LOOT.SAB_PERCENT
-                && target.health.shield > config.LOOT.SAB_NPC_AMOUNT;
+        return config.LOOT.SAB.ENABLED && hero.health.shieldPercent() < config.LOOT.SAB.PERCENT
+                && target.health.shield > config.LOOT.SAB.NPC_AMOUNT;
     }
 
     private char getAttackKey() {
-        if (sab = shouldSab()) return this.config.AUTO_SAB_KEY;
+        if (sab = shouldSab()) return this.config.LOOT.SAB.KEY;
         return this.target == null || this.target.npcInfo.attackKey == null ?
-                this.config.AMMO_KEY : this.target.npcInfo.attackKey;
+                this.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;
     }
 
     private void lockAndSetTarget() {

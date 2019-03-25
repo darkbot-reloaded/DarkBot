@@ -90,7 +90,7 @@ public class GuiManager implements Manager {
         quests.update();
 
         if (runLoadChecks && quests.lastUpdatedIn(5000)) {
-            API.keyboardClick(main.config.AMMO_KEY);
+            API.keyboardClick(main.config.LOOT.AMMO_KEY);
             quests.show(false);
             runLoadChecks = false;
         }

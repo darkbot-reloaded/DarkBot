@@ -64,7 +64,8 @@ class LoggingAPIHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
         boolean log = method.getName().startsWith("write") && !method.getName().equals("writeMemoryDouble");
         if (log) {
-            System.out.println(Thread.currentThread().getStackTrace()[3]);
+            StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+            for (int i = 3; i < trace.length - 3; i++) System.out.println(trace[i]);
             System.out.println("API CALL: " + method.getName() + (args != null ? Arrays.toString(args) : ""));
         }
         Object res = method.invoke(API, args);

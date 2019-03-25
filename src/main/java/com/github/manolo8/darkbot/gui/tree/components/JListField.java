@@ -7,7 +7,6 @@ import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
-import java.util.Comparator;
 
 public class JListField extends JComboBox<String> implements OptionEditor {
 

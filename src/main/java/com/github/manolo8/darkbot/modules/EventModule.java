@@ -103,7 +103,7 @@ public class EventModule implements Module {
         double distance = hero.locationInfo.distance(target);
         if (locked && !shooting) {
             if (distance > 550) return;
-            API.keyboardClick(config.AMMO_KEY);
+            API.keyboardClick(config.LOOT.AMMO_KEY);
             shooting = true;
             if (target.health.maxHp > 0) API.keyboardClick(config.EVENT.SHIP_ABILITY);
             return;

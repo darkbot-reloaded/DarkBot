@@ -1,15 +1,15 @@
 package com.github.manolo8.darkbot.config;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public class NpcInfo {
 
     public int priority;
 
-    public HashSet<Integer> mapList = new HashSet<>();
+    public Set<Integer> mapList = new HashSet<>();
 
     public boolean kill;
-    public boolean killOnlyIfIsLast;
 
     public double radius;
     public boolean noCircle;

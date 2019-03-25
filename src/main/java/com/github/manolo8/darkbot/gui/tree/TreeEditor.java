@@ -43,7 +43,7 @@ public class TreeEditor extends DefaultTreeCellEditor {
     private OptionEditor getEditor(ConfigField field) {
         Class<? extends OptionEditor> editorClass = field.getEditor();
         if (field.getEditor() == null) return editorsByType.getOrDefault(field.field.getType(), defaultEditor);
-        return editorsByClass.computeIfAbsent(editorClass, ReflectionUtils::createInstance);
+        return editorsByClass.computeIfAbsent(editorClass, c -> ReflectionUtils.createInstance(c, (Class<Object>) field.parent.getClass(), field.parent));
     }
 
     @Override

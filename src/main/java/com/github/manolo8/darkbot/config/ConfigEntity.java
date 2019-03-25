@@ -27,8 +27,7 @@ public class ConfigEntity {
 
             if (!name.equals("ERROR") && !name.isEmpty()) {
                 config.LOOT.NPC_INFOS.put(name, info);
-
-                config.addedNpc.send(name);
+                config.LOOT.ADDED_NPC.send(name);
 
                 config.changed = true;
             }
@@ -53,8 +52,7 @@ public class ConfigEntity {
 
             if (!name.equals("ERROR") && !name.isEmpty()) {
                 config.COLLECT.BOX_INFOS.put(name, info);
-
-                config.addedBox.send(name);
+                config.COLLECT.ADDED_BOX.send(name);
 
                 config.changed = true;
             }
