@@ -1,17 +1,19 @@
 package com.github.manolo8.darkbot.core.entities;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.Map;
 
 public class Portal extends Entity {
 
     public Map target;
     public int type;
+    public int searchType;
     public int x, y;
 
-    public Portal(int id, int type, int x, int y, Map target) {
+    public Portal(int id, int searchType, int x, int y, Map target) {
         super(id);
         super.removed = true;
-        this.type = type;
+        this.searchType = searchType;
         this.x = x;
         this.y = y;
         this.target = target;
@@ -25,6 +27,6 @@ public class Portal extends Entity {
     public void update() {
         super.update();
 
-        //type = IDarkBotAPI.readMemoryInt(address + 112);
+        type = Main.API.readMemoryInt(address + 112);
     }
 }

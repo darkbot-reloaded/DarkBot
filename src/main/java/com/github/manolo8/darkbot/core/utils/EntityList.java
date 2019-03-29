@@ -114,7 +114,7 @@ public class EntityList extends Updatable {
                 noCloack.add(whenAdd(new NoCloack(id), found));
             } else if (id < 0 && rnd == 3) {
                 boxes.add(whenAdd(new Box(id), found));
-            } else if (id <= 150000499 && id >= 150000156) {
+            } else if (id <= 150000514 && id >= 150000156) {
                 LocationInfo loc = new LocationInfo(API.readMemoryLong(found + 64));
                 loc.update();
                 portals.add(whenAdd(main.starManager.getOrCreate(id, rnd, (int) loc.now.x, (int) loc.now.y), found));
@@ -122,7 +122,7 @@ public class EntityList extends Updatable {
                 // Beacons, map ids TBD (experiment zone ids)
                 // EX 2-1 -> 150000514, 150000515 | EX 2-2 -> 150000512 | EX 2-3 -> 150000513 | EX 4-4 -> 150000566
                 npcs.add(whenAdd(new Npc(id), found));
-            } else if (id <= 150000950 && id >= 150000500) {
+            } else if (id <= 150000950 && id >= 150000532) {
                 int hullId = API.readMemoryInt(found + 116);
                 battleStations.add(whenAdd(new BattleStation(id, hullId), found));
             // 1-1: 000-022  1-4: 023

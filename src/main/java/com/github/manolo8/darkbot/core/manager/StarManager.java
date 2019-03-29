@@ -74,7 +74,7 @@ public class StarManager {
                 .addGG(54, "GG NC") // New Client GG        (No access)
                 .addGG(55, "GG δ").accessBy(5, HOME_MAPS)
                 .addGG(56, "GG Orb")// The forgotten gate   (No access)
-                .addGG(57, "GG Y6") // Year 6 (Anniversary) (No access)
+                .addGG(57, "GG Y6").accessBy(16, HOME_MAPS) // Year 6 (Anniversary)
                 .addGG(57, "HSG")   // High Score Gate      (No access)
                 .addGG(70, "GG ε").accessBy(53, HOME_MAPS)
                 .addGG(71, "GG ζ 1").accessOnlyBy(54, HOME_MAPS)
@@ -97,7 +97,7 @@ public class StarManager {
                 .addGG(304, "GG ς 5").accessBy(82, "GG ς 4")
                 .addGG(200, "LoW").accessOnlyBy(34, "1-3", "2-3", "3-3")
                 .addGG(229, "Quarantine Zone").accessOnlyBy(84, "1-7", "2-7", "3-7")
-                .addGG(227, "GG VoT 1").accessOnlyBy(54, "1-4", "2-4", "3-4") // Assume it's the same type as zeta
+                .addGG(227, "GG VoT 1").accessOnlyBy(54, "1-4", "2-4", "3-4") // Assume it's the same type as zeta?
                 .addGG(230, "GG VoT 2").accessOnlyBy(54, "GG VoT 1")
                 .addGG(231, "GG VoT 3").accessOnlyBy(54, "GG VoT 2")
                 .addGG(232, "GG VoT 4").accessOnlyBy(54, "GG VoT 3")
@@ -106,6 +106,12 @@ public class StarManager {
                 .addGG(235, "GG VoT 7").accessOnlyBy(54, "GG VoT 6")
                 .addGG(236, "GG VoT 8").accessBy(54, "GG VoT 7")
                 .addGG(305, "Compromising Invasion") // (No access)
+                .addGG(410, "GoP 1").accessOnlyBy(24, "1-8", "2-8", "3-8")
+                .addGG(411, "GoP 2").accessOnlyBy(24, "GoP 1")
+                .addGG(412, "GoP 3").accessOnlyBy(24, "GoP 2")
+                .addGG(413, "GoP 4").accessOnlyBy(24, "GoP 3")
+                .addGG(414, "GoP 5").accessOnlyBy(24, "GoP 4")
+                .addGG(415, "GoP Final").accessBy(24, "GoP 5")
                 // Special (No access)
                 .addMap(42, "???")
                 .addMap(61, "MMO Invasion").addMap(62, "EIC Invasion").addMap(63, "VRU Invasion")
@@ -130,7 +136,7 @@ public class StarManager {
     public Portal getOrCreate(int id, int type, int x, int y) {
         return starSystem.outgoingEdgesOf(HeroManager.instance.map).stream()
                 .filter(p -> (p.id != -1 && p.id == id)     // By id
-                        || (p.type != -1 && p.type == type) // By Type
+                        || (p.searchType != -1 && p.searchType == type) // By Type
                         || (p.x != -1 && p.y != -1 && p.inLoc(x, y)))  // By loc
                 .peek(p -> p.id = id)
                 .findAny().orElse(new Portal(id, type, x, y, null));

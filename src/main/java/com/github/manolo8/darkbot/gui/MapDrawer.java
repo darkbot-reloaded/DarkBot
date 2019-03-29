@@ -19,12 +19,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.ColorModel;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -297,7 +292,7 @@ public class MapDrawer extends JPanel {
                 Location loc = portal.locationInfo.now;
                 g2.drawOval(translateX(loc.x) - 5, translateY(loc.y) - 5, 10, 10);
                 if (!config.MISCELLANEOUS.DEV_STUFF) continue;
-                drawString(g2, portal.id + "", translateX(loc.x), translateY(loc.y), Align.MID);
+                drawString(g2, portal.id + "," + portal.type, translateX(loc.x), translateY(loc.y), Align.MID);
             }
 
             for (BattleStation station : this.battleStations) {

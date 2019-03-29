@@ -125,7 +125,7 @@ public class Config {
     public static class Event {
         @Option(value = "Offensive ship ability")
         public Character SHIP_ABILITY;
-        @Option(value = "Complete event progress", description = "If the bot should clickLoc on the event progress")
+        @Option(value = "Complete event progress", description = "If the bot should click on the event progress")
         public boolean PROGRESS = true;
     }
 
