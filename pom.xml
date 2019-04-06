@@ -83,31 +83,41 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
                 <version>3.1.1</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.github.manolo8.darkbot.Bot</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
                 <executions>
                     <execution>
-                        <id>assembly</id>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
                         <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
                         <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
                             <finalName>DarkBot</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>net.java.dev.jna:*</artifact>
+                                    <includes>
+                                        <include>com/sun/jna/*</include>
+                                        <include>com/sun/jna/platform/win32/**</include>
+                                        <include>com/sun/jna/win32/**</include>
+                                        <include>com/sun/jna/win32-x86-64/**</include>
+                                    </includes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.github.manolo8.darkbot.Bot</mainClass>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
@@ -121,14 +131,14 @@
                         <phase>package</phase>
                         <goals><goal>proguard</goal></goals>
                         <configuration>
-                            <injar>${project.build.finalName}-jar-with-dependencies.jar</injar>
+                            <injar>DarkBot.jar</injar>
                             <outjar>DarkBot.jar</outjar>
                             <options>
                                 <option>-allowaccessmodification</option>
                                 <option>-dontoptimize</option>
                                 <option>-dontobfuscate</option>
                                 <option>-dontnote</option>
-                                <option>-dontwarn</option> <!-- added option to ignore com.sun missing classes -->
+                                <option>-dontwarn</option>
                                 <option>-keepattributes Signature</option>
                                 <option>-keep class com.github.manolo8.** { *; }</option>
                                 <option>-keep class com.bulenkov.** { *; }</option>
