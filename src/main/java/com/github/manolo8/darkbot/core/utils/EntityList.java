@@ -178,6 +178,8 @@ public class EntityList extends Updatable {
     }
 
     private void removeAllInvalidEntities() {
+        main.hero.pet.removed = main.hero.pet.isInvalid(address);
+
         for (List<? extends Entity> entities : allEntities) {
             for (int i = 0; i < entities.size(); i++) {
                 Entity entity = entities.get(i);

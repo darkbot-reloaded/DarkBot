@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.tree.components;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.TableCharEditor;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -10,12 +11,12 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 
-public class InfoTable extends JTable implements OptionEditor {
+public abstract class InfoTable<T extends TableModel> extends JTable implements OptionEditor {
     private static final TableCharEditor CHAR_EDITOR = new TableCharEditor();
 
     private JComponent component;
 
-    InfoTable(TableModel model) {
+    InfoTable(T model) {
         super(model);
         getColumnModel().getColumn(0).setPreferredWidth(200);
         putClientProperty("ConfigTree", true);
@@ -24,25 +25,23 @@ public class InfoTable extends JTable implements OptionEditor {
         setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
         getTableHeader().setReorderingAllowed(false);
 
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>((DefaultTableModel) getModel());
+        TableRowSorter<T> sorter = new TableRowSorter<>(model);
         setRowSorter(sorter);
 
-        JPanel panel = new JPanel(new GridBagLayout()) {
+        JPanel panel = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][]", "[][grow]")) {
             public void setPreferredSize(Dimension preferredSize) {
                 super.setPreferredSize(new Dimension(500, 300));
             }
         };
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.BOTH;
-        c.weightx = 1;
-
-        panel.add(new JSearchField(sorter), c);
-
-        c.weighty = c.gridy = 1;
-        panel.add(new JScrollPane(this), c);
+        panel.add(new JSearchField<>(sorter, extraFilters()), "grow, wrap");
+        panel.add(new JScrollPane(this), "grow, span");
 
         component = panel;
+    }
+
+    protected RowFilter<T, Integer> extraFilters() {
+        return null;
     }
 
     @Override

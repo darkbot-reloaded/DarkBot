@@ -79,7 +79,7 @@ public class Gui extends Updatable {
 
         if (value != visible) {
 
-            if (System.currentTimeMillis() - 1000 > time) {
+            if (System.currentTimeMillis() - 1500 > time) {
                 API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
                 time = System.currentTimeMillis();
             }
@@ -87,6 +87,6 @@ public class Gui extends Updatable {
             return false;
         }
 
-        return System.currentTimeMillis() - 1000 > time;
+        return System.currentTimeMillis() - 1500 > time;
     }
 }

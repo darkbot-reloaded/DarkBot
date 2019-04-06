@@ -1,13 +1,12 @@
 package com.github.manolo8.darkbot.config.types.suppliers;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
 public class ModuleSupplier implements Supplier<OptionList> {
 
-    private static final List<String> MODULES = Arrays.asList("Collect", "Loot", "Loot & Collect");
+    private static final List<String> MODULES = Arrays.asList("Collect", "Loot", "Loot & Collect", "Event");
     private static final OptionList<Integer> MODULE_OPTIONS = new OptionList<Integer>() {
         @Override
         public Integer getValue(String text) {
@@ -20,7 +19,7 @@ public class ModuleSupplier implements Supplier<OptionList> {
         }
 
         @Override
-        public Collection<String> getOptions() {
+        public List<String> getOptions() {
             return MODULES;
         }
     };

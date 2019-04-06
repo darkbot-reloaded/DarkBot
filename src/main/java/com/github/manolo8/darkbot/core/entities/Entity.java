@@ -52,7 +52,6 @@ public class Entity extends Updatable {
     @Override
     public void update() {
         locationInfo.update();
-        clickable.update();
     }
 
     @Override

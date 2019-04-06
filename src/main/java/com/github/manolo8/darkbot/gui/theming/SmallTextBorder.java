@@ -11,8 +11,9 @@ public class SmallTextBorder extends DarculaTextBorder {
 
     @Override
     public Insets getBorderInsets(Component c) {
-        return c instanceof JComponent && Boolean.TRUE.equals(((JComponent) c).getClientProperty("ConfigTree")) ?
-                new InsetsUIResource(2, 3, 2, 3) : super.getBorderInsets(c);
+        if (c instanceof JComponent && Boolean.TRUE.equals(((JComponent) c).getClientProperty("ConfigTree"))) {
+            return DarculaTextFieldUI.isSearchField(c) ? super.getBorderInsets(c) : new InsetsUIResource(2, 3, 2, 3);
+        } else return super.getBorderInsets(c);
     }
 
 }

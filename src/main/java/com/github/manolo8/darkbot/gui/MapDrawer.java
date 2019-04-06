@@ -150,11 +150,6 @@ public class MapDrawer extends JPanel {
         drawDynamicEntities(g2);
         drawHero(g2);
 
-        g2.setColor(BARRIER_BORDER);
-        g2.drawRect(translateX(mapManager.boundX), translateY(mapManager.boundY),
-                translateX(mapManager.boundMaxX - mapManager.boundX),
-                translateY(mapManager.boundMaxY - mapManager.boundY));
-
         drawStats(g2,
                 "cre/h " + formatter.format(statsManager.earnedCredits()),
                 "uri/h " + formatter.format(statsManager.earnedUridium()),
@@ -359,6 +354,8 @@ public class MapDrawer extends JPanel {
         g2.setFont(FONT_SMALL);
         drawString(g2, hero.config + "C", 12, height - 12, Align.LEFT);
 
+        if (!hero.locationInfo.isLoaded()) return;
+
         g2.setColor(GOING);
         PathPoint begin = new PathPoint((int) hero.locationInfo.now.x, (int) hero.locationInfo.now.y);
         for (PathPoint path : pathFinder.path()) {
@@ -371,7 +368,12 @@ public class MapDrawer extends JPanel {
         Location loc = hero.locationInfo.now;
         g2.fillOval(translateX(loc.x) - 3, translateY(loc.y) - 3, 7, 7);
 
-        if (hero.pet.removed || !guiManager.pet.active()) return;
+        g2.setColor(BARRIER_BORDER);
+        g2.drawRect(translateX(mapManager.boundX), translateY(mapManager.boundY),
+                translateX(mapManager.boundMaxX - mapManager.boundX),
+                translateY(mapManager.boundMaxY - mapManager.boundY));
+
+        if (hero.pet.removed || !hero.pet.locationInfo.isLoaded()) return;
         loc = hero.pet.locationInfo.now;
 
         int x = translateX(loc.x),

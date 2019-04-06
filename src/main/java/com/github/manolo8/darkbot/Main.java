@@ -14,6 +14,7 @@ import com.github.manolo8.darkbot.modules.CollectorModule;
 import com.github.manolo8.darkbot.modules.EventModule;
 import com.github.manolo8.darkbot.modules.LootModule;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
+import com.github.manolo8.darkbot.modules.MapModule;
 import com.github.manolo8.darkbot.utils.ByteArrayToBase64TypeAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -26,7 +27,7 @@ import java.io.IOException;
 import java.lang.reflect.Proxy;
 
 public class Main extends Thread {
-    public static final String VERSION = "1.13.4 beta11";
+    public static final String VERSION = "1.13.6beta 2";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -48,6 +49,7 @@ public class Main extends Thread {
     public final Lazy.Sync<Boolean> status;
 
     public Config config;
+    private int lastModule;
     public Module module;
 
     public long lastRefresh;
@@ -65,8 +67,9 @@ public class Main extends Thread {
         this.config = new Config();
         loadConfig();
 
-        if (config.MISCELLANEOUS.FULL_DEBUG) API = (IDarkBotAPI) Proxy.newProxyInstance(Main.class.getClassLoader(), new Class[]{IDarkBotAPI.class}, IDarkBotAPI.getLoggingHandler());
-        else API = new DarkBotAPI();
+        API = new DarkBotAPI(config);
+        if (config.MISCELLANEOUS.FULL_DEBUG)
+            API = (IDarkBotAPI) Proxy.newProxyInstance(Main.class.getClassLoader(), new Class[]{IDarkBotAPI.class}, IDarkBotAPI.getLoggingHandler((DarkBotAPI) API));
 
         if (config.MISCELLANEOUS.DISPLAY.USE_DARCULA_THEME) {
             try {
@@ -81,10 +84,10 @@ public class Main extends Thread {
         botInstaller = new BotInstaller();
         status = new Lazy.Sync<>();
 
-        guiManager = new GuiManager(this);
         starManager = new StarManager();
         mapManager = new MapManager(this);
         hero = new HeroManager(this);
+        guiManager = new GuiManager(this);
         statsManager = new StatsManager(this);
         pingManager = new PingManager();
 
@@ -100,9 +103,8 @@ public class Main extends Thread {
             if (!value) lastRefresh = System.currentTimeMillis();
         });
 
-        status.add(r -> lastRefresh = System.currentTimeMillis());
-
-        updateConfig();
+        status.add(this::onRunningToggle);
+        checkModule();
 
         form = new MainGui(this);
         backpage = new BackpageManager(this);
@@ -122,7 +124,7 @@ public class Main extends Thread {
 
             double tickTime = System.currentTimeMillis() - time;
             avgTick = ((avgTick * 9) + tickTime) / 10;
-            sleepMax(time, botInstaller.invalid.value ? 3000 : 100);
+            sleepMax(time, botInstaller.invalid.value ? 1000 : 100);
         }
     }
 
@@ -137,6 +139,7 @@ public class Main extends Thread {
         form.tick();
 
         checkConfig();
+        checkModule();
     }
 
     private boolean isInvalid() {
@@ -150,7 +153,6 @@ public class Main extends Thread {
 
     private void validTick() {
         guiManager.tick();
-        guiManager.pet.tickActive();
         hero.tick();
         mapManager.tick();
         statsManager.tick();
@@ -180,16 +182,12 @@ public class Main extends Thread {
     }
 
     private void checkRefresh() {
-        if (config.MISCELLANEOUS.REFRESH_TIME != 0) {
+        if (config.MISCELLANEOUS.REFRESH_TIME == 0 ||
+                System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
 
-            boolean refreshTimer = System.currentTimeMillis() - lastRefresh > config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000;
-            boolean canRefresh = module.canRefresh();
-
-            if (refreshTimer && canRefresh) {
-                API.refresh();
-                lastRefresh = System.currentTimeMillis();
-            }
-        }
+        if (!module.canRefresh()) return;
+        API.handleRefresh();
+        lastRefresh = System.currentTimeMillis();
     }
 
     public <A extends Module> A setModule(A module) {
@@ -199,33 +197,27 @@ public class Main extends Thread {
     }
 
     public void setRunning(boolean running) {
-        if (this.running != running) {
+        if (this.running == running) return;
+        status.send(running);
+        this.running = running;
+    }
 
-            status.send(running);
-
-            this.running = running;
-        }
+    private void onRunningToggle(boolean running) {
+        lastRefresh = System.currentTimeMillis();
+        if (running && module instanceof MapModule) checkModule();
     }
 
     private void loadConfig() {
         try {
-
             File config = new File("config.json");
-
             if (config.exists()) {
-
                 FileReader reader = new FileReader(config);
-
                 this.config = GSON.fromJson(reader, Config.class);
-
                 if (this.config == null) this.config = new Config();
-
                 reader.close();
-
             } else {
                 saveConfig();
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -233,15 +225,10 @@ public class Main extends Thread {
 
     public void saveConfig() {
         try {
-
             File config = new File("config.json");
-
             FileWriter writer = new FileWriter(config);
-
             GSON.toJson(this.config, writer);
-
             writer.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -251,35 +238,19 @@ public class Main extends Thread {
         return running;
     }
 
-    private void updateConfig() {
-        switch (config.CURRENT_MODULE) {
-            case 0:
-                if (isNotModule(CollectorModule.class)) {
-                    setModule(new CollectorModule());
-                }
-                break;
-            case 1:
-                if (isNotModule(LootModule.class)) {
-                    setModule(new LootModule());
-                }
-                break;
-            case 2:
-                if (isNotModule(LootNCollectorModule.class)) {
-                    setModule(new LootNCollectorModule());
-                }
-                break;
-            case 3:
-                if (isNotModule(EventModule.class)) {
-                    setModule(new EventModule());
-                }
-                break;
-            default:
-                setModule(new CollectorModule());
-        }
+    private void checkModule() {
+        if (module == null || lastModule != config.GENERAL.CURRENT_MODULE)
+            setModule(getModule(lastModule = config.GENERAL.CURRENT_MODULE));
     }
 
-    private boolean isNotModule(Class clazz) {
-        return module == null || module.getClass() != clazz;
+    private Module getModule(int id) {
+        switch (id) {
+            case 0: return new CollectorModule();
+            case 1: return new LootModule();
+            case 2: return new LootNCollectorModule();
+            case 3: return new EventModule();
+            default: return new CollectorModule();
+        }
     }
 
     private void sleepMax(long time, int total) {

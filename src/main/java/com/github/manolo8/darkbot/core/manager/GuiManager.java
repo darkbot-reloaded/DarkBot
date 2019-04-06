@@ -136,7 +136,7 @@ public class GuiManager implements Manager {
 
     private void checkInvalid() {
         if (System.currentTimeMillis() - validTime > 90 * 1000 + (main.hero.map.id == -1 ? 180 * 1000 : 0)) {
-            API.refresh();
+            API.handleRefresh();
             validTime = System.currentTimeMillis();
         }
     }
@@ -153,7 +153,7 @@ public class GuiManager implements Manager {
         } else if (connecting.visible) {
 
             if (connecting.lastUpdatedIn(30000)) {
-                API.refresh();
+                API.handleRefresh();
                 connecting.reset();
             }
 

@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.manager;
 
+import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.Map;
@@ -8,15 +9,19 @@ import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class StarManager {
+    private static StarManager INSTANCE;
 
     private static int INVALID_MAP_ID = -999;
 
     private final Graph<Map, Portal> starSystem;
 
     public StarManager() {
+        INSTANCE = this;
         String[] HOME_MAPS = new String[]{"1-1", "2-1", "3-1"};
 
         starSystem = new StarBuilder()
@@ -164,7 +169,7 @@ public class StarManager {
         return map;
     }
 
-    public Collection<String> getAccessibleMaps() {
+    public List<String> getAccessibleMaps() {
         return starSystem.vertexSet().stream()
                 .filter(m -> !m.gg)
                 .filter(m -> starSystem.inDegreeOf(m) > 0)
@@ -178,6 +183,41 @@ public class StarManager {
                         (starSystem.outDegreeOf(m) == 0 || starSystem.containsEdge(m, m)))
                 .map(m -> m.name)
                 .sorted().collect(Collectors.toList());
+    }
+
+    public static class MapSupplier implements Supplier<OptionList> {
+        @Override
+        public OptionList<Integer> get() {
+            return new MapList(false);
+        }
+    }
+
+    public static class MapList extends OptionList<Integer> {
+        boolean allowNull;
+
+        public MapList(boolean allowNull) {
+            this.allowNull = allowNull;
+            if (allowNull) setSelectedItem("*");
+        }
+
+        @Override
+        public Integer getValue(String text) {
+            if (allowNull && text.equals("*")) return -1;
+            return INSTANCE.byName(text).id;
+        }
+
+        @Override
+        public String getText(Integer value) {
+            if (allowNull && value == -1) return "*";
+            return INSTANCE.byId(value).name;
+        }
+
+        @Override
+        public List<String> getOptions() {
+            List<String> maps = INSTANCE.getAccessibleMaps();
+            if (allowNull) maps.add(0, "*");
+            return maps;
+        }
     }
 
 }

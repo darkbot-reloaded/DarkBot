@@ -20,6 +20,7 @@ public class MapModule implements Module, MapChange {
     private Module back;
     private Portal current;
     private Map target;
+    private long lastMapChange;
 
     @Override
     public void install(Main main) {
@@ -41,49 +42,44 @@ public class MapModule implements Module, MapChange {
     }
 
     public void setTarget(Map target) {
+        lastMapChange = System.currentTimeMillis();
         this.target = target;
-
-        current = star.next(hero.map, hero.locationInfo, target);
-    }
-
-    public void setTargetAndBack(Map target) {
-        setTarget(target);
     }
 
     @Override
     public void tick() {
+        if (hero.map != target || current == null || current.removed)
+            current = star.next(hero.map, hero.locationInfo, target);
 
-        if (current != null && !current.removed) {
-
-            if (current.target != target) {
-                current = star.next(hero.map, hero.locationInfo, target);
+        if (current == null) {
+            if (System.currentTimeMillis() - lastMapChange > 3000) {
+                goBack();
             }
-
-            double distance = current.locationInfo.distance(hero);
-
-            hero.runMode();
-
-            if (distance < 100 && !drive.isMoving()) {
-                hero.jumpPortal(current);
-            } else if (current.locationInfo.isLoaded()) {
-                drive.move(current);
-            }
-        } else if (back != null) {
-            main.setModule(this.back);
-            back = null;
+            return;
         }
+
+        main.guiManager.pet.setEnabled(false);
+        double distance = current.locationInfo.distance(hero);
+        hero.runMode();
+
+        if (distance < 100) hero.jumpPortal(current);
+        else if (current.locationInfo.isLoaded()) drive.move(current);
     }
 
     @Override
     public void onMapChange() {
+        lastMapChange = System.currentTimeMillis();
         if (hero.map == target) {
-            if (back != null) {
-                main.setModule(back);
-                back = null;
-            }
+            goBack();
             current = null;
         } else {
             current = star.next(hero.map, hero.locationInfo, target);
         }
     }
+
+    private void goBack() {
+        if (back != null) main.setModule(this.back);
+        back = null;
+    }
+
 }

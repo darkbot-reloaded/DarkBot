@@ -1,8 +1,17 @@
 package com.github.manolo8.darkbot.core;
 
+import com.github.manolo8.darkbot.config.Config;
+import com.sun.jna.platform.win32.User32;
+
 import java.nio.charset.StandardCharsets;
 
 public class DarkBotAPI implements IDarkBotAPI {
+
+    private final Config config;
+
+    public DarkBotAPI(Config config) {
+        this.config = config;
+    }
 
     static {
         System.loadLibrary("DarkBot");
@@ -75,6 +84,12 @@ public class DarkBotAPI implements IDarkBotAPI {
     public native long[] queryMemory(byte[] query, int maxQuantity);
 
     public native void setVisible(boolean visible);
+
+    public void handleRefresh() {
+        if (config.MISCELLANEOUS.FOCUS_ON_RELOAD)
+            User32.INSTANCE.SetForegroundWindow(User32.INSTANCE.FindWindow("DarkBrowser", "DarkBrowser"));
+        refresh();
+    }
 
     public native void refresh();
 

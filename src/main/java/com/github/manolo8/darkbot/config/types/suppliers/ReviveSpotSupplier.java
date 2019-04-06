@@ -20,7 +20,7 @@ public class ReviveSpotSupplier implements Supplier<OptionList> {
         }
 
         @Override
-        public Collection<String> getOptions() {
+        public List<String> getOptions() {
             return LOCATIONS;
         }
     };

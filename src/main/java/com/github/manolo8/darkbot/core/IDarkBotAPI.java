@@ -51,15 +51,21 @@ public interface IDarkBotAPI {
 
     void setVisible(boolean visible);
 
+    void handleRefresh();
+
     void refresh();
 
-    static LoggingAPIHandler getLoggingHandler() {
-        return new LoggingAPIHandler();
+    static LoggingAPIHandler getLoggingHandler(DarkBotAPI API) {
+        return new LoggingAPIHandler(API);
     }
 }
 class LoggingAPIHandler implements InvocationHandler {
 
-    private DarkBotAPI API = new DarkBotAPI();
+    private DarkBotAPI API;
+
+    LoggingAPIHandler(DarkBotAPI API) {
+        this.API = API;
+    }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
         boolean log = method.getName().startsWith("write") && !method.getName().equals("writeMemoryDouble");

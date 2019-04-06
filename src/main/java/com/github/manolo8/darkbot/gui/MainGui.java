@@ -1,18 +1,16 @@
 package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.gui.components.ExtraButton;
 import com.github.manolo8.darkbot.gui.components.MainButton;
+import com.github.manolo8.darkbot.gui.utils.SystemUtils;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
-import java.net.URI;
-
-import static com.github.manolo8.darkbot.Main.API;
 
 public class MainGui extends JFrame {
 
@@ -21,12 +19,9 @@ public class MainGui extends JFrame {
 
     private MapDrawer mapDrawer;
 
-    private boolean visible;
-
-    private JButton toggleRunning;
-    private JButton toggleVisibility;
-    private JButton reload;
-    private JButton copySid;
+    private ExtraButton extraButton;
+    private JButton startButton;
+    private JButton openHome;
     private JButton openConfig;
 
     protected final Image icon = new ImageIcon(this.getClass().getResource("/icon.png")).getImage();
@@ -39,8 +34,6 @@ public class MainGui extends JFrame {
         this.configGui = new ConfigGui(main);
         configGui.setAlwaysOnTop(main.config.MISCELLANEOUS.DISPLAY.ALWAYS_ON_TOP);
         configGui.setIconImage(icon);
-
-        this.visible = true;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(640, 480);
@@ -56,111 +49,51 @@ public class MainGui extends JFrame {
 
     private void initComponents() {
         mapDrawer = new MapDrawer(main);
-        toggleRunning = new MainButton("START");
-        toggleVisibility = new MainButton("HIDE");
-        reload = new MainButton("RELOAD");
-        copySid = new MainButton("SID");
+        extraButton = new ExtraButton(main);
+        startButton = new MainButton("START");
+        openHome = new MainButton("HOME");
         openConfig = new MainButton("CONFIG");
     }
 
     private void setComponentPosition() {
-        getContentPane().setLayout(new GridBagLayout());
+        getContentPane().setLayout(new MigLayout("ins 0, gap 0, wrap 4, fill", "[33%][33%][33%][1%]", "[grow][]"));
 
-        GridBagConstraints c = new GridBagConstraints();
-
-        c.fill = GridBagConstraints.BOTH;
-
-        c.weightx = 1.0;
-        c.weighty = 1.0;
-
-        add(mapDrawer, c);
-
-        c.weighty = 0;
-        c.gridy = 1;
-
-        Container container = new Container();
-
-        container.setLayout(new GridLayout(1, 4));
-
-        container.add(openConfig);
-        container.add(copySid);
-        container.add(reload);
-        container.add(toggleVisibility);
-        container.add(toggleRunning);
-
-        add(container, c);
+        add(mapDrawer, "grow, span");
+        add(openConfig, "grow");
+        add(openHome, "grow");
+        add(startButton, "grow");
+        add(extraButton);
     }
 
     private void setComponentEvent() {
-
         addWindowStateListener(e -> {
             if (e.getNewState() == WindowEvent.WINDOW_CLOSING) {
                 main.saveConfig();
             }
         });
 
-        reload.addMouseListener(new MouseAdapter() {
+        startButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {
-                API.refresh();
+            public void mouseClicked(MouseEvent e) {
+                main.setRunning(!main.isRunning());
+                startButton.setText(main.isRunning() ? "STOP" : "START");
             }
         });
 
-        toggleVisibility.addMouseListener(new MouseAdapter() {
+        openHome.addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {
-                if (visible) {
-                    toggleVisibility.setText("SHOW");
-                    API.setVisible(false);
-                    visible = false;
-                } else {
-                    toggleVisibility.setText("HIDE");
-                    API.setVisible(true);
-                    visible = true;
-                }
-            }
-        });
-
-        toggleRunning.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-
-                boolean running = main.isRunning();
-
-                if (running) {
-                    toggleRunning.setText("START");
-                    main.setRunning(false);
-                } else {
-                    toggleRunning.setText("STOP");
-                    main.setRunning(true);
-                }
-            }
-        });
-
-        copySid.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                String sid = main.statsManager.sid,
-                        instance = main.statsManager.instance;
-
-                if (sid == null || sid.isEmpty()) return;
-
-                StringSelection selection = new StringSelection(sid);
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
-
-                if (SwingUtilities.isRightMouseButton(e) || instance == null || instance.isEmpty()) return;
-                try {
-                    Desktop.getDesktop().browse(URI.create(instance + "?dosid=" + sid));
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+            public void mouseClicked(MouseEvent e) {
+                String sid = main.statsManager.sid, instance = main.statsManager.instance;
+                if (sid == null || sid.isEmpty() || instance == null || instance.isEmpty()) return;
+                SystemUtils.openUrl(instance + "?dosid=" + sid);
             }
         });
 
         openConfig.addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {
-                configGui.setVisible(!configGui.isVisible());
+            public void mouseClicked(MouseEvent e) {
+                configGui.setVisible(true);
+                configGui.toFront();
             }
         });
     }

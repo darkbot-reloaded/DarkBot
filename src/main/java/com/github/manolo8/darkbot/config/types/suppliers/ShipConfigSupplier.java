@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.config.types.suppliers;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -20,7 +19,7 @@ public class ShipConfigSupplier implements Supplier<OptionList> {
         }
 
         @Override
-        public Collection<String> getOptions() {
+        public List<String> getOptions() {
             return options;
         }
     };

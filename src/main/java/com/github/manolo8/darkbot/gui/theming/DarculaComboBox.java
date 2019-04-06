@@ -20,7 +20,7 @@ public class DarculaComboBox extends DarculaComboBoxUI {
 
     @Override
     protected Insets getInsets() {
-        return Boolean.TRUE.equals(comboBox.getClientProperty("ConfigTree")) ? new InsetsUIResource(1, 7, 1, 5) : super.getInsets();
+        return Boolean.TRUE.equals(comboBox.getClientProperty("ConfigTree")) ? new InsetsUIResource(0, 9, 1, 5) : super.getInsets();
     }
 
 }

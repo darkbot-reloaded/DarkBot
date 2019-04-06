@@ -6,7 +6,7 @@
 
     <groupId>com.github.manolo8.darkbot</groupId>
     <artifactId>DarkBOT</artifactId>
-    <version>1.13.4-SNAPSHOT</version>
+    <version>1.13.6-SNAPSHOT</version>
 
     <dependencies>
 
@@ -23,9 +23,27 @@
         </dependency>
 
         <dependency>
+            <groupId>com.miglayout</groupId>
+            <artifactId>miglayout</artifactId>
+            <version>3.7.4</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
             <version>1.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>5.2.0</version>
         </dependency>
     </dependencies>
 
@@ -90,6 +108,35 @@
                             </descriptorRefs>
                             <finalName>DarkBot</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>proguard</goal></goals>
+                        <configuration>
+                            <injar>${project.build.finalName}-jar-with-dependencies.jar</injar>
+                            <outjar>DarkBot.jar</outjar>
+                            <options>
+                                <option>-allowaccessmodification</option>
+                                <option>-dontoptimize</option>
+                                <option>-dontobfuscate</option>
+                                <option>-dontnote</option>
+                                <option>-dontwarn</option> <!-- added option to ignore com.sun missing classes -->
+                                <option>-keepattributes Signature</option>
+                                <option>-keep class com.github.manolo8.** { *; }</option>
+                                <option>-keep class com.bulenkov.** { *; }</option>
+                                <option>-keep class com.sun.jna.* { *; }</option>
+                            </options>
+                            <libs>
+                                <lib>${java.home}/lib/rt.jar</lib>
+                            </libs>
                         </configuration>
                     </execution>
                 </executions>

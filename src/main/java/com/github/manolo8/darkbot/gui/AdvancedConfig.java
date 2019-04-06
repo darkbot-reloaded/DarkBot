@@ -47,6 +47,9 @@ public class AdvancedConfig extends JPanel {
 
         configTree.setCellEditor(editor);
 
+        // Unfold top-level nodes
+        for (int i = configTree.getRowCount() - 1; i >= 0; i--) configTree.expandRow(i);
+
         JScrollPane scrollPane = new JScrollPane(configTree);
         scrollPane.setBorder(null);
         return scrollPane;

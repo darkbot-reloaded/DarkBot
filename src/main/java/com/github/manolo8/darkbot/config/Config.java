@@ -4,8 +4,10 @@ import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
+import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ShipConfigSupplier;
+import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
@@ -17,9 +19,6 @@ import java.util.Map;
 
 public class Config {
 
-    public int WORKING_MAP = 26;
-    public int CURRENT_MODULE;
-
     // DEFINED AREAS
     public Map<Integer, ZoneInfo> AVOIDED = new HashMap<>();
     public Map<Integer, ZoneInfo> PREFERRED = new HashMap<>();
@@ -29,12 +28,21 @@ public class Config {
 
     public @Option("General") General GENERAL = new General();
     public static class General {
-        public @Option("Offensive config")
-        ShipConfig OFFENSIVE = new ShipConfig(1, '8');
-        public @Option("Run config")
-        ShipConfig RUN = new ShipConfig(2, '9');
-        public @Option("Roam config")
-        ShipConfig ROAM = new ShipConfig(1, '9');
+        @Option("Module")
+        @Editor(JListField.class)
+        @Options(ModuleSupplier.class)
+        public int CURRENT_MODULE;
+
+        @Option("Working map")
+        @Editor(JListField.class)
+        @Options(StarManager.MapSupplier.class)
+        public int WORKING_MAP = 26;
+        @Option("Offensive config")
+        public ShipConfig OFFENSIVE = new ShipConfig(1, '8');
+        @Option("Run config")
+        public ShipConfig RUN = new ShipConfig(2, '9');
+        @Option("Roam config")
+        public ShipConfig ROAM = new ShipConfig(1, '9');
 
         public @Option("Safety") Safety SAFETY = new Safety();
         public static class Safety {
@@ -161,6 +169,8 @@ public class Config {
         @Option(value = "Refresh every", description = "Every how many minutes to refresh")
         @Num(max = 60 * 12, step = 10)
         public int REFRESH_TIME = 0;
+        @Option("Focus browser window on reload")
+        public boolean FOCUS_ON_RELOAD = true;
         @Option("Developer stuff shown")
         public boolean DEV_STUFF = false;
         @Option("Full debug & memory trace (Don't enable)")

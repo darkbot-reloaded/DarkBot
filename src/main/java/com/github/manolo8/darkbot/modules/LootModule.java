@@ -72,6 +72,7 @@ public class LootModule implements Module {
     public void tick() {
 
         if (checkDangerousAndCurrentMap()) {
+            main.guiManager.pet.setEnabled(true);
 
             if (findTarget()) {
                 moveToAnSafePosition();
@@ -85,11 +86,11 @@ public class LootModule implements Module {
     }
 
     boolean checkDangerousAndCurrentMap() {
-        if (this.config.WORKING_MAP != this.hero.map.id && !main.mapManager.entities.portals.isEmpty()) {
+        if (this.config.GENERAL.WORKING_MAP != this.hero.map.id && !main.mapManager.entities.portals.isEmpty()) {
             this.hero.runMode();
             repairing = true;
             jump = false;
-            this.main.setModule(new MapModule()).setTargetAndBack(this.main.starManager.byId(this.main.config.WORKING_MAP));
+            this.main.setModule(new MapModule()).setTarget(this.main.starManager.byId(this.main.config.GENERAL.WORKING_MAP));
             return false;
         }
 

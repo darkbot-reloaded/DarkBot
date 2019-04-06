@@ -1,32 +1,28 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.objects.Gui;
 
 public class PetManager extends Gui {
 
     private static final int MAIN_BUTTON_X = 30, MODULES_X_MAX = 260, MODULE_Y = 120;
 
-    private long repairPetTime;
-    private long togglePetTime;
-    private long selectModuleTime;
+    private long togglePetTime, selectModuleTime;
     private int moduleStatus = -2; // -2 no module, -1 selecting module, >= 0 module selected
-    private int activity;
     private Main main;
-    private boolean enabled = true;
+    private Pet pet;
+    private boolean enabled = false;
 
     PetManager(Main main) {
         this.main = main;
+        this.pet = main.hero.pet;
     }
 
     public void tick() {
         if (!main.isRunning() || !main.config.PET.ENABLED) return;
-        if (dead()) {
-            if (show(true)) tryRevive();
-            return;
-        }
         if (active() != enabled) {
-            if (show(true)) togglePet();
+            if (show(true)) clickToggleStatus();
             return;
         }
         if (!enabled) {
@@ -41,33 +37,16 @@ public class PetManager extends Gui {
         this.enabled = enabled;
     }
 
-    private boolean dead() {
-        return main.hero.health.hp == 0;
-    }
-
-    public void tickActive() {
-        this.activity = dead() ? 0 : System.currentTimeMillis() - this.togglePetTime > 1000 && main.hero.pet.locationInfo.isMoving() ? 25 : activity;
-        if (main.hero.locationInfo.isMoving()) activity--;
-    }
-
-    public boolean active() {
-        return activity > 0;
+    private boolean active() {
+        return !pet.removed;
     }
 
     private boolean moduleSelected() {
         return System.currentTimeMillis() - this.selectModuleTime > 1000L;
     }
 
-    private void tryRevive() {
-        if (System.currentTimeMillis() - this.repairPetTime > 10000L) {
-            click(MAIN_BUTTON_X, MODULE_Y);
-            this.repairPetTime = System.currentTimeMillis();
-        }
-    }
-
-    private void togglePet() {
-        if (System.currentTimeMillis() - this.togglePetTime > 10000L) {
-            activity = activity > 0 ? 0 : 25;
+    private void clickToggleStatus() {
+        if (System.currentTimeMillis() - this.togglePetTime > 5000L) {
             click(MAIN_BUTTON_X, MODULE_Y);
             this.moduleStatus = -2;
             this.togglePetTime = System.currentTimeMillis();

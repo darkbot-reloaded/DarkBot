@@ -69,7 +69,7 @@ public class CollectorModule implements Module {
     public void tick() {
 
         if (isNotWaiting() && checkCurrentMap()) {
-
+            main.guiManager.pet.setEnabled(true);
             checkInvisibility();
             checkDangerous();
 
@@ -83,14 +83,13 @@ public class CollectorModule implements Module {
 
 
     private boolean checkCurrentMap() {
-        boolean mapWrong = config.WORKING_MAP != hero.map.id;
+        boolean mapWrong = config.GENERAL.WORKING_MAP != hero.map.id;
 
         if (mapWrong) {
 
             hero.runMode();
 
-            main.setModule(new MapModule())
-                    .setTargetAndBack(main.starManager.byId(main.config.WORKING_MAP));
+            main.setModule(new MapModule()).setTarget(main.starManager.byId(main.config.GENERAL.WORKING_MAP));
 
             return false;
         }

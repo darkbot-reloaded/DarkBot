@@ -29,9 +29,10 @@ public class JListField extends JComboBox<String> implements OptionEditor {
     @Override
     public void edit(ConfigField field) {
         this.field = null;
-        this.removeAllItems();
+        //this.removeAllItems();
         this.options = ReflectionUtils.createInstance(field.field.getAnnotation(Options.class).value()).get();
-        for (String option : options.getOptions()) addItem(option);
+        setModel(options);
+        //for (String option : options.getOptions()) addItem(option);
 
         this.setPreferredSize(null);
         setSelectedItem(options.getText(field.get()));

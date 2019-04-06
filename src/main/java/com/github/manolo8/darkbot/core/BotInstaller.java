@@ -37,7 +37,7 @@ public class BotInstaller {
     public final Lazy<Long> settingsAddress;
 
 
-    private long timer;
+    private long timer = System.currentTimeMillis();
 
     public BotInstaller() {
         this.managers = new ArrayList<>();
@@ -165,7 +165,7 @@ public class BotInstaller {
 
     private void checkInvalid() {
         if (System.currentTimeMillis() - timer > 180000) {
-            API.refresh();
+            API.handleRefresh();
             timer = System.currentTimeMillis();
         }
     }
