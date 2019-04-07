@@ -60,7 +60,8 @@ public class LootModule implements Module {
     @Override
     public String status() {
         return jump ? "Jumping port" : repairing ? "Repairing" : escaping != null ? "Avoiding enemy" :
-                target != null ? "Killing npc" : "Roaming";
+                target != null ? "Killing npc" + (shooting ? " S" : "") + (ability != null ? " A" : "") + (sab ? " SAB" : "")
+                        : "Roaming";
     }
 
     @Override
@@ -70,7 +71,6 @@ public class LootModule implements Module {
 
     @Override
     public void tick() {
-
         if (checkDangerousAndCurrentMap()) {
             main.guiManager.pet.setEnabled(true);
 
@@ -80,9 +80,7 @@ public class LootModule implements Module {
             } else if (!drive.isMoving()) {
                 drive.moveRandom();
             }
-
         }
-
     }
 
     boolean checkDangerousAndCurrentMap() {
@@ -132,25 +130,25 @@ public class LootModule implements Module {
             return;
         }
 
-        if ((!target.npcInfo.ignoreAttacked && !main.mapManager.isCurrentTargetOwned()) ||
+        if (!(target.npcInfo.ignoreAttacked || main.mapManager.isCurrentTargetOwned()) ||
                 (drive.closestDistance(target.locationInfo.now) > 400 && !target.locationInfo.isMoving()
                         && (target.health.shIncreasedIn(1000) || target.health.shieldPercent() > 0.95))) {
             target.setTimerTo(5000);
-            target = null;
+            hero.setTarget(target = null);
             return;
         }
 
-        if (!shooting || ability != null) {
-            if (hero.locationInfo.distance(target) > 575) return;
-            if (!shooting) {
-                API.keyboardClick(getAttackKey());
-                shooting = true;
-            }
-            if (ability != null && ability < System.currentTimeMillis()) {
-                if (target.health.maxHp >= config.LOOT.SHIP_ABILITY_MIN) API.keyboardClick(config.LOOT.SHIP_ABILITY);
+        if (!shooting) {
+            API.keyboardClick(getAttackKey());
+            laserTime = System.currentTimeMillis();
+            shooting = true;
+        }
+        if (ability != null && (target.health.maxHp > 0 || ability < System.currentTimeMillis())) {
+            if (target.health.maxHp < config.LOOT.SHIP_ABILITY_MIN) ability = null;
+            else if (hero.locationInfo.distance(target) < 575) {
+                API.keyboardClick(config.LOOT.SHIP_ABILITY);
                 ability = null;
             }
-            return;
         }
 
         if (checkIfIsAttackingAndCanContinue() && shouldSab() != sab) {
