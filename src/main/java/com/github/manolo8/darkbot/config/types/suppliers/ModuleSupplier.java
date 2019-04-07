@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 
 public class ModuleSupplier implements Supplier<OptionList> {
 
-    private static final List<String> MODULES = Arrays.asList("Collect", "Loot", "Loot & Collect", "Event");
+    private static final List<String> MODULES = Arrays.asList("Collect", "Loot", "Loot & Collect", "Event", "Custom");
     private static final OptionList<Integer> MODULE_OPTIONS = new OptionList<Integer>() {
         @Override
         public Integer getValue(String text) {

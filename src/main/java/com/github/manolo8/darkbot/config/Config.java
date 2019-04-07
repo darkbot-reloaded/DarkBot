@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.config.types.suppliers.ShipConfigSupplier;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
+import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
@@ -32,6 +33,10 @@ public class Config {
         @Editor(JListField.class)
         @Options(ModuleSupplier.class)
         public int CURRENT_MODULE;
+
+        @Option("Custom Module")
+        @Editor(JFileOpener.class)
+        public String CUSTOM_MODULE;
 
         @Option("Working map")
         @Editor(JListField.class)

@@ -3,9 +3,11 @@ package com.github.manolo8.darkbot.config.tree;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
+import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
+import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -71,6 +73,7 @@ public abstract class ConfigNode {
                     field.field.getAnnotation(Options.class).value()).get().getText(obj);
             if (field.getEditor() == JBoxInfoTable.class) return "Box infos (" + ((Map) obj).size() + ")";
             if (field.getEditor() == JNpcInfoTable.class) return "Npc infos (" + ((Map) obj).size() + ")";
+            if (field.getEditor() == JFileOpener.class) return Strings.fileName((String) obj);
             return Objects.toString(obj, "");
         }
 

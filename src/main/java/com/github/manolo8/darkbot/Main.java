@@ -3,11 +3,16 @@ package com.github.manolo8.darkbot;
 import com.bulenkov.darcula.DarculaLaf;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
+import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.itf.Module;
-import com.github.manolo8.darkbot.core.manager.*;
+import com.github.manolo8.darkbot.core.manager.GuiManager;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.manager.PingManager;
+import com.github.manolo8.darkbot.core.manager.StarManager;
+import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.modules.CollectorModule;
@@ -16,6 +21,7 @@ import com.github.manolo8.darkbot.modules.LootModule;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import com.github.manolo8.darkbot.modules.MapModule;
 import com.github.manolo8.darkbot.utils.ByteArrayToBase64TypeAdapter;
+import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -27,7 +33,7 @@ import java.io.IOException;
 import java.lang.reflect.Proxy;
 
 public class Main extends Thread {
-    public static final String VERSION = "1.13.6 beta 4";
+    public static final String VERSION = "1.13.6 beta 6";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -49,7 +55,7 @@ public class Main extends Thread {
     public final Lazy.Sync<Boolean> status;
 
     public Config config;
-    private int lastModule;
+    private int moduleId;
     public Module module;
 
     public long lastRefresh;
@@ -204,7 +210,10 @@ public class Main extends Thread {
 
     private void onRunningToggle(boolean running) {
         lastRefresh = System.currentTimeMillis();
-        if (running && module instanceof MapModule) checkModule();
+        if (running && module instanceof MapModule) {
+            moduleId = -1;
+            checkModule();
+        }
     }
 
     private void loadConfig() {
@@ -239,8 +248,8 @@ public class Main extends Thread {
     }
 
     private void checkModule() {
-        if (module == null || lastModule != config.GENERAL.CURRENT_MODULE)
-            setModule(getModule(lastModule = config.GENERAL.CURRENT_MODULE));
+        if (module == null || moduleId != config.GENERAL.CURRENT_MODULE)
+            setModule(getModule(moduleId = config.GENERAL.CURRENT_MODULE));
     }
 
     private Module getModule(int id) {
@@ -249,7 +258,27 @@ public class Main extends Thread {
             case 1: return new LootModule();
             case 2: return new LootNCollectorModule();
             case 3: return new EventModule();
+            case 4: {
+                Module m = getCustomModule();
+                if (m != null) return m;
+                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null,
+                        "Failed to load custom module. Make sure you've selected a valid file.", "Warning", JOptionPane.WARNING_MESSAGE));
+            }
             default: return new CollectorModule();
+        }
+    }
+
+    private Module getCustomModule() {
+        try {
+            String customModule = config.GENERAL.CUSTOM_MODULE;
+            if (customModule == null || customModule.isEmpty()) return null;
+            File file = new File(customModule);
+            if (!file.exists()) return null;
+            Class<?> newModule = ReflectionUtils.compileModule(file);
+            return (Module) ReflectionUtils.createInstance(newModule);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
