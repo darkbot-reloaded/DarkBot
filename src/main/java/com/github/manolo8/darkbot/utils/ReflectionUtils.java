@@ -6,14 +6,12 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -44,14 +42,17 @@ public class ReflectionUtils {
     public static Class<?> compileModule(File original) throws Exception {
         String moduleName = original.getName().replace(".java", "");
 
-        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        if (compiler == null)
+            throw new UnsupportedOperationException("No java compiler found, invalid classpath");
+
         try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null)) {
             File source = new File("tmp/com/github/manolo8/darkbot/modules/" + original.getName());
             if (!source.getParentFile().exists() && !source.getParentFile().mkdirs())
                 throw new IOException("Failed to create folder structure");
 
-            Files.copy(original.toPath(),source.toPath(), REPLACE_EXISTING);
+            Files.copy(original.toPath(), source.toPath(), REPLACE_EXISTING);
 
             List<String> optionList = Arrays.asList("-classpath", System.getProperty("java.class.path") + ";dist/InlineCompiler.jar");
 
@@ -60,22 +61,18 @@ public class ReflectionUtils {
                 return new URLClassLoader(new URL[]{new File("tmp").toURI().toURL()})
                     .loadClass("com.github.manolo8.darkbot.modules." + moduleName);
 
-            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-                System.err.format("Error on line %d in %s%n",
-                        diagnostic.getLineNumber(),
-                        diagnostic.getSource().toUri());
-            }
+            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics())
+                System.err.format("Error (%d,%d) java: %s%n", diagnostic.getLineNumber(), diagnostic.getColumnNumber(), diagnostic.getMessage(null));
+            throw new UnsupportedOperationException("The provided file did not compile successfully, look at the console for more details.");
         } finally {
             try {
                 deleteFolder(new File("tmp"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (IOException ignore) {}
         }
-        return null;
     }
 
     private static void deleteFolder(File f) throws IOException {
+        if (!f.exists()) return;
         if (f.isDirectory()) for (File c : f.listFiles()) deleteFolder(c);
         if (!f.delete()) throw new FileNotFoundException("Failed to delete: " + f);
     }

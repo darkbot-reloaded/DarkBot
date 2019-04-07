@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.lang.reflect.Proxy;
 
 public class Main extends Thread {
-    public static final String VERSION = "1.13.6 beta 6";
+    public static final String VERSION = "1.13.6 beta 8";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -259,27 +259,38 @@ public class Main extends Thread {
             case 2: return new LootNCollectorModule();
             case 3: return new EventModule();
             case 4: {
-                Module m = getCustomModule();
-                if (m != null) return m;
-                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null,
-                        "Failed to load custom module. Make sure you've selected a valid file.", "Warning", JOptionPane.WARNING_MESSAGE));
+                try {
+                    Module m = getCustomModule();
+                    if (m != null) {
+                        popupMessage("Success", "Successfully loaded custom module",  JOptionPane.INFORMATION_MESSAGE);
+                        return m;
+                    }
+                    popupMessage("Warning", "Couldn't load custom module, did you configure it correctly?", JOptionPane.WARNING_MESSAGE);
+                } catch (Exception e) {
+                    popupMessage("Error compiling module", e.getMessage(), JOptionPane.ERROR_MESSAGE);
+                    e.printStackTrace();
+                }
             }
             default: return new CollectorModule();
         }
     }
 
-    private Module getCustomModule() {
-        try {
-            String customModule = config.GENERAL.CUSTOM_MODULE;
-            if (customModule == null || customModule.isEmpty()) return null;
-            File file = new File(customModule);
-            if (!file.exists()) return null;
-            Class<?> newModule = ReflectionUtils.compileModule(file);
-            return (Module) ReflectionUtils.createInstance(newModule);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    private void popupMessage(String title, String content, int type) {
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane pane = new JOptionPane(content, type);
+            JDialog dialog = pane.createDialog(title);
+            dialog.setAlwaysOnTop(true);
+            dialog.setVisible(true);
+        });
+    }
+
+    private Module getCustomModule() throws Exception {
+        String customModule = config.GENERAL.CUSTOM_MODULE;
+        if (customModule == null || customModule.isEmpty()) return null;
+        File file = new File(customModule);
+        if (!file.exists()) return null;
+        Class<?> newModule = ReflectionUtils.compileModule(file);
+        return (Module) ReflectionUtils.createInstance(newModule);
     }
 
     private void sleepMax(long time, int total) {
