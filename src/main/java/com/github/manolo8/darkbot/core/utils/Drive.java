@@ -57,8 +57,11 @@ public class Drive {
         lastSegment = next;
 
         boolean diffAngle = Math.abs(now.angle(next) - last.angle(now)) > 0.1;
-        if (hero.timeTo(now.distance(next)) > 100 || diffAngle) {
-            if (heroLoc.isMoving() && !diffAngle) return;
+        if (hero.timeTo(now.distance(next)) > 100 || (diffAngle && heroLoc.isMoving())) {
+            if (heroLoc.isMoving() && !diffAngle) {
+                if (System.currentTimeMillis() - lastClick > 3000) click(next);
+                return;
+            }
 
             if (!force && heroLoc.isMoving() && !newPath && System.currentTimeMillis() - lastClick > 500) stop(false);
             else click(next);
@@ -69,7 +72,7 @@ public class Drive {
     }
 
     private void click(Location loc) {
-        if (System.currentTimeMillis() - lastClick > 300) {
+        if (System.currentTimeMillis() - lastClick > 200) {
             lastClick = System.currentTimeMillis();
             mouse.clickLoc(loc);
         }
@@ -135,7 +138,7 @@ public class Drive {
     }
 
     public Location movingTo() {
-        return tempDest == null ? heroLoc.now.copy() : tempDest.copy();
+        return endLoc == null ? heroLoc.now.copy() : endLoc.copy();
     }
 
     public boolean isOutOfMap() {

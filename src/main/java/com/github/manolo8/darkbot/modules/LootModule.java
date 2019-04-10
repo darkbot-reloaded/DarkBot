@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.modules;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
@@ -31,14 +32,12 @@ public class LootModule implements Module {
     private Config config;
 
     public Npc target;
-    private boolean shooting;
     private Long ability;
 
     private int radiusFix;
 
     private long laserTime;
     private long clickDelay;
-    private int times;
     private boolean sab;
 
     private boolean repairing;
@@ -60,7 +59,7 @@ public class LootModule implements Module {
     @Override
     public String status() {
         return jump ? "Jumping port" : repairing ? "Repairing" : escaping != null ? "Avoiding enemy" :
-                target != null ? "Killing npc" + (shooting ? " S" : "") + (ability != null ? " A" : "") + (sab ? " SAB" : "")
+                target != null ? "Killing npc" + (hero.isAttacking(target) ? " S" : "") + (ability != null ? " A" : "") + (sab ? " SAB" : "")
                         : "Roaming";
     }
 
@@ -95,7 +94,7 @@ public class LootModule implements Module {
         if (jump && escaping != null) {
             this.hero.runMode();
             if (escaping.locationInfo.distance(this.hero) < 250.0) hero.jumpPortal(escaping);
-            else this.drive.move(escaping);
+            else moveToSafety(escaping);
             return false;
         }
 
@@ -114,7 +113,7 @@ public class LootModule implements Module {
             jump |= config.LOOT.SAFETY.JUMP_PORTALS && underAttack;
             repairing |= underAttack || lowHp || !this.config.LOOT.SAFETY.STOP_RUNNING_NO_SIGHT;
 
-            if (escaping.locationInfo.distance(this.hero) > 250.0) this.drive.move(escaping);
+            if (escaping.locationInfo.distance(this.hero) > 250.0) moveToSafety(escaping);
             else if (lowHp && hero.health.hpDecreasedIn(100)) jump |= config.LOOT.SAFETY.JUMP_PORTALS;
             return false;
         }
@@ -122,6 +121,12 @@ public class LootModule implements Module {
         if (repairing) return false;
         escaping = null;
         return true;
+    }
+
+    private void moveToSafety(Entity safety) {
+        if (drive.movingTo().distance(safety.locationInfo.now) < 200) return;
+        double angle = safety.locationInfo.now.angle(hero.locationInfo.now) + Math.random() * 0.1 - 0.05;
+        drive.move(Location.of(escaping.locationInfo.now, angle, 20 + Math.random() * 200));
     }
 
     void doKillTargetTick() {
@@ -138,11 +143,6 @@ public class LootModule implements Module {
             return;
         }
 
-        if (!shooting) {
-            API.keyboardClick(getAttackKey());
-            laserTime = System.currentTimeMillis();
-            shooting = true;
-        }
         if (ability != null && (target.health.maxHp > 0 || ability < System.currentTimeMillis())) {
             if (target.health.maxHp < config.LOOT.SHIP_ABILITY_MIN) ability = null;
             else if (hero.locationInfo.distance(target) < 575) {
@@ -151,31 +151,21 @@ public class LootModule implements Module {
             }
         }
 
-        if (checkIfIsAttackingAndCanContinue() && shouldSab() != sab) {
-            API.keyboardClick(getAttackKey());
-        }
+        tryAttackOrFix();
     }
 
     boolean findTarget() {
-        if (target == null || target.removed || hero.target != target || (!shooting && hero.locationInfo.distance(target) > 600))
+        if (target == null || target.removed || hero.target != target || (!hero.isAttacking(target) && hero.locationInfo.distance(target) > 600))
             target = closestNpc(hero.locationInfo.now);
         return target != null;
     }
 
-    private boolean checkIfIsAttackingAndCanContinue() {
-
-        long laser = System.currentTimeMillis() - laserTime;
-
-        boolean attacking = hero.isAttacking(target);
-        boolean bugged = (!target.health.hpDecreasedIn(1000) && laser > 1000);
-
-        if ((!attacking || bugged) && hero.locationInfo.distance(target) < 775 && laser > 1500 + times * 10000) {
-            setRadiusAndClick(false);
-            times++;
-            laserTime = System.currentTimeMillis();
+    private void tryAttackOrFix() {
+        boolean bugged = (!target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 550);
+        if ((shouldSab() != sab || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
+            laserTime = System.currentTimeMillis() + 750;
+            API.keyboardClick(getAttackKey());
         }
-
-        return true;
     }
 
     private boolean shouldSab() {
@@ -190,19 +180,17 @@ public class LootModule implements Module {
     }
 
     private void lockAndSetTarget() {
-        if (hero.locationInfo.distance(target) > 650 || System.currentTimeMillis() - clickDelay < 500) return;
+        if (hero.locationInfo.distance(target) > 750 || System.currentTimeMillis() - clickDelay < 400) return;
         hero.setTarget(target);
-        setRadiusAndClick(true);
+        setRadiusAndClick();
         clickDelay = System.currentTimeMillis();
+        laserTime = clickDelay + 200;
         ability = clickDelay + 5000;
-        times = 0;
-
-        shooting = false;
     }
 
-    private void setRadiusAndClick(boolean single) {
+    private void setRadiusAndClick() {
         target.clickable.setRadius(800);
-        drive.clickCenter(single, target.locationInfo.now);
+        drive.clickCenter(true, target.locationInfo.now);
         target.clickable.setRadius(0);
     }
 
@@ -215,7 +203,7 @@ public class LootModule implements Module {
         double angle = targetLoc.angle(heroLoc);
         double radius = target.npcInfo.radius;
 
-        if (target != hero.target || !shooting || ability != null) radius = Math.min(500, radius);
+        if (target != hero.target || ability != null) radius = Math.min(500, radius);
         if (!target.locationInfo.isMoving() && target.health.hpPercent() < 0.25) radius = Math.min(radius, 600);
 
         if (target.npcInfo.noCircle) {
