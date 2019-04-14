@@ -9,6 +9,7 @@ import javax.tools.ToolProvider;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;

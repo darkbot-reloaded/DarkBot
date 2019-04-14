@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.lang.reflect.Proxy;
 
 public class Main extends Thread {
-    public static final String VERSION = "1.13.6 beta 9";
+    public static final String VERSION = "1.13.6 beta 11";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -129,7 +129,7 @@ public class Main extends Thread {
             tick();
 
             double tickTime = System.currentTimeMillis() - time;
-            avgTick = ((avgTick * 9) + tickTime) / 10;
+            avgTick = ((avgTick * 4) + tickTime) / 5;
             sleepMax(time, botInstaller.invalid.value ? 1000 : 100);
         }
     }
@@ -167,6 +167,8 @@ public class Main extends Thread {
         if (tickingModule) tickRunning();
 
         pingManager.tick();
+        //if (config.MISCELLANEOUS.DEV_STUFF && mapManager.width > 0)
+        //    API.pixelsAndDisplay(0, 0, (int) mapManager.width, (int) mapManager.height);
     }
 
     private void tickRunning() {

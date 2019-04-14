@@ -53,6 +53,8 @@ public interface IDarkBotAPI {
 
     void handleRefresh();
 
+    int[] pixelsAndDisplay(int x, int y, int w, int h);
+
     void refresh();
 
     static LoggingAPIHandler getLoggingHandler(DarkBotAPI API) {

@@ -31,20 +31,17 @@ public class PingManager implements Manager {
 
             searchPingManager();
 
-        } else {
+        } else if (System.currentTimeMillis() - lastCheck >= 2000) {
+            lastPings.update();
 
-            if (System.currentTimeMillis() - lastCheck >= 1000) {
-                lastPings.update();
+            if (currentIndex == lastPings.size)
+                ping += System.currentTimeMillis() - lastCheck;
+            else if (lastPings.size > 0)
+                ping = lastPings.elements[lastPings.size - 1];
 
-                if (currentIndex == lastPings.size)
-                    ping += 1000;
-                else if (lastPings.size > 0)
-                    ping = lastPings.elements[lastPings.size - 1];
+            currentIndex = lastPings.size;
 
-                currentIndex = lastPings.size;
-
-                lastCheck = System.currentTimeMillis();
-            }
+            lastCheck = System.currentTimeMillis();
         }
     }
 

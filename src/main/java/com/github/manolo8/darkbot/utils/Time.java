@@ -25,5 +25,11 @@ public class Time {
         builder.append(seconds);
         return builder.toString();
     }
+
+    public static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignore) {}
+    }
     
 }

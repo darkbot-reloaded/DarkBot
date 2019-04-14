@@ -37,6 +37,7 @@ public class LootModule implements Module {
     private int radiusFix;
 
     private long laserTime;
+    private long fixTimes;
     private long clickDelay;
     private boolean sab;
 
@@ -154,6 +155,16 @@ public class LootModule implements Module {
         tryAttackOrFix();
     }
 
+    private void lockAndSetTarget() {
+        if (hero.locationInfo.distance(target) > 750 || System.currentTimeMillis() - clickDelay < 400) return;
+        hero.setTarget(target);
+        setRadiusAndClick(true);
+        clickDelay = System.currentTimeMillis();
+        fixTimes = 0;
+        laserTime = clickDelay + 200;
+        ability = clickDelay + 5000;
+    }
+
     boolean findTarget() {
         if (target == null || target.removed || hero.target != target || (!hero.isAttacking(target) && hero.locationInfo.distance(target) > 600))
             target = closestNpc(hero.locationInfo.now);
@@ -161,10 +172,16 @@ public class LootModule implements Module {
     }
 
     private void tryAttackOrFix() {
-        boolean bugged = (!target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 550);
-        if ((shouldSab() != sab || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
+        boolean bugged = hero.isAttacking(target) && !target.health.hpDecreasedIn(1000) && hero.locationInfo.distance(target) < 650
+                && System.currentTimeMillis() > (laserTime + fixTimes * 5000);
+        boolean sabChanged = shouldSab() != sab;
+        if ((sabChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
             laserTime = System.currentTimeMillis() + 750;
-            API.keyboardClick(getAttackKey());
+            if (!bugged || sabChanged) API.keyboardClick(getAttackKey());
+            else {
+                setRadiusAndClick(false);
+                fixTimes++;
+            }
         }
     }
 
@@ -179,18 +196,9 @@ public class LootModule implements Module {
                 this.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;
     }
 
-    private void lockAndSetTarget() {
-        if (hero.locationInfo.distance(target) > 750 || System.currentTimeMillis() - clickDelay < 400) return;
-        hero.setTarget(target);
-        setRadiusAndClick();
-        clickDelay = System.currentTimeMillis();
-        laserTime = clickDelay + 200;
-        ability = clickDelay + 5000;
-    }
-
-    private void setRadiusAndClick() {
+    private void setRadiusAndClick(boolean single) {
         target.clickable.setRadius(800);
-        drive.clickCenter(true, target.locationInfo.now);
+        drive.clickCenter(single, target.locationInfo.now);
         target.clickable.setRadius(0);
     }
 

@@ -178,6 +178,8 @@ public class Config {
         public boolean FOCUS_ON_RELOAD = true;
         @Option("Developer stuff shown")
         public boolean DEV_STUFF = false;
+        @Option("Old hide mechanic")
+        public boolean OLD_HIDE = false;
         @Option("Full debug & memory trace (Don't enable)")
         public boolean FULL_DEBUG = false;
     }
