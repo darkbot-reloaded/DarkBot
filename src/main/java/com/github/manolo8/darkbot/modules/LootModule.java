@@ -161,18 +161,16 @@ public class LootModule implements Module {
         setRadiusAndClick(true);
         clickDelay = System.currentTimeMillis();
         fixTimes = 0;
-        laserTime = clickDelay + 200;
+        laserTime = clickDelay + 50;
         ability = clickDelay + 5000;
     }
 
     boolean findTarget() {
-        if (target == null || target.removed || hero.target != target || (!hero.isAttacking(target) && hero.locationInfo.distance(target) > 600))
-            target = closestNpc(hero.locationInfo.now);
-        return target != null;
+        return (target = closestNpc(hero.locationInfo.now)) != null;
     }
 
     private void tryAttackOrFix() {
-        boolean bugged = hero.isAttacking(target) && !target.health.hpDecreasedIn(1000) && hero.locationInfo.distance(target) < 650
+        boolean bugged = hero.isAttacking(target) && !target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 650
                 && System.currentTimeMillis() > (laserTime + fixTimes * 5000);
         boolean sabChanged = shouldSab() != sab;
         if ((sabChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
@@ -278,20 +276,22 @@ public class LootModule implements Module {
         if (npc.npcInfo.ignoreAttacked) return false;
         if (npc.isInTimer()) return true;
         for (Ship ship : this.ships) {
+            if (ship.address == hero.address || ship.address == hero.pet.address) continue;
             if (!ship.isAttacking(npc)) continue;
-            npc.setTimerTo(5000);
+            npc.setTimerTo(30000);
             return true;
         }
         return false;
     }
 
     private Npc closestNpc(Location location) {
+        int extraPriority = target != null && !target.removed &&
+                (hero.target == target || hero.locationInfo.distance(target) < 600)
+                ? 20 - (int)(target.health.hpPercent() * 10) : 0;
         return this.npcs.stream()
-                .filter(n -> n.npcInfo.kill)
-                .filter(n -> !this.isAttackedByOthers(n))
-                .filter(n -> drive.closestDistance(location) < 200)
-                .min(Comparator.<Npc>comparingInt(n -> n.npcInfo.priority)
-                        .thenComparing(n -> n.health.hpPercent())
+                .filter(n -> this.target == n || (n.npcInfo.kill &&
+                        !this.isAttackedByOthers(n) && drive.closestDistance(location) < 200))
+                .min(Comparator.<Npc>comparingInt(n -> n.npcInfo.priority - (n == target ? extraPriority : 0))
                         .thenComparing(n -> n.locationInfo.now.distance(location))).orElse(null);
     }
 }

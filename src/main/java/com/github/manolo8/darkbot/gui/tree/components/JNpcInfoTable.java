@@ -39,18 +39,18 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
     }
 
     private static class NpcTableModel extends DefaultTableModel {
-        private static final Class[] TYPES = new Class[]{String.class, Double.class, Integer.class, Boolean.class, Boolean.class, Character.class};
+        private static final Class[] TYPES = new Class[]{String.class, Double.class, Integer.class, Boolean.class, Boolean.class, Character.class, Boolean.class};
 
         private Map<String, NpcInfo> NPC_INFOS;
 
         NpcTableModel(Map<String, NpcInfo> NPC_INFOS, Lazy<String> added) {
-            super(new Object[]{"Name", "Radius", "Priority", "Kill", "No circle", "Ammo Key"}, 0);
+            super(new Object[]{"Name", "Radius", "Priority", "Kill", "No circle", "Ammo Key", "Ign. own"}, 0);
             (this.NPC_INFOS = NPC_INFOS).forEach(this::addEntry);
             added.add(n -> addEntry(n, NPC_INFOS.get(n)));
         }
 
         private void addEntry(String name, NpcInfo info) {
-            addRow(new Object[]{name, info.radius, info.priority, info.kill, info.noCircle, info.attackKey});
+            addRow(new Object[]{name, info.radius, info.priority, info.kill, info.noCircle, info.attackKey, info.ignoreAttacked});
         }
 
         @Override
@@ -73,6 +73,7 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
             else if (column == 3) info.kill = (Boolean) value;
             else if (column == 4) info.noCircle = (Boolean) value;
             else if (column == 5) info.attackKey = (Character) value;
+            else if (column == 6) info.ignoreAttacked = (Boolean) value;
         }
     }
 
