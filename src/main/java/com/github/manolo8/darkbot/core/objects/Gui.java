@@ -65,6 +65,7 @@ public class Gui extends Updatable {
         this.visible = false;
         this.height = 0;
         this.width = 0;
+        this.update = 0;
     }
 
     public boolean lastUpdatedIn(long time) {

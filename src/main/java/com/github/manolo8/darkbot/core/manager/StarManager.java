@@ -5,13 +5,17 @@ import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.Map;
 import org.jgrapht.Graph;
+import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class StarManager {
     private static StarManager INSTANCE;
@@ -24,56 +28,57 @@ public class StarManager {
         INSTANCE = this;
         String[] HOME_MAPS = new String[]{"1-1", "2-1", "3-1"};
 
-        starSystem = new StarBuilder()
-                .addMap(-1, "Loading")
+        StarBuilder mapBuild = new StarBuilder();
+        mapBuild.addMap(-1, "Loading")
+                .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1");
                 // MMO
-                .addMap(1, "1-1").addPortal(18500, 11500, "1-2")
+        mapBuild.addMap(1, "1-1").addPortal(18500, 11500, "1-2").addPortal(10500, 6750, "Experiment Zone 1")
                 .addMap(2, "1-2").addPortal(2000, 2000, "1-1").addPortal(18500, 2000, "1-3").addPortal(18500, 11500, "1-4")
                 .addMap(3, "1-3").addPortal(2000, 11500, "1-2").addPortal(18500, 11500, "1-4").addPortal(18500, 2000, "2-3")
                 .addMap(4, "1-4").addPortal(2000, 2000, "1-2").addPortal(18500, 2000, "1-3").addPortal(19000, 6000, "4-1").addPortal(18500, 11500, "3-4")
-                .addMap(17, "1-5").addPortal(19000, 6000, "4-4").addPortal(10000, 12000, "4-5").addPortal(2000, 2000, "1-6").addPortal(2000, 11500, "1-7")
+                .addMap(17, "1-5").addPortal(19000, 6000, "4-4").addPortal(10000, 12000, "4-5").addPortal(2000, 2000, "1-6").addPortal(2000, 11500, "1-7").addPortal(10500, 6750, "Experiment Zone 2-1")
                 .addMap(18, "1-6").addPortal(18500, 11500, "1-5").addPortal(2000, 11500, "1-8")
                 .addMap(19, "1-7").addPortal(2000, 2000, "1-8").addPortal(18500, 2000, "1-5")
-                .addMap(20, "1-8").addPortal(18500, 2000, "1-6").addPortal(18500, 11500, "1-7").addPortal(11084, 11084, "1BL")
+                .addMap(20, "1-8").addPortal(18500, 2000, "1-6").addPortal(18500, 11500, "1-7").addPortal(11084, 11084, "1BL");
                 // EIC
-                .addMap(5, "2-1").addPortal(2000, 11500, "2-2")
+        mapBuild.addMap(5, "2-1").addPortal(2000, 11500, "2-2").addPortal(10500, 6750, "Experiment Zone 1")
                 .addMap(6, "2-2").addPortal(2000, 11500, "2-3").addPortal(18500, 11500, "2-4").addPortal(18500, 2000, "2-1")
                 .addMap(7, "2-3").addPortal(2000, 11500, "1-3").addPortal(18500, 11500, "2-4").addPortal(18500, 2000, "2-2")
                 .addMap(8, "2-4").addPortal(2000, 2000, "2-2").addPortal(18500, 2000, "2-3").addPortal(2000, 11500, "3-3").addPortal(10000, 12000, "4-2")
-                .addMap(21, "2-5").addPortal(2000, 11500, "4-4").addPortal(18500, 11500, "4-5").addPortal(2000, 2000, "2-6").addPortal(18500, 2000, "2-7")
+                .addMap(21, "2-5").addPortal(2000, 11500, "4-4").addPortal(18500, 11500, "4-5").addPortal(2000, 2000, "2-6").addPortal(18500, 2000, "2-7").addPortal(10500, 6750, "Experiment Zone 2-2")
                 .addMap(22, "2-6").addPortal(2000, 11500, "2-5").addPortal(18500, 2000, "2-8")
                 .addMap(23, "2-7").addPortal(2000, 11500, "2-5").addPortal(18500, 2000, "2-8")
-                .addMap(24, "2-8").addPortal(2000, 11500, "2-6").addPortal(18500, 11500, "2-7").addPortal(11084, 11084, "2BL")
+                .addMap(24, "2-8").addPortal(2000, 11500, "2-6").addPortal(18500, 11500, "2-7").addPortal(11084, 11084, "2BL");
                 // VRU
-                .addMap(9, "3-1").addPortal(2000, 2000, "3-2")
+        mapBuild.addMap(9, "3-1").addPortal(2000, 2000, "3-2").addPortal(10500, 6750, "Experiment Zone 1")
                 .addMap(10, "3-2").addPortal(18500, 2000, "3-3").addPortal(2000, 2000, "3-4").addPortal(18500, 11500, "3-1")
                 .addMap(11, "3-3").addPortal(2000, 2000, "2-4").addPortal(2000, 11500, "3-4").addPortal(18500, 11500, "3-2")
                 .addMap(12, "3-4").addPortal(2000, 2000, "1-4").addPortal(10000, 1500, "4-3").addPortal(18500, 2000, "3-3").addPortal(18500, 11500, "3-2")
-                .addMap(25, "3-5").addPortal(2000, 2000, "4-4").addPortal(16500, 1500, "4-5").addPortal(2000, 11500, "3-6").addPortal(18500, 11500, "3-7")
+                .addMap(25, "3-5").addPortal(2000, 2000, "4-4").addPortal(16500, 1500, "4-5").addPortal(2000, 11500, "3-6").addPortal(18500, 11500, "3-7").addPortal(10500, 6750, "Experiment Zone 2-3")
                 .addMap(26, "3-6").addPortal(2000, 2000, "3-5").addPortal(18500, 11500, "3-8")
                 .addMap(27, "3-7").addPortal(2000, 11500, "3-5").addPortal(18500, 11500, "3-8")
-                .addMap(28, "3-8").addPortal(2000, 2000, "3-7").addPortal(2000, 11500, "3-6").addPortal(11084, 11084, "3BL")
+                .addMap(28, "3-8").addPortal(2000, 2000, "3-7").addPortal(2000, 11500, "3-6").addPortal(11084, 11084, "3BL");
                 // B-MAPS
-                .addMap(13, "4-1").addPortal(1500, 6000, "1-4").addPortal(18500, 2000, "4-2").addPortal(18500, 11500, "4-3").addPortal(10500, 6750, "4-4")
+        mapBuild.addMap(13, "4-1").addPortal(1500, 6000, "1-4").addPortal(18500, 2000, "4-2").addPortal(18500, 11500, "4-3").addPortal(10500, 6750, "4-4")
                 .addMap(14, "4-2").addPortal(10000, 1500, "2-4").addPortal(2000, 11500, "4-1").addPortal(18500, 11500, "4-3").addPortal(10500, 6750, "4-4")
                 .addMap(15, "4-3").addPortal(19000, 6000, "3-4").addPortal(2000, 2000, "4-2").addPortal(2000, 11500, "4-1").addPortal(10500, 6750, "4-4")
                 .addMap(16, "4-4").addPortal(7000, 13500, "1-5").addPortal(28000, 1376, "2-5").addPortal(28000, 25124, "3-5").addPortal(19200, 13500, "4-1").addPortal(21900, 11941, "4-2").addPortal(21900, 14559, "4-3")
-                .addMap(29, "4-5").addPortal(7000, 13500, "1-5").addPortal(28000, 1376, "2-5").addPortal(28000, 25624, "3-5").addPortal(12200, 13300, "5-1").addPortal(25000, 6300, "5-1").addPortal(25000, 20700, "5-1")
+                .addMap(29, "4-5").addPortal(7000, 13500, "1-5").addPortal(28000, 1376, "2-5").addPortal(28000, 25624, "3-5").addPortal(12200, 13300, "5-1").addPortal(25000, 6300, "5-1").addPortal(25000, 20700, "5-1");
                 // Pirates
-                .addMap(91, "5-1").addPortal(5200, 6800, "5-2").addPortal(2900, 13500, "5-2").addPortal(5200, 20600, "5-2")
+        mapBuild.addMap(91, "5-1").addPortal(5200, 6800, "5-2").addPortal(2900, 13500, "5-2").addPortal(5200, 20600, "5-2")
                 .addMap(92, "5-2").addPortal(2800, 3600, "5-3").addPortal(1300, 6750, "5-3").addPortal(2800, 10900, "5-3")
-                .addMap(93, "5-3").addPortal(2000, 9500, "4-4").addPortal(2000, 13500, "4-4").addPortal(2000, 17500, "4-4")
+                .addMap(93, "5-3").addPortal(2000, 9500, "4-4").addPortal(2000, 13500, "4-4").addPortal(2000, 17500, "4-4");
                 // BL
-                .addMap(306, "1BL").addPortal(150000202, "1-8").addPortal(150000203, "2BL").addPortal(150000204, "3BL")
+        mapBuild.addMap(306, "1BL").addPortal(150000202, "1-8").addPortal(150000203, "2BL").addPortal(150000204, "3BL")
                 .addMap(307, "2BL").addPortal(150000207, "1BL").addPortal(150000206, "2-8").addPortal(150000208, "3BL")
-                .addMap(308, "3BL").addPortal(150000211, "1BL").addPortal(150000212, "2BL").addPortal(150000210, "3-8")
+                .addMap(308, "3BL").addPortal(150000211, "1BL").addPortal(150000212, "2BL").addPortal(150000210, "3-8");
                 // EX
-                .addMap(401, "Experiment Zone 1").addPortal(1000, 1000,"1-1") // Unsure about positions
-                .addMap(402, "Experiment Zone 2-1").addPortal(1000, 1000,"1-5")
-                .addMap(403, "Experiment Zone 2-2").addPortal(1000, 1000,"2-5")
-                .addMap(404, "Experiment Zone 2-3").addPortal(1000, 1000,"3-5")
+        mapBuild.addMap(401, "Experiment Zone 1").addPortal(1200, 1100, "Home Map")
+                .addMap(402, "Experiment Zone 2-1").addPortal(1200, 1100, "1-5")
+                .addMap(403, "Experiment Zone 2-2").addPortal(1200, 1100, "2-5")
+                .addMap(404, "Experiment Zone 2-3").addPortal(1200, 1100, "3-5");
                 // GG
-                .addGG(51, "GG α").accessBy(2, HOME_MAPS)
+        mapBuild.addGG(51, "GG α").accessBy(2, HOME_MAPS)
                 .addGG(52, "GG β").accessBy(3, HOME_MAPS)
                 .addGG(53, "GG γ").accessBy(4, HOME_MAPS)
                 .addGG(54, "GG NC") // New Client GG        (No access)
@@ -116,9 +121,9 @@ public class StarManager {
                 .addGG(412, "GoP 3").accessOnlyBy(24, "GoP 2")
                 .addGG(413, "GoP 4").accessOnlyBy(24, "GoP 3")
                 .addGG(414, "GoP 5").accessOnlyBy(24, "GoP 4")
-                .addGG(415, "GoP Final").accessBy(24, "GoP 5")
+                .addGG(415, "GoP Final").accessBy(24, "GoP 5");
                 // Special (No access)
-                .addMap(42, "???")
+        mapBuild.addMap(42, "???")
                 .addMap(61, "MMO Invasion").addMap(62, "EIC Invasion").addMap(63, "VRU Invasion")
                 .addMap(64, "MMO Invasion").addMap(65, "EIC Invasion").addMap(66, "VRU Invasion")
                 .addMap(67, "MMO Invasion").addMap(68, "EIC Invasion").addMap(69, "VRU Invasion")
@@ -134,8 +139,9 @@ public class StarManager {
                 .addMap(152, "R-Zone 3").addMap(153, "R-Zone 4")
                 .addMap(154, "R-Zone 5").addMap(155, "R-Zone 6")
                 .addMap(156, "R-Zone 7").addMap(157, "R-Zone 8")
-                .addMap(158, "R-Zone 9").addMap(159, "R-Zone 10")
-                .build();
+                .addMap(158, "R-Zone 9").addMap(159, "R-Zone 10");
+
+        starSystem = mapBuild.build();
     }
 
     public Portal getOrCreate(int id, int type, int x, int y) {
@@ -159,6 +165,10 @@ public class StarManager {
                 .orElseGet(() -> addMap(new Map(--INVALID_MAP_ID, name, false, false)));
     }
 
+    public Stream<Map> mapSet() {
+        return starSystem.vertexSet().stream();
+    }
+
     public Map byId(int id) {
         return starSystem.vertexSet().stream().filter(m -> m.id == id).findAny()
                 .orElseGet(() -> addMap(new Map(id, "Unknown map " + id, false, false)));
@@ -171,7 +181,7 @@ public class StarManager {
 
     public List<String> getAccessibleMaps() {
         return starSystem.vertexSet().stream()
-                .filter(m -> !m.gg)
+                .filter(m -> !m.gg && m.id > 0)
                 .filter(m -> starSystem.inDegreeOf(m) > 0)
                 .map(m -> m.name).sorted().collect(Collectors.toList());
     }

@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.*;
 import com.github.manolo8.darkbot.core.manager.*;
 import com.github.manolo8.darkbot.core.objects.Health;
+import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class MapDrawer extends JPanel {
@@ -84,18 +86,6 @@ public class MapDrawer extends JPanel {
     private RenderingHints hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
     private Location last = new Location(0, 0);
-    /*private class Line {
-        double x1, x2, y1, y2;
-        Line(Location loc1, Location loc2) {
-            this.x1 = loc1.x;
-            this.x2 = loc2.x;
-            this.y1 = loc1.y;
-            this.y2 = loc2.y;
-        }
-        void draw(Graphics2D g2) {
-            drawLine(g2, x1, y1, x2, y2);
-        }
-    }*/
 
     protected int width, height, mid;
 
@@ -149,6 +139,30 @@ public class MapDrawer extends JPanel {
         drawStaticEntities(g2);
         drawDynamicEntities(g2);
         drawHero(g2);
+
+        if (config.MISCELLANEOUS.DEV_STUFF) {
+            g2.setFont(FONT_TINY);
+            g2.setColor(TEXT_DARK);
+            synchronized (Main.UPDATE_LOCKER) {
+                List<Entity> entities = mapManager.entities.allEntities.stream().flatMap(Collection::stream)
+                        .filter(e -> e.id > 150_000_000 && e.id < 160_000_000)
+                        .filter(e -> e.locationInfo.isLoaded())
+                        .collect(Collectors.toList());
+
+                g2.setColor(STATS_BACKGROUND);
+                for (Entity e : entities) {
+                    Location loc = e.locationInfo.now;
+                    int strWidth = g2.getFontMetrics().stringWidth(e.toString());
+                    g2.fillRect(translateX(loc.x) - (strWidth >> 1), translateY(loc.y) - 7, strWidth, 8);
+                }
+                g2.setColor(TEXT);
+                g2.setFont(FONT_TINY);
+                for (Entity e : entities) {
+                    Location loc = e.locationInfo.now;
+                    drawString(g2, e.toString(), translateX(loc.x), translateY(loc.y), Align.MID);
+                }
+            }
+        }
 
         drawStats(g2,
                 "cre/h " + formatter.format(statsManager.earnedCredits()),
@@ -281,13 +295,10 @@ public class MapDrawer extends JPanel {
 
     protected void drawStaticEntities(Graphics2D g2) {
         synchronized (Main.UPDATE_LOCKER) {
-            g2.setFont(FONT_TINY);
             g2.setColor(PORTALS);
             for (Portal portal : portals) {
                 Location loc = portal.locationInfo.now;
                 g2.drawOval(translateX(loc.x) - 5, translateY(loc.y) - 5, 10, 10);
-                if (!config.MISCELLANEOUS.DEV_STUFF) continue;
-                drawString(g2, portal.id + "," + portal.type, translateX(loc.x), translateY(loc.y), Align.MID);
             }
 
             for (BattleStation station : this.battleStations) {
@@ -299,10 +310,6 @@ public class MapDrawer extends JPanel {
                 if (station.hullId >= 0 && station.hullId < 255)
                     g2.fillOval(translateX(loc.x) - 5, translateY(loc.y) - 4, 11, 9);
                 else drawEntity(g2, loc, false);
-
-                if (config.MISCELLANEOUS.DEV_STUFF) {
-                    drawString(g2,station.id + "", translateX(loc.x),translateY(loc.y) + 5, Align.MID);
-                }
             }
 
             g2.setColor(this.BASES);
@@ -330,7 +337,7 @@ public class MapDrawer extends JPanel {
                 g2.setColor(GOING);
                 Location now = hero.target.locationInfo.now, later = hero.target.locationInfo.destinationInTime(200);
                 drawLine(g2, now.x, now.y, later.x, later.y);
-                g2.setColor(NPCS.darker());
+                g2.setColor(TARGET);
                 drawEntity(g2, hero.target.locationInfo.now, true);
             }
 
@@ -338,8 +345,6 @@ public class MapDrawer extends JPanel {
 
             g2.setColor(UNKNOWN);
             for (Entity entity : mapManager.entities.unknown) {
-                Location loc = entity.locationInfo.now;
-                drawString(g2, entity.id + "", translateX(loc.x), translateY(loc.y), Align.MID);
                 drawEntity(g2, entity.locationInfo.now, false);
             }
 

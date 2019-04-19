@@ -37,6 +37,10 @@ public class PetManager extends Gui {
         this.enabled = enabled;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
     private boolean active() {
         return !pet.removed;
     }

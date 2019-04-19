@@ -9,18 +9,22 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.swf.Array;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
+import static java.lang.Thread.activeCount;
 
 public class EntityList extends Updatable {
 
     private final Main main;
     private final Array entitiesAddress;
-    private final List<List<? extends Entity>> allEntities;
+    public final List<List<? extends Entity>> allEntities;
     private final HashSet<Integer> ids;
 
     public final List<Obstacle> obstacles;
@@ -91,22 +95,18 @@ public class EntityList extends Updatable {
     private void refreshEntities() {
 
         entitiesAddress.update();
+        Set<Long> newFound = new HashSet<>();
 
         for (int i = 0; i < entitiesAddress.size; i++) {
-
             long found = entitiesAddress.elements[i];
 
             int id = API.readMemoryInt(found + 56);
-
             if (!ids.add(id)) continue;
+            newFound.add(found);
 
             int rnd = API.readMemoryInt(found + 112);
-
+            int hullId = API.readMemoryInt(found + 116);
             String key = API.readMemoryString(API.readMemoryLong(found + 136));
-
-            /*if (!key.equals("ERROR") && !key.isEmpty()) {
-                System.out.println(id + ":" + key);
-            }*/
 
             if (key.equals("NOA")) {
                 barriers.add(whenAdd(new Barrier(id), found));
@@ -118,25 +118,11 @@ public class EntityList extends Updatable {
                 LocationInfo loc = new LocationInfo(API.readMemoryLong(found + 64));
                 loc.update();
                 portals.add(whenAdd(main.starManager.getOrCreate(id, rnd, (int) loc.now.x, (int) loc.now.y), found));
-            } else if (main.hero.map.id > 400 && main.hero.map.id < 405 && id >= 150000500 && id <= 150000600) {
-                // Beacons, map ids TBD (experiment zone ids)
-                // EX 2-1 -> 150000514, 150000515 | EX 2-2 -> 150000512 | EX 2-3 -> 150000513 | EX 4-4 -> 150000566
-                npcs.add(whenAdd(new Npc(id), found));
-            } else if (id <= 150000950 && id >= 150000532) {
-                int hullId = API.readMemoryInt(found + 116);
+            } else if (id <= 150000950 && id >= 150000532 && hullId < 255 && hullId >= 0) {
                 battleStations.add(whenAdd(new BattleStation(id, hullId), found));
-            // 1-1: 000-022  1-4: 023
-            // 2-1: 024-046  2-4: 047
-            // 3-1: 048-070  3-4: 071
-            // 1-5: 072      1-8: 073-095
-            // 2-5: 096      2-8: 097-119
-            // 3-5: 120      3-8: 121-143
-            // 1-BL: 144  2-BL: 145  3-BL: 146
-            // 5-2: 147
             } else if (id <= 150000147 && id >= 150000000) {
                 this.basePoints.add(whenAdd(new BasePoint(id), found));
             } else {
-
                 int npc = API.readMemoryInt(found + 112);
                 int visible = API.readMemoryInt(found + 116);
                 int c = API.readMemoryInt(found + 120);
@@ -149,9 +135,32 @@ public class EntityList extends Updatable {
                         ships.add(whenAdd(new Ship(id), found));
                     }
                 } else {
-                    unknown.add(whenAdd(new Entity(id), found));
+                    Entity entity = whenAdd(new Entity(id), found);
+                    if (entity.clickable.defRadius == 150) {
+                        npcs.add(whenAdd(new MapNpc(id), found));
+                    } else unknown.add(entity);
                 }
+            }
+        }
 
+        if (main.config.MISCELLANEOUS.DEV_STUFF) {
+            long[] addr = Arrays.copyOf(entitiesAddress.elements, entitiesAddress.size);
+            Arrays.sort(addr);
+
+            for (int i = 0; i < addr.length; i++) {
+                long curr = addr[i];
+                if (!newFound.contains(curr)) continue;
+                int id = API.readMemoryInt(curr + 56);
+                if (id < 150_000_000 || id >= 150_200_000) continue;
+
+                StringBuilder str = new StringBuilder().append(id);
+                int search = 200;
+                if (i < addr.length - 1) search = Math.min(search, Math.max(100, (int) (addr[i+1] - curr)));
+                for (int offset = 0; offset < search; offset += 4) {
+                    int f = API.readMemoryInt(curr + offset);
+                    if (f > -1000 && f < 1000) str.append(" | ").append(offset).append(":").append(f);
+                }
+                System.out.println(str);
             }
 
         }

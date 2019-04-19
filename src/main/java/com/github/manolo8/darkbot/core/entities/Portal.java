@@ -29,4 +29,9 @@ public class Portal extends Entity {
 
         type = Main.API.readMemoryInt(address + 112);
     }
+
+    @Override
+    public String toString() {
+        return id + "," + type;
+    }
 }

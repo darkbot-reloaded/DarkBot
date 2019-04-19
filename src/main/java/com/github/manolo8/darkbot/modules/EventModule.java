@@ -7,19 +7,27 @@ import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.manager.PetManager;
+import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
+import com.github.manolo8.darkbot.modules.utils.NpcAttacker;
 import com.github.manolo8.darkbot.utils.Time;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
-import static com.github.manolo8.darkbot.Main.API;
-import static java.lang.Math.cos;
 import static java.lang.Math.random;
-import static java.lang.Math.sin;
 
 public class EventModule implements Module {
 
+    private static final String MAP_PREFIX = "Experiment Zone 2-";
+    private static int TIME_PER_NPC = 24 * 60 * 1000,
+            TIME_TO_NEXT_NPC = 20 * 60 * 1000,
+            TRAVEL_TIME = 3 * 60 * 1000;
     private static final double TAU = Math.PI * 2;
 
     private Main main;
@@ -28,13 +36,33 @@ public class EventModule implements Module {
     private List<Box> boxes;
     private HeroManager hero;
     private Drive drive;
-    private Location direction;
+    private PetManager pet;
 
-    public Npc target;
-    private boolean shooting;
-    private long clickDelay;
-    private long lastNpc = System.currentTimeMillis();
-    private long timeSinceNpc;
+    private NpcAttacker attack;
+
+    private static TreeMap<Integer, MapTiming> maps = new TreeMap<>();
+    class MapTiming {
+        private Map map;
+        private Long npcTime;
+
+        MapTiming(Map map) {
+            this.map = map;
+        }
+
+        private Integer sinceNpc() {
+            return npcTime == null ? null : (int) (System.currentTimeMillis() - npcTime);
+        }
+        private Integer nextNpc() {
+            Integer since = sinceNpc();
+            if (since == null) return null;
+            int time = TIME_TO_NEXT_NPC - (since % TIME_PER_NPC);
+            if (time < 0) time += TIME_PER_NPC;
+            return time;
+        }
+    }
+    private Integer sinceNpc() {
+        return maps.getOrDefault(hero.map.id, new MapTiming(null)).sinceNpc();
+    }
 
     private Box drop;
     private long waiting;
@@ -44,48 +72,80 @@ public class EventModule implements Module {
     @Override
     public void install(Main main) {
         this.main = main;
+        this.attack = new NpcAttacker(main);
         this.config = main.config;
 
         this.hero = main.hero;
         this.drive = main.hero.drive;
+        this.pet = main.guiManager.pet;
 
         this.npcs = main.mapManager.entities.npcs;
         this.boxes = main.mapManager.entities.boxes;
+
+        main.starManager.mapSet()
+                .filter(m -> m.name.startsWith(MAP_PREFIX))
+                .forEach(m -> maps.putIfAbsent(m.id, new MapTiming(m)));
     }
+
 
     @Override
     public boolean canRefresh() {
-        return timeSinceNpc > 2 * 60 * 1000 && (timeSinceNpc <  15 * 60 * 1000 || timeSinceNpc > 25 * 60 * 1000);
+        Integer sinceNpc = sinceNpc();
+        return sinceNpc != null && (sinceNpc > 2 * 60 * 1000 && (sinceNpc <  15 * 60 * 1000 || sinceNpc > 25 * 60 * 1000));
     }
 
     @Override
     public String status() {
-        timeSinceNpc = System.currentTimeMillis() - this.lastNpc;
-        return timeSinceNpc > 1000 ? "Waiting: " + Time.toString(timeSinceNpc) : null;
+        return (attack.hasTarget() ? attack.status() + " - " : drop != null ? "Collecting drop - " :
+                clickReward > -1 ? "Clicking reward - " : "") + "Waiting: [ " +
+                maps.values().stream()
+                        .filter(mt -> config.EVENT.MAP_SWITCHING ? mt.map.name.startsWith(MAP_PREFIX) : mt.map == hero.map)
+                        .map(MapTiming::sinceNpc)
+                        .map(Time::toString).collect(Collectors.joining(" | ")) + " ]";
     }
 
     @Override
     public void tick() {
         if (System.currentTimeMillis() < waiting) return;
+        MapTiming mt = maps.computeIfAbsent(hero.map.id, id -> new MapTiming(hero.map));
+
+        int since = Optional.ofNullable(sinceNpc()).orElse(60_000);
+
+        if (clickReward == -1 && config.EVENT.MAP_SWITCHING && (!hero.map.name.startsWith(MAP_PREFIX) ||
+                (sinceNpc() != null && since > 5000 && since < 20000))) {
+            MapTiming next = maps.values().stream()
+                    .filter(timing -> timing.map.name.startsWith(MAP_PREFIX))
+                    .min(Comparator.comparing(MapTiming::nextNpc, Comparator.nullsFirst(
+                            Comparator.comparingInt((Integer t) -> {
+                                t -= TRAVEL_TIME;
+                                return t > 0 ? t : t + TIME_PER_NPC;
+                            })))).orElse(mt);
+            if (next != mt) {
+                main.setModule(new MapModule()).setTarget(next.map);
+                return;
+            }
+        }
 
         if (findTarget()) {
+            mt.npcTime = System.currentTimeMillis();
+            pet.setEnabled(true);
             hero.attackMode();
-            lastNpc = System.currentTimeMillis();
-            setTargetAndTryStartLaserAttack();
+
             moveToAnSafePosition();
+            attack.doKillTargetTick();
         } else if (findBox()) {
             hero.runMode();
             pickUpBox();
             if (config.EVENT.PROGRESS) clickReward = 2;
             return;
-        } else if (clickReward == -1 && timeSinceNpc > 5000 && !hero.locationInfo.isMoving() &&
-                hero.locationInfo.distance(MapManager.internalWidth / 2d, MapManager.internalHeight / 2d) > 600) {
+        } else if (clickReward == -1 && since > 5000 && !hero.locationInfo.isMoving() &&
+                hero.locationInfo.distance(MapManager.internalWidth / 2d, MapManager.internalHeight / 2d) > 800) {
             hero.runMode();
-            hero.drive.move(MapManager.internalWidth / 2d + (random() * 400 - 200),
-                    MapManager.internalHeight / 2d + (random() * 400 - 200));
-        } else if (timeSinceNpc > 10000 && !hero.drive.isMoving()) hero.attackMode();
+            hero.drive.move(MapManager.internalWidth / 2d + (random() * 600 - 300),
+                    MapManager.internalHeight / 2d + (random() * 600 - 300));
+        } else if (since > 10000 && !hero.drive.isMoving()) hero.attackMode();
 
-        main.guiManager.pet.setEnabled(timeSinceNpc < 3000);
+        pet.setEnabled(since < 3000 && pet.isEnabled());
         if (clickReward > -1 && main.guiManager.eventProgress.show(clickReward > 0)) {
             if (clickReward > 0) main.guiManager.eventProgress.click(200, 335);
             waiting = System.currentTimeMillis() + 500;
@@ -94,66 +154,38 @@ public class EventModule implements Module {
     }
 
     private boolean findTarget() {
-        if (target == null || target.removed) target = npcs.isEmpty() ? null : npcs.get(0);
-        return target != null;
-    }
-
-    private void setTargetAndTryStartLaserAttack() {
-        boolean locked = main.mapManager.isTarget(target);
-        double distance = hero.locationInfo.distance(target);
-        if (locked && !shooting) {
-            if (distance > 550) return;
-            API.keyboardClick(config.LOOT.AMMO_KEY);
-            shooting = true;
-            if (target.health.maxHp > 0) API.keyboardClick(config.EVENT.SHIP_ABILITY);
-            return;
-        }
-        if (locked) return;
-
-        if (hero.locationInfo.distance(target) < 750 && System.currentTimeMillis() - clickDelay > 1000) {
-            hero.setTarget(target);
-            setRadiusAndClick();
-            clickDelay = System.currentTimeMillis();
-
-            shooting = false;
-        }
-    }
-
-    private void setRadiusAndClick() {
-        target.clickable.setRadius(800);
-        drive.clickCenter(true, target.locationInfo.now);
-        target.clickable.setRadius(0);
+        if (!attack.hasTarget()) attack.target = npcs.isEmpty() ? null : npcs.get(0);
+        return attack.hasTarget();
     }
 
     private void moveToAnSafePosition() {
-        if (!hero.drive.isMoving()) direction = null;
+        Location direction = drive.movingTo();
         Location heroLoc = hero.locationInfo.now;
-        if (target == null || target.locationInfo == null) return;
-        Location targetLoc = target.locationInfo.destinationInTime(400);
+        Location targetLoc = attack.target.locationInfo.destinationInTime(400);
 
         double angle = targetLoc.angle(heroLoc), distance = heroLoc.distance(targetLoc),
-                angleDiff = Math.abs(target.locationInfo.angle - heroLoc.angle(target.locationInfo.now)) % TAU;
+                angleDiff = Math.abs(attack.target.locationInfo.angle - heroLoc.angle(attack.target.locationInfo.now)) % TAU;
         if (angleDiff > Math.PI) angleDiff = TAU - angleDiff;
 
-        boolean npcFollowing = target.locationInfo.isMoving() && (angleDiff < 1.25);
+        boolean npcFollowing = attack.target.locationInfo.isMoving() && (angleDiff < 1.5);
 
-        if (target == hero.target && shooting && (hero.health.hpPercent() + hero.health.shieldPercent() < 0.8 ||
-                hero.health.hpDecreasedIn(2000) || (hero.health.hpDecreasedIn(60000) && npcFollowing))) {
+        if (attack.target == hero.target && !attack.castingAbility() &&
+                (hero.health.hpPercent() + hero.health.shieldPercent() < 0.8 ||
+                        hero.health.hpDecreasedIn(2000) || (hero.health.hpDecreasedIn(60000) && npcFollowing))) {
             distance = 800 - (hero.health.shieldPercent() * 300);
-            angle += 0.2 + (random() * 0.1);
+            angle += 0.15 + (random() * 0.1);
         } else {
             if (distance <= 320 || (direction != null && targetLoc.distance(direction) <= 320)) return;
             distance = 200 + Math.random() * 75;
             angle += random() * 2 - 1;
         }
+        direction = Location.of(targetLoc, angle, distance);
 
-        do {
-            direction = new Location(targetLoc.x - cos(angle) * distance, targetLoc.y - sin(angle) * distance);
-            angle += 0.3;
-            distance += 2;
-        } while (main.mapManager.isOutOfMap(direction.x, direction.y));
+        while (!drive.canMove(direction) && distance < 10000)
+            direction.toAngle(targetLoc, angle += 0.3, distance += 2);
+        if (distance >= 10000) direction.toAngle(targetLoc, angle, 600);
 
-        drive.move(direction.x, direction.y);
+        drive.move(direction);
     }
 
     private boolean findBox() {

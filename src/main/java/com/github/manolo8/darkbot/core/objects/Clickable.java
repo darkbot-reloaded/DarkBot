@@ -11,8 +11,8 @@ public class Clickable extends Updatable {
     public int radius;
     public int priority;
 
-    private int defRadius = -1;
-    private int defPriority = -1;
+    public int defRadius = -1;
+    public int defPriority = -1;
 
     public void setPriority(int priority) {
         if (this.priority == priority || isInvalid()) return;

@@ -52,4 +52,9 @@ public class BattleStation
     public boolean use() {
         return hullId > 0 && hullId < 255 && info.isEnemy();
     }
+
+    @Override
+    public String toString() {
+        return id + "," + hullId;
+    }
 }

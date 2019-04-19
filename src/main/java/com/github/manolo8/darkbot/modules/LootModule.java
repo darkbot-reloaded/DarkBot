@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
+import com.github.manolo8.darkbot.modules.utils.NpcAttacker;
 
 import java.util.Comparator;
 import java.util.List;
@@ -31,15 +32,9 @@ public class LootModule implements Module {
 
     private Config config;
 
-    public Npc target;
-    private Long ability;
-
     private int radiusFix;
 
-    private long laserTime;
-    private long fixTimes;
-    private long clickDelay;
-    private boolean sab;
+    NpcAttacker attack;
 
     private boolean repairing;
     private boolean jump;
@@ -48,6 +43,7 @@ public class LootModule implements Module {
     @Override
     public void install(Main main) {
         this.main = main;
+        this.attack = new NpcAttacker(main);
 
         this.hero = main.hero;
         this.drive = main.hero.drive;
@@ -60,13 +56,12 @@ public class LootModule implements Module {
     @Override
     public String status() {
         return jump ? "Jumping port" : repairing ? "Repairing" : escaping != null ? "Avoiding enemy" :
-                target != null ? "Killing npc" + (hero.isAttacking(target) ? " S" : "") + (ability != null ? " A" : "") + (sab ? " SAB" : "")
-                        : "Roaming";
+                attack.hasTarget() ? attack.status() : "Roaming";
     }
 
     @Override
     public boolean canRefresh() {
-        return target == null;
+        return attack.target == null;
     }
 
     @Override
@@ -76,7 +71,8 @@ public class LootModule implements Module {
 
             if (findTarget()) {
                 moveToAnSafePosition();
-                doKillTargetTick();
+                attack.doKillTargetTick();
+                ignoreInvalidTarget();
             } else if (!drive.isMoving()) {
                 drive.moveRandom();
             }
@@ -102,7 +98,7 @@ public class LootModule implements Module {
         boolean underAttack = this.isUnderAttack();
         boolean lowHp = this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_HP ||
                 (this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_HP_NO_NPC &&
-                        (this.target == null || this.target.removed || this.target.health.hp == 0 || this.target.health.hpPercent() > 0.8));
+                        (!attack.hasTarget() || attack.target.health.hp == 0 || attack.target.health.hpPercent() > 0.8));
 
         if (lowHp || hasEnemies()) {
             escaping = this.main.starManager.next(this.hero.map, this.hero.locationInfo, this.hero.map);
@@ -130,78 +126,22 @@ public class LootModule implements Module {
         drive.move(Location.of(escaping.locationInfo.now, angle, 20 + Math.random() * 200));
     }
 
-    void doKillTargetTick() {
-        if (!main.mapManager.isTarget(target)) {
-            lockAndSetTarget();
-            return;
-        }
-
-        if (!(target.npcInfo.ignoreAttacked || main.mapManager.isCurrentTargetOwned()) ||
-                (drive.closestDistance(target.locationInfo.now) > 400 && !target.locationInfo.isMoving()
-                        && (target.health.shIncreasedIn(1000) || target.health.shieldPercent() > 0.95))) {
-            target.setTimerTo(5000);
-            hero.setTarget(target = null);
-            return;
-        }
-
-        if (ability != null && (target.health.maxHp > 0 || ability < System.currentTimeMillis())) {
-            if (target.health.maxHp < config.LOOT.SHIP_ABILITY_MIN) ability = null;
-            else if (hero.locationInfo.distance(target) < 575) {
-                API.keyboardClick(config.LOOT.SHIP_ABILITY);
-                ability = null;
-            }
-        }
-
-        tryAttackOrFix();
-    }
-
-    private void lockAndSetTarget() {
-        if (hero.locationInfo.distance(target) > 750 || System.currentTimeMillis() - clickDelay < 400) return;
-        hero.setTarget(target);
-        setRadiusAndClick(true);
-        clickDelay = System.currentTimeMillis();
-        fixTimes = 0;
-        laserTime = clickDelay + 50;
-        ability = clickDelay + 5000;
-    }
-
     boolean findTarget() {
-        return (target = closestNpc(hero.locationInfo.now)) != null;
+        return (attack.target = closestNpc(hero.locationInfo.now)) != null;
     }
 
-    private void tryAttackOrFix() {
-        boolean bugged = hero.isAttacking(target) && !target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 650
-                && System.currentTimeMillis() > (laserTime + fixTimes * 5000);
-        boolean sabChanged = shouldSab() != sab;
-        if ((sabChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
-            laserTime = System.currentTimeMillis() + 750;
-            if (!bugged || sabChanged) API.keyboardClick(getAttackKey());
-            else {
-                setRadiusAndClick(false);
-                fixTimes++;
-            }
+    private void ignoreInvalidTarget() {
+        if (!(attack.target.npcInfo.ignoreAttacked || main.mapManager.isCurrentTargetOwned()) ||
+                (drive.closestDistance(attack.target.locationInfo.now) > 400 && !attack.target.locationInfo.isMoving()
+                        && (attack.target.health.shIncreasedIn(1000) || attack.target.health.shieldPercent() > 0.95))) {
+            attack.target.setTimerTo(5000);
+            hero.setTarget(attack.target = null);
         }
-    }
-
-    private boolean shouldSab() {
-        return config.LOOT.SAB.ENABLED && hero.health.shieldPercent() < config.LOOT.SAB.PERCENT
-                && target.health.shield > config.LOOT.SAB.NPC_AMOUNT;
-    }
-
-    private char getAttackKey() {
-        if (sab = shouldSab()) return this.config.LOOT.SAB.KEY;
-        return this.target == null || this.target.npcInfo.attackKey == null ?
-                this.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;
-    }
-
-    private void setRadiusAndClick(boolean single) {
-        target.clickable.setRadius(800);
-        drive.clickCenter(single, target.locationInfo.now);
-        target.clickable.setRadius(0);
     }
 
     void moveToAnSafePosition() {
-        Location direction = hero.drive.movingTo();
+        Npc target = attack.target;
+        Location direction = drive.movingTo();
         Location heroLoc = hero.locationInfo.now;
         Location targetLoc = target.locationInfo.destinationInTime(400);
 
@@ -209,7 +149,7 @@ public class LootModule implements Module {
         double angle = targetLoc.angle(heroLoc);
         double radius = target.npcInfo.radius;
 
-        if (target != hero.target || ability != null) radius = Math.min(500, radius);
+        if (target != hero.target || attack.castingAbility()) radius = Math.min(500, radius);
         if (!target.locationInfo.isMoving() && target.health.hpPercent() < 0.25) radius = Math.min(radius, 600);
 
         if (target.npcInfo.noCircle) {
@@ -285,13 +225,13 @@ public class LootModule implements Module {
     }
 
     private Npc closestNpc(Location location) {
-        int extraPriority = target != null && !target.removed &&
-                (hero.target == target || hero.locationInfo.distance(target) < 600)
-                ? 20 - (int)(target.health.hpPercent() * 10) : 0;
+        int extraPriority = attack.hasTarget() &&
+                (hero.target == attack.target || hero.locationInfo.distance(attack.target) < 600)
+                ? 20 - (int)(attack.target.health.hpPercent() * 10) : 0;
         return this.npcs.stream()
-                .filter(n -> this.target == n || (n.npcInfo.kill &&
+                .filter(n -> n == attack.target && hero.isAttacking(attack.target) || (n.npcInfo.kill &&
                         !this.isAttackedByOthers(n) && drive.closestDistance(location) < 200))
-                .min(Comparator.<Npc>comparingInt(n -> n.npcInfo.priority - (n == target ? extraPriority : 0))
+                .min(Comparator.<Npc>comparingInt(n -> n.npcInfo.priority - (n == attack.target ? extraPriority : 0))
                         .thenComparing(n -> n.locationInfo.now.distance(location))).orElse(null);
     }
 }

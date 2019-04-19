@@ -116,11 +116,20 @@ public class DarkBotAPI implements IDarkBotAPI {
         return pix;
     }
 
+    private int x, y, w, h;
     public void setVisible(boolean visible) {
+        if (!visible) {
+            WinDef.RECT rect = new WinDef.RECT();
+            USER_32.GetWindowRect(window, rect);
+            x = rect.left;
+            y = rect.top;
+            w = Math.abs(rect.right - rect.left);
+            h = Math.abs(rect.bottom - rect.top);
+        }
         int minX = Arrays.stream(GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices())
                 .mapToInt(g -> g.getDefaultConfiguration().getBounds().x).min().orElse(0);
-        if (config.MISCELLANEOUS.OLD_HIDE) USER_32.SetWindowPos(window, new WinDef.HWND(new Pointer(-1)), 0, 0, 0, 0, NO_MOVE | NO_RESIZE | (visible ? SHOWN : HIDDEN));
-        else USER_32.MoveWindow(window, visible ? 0 : minX - 1280, 0, 1280, 720, true);
+
+        USER_32.MoveWindow(window, visible ? x : minX - w, y, w, h, true);
     }
 
     public void handleRefresh() {

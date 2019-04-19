@@ -61,13 +61,13 @@ public class LootNCollectorModule implements Module {
                 Box box = collectorModule.current;
 
                 if (box == null || box.locationInfo.distance(hero) > config.LOOT_COLLECT.RADIUS
-                        || lootModule.target.health.hpPercent() < 0.25) {
+                        || lootModule.attack.target.health.hpPercent() < 0.25) {
                     lootModule.moveToAnSafePosition();
                 } else {
                     collectorModule.tryCollectNearestBox();
                 }
 
-                lootModule.doKillTargetTick();
+                lootModule.attack.doKillTargetTick();
 
             } else {
                 hero.roamMode();

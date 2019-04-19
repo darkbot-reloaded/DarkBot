@@ -106,7 +106,7 @@ public class Config {
 
         public @Option(value = "Sab", description = "Auto sab npcs to survive longer") Sab SAB = new Sab();
         public static class Sab {
-            public @Option("Enabled") boolean ENABLED = true;
+            public @Option("Enabled") boolean ENABLED = false;
             public @Option("Key") char KEY = '2';
             public @Option("Ship under") @Editor(JPercentField.class) double PERCENT = 0.8;
             public @Option("NPC min shield") @Num(min = 500, max = 100000, step = 500) int NPC_AMOUNT = 12000;
@@ -136,17 +136,17 @@ public class Config {
 
     public @Option("Event") Event EVENT = new Event();
     public static class Event {
-        @Option(value = "Offensive ship ability")
-        public Character SHIP_ABILITY;
         @Option(value = "Complete event progress", description = "If the bot should click on the event progress")
         public boolean PROGRESS = true;
+        @Option(value = "Map switching", description = "Switch between Exp zone 2-x maps")
+        public boolean MAP_SWITCHING = true;
     }
 
 
     public @Option("Pet") PetSettings PET = new PetSettings();
     public static class PetSettings {
         @Option("Use pet")
-        public boolean ENABLED = true;
+        public boolean ENABLED = false;
         @Option(value = "# of module to use", description = "0 -> Passive, 1 -> Guard module, then whatever's next")
         @Num(max = 8, step = 1)
         public int MODULE = 1;
@@ -178,8 +178,6 @@ public class Config {
         public boolean FOCUS_ON_RELOAD = true;
         @Option("Developer stuff shown")
         public boolean DEV_STUFF = false;
-        @Option("Old hide mechanic")
-        public boolean OLD_HIDE = false;
         @Option("Full debug & memory trace (Don't enable)")
         public boolean FULL_DEBUG = false;
     }

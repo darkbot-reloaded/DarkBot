@@ -22,7 +22,7 @@ public class ConfigEntity {
         if (info == null) {
             info = new NpcInfo();
 
-            info.radius = 400;
+            info.radius = 500;
             info.mapList.add(mapId);
 
             if (!name.equals("ERROR") && !name.isEmpty()) {

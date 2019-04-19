@@ -80,4 +80,9 @@ public class Entity extends Updatable {
     public void removed() {
         removed = true;
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(id);
+    }
 }
