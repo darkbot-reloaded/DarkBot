@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Npc;
+import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
@@ -111,18 +112,25 @@ public class EventModule implements Module {
 
         int since = Optional.ofNullable(sinceNpc()).orElse(60_000);
 
-        if (clickReward == -1 && config.EVENT.MAP_SWITCHING && (!hero.map.name.startsWith(MAP_PREFIX) ||
-                (sinceNpc() != null && since > 5000 && since < 20000))) {
-            MapTiming next = maps.values().stream()
-                    .filter(timing -> timing.map.name.startsWith(MAP_PREFIX))
-                    .min(Comparator.comparing(MapTiming::nextNpc, Comparator.nullsFirst(
-                            Comparator.comparingInt((Integer t) -> {
-                                t -= TRAVEL_TIME;
-                                return t > 0 ? t : t + TIME_PER_NPC;
-                            })))).orElse(mt);
-            if (next != mt) {
-                main.setModule(new MapModule()).setTarget(next.map);
-                return;
+        if (config.EVENT.MAP_SWITCHING && (!hero.map.name.startsWith(MAP_PREFIX) ||
+                (sinceNpc() != null && since > 3000 && since < 20000))) {
+            if (clickReward != -1) {
+                if (!hero.locationInfo.isMoving()) {
+                    Portal next = main.starManager.next(hero.map, hero.locationInfo, hero.map);
+                    if (next != null) drive.move(next);
+                }
+            } else {
+                MapTiming next = maps.values().stream()
+                        .filter(timing -> timing.map.name.startsWith(MAP_PREFIX))
+                        .min(Comparator.comparing(MapTiming::nextNpc, Comparator.nullsFirst(
+                                Comparator.comparingInt((Integer t) -> {
+                                    t -= TRAVEL_TIME;
+                                    return t > 0 ? t : t + TIME_PER_NPC;
+                                })))).orElse(mt);
+                if (next != mt) {
+                    main.setModule(new MapModule()).setTarget(next.map);
+                    return;
+                }
             }
         }
 
