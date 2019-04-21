@@ -82,7 +82,7 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
         public boolean include(Entry<? extends NpcTableModel, ? extends Integer> entry) {
             if (filteredMap == -1) return true;
             NpcTableModel model = entry.getModel();
-            return model.NPC_INFOS.get((String) model.getValueAt(entry.getIdentifier(),0)).mapList.contains(filteredMap);
+            return model.NPC_INFOS.get((String) model.getValueAt(entry.getIdentifier(), 0)).mapList.contains(filteredMap);
         }
     }
 

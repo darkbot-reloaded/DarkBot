@@ -169,9 +169,9 @@ public class EntityList extends Updatable {
 
     private <E extends Entity> E whenAdd(E entity, long address) {
 
+        entity.added();
         entity.update(address);
         entity.update();
-        entity.removed = false;
 
         if (entity instanceof Obstacle)
             obstacles.add((Obstacle) entity);
@@ -226,9 +226,7 @@ public class EntityList extends Updatable {
             obstacles.clear();
 
             for (List<? extends Entity> entities : allEntities) {
-                for (Entity entity : entities) {
-                    entity.removed = true;
-                }
+                for (Entity entity : entities) entity.removed();
                 entities.clear();
             }
         }

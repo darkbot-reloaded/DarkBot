@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -25,6 +26,7 @@ public class Drive {
     private final LocationInfo heroLoc;
 
     public PathFinder pathFinder;
+    public LinkedList<PathPoint> paths = new LinkedList<>();
 
     private Location tempDest, endLoc, lastSegment;
 
@@ -43,16 +45,17 @@ public class Drive {
 
         boolean newPath = tempDest != null;
         if (tempDest != null) {
-            pathFinder.createRote(heroLoc.now, tempDest);
+            paths = pathFinder.createRote(heroLoc.now, tempDest);
             tempDest = null;
         }
 
-        if (pathFinder.isEmpty() || !heroLoc.isLoaded())
+        if (paths.isEmpty() || !heroLoc.isLoaded())
             return;
 
         lastMoved = System.currentTimeMillis();
 
-        Location now = heroLoc.now, last = heroLoc.last, next = pathFinder.current();
+        Location now = heroLoc.now, last = heroLoc.last, next = current();
+        if (next == null) return;
         newPath |= !next.equals(lastSegment);
         lastSegment = next;
 
@@ -66,13 +69,19 @@ public class Drive {
             if (!force && heroLoc.isMoving() && !newPath && System.currentTimeMillis() - lastClick > 500) stop(false);
             else click(next);
         } else {
-            pathFinder.currentCompleted();
-            if (pathFinder.isEmpty()) this.endLoc = null;
+            paths.removeFirst();
+            if (paths.isEmpty()) this.endLoc = null;
         }
     }
 
+    private Location current() {
+        if (paths.isEmpty()) return null;
+        PathPoint point = paths.getFirst();
+        return new Location(point.x, point.y);
+    }
+
     private void click(Location loc) {
-        if (System.currentTimeMillis() - lastClick > 200) {
+        if (System.currentTimeMillis() - lastClick > 300) {
             lastClick = System.currentTimeMillis();
             mouse.clickLoc(loc);
         }
@@ -83,7 +92,16 @@ public class Drive {
     }
 
     public double closestDistance(Location location) {
-        return location.distance(pathFinder.fixToClosest(new PathPoint((int) location.x, (int) location.y)).toLocation());
+        PathPoint closest = pathFinder.fixToClosest(new PathPoint((int) location.x, (int) location.y));
+        return location.distance(closest.toLocation());
+    }
+
+    public double distanceBetween(Location loc, int x, int y) {
+        double sum = 0;
+        PathPoint begin = new PathPoint((int) loc.x, (int) loc.y);
+        for (PathPoint curr : pathFinder.createRote(begin, new PathPoint(x, y)))
+            sum += Math.sqrt(Math.pow(begin.x - curr.x, 2) + Math.pow(begin.y - curr.y, 2));
+        return sum;
     }
 
     public void toggleRunning(boolean running) {
@@ -99,7 +117,7 @@ public class Drive {
         }
 
         endLoc = null;
-        if (!pathFinder.isEmpty()) pathFinder.path().clear();
+        if (!paths.isEmpty()) paths.clear();
     }
 
     public void clickCenter(boolean single, Location aim) {
@@ -134,7 +152,7 @@ public class Drive {
     }
 
     public boolean isMoving() {
-        return !pathFinder.isEmpty() || heroLoc.isMoving();
+        return !paths.isEmpty() || heroLoc.isMoving();
     }
 
     public Location movingTo() {

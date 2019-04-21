@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot;
 
+import com.github.manolo8.darkbot.utils.Time;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -7,10 +9,19 @@ public class BackpageManager extends Thread {
     private final Main main;
     private static final int SECOND = 1000, MINUTE = 60 * SECOND;
 
+    private static final String[] ACTIONS = new String[] {
+            "internalStart", "internalDock", "internalAuction", "internalSkylab", "internalGalaxyGates", "internalPilotSheet"
+    };
+    private static String getRandomAction() {
+        return ACTIONS[(int) (Math.random() * ACTIONS.length)];
+    }
+
     private String sid;
     private String instance;
 
-    private volatile int sidStatus = -1;
+    private long waitTime = 0;
+    private long lastUpdate = System.currentTimeMillis();
+    private int sidStatus = -1;
 
     public BackpageManager(Main main) {
         super("BackpageManager");
@@ -20,14 +31,21 @@ public class BackpageManager extends Thread {
 
     @Override
     public void run() {
-        int waitTime = 0;
-        while (sidStatus != 302 && sleep((int) (waitTime + waitTime * Math.random()))) {
+        while (true) {
+            lastUpdate = System.currentTimeMillis();
+            int waitTime;
+
             if (isInvalid()) {
                 sidStatus = -1;
                 waitTime = SECOND;
-                continue;
+            } else {
+                waitTime = validTick();
             }
-            waitTime = validTick();
+
+            if (sidStatus == 302) break;
+
+            this.waitTime = (int) (waitTime + waitTime * Math.random());
+            sleep(waitTime);
         }
     }
 
@@ -49,7 +67,8 @@ public class BackpageManager extends Thread {
     }
 
     private int sidKeepAlive() throws Exception {
-        HttpURLConnection conn = (HttpURLConnection) new URL(instance + "indexInternal.es").openConnection();
+        HttpURLConnection conn = (HttpURLConnection) new URL(instance + "indexInternal.es?action=" + getRandomAction())
+                .openConnection();
         conn.setInstanceFollowRedirects(false);
         conn.setRequestProperty("Cookie", "dosid=" + sid);
         return conn.getResponseCode();
@@ -64,7 +83,12 @@ public class BackpageManager extends Thread {
         return true;
     }
 
-    public String sidStatus() {
+    public synchronized String sidStatus() {
+        return sidStat() + (sidStatus != -1 && sidStatus != 302 ?
+                " " + Time.toString(System.currentTimeMillis() - lastUpdate) + "/" + Time.toString(waitTime) : "");
+    }
+
+    private String sidStat() {
         switch (sidStatus) {
             case -1: return "--";
             case -2: return "ERR";

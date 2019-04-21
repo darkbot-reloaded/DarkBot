@@ -14,7 +14,6 @@ import static java.lang.Math.sin;
 public class PathFinder {
 
     private final MapManager map;
-    private final LinkedList<PathPoint> paths;
     public final Set<PathPoint> points;
 
     private final ObstacleHandler obstacleHandler;
@@ -22,42 +21,24 @@ public class PathFinder {
     public PathFinder(MapManager map) {
         this.map = map;
         this.obstacleHandler = new ObstacleHandler(map);
-        this.paths = new LinkedList<>();
         this.points = new HashSet<>();
     }
 
-    public Location current() {
-        if (paths.size() > 0) {
-            PathPoint point = paths.getFirst();
-
-            return new Location(point.x, point.y);
-        }
-        return null;
-    }
-
-    public void currentCompleted() {
-        paths.removeFirst();
-    }
-
-    public boolean isEmpty() {
-        return paths.isEmpty();
-    }
-
-    public void createRote(Location current, Location destination) {
-        createRote(
+    public LinkedList<PathPoint> createRote(Location current, Location destination) {
+        return createRote(
                 new PathPoint((int) current.x, (int) current.y),
                 new PathPoint((int) destination.x, (int) destination.y)
         );
     }
 
-    private void createRote(PathPoint current, PathPoint destination) {
-        paths.clear();
+    public LinkedList<PathPoint> createRote(PathPoint current, PathPoint destination) {
+        LinkedList<PathPoint> paths = new LinkedList<>();
         fixToClosest(current);
         fixToClosest(destination);
 
         if (hasLineOfSight(current, destination)) {
             paths.add(destination);
-            return;
+            return paths;
         }
 
         current.fillLineOfSight(this);
@@ -65,6 +46,7 @@ public class PathFinder {
 
         new PathFinderCalculator(current, destination)
                 .fillGeneratedPathTo(paths);
+        return paths;
     }
 
     public PathPoint fixToClosest(PathPoint point) {
@@ -147,10 +129,6 @@ public class PathFinder {
 
     boolean hasLineOfSight(PathPoint point1, PathPoint point2) {
         return obstacleHandler.stream().allMatch(a -> a.hasLineOfSight(point1, point2));
-    }
-
-    public List<PathPoint> path() {
-        return paths;
     }
 
     private enum Corner {

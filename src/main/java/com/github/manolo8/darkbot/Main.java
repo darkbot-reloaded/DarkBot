@@ -29,14 +29,17 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.util.prefs.Preferences;
 
 public class Main extends Thread {
-    public static final String VERSION = "1.13.8";
+    public static final String VERSION = "1.13.9 beta 2";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -58,6 +61,7 @@ public class Main extends Thread {
     public final Lazy.Sync<Boolean> status;
 
     public Config config;
+    private boolean failedConfig;
     private int moduleId;
     public Module module;
 
@@ -89,6 +93,8 @@ public class Main extends Thread {
         }
         showDiscordWarning();
 
+        if (failedConfig) popupMessage("Failed to load config",
+                "Default config will be used, config won't be save.", JOptionPane.ERROR_MESSAGE);
         new ConfigEntity(config);
 
         botInstaller = new BotInstaller();
@@ -128,8 +134,8 @@ public class Main extends Thread {
         long firstInit = prefs.getLong(VERSION, System.currentTimeMillis());
         prefs.putLong(VERSION, firstInit);
 
-        int TIME_BEFORE_MESSAGE = 48 * 60 * 60 * 1000;
-        if (System.currentTimeMillis() - TIME_BEFORE_MESSAGE < firstInit) return;
+        long TIME_BEFORE_MESSAGE = 48 * 60 * 60 * 1000;
+        if (System.currentTimeMillis() - firstInit < TIME_BEFORE_MESSAGE) return;
 
         JPanel panel = new JPanel(new MigLayout("ins 0, wrap 1"));
         panel.add(new JLabel("This bot is free, if you paid for it or watched ads, you were scammed!"));
@@ -254,27 +260,25 @@ public class Main extends Thread {
     }
 
     private void loadConfig() {
-        try {
-            File config = new File("config.json");
-            if (config.exists()) {
-                FileReader reader = new FileReader(config);
-                this.config = GSON.fromJson(reader, Config.class);
-                if (this.config == null) this.config = new Config();
-                reader.close();
-            } else {
-                saveConfig();
-            }
-        } catch (IOException e) {
+        File config = new File("config.json");
+        if (!config.exists()) {
+            saveConfig();
+            return;
+        }
+        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(config), StandardCharsets.UTF_8)) {
+            this.config = GSON.fromJson(reader, Config.class);
+            if (this.config == null) this.config = new Config();
+        } catch (Exception e) {
+            failedConfig = true;
             e.printStackTrace();
         }
     }
 
     public void saveConfig() {
-        try {
-            File config = new File("config.json");
-            FileWriter writer = new FileWriter(config);
+        if (failedConfig) return; // Don't save defaults if config failed to load!
+        File config = new File("config.json");
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(config), StandardCharsets.UTF_8)) {
             GSON.toJson(this.config, writer);
-            writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.utils.ClickPoint;
 import com.github.manolo8.darkbot.core.utils.Location;
 
@@ -9,8 +11,8 @@ import static com.github.manolo8.darkbot.Main.API;
 public class MouseManager extends Thread {
 
     private final Object LOCK = new Object();
-    private volatile ClickPoint clickPoint = new ClickPoint(0, 0);
-    private volatile long address;
+    private ClickPoint clickPoint = new ClickPoint(0, 0);
+    private Point point = new Point();
     private volatile boolean waiting;
 
     private final MapManager map;
@@ -30,9 +32,8 @@ public class MouseManager extends Thread {
     public void clickLoc(Location loc) {
         clickPoint.set((int) loc.x, (int) loc.y);
 
+        point.update(Main.API.readMemoryLong(Main.API.readMemoryLong(map.eventAddress) + 64L));
         ClickPoint click = pointCenter(loc);
-
-        address = Main.API.readMemoryLong(Main.API.readMemoryLong(map.eventAddress) + 64L);
 
         waiting = false;
         synchronized (LOCK) {
@@ -44,8 +45,11 @@ public class MouseManager extends Thread {
 
 
     private ClickPoint pointCenter(Location aim) {
-        Location center = new Location(map.boundX + map.width / 2, map.boundY + map.height / 2);
-        center.toAngle(center, center.angle(aim) + Math.random() * 0.2 - 0.1, 125 + Math.random() * 75);
+        Location center;
+        if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.CLICK_TEST)
+            center = HeroManager.instance.locationInfo.now.copy();
+        else center = new Location(map.boundX + map.width / 2, map.boundY + map.height / 2);
+        center.toAngle(center, center.angle(aim) + Math.random() * 0.2 - 0.1, 100 + Math.random() * 50);
         return pointLoc(center);
     }
 
@@ -65,8 +69,8 @@ public class MouseManager extends Thread {
                     }
                 }
 
-                Main.API.writeMemoryDouble(address + 32L, (double) clickPoint.x);
-                Main.API.writeMemoryDouble(address + 40L, (double) clickPoint.y);
+                Main.API.writeMemoryDouble(point.address + 32L, (double) clickPoint.x);
+                Main.API.writeMemoryDouble(point.address + 40L, (double) clickPoint.y);
             }
         }
     }

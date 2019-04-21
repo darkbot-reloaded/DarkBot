@@ -27,7 +27,7 @@ public class JBoxInfoTable extends InfoTable implements OptionEditor {
         private Map<String, BoxInfo> BOX_INFOS;
 
         BoxTableModel(Map<String, BoxInfo> BOX_INFOS, Lazy<String> added) {
-            super(new String[]{"Name", "Collect", "Wait"}, 0);
+            super(new String[]{"Name", "Collect", "Wait (ms)"}, 0);
             (this.BOX_INFOS = BOX_INFOS).forEach(this::addEntry);
             added.add(n -> addEntry(n, BOX_INFOS.get(n)));
         }

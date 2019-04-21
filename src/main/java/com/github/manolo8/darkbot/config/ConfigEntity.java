@@ -1,6 +1,11 @@
 package com.github.manolo8.darkbot.config;
 
+import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.manager.MapManager;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class ConfigEntity {
 
@@ -14,11 +19,8 @@ public class ConfigEntity {
     }
 
     public NpcInfo getOrCreateNpcInfo(String name) {
-
         int mapId = MapManager.id;
-
         NpcInfo info = config.LOOT.NPC_INFOS.get(name);
-
         if (info == null) {
             info = new NpcInfo();
 
@@ -31,25 +33,16 @@ public class ConfigEntity {
 
                 config.changed = true;
             }
-
-        } else {
-
-            if (info.mapList.add(mapId)) {
-                config.changed = true;
-            }
-
+        } else if (info.mapList.add(mapId)) {
+            config.changed = true;
         }
-
         return info;
     }
 
     public BoxInfo getOrCreateBoxInfo(String name) {
-
         BoxInfo info = config.COLLECT.BOX_INFOS.get(name);
-
         if (info == null) {
             info = new BoxInfo();
-
             if (!name.equals("ERROR") && !name.isEmpty()) {
                 config.COLLECT.BOX_INFOS.put(name, info);
                 config.COLLECT.ADDED_BOX.send(name);
@@ -57,8 +50,26 @@ public class ConfigEntity {
                 config.changed = true;
             }
         }
-
         return info;
+    }
+
+    public void updateSafetyFor(Entity entity) {
+        if (!entity.locationInfo.isLoaded()) return;
+        SafetyInfo.Type type = SafetyInfo.Type.of(entity);
+        if (type == null) return;
+
+        Set<SafetyInfo> safetyInfos = getOrCreateSafeties();
+
+        config.ADDED_SAFETY.send(safetyInfos.stream().filter(info -> info.type == type
+                && info.x == (int) entity.locationInfo.now.x
+                && info.y == (int) entity.locationInfo.now.y)
+                .peek(info -> info.entity = entity)
+                .findFirst()
+                .orElseGet(() -> {
+                    SafetyInfo s = new SafetyInfo(type, (int) entity.locationInfo.now.x, (int) entity.locationInfo.now.y, entity);
+                    safetyInfos.add(s);
+                    return s;
+                }));
     }
 
     public ZoneInfo getOrCreatePreferred() {
@@ -67,6 +78,14 @@ public class ConfigEntity {
 
     public ZoneInfo getOrCreateAvoided() {
         return config.AVOIDED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.MISCELLANEOUS.ZONE_RESOLUTION));
+    }
+
+    public Set<SafetyInfo> getOrCreateSafeties() {
+        return config.SAFETY.computeIfAbsent(MapManager.id, id -> new HashSet<>());
+    }
+
+    public Config getConfig() {
+        return config;
     }
 
 }

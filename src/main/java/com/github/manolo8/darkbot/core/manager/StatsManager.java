@@ -96,11 +96,13 @@ public class StatsManager implements Manager {
     }
 
     private void updateExperience(double experience) {
+        if (experience == 0) return;
         if (this.experience != 0) earnedExperience += experience - this.experience;
         this.experience = experience;
     }
 
     private void updateHonor(double honor) {
+        if (honor == 0) return;
         if (this.honor != 0) earnedHonor += honor - this.honor;
         this.honor = honor;
     }

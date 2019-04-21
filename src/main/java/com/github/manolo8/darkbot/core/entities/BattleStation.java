@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.entities;
 
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.objects.PlayerInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
@@ -27,8 +28,16 @@ public class BattleStation
         super.update();
 
         info.update();
-        if (locationInfo.isMoving())
+        if (locationInfo.isMoving()) {
             area.set(locationInfo.now, 1200, 1000);
+            ConfigEntity.INSTANCE.updateSafetyFor(this);
+        }
+    }
+
+    @Override
+    public void removed() {
+        super.removed();
+        ConfigEntity.INSTANCE.updateSafetyFor(this);
     }
 
     @Override

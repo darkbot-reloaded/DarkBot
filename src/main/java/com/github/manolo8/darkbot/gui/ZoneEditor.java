@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 
 import javax.swing.*;
@@ -8,6 +9,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ZoneEditor extends MapDrawer {
 
@@ -16,9 +18,6 @@ public class ZoneEditor extends MapDrawer {
     private Color SELECTING = new Color(0, 128, 255);
     private Color ZONE = new Color(0, 255, 128, 64);
 
-    private Map<Integer, ZoneInfo> zonesByMap;
-
-    private Integer map = null;
     private ZoneInfo zoneInfo = null;
     private boolean hovering, selecting;
     private Rect area = new Rect();
@@ -53,12 +52,7 @@ public class ZoneEditor extends MapDrawer {
         }
     }
 
-    public void setup(Main main, Map<Integer, ZoneInfo> zonesByMap) {
-        super.setup(main);
-        this.zonesByMap = zonesByMap;
-    }
-
-    public ZoneEditor() {
+    ZoneEditor() {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -103,20 +97,29 @@ public class ZoneEditor extends MapDrawer {
         });
     }
 
+    void setup(Main main, Map<Integer, ZoneInfo> zonesByMap) {
+        super.setup(main);
+        main.mapManager.mapChange.add(map -> {
+            zoneInfo = zonesByMap.computeIfAbsent(map.id, id -> new ZoneInfo(config.MISCELLANEOUS.ZONE_RESOLUTION));
+            ZoneEditor.this.repaint();
+        });
+        zoneInfo = zonesByMap.get(-1);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
-        int res = config.MISCELLANEOUS.ZONE_RESOLUTION;
-        if (map == null || hero.map.id != map) {
-            zoneInfo = zonesByMap.computeIfAbsent(map = hero.map.id, id -> new ZoneInfo(config.MISCELLANEOUS.ZONE_RESOLUTION));
+        Graphics2D g2 = setupDraw(g);
+
+        synchronized (Main.UPDATE_LOCKER) {
+            drawZones(g2);
+            drawStaticEntities(g2);
+            drawMap(g2);
         }
+
         if (zoneInfo == null) return;
 
+        int res = config.MISCELLANEOUS.ZONE_RESOLUTION;
         if (zoneInfo.resolution != res) zoneInfo.setResolution(res);
-
-        Graphics2D g2 = setupDraw(g);
-        drawZones(g2);
-        drawStaticEntities(g2);
-        drawMap(g2);
         drawCustomZones(g2);
         drawGrid(g2, res);
 

@@ -2,54 +2,101 @@ package com.github.manolo8.darkbot.gui.trail;
 
 import com.github.manolo8.darkbot.core.utils.Location;
 
-import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * A class to represent a line created from two points
+ * A method to smooth a hand-drawn line based on the McMaster
+ * line smoothing algorithm
+ *
+ * Heavily modified version, based on the implementation by:
  * @author Derek Springer
+ * @link https://12inchpianist.com/2010/07/30/line-smoothing-in-java/
  */
 public class Line {
+    private final Location from, to;
+    private Location fromCopy, toCopy;
 
-    public double x1;
-    public double y1;
-    public double x2;
-    public double y2;
-
-    public Line(Location loc1, Location loc2) {
-        this.x1 = loc1.x;
-        this.y1 = loc1.y;
-        this.x2 = loc2.x;
-        this.y2 = loc2.y;
+    public Line(Location from, Location to) {
+        this.from = from;
+        this.to = to;
     }
 
-    public double slope() {
-        if(x2 - x1 == 0) return Double.NaN;
-        return (y2 - y1) / (x2 - x1);
+    private Location getFrom() {
+        return fromCopy == null ? fromCopy = from.copy() : fromCopy.set(from.x, from.y);
     }
 
-    public double intercept() {
-        return y1 - slope() * x1;
+    private Location getTo() {
+        return toCopy == null ? toCopy = to.copy() : toCopy.set(to.x, to.y);
     }
 
-    public static double slope(double x1, double y1, double x2, double y2) {
-        return (y2-y1)/(x2-x1);
+    public static List<List<Location>> getSmoothedPaths(Collection<Line> lines) {
+        return getPaths(lines).stream().map(Line::smoothPath).collect(Collectors.toList());
     }
 
-    public static double slope(Point point1, Point point2) {
-        return slope(point1.getX(), point1.getY(), point2.getX(), point2.getY());
+    /**
+     * Split a single list of lines in N paths
+     */
+    private static List<List<Location>> getPaths(Collection<Line> lines) {
+        List<List<Location>> paths = new ArrayList<>();
+
+        List<Location> current = null;
+        Line last = null;
+
+        for (Line line : lines) {
+            if (last == null || last.to != line.from) {
+                paths.add(current = new ArrayList<>());
+                current.add(line.getFrom());
+            }
+            last = line;
+            current.add(line.getTo());
+        }
+        return paths;
     }
 
-    public static double intercept(double x1, double y1, double x2, double y2) {
-        return y1 - slope(x1, y1, x2, y2) * x1;
+    /**
+     * @param path A list of line segments representing a line
+     * @return A list line segments representing the smoothed line
+     */
+    private static List<Location> smoothPath(List<Location> path) {
+        int size = path.size();
+        if (size < 4) return path;
+
+        Location[] points = new Location[5];
+        for (int i = 0; i < 5; i++) points[i] = new Location();
+
+        for (int i = 0; i <= size; i++) {
+            if (i < size) {
+                Location loc = path.get(i);
+                points[i % points.length].set(loc.x, loc.y);
+            } else {
+                points[i % points.length] = null;
+                points[(i + 1) % points.length] = null;
+            }
+            if (i < 5) continue;
+
+            smoothPoint(points, path.get(i - 2));
+        }
+        return path;
     }
 
-    public static double intercept(Point point1, Point point2) {
-        return intercept(point1.getX(), point1.getY(), point2.getX(), point2.getY());
+    /**
+     * Find the new point for a smoothed line segment
+     * @param points The n points around the smoothed point
+     */
+    private static void smoothPoint(Location[] points, Location oldPoint) {
+        int sumX = 0, sumY = 0, total = 0;
+        for(Location point : points) {
+            if (point == null) continue;
+            sumX += point.x;
+            sumY += point.y;
+            total++;
+        }
+
+        oldPoint.x = ((sumX / total) + oldPoint.x) / 2;
+        oldPoint.y = ((sumY / total) + oldPoint.y) / 2;
     }
 
-    @Override
-    public String toString() {
-        return "[(" + x1 + ", " + x2 + "), (" + y1 + ", " + y2 + ")] " +
-                "m=" + slope() + ", b=" + intercept();
-    }
 }

@@ -16,13 +16,17 @@ import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Config {
 
     // DEFINED AREAS
     public Map<Integer, ZoneInfo> AVOIDED = new HashMap<>();
     public Map<Integer, ZoneInfo> PREFERRED = new HashMap<>();
+    public Map<Integer, Set<SafetyInfo>> SAFETY = new HashMap<>();
+    public transient Lazy<SafetyInfo> ADDED_SAFETY = new Lazy<>();
     // DEFINED AREAS
 
     public transient boolean changed;
@@ -60,8 +64,6 @@ public class Config {
             @Option("Repair until")
             @Editor(JPercentField.class)
             public double REPAIR_TO_HP = 0.95;
-            @Option(value = "Ship ability", description = "Clicked when running away")
-            public Character SHIP_ABILITY;
             @Option("Max deaths")
             @Num(min = 1, max = 999)
             public int MAX_DEATHS = 10;
@@ -72,6 +74,27 @@ public class Config {
             @Option("Wait after revive (sec)")
             @Num(max = 60 * 60, step = 10)
             public int WAIT_AFTER_REVIVE = 90;
+        }
+
+        public @Option("Running") Running RUNNING = new Running();
+        public static class Running {
+            @Option("Run from enemies")
+            public boolean RUN_FROM_ENEMIES = true;
+            @Option("Run from enemies in sight")
+            public boolean RUN_FROM_ENEMIES_SIGHT = false;
+            @Option(value = "Stop running when out of sight", description = "Will stop running if the enemy isn't attacking and is no longer on sight")
+            public boolean STOP_RUNNING_NO_SIGHT = true;
+            @Option(value = "Max sight distance", description = "No longer consider enemies in sight if further away than this")
+            @Num(min = 500, max = 20000, step = 500)
+            public int MAX_SIGHT_DISTANCE = 4000;
+            @Option(value = "Ship ability", description = "Clicked when running away")
+            public Character SHIP_ABILITY;
+            @Option(value = "Ship ability min distance", description = "Minimum distance to safety to use ability")
+            @Num(max = 20000, step = 500)
+            public int SHIP_ABILITY_MIN = 1500;
+            @Option(value = "Closest port distance max", description = "Run to port further away from enemy, unless port dist under max")
+            @Num(max = 20000, step = 500)
+            public int RUN_FURTHEST_PORT = 1500;
         }
     }
 
@@ -89,21 +112,6 @@ public class Config {
 
     public @Option("Loot") Loot LOOT = new Loot();
     public static class Loot {
-        public @Option("Safety") Safety SAFETY = new Safety();
-        public static class Safety {
-            public @Option("Run from enemies")
-            boolean RUN_FROM_ENEMIES = true;
-            public @Option("Run from enemies in sight")
-            boolean RUN_FROM_ENEMIES_SIGHT;
-            @Option(value = "Stop running when out of sight", description = "Will stop running if the enemy isn't attacking and is no longer on sight")
-            public boolean STOP_RUNNING_NO_SIGHT = true;
-            @Option(value = "Max sight distance", description = "No longer consider enemies in sight if further away than this")
-            @Num(min = 500, max = 20000, step = 500)
-            public int MAX_SIGHT_DISTANCE = 4000;
-            @Option(value = "Jump portals to escape")
-            public boolean JUMP_PORTALS = true;
-        }
-
         public @Option(value = "Sab", description = "Auto sab npcs to survive longer") Sab SAB = new Sab();
         public static class Sab {
             public @Option("Enabled") boolean ENABLED = false;
@@ -125,6 +133,10 @@ public class Config {
         @Editor(JNpcInfoTable.class)
         public Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_NPC = new Lazy<>();
+
+        @Option("Ignore npcs further than")
+        @Num(min = 1000, max = 20000, step = 500)
+        public int NPC_DISTANCE_IGNORE = 3000;
     }
 
     public @Option("Loot & collect") LootNCollect LOOT_COLLECT = new LootNCollect();
@@ -180,6 +192,8 @@ public class Config {
         public boolean DEV_STUFF = false;
         @Option("Full debug & memory trace (Don't enable)")
         public boolean FULL_DEBUG = false;
+        @Option("Test click behaviour")
+        public boolean CLICK_TEST = false;
     }
 
     public static class ShipConfig {

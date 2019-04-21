@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.config;
 
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

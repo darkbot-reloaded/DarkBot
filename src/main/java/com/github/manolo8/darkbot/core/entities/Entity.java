@@ -77,6 +77,10 @@ public class Entity extends Updatable {
         }
     }
 
+    public void added() {
+        removed = false;
+    }
+
     public void removed() {
         removed = true;
     }

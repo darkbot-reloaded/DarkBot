@@ -40,8 +40,19 @@ public class Location {
         this.y = center.y - sin(angle) * distance;
     }
 
+    public Location set(double x, double y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
+
     public Location copy() {
         return new Location(x, y);
+    }
+
+    @Override
+    public String toString() {
+        return x + "," + y;
     }
 
     @Override

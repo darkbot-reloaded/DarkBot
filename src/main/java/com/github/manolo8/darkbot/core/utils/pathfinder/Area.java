@@ -15,10 +15,10 @@ public class Area {
     public boolean cachedUsing;
 
     public Area(double minX, double minY, double maxX, double maxY) {
-        this.minX = minX;
-        this.minY = minY;
-        this.maxX = maxX;
-        this.maxY = maxY;
+        this.minX = Math.floor(minX);
+        this.minY = Math.floor(minY);
+        this.maxX = Math.ceil(maxX);
+        this.maxY = Math.ceil(maxY);
     }
     public static Area ofSize(double minX, double minY, double width, double height) {
         return new Area(minX, minY, minX + width, minY + height);
@@ -68,10 +68,8 @@ public class Area {
     }
 
     public boolean inside(int x, int y) {
-        return (minX <= x &&
-                x <= maxX &&
-                minY <= y &&
-                y <= maxY);
+        return (minX <= x && x <= maxX &&
+                minY <= y && y <= maxY);
     }
 
     public void set(Location o, int addX, int addY) {

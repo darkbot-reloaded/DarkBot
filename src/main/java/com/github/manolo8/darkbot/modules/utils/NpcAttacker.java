@@ -4,13 +4,14 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class NpcAttacker {
 
-    private Main main;
+    private MapManager mapManager;
     private Config config;
     private HeroManager hero;
     private Drive drive;
@@ -25,7 +26,7 @@ public class NpcAttacker {
     private boolean sab;
 
     public NpcAttacker(Main main) {
-        this.main = main;
+        this.mapManager = main.mapManager;
         this.hero = main.hero;
         this.config = main.config;
         this.drive = hero.drive;
@@ -44,12 +45,13 @@ public class NpcAttacker {
     }
 
     public void doKillTargetTick() {
-        if (!main.mapManager.isTarget(target)) {
+        if (target == null) return;
+        if (!mapManager.isTarget(target)) {
             lockAndSetTarget();
             return;
         }
 
-        if (ability != null && (target.health.maxHp > 0 || ability < System.currentTimeMillis())) {
+        if (ability != null && ability < System.currentTimeMillis()) {
             if (target.health.maxHp < config.LOOT.SHIP_ABILITY_MIN) ability = null;
             else if (hero.locationInfo.distance(target) < 575) {
                 API.keyboardClick(config.LOOT.SHIP_ABILITY);
@@ -67,7 +69,7 @@ public class NpcAttacker {
         clickDelay = System.currentTimeMillis();
         fixTimes = 0;
         laserTime = clickDelay + 50;
-        ability = clickDelay + 2000;
+        ability = clickDelay + 3000;
     }
 
     private void tryAttackOrFix() {

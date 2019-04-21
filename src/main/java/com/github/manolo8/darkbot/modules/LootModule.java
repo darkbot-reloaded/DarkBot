@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.modules;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
@@ -11,11 +10,11 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.modules.utils.NpcAttacker;
+import com.github.manolo8.darkbot.modules.utils.SafetyFinder;
 
 import java.util.Comparator;
 import java.util.List;
 
-import static com.github.manolo8.darkbot.Main.API;
 import static java.lang.Double.max;
 import static java.lang.Double.min;
 import static java.lang.Math.random;
@@ -35,15 +34,13 @@ public class LootModule implements Module {
     private int radiusFix;
 
     NpcAttacker attack;
-
-    private boolean repairing;
-    private boolean jump;
-    private Portal escaping;
+    private SafetyFinder safety;
 
     @Override
     public void install(Main main) {
         this.main = main;
         this.attack = new NpcAttacker(main);
+        this.safety = new SafetyFinder(main);
 
         this.hero = main.hero;
         this.drive = main.hero.drive;
@@ -55,7 +52,7 @@ public class LootModule implements Module {
 
     @Override
     public String status() {
-        return jump ? "Jumping port" : repairing ? "Repairing" : escaping != null ? "Avoiding enemy" :
+        return safety.state() != SafetyFinder.Escaping.NONE ? safety.status() :
                 attack.hasTarget() ? attack.status() : "Roaming";
     }
 
@@ -71,8 +68,8 @@ public class LootModule implements Module {
 
             if (findTarget()) {
                 moveToAnSafePosition();
-                attack.doKillTargetTick();
                 ignoreInvalidTarget();
+                attack.doKillTargetTick();
             } else if (!drive.isMoving()) {
                 drive.moveRandom();
             }
@@ -80,60 +77,30 @@ public class LootModule implements Module {
     }
 
     boolean checkDangerousAndCurrentMap() {
-        if (this.config.GENERAL.WORKING_MAP != this.hero.map.id && !main.mapManager.entities.portals.isEmpty()) {
-            this.hero.runMode();
-            repairing = true;
-            jump = false;
-            this.main.setModule(new MapModule()).setTarget(this.main.starManager.byId(this.main.config.GENERAL.WORKING_MAP));
-            return false;
-        }
-
-        if (jump && escaping != null) {
-            this.hero.runMode();
-            if (escaping.locationInfo.distance(this.hero) < 250.0) hero.jumpPortal(escaping);
-            else moveToSafety(escaping);
-            return false;
-        }
-
-        boolean underAttack = this.isUnderAttack();
-        boolean lowHp = this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_HP ||
-                (this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_HP_NO_NPC &&
-                        (!attack.hasTarget() || attack.target.health.hp == 0 || attack.target.health.hpPercent() > 0.8));
-
-        if (lowHp || hasEnemies()) {
-            escaping = this.main.starManager.next(this.hero.map, this.hero.locationInfo, this.hero.map);
-            if (escaping == null) return true; // No place to run, don't even try.
-
-            this.hero.runMode();
-            if (underAttack && !repairing) Main.API.keyboardClick(config.GENERAL.SAFETY.SHIP_ABILITY);
-
-            jump |= config.LOOT.SAFETY.JUMP_PORTALS && underAttack;
-            repairing |= underAttack || lowHp || !this.config.LOOT.SAFETY.STOP_RUNNING_NO_SIGHT;
-
-            if (escaping.locationInfo.distance(this.hero) > 250.0) moveToSafety(escaping);
-            else if (lowHp && hero.health.hpDecreasedIn(100)) jump |= config.LOOT.SAFETY.JUMP_PORTALS;
-            return false;
-        }
-        repairing &= this.hero.health.hpPercent() < this.config.GENERAL.SAFETY.REPAIR_TO_HP;
-        if (repairing) return false;
-        escaping = null;
-        return true;
+        return safety.tick() && checkMap();
     }
 
-    private void moveToSafety(Entity safety) {
-        if (drive.movingTo().distance(safety.locationInfo.now) < 200) return;
-        double angle = safety.locationInfo.now.angle(hero.locationInfo.now) + Math.random() * 0.1 - 0.05;
-        drive.move(Location.of(escaping.locationInfo.now, angle, 20 + Math.random() * 200));
+    private boolean checkMap() {
+        if (this.config.GENERAL.WORKING_MAP != this.hero.map.id && !main.mapManager.entities.portals.isEmpty()) {
+            this.main.setModule(new MapModule())
+                    .setTarget(this.main.starManager.byId(this.main.config.GENERAL.WORKING_MAP));
+            return false;
+        }
+        return true;
     }
 
     boolean findTarget() {
         return (attack.target = closestNpc(hero.locationInfo.now)) != null;
     }
 
-    private void ignoreInvalidTarget() {
-        if (!(attack.target.npcInfo.ignoreAttacked || main.mapManager.isCurrentTargetOwned()) ||
-                (drive.closestDistance(attack.target.locationInfo.now) > 400 && !attack.target.locationInfo.isMoving()
-                        && (attack.target.health.shIncreasedIn(1000) || attack.target.health.shieldPercent() > 0.95))) {
+    void ignoreInvalidTarget() {
+        if (!main.mapManager.isTarget(attack.target)) return;
+        double closestDist;
+        if (!(attack.target.npcInfo.ignoreAttacked || main.mapManager.isCurrentTargetOwned())
+                || (hero.locationInfo.distance(attack.target) > config.LOOT.NPC_DISTANCE_IGNORE) // Too far away from ship
+                || (closestDist = drive.closestDistance(attack.target.locationInfo.now)) > 650   // Too far into obstacle
+                || (closestDist > 500 && !attack.target.locationInfo.isMoving() // Inside obstacle, waiting & and regen shields
+                        && (attack.target.health.shIncreasedIn(1000) || attack.target.health.shieldPercent() > 0.99))) {
             attack.target.setTimerTo(5000);
             hero.setTarget(attack.target = null);
         }
@@ -185,43 +152,15 @@ public class LootModule implements Module {
         drive.move(direction);
     }
 
-    private boolean isUnderAttack() {
-        if (!config.LOOT.SAFETY.RUN_FROM_ENEMIES && !config.LOOT.SAFETY.RUN_FROM_ENEMIES_SIGHT) return false;
-        for (Ship ship : ships) {
-            if (ship.playerInfo.isEnemy() && ship.isAttacking(hero)) return true;
-        }
-        return false;
-    }
-
-    private boolean hasEnemies() {
-        if (!config.LOOT.SAFETY.RUN_FROM_ENEMIES && !config.LOOT.SAFETY.RUN_FROM_ENEMIES_SIGHT) return false;
-
-        for (Ship ship : ships) {
-            if (!ship.playerInfo.isEnemy()) continue;
-
-            if (config.LOOT.SAFETY.RUN_FROM_ENEMIES_SIGHT && ship.locationInfo.distance(hero) < config.LOOT.SAFETY.MAX_SIGHT_DISTANCE)
-                return true;
-
-            if (ship.isAttacking(hero)) {
-                ship.setTimerTo(400_000);
-                return true;
-            } else if (ship.isInTimer()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private boolean isAttackedByOthers(Npc npc) {
         if (npc.npcInfo.ignoreAttacked) return false;
-        if (npc.isInTimer()) return true;
         for (Ship ship : this.ships) {
-            if (ship.address == hero.address || ship.address == hero.pet.address) continue;
-            if (!ship.isAttacking(npc)) continue;
-            npc.setTimerTo(30000);
+            if (ship.address == hero.address || ship.address == hero.pet.address
+                    || !ship.isAttacking(npc)) continue;
+            npc.setTimerTo(20_000);
             return true;
         }
-        return false;
+        return npc.isInTimer();
     }
 
     private Npc closestNpc(Location location) {
@@ -230,7 +169,7 @@ public class LootModule implements Module {
                 ? 20 - (int)(attack.target.health.hpPercent() * 10) : 0;
         return this.npcs.stream()
                 .filter(n -> n == attack.target && hero.isAttacking(attack.target) || (n.npcInfo.kill &&
-                        !this.isAttackedByOthers(n) && drive.closestDistance(location) < 200))
+                        !this.isAttackedByOthers(n) && drive.closestDistance(location) < 450))
                 .min(Comparator.<Npc>comparingInt(n -> n.npcInfo.priority - (n == attack.target ? extraPriority : 0))
                         .thenComparing(n -> n.locationInfo.now.distance(location))).orElse(null);
     }

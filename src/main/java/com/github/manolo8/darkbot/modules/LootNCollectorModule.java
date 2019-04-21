@@ -67,6 +67,7 @@ public class LootNCollectorModule implements Module {
                     collectorModule.tryCollectNearestBox();
                 }
 
+                lootModule.ignoreInvalidTarget();
                 lootModule.attack.doKillTargetTick();
 
             } else {
