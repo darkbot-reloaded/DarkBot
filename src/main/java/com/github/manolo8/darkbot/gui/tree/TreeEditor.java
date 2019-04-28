@@ -8,7 +8,6 @@ import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellEditor;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
@@ -43,23 +42,30 @@ public class TreeEditor extends DefaultTreeCellEditor {
     private OptionEditor getEditor(ConfigField field) {
         Class<? extends OptionEditor> editorClass = field.getEditor();
         if (field.getEditor() == null) return editorsByType.getOrDefault(field.field.getType(), defaultEditor);
-        return editorsByClass.computeIfAbsent(editorClass, c -> ReflectionUtils.createInstance(c, (Class<Object>) field.parent.getClass(), field.parent));
+        return editorsByClass.computeIfAbsent(editorClass,
+                c -> ReflectionUtils.createInstance(c, (Class<Object>) field.parent.getClass(), field.parent));
     }
 
     @Override
     public Component getTreeCellEditorComponent(JTree tree, Object value, boolean isSelected,
                                                 boolean expanded, boolean leaf, int row) {
-        if (!leaf) return super.getTreeCellEditorComponent(tree, ((ConfigNode) value).name, isSelected, expanded, false, row);
-
-        ConfigNode.Leaf option = ((ConfigNode.Leaf) value);
-        label.setText(option.name + ": ");
+        ConfigNode node = ((ConfigNode) value);
+        label.setText(node.name + (leaf ? ": " : ""));
 
         if (currentEditor != null) panel.remove(currentEditor.getComponent());
-        currentEditor = getEditor(option.field);
-        currentEditor.edit(option.field);
-        JComponent comp = currentEditor.getComponent();
-        comp.setPreferredSize(new Dimension(comp.getPreferredSize().width, renderer.getPreferredSize().height));
-        panel.add(currentEditor.getComponent());
+        if (leaf) {
+            ConfigNode.Leaf option = (ConfigNode.Leaf) node;
+            currentEditor = getEditor(option.field);
+            currentEditor.edit(option.field);
+            JComponent comp = currentEditor.getComponent();
+            comp.setPreferredSize(new Dimension(comp.getPreferredSize().width, renderer.getPreferredSize().height));
+            comp.setOpaque(false);
+            panel.add(currentEditor.getComponent());
+        } else {
+            currentEditor = null;
+            if (expanded) tree.collapseRow(row);
+            else tree.expandRow(row);
+        }
         return panel;
     }
 
@@ -67,8 +73,9 @@ public class TreeEditor extends DefaultTreeCellEditor {
     public boolean isCellEditable(EventObject e) {
         if (e == null || e.getSource() != tree || !(e instanceof MouseEvent)) return false;
 
-        TreePath path = tree.getPathForLocation(((MouseEvent)e).getX(), ((MouseEvent)e).getY());
-        return lastPath != null && lastPath.equals(lastPath = path) && lastPath.getLastPathComponent() instanceof ConfigNode.Leaf;
+        ((MouseEvent) e).consume();
+        lastPath = tree.getClosestPathForLocation(((MouseEvent)e).getX(), ((MouseEvent)e).getY());
+        return lastPath != null;
     }
 
 }

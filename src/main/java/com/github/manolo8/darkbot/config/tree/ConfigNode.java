@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.config.tree;
 
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
@@ -7,6 +8,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
+import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 

@@ -81,7 +81,7 @@ public class SafetyFinder {
      * @return True if it's safe to keep working, false if the safety is working.
      */
     public boolean tick() {
-        if (jumpState == JumpState.CURRENT_MAP) {
+        if (jumpState == JumpState.CURRENT_MAP || jumpState == JumpState.JUMPING) {
             Escaping oldEscape = escape;
             escape = getEscape();
             if (escape == Escaping.NONE) return true;

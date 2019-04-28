@@ -10,8 +10,13 @@ import com.github.manolo8.darkbot.gui.tree.components.JNumberField;
 import com.github.manolo8.darkbot.gui.tree.components.JStringField;
 
 import javax.swing.*;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class AdvancedConfig extends JPanel {
 
@@ -31,6 +36,7 @@ public class AdvancedConfig extends JPanel {
     private JComponent setupUI() {
         JTree configTree = new JTree(new ConfigTree(config));
         configTree.setEditable(true);
+        configTree.setFocusable(false);
         configTree.setRootVisible(false);
         configTree.setShowsRootHandles(true);
         configTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);

@@ -14,6 +14,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
+import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,11 +47,14 @@ public class Config {
         @Editor(JListField.class)
         @Options(StarManager.MapSupplier.class)
         public int WORKING_MAP = 26;
-        @Option("Offensive config")
+        @Option(value = "Offensive config", description = "Used to kill NPCs")
+        @Editor(JShipConfigField.class)
         public ShipConfig OFFENSIVE = new ShipConfig(1, '8');
-        @Option("Run config")
+        @Option(value = "Run config", description = "Used to run to safety or switch around maps")
+        @Editor(JShipConfigField.class)
         public ShipConfig RUN = new ShipConfig(2, '9');
-        @Option("Roam config")
+        @Option(value = "Roam config", description = "Used to roam around the map, searching for NPCs")
+        @Editor(JShipConfigField.class)
         public ShipConfig ROAM = new ShipConfig(1, '9');
 
         public @Option("Safety") Safety SAFETY = new Safety();
@@ -204,10 +208,16 @@ public class Config {
             this.FORMATION = FORMATION;
         }
 
-        @Option("Ship config")
-        @Editor(JListField.class)
-        @Options(ShipConfigSupplier.class)
+        //@Option("Ship config")
+        //@Editor(JListField.class)
+        //@Options(ShipConfigSupplier.class)
         public int CONFIG = 1;
-        public @Option("Formation key") char FORMATION = '9';
+        //@Option("Formation key")
+        public char FORMATION = '9';
+
+        @Override
+        public String toString() {
+            return "Config: " + CONFIG + " Formation: " + FORMATION;
+        }
     }
 }

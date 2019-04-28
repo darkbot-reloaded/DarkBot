@@ -33,7 +33,8 @@ public class SafetyInfo {
         this.x = x;
         this.y = y;
         this.diameter = type == Type.BASE ? 1500 : 500;
-        this.runMode = type == Type.PORTAL && !((Portal) entity).target.gg ? RunMode.ALWAYS : RunMode.NEVER;
+        this.runMode = type == Type.PORTAL && ((Portal) entity).target != null  && !((Portal) entity).target.gg
+                ? RunMode.ALWAYS : RunMode.NEVER;
         if (type == Type.PORTAL) jumpMode = JumpMode.ESCAPING;
         if (type == Type.CBS) cbsMode = CbsMode.ALLY;
         this.entity = entity;

@@ -10,7 +10,7 @@ public class BackpageManager extends Thread {
     private static final int SECOND = 1000, MINUTE = 60 * SECOND;
 
     private static final String[] ACTIONS = new String[] {
-            "internalStart", "internalDock", "internalAuction", "internalSkylab", "internalGalaxyGates", "internalPilotSheet"
+            "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"
     };
     private static String getRandomAction() {
         return ACTIONS[(int) (Math.random() * ACTIONS.length)];

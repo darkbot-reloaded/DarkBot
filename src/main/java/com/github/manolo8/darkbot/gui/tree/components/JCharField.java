@@ -10,6 +10,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.Objects;
 
 public class JCharField extends JTextField implements OptionEditor {
@@ -27,10 +29,16 @@ public class JCharField extends JTextField implements OptionEditor {
     public JCharField() {
         putClientProperty("ConfigTree", true);
         ((AbstractDocument) getDocument()).setDocumentFilter(SINGLE_CHAR_DOCUMENT);
-        this.getDocument().addDocumentListener((GeneralDocumentListener) e ->  {
-            if (field != null) field.set(getValue());
-        });
+        getDocument().addDocumentListener((GeneralDocumentListener) e -> setValue(getValue()));
         setPreferredSize(new Dimension(20, 16));
+        setMaximumSize(new Dimension(20, 16));
+
+        addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                select(0, 0);
+            }
+        });
     }
 
     @Override
@@ -48,6 +56,10 @@ public class JCharField extends JTextField implements OptionEditor {
     public Character getValue() {
         if (field != null && field.isPrimitive() && getText().isEmpty()) return EMPTY;
         return getText().isEmpty() ? null : getText().charAt(0);
+    }
+
+    protected void setValue(Character value) {
+        if (field != null) field.set(value);
     }
 
 }
