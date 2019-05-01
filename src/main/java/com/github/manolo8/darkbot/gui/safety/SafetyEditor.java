@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.safety;
 
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.SafetyInfo;
 import net.miginfocom.swing.MigLayout;
 
@@ -30,18 +31,28 @@ class SafetyEditor extends JPanel {
         add(diameterEditor, "span, grow");
 
         runEditor.addActionListener(a -> {
-            if (editor.editing != null) editor.editing.runMode = runEditor.getItemAt(runEditor.getSelectedIndex());
+            if (editor.editing != null) {
+                editor.editing.runMode = runEditor.getItemAt(runEditor.getSelectedIndex());
+                ConfigEntity.changed();
+            }
         });
         jumpEditor.addActionListener(a -> {
-            if (editor.editing != null) editor.editing.jumpMode = jumpEditor.getItemAt(jumpEditor.getSelectedIndex());
+            if (editor.editing != null) {
+                editor.editing.jumpMode = jumpEditor.getItemAt(jumpEditor.getSelectedIndex());
+                ConfigEntity.changed();
+            }
         });
         cbsEditor.addActionListener(a -> {
-            if (editor.editing != null) editor.editing.cbsMode = cbsEditor.getItemAt(cbsEditor.getSelectedIndex());
+            if (editor.editing != null) {
+                editor.editing.cbsMode = cbsEditor.getItemAt(cbsEditor.getSelectedIndex());
+                ConfigEntity.changed();
+            }
         });
         diameterEditor.addChangeListener(a -> {
             if (editor.editing != null) {
                 editor.editing.diameter = diameterEditor.getValue();
                 editor.edit(editor.editing);
+                ConfigEntity.changed();
             }
         });
     }

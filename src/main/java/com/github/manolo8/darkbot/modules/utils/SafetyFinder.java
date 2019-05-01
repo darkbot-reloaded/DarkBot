@@ -115,6 +115,7 @@ public class SafetyFinder {
                         // Also jump if taking damage & you would jump away from enemy.
                         || (hero.health.hpDecreasedIn(200) && Escaping.ENEMY.shouldJump(safety))) {
                     prevMap = hero.map;
+                    drive.stop(false);
                     hero.jumpPortal((Portal) safety.entity);
                     jumpState = JumpState.JUMPING;
                     return false;
@@ -173,7 +174,9 @@ public class SafetyFinder {
     }
 
     private void runToSafety() {
-        if (jumpState != JumpState.CURRENT_MAP || drive.movingTo().distance(safety.x, safety.y) < safety.radius()) return;
+        if ((jumpState != JumpState.CURRENT_MAP && jumpState != JumpState.JUMPING)
+                || drive.movingTo().distance(safety.x, safety.y) < safety.radius()
+                || safety.entity.removed) return;
         Location safeLoc = new Location(safety.x, safety.y);
 
         double angle = safeLoc.angle(hero.locationInfo.now) + Math.random() * 0.2 - 0.1;

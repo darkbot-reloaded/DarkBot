@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
-import com.github.manolo8.darkbot.config.types.suppliers.ShipConfigSupplier;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
@@ -17,7 +16,6 @@ import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -196,8 +194,6 @@ public class Config {
         public boolean DEV_STUFF = false;
         @Option("Full debug & memory trace (Don't enable)")
         public boolean FULL_DEBUG = false;
-        @Option("Test click behaviour")
-        public boolean CLICK_TEST = false;
     }
 
     public static class ShipConfig {
@@ -208,11 +204,7 @@ public class Config {
             this.FORMATION = FORMATION;
         }
 
-        //@Option("Ship config")
-        //@Editor(JListField.class)
-        //@Options(ShipConfigSupplier.class)
         public int CONFIG = 1;
-        //@Option("Formation key")
         public char FORMATION = '9';
 
         @Override

@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.tree.components;
 
 import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import net.miginfocom.swing.MigLayout;
@@ -31,7 +32,10 @@ public class JShipConfigField extends JPanel implements OptionEditor {
     private void setConfig(int num) {
         config1.setBackground(num == 1 ? UIManager.getColor("Tree.selectionBackground") : UIManager.getColor("Button.background"));
         config2.setBackground(num == 2 ? UIManager.getColor("Tree.selectionBackground") : UIManager.getColor("Button.background"));
-        if (editing != null) this.editing.CONFIG = num;
+        if (editing != null) {
+            this.editing.CONFIG = num;
+            ConfigEntity.changed();
+        }
     }
 
     @Override
@@ -77,7 +81,9 @@ public class JShipConfigField extends JPanel implements OptionEditor {
 
         @Override
         protected void setValue(Character value) {
-            if (editing != null) editing.FORMATION = value;
+            if (editing == null || value == null) return;
+            editing.FORMATION = value;
+            ConfigEntity.changed();
         }
 
     }

@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 
 import java.util.HashSet;
@@ -68,6 +67,7 @@ public class ConfigEntity {
                 .orElseGet(() -> {
                     SafetyInfo s = new SafetyInfo(type, (int) entity.locationInfo.now.x, (int) entity.locationInfo.now.y, entity);
                     safetyInfos.add(s);
+                    config.changed = true;
                     return s;
                 }));
     }
@@ -82,6 +82,10 @@ public class ConfigEntity {
 
     public Set<SafetyInfo> getOrCreateSafeties() {
         return config.SAFETY.computeIfAbsent(MapManager.id, id -> new HashSet<>());
+    }
+
+    public static void changed() {
+        INSTANCE.config.changed = true;
     }
 
     public Config getConfig() {

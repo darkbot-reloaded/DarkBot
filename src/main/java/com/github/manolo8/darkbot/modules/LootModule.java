@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.modules;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.entities.Npc;
-import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
@@ -96,7 +95,7 @@ public class LootModule implements Module {
     void ignoreInvalidTarget() {
         if (!main.mapManager.isTarget(attack.target)) return;
         double closestDist;
-        if (!(attack.target.npcInfo.ignoreAttacked || main.mapManager.isCurrentTargetOwned())
+        if (!(attack.target.npcInfo.ignoreOwnership || main.mapManager.isCurrentTargetOwned())
                 || (hero.locationInfo.distance(attack.target) > config.LOOT.NPC_DISTANCE_IGNORE) // Too far away from ship
                 || (closestDist = drive.closestDistance(attack.target.locationInfo.now)) > 650   // Too far into obstacle
                 || (closestDist > 500 && !attack.target.locationInfo.isMoving() // Inside obstacle, waiting & and regen shields
@@ -168,9 +167,16 @@ public class LootModule implements Module {
                 (hero.target == attack.target || hero.locationInfo.distance(attack.target) < 600)
                 ? 20 - (int)(attack.target.health.hpPercent() * 10) : 0;
         return this.npcs.stream()
-                .filter(n -> n == attack.target && hero.isAttacking(attack.target) || (n.npcInfo.kill &&
-                        !this.isAttackedByOthers(n) && drive.closestDistance(location) < 450))
+                .filter(n -> (n == attack.target && hero.isAttacking(attack.target)) ||
+                        (drive.closestDistance(location) < 450 && shouldKill(n)))
                 .min(Comparator.<Npc>comparingInt(n -> n.npcInfo.priority - (n == attack.target ? extraPriority : 0))
                         .thenComparing(n -> n.locationInfo.now.distance(location))).orElse(null);
     }
+
+    private boolean shouldKill(Npc n) {
+        return n.npcInfo.kill &&
+                (n.npcInfo.ignoreAttacked || !this.isAttackedByOthers(n)) &&
+                (!n.npcInfo.passive || n.isAttacking(hero));
+    }
+
 }

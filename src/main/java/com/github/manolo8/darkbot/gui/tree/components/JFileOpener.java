@@ -19,11 +19,6 @@ public class JFileOpener extends JLabel implements OptionEditor {
         }
     };
 
-    public JFileOpener() {
-        Font f = getFont();
-        setFont(f.deriveFont(f.getStyle() & ~Font.BOLD));
-    }
-
     @Override
     public JComponent getComponent() {
         return this;

@@ -45,10 +45,7 @@ public class MouseManager extends Thread {
 
 
     private ClickPoint pointCenter(Location aim) {
-        Location center;
-        if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.CLICK_TEST)
-            center = HeroManager.instance.locationInfo.now.copy();
-        else center = new Location(map.boundX + map.width / 2, map.boundY + map.height / 2);
+        Location center = new Location(map.boundX + map.width / 2, map.boundY + map.height / 2);
         center.toAngle(center, center.angle(aim) + Math.random() * 0.2 - 0.1, 100 + Math.random() * 50);
         return pointLoc(center);
     }

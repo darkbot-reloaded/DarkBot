@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.config.tree;
 
 
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 
@@ -37,6 +38,7 @@ public class ConfigField {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+        ConfigEntity.changed();
     }
 
     public Class<? extends OptionEditor> getEditor() {

@@ -164,6 +164,7 @@ public class ZoneEditor extends MapDrawer {
 
         if (toggle) {
             zoneInfo.toggle(startX, startY, endX, endY);
+            config.changed = true;
             return;
         }
 
@@ -177,6 +178,7 @@ public class ZoneEditor extends MapDrawer {
         }
 
         zoneInfo.set(startX, startY, endX, endY, !differ ? !sel : def);
+        config.changed = true;
     }
 
 

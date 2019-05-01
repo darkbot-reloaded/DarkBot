@@ -24,7 +24,7 @@ public class MapManager implements Manager {
 
     private long mapAddressStatic;
     private long viewAddressStatic;
-    public long mapAddress;
+    private long mapAddress;
     private long viewAddress;
     private long boundsAddress;
     long eventAddress;
@@ -71,9 +71,9 @@ public class MapManager implements Manager {
 
         if (mapAddress != temp) {
             update(temp);
+        } else {
+            entities.update();
         }
-
-        entities.update();
 
         updateBounds();
         checkMirror();
@@ -102,7 +102,7 @@ public class MapManager implements Manager {
         }
     }
 
-    void checkMirror() {
+    private void checkMirror() {
         long temp = API.readMemoryLong(eventAddress) + 4 * 14;
 
         if (API.readMemoryBoolean(temp)) {
@@ -110,7 +110,7 @@ public class MapManager implements Manager {
         }
     }
 
-    void updateBounds() {
+    private void updateBounds() {
         long temp = API.readMemoryLong(viewAddressStatic);
 
         if (viewAddress != temp) {

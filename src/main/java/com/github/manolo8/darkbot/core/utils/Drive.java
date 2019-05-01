@@ -30,7 +30,8 @@ public class Drive {
 
     private Location tempDest, endLoc, lastSegment;
 
-    public long lastClick, lastMoved;
+    private long lastClick, firstClick;
+    public long lastMoved;
 
     public Drive(HeroManager hero, MapManager map) {
         this.map = map;
@@ -62,12 +63,16 @@ public class Drive {
         boolean diffAngle = Math.abs(now.angle(next) - last.angle(now)) > 0.1;
         if (hero.timeTo(now.distance(next)) > 100 || (diffAngle && heroLoc.isMoving())) {
             if (heroLoc.isMoving() && !diffAngle) {
-                if (System.currentTimeMillis() - lastClick > 3000) click(next);
+                if (System.currentTimeMillis() - lastClick > 400 &&
+                        System.currentTimeMillis() - firstClick < 1500) click(next);
                 return;
             }
 
-            if (!force && heroLoc.isMoving() && !newPath && System.currentTimeMillis() - lastClick > 500) stop(false);
-            else click(next);
+            if (!force && heroLoc.isMoving() && !newPath && System.currentTimeMillis() - lastClick > 250) stop(false);
+            else {
+                firstClick = System.currentTimeMillis();
+                click(next);
+            }
         } else {
             paths.removeFirst();
             if (paths.isEmpty()) this.endLoc = null;
