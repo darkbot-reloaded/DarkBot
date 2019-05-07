@@ -46,7 +46,7 @@ public class MouseManager extends Thread {
 
     private ClickPoint pointCenter(Location aim) {
         Location center = new Location(map.boundX + map.width / 2, map.boundY + map.height / 2);
-        center.toAngle(center, center.angle(aim) + Math.random() * 0.2 - 0.1, 100 + Math.random() * 50);
+        center.toAngle(center, center.angle(aim) + Math.random() * 0.2 - 0.1, 125 + Math.random() * 75);
         return pointLoc(center);
     }
 

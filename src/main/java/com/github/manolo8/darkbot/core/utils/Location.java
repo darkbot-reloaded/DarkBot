@@ -35,9 +35,10 @@ public class Location {
         return atan2(y - o.y, x - o.x);
     }
 
-    public void toAngle(Location center, double angle, double distance) {
+    public Location toAngle(Location center, double angle, double distance) {
         this.x = center.x - cos(angle) * distance;
         this.y = center.y - sin(angle) * distance;
+        return this;
     }
 
     public Location set(double x, double y) {

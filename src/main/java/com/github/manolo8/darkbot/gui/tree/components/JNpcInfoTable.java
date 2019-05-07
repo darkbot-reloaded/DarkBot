@@ -9,15 +9,13 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.JCheckBoxMenuItemNoClose;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
+import com.github.manolo8.darkbot.gui.utils.TableDoubleEditor;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
@@ -37,6 +35,7 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
 
         setDefaultEditor(ExtraNpcInfo.class, new ExtraNpcInfoEditor());
+        setDefaultEditor(Double.class, new TableDoubleEditor());
 
         OptionList<Integer> options = new StarManager.MapList(true);
         JComboBox mapFilter = new JComboBox<>(options);
@@ -153,7 +152,7 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
             button.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    extraOptions.show(button, e.getX(), e.getY());
+                    if (button.isShowing()) extraOptions.show(button, e.getX(), e.getY());
                 }
             });
             extraOptions.addPopupMenuListener(new PopupMenuListenerAdapter() {

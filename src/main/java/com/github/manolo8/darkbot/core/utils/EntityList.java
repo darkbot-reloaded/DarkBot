@@ -128,7 +128,7 @@ public class EntityList extends Updatable {
                 int c = API.readMemoryInt(found + 120);
                 int d = API.readMemoryInt(found + 124);
 
-                if ((visible == 1 || visible == 0) && (c == 1 || c == 0) && d == 0) {
+                if (id > 0 && (visible == 1 || visible == 0) && (c == 1 || c == 0) && d == 0) {
                     if (npc == 1) {
                         npcs.add(whenAdd(new Npc(id), found));
                     } else if (npc == 0 && found != main.hero.address && found != main.hero.pet.address) {
