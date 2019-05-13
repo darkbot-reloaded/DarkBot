@@ -13,6 +13,7 @@ import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.gui.trail.Line;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.Time;
 
 import javax.swing.*;
@@ -59,6 +60,9 @@ public class MapDrawer extends JPanel {
     private Color UNKNOWN = Color.decode("#7C05D1");
     private Color STATS_BACKGROUND = new Color(38, 50, 56, 128);
 
+    private Color ACTION_BUTTON = new Color(255, 255, 255, 160);
+    private Color DARKEN_BACK = new Color(0, 0, 0, 96);
+
     protected Font FONT_BIG = new Font("Consolas", Font.PLAIN, 32);
     private Font FONT_MID = new Font(Font.SANS_SERIF, Font.PLAIN, 18);
     private Font FONT_SMALL = new Font("Consolas", Font.PLAIN, 12);
@@ -86,22 +90,41 @@ public class MapDrawer extends JPanel {
 
     private Location last = new Location(0, 0);
 
+    protected boolean hovering;
     protected int width, height, mid;
 
     public MapDrawer() {
+        addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                hovering = true;
+                repaint();
+            }
+            public void mouseExited(MouseEvent evt) {
+                hovering = false;
+                repaint();
+            }
+        });
     }
 
     public MapDrawer(Main main) {
+        this();
+        setBorder(UIUtils.getBorder());
         setup(main);
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                if (main.config.MISCELLANEOUS.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) {
+                    main.setRunning(!main.isRunning());
+                    repaint();
+                    return;
+                }
                 hero.drive.move(undoTranslateX(e.getX()), undoTranslateY(e.getY()));
             }
         });
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
+                if (main.config.MISCELLANEOUS.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) return;
                 hero.drive.move(undoTranslateX(e.getX()), undoTranslateY(e.getY()));
             }
         });
@@ -174,6 +197,7 @@ public class MapDrawer extends JPanel {
                 "cargo " + statsManager.deposit + "/" + statsManager.depositTotal,
                 "death " + guiManager.deaths + '/' + config.GENERAL.SAFETY.MAX_DEATHS);
 
+        if (hovering && main.config.MISCELLANEOUS.MAP_START_STOP) drawActionButton(g2);
     }
 
     protected Graphics2D setupDraw(Graphics g) {
@@ -391,6 +415,21 @@ public class MapDrawer extends JPanel {
 
         g2.setColor(PET_IN);
         g2.fillRect(x - 2, y - 2, 4, 4);
+    }
+
+    private void drawActionButton(Graphics2D g2) {
+        g2.setColor(this.DARKEN_BACK);
+        g2.fillRect(0, 0, this.getWidth(), this.getHeight());
+        g2.setColor(this.ACTION_BUTTON);
+        int height2 = this.getHeight() / 2, height3 = this.getHeight() / 3,
+                width3 = this.getWidth() / 3, width9 = this.getWidth() / 9;
+        if (this.main.isRunning()) {
+            g2.fillRect(width3, height3, width9, height3); // Two vertical parallel lines
+            g2.fillRect((width3 * 2) - width9, height3, width9, height3);
+        } else { // A "play" triangle
+            g2.fillPolygon(new int[]{width3, width3 * 2, width3},
+                    new int[]{height3, height2, height3 * 2}, 3);
+        }
     }
 
     private void drawStats(Graphics2D g2, String... stats) {

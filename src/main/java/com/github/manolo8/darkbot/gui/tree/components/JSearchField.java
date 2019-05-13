@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.gui.tree.components;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.util.Arrays;

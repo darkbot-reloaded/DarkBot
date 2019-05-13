@@ -35,7 +35,7 @@ public class Config {
         @Option("Module")
         @Editor(JListField.class)
         @Options(ModuleSupplier.class)
-        public int CURRENT_MODULE;
+        public int CURRENT_MODULE = 2;
 
         @Option("Custom Module")
         @Editor(JFileOpener.class)
@@ -134,7 +134,7 @@ public class Config {
         @Option("Npcs")
         @Editor(JNpcInfoTable.class)
         public Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
-        public transient Lazy<String> ADDED_NPC = new Lazy<>();
+        public transient Lazy<String> MODIFIED_NPC = new Lazy<>();
 
         @Option("Ignore npcs further than")
         @Num(min = 1000, max = 20000, step = 500)
@@ -177,10 +177,13 @@ public class Config {
             public int TRAIL_LENGTH = 15;
             @Option(value = "Show zones in main map", description = "Tick to show avoided/preferred zones on map")
             public boolean SHOW_ZONES = true;
-            @Option(value = "Always on top", description = "Should the bot window stay on top of other windows?")
-            public boolean ALWAYS_ON_TOP = true;
+            @Option(value = "GUI Button size", description = "Change tab in config & resize main window to update.")
+            @Num(min = 1, max = 15, step = 1)
+            public int BUTTON_SIZE = 4;
             @Option("Use darcula theme")
             public boolean USE_DARCULA_THEME = true;
+
+            public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
         }
         @Option(value = "Zone precision", description = "Amount of map subdivisions when selecting zones")
         @Num(min = 10, max = 300)
@@ -193,7 +196,11 @@ public class Config {
         public double REPAIR_DRONE_PERCENTAGE = 0.9;
         @Option("Focus browser window on reload")
         public boolean FOCUS_ON_RELOAD = true;
-        @Option("Developer stuff shown")
+        @Option(value = "Start or pause clicking on map", description = "Left click to start/pause. Right click to move ship")
+        public boolean MAP_START_STOP = false;
+        @Option(value = "Confirm exiting", description = "Confirm before exiting the bot")
+        public boolean CONFIRM_EXIT = true;
+        @Option(value = "Developer stuff shown", description = "Enabling this WILL make your bot use more cpu.")
         public boolean DEV_STUFF = false;
         @Option("Full debug & memory trace (Don't enable)")
         public boolean FULL_DEBUG = false;

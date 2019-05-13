@@ -17,7 +17,6 @@ class SafetiesDisplay extends MapDrawer {
 
     private SafetiesEditor editor;
     private SafetyInfo closest;
-    private boolean hovering;
 
     SafetiesDisplay(SafetiesEditor editor) {
         this.editor = editor;
@@ -26,17 +25,6 @@ class SafetiesDisplay extends MapDrawer {
             public void mousePressed(MouseEvent e) {
                 updateClosest(e);
                 if (closest != null) editor.edit(closest);
-            }
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                hovering = true;
-                updateClosest(e);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                hovering = false;
-                updateClosest(e);
             }
         });
         addMouseMotionListener(new MouseAdapter() {

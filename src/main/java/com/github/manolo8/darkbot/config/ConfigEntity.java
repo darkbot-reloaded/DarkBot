@@ -28,12 +28,13 @@ public class ConfigEntity {
 
             if (!name.equals("ERROR") && !name.isEmpty()) {
                 config.LOOT.NPC_INFOS.put(name, info);
-                config.LOOT.ADDED_NPC.send(name);
+                config.LOOT.MODIFIED_NPC.send(name);
 
                 config.changed = true;
             }
         } else if (info.mapList.add(mapId)) {
             config.changed = true;
+            config.LOOT.MODIFIED_NPC.send(name);
         }
         return info;
     }

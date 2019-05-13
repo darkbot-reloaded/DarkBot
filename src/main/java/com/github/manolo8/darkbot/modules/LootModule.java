@@ -69,8 +69,9 @@ public class LootModule implements Module {
                 moveToAnSafePosition();
                 ignoreInvalidTarget();
                 attack.doKillTargetTick();
-            } else if (!drive.isMoving()) {
-                drive.moveRandom();
+            } else {
+                hero.roamMode();
+                if (!drive.isMoving()) drive.moveRandom();
             }
         }
     }
@@ -152,7 +153,6 @@ public class LootModule implements Module {
     }
 
     private boolean isAttackedByOthers(Npc npc) {
-        if (npc.npcInfo.ignoreAttacked) return false;
         for (Ship ship : this.ships) {
             if (ship.address == hero.address || ship.address == hero.pet.address
                     || !ship.isAttacking(npc)) continue;
@@ -174,8 +174,10 @@ public class LootModule implements Module {
     }
 
     private boolean shouldKill(Npc n) {
+        boolean attacked = this.isAttackedByOthers(n);
         return n.npcInfo.kill &&
-                (n.npcInfo.ignoreAttacked || !this.isAttackedByOthers(n)) &&
+                (n.npcInfo.ignoreAttacked || !attacked) && // Either ignore attacked, or not being attacked
+                (!n.npcInfo.attackSecond || attacked) &&    // Either don't want to attack second, or being attacked
                 (!n.npcInfo.passive || n.isAttacking(hero));
     }
 

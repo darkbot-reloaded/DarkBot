@@ -30,7 +30,7 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
     private int filteredMap = -1;
 
     public JNpcInfoTable(Config.Loot config) {
-        super(new NpcTableModel(config.NPC_INFOS, config.ADDED_NPC));
+        super(new NpcTableModel(config.NPC_INFOS, config.MODIFIED_NPC));
         getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(3, SortOrder.DESCENDING),
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
 
@@ -57,13 +57,14 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
 
         private Map<String, NpcInfo> NPC_INFOS;
 
-        NpcTableModel(Map<String, NpcInfo> NPC_INFOS, Lazy<String> added) {
+        NpcTableModel(Map<String, NpcInfo> NPC_INFOS, Lazy<String> modified) {
             super(new Object[]{"Name", "Radius", "Priority", "Kill", "Ammo Key", "Extra"}, 0);
             (this.NPC_INFOS = NPC_INFOS).forEach(this::addEntry);
-            added.add(n -> addEntry(n, NPC_INFOS.get(n)));
+            modified.add(n -> addEntry(n, NPC_INFOS.get(n)));
         }
 
         private void addEntry(String name, NpcInfo info) {
+            for (int i = (getRowCount() - 1); i >= 0; i--) if (getValueAt(i, 0).equals(name)) return;
             addRow(new Object[]{name, info.radius, info.priority, info.kill, info.attackKey, new ExtraNpcInfo(info)});
         }
 
@@ -103,7 +104,8 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
                     info.noCircle ? "NC" : null,
                     info.ignoreOwnership ? "IO" : null,
                     info.ignoreAttacked ? "IA" : null,
-                    info.passive ? "P" : null
+                    info.passive ? "P" : null,
+                    info.attackSecond ? "AS" : null
             ).filter(Objects::nonNull).collect(Collectors.joining(","));
         }
     }
@@ -127,13 +129,15 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
                 noCircle = new JCheckBoxMenuItemNoClose("No circle", update(s -> info.noCircle = s)),
                 ignoreOwnership = new JCheckBoxMenuItemNoClose("Ignore ownership", update(s -> info.ignoreOwnership = s)),
                 ignoreAttacked = new JCheckBoxMenuItemNoClose("Ignore attacked", update(s -> info.ignoreAttacked = s)),
-                passive = new JCheckBoxMenuItemNoClose("Passive", update(s -> info.passive = s));
+                passive = new JCheckBoxMenuItemNoClose("Passive", update(s -> info.passive = s)),
+                attackSecond = new JCheckBoxMenuItemNoClose("Attack second", update(s -> info.attackSecond = s));
 
         private JPopupMenu extraOptions = new JPopupMenu("Extra options");
 
         private Consumer<Boolean> update(Consumer<Boolean> bool) {
             return bool.andThen(s -> button.setText(curr.toString()));
         }
+        private int tooltipDelay = -1;
 
         ExtraNpcInfoEditor() {
             button.setOpaque(false);
@@ -143,22 +147,29 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
             extraOptions.add(ignoreOwnership);
             extraOptions.add(ignoreAttacked);
             extraOptions.add(passive);
+            extraOptions.add(attackSecond);
 
             noCircle.setToolTipText("Don't circle the npc, just stay inside the radius");
             ignoreOwnership.setToolTipText("Continue killing the npc even if it has a white lock");
             ignoreAttacked.setToolTipText("Select the npc even if other players are already shooting it");
             passive.setToolTipText("Be passive towards this npc, only shoot if npc is shooting you");
+            attackSecond.setToolTipText("<html>Only shoot if others are attacking already.<br><strong>Must</strong> also select ignore attacked & ignore ownership</html>");
 
             button.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (button.isShowing()) extraOptions.show(button, e.getX(), e.getY());
+                    if (button.isShowing()) {
+                        extraOptions.show(button, e.getX(), e.getY());
+                        if (tooltipDelay == -1) tooltipDelay = ToolTipManager.sharedInstance().getInitialDelay();
+                        ToolTipManager.sharedInstance().setInitialDelay(0);
+                    }
                 }
             });
             extraOptions.addPopupMenuListener(new PopupMenuListenerAdapter() {
                 @Override
                 public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                     stopCellEditing();
+                    if (tooltipDelay != -1) ToolTipManager.sharedInstance().setInitialDelay(tooltipDelay);
                 }
             });
         }
@@ -176,6 +187,7 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
             ignoreOwnership.setSelected(info.ignoreOwnership);
             ignoreAttacked.setSelected(info.ignoreAttacked);
             passive.setSelected(info.passive);
+            attackSecond.setSelected(info.attackSecond);
 
             return button;
         }

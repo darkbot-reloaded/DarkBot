@@ -15,6 +15,7 @@ public class NpcInfo {
     public boolean noCircle;
     public boolean ignoreOwnership;
     public boolean ignoreAttacked;
+    public boolean attackSecond;
     public boolean passive;
     public Character attackKey;
 }

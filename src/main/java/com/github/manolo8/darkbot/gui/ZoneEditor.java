@@ -19,7 +19,7 @@ public class ZoneEditor extends MapDrawer {
     private Color ZONE = new Color(0, 255, 128, 64);
 
     private ZoneInfo zoneInfo = null;
-    private boolean hovering, selecting;
+    private boolean selecting;
     private Rect area = new Rect();
 
     private int startX, startY;
@@ -67,18 +67,6 @@ public class ZoneEditor extends MapDrawer {
                 area.set(startX, startY, e.getX(), e.getY());
                 toggleSelection(SwingUtilities.isMiddleMouseButton(e), SwingUtilities.isLeftMouseButton(e));
                 area.set(e.getX(), e.getY(), e.getX(), e.getY());
-                ZoneEditor.super.repaint();
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                hovering = true;
-                ZoneEditor.super.repaint();
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                hovering = false;
                 ZoneEditor.super.repaint();
             }
         });

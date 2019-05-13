@@ -15,7 +15,7 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
-import com.github.manolo8.darkbot.gui.utils.SystemUtils;
+import com.github.manolo8.darkbot.utils.SystemUtils;
 import com.github.manolo8.darkbot.modules.CollectorModule;
 import com.github.manolo8.darkbot.modules.EventModule;
 import com.github.manolo8.darkbot.modules.LootModule;
@@ -39,7 +39,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.prefs.Preferences;
 
 public class Main extends Thread {
-    public static final String VERSION = "1.13.10";
+
+    public static final String VERSION = "1.13.11 alpha 4";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -139,7 +140,7 @@ public class Main extends Thread {
 
         JPanel panel = new JPanel(new MigLayout("ins 0, wrap 1"));
         panel.add(new JLabel("This bot is free, if you paid for it or watched ads, you were scammed!"));
-        panel.add(new JLabel("Make sure you are in the official discord server to get latest updates for free."));
+        panel.add(new JLabel("Make sure you are in the official discord server to getIcon latest updates for free."));
         JCheckBox dontShow = new JCheckBox("Don't show this message again");
         panel.add(dontShow);
 

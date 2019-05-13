@@ -51,7 +51,7 @@ public class ReflectionUtils {
         try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null)) {
             File source = new File("tmp/com/github/manolo8/darkbot/modules/" + original.getName());
             if (!source.getParentFile().exists() && !source.getParentFile().mkdirs())
-                throw new IOException("Failed to create folder structure");
+                throw new IOException("Failed to create folder structure. No permission?");
 
             Files.copy(original.toPath(), source.toPath(), REPLACE_EXISTING);
 
@@ -64,7 +64,7 @@ public class ReflectionUtils {
 
             for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics())
                 System.err.format("Error (%d,%d) java: %s%n", diagnostic.getLineNumber(), diagnostic.getColumnNumber(), diagnostic.getMessage(null));
-            throw new UnsupportedOperationException("The provided file did not compile successfully, look at the console for more details.");
+            throw new UnsupportedOperationException("There was an error in the module. Look at the console for more details and ask the module creator.");
         } finally {
             try {
                 deleteFolder(new File("tmp"));
@@ -75,7 +75,7 @@ public class ReflectionUtils {
     private static void deleteFolder(File f) throws IOException {
         if (!f.exists()) return;
         if (f.isDirectory()) for (File c : f.listFiles()) deleteFolder(c);
-        if (!f.delete()) throw new FileNotFoundException("Failed to delete: " + f);
+        if (!f.delete()) throw new FileNotFoundException("Failed to delete folders. No permission?: " + f);
     }
 
 }
