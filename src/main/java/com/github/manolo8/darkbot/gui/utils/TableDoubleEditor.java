@@ -30,7 +30,7 @@ public class TableDoubleEditor extends DefaultCellEditor {
 
     public boolean stopCellEditing() {
         try {
-            value = nf.parse((String) super.getCellEditorValue());
+            value = nf.parse((String) super.getCellEditorValue()).doubleValue();
         } catch (Exception e) {
             ((JComponent)getComponent()).setBorder(new LineBorder(Color.red));
             return false;
