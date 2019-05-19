@@ -22,8 +22,8 @@ public class BackpageManager extends Thread {
     private String sid;
     private String instance;
 
-    private long sidNextUpdate = 0;
-    private long lastUpdate = System.currentTimeMillis();
+    private long sidLastUpdate = System.currentTimeMillis();
+    private long sidNextUpdate = sidLastUpdate;
     private int sidStatus = -1;
     private boolean checkDrones = false;
 
@@ -44,13 +44,14 @@ public class BackpageManager extends Thread {
 
             if (isInvalid()) {
                 sidStatus = -1;
-                return;
+                continue;
             }
 
 
             if (System.currentTimeMillis() > sidNextUpdate) {
                 int waitTime = sidCheck();
-                sidNextUpdate = (int) (waitTime + waitTime * Math.random());
+                sidLastUpdate = System.currentTimeMillis();
+                sidNextUpdate = sidLastUpdate + (int) (waitTime + waitTime * Math.random());
             }
 
             if (checkDrones) {
@@ -60,11 +61,6 @@ public class BackpageManager extends Thread {
 
 
             if (sidStatus == 302) break;
-
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ignored) {
-            }
         }
     }
 
@@ -116,7 +112,8 @@ public class BackpageManager extends Thread {
 
     public synchronized String sidStatus() {
         return sidStat() + (sidStatus != -1 && sidStatus != 302 ?
-                " " + Time.toString(System.currentTimeMillis() - lastUpdate) + "/" + Time.toString(sidNextUpdate) : "");
+                " " + Time.toString(System.currentTimeMillis() - sidLastUpdate) + "/" +
+                        Time.toString(sidNextUpdate - sidLastUpdate) : "");
     }
 
     private String sidStat() {
