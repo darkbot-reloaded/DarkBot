@@ -15,7 +15,7 @@ public class Hangar {
         this.hangarIsActive = hangarIsActive;
     }
 
-    public String getHangarID() {
+    public String getHangarId() {
         return hangarId;
     }
 

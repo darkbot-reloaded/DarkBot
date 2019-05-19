@@ -61,6 +61,7 @@ public class Drone {
     }
 
     public int getDamage() {
-        return Integer.parseInt(damage.replace("%"," ").trim());
+        return Integer.parseInt(damage.replaceAll("\\D+", ""));
     }
+
 }

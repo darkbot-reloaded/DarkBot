@@ -22,7 +22,7 @@ public class BackpageManager extends Thread {
     private String sid;
     private String instance;
 
-    private long waitTime = 0;
+    private long sidNextUpdate = 0;
     private long lastUpdate = System.currentTimeMillis();
     private int sidStatus = -1;
     private boolean checkDrones = false;
@@ -37,25 +37,34 @@ public class BackpageManager extends Thread {
     @Override
     public void run() {
         while (true) {
-            lastUpdate = System.currentTimeMillis();
-            int waitTime;
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ignored) {
+            }
 
             if (isInvalid()) {
                 sidStatus = -1;
-                waitTime = SECOND;
-            } else {
-                waitTime = validTick();
-                if(checkDrones) {
-                    hangarManager.checkDrones();
-                    checkDrones = false;
-                }
+                return;
+            }
+
+
+            if (System.currentTimeMillis() > sidNextUpdate) {
+                int waitTime = sidCheck();
+                sidNextUpdate = (int) (waitTime + waitTime * Math.random());
+            }
+
+            if (checkDrones) {
+                hangarManager.checkDrones();
+                checkDrones = false;
             }
 
 
             if (sidStatus == 302) break;
 
-            this.waitTime = (int) (waitTime + waitTime * Math.random());
-            sleep(waitTime);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 
@@ -69,7 +78,7 @@ public class BackpageManager extends Thread {
         return sid == null || instance == null || sid.isEmpty() || instance.isEmpty();
     }
 
-    private int validTick() {
+    private int sidCheck() {
         try {
             sidStatus = sidKeepAlive();
         } catch (Exception e) {
@@ -105,18 +114,9 @@ public class BackpageManager extends Thread {
         return data;
     }
 
-    private boolean sleep(int millis) {
-        if (millis <= 0) return true;
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignored) {
-        }
-        return true;
-    }
-
     public synchronized String sidStatus() {
         return sidStat() + (sidStatus != -1 && sidStatus != 302 ?
-                " " + Time.toString(System.currentTimeMillis() - lastUpdate) + "/" + Time.toString(waitTime) : "");
+                " " + Time.toString(System.currentTimeMillis() - lastUpdate) + "/" + Time.toString(sidNextUpdate) : "");
     }
 
     private String sidStat() {

@@ -121,7 +121,7 @@ public class GuiManager implements Manager {
             API.writeMemoryLong(repairAddress + 32, main.config.GENERAL.SAFETY.REVIVE_LOCATION);
             API.mouseClick(MapManager.clientWidth / 2, (MapManager.clientHeight / 2) + 190);
             repairTime = System.currentTimeMillis();
-            this.main.backpage.checkDronesAfterKill();
+            if (main.config.MISCELLANEOUS.REPAIR_DRONE_PERCENTAGE != 0) this.main.backpage.checkDronesAfterKill();
         }
     }
 
