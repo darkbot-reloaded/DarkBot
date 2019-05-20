@@ -1,14 +1,13 @@
-package com.github.manolo8.darkbot.core.manager;
+package com.github.manolo8.darkbot.backpage;
 
-import com.github.manolo8.darkbot.BackpageManager;
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.entities.Drone;
-import com.github.manolo8.darkbot.core.entities.Hangar;
+import com.github.manolo8.darkbot.backpage.entities.Drone;
+import com.github.manolo8.darkbot.backpage.entities.Hangar;
 import com.github.manolo8.darkbot.utils.Base64Utils;
+import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
-import java.awt.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,15 +25,15 @@ public class HangarManager {
     private List<Hangar> hangars;
     private List<Drone> drones;
 
-    public HangarManager(Main main){
+    public HangarManager(Main main, BackpageManager backpageManager) {
         this.main = main;
-        this.backpageManager = main.backpage;
+        this.backpageManager = backpageManager;
         this.hangars = new ArrayList<>();
         this.drones = new ArrayList<>();
     }
 
     public boolean changeHangar(String hangarID) {
-        if (this.lastChangeHangar <= System.currentTimeMillis() - 40000 && this.main.backpage.sidStatus().contains("OK")) {
+        if (this.lastChangeHangar <= System.currentTimeMillis() - 40000 && backpageManager.sidStatus().contains("OK")) {
             String url = "indexInternal.es?action=internalDock&subAction=changeHangar&hangarId=" + hangarID;
             try {
                 backpageManager.getConnection(url).getResponseCode();
@@ -52,8 +51,9 @@ public class HangarManager {
         updateDrones();
         boolean repaired = true;
         for (Drone drone : drones) {
-            if (drone.getDamage() / 100d >= this.main.config.MISCELLANEOUS.REPAIR_DRONE_PERCENTAGE) {
+            if (drone.getDamage() / 100d >= main.config.MISCELLANEOUS.REPAIR_DRONE_PERCENTAGE) {
                 repaired &= repairDrone(drone);
+                Time.sleep(2000);
             }
         }
         return repaired;
@@ -101,7 +101,7 @@ public class HangarManager {
 
     public void updateHangars() {
         String params = "flashAPI/inventory.php?action=getHangarList";
-        String hangarData = this.main.backpage.getDataInventory(params);
+        String hangarData = backpageManager.getDataInventory(params);
 
         if (hangarData == null) return;
 

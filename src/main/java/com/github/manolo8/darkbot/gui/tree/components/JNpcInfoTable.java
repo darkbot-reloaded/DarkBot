@@ -3,8 +3,8 @@ package com.github.manolo8.darkbot.gui.tree.components;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
-import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.core.manager.StarManager;
+import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.JCheckBoxMenuItemNoClose;
@@ -19,8 +19,9 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,6 +29,7 @@ import java.util.stream.Stream;
 public class JNpcInfoTable extends InfoTable implements OptionEditor {
 
     private int filteredMap = -1;
+    private JComboBox<Map> mapFilter;
 
     public JNpcInfoTable(Config.Loot config) {
         super(new NpcTableModel(config.NPC_INFOS, config.MODIFIED_NPC));
@@ -37,14 +39,29 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
         setDefaultEditor(ExtraNpcInfo.class, new ExtraNpcInfoEditor());
         setDefaultEditor(Double.class, new TableDoubleEditor());
 
-        OptionList<Integer> options = new StarManager.MapList(true);
-        JComboBox mapFilter = new JComboBox<>(options);
+        mapFilter = new JComboBox<>();
+
         mapFilter.addActionListener(e -> {
-            filteredMap = options.getValue((String) mapFilter.getSelectedItem());
+            if (mapFilter.getSelectedItem() == null) return;
+            filteredMap = ((Map) mapFilter.getSelectedItem()).id;
             getRowSorter().allRowsChanged();
         });
+        config.MODIFIED_NPC.add(s -> updateMapList(config.NPC_INFOS.values()));
+        updateMapList(config.NPC_INFOS.values());
+
         mapFilter.setSelectedIndex(0);
         getComponent().add(mapFilter, "cell 1 0");
+    }
+
+    private void updateMapList(Collection<NpcInfo> npcInfos) {
+        Map map = (Map) mapFilter.getSelectedItem();
+        mapFilter.removeAllItems();
+        mapFilter.addItem(new Map(-1, "*", false, false));
+
+        Set<Integer> maps = npcInfos.stream().flatMap(n -> n.mapList.stream()).collect(Collectors.toSet());
+        StarManager.getAllMaps().stream().filter(m -> m.id >= 0 && maps.contains(m.id)).forEach(mapFilter::addItem);
+
+        mapFilter.setSelectedItem(map);
     }
 
     @Override
@@ -55,9 +72,9 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
     private static class NpcTableModel extends DefaultTableModel {
         private static final Class[] TYPES = new Class[]{String.class, Double.class, Integer.class, Boolean.class, Character.class, ExtraNpcInfo.class};
 
-        private Map<String, NpcInfo> NPC_INFOS;
+        private java.util.Map<String, NpcInfo> NPC_INFOS;
 
-        NpcTableModel(Map<String, NpcInfo> NPC_INFOS, Lazy<String> modified) {
+        NpcTableModel(java.util.Map<String, NpcInfo> NPC_INFOS, Lazy<String> modified) {
             super(new Object[]{"Name", "Radius", "Priority", "Kill", "Ammo Key", "Extra"}, 0);
             (this.NPC_INFOS = NPC_INFOS).forEach(this::addEntry);
             modified.add(n -> addEntry(n, NPC_INFOS.get(n)));

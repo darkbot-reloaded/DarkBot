@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot;
 
 import com.bulenkov.darcula.DarculaLaf;
+import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.BotInstaller;
@@ -40,7 +41,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 alpha 4";
+    public static final String VERSION = "1.13.11 alpha 7";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()

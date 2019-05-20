@@ -1,4 +1,4 @@
-package com.github.manolo8.darkbot.core.entities;
+package com.github.manolo8.darkbot.backpage.entities;
 
 import com.google.gson.annotations.SerializedName;
 

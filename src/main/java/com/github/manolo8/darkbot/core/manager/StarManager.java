@@ -192,38 +192,32 @@ public class StarManager {
                 .sorted().collect(Collectors.toList());
     }
 
+    public static Collection<Map> getAllMaps() {
+        return INSTANCE.starSystem.vertexSet();
+    }
+
     public static class MapSupplier implements Supplier<OptionList> {
         @Override
         public OptionList<Integer> get() {
-            return new MapList(false);
+            return new MapList();
         }
     }
 
     public static class MapList extends OptionList<Integer> {
-        boolean allowNull;
-
-        public MapList(boolean allowNull) {
-            this.allowNull = allowNull;
-            if (allowNull) setSelectedItem("*");
-        }
 
         @Override
         public Integer getValue(String text) {
-            if (allowNull && text.equals("*")) return -1;
             return INSTANCE.byName(text).id;
         }
 
         @Override
         public String getText(Integer value) {
-            if (allowNull && value == -1) return "*";
             return INSTANCE.byId(value).name;
         }
 
         @Override
         public List<String> getOptions() {
-            List<String> maps = INSTANCE.getAccessibleMaps();
-            if (allowNull) maps.add(0, "*");
-            return maps;
+            return INSTANCE.getAccessibleMaps();
         }
     }
 

@@ -1,6 +1,7 @@
-package com.github.manolo8.darkbot;
+package com.github.manolo8.darkbot.backpage;
 
-import com.github.manolo8.darkbot.core.manager.HangarManager;
+import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.backpage.HangarManager;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
 
@@ -30,17 +31,14 @@ public class BackpageManager extends Thread {
     public BackpageManager(Main main) {
         super("BackpageManager");
         this.main = main;
-        this.hangarManager = new HangarManager(main);
+        this.hangarManager = new HangarManager(main, this);
         start();
     }
 
     @Override
     public void run() {
         while (true) {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ignored) {
-            }
+            Time.sleep(5000);
 
             if (isInvalid()) {
                 sidStatus = -1;
