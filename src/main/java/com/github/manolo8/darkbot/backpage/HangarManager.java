@@ -12,6 +12,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class HangarManager {
 
@@ -52,8 +53,8 @@ public class HangarManager {
         boolean repaired = true;
         for (Drone drone : drones) {
             if (drone.getDamage() / 100d >= main.config.MISCELLANEOUS.REPAIR_DRONE_PERCENTAGE) {
-                repaired &= repairDrone(drone);
                 Time.sleep(2000);
+                repaired &= repairDrone(drone);
             }
         }
         return repaired;
@@ -68,13 +69,13 @@ public class HangarManager {
             String url = "flashAPI/inventory.php?action=getHangar&params="+encodeParams;
             String json = this.backpageManager.getDataInventory(url);
 
-            JsonElement element = new JsonParser().parse(json).getAsJsonObject().get("data")
-                    .getAsJsonObject().get("ret").getAsJsonObject().get("hangars");
+            JsonObject hangars = new JsonParser().parse(json).getAsJsonObject().get("data")
+                    .getAsJsonObject().get("ret").getAsJsonObject().get("hangars").getAsJsonObject();
 
-            for (JsonElement hangar : (element.isJsonArray() ? element.getAsJsonArray() : Collections.singleton(element))) {
-                if (!hangar.getAsJsonObject().get("hangar_is_active").getAsBoolean()) continue;
+            for (Map.Entry<String, JsonElement> hangar : hangars.entrySet()) {
+                if (!hangar.getValue().getAsJsonObject().get("hangar_is_active").getAsBoolean()) continue;
 
-                JsonArray dronesArray = hangar.getAsJsonObject().get("general").getAsJsonObject().get("drones").getAsJsonArray();
+                JsonElement dronesArray = hangar.getValue().getAsJsonObject().get("general").getAsJsonObject().get("drones");
                 this.drones = GSON.fromJson(dronesArray, DRONE_LIST);
             }
 
