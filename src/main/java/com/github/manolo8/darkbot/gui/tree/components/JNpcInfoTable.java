@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Map;
-import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.JCheckBoxMenuItemNoClose;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
@@ -18,8 +17,11 @@ import javax.swing.table.TableCellEditor;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -32,7 +34,7 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
     private JComboBox<Map> mapFilter;
 
     public JNpcInfoTable(Config.Loot config) {
-        super(new NpcTableModel(config.NPC_INFOS, config.MODIFIED_NPC));
+        super(new NpcTableModel(config));
         getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(3, SortOrder.DESCENDING),
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
 
@@ -69,20 +71,49 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
         return new NpcMapFilter();
     }
 
+    @Override
+    public JComponent getComponent() {
+        ((NpcTableModel) getModel()).updateTable();
+        return super.getComponent();
+    }
+
     private static class NpcTableModel extends DefaultTableModel {
         private static final Class[] TYPES = new Class[]{String.class, Double.class, Integer.class, Boolean.class, Character.class, ExtraNpcInfo.class};
 
-        private java.util.Map<String, NpcInfo> NPC_INFOS;
+        private Config.Loot config;
+        private java.util.Map<String, Collection<NpcInfo>> NPC_INFOS = new HashMap<>();
 
-        NpcTableModel(java.util.Map<String, NpcInfo> NPC_INFOS, Lazy<String> modified) {
+        NpcTableModel(Config.Loot config) {
             super(new Object[]{"Name", "Radius", "Priority", "Kill", "Ammo Key", "Extra"}, 0);
-            (this.NPC_INFOS = NPC_INFOS).forEach(this::addEntry);
-            modified.add(n -> addEntry(n, NPC_INFOS.get(n)));
+            this.config = config;
+            updateTable();
+            config.MODIFIED_NPC.add(n -> updateEntry(n, config.NPC_INFOS.get(n)));
         }
 
-        private void addEntry(String name, NpcInfo info) {
-            for (int i = (getRowCount() - 1); i >= 0; i--) if (getValueAt(i, 0).equals(name)) return;
-            addRow(new Object[]{name, info.radius, info.priority, info.kill, info.attackKey, new ExtraNpcInfo(info)});
+        public void updateTable() {
+            NPC_INFOS.clear();
+            this.setNumRows(0);
+            config.NPC_INFOS.forEach(this::updateEntry);
+        }
+
+        private void updateEntry(String originalName, NpcInfo info) {
+            String name = simplifyName(originalName);
+            Collection<NpcInfo> infoGroup;
+            if (name.equals(originalName)) infoGroup = Collections.singleton(info);
+            else (infoGroup = NPC_INFOS.getOrDefault(name, new ArrayList<>())).add(info);
+
+            if (NPC_INFOS.containsKey(name)) {
+                info.copyOf(infoGroup.iterator().next());
+                return;
+            }
+            NPC_INFOS.put(name, infoGroup);
+            addRow(new Object[]{name, info.radius, info.priority, info.kill, info.attackKey, new ExtraNpcInfo(infoGroup)});
+        }
+
+        private String simplifyName(String name) {
+            if (!config.GROUP_NPCS || !name.matches("^[^\\d]+\\d{1,3}$")) return name;
+
+            return name.replaceAll("\\d{1,3}$", " *");
         }
 
         @Override
@@ -98,25 +129,26 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
         @Override
         public void setValueAt(Object value, int row, int column) {
             super.setValueAt(value, row, column);
-            NpcInfo info = NPC_INFOS.get((String) this.getValueAt(row, 0));
-            if (column == 1) info.radius = (Double) value;
-            else if (column == 2) info.priority = (Integer) value;
-            else if (column == 3) info.kill = (Boolean) value;
-            else if (column == 4) info.attackKey = (Character) value;
-
+            NPC_INFOS.get((String) this.getValueAt(row, 0)).forEach(info -> {
+                if (column == 1) info.radius = (Double) value;
+                else if (column == 2) info.priority = (Integer) value;
+                else if (column == 3) info.kill = (Boolean) value;
+                else if (column == 4) info.attackKey = (Character) value;
+            });
             ConfigEntity.changed();
         }
     }
 
     private static class ExtraNpcInfo {
-        NpcInfo info;
+        Collection<NpcInfo> infos;
 
-        ExtraNpcInfo(NpcInfo npcInfo) {
-            this.info = npcInfo;
+        ExtraNpcInfo(Collection<NpcInfo> npcInfos) {
+            this.infos = npcInfos;
         }
 
         @Override
         public String toString() {
+            NpcInfo info = infos.iterator().next();
             return Stream.of(
                     info.noCircle ? "NC" : null,
                     info.ignoreOwnership ? "IO" : null,
@@ -132,22 +164,23 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
         public boolean include(Entry<? extends NpcTableModel, ? extends Integer> entry) {
             if (filteredMap == -1) return true;
             NpcTableModel model = entry.getModel();
-            return model.NPC_INFOS.get((String) model.getValueAt(entry.getIdentifier(), 0)).mapList.contains(filteredMap);
+            return model.NPC_INFOS.get((String) model.getValueAt(entry.getIdentifier(), 0))
+                    .stream().anyMatch(n -> n.mapList.contains(filteredMap));
         }
     }
 
     public static class ExtraNpcInfoEditor extends AbstractCellEditor implements TableCellEditor {
 
         private ExtraNpcInfo curr;
-        private NpcInfo info;
+        private Collection<NpcInfo> infos;
         private JLabel button = new JLabel();
 
         private JCheckBoxMenuItemNoClose
-                noCircle = new JCheckBoxMenuItemNoClose("No circle", update(s -> info.noCircle = s)),
-                ignoreOwnership = new JCheckBoxMenuItemNoClose("Ignore ownership", update(s -> info.ignoreOwnership = s)),
-                ignoreAttacked = new JCheckBoxMenuItemNoClose("Ignore attacked", update(s -> info.ignoreAttacked = s)),
-                passive = new JCheckBoxMenuItemNoClose("Passive", update(s -> info.passive = s)),
-                attackSecond = new JCheckBoxMenuItemNoClose("Attack second", update(s -> info.attackSecond = s));
+                noCircle = new JCheckBoxMenuItemNoClose("No circle", update(s -> infos.forEach(info -> info.noCircle = s))),
+                ignoreOwnership = new JCheckBoxMenuItemNoClose("Ignore ownership", update(s -> infos.forEach(info -> info.ignoreOwnership = s))),
+                ignoreAttacked = new JCheckBoxMenuItemNoClose("Ignore attacked", update(s -> infos.forEach(info -> info.ignoreAttacked = s))),
+                passive = new JCheckBoxMenuItemNoClose("Passive", update(s -> infos.forEach(info -> info.passive = s))),
+                attackSecond = new JCheckBoxMenuItemNoClose("Attack second", update(s -> infos.forEach(info -> info.attackSecond = s)));
 
         private JPopupMenu extraOptions = new JPopupMenu("Extra options");
 
@@ -197,8 +230,10 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
 
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
             curr = (ExtraNpcInfo) value;
-            info = curr.info;
+            infos = curr.infos;
             button.setText(curr.toString());
+
+            NpcInfo info = infos.iterator().next();
 
             noCircle.setSelected(info.noCircle);
             ignoreOwnership.setSelected(info.ignoreOwnership);

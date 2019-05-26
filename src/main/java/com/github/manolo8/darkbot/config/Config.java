@@ -131,6 +131,8 @@ public class Config {
         @Option(value = "Run config to chase", description = "Use run config to follow escaping npcs")
         public boolean RUN_CONFIG_IN_CIRCLE = true;
 
+        @Option(value = "Group similar NPCs", description = "Group NPCs in the same GG in the NPC table")
+        public boolean GROUP_NPCS = true;
         @Option("Npcs")
         @Editor(JNpcInfoTable.class)
         public Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
