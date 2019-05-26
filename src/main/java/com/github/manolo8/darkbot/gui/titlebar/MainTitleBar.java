@@ -14,7 +14,7 @@ public class MainTitleBar extends JPanel implements SimpleMouseListener {
 
         add(new ExtraButton(main, frame), "grow");
         add(new ConfigButton(frame), "grow");
-        add(new StatsButton(frame), "grow");
+        add(new StatsButton(frame), "grow, hidemode 2");
         add(new StartButton(main, frame), "grow");
 
         add(new DragArea(frame), "grow");

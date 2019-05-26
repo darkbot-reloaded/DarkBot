@@ -10,6 +10,7 @@ public class StatsButton extends TitleBarButton<MainGui> {
 
     StatsButton(MainGui frame) {
         super(UIUtils.getIcon("stats"), frame);
+        super.setVisible(false);
         setToolTipText("Open stats view");
     }
 
