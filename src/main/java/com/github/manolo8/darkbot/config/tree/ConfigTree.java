@@ -2,16 +2,43 @@ package com.github.manolo8.darkbot.config.tree;
 
 import com.github.manolo8.darkbot.config.Config;
 
+import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ConfigTree implements TreeModel {
 
-    private ConfigNode root;
+    private ConfigNode.Parent root;
+    private ConfigNode[] originalChildren;
+    private List<TreeModelListener> listeners = new ArrayList<>();
 
     public ConfigTree(Config config) {
-        this.root = ConfigNode.root(config);
+        this.root = ConfigNode.root("Root", config);
+        this.originalChildren = root.children;
+    }
+
+    public void setCustom(String name, Object customConfig) {
+        ConfigNode[] newChildren;
+        if (customConfig == null) newChildren = originalChildren;
+        else {
+            newChildren = Arrays.copyOf(originalChildren, originalChildren.length + 1);
+            newChildren[originalChildren.length] = ConfigNode.root(name, customConfig);
+        }
+
+        this.root.children = newChildren;
+        updateListeners();
+    }
+
+    private void updateListeners() {
+        TreeModelEvent event = new TreeModelEvent(this, (TreeNode[]) null, null, null);
+        for (TreeModelListener listener : listeners) {
+            listener.treeStructureChanged(event);
+        }
     }
 
     @Override
@@ -49,9 +76,11 @@ public class ConfigTree implements TreeModel {
 
     @Override
     public void addTreeModelListener(TreeModelListener l) {
+        listeners.add(l);
     }
 
     @Override
     public void removeTreeModelListener(TreeModelListener l) {
+        listeners.remove(l);
     }
 }

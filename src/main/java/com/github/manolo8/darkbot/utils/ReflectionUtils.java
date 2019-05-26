@@ -57,10 +57,22 @@ public class ReflectionUtils {
 
             List<String> optionList = Arrays.asList("-classpath", System.getProperty("java.class.path") + ";dist/InlineCompiler.jar");
 
-            if (compiler.getTask(null, fileManager, diagnostics, optionList, null,
-                    fileManager.getJavaFileObjectsFromFiles(Collections.singletonList(source))).call())
-                return new URLClassLoader(new URL[]{new File("tmp").toURI().toURL()})
-                    .loadClass("com.github.manolo8.darkbot.modules." + moduleName);
+            if (compiler.getTask(null, fileManager, diagnostics, optionList, null, fileManager.getJavaFileObjects(source)).call()) {
+                URLClassLoader classLoader = new URLClassLoader(new URL[]{new File("tmp").toURI().toURL()});
+
+                Class<?> module = classLoader.loadClass("com.github.manolo8.darkbot.modules." + moduleName);
+
+                File moduleFolder = new File("tmp/com/github/manolo8/darkbot/modules/");
+                File[] subclasses = moduleFolder.listFiles(f -> f.getName().matches(moduleName + "[$][a-zA-Z0-9]+[.]class$"));
+                if (subclasses == null) return module;
+
+                for (File file : subclasses) {
+                    classLoader.loadClass("com.github.manolo8.darkbot.modules." + file.getName().replace(".class", ""));
+                }
+
+                return module;
+
+            }
 
             for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics())
                 System.err.format("Error (%d,%d) java: %s%n", diagnostic.getLineNumber(), diagnostic.getColumnNumber(), diagnostic.getMessage(null));

@@ -8,19 +8,18 @@ import com.github.manolo8.darkbot.gui.tree.components.JBoolField;
 import com.github.manolo8.darkbot.gui.tree.components.JCharField;
 import com.github.manolo8.darkbot.gui.tree.components.JNumberField;
 import com.github.manolo8.darkbot.gui.tree.components.JStringField;
+import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
 
 import javax.swing.*;
-import javax.swing.tree.TreePath;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 public class AdvancedConfig extends JPanel {
 
     private Config config;
+    private ConfigTree treeModel;
 
     public AdvancedConfig() {
         setBorder(BorderFactory.createEmptyBorder());
@@ -33,8 +32,12 @@ public class AdvancedConfig extends JPanel {
         add(setupUI());
     }
 
+    public void setCustomConfig(String name, Object config) {
+        treeModel.setCustom(name, config);
+    }
+
     private JComponent setupUI() {
-        JTree configTree = new JTree(new ConfigTree(config));
+        JTree configTree = new JTree(this.treeModel = new ConfigTree(config));
         configTree.setEditable(true);
         configTree.setFocusable(false);
         configTree.setRootVisible(false);
@@ -53,12 +56,16 @@ public class AdvancedConfig extends JPanel {
 
         configTree.setCellEditor(editor);
 
-        // Unfold top-level nodes
-        for (int i = configTree.getRowCount() - 1; i >= 0; i--) configTree.expandRow(i);
+        treeModel.addTreeModelListener((SimpleTreeListener) e -> unfoldTopLevelTree(configTree));
+        unfoldTopLevelTree(configTree);
 
         JScrollPane scrollPane = new JScrollPane(configTree);
         scrollPane.setBorder(null);
         return scrollPane;
+    }
+
+    private void unfoldTopLevelTree(JTree configTree) {
+        for (int i = configTree.getRowCount() - 1; i >= 0; i--) configTree.expandRow(i);
     }
 
 }

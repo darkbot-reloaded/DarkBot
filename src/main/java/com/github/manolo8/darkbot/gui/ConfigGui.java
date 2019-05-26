@@ -93,6 +93,10 @@ public class ConfigGui extends JFrame {
         safeEditor.setup(main);
     }
 
+    void setCustomConfig(String name, Object config) {
+        advancedPane.setCustomConfig(name, config);
+    }
+
     @Override
     public void setVisible(boolean b) {
         super.setVisible(b);

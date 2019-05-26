@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
+import com.github.manolo8.darkbot.core.itf.CustomModule;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
@@ -41,7 +42,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 alpha 8";
+    public static final String VERSION = "1.13.11 beta";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -122,11 +123,11 @@ public class Main extends Thread {
         });
 
         status.add(this::onRunningToggle);
-        checkModule();
 
         form = new MainGui(this);
         backpage = new BackpageManager(this);
 
+        checkModule();
         start();
         API.createWindow();
     }
@@ -291,8 +292,10 @@ public class Main extends Thread {
     }
 
     private void checkModule() {
-        if (module == null || moduleId != config.GENERAL.CURRENT_MODULE)
-            setModule(getModule(moduleId = config.GENERAL.CURRENT_MODULE));
+        if (module == null || moduleId != config.GENERAL.CURRENT_MODULE) {
+            Module module = getModule(moduleId = config.GENERAL.CURRENT_MODULE);
+            setModule(module);
+        }
     }
 
     private Module getModule(int id) {
@@ -303,9 +306,11 @@ public class Main extends Thread {
             case 3: return new EventModule();
             case 4: {
                 try {
-                    Module m = getCustomModule();
+                    CustomModule m = getCustomModule();
                     if (m != null) {
                         popupMessage("Success", "Successfully loaded custom module",  JOptionPane.INFORMATION_MESSAGE);
+
+                        form.setCustomConfig(m.name(), m.configuration());
                         return m;
                     }
                     popupMessage("Warning", "Couldn't load custom module, did you configure it correctly?", JOptionPane.WARNING_MESSAGE);
@@ -327,13 +332,13 @@ public class Main extends Thread {
         });
     }
 
-    private Module getCustomModule() throws Exception {
+    private CustomModule getCustomModule() throws Exception {
         String customModule = config.GENERAL.CUSTOM_MODULE;
         if (customModule == null || customModule.isEmpty()) return null;
         File file = new File(customModule);
         if (!file.exists()) return null;
         Class<?> newModule = ReflectionUtils.compileModule(file);
-        return (Module) ReflectionUtils.createInstance(newModule);
+        return (CustomModule) ReflectionUtils.createInstance(newModule);
     }
 
     private void sleepMax(long time, int total) {

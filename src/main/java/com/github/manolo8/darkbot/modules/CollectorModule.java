@@ -97,11 +97,11 @@ public class CollectorModule implements Module {
         return true;
     }
 
-    boolean isNotWaiting() {
+    public boolean isNotWaiting() {
         return System.currentTimeMillis() > waiting;
     }
 
-    boolean tryCollectNearestBox() {
+    public boolean tryCollectNearestBox() {
 
         if (current != null) {
             collectBox();
@@ -174,7 +174,7 @@ public class CollectorModule implements Module {
         drive.move(target);
     }
 
-    void findBox() {
+    public void findBox() {
         LocationInfo locationInfo = hero.locationInfo;
 
         Box best = boxes.stream()

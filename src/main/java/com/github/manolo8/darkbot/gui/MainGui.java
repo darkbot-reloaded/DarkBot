@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.gui.components.ExitConfirmation;
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -62,6 +63,10 @@ public class MainGui extends JFrame {
             configGui.setAlwaysOnTop(this.isAlwaysOnTop());
             configGui.toFront();
         }
+    }
+
+    public void setCustomConfig(String name, Object config) {
+        configGui.setCustomConfig(name, config);
     }
 
     public void tryClose() {

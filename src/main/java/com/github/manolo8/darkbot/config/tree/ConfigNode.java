@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.config.tree;
 
-import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
@@ -8,7 +7,6 @@ import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
-import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
@@ -31,8 +29,8 @@ public abstract class ConfigNode {
         this(option.value(), option.description());
     }
 
-    static ConfigNode root(Object root) {
-        return new Parent("root", "", Arrays.stream(root.getClass().getFields())
+    static ConfigNode.Parent root(String name, Object root) {
+        return new Parent(name, "", Arrays.stream(root.getClass().getFields())
                 .filter(f -> f.getAnnotation(Option.class) != null)
                 .map(f -> ConfigNode.of(new ConfigField(root, f))).toArray(ConfigNode[]::new));
     }
@@ -51,7 +49,7 @@ public abstract class ConfigNode {
     }
     
     static class Parent extends ConfigNode {
-        final ConfigNode[] children;
+        ConfigNode[] children;
 
         Parent(String name, String description, ConfigNode[] children) {
             super(name, description);
