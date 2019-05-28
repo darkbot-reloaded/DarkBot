@@ -68,7 +68,7 @@ public class HeroManager extends Ship implements Manager {
         super.update();
         pet.update();
 
-        config = API.readMemoryInt(settingsAddress + 56);
+        config = API.readMemoryInt(settingsAddress + 52);
 
         long petAddress = API.readMemoryLong(address + 176);
         if (petAddress != pet.address) pet.update(petAddress);
@@ -97,10 +97,10 @@ public class HeroManager extends Ship implements Manager {
 
     // 208 -> next map, 212 -> curr map, 216 -> prev map
     private int nextMap() {
-        return API.readMemoryInt(settingsAddress + 208);
+        return API.readMemoryInt(settingsAddress + 204);
     }
     private int currMap() {
-        return API.readMemoryInt(settingsAddress + 212);
+        return API.readMemoryInt(settingsAddress + 208);
     }
 
     public void jumpPortal(Portal portal) {
