@@ -73,8 +73,11 @@ public class Config {
             @Editor(JListField.class)
             @Options(ReviveSpotSupplier.class)
             public long REVIVE_LOCATION = 1L;
+            @Option("Wait before revive (sec)")
+            @Num(min = 2, max = 60, step = 10)
+            public int WAIT_BEFORE_REVIVE = 3;
             @Option("Wait after revive (sec)")
-            @Num(max = 60 * 60, step = 10)
+            @Num(min = 3, max = 15 * 60, step = 10)
             public int WAIT_AFTER_REVIVE = 90;
         }
 

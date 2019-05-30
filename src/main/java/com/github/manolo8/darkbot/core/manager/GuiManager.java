@@ -17,7 +17,8 @@ public class GuiManager implements Manager {
     private final Dictionary guis;
 
     private long reconnectTime;
-    private long repairTime;
+    private long lastDeath = -1;
+    private long lastRepair;
     private long validTime;
 
     private long repairAddress;
@@ -115,14 +116,16 @@ public class GuiManager implements Manager {
         }
     }
 
-    private void tryRevive() {
-        if (System.currentTimeMillis() - repairTime > 10000) {
+    private boolean tryRevive() {
+        if (System.currentTimeMillis() - lastRepair > 10000) {
             deaths++;
             API.writeMemoryLong(repairAddress + 32, main.config.GENERAL.SAFETY.REVIVE_LOCATION);
             API.mouseClick(MapManager.clientWidth / 2, (MapManager.clientHeight / 2) + 190);
-            repairTime = System.currentTimeMillis();
+            lastRepair = System.currentTimeMillis();
             if (main.config.MISCELLANEOUS.REPAIR_DRONE_PERCENTAGE != 0) this.main.backpage.checkDronesAfterKill();
+            return true;
         }
+        return false;
     }
 
     private boolean isInvalidShip() {
@@ -132,19 +135,11 @@ public class GuiManager implements Manager {
     private boolean isDead() {
         if (repairAddress != 0) {
             return API.readMemoryBoolean(repairAddress + 40);
-        } else {
-            if (isInvalidShip()) {
-
-                long[] values = API.queryMemory(ByteUtils.getBytes(guiAddress, mainAddress), 1);
-
-                if (values.length == 1)
-                    repairAddress = values[0] - 56;
-
-                return false;
-            } else {
-                return false;
-            }
+        } else if (isInvalidShip()) {
+            long[] values = API.queryMemory(ByteUtils.getBytes(guiAddress, mainAddress), 1);
+            if (values.length == 1) repairAddress = values[0] - 56;
         }
+        return false;
     }
 
     private void checkInvalid() {
@@ -174,16 +169,20 @@ public class GuiManager implements Manager {
         } else if (isDead()) {
             main.hero.drive.stop(false);
 
-            tryRevive();
+            if (lastDeath == -1) lastDeath = System.currentTimeMillis();
+
+            if (System.currentTimeMillis() - lastDeath < main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE ||
+                    !tryRevive()) return false;
+
+            lastDeath = -1;
 
             if (deaths >= main.config.GENERAL.SAFETY.MAX_DEATHS)
                 main.setRunning(false);
             else
                 checkInvalid();
 
-
             return false;
-        } else if (System.currentTimeMillis() - repairTime < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
+        } else if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
             validTime = System.currentTimeMillis();
             return false;
         } else if (main.hero.locationInfo.isLoaded() && (main.hero.locationInfo.isMoving() ||

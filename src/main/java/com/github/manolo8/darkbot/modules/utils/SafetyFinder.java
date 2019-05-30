@@ -29,8 +29,9 @@ public class SafetyFinder {
     private Drive drive;
 
     private SafetyInfo safety;
-
     private Escaping escape = Escaping.NONE;
+    private long lastTick;
+
     public enum Escaping {
         ENEMY, SIGHT, REPAIR, NONE;
         boolean canUse(SafetyInfo safety) {
@@ -73,14 +74,25 @@ public class SafetyFinder {
     }
 
     public String status() {
-        return "Escaping " + escape + (safety == null ? "" : " " + safety +
-                (safety.type == SafetyInfo.Type.PORTAL ? " - " + jumpState : ""));
+        return "Escaping " + simplify(escape) + (safety == null ? "" : " " + safety +
+                (safety.type == SafetyInfo.Type.PORTAL ? " - " + simplify(jumpState) : ""));
+    }
+
+    private String simplify(Object obj) {
+        return obj.toString().toLowerCase().replace("_", " ");
     }
 
     /**
      * @return True if it's safe to keep working, false if the safety is working.
      */
     public boolean tick() {
+        // If no tick occurred for a while, means safety finder should have reset (Probably died)
+        if (System.currentTimeMillis() - lastTick > 2500) {
+            escape = Escaping.NONE;
+            jumpState = JumpState.CURRENT_MAP;
+        }
+        lastTick = System.currentTimeMillis();
+
         if (jumpState == JumpState.CURRENT_MAP || jumpState == JumpState.JUMPING) {
             Escaping oldEscape = escape;
             escape = getEscape();

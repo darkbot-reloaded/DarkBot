@@ -42,7 +42,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta";
+    public static final String VERSION = "1.13.11 beta 3";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -313,7 +313,6 @@ public class Main extends Thread {
                         form.setCustomConfig(m.name(), m.configuration());
                         return m;
                     }
-                    popupMessage("Warning", "Couldn't load custom module, did you configure it correctly?", JOptionPane.WARNING_MESSAGE);
                 } catch (Exception e) {
                     popupMessage("Error compiling module", e.getMessage(), JOptionPane.ERROR_MESSAGE);
                     e.printStackTrace();
@@ -327,6 +326,7 @@ public class Main extends Thread {
         SwingUtilities.invokeLater(() -> {
             JOptionPane pane = new JOptionPane(content, type);
             JDialog dialog = pane.createDialog(title);
+            dialog.setIconImage(form.getIconImage());
             dialog.setAlwaysOnTop(true);
             dialog.setVisible(true);
         });
@@ -334,11 +334,21 @@ public class Main extends Thread {
 
     private CustomModule getCustomModule() throws Exception {
         String customModule = config.GENERAL.CUSTOM_MODULE;
-        if (customModule == null || customModule.isEmpty()) return null;
+        if (customModule == null || customModule.isEmpty()) {
+            popupMessage("Warning", "No custom module file selected", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
         File file = new File(customModule);
-        if (!file.exists()) return null;
+        if (!file.exists()) {
+            popupMessage("Warning", "Custom module file doesn't exist", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
         Class<?> newModule = ReflectionUtils.compileModule(file);
-        return (CustomModule) ReflectionUtils.createInstance(newModule);
+        Module module = (Module) ReflectionUtils.createInstance(newModule);
+        if (module instanceof CustomModule) return (CustomModule) module;
+
+        popupMessage("Warning", "The custom module is outdated, and can't be loaded", JOptionPane.WARNING_MESSAGE);
+        return null;
     }
 
     private void sleepMax(long time, int total) {

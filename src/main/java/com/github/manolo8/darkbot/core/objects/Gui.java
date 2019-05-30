@@ -55,7 +55,7 @@ public class Gui extends Updatable {
             reset();
         } else {
             super.update(address);
-            this.addressInfo = API.readMemoryLong(address + 488);
+            this.addressInfo = API.readMemoryLong(address + 496);
             this.update = System.currentTimeMillis();
         }
     }
@@ -77,7 +77,7 @@ public class Gui extends Updatable {
     }
 
     public boolean show(boolean value) {
-
+        if (minimized.address == 0) return false;
         if (value != visible) {
 
             if (System.currentTimeMillis() - 1500 > time) {

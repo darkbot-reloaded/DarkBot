@@ -53,7 +53,12 @@ public class BackpageManager extends Thread {
             }
 
             if (checkDrones) {
-                hangarManager.checkDrones();
+                try {
+                    hangarManager.checkDrones();
+                } catch (Exception e) {
+                    System.err.println("Failed to check & repair drones");
+                    e.printStackTrace();
+                }
                 checkDrones = false;
             }
 
