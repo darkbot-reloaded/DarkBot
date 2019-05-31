@@ -119,7 +119,7 @@ public class StarManager {
                 .addGG(413, "GoP 4").accessOnlyBy(24, "GoP 3")
                 .addGG(414, "GoP 5").accessOnlyBy(24, "GoP 4")
                 .addGG(415, "GoP Final").accessBy(24, "GoP 5");
-                // Special (No access)
+                // Special (No direct access)
         mapBuild.addMap(42, "???")
                 .addMap(61, "MMO Invasion").addMap(62, "EIC Invasion").addMap(63, "VRU Invasion")
                 .addMap(64, "MMO Invasion").addMap(65, "EIC Invasion").addMap(66, "VRU Invasion")
@@ -136,16 +136,16 @@ public class StarManager {
                 .addMap(152, "R-Zone 3").addMap(153, "R-Zone 4")
                 .addMap(154, "R-Zone 5").addMap(155, "R-Zone 6")
                 .addMap(156, "R-Zone 7").addMap(157, "R-Zone 8")
-                .addMap(158, "R-Zone 9").addMap(159, "R-Zone 10");
+                .addMap(158, "R-Zone 9").addMap(159, "R-Zone 10")
+                .addMap(420, "WarGame 1").addMap(421, "WarGame 2").addMap(422, "WarGame 3")
+                .addMap(423, "WarGame 4").addMap(423, "WarGame 5").addMap(423, "WarGame 6");
 
         starSystem = mapBuild.build();
     }
 
     public Portal getOrCreate(int id, int type, int x, int y) {
         return starSystem.outgoingEdgesOf(HeroManager.instance.map).stream()
-                .filter(p -> (p.id != -1 && p.id == id)     // By id
-                        || (p.searchType != -1 && p.searchType == type) // By Type
-                        || (p.x != -1 && p.y != -1 && p.inLoc(x, y)))  // By loc
+                .filter(p -> p.matches(id, x, y, type))
                 .peek(p -> p.id = id)
                 .findAny().orElse(new Portal(id, type, x, y, null));
     }

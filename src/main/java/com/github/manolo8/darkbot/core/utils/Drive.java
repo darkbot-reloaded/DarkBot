@@ -41,7 +41,7 @@ public class Drive {
         this.pathFinder = new PathFinder(map);
     }
 
-    public void checkMove() {
+    public synchronized void checkMove() {
         if (endLoc != null && pathFinder.changed() && tempDest == null) tempDest = endLoc;
 
         boolean newPath = tempDest != null;
@@ -106,12 +106,12 @@ public class Drive {
         return sum;
     }
 
-    public void toggleRunning(boolean running) {
+    public synchronized void toggleRunning(boolean running) {
         this.force = running;
         stop(true);
     }
 
-    public void stop(boolean current) {
+    public synchronized void stop(boolean current) {
         if (heroLoc.isMoving() && current) {
             Location stopLoc = heroLoc.now.copy();
             stopLoc.toAngle(heroLoc.now, heroLoc.last.angle(heroLoc.now), 100);
@@ -134,7 +134,7 @@ public class Drive {
         move(location.x, location.y);
     }
 
-    public void move(double x, double y) {
+    public synchronized void move(double x, double y) {
         tempDest = endLoc = new Location(x, y);
     }
 
