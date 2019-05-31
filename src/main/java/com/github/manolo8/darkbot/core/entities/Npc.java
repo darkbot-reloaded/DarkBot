@@ -20,7 +20,7 @@ public class Npc extends Ship {
         String oldName = playerInfo.username;
         super.update();
 
-        ish = API.readMemoryBoolean(API.readMemoryLong(address + 160) + 32);
+        ish = API.readMemoryBoolean(API.readMemoryLong(address + 208) + 56);
 
         if (!oldName.equals(playerInfo.username))
             npcInfo = ConfigEntity.INSTANCE.getOrCreateNpcInfo(playerInfo.username);
