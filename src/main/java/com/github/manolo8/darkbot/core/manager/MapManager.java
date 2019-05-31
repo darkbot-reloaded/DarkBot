@@ -84,11 +84,9 @@ public class MapManager implements Manager {
 
         internalWidth = API.readMemoryInt(address + 68);
         internalHeight = API.readMemoryInt(address + 72);
-        int tempId = API.readMemoryInt(address + 76);
-        entities.update(address);
-
-        if (tempId != id) {
-            id = tempId;
+        int currMap = API.readMemoryInt(address + 76);
+        if (currMap != id) {
+            id = currMap;
             main.hero.map = main.starManager.byId(id);
             preferred = ConfigEntity.INSTANCE.getOrCreatePreferred();
             avoided = ConfigEntity.INSTANCE.getOrCreateAvoided();
@@ -100,6 +98,7 @@ public class MapManager implements Manager {
                 ((MapChange) main.module).onMapChange();
             }
         }
+        entities.update(address);
     }
 
     private void checkMirror() {

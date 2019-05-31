@@ -68,6 +68,7 @@ public class Drive {
             }
 
             if (!force && heroLoc.isMoving() && !newPath && System.currentTimeMillis() - lastClick > 450) stop(false);
+            else if (!newPath && System.currentTimeMillis() - lastClick > 300) move(endLoc);
             else click(next);
         } else {
             paths.removeFirst();

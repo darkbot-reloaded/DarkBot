@@ -183,7 +183,7 @@ public class Config {
             @Option(value = "Show zones in main map", description = "Tick to show avoided/preferred zones on map")
             public boolean SHOW_ZONES = true;
             @Option(value = "GUI Button size", description = "Change tab in config & resize main window to update.")
-            @Num(min = 1, max = 15, step = 1)
+            @Num(min = 1, max = 20, step = 1)
             public int BUTTON_SIZE = 4;
             @Option("Use darcula theme")
             public boolean USE_DARCULA_THEME = true;
