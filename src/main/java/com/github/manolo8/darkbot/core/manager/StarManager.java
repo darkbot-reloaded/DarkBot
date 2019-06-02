@@ -66,9 +66,9 @@ public class StarManager {
                 .addMap(92, "5-2").addPortal(2800, 3600, "5-3").addPortal(1300, 6750, "5-3").addPortal(2800, 10900, "5-3")
                 .addMap(93, "5-3").addPortal(2000, 9500, "4-4").addPortal(2000, 13500, "4-4").addPortal(2000, 17500, "4-4");
                 // BL
-        mapBuild.addMap(306, "1BL").addPortal(150000202, "1-8").addPortal(150000203, "2BL").addPortal(150000204, "3BL")
-                .addMap(307, "2BL").addPortal(150000207, "1BL").addPortal(150000206, "2-8").addPortal(150000208, "3BL")
-                .addMap(308, "3BL").addPortal(150000211, "1BL").addPortal(150000212, "2BL").addPortal(150000210, "3-8");
+        mapBuild.addMap(306, "1BL").addPortal( 786, 11458, "1-8").addPortal( 7589,  1456, "2BL").addPortal(20072, 11732, "3BL")
+                .addMap(307, "2BL").addPortal(9893,   862, "1BL").addPortal(  593,  5884, "2-8").addPortal(20377,  7996, "3BL")
+                .addMap(308, "3BL").addPortal(1545, 12210, "1BL").addPortal(19400, 11854, "2BL").addPortal(14027,  3181, "3-8");
                 // EX
         mapBuild.addMap(401, "Experiment Zone 1").addPortal(1200, 1100, "Home Map")
                 .addMap(402, "Experiment Zone 2-1").addPortal(1200, 1100, "1-5")
@@ -147,7 +147,7 @@ public class StarManager {
         return starSystem.outgoingEdgesOf(HeroManager.instance.map).stream()
                 .filter(p -> p.matches(id, x, y, type))
                 .peek(p -> p.id = id)
-                .findAny().orElse(new Portal(id, type, x, y, null));
+                .findAny().orElse(new Portal(id, type, x, y));
     }
 
     public Portal next(Map current, LocationInfo locationInfo, Map target) {

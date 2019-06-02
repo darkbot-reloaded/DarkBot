@@ -49,13 +49,13 @@ public class Area {
         int min = min(diffBottom, min(min(diffTop, diffLeft), diffRight));
 
         if (min == diffTop)
-            point.y = (int) minY - 1;
+            point.y = (int) minY - 5;
         else if (min == diffBottom)
-            point.y = (int) maxY + 1;
+            point.y = (int) maxY + 5;
         else if (min == diffLeft)
-            point.x = (int) minX - 1;
+            point.x = (int) minX - 5;
         else
-            point.x = (int) maxX + 1;
+            point.x = (int) maxX + 5;
         return point;
     }
 

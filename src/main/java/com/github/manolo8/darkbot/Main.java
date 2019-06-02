@@ -42,7 +42,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta 4";
+    public static final String VERSION = "1.13.11 beta 5";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -299,6 +299,7 @@ public class Main extends Thread {
     }
 
     private Module getModule(int id) {
+        if (id != 4) form.setCustomConfig(null, null);
         switch (id) {
             case 0: return new CollectorModule();
             case 1: return new LootModule();
@@ -317,6 +318,7 @@ public class Main extends Thread {
                     popupMessage("Error compiling module", e.getMessage(), JOptionPane.ERROR_MESSAGE);
                     e.printStackTrace();
                 }
+                form.setCustomConfig(null, null);
             }
             default: return new CollectorModule();
         }

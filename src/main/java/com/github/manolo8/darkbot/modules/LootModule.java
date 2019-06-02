@@ -94,12 +94,15 @@ public class LootModule implements Module {
     }
 
     void ignoreInvalidTarget() {
-        if (!main.mapManager.isTarget(attack.target)) return;
-        double closestDist;
-        if (!(attack.target.npcInfo.ignoreOwnership || main.mapManager.isCurrentTargetOwned())
+        double closestDist = drive.closestDistance(attack.target.locationInfo.now);
+        if (!main.mapManager.isTarget(attack.target)) {
+            if (closestDist > 600) {
+                attack.target.setTimerTo(5000);
+                hero.setTarget(attack.target = null);
+            }
+        } else if (!(attack.target.npcInfo.ignoreOwnership || main.mapManager.isCurrentTargetOwned())
                 || (hero.locationInfo.distance(attack.target) > config.LOOT.NPC_DISTANCE_IGNORE) // Too far away from ship
-                || ((closestDist = drive.closestDistance(attack.target.locationInfo.now)) > 650
-                        && attack.target.health.hpPercent() > 0.90)   // Too far into obstacle and full hp
+                || (closestDist > 650 && attack.target.health.hpPercent() > 0.90)   // Too far into obstacle and full hp
                 || (closestDist > 500 && !attack.target.locationInfo.isMoving() // Inside obstacle, waiting & and regen shields
                         && (attack.target.health.shIncreasedIn(1000) || attack.target.health.shieldPercent() > 0.99))) {
             attack.target.setTimerTo(5000);

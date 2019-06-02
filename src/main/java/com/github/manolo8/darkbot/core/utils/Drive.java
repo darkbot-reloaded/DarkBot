@@ -41,11 +41,13 @@ public class Drive {
         this.pathFinder = new PathFinder(map);
     }
 
-    public synchronized void checkMove() {
+    public void checkMove() {
+        // Path-finder changed and bot is already traveling, re-create route
         if (endLoc != null && pathFinder.changed() && tempDest == null) tempDest = endLoc;
 
         boolean newPath = tempDest != null;
-        if (tempDest != null) {
+        if (newPath) { // Calculate new path
+            if (endLoc == null) endLoc = tempDest; // Should never happen
             paths = pathFinder.createRote(heroLoc.now, tempDest);
             tempDest = null;
         }
@@ -68,11 +70,11 @@ public class Drive {
             }
 
             if (!force && heroLoc.isMoving() && !newPath && System.currentTimeMillis() - lastClick > 450) stop(false);
-            else if (!newPath && System.currentTimeMillis() - lastClick > 300) move(endLoc);
+            else if (!newPath && System.currentTimeMillis() - lastClick > 300) tempDest = endLoc; // Re-calculate path next tick
             else click(next);
         } else {
             paths.removeFirst();
-            if (paths.isEmpty()) this.endLoc = null;
+            if (paths.isEmpty()) this.endLoc = this.tempDest = null;
         }
     }
 
@@ -106,19 +108,19 @@ public class Drive {
         return sum;
     }
 
-    public synchronized void toggleRunning(boolean running) {
+    public void toggleRunning(boolean running) {
         this.force = running;
         stop(true);
     }
 
-    public synchronized void stop(boolean current) {
+    public void stop(boolean current) {
         if (heroLoc.isMoving() && current) {
             Location stopLoc = heroLoc.now.copy();
             stopLoc.toAngle(heroLoc.now, heroLoc.last.angle(heroLoc.now), 100);
             mouse.clickLoc(stopLoc);
         }
 
-        endLoc = null;
+        endLoc = tempDest = null;
         if (!paths.isEmpty()) paths.clear();
     }
 
@@ -134,7 +136,7 @@ public class Drive {
         move(location.x, location.y);
     }
 
-    public synchronized void move(double x, double y) {
+    public void move(double x, double y) {
         tempDest = endLoc = new Location(x, y);
     }
 

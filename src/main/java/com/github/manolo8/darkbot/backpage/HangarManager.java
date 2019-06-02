@@ -10,26 +10,26 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class HangarManager {
 
     private static final Gson GSON = new Gson();
-    private static final Type HANGAR_LIST = new TypeToken<ArrayList<Hangar>>(){}.getType();
-    private static final Type DRONE_LIST = new TypeToken<ArrayList<Drone>>(){}.getType();
+    private static final Type HANGAR_MAP = new TypeToken<Map<String, Hangar>>(){}.getType();
+    private static final Type DRONE_LIST = new TypeToken<List<Drone>>(){}.getType();
 
     private final Main main;
     private final BackpageManager backpageManager;
     private long lastChangeHangar = 0;
-    private List<Hangar> hangars;
+    private Map<String, Hangar> hangars;
     private List<Drone> drones;
 
     public HangarManager(Main main, BackpageManager backpageManager) {
         this.main = main;
         this.backpageManager = backpageManager;
-        this.hangars = new ArrayList<>();
+        this.hangars = new HashMap<>();
         this.drones = new ArrayList<>();
     }
 
@@ -73,10 +73,10 @@ public class HangarManager {
                     .getAsJsonObject().get("ret").getAsJsonObject().get("hangars").getAsJsonObject();
 
             for (Map.Entry<String, JsonElement> hangar : hangars.entrySet()) {
-                if (!hangar.getValue().getAsJsonObject().get("hangar_is_active").getAsBoolean()) continue;
+                JsonObject currHangar = hangar.getValue().getAsJsonObject();
+                if (!currHangar.get("hangar_is_active").getAsBoolean()) continue;
 
-                JsonElement dronesArray = hangar.getValue().getAsJsonObject().get("general").getAsJsonObject().get("drones");
-                this.drones = GSON.fromJson(dronesArray, DRONE_LIST);
+                this.drones = GSON.fromJson(currHangar.get("general").getAsJsonObject().get("drones"), DRONE_LIST);
             }
 
         } catch (Exception e){
@@ -106,13 +106,14 @@ public class HangarManager {
 
         if (hangarData == null) return;
 
-        JsonArray hangarsArray =  new JsonParser().parse(hangarData).getAsJsonObject().get("data").getAsJsonObject()
-                .get("ret").getAsJsonObject().get("hangars").getAsJsonArray();
-        this.hangars = GSON.fromJson(hangarsArray, HANGAR_LIST);
+        JsonObject hangarsArray = new JsonParser().parse(hangarData).getAsJsonObject().get("data").getAsJsonObject()
+                .get("ret").getAsJsonObject().get("hangars").getAsJsonObject();
+
+        this.hangars = GSON.fromJson(hangarsArray, HANGAR_MAP);
     }
 
     public String getActiveHangar() {
-        for (Hangar hangar : hangars) {
+        for (Hangar hangar : hangars.values()) {
             if (hangar.hangarIsActive()) return hangar.getHangarId();
         }
         return null;

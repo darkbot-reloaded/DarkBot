@@ -51,9 +51,14 @@ public class PathFinder {
 
     public PathPoint fixToClosest(PathPoint point) {
         int initialX = point.x, initialY = point.y;
-        Area area;
-        if ((area = areaTo(point)) == null) return point; // Not inside an area
-        if (areaTo(area.toSide(point)) == null) return point; // Got out of the area
+
+        Area area = areaTo(point);
+        if (area != null) area = areaTo(area.toSide(point)); // Inside an area, get out of it
+        if (map.isOutOfMap(point.x, point.y)) { // In radiation, get out of it
+            point.x = Math.min(Math.max(point.x, 0), MapManager.internalWidth);
+            point.y = Math.min(Math.max(point.y, 0), MapManager.internalHeight);
+            if (areaTo(point) == null) return point; // Got out of rad and not in area
+        } else if (area == null) return point; // Inside map & not in area (anymore)
 
         double angle = 0, distance = 0;
         do {
