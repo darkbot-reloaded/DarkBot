@@ -124,7 +124,7 @@ public class HeroManager extends Ship implements Manager {
         setMode(main.config.GENERAL.ROAM);
     }
 
-    private void setMode(Config.ShipConfig config) {
+    public void setMode(Config.ShipConfig config) {
         if (this.config != config.CONFIG && System.currentTimeMillis() - configTime > 5500L) {
             Main.API.keyboardClick('c');
             this.configTime = System.currentTimeMillis();

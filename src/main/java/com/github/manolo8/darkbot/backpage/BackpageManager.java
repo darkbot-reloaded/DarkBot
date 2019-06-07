@@ -26,7 +26,7 @@ public class BackpageManager extends Thread {
     private long sidLastUpdate = System.currentTimeMillis();
     private long sidNextUpdate = sidLastUpdate;
     private int sidStatus = -1;
-    private boolean checkDrones = false;
+    private long checkDrones = Long.MAX_VALUE;
 
     public BackpageManager(Main main) {
         super("BackpageManager");
@@ -52,14 +52,19 @@ public class BackpageManager extends Thread {
                 sidNextUpdate = sidLastUpdate + (int) (waitTime + waitTime * Math.random());
             }
 
-            if (checkDrones) {
+            if (System.currentTimeMillis() > checkDrones) {
                 try {
-                    hangarManager.checkDrones();
+                    boolean checked = hangarManager.checkDrones();
+
+                    System.out.println("Checked/repaired drones, all successful: " + checked);
+
+                    checkDrones = checked ? System.currentTimeMillis() + 30_000 : Long.MAX_VALUE;
                 } catch (Exception e) {
-                    System.err.println("Failed to check & repair drones");
+                    System.err.println("Failed to check & repair drones, retry in 5m");
+                    checkDrones = System.currentTimeMillis() + 300_000;
                     e.printStackTrace();
                 }
-                checkDrones = false;
+
             }
 
 
@@ -68,7 +73,7 @@ public class BackpageManager extends Thread {
     }
 
     public void checkDronesAfterKill() {
-        this.checkDrones = true;
+        this.checkDrones = System.currentTimeMillis();
     }
 
     private boolean isInvalid() {
@@ -101,7 +106,7 @@ public class BackpageManager extends Thread {
         return conn;
     }
 
-    public String getDataInventory(String params){
+    public String getDataInventory(String params) {
         String data = null;
         try {
             HttpURLConnection conn = getConnection(params);

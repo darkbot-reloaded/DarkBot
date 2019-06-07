@@ -13,23 +13,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class HangarManager {
 
     private static final Gson GSON = new Gson();
-    private static final Type HANGAR_MAP = new TypeToken<Map<String, Hangar>>(){}.getType();
+    private static final JsonParser JSON_PARSER = new JsonParser();
     private static final Type DRONE_LIST = new TypeToken<List<Drone>>(){}.getType();
 
     private final Main main;
     private final BackpageManager backpageManager;
     private long lastChangeHangar = 0;
-    private Map<String, Hangar> hangars;
+    private List<Hangar> hangars;
     private List<Drone> drones;
 
     public HangarManager(Main main, BackpageManager backpageManager) {
         this.main = main;
         this.backpageManager = backpageManager;
-        this.hangars = new HashMap<>();
+        this.hangars = new ArrayList<>();
         this.drones = new ArrayList<>();
     }
 
@@ -61,30 +62,20 @@ public class HangarManager {
     }
 
     public void updateDrones() {
-        try {
-            String hangarID = getActiveHangar();
-            if (hangarID == null) return;
+        String hangarID = getActiveHangar();
+        if (hangarID == null) return;
 
-            String encodeParams = Base64Utils.base64Encode("{\"params\":{\"hi\":" + hangarID + "}}");
-            String url = "flashAPI/inventory.php?action=getHangar&params="+encodeParams;
-            String json = this.backpageManager.getDataInventory(url);
+        String encodeParams = Base64Utils.base64Encode("{\"params\":{\"hi\":" + hangarID + "}}");
+        String url = "flashAPI/inventory.php?action=getHangar&params="+encodeParams;
+        String json = this.backpageManager.getDataInventory(url);
 
-            JsonObject hangars = new JsonParser().parse(json).getAsJsonObject().get("data")
-                    .getAsJsonObject().get("ret").getAsJsonObject().get("hangars").getAsJsonObject();
-
-            for (Map.Entry<String, JsonElement> hangar : hangars.entrySet()) {
-                JsonObject currHangar = hangar.getValue().getAsJsonObject();
-                if (!currHangar.get("hangar_is_active").getAsBoolean()) continue;
-
-                this.drones = GSON.fromJson(currHangar.get("general").getAsJsonObject().get("drones"), DRONE_LIST);
-            }
-
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+        forEachHangar(json, h -> {
+            if (h.get("hangar_is_active").getAsBoolean()) return;
+            this.drones = GSON.fromJson(h.get("general").getAsJsonObject().get("drones"), DRONE_LIST);
+        });
     }
 
-    private boolean repairDrone(Drone drone){
+    private boolean repairDrone(Drone drone) {
         try {
             String encodeParams = Base64Utils.base64Encode( "{\"action\":\"repairDrone\",\"lootId\":\""
                     + drone.getLoot() + "\",\"repairPrice\":" + drone.getRepairPrice() +
@@ -106,14 +97,22 @@ public class HangarManager {
 
         if (hangarData == null) return;
 
-        JsonObject hangarsArray = new JsonParser().parse(hangarData).getAsJsonObject().get("data").getAsJsonObject()
-                .get("ret").getAsJsonObject().get("hangars").getAsJsonObject();
+        hangars.clear();
+        forEachHangar(hangarData, h -> hangars.add(GSON.fromJson(h, Hangar.class)));
+    }
 
-        this.hangars = GSON.fromJson(hangarsArray, HANGAR_MAP);
+    private void forEachHangar(String json, Consumer<JsonObject> hangarConsumer) {
+        JsonElement hangars = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject()
+                .get("ret").getAsJsonObject().get("hangars");
+        if (hangars instanceof JsonArray) {
+            hangars.getAsJsonArray().forEach(h -> hangarConsumer.accept(h.getAsJsonObject()));
+        } else {
+            hangars.getAsJsonObject().entrySet().forEach(h -> hangarConsumer.accept(h.getValue().getAsJsonObject()));
+        }
     }
 
     public String getActiveHangar() {
-        for (Hangar hangar : hangars.values()) {
+        for (Hangar hangar : hangars) {
             if (hangar.hangarIsActive()) return hangar.getHangarId();
         }
         return null;
