@@ -3,3 +3,5 @@
 /test
 /out
 dependency-reduced-pom.xml
+**/DiscordUtils.java
+**/resources/style.css

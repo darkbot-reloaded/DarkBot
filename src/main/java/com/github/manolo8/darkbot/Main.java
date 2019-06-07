@@ -18,7 +18,7 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
-import com.github.manolo8.darkbot.utils.SystemUtils;
+import com.github.manolo8.darkbot.utils.DiscordUtils;
 import com.github.manolo8.darkbot.modules.CollectorModule;
 import com.github.manolo8.darkbot.modules.EventModule;
 import com.github.manolo8.darkbot.modules.LootModule;
@@ -29,8 +29,6 @@ import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.internal.LinkedTreeMap;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.io.File;
@@ -39,9 +37,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
-import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
@@ -98,8 +94,7 @@ public class Main extends Thread {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-        showDiscordWarning();
-
+        new DiscordUtils().setupOauth();
 
         new ConfigEntity(config);
 
@@ -136,37 +131,6 @@ public class Main extends Thread {
         checkModule();
         start();
         API.createWindow();
-    }
-
-    private void showDiscordWarning() {
-        Preferences prefs = Preferences.userNodeForPackage(getClass());
-        long firstInit = prefs.getLong(VERSION, System.currentTimeMillis());
-        prefs.putLong(VERSION, firstInit);
-
-        long TIME_BEFORE_MESSAGE = 2 * 60 * 60 * 1000;
-        if (System.currentTimeMillis() - firstInit < TIME_BEFORE_MESSAGE) return;
-
-        JPanel panel = new JPanel(new MigLayout("ins 0, wrap 1"));
-        panel.add(new JLabel("This bot is free, if you paid for it or watched ads, you were scammed!"));
-        panel.add(new JLabel("Make sure you are in the official discord server to get latest updates for free."));
-        JCheckBox dontShow = new JCheckBox("Don't show this message again");
-        panel.add(dontShow);
-
-        JButton join = new JButton("Join discord");
-        join.addActionListener(e -> {
-            SystemUtils.openUrl("https://discord.gg/KFd8vZT");
-            if (dontShow.isSelected()) prefs.putLong(VERSION, Long.MAX_VALUE);
-            JOptionPane.getRootFrame().dispose();
-        });
-        JButton ignore = new JButton("Ignore");
-        ignore.addActionListener(e -> {
-            if (dontShow.isSelected()) prefs.putLong(VERSION, Long.MAX_VALUE);
-            JOptionPane.getRootFrame().dispose();
-        });
-
-        JOptionPane.showOptionDialog(null, panel, "Join the official discord!",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
-                new Object[]{join, ignore}, join);
     }
 
     @Override
