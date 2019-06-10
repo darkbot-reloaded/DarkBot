@@ -174,7 +174,7 @@ public class Main extends Thread {
 
             double tickTime = System.currentTimeMillis() - time;
             avgTick = ((avgTick * 4) + tickTime) / 5;
-            sleepMax(time, botInstaller.invalid.value ? 1000 : 100);
+            sleepMax(time, botInstaller.invalid.value ? 5000 : 100);
         }
     }
 

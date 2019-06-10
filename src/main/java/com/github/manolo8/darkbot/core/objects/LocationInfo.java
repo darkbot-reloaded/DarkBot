@@ -71,7 +71,7 @@ public class LocationInfo extends Updatable {
     }
 
     public boolean isLoaded() {
-        return now.x != 0 && now.y != 0;
+        return address != 0;
     }
 
     public boolean isMoving() {

@@ -129,6 +129,7 @@ public class DarkBotAPI implements IDarkBotAPI {
                 .mapToInt(g -> g.getDefaultConfiguration().getBounds().x).min().orElse(0);
 
         USER_32.MoveWindow(window, visible ? x : minX - w, y, w, h, true);
+        if (visible) USER_32.SetForegroundWindow(window);
     }
 
     public void handleRefresh() {
