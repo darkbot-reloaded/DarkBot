@@ -17,7 +17,7 @@ public class Box extends Entity {
     }
 
     public boolean isCollected() {
-        return System.currentTimeMillis() > collectedUntil;
+        return removed || System.currentTimeMillis() < collectedUntil;
     }
 
     public void setCollected() {

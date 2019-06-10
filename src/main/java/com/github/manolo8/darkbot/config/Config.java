@@ -201,6 +201,8 @@ public class Config {
         @Option(value = "Zone precision", description = "Amount of map subdivisions when selecting zones")
         @Num(min = 10, max = 300)
         public int ZONE_RESOLUTION = 30;
+        @Option("Roam towards same point until reached")
+        public boolean ROAM_KEEP = false;
         @Option(value = "Refresh every", description = "Every how many minutes to refresh")
         @Num(max = 60 * 12, step = 10)
         public int REFRESH_TIME = 0;

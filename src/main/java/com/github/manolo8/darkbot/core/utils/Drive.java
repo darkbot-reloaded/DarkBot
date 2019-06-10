@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.utils;
 
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
@@ -74,7 +75,10 @@ public class Drive {
             else click(next);
         } else {
             paths.removeFirst();
-            if (paths.isEmpty()) this.endLoc = this.tempDest = null;
+            if (paths.isEmpty()) {
+                if (this.endLoc.equals(lastRandomMove)) lastRandomMove = null;
+                this.endLoc = this.tempDest = null;
+            }
         }
     }
 
@@ -140,19 +144,27 @@ public class Drive {
         tempDest = endLoc = new Location(x, y);
     }
 
+    private ZoneInfo lastZoneInfo;
+    private Location lastRandomMove;
     public void moveRandom() {
-        ZoneInfo area = map.preferred;
+        if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.ROAM_KEEP
+                && lastZoneInfo == map.preferred && lastRandomMove != null) {
+            move(lastRandomMove);
+            return;
+        }
+        ZoneInfo area = lastZoneInfo = map.preferred;
         List<ZoneInfo.Zone> zones = area.getZones();
         if (zones.isEmpty()) {
-            move(random() * MapManager.internalWidth, random() * MapManager.internalHeight);
+            lastRandomMove = new Location(random() * MapManager.internalWidth, random() * MapManager.internalHeight);
         } else {
             ZoneInfo.Zone zone = zones.get(RANDOM.nextInt(zones.size()));
             double cellSize = 1d / area.resolution;
             double xProportion = (zone.x / (double) area.resolution) + random() * cellSize,
                     yProportion = (zone.y / (double) area.resolution) + random() * cellSize;
 
-            move(xProportion * MapManager.internalWidth, yProportion * MapManager.internalHeight);
+            lastRandomMove = new Location(xProportion * MapManager.internalWidth, yProportion * MapManager.internalHeight);
         }
+        move(lastRandomMove);
     }
 
     public boolean isMoving() {
