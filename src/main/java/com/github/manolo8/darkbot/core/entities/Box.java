@@ -7,7 +7,7 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class Box extends Entity {
 
-    protected boolean collected;
+    private long collectedUntil, reset = 7_000;
     public String type;
 
     public BoxInfo boxInfo;
@@ -17,11 +17,12 @@ public class Box extends Entity {
     }
 
     public boolean isCollected() {
-        return collected;
+        return System.currentTimeMillis() > collectedUntil;
     }
 
-    public void setCollected(boolean collected) {
-        this.collected = collected;
+    public void setCollected() {
+        collectedUntil = System.currentTimeMillis() + reset;
+        reset += reset < 15_000 ? 3_000 : 120_000;
     }
 
     @Override

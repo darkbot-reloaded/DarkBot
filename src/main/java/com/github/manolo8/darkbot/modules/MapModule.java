@@ -58,7 +58,8 @@ public class MapModule implements Module, MapChange {
             return;
         }
 
-        main.guiManager.pet.setEnabled(false);
+        if (current.locationInfo.distance(hero) > 1500) // Portal very close, no need to disable pet
+            main.guiManager.pet.setEnabled(false);
         double distance = current.locationInfo.distance(hero);
         hero.runMode();
 

@@ -45,6 +45,7 @@ public class SafetyInfo {
         ALWAYS("Always"),
         ENEMY_FLEE_ONLY("Fleeing (Enemy on sight)"),
         REPAIR_ONLY("Repairing (No enemies)"),
+        REFRESH("Refresh"),
         NEVER("Never");
         String text;
         RunMode(String text) {this.text = text;}
@@ -58,6 +59,7 @@ public class SafetyInfo {
         NEVER("Never"),
         ESCAPING("Escaping (Enemy shooting)"),
         FLEEING("Fleeing (Enemy on sight)"),
+        REPAIRING("Repairing"),
         ALWAYS("Always"),
         ALWAYS_OTHER_SIDE("Always (repair on other side)");
         String text;

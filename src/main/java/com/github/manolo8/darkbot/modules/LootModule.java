@@ -33,6 +33,7 @@ public class LootModule implements Module {
     private int radiusFix;
 
     NpcAttacker attack;
+    private long refreshing;
     private SafetyFinder safety;
 
     @Override
@@ -57,7 +58,8 @@ public class LootModule implements Module {
 
     @Override
     public boolean canRefresh() {
-        return attack.target == null;
+        if (attack.target == null) refreshing = System.currentTimeMillis() + 10000;
+        return attack.target == null && safety.state() == SafetyFinder.Escaping.WAITING;
     }
 
     @Override
@@ -77,6 +79,7 @@ public class LootModule implements Module {
     }
 
     boolean checkDangerousAndCurrentMap() {
+        safety.setRefreshing(System.currentTimeMillis() <= refreshing);
         return safety.tick() && checkMap();
     }
 

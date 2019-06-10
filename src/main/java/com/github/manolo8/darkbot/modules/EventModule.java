@@ -208,7 +208,7 @@ public class EventModule implements Module {
         double distance = hero.locationInfo.distance(drop);
 
         if (distance < 300) {
-            drop.setCollected(true);
+            drop.setCollected();
 
             drive.stop(false);
             drop.clickable.setRadius(800);

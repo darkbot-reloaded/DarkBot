@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 public class SafetyFinder {
 
-    private final Main main;
     private final MapManager mapManager;
     private final Config.General.Safety SAFETY;
     private final Config.General.Running RUNNING;
@@ -27,13 +26,15 @@ public class SafetyFinder {
     private List<Ship> ships;
     private HeroManager hero;
     private Drive drive;
+    private MapModule mapModule;
 
     private SafetyInfo safety;
     private Escaping escape = Escaping.NONE;
+    private boolean refreshing;
     private long lastTick;
 
     public enum Escaping {
-        ENEMY, SIGHT, REPAIR, NONE;
+        ENEMY, SIGHT, REPAIR, REFRESH, WAITING, NONE;
         boolean canUse(SafetyInfo safety) {
             if (safety.type == SafetyInfo.Type.CBS) {
                 BattleStation cbs = ((BattleStation) safety.entity);
@@ -53,7 +54,6 @@ public class SafetyFinder {
     private Map prevMap;
 
     public SafetyFinder(Main main) {
-        this.main = main;
         this.mapManager = main.mapManager;
         this.SAFETY = main.config.GENERAL.SAFETY;
         this.RUNNING = main.config.GENERAL.RUNNING;
@@ -61,6 +61,8 @@ public class SafetyFinder {
         this.ships = main.mapManager.entities.ships;
         this.hero = main.hero;
         this.drive = main.hero.drive;
+        this.mapModule = new MapModule();
+        mapModule.install(main);
         mapManager.mapChange.add(m -> {
             if (safety != null && safety.type == SafetyInfo.Type.PORTAL) {
                 if (jumpState == JumpState.JUMPING) jumpState = JumpState.JUMPED;
@@ -69,13 +71,18 @@ public class SafetyFinder {
         });
     }
 
+    public void setRefreshing(boolean refreshing) {
+        this.refreshing = refreshing;
+    }
+
     public Escaping state() {
-        return escape;
+        return jumpState == JumpState.JUMPED && safety.jumpMode == SafetyInfo.JumpMode.ALWAYS_OTHER_SIDE ?
+                Escaping.WAITING : escape;
     }
 
     public String status() {
         return "Escaping " + simplify(escape) + (safety == null ? "" : " " + safety +
-                (safety.type == SafetyInfo.Type.PORTAL ? " - " + simplify(jumpState) : ""));
+                (escape.shouldJump(safety) ? " " + simplify(jumpState) + (jumpState == JumpState.RETURNING ? " " + prevMap : "") : ""));
     }
 
     private String simplify(Object obj) {
@@ -93,63 +100,71 @@ public class SafetyFinder {
         }
         lastTick = System.currentTimeMillis();
 
-        if (jumpState == JumpState.CURRENT_MAP || jumpState == JumpState.JUMPING) {
-            Escaping oldEscape = escape;
-            escape = getEscape();
-            if (escape == Escaping.NONE) return true;
+        if (escape != Escaping.WAITING) {
+            if (jumpState == JumpState.CURRENT_MAP || jumpState == JumpState.JUMPING) {
+                activeTick();
 
-            if (escape != oldEscape || safety == null || safety.entity == null || safety.entity.removed) {
-                safety = getSafety();
+                if (escape == Escaping.NONE || safety == null) return true;
+
+                if (hero.locationInfo.distance(safety.x, safety.y) > safety.radius()) {
+                    hero.runMode();
+                    return false;
+                }
             }
-            if (safety == null) {
+
+            switch (jumpState) {
+                case CURRENT_MAP:
+                case JUMPING:
+                    if (escape.shouldJump(safety)
+                            // Also jump if taking damage & you would jump away from enemy.
+                            || (hero.health.hpDecreasedIn(200) && Escaping.ENEMY.shouldJump(safety))) {
+                        prevMap = hero.map;
+                        drive.stop(false);
+                        hero.jumpPortal((Portal) safety.entity);
+                        jumpState = JumpState.JUMPING;
+                        return false;
+                    }
+                    break;
+                case JUMPED:
+                case RETURNING:
+                    if (hero.health.hpDecreasedIn(100) || ((!refreshing && doneRepairing())
+                            || safety.jumpMode != SafetyInfo.JumpMode.ALWAYS_OTHER_SIDE)) {
+                        mapModule.setTarget(prevMap);
+                        mapModule.tick();
+                        jumpState = JumpState.RETURNING;
+                        return false;
+                    }
+                    break;
+            }
+        }
+
+        if (jumpState == JumpState.RETURNED || (!escape.shouldJump(safety) && jumpState == JumpState.CURRENT_MAP)) {
+            escape = Escaping.WAITING;
+
+            if (!refreshing && doneRepairing() && !hasEnemy()) {
                 escape = Escaping.NONE;
+                jumpState = JumpState.CURRENT_MAP;
                 return true;
             }
-
-            runToSafety();
-            if (oldEscape != escape && escape == Escaping.ENEMY) {
-                Location to = drive.movingTo();
-                if (drive.distanceBetween(hero.locationInfo.now, (int) to.x, (int) to.y) >= RUNNING.SHIP_ABILITY_MIN) {
-                    Main.API.keyboardClick(RUNNING.SHIP_ABILITY);
-                }
-            }
-
-            if (hero.locationInfo.distance(safety.x, safety.y) > safety.radius()) {
-                hero.runMode();
-                return false;
-            }
-        }
-
-        switch (jumpState) {
-            case CURRENT_MAP:
-            case JUMPING:
-                if (escape.shouldJump(safety)
-                        // Also jump if taking damage & you would jump away from enemy.
-                        || (hero.health.hpDecreasedIn(200) && Escaping.ENEMY.shouldJump(safety))) {
-                    prevMap = hero.map;
-                    drive.stop(false);
-                    hero.jumpPortal((Portal) safety.entity);
-                    jumpState = JumpState.JUMPING;
-                    return false;
-                }
-                break;
-            case JUMPED:
-            case RETURNING:
-                if (safety.jumpMode != SafetyInfo.JumpMode.ALWAYS_OTHER_SIDE || doneRepairing() || hero.health.hpDecreasedIn(100)) {
-                    main.setModule(new MapModule()).setTarget(prevMap);
-                    jumpState = JumpState.RETURNING;
-                    return false;
-                }
-                break;
-        }
-
-        if ((jumpState == JumpState.RETURNED || (!escape.shouldJump(safety) && jumpState == JumpState.CURRENT_MAP))
-                && doneRepairing() && !hasEnemy()) {
-            escape = Escaping.NONE;
-            jumpState = JumpState.CURRENT_MAP;
-            return true;
         }
         return false;
+    }
+
+    private void activeTick() {
+        Escaping oldEscape = escape;
+        escape = getEscape();
+        if (escape == Escaping.NONE) return;
+
+        if (escape != oldEscape || safety == null || safety.entity == null || safety.entity.removed) {
+            safety = getSafety();
+        }
+        if (safety == null) {
+            escape = Escaping.NONE;
+            return;
+        }
+
+        moveToSafety();
+        if (oldEscape != escape && escape == Escaping.ENEMY) castDefensiveAbility();
     }
 
     private Escaping getEscape() {
@@ -158,7 +173,7 @@ public class SafetyFinder {
         if (escape == Escaping.REPAIR || hero.health.hpPercent() < SAFETY.REPAIR_HP ||
                 (hero.health.hpPercent() < this.SAFETY.REPAIR_HP_NO_NPC &&
                         (!hero.hasTarget() || hero.target.health.hpPercent() > 0.9))) return Escaping.REPAIR;
-        return Escaping.NONE;
+        return refreshing ? Escaping.REFRESH : Escaping.NONE;
     }
 
     private SafetyInfo getSafety() {
@@ -172,7 +187,7 @@ public class SafetyFinder {
 
         SafetyInfo best = safeties.get(0);
 
-        if (escape == Escaping.REPAIR ||
+        if (escape == Escaping.REPAIR || escape == Escaping.REFRESH ||
                 RUNNING.RUN_FURTHEST_PORT == 0 || best.distance < RUNNING.RUN_FURTHEST_PORT) return best;
 
         List<Ship> enemies = ships.stream().filter(this::runFrom).collect(Collectors.toList());
@@ -185,7 +200,7 @@ public class SafetyFinder {
                 .orElse(best);
     }
 
-    private void runToSafety() {
+    private void moveToSafety() {
         if ((jumpState != JumpState.CURRENT_MAP && jumpState != JumpState.JUMPING)
                 || drive.movingTo().distance(safety.x, safety.y) < safety.radius()
                 || safety.entity.removed) return;
@@ -193,6 +208,13 @@ public class SafetyFinder {
 
         double angle = safeLoc.angle(hero.locationInfo.now) + Math.random() * 0.2 - 0.1;
         drive.move(Location.of(safeLoc, angle, -safety.radius() * (0.3 + (0.65 * Math.random())))); // 30%-95% radius
+    }
+
+    private void castDefensiveAbility() {
+        Location to = drive.movingTo();
+        if (drive.distanceBetween(hero.locationInfo.now, (int) to.x, (int) to.y) >= RUNNING.SHIP_ABILITY_MIN) {
+            Main.API.keyboardClick(RUNNING.SHIP_ABILITY);
+        }
     }
 
     private boolean doneRepairing() {

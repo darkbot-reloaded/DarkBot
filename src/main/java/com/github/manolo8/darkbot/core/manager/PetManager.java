@@ -9,6 +9,7 @@ public class PetManager extends Gui {
     private static final int MAIN_BUTTON_X = 30, MODULES_X_MAX = 260, MODULE_Y = 120;
 
     private long togglePetTime, selectModuleTime;
+    private long activeUntil;
     private int moduleStatus = -2; // -2 no module, -1 selecting module, >= 0 module selected
     private Main main;
     private Pet pet;
@@ -42,7 +43,8 @@ public class PetManager extends Gui {
     }
 
     private boolean active() {
-        return !pet.removed;
+        if (!pet.removed) activeUntil = System.currentTimeMillis() + 5000;
+        return System.currentTimeMillis() < activeUntil;
     }
 
     private boolean moduleSelected() {

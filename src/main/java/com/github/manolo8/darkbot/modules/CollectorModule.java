@@ -120,7 +120,7 @@ public class CollectorModule implements Module {
             drive.clickCenter(true, current.locationInfo.now);
             current.clickable.setRadius(0);
 
-            current.setCollected(true);
+            current.setCollected();
 
             waiting = System.currentTimeMillis() + current.boxInfo.waitTime + hero.timeTo(distance) + 30;
 
