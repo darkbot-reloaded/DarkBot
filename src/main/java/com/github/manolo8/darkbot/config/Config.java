@@ -66,6 +66,12 @@ public class Config {
             @Option("Repair until")
             @Editor(JPercentField.class)
             public double REPAIR_TO_HP = 0.95;
+            @Option("Repair until shield")
+            @Editor(JPercentField.class)
+            public double REPAIR_TO_SHIELD = 1;
+            @Option(value = "Repair config", description = "Used to repair after run formation shields are full")
+            @Editor(JShipConfigField.class)
+            public ShipConfig REPAIR = new ShipConfig(1, '9');
             @Option("Max deaths")
             @Num(min = 1, max = 999)
             public int MAX_DEATHS = 10;

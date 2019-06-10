@@ -112,19 +112,19 @@ public class HeroManager extends Ship implements Manager {
         }
     }
 
-    public void attackMode() {
-        setMode(this.main.config.GENERAL.OFFENSIVE);
+    public boolean attackMode() {
+        return setMode(this.main.config.GENERAL.OFFENSIVE);
     }
 
-    public void runMode() {
-        setMode(this.main.config.GENERAL.RUN);
+    public boolean runMode() {
+        return setMode(this.main.config.GENERAL.RUN);
     }
 
-    public void roamMode() {
-        setMode(main.config.GENERAL.ROAM);
+    public boolean roamMode() {
+        return setMode(main.config.GENERAL.ROAM);
     }
 
-    public void setMode(Config.ShipConfig config) {
+    public boolean setMode(Config.ShipConfig config) {
         if (this.config != config.CONFIG && System.currentTimeMillis() - configTime > 5500L) {
             Main.API.keyboardClick('c');
             this.configTime = System.currentTimeMillis();
@@ -133,6 +133,7 @@ public class HeroManager extends Ship implements Manager {
             Main.API.keyboardClick(this.formation = config.FORMATION);
             this.formationTime = System.currentTimeMillis();
         }
+        return System.currentTimeMillis() - configTime > 5500L && System.currentTimeMillis() - formationTime > 3500L;
     }
 
 }

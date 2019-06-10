@@ -218,7 +218,8 @@ public class SafetyFinder {
     }
 
     private boolean doneRepairing() {
-        return this.hero.health.hpPercent() >= SAFETY.REPAIR_TO_HP;
+        return this.hero.health.shieldPercent() >= SAFETY.REPAIR_TO_SHIELD &&
+                hero.setMode(SAFETY.REPAIR) && this.hero.health.hpPercent() >= SAFETY.REPAIR_TO_HP;
     }
 
     private boolean isUnderAttack() {
