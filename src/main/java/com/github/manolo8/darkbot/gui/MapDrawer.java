@@ -356,8 +356,11 @@ public class MapDrawer extends JPanel {
         for (Npc npc : npcs) drawEntity(g2, npc.locationInfo.now, npc.npcInfo.kill);
 
         for (Ship ship : ships) {
+            Location loc = ship.locationInfo.now;
             g2.setColor(ship.playerInfo.isEnemy() ? ENEMIES : ALLIES);
             drawEntity(g2, ship.locationInfo.now, false);
+            if (config.MISCELLANEOUS.DISPLAY.SHOW_NAMES)
+                drawString(g2, ship.playerInfo.username, translateX(loc.x), translateY(loc.y) - 5, Align.MID);
         }
 
         if (hero.target != null && !hero.target.removed) {

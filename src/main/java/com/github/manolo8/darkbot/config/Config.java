@@ -175,6 +175,8 @@ public class Config {
     public static class Miscellaneous {
         public @Option("Display") Display DISPLAY = new Display();
         public static class Display {
+            @Option(value = "Show usernames", description = "Show usernames on minimap")
+            public boolean SHOW_NAMES;
             @Option(value = "Hide name", description = "Hide hero name in the map")
             public boolean HIDE_NAME;
             @Option(value = "Trail length", description = "Amount of time the trail should be in the map in seconds")

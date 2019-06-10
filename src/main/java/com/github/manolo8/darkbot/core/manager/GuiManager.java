@@ -31,6 +31,7 @@ public class GuiManager implements Manager {
     private final Gui connecting;
     private final Gui quests;
     public final Gui eventProgress;
+    public final Gui oreTrade;
     public final PetManager pet;
 
     private LoadStatus checks = LoadStatus.WAITING;
@@ -56,6 +57,7 @@ public class GuiManager implements Manager {
         this.connecting = new Gui();
         this.quests = new Gui();
         this.eventProgress = new Gui();
+        this.oreTrade = new Gui();
         this.pet = new PetManager(main);
 
         this.main.status.add(value -> validTime = System.currentTimeMillis());
@@ -68,6 +70,7 @@ public class GuiManager implements Manager {
         this.guis.addLazy("connection", connecting::update);
         this.guis.addLazy("quests", this.quests::update);
         this.guis.addLazy("eventProgress", this.eventProgress::update);
+        this.guis.addLazy("ore_trade", this.oreTrade::update);
         this.guis.addLazy("pet", this.pet::update);
 
         botInstaller.screenManagerAddress.add(value -> screenAddress = value);
@@ -88,6 +91,7 @@ public class GuiManager implements Manager {
             lostConnection.reset();
             connecting.reset();
             eventProgress.reset();
+            oreTrade.reset();
             pet.reset();
             checks = LoadStatus.WAITING;
         });
@@ -100,6 +104,7 @@ public class GuiManager implements Manager {
         connecting.update();
         quests.update();
         eventProgress.update();
+        oreTrade.update();
         pet.update();
 
 

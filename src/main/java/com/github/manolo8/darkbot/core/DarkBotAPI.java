@@ -71,7 +71,7 @@ public class DarkBotAPI implements IDarkBotAPI {
         int size = readMemoryInt(address + 32) << width;
         int type = (flags & 0x00000006) >> 1;
 
-        if (size > 256 || size < 0) return "ERROR";
+        if (size > 1024 || size < 0) return "ERROR";
 
         byte[] bytes;
 
