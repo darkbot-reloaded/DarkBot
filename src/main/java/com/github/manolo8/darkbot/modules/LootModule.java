@@ -58,8 +58,8 @@ public class LootModule implements Module {
 
     @Override
     public boolean canRefresh() {
-        if (attack.target == null) refreshing = System.currentTimeMillis() + 10000;
-        return attack.target == null && safety.state() == SafetyFinder.Escaping.WAITING;
+        if (!attack.hasTarget()) refreshing = System.currentTimeMillis() + 10000;
+        return !attack.hasTarget() && safety.state() == SafetyFinder.Escaping.WAITING;
     }
 
     @Override

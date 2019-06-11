@@ -42,7 +42,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta 9";
+    public static final String VERSION = "1.13.11 beta 11";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -142,7 +142,7 @@ public class Main extends Thread {
 
         JPanel panel = new JPanel(new MigLayout("ins 0, wrap 1"));
         panel.add(new JLabel("This bot is free, if you paid for it or watched ads, you were scammed!"));
-        panel.add(new JLabel("Make sure you are in the official discord server to getIcon latest updates for free."));
+        panel.add(new JLabel("Make sure you are in the official discord server to get latest updates for free."));
         JCheckBox dontShow = new JCheckBox("Don't show this message again");
         panel.add(dontShow);
 

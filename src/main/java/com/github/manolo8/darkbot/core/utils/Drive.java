@@ -158,13 +158,19 @@ public class Drive {
             lastRandomMove = new Location(random() * MapManager.internalWidth, random() * MapManager.internalHeight);
         } else {
             ZoneInfo.Zone zone = zones.get(RANDOM.nextInt(zones.size()));
-            double cellSize = 1d / area.resolution;
-            double xProportion = (zone.x / (double) area.resolution) + random() * cellSize,
-                    yProportion = (zone.y / (double) area.resolution) + random() * cellSize;
 
-            lastRandomMove = new Location(xProportion * MapManager.internalWidth, yProportion * MapManager.internalHeight);
+
+            lastRandomMove = randomLoc(area, zone);
         }
         move(lastRandomMove);
+    }
+
+    private Location randomLoc(ZoneInfo area, ZoneInfo.Zone zone) {
+        double cellSize = 1d / area.resolution;
+        double xProportion = (zone.x / (double) area.resolution) + random() * cellSize,
+                yProportion = (zone.y / (double) area.resolution) + random() * cellSize;
+
+        return new Location(xProportion * MapManager.internalWidth, yProportion * MapManager.internalHeight);
     }
 
     public boolean isMoving() {
