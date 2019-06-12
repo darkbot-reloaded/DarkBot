@@ -58,7 +58,7 @@ public class BackpageManager extends Thread {
 
                     System.out.println("Checked/repaired drones, all successful: " + checked);
 
-                    checkDrones = checked ? System.currentTimeMillis() + 30_000 : Long.MAX_VALUE;
+                    checkDrones = !checked ? System.currentTimeMillis() + 30_000 : Long.MAX_VALUE;
                 } catch (Exception e) {
                     System.err.println("Failed to check & repair drones, retry in 5m");
                     checkDrones = System.currentTimeMillis() + 300_000;

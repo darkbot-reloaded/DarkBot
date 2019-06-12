@@ -9,7 +9,14 @@ import com.github.manolo8.darkbot.core.manager.MouseManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
+import org.jgrapht.Graph;
+import org.jgrapht.alg.tour.PalmerHamiltonianCycle;
+import org.jgrapht.generate.CompleteGraphGenerator;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -144,33 +151,38 @@ public class Drive {
         tempDest = endLoc = new Location(x, y);
     }
 
-    private ZoneInfo lastZoneInfo;
     private Location lastRandomMove;
+    private List<ZoneInfo.Zone> lastZones;
+    private int lastZoneIdx;
     public void moveRandom() {
-        if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.ROAM_KEEP
-                && lastZoneInfo == map.preferred && lastRandomMove != null) {
+        ZoneInfo area = map.preferred;
+        boolean sequential = ConfigEntity.INSTANCE.getConfig().GENERAL.ROAMING.SEQUENTIAL;
+
+        List<ZoneInfo.Zone> zones = sequential ? area.getSortedZones() : area.getZones();
+        boolean changed = !zones.equals(lastZones);
+        lastZones = zones;
+
+        if (ConfigEntity.INSTANCE.getConfig().GENERAL.ROAMING.KEEP && !changed && lastRandomMove != null) {
             move(lastRandomMove);
             return;
         }
-        ZoneInfo area = lastZoneInfo = map.preferred;
-        List<ZoneInfo.Zone> zones = area.getZones();
-        if (zones.isEmpty()) {
+
+        if (changed && !lastZones.isEmpty()) {
+            Location search = lastRandomMove != null ? lastRandomMove : movingTo();
+            ZoneInfo.Zone closest = lastZones.stream().min(Comparator.comparingDouble(zone ->
+                    zone.innerPoint(0.5, 0.5, MapManager.internalWidth, MapManager.internalHeight).distance(search))).orElse(null);
+            lastZoneIdx = lastZones.indexOf(closest);
+        }
+
+        if (lastZones.isEmpty()) {
             lastRandomMove = new Location(random() * MapManager.internalWidth, random() * MapManager.internalHeight);
         } else {
-            ZoneInfo.Zone zone = zones.get(RANDOM.nextInt(zones.size()));
+            if (lastZoneIdx >= lastZones.size()) lastZoneIdx = 0;
+            ZoneInfo.Zone zone = lastZones.get(sequential ? lastZoneIdx++ : RANDOM.nextInt(zones.size()));
 
-
-            lastRandomMove = randomLoc(area, zone);
+            lastRandomMove = zone.innerPoint(random(), random(), MapManager.internalWidth, MapManager.internalHeight);
         }
         move(lastRandomMove);
-    }
-
-    private Location randomLoc(ZoneInfo area, ZoneInfo.Zone zone) {
-        double cellSize = 1d / area.resolution;
-        double xProportion = (zone.x / (double) area.resolution) + random() * cellSize,
-                yProportion = (zone.y / (double) area.resolution) + random() * cellSize;
-
-        return new Location(xProportion * MapManager.internalWidth, yProportion * MapManager.internalHeight);
     }
 
     public boolean isMoving() {

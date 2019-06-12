@@ -1,7 +1,21 @@
 package com.github.manolo8.darkbot.config;
 
+import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.utils.Location;
+import com.github.manolo8.darkbot.core.utils.pathfinder.FixedTwoOptHeuristicTSP;
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.interfaces.HamiltonianCycleAlgorithm;
+import org.jgrapht.alg.tour.ChristofidesThreeHalvesApproxMetricTSP;
+import org.jgrapht.alg.tour.HeldKarpTSP;
+import org.jgrapht.alg.tour.PalmerHamiltonianCycle;
+import org.jgrapht.alg.tour.TwoApproxMetricTSP;
+import org.jgrapht.alg.tour.TwoOptHeuristicTSP;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ZoneInfo implements Serializable {
@@ -14,6 +28,7 @@ public class ZoneInfo implements Serializable {
     private byte[] data;
     private transient List<Zone> zones;
     public transient boolean changed = true;
+    private transient boolean ordered = false;
 
     public ZoneInfo() {}
 
@@ -94,6 +109,38 @@ public class ZoneInfo implements Serializable {
                     if (get(x, y)) zones.add(new Zone(x, y));
             }
             changed = false;
+            ordered = false;
+        }
+        return zones;
+    }
+
+    public List<Zone> getSortedZones() {
+        getZones(); // Update zones
+        if (!ordered) {
+            ordered = true;
+            if (zones.size() <= 1) return zones;
+
+            SimpleWeightedGraph<Zone, DefaultWeightedEdge> zoneGraph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+            for (ZoneInfo.Zone zone : zones) zoneGraph.addVertex(zone); // Add vertex
+            for (int i = 0; i < zones.size(); i++) {
+                ZoneInfo.Zone from = zones.get(i);
+                for (int j = i + 1; j < zones.size(); j++) { // Add connections
+                    ZoneInfo.Zone to = zones.get(j);
+                    zoneGraph.addEdge(from, to);
+                    zoneGraph.setEdgeWeight(from, to, Math.sqrt(Math.pow(from.x - to.x, 2) + Math.pow(from.y - to.y, 2)));
+                }
+            }
+            HamiltonianCycleAlgorithm<Zone, DefaultWeightedEdge> alg;
+            if (zones.size() <= 20) {
+                // For small graphs, find the best path
+                alg = new HeldKarpTSP<>();
+            } else {
+                // Make less passes the bigger the graph, keeping an ok time.
+                alg = new FixedTwoOptHeuristicTSP<>(Math.max(Math.min(1500 - (zones.size() * 10), 750), 1));
+            }
+            GraphPath<Zone, DefaultWeightedEdge> path = alg.getTour(zoneGraph);
+            zones = path.getVertexList();
+            zones.remove(0);
         }
         return zones;
     }
@@ -103,6 +150,22 @@ public class ZoneInfo implements Serializable {
         public Zone(int x, int y) {
             this.x = x;
             this.y = y;
+        }
+
+        /**
+         * Finds the inner point for a width and height scale
+         * @param xProp The 0-1 proportion in the X position inside the zone
+         * @param yProp The 0-1 proportion in the Y position inside the zone
+         * @param width The total width of the area this zone belongs to
+         * @param height The total height of the area this zone belongs to
+         * @return The location for the x & y proportion inside the zone, for the area this belongs to.
+         */
+        public Location innerPoint(double xProp, double yProp, double width, double height) {
+            double cellSize = 1d / resolution;
+            double xProportion = (x / (double) resolution) + xProp * cellSize,
+                    yProportion = (y / (double) resolution) + yProp * cellSize;
+
+            return new Location(xProportion * width, yProportion * height);
         }
     }
 

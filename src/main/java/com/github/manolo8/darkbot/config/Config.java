@@ -107,6 +107,14 @@ public class Config {
             @Num(max = 20000, step = 500)
             public int RUN_FURTHEST_PORT = 1500;
         }
+
+        public @Option("Roaming") Roaming ROAMING = new Roaming();
+        public static class Roaming {
+            @Option("Keep roaming towards same point until reached")
+            public boolean KEEP = false;
+            @Option("Roam to preferred zones in order")
+            public boolean SEQUENTIAL = false;
+        }
     }
 
     public @Option("Collect") Collect COLLECT = new Collect();
@@ -201,8 +209,6 @@ public class Config {
         @Option(value = "Zone precision", description = "Amount of map subdivisions when selecting zones")
         @Num(min = 10, max = 300)
         public int ZONE_RESOLUTION = 30;
-        @Option("Roam towards same point until reached")
-        public boolean ROAM_KEEP = false;
         @Option(value = "Refresh every", description = "Every how many minutes to refresh")
         @Num(max = 60 * 12, step = 10)
         public int REFRESH_TIME = 0;

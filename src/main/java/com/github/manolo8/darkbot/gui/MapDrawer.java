@@ -239,6 +239,7 @@ public class MapDrawer extends JPanel {
     protected void drawCustomZones(Graphics2D g2) {
         g2.setColor(PREFER);
         drawCustomZone(g2, config.PREFERRED.get(hero.map.id));
+        if (config.GENERAL.ROAMING.SEQUENTIAL) drawCustomZonePath(g2, config.PREFERRED.get(hero.map.id));
         g2.setColor(AVOID);
         drawCustomZone(g2, config.AVOIDED.get(hero.map.id));
         g2.setColor(SAFETY);
@@ -453,6 +454,16 @@ public class MapDrawer extends JPanel {
                 int startX = gridToMapX(x), startY = gridToMapY(y);
                 g2.fillRect(startX, startY, gridToMapX(x + 1) - startX, gridToMapY(y + 1) - startY);
             }
+        }
+    }
+
+    protected void drawCustomZonePath(Graphics2D g2, ZoneInfo zoneInfo) {
+        if (zoneInfo == null) return;
+        List<ZoneInfo.Zone> zones = zoneInfo.getSortedZones();
+        for (int i = 0; i < zones.size(); i++) {
+            Location loc1 = zones.get(i).innerPoint(0.5, 0.5, MapManager.internalWidth, MapManager.internalHeight);
+            Location loc2 = zones.get((i + 1) % zones.size()).innerPoint(0.5, 0.5,MapManager.internalWidth, MapManager.internalHeight);
+            drawLine(g2, loc1.x, loc1.y, loc2.x, loc2.y);
         }
     }
 

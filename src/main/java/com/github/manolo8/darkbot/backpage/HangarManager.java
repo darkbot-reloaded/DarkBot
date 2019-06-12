@@ -102,12 +102,17 @@ public class HangarManager {
     }
 
     private void forEachHangar(String json, Consumer<JsonObject> hangarConsumer) {
-        JsonElement hangars = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject()
-                .get("ret").getAsJsonObject().get("hangars");
-        if (hangars instanceof JsonArray) {
-            hangars.getAsJsonArray().forEach(h -> hangarConsumer.accept(h.getAsJsonObject()));
-        } else {
-            hangars.getAsJsonObject().entrySet().forEach(h -> hangarConsumer.accept(h.getValue().getAsJsonObject()));
+        try {
+            JsonElement hangars = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject()
+                    .get("ret").getAsJsonObject().get("hangars");
+            if (hangars instanceof JsonArray) {
+                hangars.getAsJsonArray().forEach(h -> hangarConsumer.accept(h.getAsJsonObject()));
+            } else {
+                hangars.getAsJsonObject().entrySet().forEach(h -> hangarConsumer.accept(h.getValue().getAsJsonObject()));
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to iterate hangars: " + json);
+            throw e;
         }
     }
 
