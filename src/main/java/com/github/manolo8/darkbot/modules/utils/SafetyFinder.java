@@ -100,42 +100,41 @@ public class SafetyFinder {
         }
         lastTick = System.currentTimeMillis();
 
-        if (escape != Escaping.WAITING) {
-            if (jumpState == JumpState.CURRENT_MAP || jumpState == JumpState.JUMPING) {
-                activeTick();
 
-                if (escape == Escaping.NONE || safety == null) return true;
+        if (jumpState == JumpState.CURRENT_MAP || jumpState == JumpState.JUMPING) {
+            activeTick();
 
-                if (hero.locationInfo.distance(safety.x, safety.y) > safety.radius()) {
-                    hero.runMode();
+            if (escape == Escaping.NONE || safety == null) return true;
+
+            if (hero.locationInfo.distance(safety.x, safety.y) > safety.radius()) {
+                hero.runMode();
+                return false;
+            }
+        }
+
+        switch (jumpState) {
+            case CURRENT_MAP:
+            case JUMPING:
+                if (escape.shouldJump(safety)
+                        // Also jump if taking damage & you would jump away from enemy.
+                        || (hero.health.hpDecreasedIn(200) && Escaping.ENEMY.shouldJump(safety))) {
+                    prevMap = hero.map;
+                    drive.stop(false);
+                    hero.jumpPortal((Portal) safety.entity);
+                    jumpState = JumpState.JUMPING;
                     return false;
                 }
-            }
-
-            switch (jumpState) {
-                case CURRENT_MAP:
-                case JUMPING:
-                    if (escape.shouldJump(safety)
-                            // Also jump if taking damage & you would jump away from enemy.
-                            || (hero.health.hpDecreasedIn(200) && Escaping.ENEMY.shouldJump(safety))) {
-                        prevMap = hero.map;
-                        drive.stop(false);
-                        hero.jumpPortal((Portal) safety.entity);
-                        jumpState = JumpState.JUMPING;
-                        return false;
-                    }
-                    break;
-                case JUMPED:
-                case RETURNING:
-                    if (hero.health.hpDecreasedIn(100) || ((!refreshing && doneRepairing())
-                            || safety.jumpMode != SafetyInfo.JumpMode.ALWAYS_OTHER_SIDE)) {
-                        mapModule.setTarget(prevMap);
-                        mapModule.tick();
-                        jumpState = JumpState.RETURNING;
-                        return false;
-                    }
-                    break;
-            }
+                break;
+            case JUMPED:
+            case RETURNING:
+                if (hero.health.hpDecreasedIn(100) || ((!refreshing && doneRepairing())
+                        || safety.jumpMode != SafetyInfo.JumpMode.ALWAYS_OTHER_SIDE)) {
+                    mapModule.setTarget(prevMap);
+                    mapModule.tick();
+                    jumpState = JumpState.RETURNING;
+                    return false;
+                }
+                break;
         }
 
         if (jumpState == JumpState.RETURNED || (!escape.shouldJump(safety) && jumpState == JumpState.CURRENT_MAP)) {
@@ -153,7 +152,7 @@ public class SafetyFinder {
     private void activeTick() {
         Escaping oldEscape = escape;
         escape = getEscape();
-        if (escape == Escaping.NONE) return;
+        if (escape == Escaping.NONE || escape == Escaping.WAITING) return;
 
         if (escape != oldEscape || safety == null || safety.entity == null || safety.entity.removed) {
             safety = getSafety();
@@ -169,6 +168,7 @@ public class SafetyFinder {
 
     private Escaping getEscape() {
         if (escape == Escaping.ENEMY || isUnderAttack()) return Escaping.ENEMY;
+        if (escape == Escaping.WAITING) return Escaping.WAITING;
         if ((escape == Escaping.SIGHT && !RUNNING.STOP_RUNNING_NO_SIGHT) || hasEnemy()) return Escaping.SIGHT;
         if (escape == Escaping.REPAIR || hero.health.hpPercent() < SAFETY.REPAIR_HP ||
                 (hero.health.hpPercent() < this.SAFETY.REPAIR_HP_NO_NPC &&
@@ -218,6 +218,9 @@ public class SafetyFinder {
     }
 
     private boolean doneRepairing() {
+        if (!hero.isInMode(SAFETY.REPAIR)
+                && (hero.health.hpIncreasedIn(1000) || hero.health.hpPercent() == 1)
+                && (hero.health.shDecreasedIn(1000) || hero.health.shieldPercent() == 0)) hero.setMode(SAFETY.REPAIR);
         return this.hero.health.shieldPercent() >= SAFETY.REPAIR_TO_SHIELD &&
                 hero.setMode(SAFETY.REPAIR) && this.hero.health.hpPercent() >= SAFETY.REPAIR_TO_HP;
     }

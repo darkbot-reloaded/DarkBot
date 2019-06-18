@@ -19,13 +19,13 @@ public class Array extends Updatable {
     public void update() {
         int size = API.readMemoryInt(address + 56);
 
-        if (size < 0 || size > 512) {
+        if (size < 0 || size > 8192) {
             return;
         } else {
             this.size = size;
 
             if (elements.length < size) {
-                elements = new long[size];
+                elements = new long[Math.min((int) (size * 1.25), 8192)];
             }
         }
 
@@ -34,14 +34,8 @@ public class Array extends Updatable {
 
         byte[] bytes = API.readMemory(table, length);
 
-        int current = 0;
-
-        for (int i = 0; i < length; i += 8) {
-            long value = ByteUtils.getLong(bytes, i) - 1;
-            //Can change at any time!
-            if (value != -1 && current < elements.length) {
-                elements[current++] = value;
-            }
+        for (int current = 0, i = 0; i < length && current < size; current++, i += 8) {
+            elements[current] = ByteUtils.getLong(bytes, i) - 1;
         }
     }
 }

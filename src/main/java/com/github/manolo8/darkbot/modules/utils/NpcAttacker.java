@@ -69,7 +69,7 @@ public class NpcAttacker {
         clickDelay = System.currentTimeMillis();
         fixTimes = 0;
         laserTime = clickDelay + 50;
-        ability = clickDelay + 4000;
+        if (config.LOOT.SHIP_ABILITY != null) ability = clickDelay + 4000;
     }
 
     private void tryAttackOrFix() {

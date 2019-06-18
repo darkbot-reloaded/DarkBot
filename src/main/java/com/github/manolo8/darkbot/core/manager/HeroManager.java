@@ -29,7 +29,7 @@ public class HeroManager extends Ship implements Manager {
 
     public int config;
     private long configTime;
-    private char formation = (char) -1;
+    private Character formation = null;
     private long formationTime;
     private long portalTime;
 
@@ -124,6 +124,10 @@ public class HeroManager extends Ship implements Manager {
         return setMode(main.config.GENERAL.ROAM);
     }
 
+    public boolean isInMode(Config.ShipConfig config) {
+        return this.config == config.CONFIG && this.formation == config.FORMATION;
+    }
+
     public boolean setMode(Config.ShipConfig config) {
         if (this.config != config.CONFIG && System.currentTimeMillis() - configTime > 5500L) {
             Main.API.keyboardClick('c');
@@ -131,9 +135,9 @@ public class HeroManager extends Ship implements Manager {
         }
         if (this.formation != config.FORMATION && System.currentTimeMillis() - formationTime > 3500L) {
             Main.API.keyboardClick(this.formation = config.FORMATION);
-            this.formationTime = System.currentTimeMillis();
+            if (formation != null) this.formationTime = System.currentTimeMillis();
         }
-        return System.currentTimeMillis() - configTime > 5500L && System.currentTimeMillis() - formationTime > 3500L;
+        return isInMode(config);
     }
 
 }

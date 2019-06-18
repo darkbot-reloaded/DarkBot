@@ -121,7 +121,7 @@ public class Config {
     public static class Collect {
         public @Option("Stay away from enemies") boolean STAY_AWAY_FROM_ENEMIES;
         public @Option("Auto cloack") boolean AUTO_CLOACK;
-        public @Option("Auto cloack key") char AUTO_CLOACK_KEY;
+        public @Option("Auto cloack key") Character AUTO_CLOACK_KEY;
 
         @Option("Resources")
         @Editor(JBoxInfoTable.class)
@@ -134,11 +134,11 @@ public class Config {
         public @Option(value = "Sab", description = "Auto sab npcs to survive longer") Sab SAB = new Sab();
         public static class Sab {
             public @Option("Enabled") boolean ENABLED = false;
-            public @Option("Key") char KEY = '2';
+            public @Option("Key") Character KEY = '2';
             public @Option("Ship under") @Editor(JPercentField.class) double PERCENT = 0.8;
             public @Option("NPC min shield") @Num(min = 500, max = 100000, step = 500) int NPC_AMOUNT = 12000;
         }
-        public @Option("Ammo key") char AMMO_KEY = '1';
+        public @Option("Ammo key") Character AMMO_KEY = '1';
 
         @Option(value = "Offensive ability key")
         public Character SHIP_ABILITY;
@@ -230,13 +230,13 @@ public class Config {
     public static class ShipConfig {
         public ShipConfig() {}
 
-        ShipConfig(int CONFIG, char FORMATION) {
+        ShipConfig(int CONFIG, Character FORMATION) {
             this.CONFIG = CONFIG;
             this.FORMATION = FORMATION;
         }
 
         public int CONFIG = 1;
-        public char FORMATION = '9';
+        public Character FORMATION = '9';
 
         @Override
         public String toString() {

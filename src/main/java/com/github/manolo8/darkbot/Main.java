@@ -42,7 +42,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta 13";
+    public static final String VERSION = "1.13.11 beta 15";
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -173,8 +173,9 @@ public class Main extends Thread {
             tick();
 
             double tickTime = System.currentTimeMillis() - time;
-            avgTick = ((avgTick * 4) + tickTime) / 5;
-            sleepMax(time, botInstaller.invalid.value ? 1000 : 100);
+            avgTick = ((avgTick * 9) + tickTime) / 10;
+
+            sleepMax(time, botInstaller.invalid.value ? 1000 : Math.max(Math.min((int) (avgTick * 1.25), 100), 10));
         }
     }
 

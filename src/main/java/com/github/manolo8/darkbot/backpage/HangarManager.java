@@ -48,10 +48,11 @@ public class HangarManager {
         return false;
     }
 
-    public boolean checkDrones() {
+    public Boolean checkDrones() {
         updateHangars();
+        Time.sleep(2000);
         updateDrones();
-        boolean repaired = true;
+        boolean repaired = !drones.isEmpty();
         for (Drone drone : drones) {
             if (drone.getDamage() / 100d >= main.config.MISCELLANEOUS.REPAIR_DRONE_PERCENTAGE) {
                 Time.sleep(2000);
@@ -70,7 +71,7 @@ public class HangarManager {
         String json = this.backpageManager.getDataInventory(url);
 
         forEachHangar(json, h -> {
-            if (h.get("hangar_is_active").getAsBoolean()) return;
+            if (!h.get("hangar_is_active").getAsBoolean()) return;
             this.drones = GSON.fromJson(h.get("general").getAsJsonObject().get("drones"), DRONE_LIST);
         });
     }
@@ -85,7 +86,7 @@ public class HangarManager {
             String url = "flashAPI/inventory.php?action=repairDrone&params="+encodeParams;
             String json = this.backpageManager.getDataInventory(url);
             return json.contains("'isError':0");
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }

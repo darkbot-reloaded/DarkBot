@@ -30,8 +30,6 @@ public class LootModule implements Module {
 
     private Config config;
 
-    private int radiusFix;
-
     NpcAttacker attack;
     private long refreshing;
     private SafetyFinder safety;
@@ -131,13 +129,8 @@ public class LootModule implements Module {
             distance = 100 + random() * (radius - 110);
             angle += (random() * 0.1) - 0.05;
         } else {
-            if (distance > radius) {
-                radiusFix -= (distance - radius) / 2;
-                radiusFix = (int) max(radiusFix, -target.npcInfo.radius / 2);
-            } else {
-                radiusFix += (radius - distance) / 6;
-                radiusFix = (int) min(radiusFix, target.npcInfo.radius / 2);
-            }
+            double maxRadFix = target.npcInfo.radius / 2,
+                    radiusFix = (int) Math.max(Math.min(radius - distance, maxRadFix), -maxRadFix);
             distance = (radius += radiusFix);
             // Moved distance + speed - distance to chosen radius same angle, divided by radius
             angle += Math.max((hero.shipInfo.speed * 0.625) + (min(200, target.locationInfo.speed) * 0.625)

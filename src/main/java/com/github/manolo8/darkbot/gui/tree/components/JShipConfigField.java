@@ -81,7 +81,7 @@ public class JShipConfigField extends JPanel implements OptionEditor {
 
         @Override
         protected void setValue(Character value) {
-            if (editing == null || value == null) return;
+            if (editing == null) return;
             editing.FORMATION = value;
             ConfigEntity.changed();
         }
