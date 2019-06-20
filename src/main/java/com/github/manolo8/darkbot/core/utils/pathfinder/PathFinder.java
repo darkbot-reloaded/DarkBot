@@ -70,6 +70,7 @@ public class PathFinder {
 
         if (distance >= 20000) {
             PathPoint closest = closest(point);
+            if (closest == null) return point;
             point.x = closest.x;
             point.y = closest.y;
         }

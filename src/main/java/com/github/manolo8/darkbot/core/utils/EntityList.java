@@ -192,7 +192,8 @@ public class EntityList extends Updatable {
             for (int i = 0; i < entities.size(); i++) {
                 Entity entity = entities.get(i);
 
-                if (entity.isInvalid(address)) {
+                if (entity.isInvalid(address) ||
+                        entity.address == main.hero.address || entity.address == main.hero.pet.address) {
                     entities.remove(i);
                     ids.remove(entity.id);
                     whenRemove(entity);

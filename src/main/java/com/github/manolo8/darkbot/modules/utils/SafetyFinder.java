@@ -100,7 +100,6 @@ public class SafetyFinder {
         }
         lastTick = System.currentTimeMillis();
 
-
         if (jumpState == JumpState.CURRENT_MAP || jumpState == JumpState.JUMPING) {
             activeTick();
 
@@ -114,30 +113,28 @@ public class SafetyFinder {
 
         switch (jumpState) {
             case CURRENT_MAP:
-            case JUMPING:
                 if (escape.shouldJump(safety)
                         // Also jump if taking damage & you would jump away from enemy.
-                        || (hero.health.hpDecreasedIn(200) && Escaping.ENEMY.shouldJump(safety))) {
-                    prevMap = hero.map;
-                    drive.stop(false);
-                    hero.jumpPortal((Portal) safety.entity);
+                        || (hero.health.hpDecreasedIn(200) && Escaping.ENEMY.shouldJump(safety)))
                     jumpState = JumpState.JUMPING;
-                    return false;
-                }
                 break;
+            case JUMPING:
+                prevMap = hero.map;
+                drive.stop(false);
+                hero.jumpPortal((Portal) safety.entity);
+                return false;
             case JUMPED:
-            case RETURNING:
-                if (hero.health.hpDecreasedIn(100) || ((!refreshing && doneRepairing())
-                        || safety.jumpMode != SafetyInfo.JumpMode.ALWAYS_OTHER_SIDE)) {
-                    mapModule.setTarget(prevMap);
-                    mapModule.tick();
+                if (hero.health.hpDecreasedIn(100) || safety.jumpMode != SafetyInfo.JumpMode.ALWAYS_OTHER_SIDE
+                        || (!refreshing && doneRepairing()))
                     jumpState = JumpState.RETURNING;
-                    return false;
-                }
                 break;
+            case RETURNING:
+                mapModule.setTarget(prevMap);
+                mapModule.tick();
+                return false;
         }
 
-        if (jumpState == JumpState.RETURNED || (!escape.shouldJump(safety) && jumpState == JumpState.CURRENT_MAP)) {
+        if (jumpState == JumpState.CURRENT_MAP || jumpState == JumpState.RETURNED) {
             escape = Escaping.WAITING;
 
             if (!refreshing && doneRepairing() && !hasEnemy()) {

@@ -13,6 +13,7 @@ import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.modules.utils.NpcAttacker;
+import com.github.manolo8.darkbot.utils.MathUtils;
 import com.github.manolo8.darkbot.utils.Time;
 
 import java.util.Comparator;
@@ -29,7 +30,6 @@ public class EventModule implements Module {
     private static int TIME_PER_NPC = 24 * 60 * 1000,
             TIME_TO_NEXT_NPC = 20 * 60 * 1000,
             TRAVEL_TIME = 3 * 60 * 1000;
-    private static final double TAU = Math.PI * 2;
 
     private Main main;
     private Config config;
@@ -172,8 +172,7 @@ public class EventModule implements Module {
         Location targetLoc = attack.target.locationInfo.destinationInTime(400);
 
         double angle = targetLoc.angle(heroLoc), distance = heroLoc.distance(targetLoc),
-                angleDiff = Math.abs(attack.target.locationInfo.angle - heroLoc.angle(attack.target.locationInfo.now)) % TAU;
-        if (angleDiff > Math.PI) angleDiff = TAU - angleDiff;
+                angleDiff = MathUtils.angleDiff(attack.target.locationInfo.angle, heroLoc.angle(attack.target.locationInfo.now));
 
         boolean npcFollowing = attack.target.locationInfo.isMoving() && (angleDiff < 1.5);
 

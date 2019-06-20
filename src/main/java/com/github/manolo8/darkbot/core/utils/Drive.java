@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.utils;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.entities.Entity;
@@ -9,6 +10,7 @@ import com.github.manolo8.darkbot.core.manager.MouseManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
+import com.github.manolo8.darkbot.utils.MathUtils;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.tour.PalmerHamiltonianCycle;
 import org.jgrapht.generate.CompleteGraphGenerator;
@@ -70,16 +72,18 @@ public class Drive {
         newPath |= !next.equals(lastSegment);
         lastSegment = next;
 
-        boolean diffAngle = Math.abs(now.angle(next) - last.angle(now)) > 0.1;
+        boolean diffAngle = MathUtils.angleDiff(heroLoc.angle, next.angle(last)) > 0.01;
         if (hero.timeTo(now.distance(next)) > 100 || (diffAngle && heroLoc.isMoving())) {
             if (heroLoc.isMoving() && !diffAngle) {
                 if (System.currentTimeMillis() - lastClick > 2000) click(next);
                 return;
             }
 
-            if (!force && heroLoc.isMoving() && !newPath && System.currentTimeMillis() - lastClick > 450) stop(false);
-            else if (!newPath && System.currentTimeMillis() - lastClick > 300) tempDest = endLoc; // Re-calculate path next tick
-            else click(next);
+            if (!force && heroLoc.isMoving() && !newPath && System.currentTimeMillis() - lastClick > 350) stop(false);
+            else {
+                if (!newPath && System.currentTimeMillis() - lastClick > 300) tempDest = endLoc; // Re-calculate path next tick
+                click(next);
+            }
         } else {
             paths.removeFirst();
             if (paths.isEmpty()) {

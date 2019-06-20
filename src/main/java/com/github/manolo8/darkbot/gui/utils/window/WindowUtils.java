@@ -22,10 +22,18 @@ public class WindowUtils {
                 resizeFrame.setSize(sizeIn);
                 mainPanel.setSize(sizeIn);
             }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                setMaximizedInsets(mainFrame);
+            }
         });
         Dimension sizeIn = mainFrame.getSize();
         resizeFrame.setSize(sizeIn);
         mainPanel.setSize(sizeIn);
+        setMaximizedInsets(mainFrame);
+
+        mainFrame.addWindowStateListener(e -> RepaintManager.currentManager(mainFrame).addInvalidComponent(mainFrame.getRootPane()));
     }
 
     static boolean isMaximized(JFrame frame) {
@@ -40,9 +48,7 @@ public class WindowUtils {
         if (maximized == isMaximized(frame)) return;
         setMaximizedInsets(frame);
         if (maximized) frame.setExtendedState(frame.getExtendedState() | Frame.MAXIMIZED_BOTH);
-        else  frame.setExtendedState(frame.getExtendedState() & ~Frame.MAXIMIZED_BOTH);
-
-        RepaintManager.currentManager(frame).addInvalidComponent(frame.getRootPane());
+        else frame.setExtendedState(frame.getExtendedState() & ~Frame.MAXIMIZED_BOTH);
     }
 
     /**
