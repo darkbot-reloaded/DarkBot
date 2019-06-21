@@ -223,6 +223,9 @@ public class Config {
         public boolean MAP_START_STOP = false;
         @Option(value = "Confirm exiting", description = "Confirm before exiting the bot")
         public boolean CONFIRM_EXIT = true;
+        @Option(value = "Minimum tick time")
+        @Num(min = 10, max = 250)
+        public int MIN_TICK = 15;
         @Option(value = "Developer stuff shown", description = "Enabling this WILL make your bot use more cpu.")
         public boolean DEV_STUFF = false;
         @Option("Full debug & memory trace (Don't enable)")
