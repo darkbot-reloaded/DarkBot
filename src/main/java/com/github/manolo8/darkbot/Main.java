@@ -27,6 +27,7 @@ import com.github.manolo8.darkbot.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -42,7 +43,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta 19";
+    public static final String VERSION = "1.13.11 beta 20";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -245,8 +246,23 @@ public class Main extends Thread {
 
     public <A extends Module> A setModule(A module) {
         module.install(this);
+        if (module instanceof CustomModule) installCustomModule((CustomModule<?>) module);
         this.module = module;
         return module;
+    }
+
+    private <C> void installCustomModule(CustomModule<C> module) {
+        Class<C> configClass = module.configuration();
+        C moduleConfig = null;
+        if (configClass != null) {
+            Object storedConfig = config.CUSTOM_CONFIGS.get(module.id());
+
+            moduleConfig = configClass.isInstance(storedConfig) ? configClass.cast(storedConfig) :
+                    storedConfig instanceof JsonObject ? Main.GSON.fromJson((JsonObject) storedConfig, configClass) :
+                            ReflectionUtils.createInstance(configClass);
+            config.CUSTOM_CONFIGS.put(module.id(), moduleConfig);
+        }
+        module.install(this, moduleConfig);
     }
 
     public void setRunning(boolean running) {

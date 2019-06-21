@@ -1,8 +1,6 @@
 package com.github.manolo8.darkbot.core.itf;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.utils.ReflectionUtils;
-import com.google.gson.JsonObject;
 
 public interface CustomModule<C> extends Module {
 
@@ -34,19 +32,16 @@ public interface CustomModule<C> extends Module {
         return null;
     }
 
-    default void install(Main main) {
-        C config = null;
-        Class<C> configClass = configuration();
-        if (configClass == null) {
-            Object storedConfig = main.config.CUSTOM_CONFIGS.get(name());
-            if (configuration().isInstance(storedConfig)) config = configuration().cast(storedConfig);
-            else if (storedConfig instanceof JsonObject) Main.GSON.fromJson((JsonObject) storedConfig, configuration());
-            else config = ReflectionUtils.createInstance(configuration());
-            main.config.CUSTOM_CONFIGS.put(name(), config);
-        }
-        install(main, config);
-    }
+    /**
+     * Custom modules should avoid using the plain install method from Module, and use install with config instead.
+     */
+    default void install(Main main) {}
 
+    /**
+     * The method to install the main in your module.
+     * @param main Main to install the module for.
+     * @param config The config provided by the bot for your module.
+     */
     void install(Main main, C config);
 
 }

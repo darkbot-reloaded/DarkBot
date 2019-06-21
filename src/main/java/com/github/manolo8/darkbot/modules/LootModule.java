@@ -177,7 +177,7 @@ public class LootModule implements Module {
         boolean attacked = this.isAttackedByOthers(n);
         return n.npcInfo.kill &&
                 (n.npcInfo.ignoreAttacked || !attacked) && // Either ignore attacked, or not being attacked
-                (!n.npcInfo.attackSecond || attacked) &&    // Either don't want to attack second, or being attacked
+                (!n.npcInfo.attackSecond || attacked) &&   // Either don't want to attack second, or being attacked
                 (!n.npcInfo.passive || n.isAttacking(hero));
     }
 
