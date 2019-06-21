@@ -1,21 +1,15 @@
 package com.github.manolo8.darkbot.config;
 
-import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.FixedTwoOptHeuristicTSP;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.HamiltonianCycleAlgorithm;
-import org.jgrapht.alg.tour.ChristofidesThreeHalvesApproxMetricTSP;
 import org.jgrapht.alg.tour.HeldKarpTSP;
-import org.jgrapht.alg.tour.PalmerHamiltonianCycle;
-import org.jgrapht.alg.tour.TwoApproxMetricTSP;
-import org.jgrapht.alg.tour.TwoOptHeuristicTSP;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ZoneInfo implements Serializable {

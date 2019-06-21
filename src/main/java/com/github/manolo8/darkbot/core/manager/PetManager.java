@@ -43,7 +43,7 @@ public class PetManager extends Gui {
     }
 
     private boolean active() {
-        if (!pet.removed) activeUntil = System.currentTimeMillis() + 5000;
+        if (!pet.removed) activeUntil = System.currentTimeMillis() + 1000;
         return System.currentTimeMillis() < activeUntil;
     }
 
