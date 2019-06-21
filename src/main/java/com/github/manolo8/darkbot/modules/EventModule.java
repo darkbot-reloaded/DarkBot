@@ -116,7 +116,7 @@ public class EventModule implements Module {
                 (sinceNpc() != null && since > 3000 && since < 20000))) {
             if (clickReward != -1) {
                 if (!hero.locationInfo.isMoving()) {
-                    Portal next = main.starManager.next(hero.map, hero.locationInfo, hero.map);
+                    Portal next = main.starManager.next(hero, hero.map);
                     if (next != null) drive.move(next);
                 }
             } else {

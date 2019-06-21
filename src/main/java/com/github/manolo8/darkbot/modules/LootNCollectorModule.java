@@ -13,10 +13,10 @@ public class LootNCollectorModule implements Module {
     private final LootModule lootModule;
     private final CollectorModule collectorModule;
 
-    private PetManager pet;
-    private HeroManager hero;
-    private Drive drive;
-    private Config config;
+    protected PetManager pet;
+    protected HeroManager hero;
+    protected Drive drive;
+    protected Config config;
 
     public LootNCollectorModule() {
         this.lootModule = new LootModule();

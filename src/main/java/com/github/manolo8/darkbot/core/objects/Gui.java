@@ -77,17 +77,27 @@ public class Gui extends Updatable {
     }
 
     public boolean show(boolean value) {
-        if (minimized.address == 0) return false;
-        if (value != visible) {
-
-            if (System.currentTimeMillis() - 1500 > time) {
-                API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
-                time = System.currentTimeMillis();
-            }
-
+        if (trySetShowing(value)) {
+            if (minimized.address != 0) API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
             return false;
         }
+        return isAnimationDone();
+    }
 
+    /**
+     * @param value Desired visibility status
+     * @return If action should be taken to change the visibility status
+     */
+    public boolean trySetShowing(boolean value) {
+        if (value != visible && isAnimationDone()) {
+            time = System.currentTimeMillis();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isAnimationDone() {
         return System.currentTimeMillis() - 1500 > time;
     }
+
 }

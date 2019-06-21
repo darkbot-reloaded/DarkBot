@@ -64,7 +64,7 @@ public class StarManager {
                 // Pirates
         mapBuild.addMap(91, "5-1").addPortal(5200, 6800, "5-2").addPortal(2900, 13500, "5-2").addPortal(5200, 20600, "5-2")
                 .addMap(92, "5-2").addPortal(2800, 3600, "5-3").addPortal(1300, 6750, "5-3").addPortal(2800, 10900, "5-3")
-                .addMap(93, "5-3").addPortal(2000, 9500, "4-4").addPortal(2000, 13500, "4-4").addPortal(2000, 17500, "4-4");
+                .addMap(93, "5-3").addPortal(2000, 9500, "4-4", 1).addPortal(2000, 13500, "4-4", 2).addPortal(2000, 17500, "4-4", 3);
                 // BL
         mapBuild.addMap(306, "1BL").addPortal( 786, 11458, "1-8").addPortal( 7589,  1456, "2BL").addPortal(20072, 11732, "3BL")
                 .addMap(307, "2BL").addPortal(9893,   862, "1BL").addPortal(  593,  5884, "2-8").addPortal(20377,  7996, "3BL")
@@ -145,16 +145,17 @@ public class StarManager {
 
     public Portal getOrCreate(int id, int type, int x, int y) {
         return starSystem.outgoingEdgesOf(HeroManager.instance.map).stream()
-                .filter(p -> p.matches(id, x, y, type))
+                .filter(p -> p.matches(x, y, type))
                 .peek(p -> p.id = id)
                 .findAny().orElse(new Portal(id, type, x, y));
     }
 
-    public Portal next(Map current, LocationInfo locationInfo, Map target) {
+    public Portal next(HeroManager hero, Map target) {
         DijkstraShortestPath<Map, Portal> path = new DijkstraShortestPath<>(starSystem);
-        return starSystem.outgoingEdgesOf(current).stream().filter(p -> !p.removed).min(
+        return starSystem.outgoingEdgesOf(hero.map).stream().filter(p -> !p.removed).min(
                 Comparator.<Portal>comparingDouble(p -> path.getPaths(p.target).getWeight(target))
-                        .thenComparing(p -> locationInfo.distance(p.locationInfo))).orElse(null);
+                        .thenComparing(p -> p.factionId == -1 ? 0 : p.factionId == hero.playerInfo.factionId ? -1 : 1)
+                        .thenComparing(p -> hero.locationInfo.distance(p.locationInfo))).orElse(null);
     }
 
     public Map byName(String name) {

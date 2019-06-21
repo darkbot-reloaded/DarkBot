@@ -35,7 +35,7 @@ public class LocationInfo extends Updatable {
         double newY = API.readMemoryDouble(address + 40);
 
         // Update only if both x and y changed, or >50 ms since last update
-        if ((newX == now.x || newY == now.y) && System.currentTimeMillis() - lastUpdate > 50) return;
+        if ((newX == now.x || newY == now.y) && System.currentTimeMillis() - lastUpdate < 50) return;
         lastUpdate = System.currentTimeMillis();
 
         last.x = now.x;

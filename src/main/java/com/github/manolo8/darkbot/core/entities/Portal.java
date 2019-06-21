@@ -6,26 +6,28 @@ import com.github.manolo8.darkbot.core.objects.Map;
 
 public class Portal extends Entity {
 
-    private PortalMatcher matcher;
+    private final PortalMatcher matcher;
 
-    public Map target;
+    public final Map target;
+    public final int factionId;
     public int type;
 
-    public Portal(int searchId, int searchType, int searchX, int searchY, Map target) {
+    public Portal(int searchType, int searchX, int searchY, Map target, int factionId) {
         super(-1);
-        this.matcher = new PortalMatcher(searchId, searchType, searchX, searchY);
+        this.matcher = new PortalMatcher(searchType, searchX, searchY);
 
         super.removed = true;
         this.target = target;
+        this.factionId = factionId;
     }
 
     public Portal(int id, int type, int x, int y) {
-        this(id, type, x, y, null);
+        this(type, x, y, null, -1);
         this.id = id;
     }
 
-    public boolean matches(long id, int x, int y, int type) {
-        return matcher.matches(id, x, y, type);
+    public boolean matches(int x, int y, int type) {
+        return matcher.matches(x, y, type);
     }
 
     @Override
@@ -49,19 +51,16 @@ public class Portal extends Entity {
 
     // Holds the search criteria portals in the star manager
     private class PortalMatcher {
-        private long searchId;
         private int searchType, searchX, searchY;
 
-        PortalMatcher(int searchId, int searchType, int searchX, int searchY) {
-            this.searchId = searchId;
+        PortalMatcher(int searchType, int searchX, int searchY) {
             this.searchType = searchType;
             this.searchX = searchX;
             this.searchY = searchY;
         }
 
-        boolean matches(long id, int x, int y, int type) {
-            return (searchId != -1 && searchId == id) || // By id
-                    (searchType != 1 && searchType == type) || // By type
+        boolean matches(int x, int y, int type) {
+            return (searchType != 1 && searchType == type) || // By type
                     (searchX != -1 && searchY != -1 && searchX == x && searchY == y); // By pos
         }
 

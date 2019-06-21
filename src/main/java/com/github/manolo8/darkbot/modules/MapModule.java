@@ -49,7 +49,7 @@ public class MapModule implements Module, MapChange {
     @Override
     public void tick() {
         if (hero.map != target || current == null || current.removed)
-            current = star.next(hero.map, hero.locationInfo, target);
+            current = star.next(hero, target);
 
         if (current == null) {
             if (System.currentTimeMillis() - lastMapChange > 3000) {
@@ -74,7 +74,7 @@ public class MapModule implements Module, MapChange {
             goBack();
             current = null;
         } else {
-            current = star.next(hero.map, hero.locationInfo, target);
+            current = star.next(hero, target);
         }
     }
 

@@ -42,9 +42,9 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta 17";
+    public static final String VERSION = "1.13.11 beta 19";
 
-    private static final Gson GSON = new GsonBuilder()
+    public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .setLenient()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter()).create();
@@ -137,7 +137,7 @@ public class Main extends Thread {
         long firstInit = prefs.getLong(VERSION, System.currentTimeMillis());
         prefs.putLong(VERSION, firstInit);
 
-        long TIME_BEFORE_MESSAGE = 48 * 60 * 60 * 1000;
+        long TIME_BEFORE_MESSAGE = 2 * 60 * 60 * 1000;
         if (System.currentTimeMillis() - firstInit < TIME_BEFORE_MESSAGE) return;
 
         JPanel panel = new JPanel(new MigLayout("ins 0, wrap 1"));

@@ -14,6 +14,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
+import com.google.gson.JsonObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,8 @@ public class Config {
     public Map<Integer, Set<SafetyInfo>> SAFETY = new HashMap<>();
     public transient Lazy<SafetyInfo> ADDED_SAFETY = new Lazy<>();
     // DEFINED AREAS
+
+    public Map<String, Object> CUSTOM_CONFIGS = new HashMap<>();
 
     public transient boolean changed;
 
@@ -174,7 +177,6 @@ public class Config {
         @Option(value = "Map switching", description = "Switch between Exp zone 2-x maps")
         public boolean MAP_SWITCHING = true;
     }
-
 
     public @Option("Pet") PetSettings PET = new PetSettings();
     public static class PetSettings {
