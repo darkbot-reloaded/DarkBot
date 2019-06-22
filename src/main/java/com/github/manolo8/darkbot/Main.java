@@ -27,7 +27,7 @@ import com.github.manolo8.darkbot.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.internal.LinkedTreeMap;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -43,7 +43,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta 21";
+    public static final String VERSION = "1.13.11 beta 22";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -259,9 +259,11 @@ public class Main extends Thread {
             Object storedConfig = config.CUSTOM_CONFIGS.get(module.id());
 
             moduleConfig = configClass.isInstance(storedConfig) ? configClass.cast(storedConfig) :
-                    storedConfig instanceof JsonObject ? Main.GSON.fromJson((JsonObject) storedConfig, configClass) :
+                    storedConfig instanceof LinkedTreeMap ? Main.GSON.fromJson(Main.GSON.toJsonTree(storedConfig), configClass) :
                             ReflectionUtils.createInstance(configClass);
             config.CUSTOM_CONFIGS.put(module.id(), moduleConfig);
+
+            form.setCustomConfig(module.name(), moduleConfig);
         }
         module.install(this, moduleConfig);
     }
@@ -328,8 +330,6 @@ public class Main extends Thread {
                     CustomModule m = getCustomModule();
                     if (m != null) {
                         popupMessage("Success", "Successfully loaded custom module",  JOptionPane.INFORMATION_MESSAGE);
-
-                        form.setCustomConfig(m.name(), m.configuration());
                         return m;
                     }
                 } catch (Exception e) {

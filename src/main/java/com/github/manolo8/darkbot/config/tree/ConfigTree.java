@@ -23,6 +23,7 @@ public class ConfigTree implements TreeModel {
     }
 
     public void setCustom(String name, Object customConfig) {
+        if ((customConfig == null) == (root.children == originalChildren)) return;
         ConfigNode[] newChildren;
         if (customConfig == null) newChildren = originalChildren;
         else {
