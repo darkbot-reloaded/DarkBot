@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
 import com.github.manolo8.darkbot.config.tree.ConfigField;
+import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 
 import javax.swing.*;
@@ -14,7 +15,6 @@ public class JPercentField extends JSpinner implements OptionEditor {
         super(new SpinnerNumberModel(0, 0, 1, 0.05));
         putClientProperty("ConfigTree", true);
         setEditor(new JSpinner.NumberEditor(this, "0%"));
-        setPreferredSize(new Dimension(50, 16));
 
         addChangeListener(e -> {
             if (field != null) field.set(getValue());
@@ -32,4 +32,10 @@ public class JPercentField extends JSpinner implements OptionEditor {
         setValue(field.get());
         this.field = field;
     }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
+    }
+
 }

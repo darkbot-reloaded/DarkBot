@@ -20,7 +20,6 @@ public class JSearchField<M> extends JTextField {
         putClientProperty("ConfigTree", true);
         putClientProperty("JTextField.variant", "search");
         this.getDocument().addDocumentListener((GeneralDocumentListener) e -> update());
-        setPreferredSize(new Dimension(30, 16));
         update();
     }
 

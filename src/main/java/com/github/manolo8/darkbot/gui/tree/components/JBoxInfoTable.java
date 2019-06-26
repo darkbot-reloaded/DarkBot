@@ -10,19 +10,23 @@ import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Map;
 
-public class JBoxInfoTable extends InfoTable implements OptionEditor {
+public class JBoxInfoTable extends InfoTable<JBoxInfoTable.BoxTableModel> implements OptionEditor {
 
     public JBoxInfoTable(Config.Collect collect) {
         super(new BoxTableModel(collect.BOX_INFOS, collect.ADDED_BOX));
+
+        super.getComponent().setPreferredSize(new Dimension(500, 400));
+
         getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(1, SortOrder.DESCENDING),
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
     }
 
-    private static class BoxTableModel extends DefaultTableModel {
+    protected static class BoxTableModel extends DefaultTableModel {
         private static final Class[] TYPES = new Class[]{String.class, Boolean.class, Integer.class};
 
         private Map<String, BoxInfo> BOX_INFOS;

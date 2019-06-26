@@ -2,8 +2,10 @@ package com.github.manolo8.darkbot.gui.tree;
 
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.tree.ConfigNode;
+import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.components.JLabelField;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellEditor;
@@ -16,12 +18,21 @@ import java.util.Map;
 
 public class TreeEditor extends DefaultTreeCellEditor {
 
+    private boolean leaf;
+
     private Map<Class, OptionEditor> editorsByType = new HashMap<>();
     private Map<Class<? extends OptionEditor>, OptionEditor> editorsByClass = new HashMap<>();
     private OptionEditor defaultEditor = new JLabelField();
 
-    private JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-    private JLabel label = new JLabel();
+    private JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    private JLabel label = new JLabel(){
+        @Override
+        public Dimension getPreferredSize() {
+            Dimension d = super.getPreferredSize();
+            d.height = leaf ? AdvancedConfig.ROW_HEIGHT : AdvancedConfig.HEADER_HEIGHT;
+            return d;
+        }
+    };
     private OptionEditor currentEditor = null;
 
     public TreeEditor(JTree tree, DefaultTreeCellRenderer renderer) {
@@ -29,7 +40,7 @@ public class TreeEditor extends DefaultTreeCellEditor {
 
         this.label.setFont(renderer.getFont());
         this.panel.add(label);
-        this.panel.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
+        this.panel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
         panel.setOpaque(false);
         defaultEditor.getComponent().setOpaque(false);
     }
@@ -49,6 +60,8 @@ public class TreeEditor extends DefaultTreeCellEditor {
     @Override
     public Component getTreeCellEditorComponent(JTree tree, Object value, boolean isSelected,
                                                 boolean expanded, boolean leaf, int row) {
+        this.leaf = leaf;
+
         ConfigNode node = ((ConfigNode) value);
         label.setText(node.name + (leaf ? ": " : ""));
 
@@ -57,9 +70,6 @@ public class TreeEditor extends DefaultTreeCellEditor {
             ConfigNode.Leaf option = (ConfigNode.Leaf) node;
             currentEditor = getEditor(option.field);
             currentEditor.edit(option.field);
-            JComponent comp = currentEditor.getComponent();
-            comp.setPreferredSize(new Dimension(comp.getPreferredSize().width, renderer.getPreferredSize().height));
-            comp.setOpaque(false);
             panel.add(currentEditor.getComponent());
         } else {
             currentEditor = null;

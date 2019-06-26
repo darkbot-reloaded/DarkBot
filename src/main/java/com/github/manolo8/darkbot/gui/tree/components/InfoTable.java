@@ -28,16 +28,10 @@ public abstract class InfoTable<T extends TableModel> extends JTable implements 
         TableRowSorter<T> sorter = new TableRowSorter<>(model);
         setRowSorter(sorter);
 
-        JPanel panel = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][]", "[][grow]")) {
-            public void setPreferredSize(Dimension preferredSize) {
-                super.setPreferredSize(new Dimension(500, 300));
-            }
-        };
+        component = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][]", "[][grow]"));
 
-        panel.add(new JSearchField<>(sorter, extraFilters()), "grow, wrap");
-        panel.add(new JScrollPane(this), "grow, span");
-
-        component = panel;
+        component.add(new JSearchField<>(sorter, extraFilters()), "grow, wrap");
+        component.add(new JScrollPane(this), "grow, span");
     }
 
     protected RowFilter<T, Integer> extraFilters() {

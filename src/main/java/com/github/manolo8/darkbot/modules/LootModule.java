@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.modules.utils.NpcAttacker;
@@ -168,7 +169,9 @@ public class LootModule implements Module {
                 ? 20 - (int)(attack.target.health.hpPercent() * 10) : 0;
         return this.npcs.stream()
                 .filter(n -> (n == attack.target && hero.isAttacking(attack.target)) ||
-                        (drive.closestDistance(location) < 450 && shouldKill(n)))
+                        ((!config.LOOT.ONLY_KILL_PREFERRED || main.mapManager.preferred.contains(n.locationInfo.now))
+                                && drive.closestDistance(location) < 450
+                                && shouldKill(n)))
                 .min(Comparator.<Npc>comparingInt(n -> n.npcInfo.priority - (n == attack.target ? extraPriority : 0))
                         .thenComparing(n -> n.locationInfo.now.distance(location))).orElse(null);
     }

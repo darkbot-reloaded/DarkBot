@@ -15,7 +15,6 @@ import java.util.Arrays;
 public class DarkBotAPI implements IDarkBotAPI {
 
     private static final User32 USER_32 = User32.INSTANCE;
-    private static final int NO_MOVE = 0x0002, NO_RESIZE = 0x0001, SHOWN = 0x0040, HIDDEN = 0x0080;
     private volatile WinDef.HWND window;
     private final Config config;
 
@@ -34,7 +33,6 @@ public class DarkBotAPI implements IDarkBotAPI {
         }, "BotBrowser").start();
         new Thread(() -> {
             while ((window = USER_32.FindWindow("DarkBrowser", "DarkBrowser")) == null || !USER_32.IsWindow(window)) Time.sleep(100);
-            USER_32.SetWindowPos(window, new WinDef.HWND(new Pointer(config.MISCELLANEOUS.DISPLAY.ALWAYS_ON_TOP ? -1 : 0)), 0, 0, 0, 0, NO_MOVE | NO_RESIZE);
         }).start();
     }
 

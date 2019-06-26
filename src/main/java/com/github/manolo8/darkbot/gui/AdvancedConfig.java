@@ -7,16 +7,23 @@ import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
 import com.github.manolo8.darkbot.gui.tree.components.JBoolField;
 import com.github.manolo8.darkbot.gui.tree.components.JCharField;
 import com.github.manolo8.darkbot.gui.tree.components.JNumberField;
+import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
 import com.github.manolo8.darkbot.gui.tree.components.JStringField;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
+import sun.swing.DefaultLookup;
 
 import javax.swing.*;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
+import javax.swing.plaf.TreeUI;
+import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 
 public class AdvancedConfig extends JPanel {
+
+    public static final int ROW_HEIGHT = 18;
+    public static final int HEADER_HEIGHT = 22;
 
     private Config config;
     private ConfigTree treeModel;
@@ -49,10 +56,11 @@ public class AdvancedConfig extends JPanel {
         TreeRenderer renderer = new TreeRenderer();
         configTree.setCellRenderer(renderer);
         TreeEditor editor = new TreeEditor(configTree, renderer);
-        editor.addEditor(new JCharField(), char.class, Character.class);
+        editor.addEditor(new JCharField(), Character.class);
         editor.addEditor(new JBoolField(), boolean.class);
         editor.addEditor(new JNumberField(), double.class, int.class);
         editor.addEditor(new JStringField(), String.class);
+        editor.addEditor(new JShipConfigField(), Config.ShipConfig.class);
 
         configTree.setCellEditor(editor);
 
@@ -66,6 +74,11 @@ public class AdvancedConfig extends JPanel {
 
     private void unfoldTopLevelTree(JTree configTree) {
         for (int i = configTree.getRowCount() - 1; i >= 0; i--) configTree.expandRow(i);
+    }
+
+    public static Dimension forcePreferredHeight(Dimension preferred) {
+        preferred.height = ROW_HEIGHT;
+        return preferred;
     }
 
 }

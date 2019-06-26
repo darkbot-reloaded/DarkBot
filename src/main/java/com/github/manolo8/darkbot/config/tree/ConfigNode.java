@@ -74,7 +74,7 @@ public abstract class ConfigNode {
             if (field.getEditor() == JBoxInfoTable.class) return "Box infos (" + ((Map) obj).size() + ")";
             if (field.getEditor() == JNpcInfoTable.class) return "Npc infos (" + ((Map) obj).size() + ")";
             if (field.getEditor() == JFileOpener.class) return Strings.fileName((String) obj);
-            return Objects.toString(obj, "");
+            return Objects.toString(obj, "(unset)");
         }
 
     }

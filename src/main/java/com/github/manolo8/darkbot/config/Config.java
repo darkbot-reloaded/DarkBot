@@ -13,11 +13,12 @@ import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
-import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
-import com.google.gson.JsonObject;
+import com.github.manolo8.darkbot.gui.tree.components.JTimeField;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class Config {
@@ -49,13 +50,10 @@ public class Config {
         @Options(StarManager.MapSupplier.class)
         public int WORKING_MAP = 26;
         @Option(value = "Offensive config", description = "Used to kill NPCs")
-        @Editor(JShipConfigField.class)
         public ShipConfig OFFENSIVE = new ShipConfig(1, '8');
         @Option(value = "Run config", description = "Used to run to safety or switch around maps")
-        @Editor(JShipConfigField.class)
         public ShipConfig RUN = new ShipConfig(2, '9');
         @Option(value = "Roam config", description = "Used to roam around the map, searching for NPCs")
-        @Editor(JShipConfigField.class)
         public ShipConfig ROAM = new ShipConfig(1, '9');
 
         public @Option("Safety") Safety SAFETY = new Safety();
@@ -73,7 +71,6 @@ public class Config {
             @Editor(JPercentField.class)
             public double REPAIR_TO_SHIELD = 1;
             @Option(value = "Repair config", description = "Used to repair after run formation shields are full")
-            @Editor(JShipConfigField.class)
             public ShipConfig REPAIR = new ShipConfig(1, '9');
             @Option("Max deaths")
             @Num(min = 1, max = 999)
@@ -150,6 +147,9 @@ public class Config {
         public int SHIP_ABILITY_MIN = 150_000;
         @Option(value = "Run config to chase", description = "Use run config to follow escaping npcs")
         public boolean RUN_CONFIG_IN_CIRCLE = true;
+
+        @Option(value = "Only kill in preferred area", description = "Only select and kill NPCs when they are inside a preferred area")
+        public boolean ONLY_KILL_PREFERRED = false;
 
         @Option(value = "Group similar NPCs", description = "Group NPCs in the same GG in the NPC table")
         public boolean GROUP_NPCS = true;
@@ -228,7 +228,7 @@ public class Config {
         public int MIN_TICK = 15;
         @Option(value = "Developer stuff shown", description = "Enabling this WILL make your bot use more cpu.")
         public boolean DEV_STUFF = false;
-        @Option("Full debug & memory trace (Don't enable)")
+        //@Option("Full debug & memory trace (Don't enable)")
         public boolean FULL_DEBUG = false;
     }
 
@@ -245,7 +245,7 @@ public class Config {
 
         @Override
         public String toString() {
-            return "Config: " + CONFIG + " Formation: " + FORMATION;
+            return "Config: " + CONFIG + "   Formation: " + Objects.toString(FORMATION, "(unset)");
         }
     }
 }

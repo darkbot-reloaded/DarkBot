@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
 import com.github.manolo8.darkbot.config.tree.ConfigField;
+import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 
@@ -19,6 +20,10 @@ public class JFileOpener extends JLabel implements OptionEditor {
         }
     };
 
+    public JFileOpener() {
+        this.setPreferredSize(new Dimension(1000, 0)); // Make it wide, otherwise text gets cut when updated
+    }
+
     @Override
     public JComponent getComponent() {
         return this;
@@ -32,6 +37,11 @@ public class JFileOpener extends JLabel implements OptionEditor {
             field.set(fc.getSelectedFile().getAbsolutePath());
             setText(Strings.fileName(field.get()));
         });
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
 }

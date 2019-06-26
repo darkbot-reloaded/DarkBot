@@ -51,8 +51,8 @@ public class MouseManager extends Thread {
     }
 
     private ClickPoint pointLoc(Location loc) {
-        return new ClickPoint((int) ((loc.x - map.boundX) / (map.boundMaxX - map.boundX) * (double) MapManager.clientWidth),
-                (int) ((loc.y - map.boundY) / (map.boundMaxY - map.boundY) * (double) MapManager.clientHeight));
+        return new ClickPoint((int) ((loc.x - map.boundX) / (map.width) * (double) MapManager.clientWidth),
+                (int) ((loc.y - map.boundY) / (map.height) * (double) MapManager.clientHeight));
     }
 
     public final void run() {

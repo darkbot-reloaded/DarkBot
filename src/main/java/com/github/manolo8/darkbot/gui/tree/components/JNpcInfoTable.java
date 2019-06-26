@@ -28,13 +28,16 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class JNpcInfoTable extends InfoTable implements OptionEditor {
+public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel> implements OptionEditor {
 
     private int filteredMap = -1;
     private JComboBox<Map> mapFilter;
 
     public JNpcInfoTable(Config.Loot config) {
         super(new NpcTableModel(config));
+
+        super.getComponent().setPreferredSize(new Dimension(550, 400));
+
         getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(3, SortOrder.DESCENDING),
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
 
@@ -67,7 +70,7 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
     }
 
     @Override
-    protected RowFilter extraFilters() {
+    protected RowFilter<NpcTableModel, Integer> extraFilters() {
         return new NpcMapFilter();
     }
 
@@ -77,7 +80,7 @@ public class JNpcInfoTable extends InfoTable implements OptionEditor {
         return super.getComponent();
     }
 
-    private static class NpcTableModel extends DefaultTableModel {
+    protected static class NpcTableModel extends DefaultTableModel {
         private static final Class[] TYPES = new Class[]{String.class, Double.class, Integer.class, Boolean.class, Character.class, ExtraNpcInfo.class};
 
         private Config.Loot config;

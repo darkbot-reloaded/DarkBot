@@ -98,7 +98,7 @@ public class CollectorModule implements Module {
     }
 
     public boolean isNotWaiting() {
-        return System.currentTimeMillis() > waiting;
+        return System.currentTimeMillis() > waiting || current == null || current.removed;
     }
 
     public boolean tryCollectNearestBox() {

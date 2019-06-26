@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.tree.components;
 
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.Num;
+import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 
 import javax.swing.*;
@@ -28,8 +29,13 @@ public class JNumberField extends JSpinner implements OptionEditor {
         this.field = null;
         Num number = field.field.getAnnotation(Num.class);
         setModel(new SpinnerNumberModel((Number) field.get(), number.min(), number.max(), number.step()));
-        setPreferredSize(new Dimension(25 + (String.valueOf(number.max()).length() * 9), 16));
+        setPreferredSize(new Dimension(25 + (String.valueOf(number.max()).length() * 9), AdvancedConfig.ROW_HEIGHT));
         this.field = field;
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
 }

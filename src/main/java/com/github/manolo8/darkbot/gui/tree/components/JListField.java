@@ -3,10 +3,12 @@ package com.github.manolo8.darkbot.gui.tree.components;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.config.types.Options;
+import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class JListField extends JComboBox<String> implements OptionEditor {
 
@@ -32,8 +34,13 @@ public class JListField extends JComboBox<String> implements OptionEditor {
         this.options = ReflectionUtils.createInstance(field.field.getAnnotation(Options.class).value()).get();
         setModel(options);
 
-        this.setPreferredSize(null);
         setSelectedItem(options.getText(field.get()));
         this.field = field;
     }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
+    }
+
 }

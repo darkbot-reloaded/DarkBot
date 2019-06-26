@@ -63,7 +63,7 @@ public class ReflectionUtils {
                 Class<?> module = classLoader.loadClass("com.github.manolo8.darkbot.modules." + moduleName);
 
                 File moduleFolder = new File("tmp/com/github/manolo8/darkbot/modules/");
-                File[] subclasses = moduleFolder.listFiles(f -> f.getName().matches(moduleName + "[$][a-zA-Z0-9]+[.]class$"));
+                File[] subclasses = moduleFolder.listFiles(f -> f.getName().matches(moduleName + "([$][a-zA-Z0-9]+)+[.]class$"));
                 if (subclasses == null) return module;
 
                 for (File file : subclasses) {

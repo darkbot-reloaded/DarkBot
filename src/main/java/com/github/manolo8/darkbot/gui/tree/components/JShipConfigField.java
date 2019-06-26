@@ -4,12 +4,14 @@ import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
+import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 public class JShipConfigField extends JPanel implements OptionEditor {
 
@@ -48,11 +50,21 @@ public class JShipConfigField extends JPanel implements OptionEditor {
         this.editing = null;
         Config.ShipConfig conf = field.get();
         setConfig(conf.CONFIG);
-        formation.setText(conf.FORMATION + "");
+        formation.setText(Objects.toString(conf.FORMATION, ""));
         formation.requestFocus();
 
         valueSet = System.currentTimeMillis();
         this.editing = conf;
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
     private class ConfigButton extends JButton {
@@ -60,7 +72,7 @@ public class JShipConfigField extends JPanel implements OptionEditor {
             super(config + "");
             putClientProperty("JButton.buttonType", "square");
             setBorder(BorderFactory.createLineBorder(Gray._80));
-            setMaximumSize(new Dimension(1000, 16));
+            setMaximumSize(new Dimension(1000, AdvancedConfig.ROW_HEIGHT));
             setFocusable(false);
 
             addActionListener(a -> setConfig(config));

@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.config;
 
+import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.FixedTwoOptHeuristicTSP;
 import org.jgrapht.GraphPath;
@@ -91,8 +92,12 @@ public class ZoneInfo implements Serializable {
         return x < 0 || y < 0 || x >= resolution || y >= resolution;
     }
 
-    public boolean contains(double x, double y) {
-        return get(Math.min((int) (x * resolution), resolution - 1), Math.min((int) (y * resolution), resolution - 1));
+    public boolean contains(double xPercent, double yPercent) {
+        return get(Math.min((int) (xPercent * resolution), resolution - 1), Math.min((int) (yPercent * resolution), resolution - 1));
+    }
+
+    public boolean contains(Location loc) {
+        return contains(loc.x / MapManager.internalWidth, loc.y / MapManager.internalHeight);
     }
 
     public List<Zone> getZones() {
