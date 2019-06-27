@@ -10,17 +10,14 @@ import java.util.Objects;
 
 public class TreeRenderer extends DefaultTreeCellRenderer {
 
-    private boolean leaf;
-
-    public TreeRenderer() {
-        setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
-        setOpaque(false);
-    }
+    private int depth = 0;
 
     @Override
-    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-        this.leaf = leaf;
+    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
+                                                  boolean leaf, int row, boolean hasFocus) {
         ConfigNode node = (ConfigNode) value;
+        depth = node.getDepth();
+
         setToolTipText(node.description.isEmpty() ? null : node.description);
         String text = node.name + (leaf ? ": " + Objects.toString(value, "") : "");
         super.getTreeCellRendererComponent(tree, text, sel, expanded, leaf, row, false);
@@ -30,7 +27,7 @@ public class TreeRenderer extends DefaultTreeCellRenderer {
     @Override
     public Dimension getPreferredSize() {
         Dimension d = super.getPreferredSize();
-        d.height = leaf ? AdvancedConfig.ROW_HEIGHT : AdvancedConfig.HEADER_HEIGHT;
+        d.height = depth <= 1 ? AdvancedConfig.HEADER_HEIGHT : AdvancedConfig.ROW_HEIGHT;
         return d;
     }
 

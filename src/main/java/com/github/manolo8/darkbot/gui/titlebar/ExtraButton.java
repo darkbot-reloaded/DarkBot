@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.utils.SystemUtils;
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -32,7 +33,9 @@ public class ExtraButton extends TitleBarButton<JFrame> {
         home.addActionListener(e -> {
             String sid = main.statsManager.sid, instance = main.statsManager.instance;
             if (sid == null || sid.isEmpty() || instance == null || instance.isEmpty()) return;
-            SystemUtils.openUrl(instance + "?dosid=" + sid);
+            String url = instance + "?dosid=" + sid;
+            if ((e.getModifiers() & InputEvent.BUTTON3_MASK) != 0) SystemUtils.toClipboard(url);
+            else SystemUtils.openUrl(url);
         });
         reload.addActionListener(e -> API.handleRefresh());
         discord.addActionListener(e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT"));

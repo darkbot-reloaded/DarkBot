@@ -1,9 +1,10 @@
 package com.github.manolo8.darkbot.config;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NpcInfo {
+public class NpcInfo implements Serializable {
 
     public int priority;
 

@@ -11,5 +11,5 @@ import java.util.function.Supplier;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Options {
-    Class<? extends Supplier<OptionList>> value();
+    Class<? extends OptionList> value();
 }

@@ -169,7 +169,7 @@ public class LootModule implements Module {
                 ? 20 - (int)(attack.target.health.hpPercent() * 10) : 0;
         return this.npcs.stream()
                 .filter(n -> (n == attack.target && hero.isAttacking(attack.target)) ||
-                        ((!config.LOOT.ONLY_KILL_PREFERRED || main.mapManager.preferred.contains(n.locationInfo.now))
+                        ((!config.GENERAL.ROAMING.ONLY_KILL_PREFERRED || main.mapManager.preferred.contains(n.locationInfo.now))
                                 && drive.closestDistance(location) < 450
                                 && shouldKill(n)))
                 .min(Comparator.<Npc>comparingInt(n -> n.npcInfo.priority - (n == attack.target ? extraPriority : 0))

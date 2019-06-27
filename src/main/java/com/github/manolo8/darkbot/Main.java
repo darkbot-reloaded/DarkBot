@@ -4,6 +4,7 @@ import com.bulenkov.darcula.DarculaLaf;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
@@ -23,7 +24,7 @@ import com.github.manolo8.darkbot.modules.EventModule;
 import com.github.manolo8.darkbot.modules.LootModule;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import com.github.manolo8.darkbot.modules.MapModule;
-import com.github.manolo8.darkbot.utils.ByteArrayToBase64TypeAdapter;
+import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,12 +44,14 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta 23 alpha";
+    public static final String VERSION = "1.13.11 beta 23 alpha 3";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .setLenient()
-            .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter()).create();
+            .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
+            .registerTypeAdapterFactory(new SpecialTypeAdapter())
+            .create();
 
     public static final Object UPDATE_LOCKER = new Object();
 
@@ -85,20 +88,18 @@ public class Main extends Thread {
         loadConfig();
 
         API = new DarkBotAPI(config);
-        if (config.MISCELLANEOUS.FULL_DEBUG)
+        /*if (config.MISCELLANEOUS.FULL_DEBUG)
             API = (IDarkBotAPI) Proxy.newProxyInstance(Main.class.getClassLoader(), new Class[]{IDarkBotAPI.class}, IDarkBotAPI.getLoggingHandler((DarkBotAPI) API));
+        */
 
-        if (config.MISCELLANEOUS.DISPLAY.USE_DARCULA_THEME) {
-            try {
-                UIManager.setLookAndFeel(new DarculaLaf());
-            } catch (UnsupportedLookAndFeelException e) {
-                e.printStackTrace();
-            }
+        try {
+            UIManager.setLookAndFeel(new DarculaLaf());
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
         }
         showDiscordWarning();
 
-        if (failedConfig) popupMessage("Failed to load config",
-                "Default config will be used, config won't be save.", JOptionPane.ERROR_MESSAGE);
+
         new ConfigEntity(config);
 
         botInstaller = new BotInstaller();
@@ -127,6 +128,9 @@ public class Main extends Thread {
 
         form = new MainGui(this);
         backpage = new BackpageManager(this);
+
+        if (failedConfig) popupMessage("Error",
+                "Failed to load config. Default config will be used, config won't be save.", JOptionPane.ERROR_MESSAGE);
 
         checkModule();
         start();

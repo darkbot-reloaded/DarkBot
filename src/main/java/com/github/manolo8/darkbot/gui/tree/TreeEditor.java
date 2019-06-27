@@ -25,14 +25,7 @@ public class TreeEditor extends DefaultTreeCellEditor {
     private OptionEditor defaultEditor = new JLabelField();
 
     private JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-    private JLabel label = new JLabel(){
-        @Override
-        public Dimension getPreferredSize() {
-            Dimension d = super.getPreferredSize();
-            d.height = leaf ? AdvancedConfig.ROW_HEIGHT : AdvancedConfig.HEADER_HEIGHT;
-            return d;
-        }
-    };
+    private JLabel label = new JLabelField();
     private OptionEditor currentEditor = null;
 
     public TreeEditor(JTree tree, DefaultTreeCellRenderer renderer) {
@@ -40,7 +33,6 @@ public class TreeEditor extends DefaultTreeCellEditor {
 
         this.label.setFont(renderer.getFont());
         this.panel.add(label);
-        this.panel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
         panel.setOpaque(false);
         defaultEditor.getComponent().setOpaque(false);
     }
@@ -83,9 +75,8 @@ public class TreeEditor extends DefaultTreeCellEditor {
     public boolean isCellEditable(EventObject e) {
         if (e == null || e.getSource() != tree || !(e instanceof MouseEvent)) return false;
 
-        ((MouseEvent) e).consume();
         lastPath = tree.getClosestPathForLocation(((MouseEvent)e).getX(), ((MouseEvent)e).getY());
-        return lastPath != null;
+        return lastPath != null && tree.getModel().isLeaf(lastPath.getLastPathComponent());
     }
 
 }

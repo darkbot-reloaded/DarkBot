@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.config.tree;
 
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
+import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
@@ -10,58 +11,73 @@ import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
+import javax.swing.tree.TreeNode;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 public abstract class ConfigNode {
+    private final ConfigNode parent;
     public final String name;
     public final String description;
 
-    ConfigNode(String name, String description) {
+    ConfigNode(Parent parent, String name, String description) {
+        this.parent = parent;
         this.name = name;
         this.description = description;
     }
 
-    ConfigNode(Option option) {
-        this(option.value(), option.description());
+    public int getDepth() {
+        ConfigNode node = this;
+        int levels = 0;
+        while((node = node.parent) != null) levels++;
+        return levels;
     }
 
-    static ConfigNode.Parent root(String name, Object root) {
-        return new Parent(name, "", Arrays.stream(root.getClass().getFields())
+    ConfigNode(Parent parent, Option option) {
+        this(parent, option.value(), option.description());
+    }
+
+    static ConfigNode.Parent rootingFrom(Parent parent, String name, Object root) {
+        return new Parent(parent, name, "").addChildren(p -> Arrays.stream(root.getClass().getFields())
                 .filter(f -> f.getAnnotation(Option.class) != null)
-                .map(f -> ConfigNode.of(new ConfigField(root, f))).toArray(ConfigNode[]::new));
+                .map(f -> ConfigNode.of(p, new ConfigField(root, f))).toArray(ConfigNode[]::new));
     }
 
-    private static ConfigNode of(ConfigField field) {
+    private static ConfigNode of(Parent parent, ConfigField field) {
         Field[] children = Arrays.stream(field.field.getType().getDeclaredFields())
                 .filter(f -> f.getAnnotation(Option.class) != null)
                 .toArray(Field[]::new);
 
-        if (children.length == 0) return new Leaf(field);
+        if (children.length == 0) return new Leaf(parent, field);
         Object obj = field.get();
         Option op = field.field.getAnnotation(Option.class);
-        return new Parent(op.value(), op.description(), Arrays.stream(children)
-                .map(f -> ConfigNode.of(new ConfigField(obj, f))).toArray(ConfigNode[]::new));
+        return new Parent(parent, op.value(), op.description()).addChildren(p -> Arrays.stream(children)
+                .map(f -> ConfigNode.of(p, new ConfigField(obj, f))).toArray(ConfigNode[]::new));
 
     }
     
     static class Parent extends ConfigNode {
         ConfigNode[] children;
 
-        Parent(String name, String description, ConfigNode[] children) {
-            super(name, description);
-            this.children = children;
+        Parent(Parent parent, String name, String description) {
+            super(parent, name, description);
+        }
+
+        Parent addChildren(Function<Parent, ConfigNode[]> children) {
+            this.children = children.apply(this);
+            return this;
         }
     }
     
     public static class Leaf extends ConfigNode {
         public final ConfigField field;
 
-        Leaf(ConfigField field) {
-            super(field.field.getAnnotation(Option.class));
+        Leaf(Parent parent, ConfigField field) {
+            super(parent, field.field.getAnnotation(Option.class));
             this.field = field;
         }
 
@@ -69,8 +85,9 @@ public abstract class ConfigNode {
         public String toString() {
             Object obj = field.get();
             if (field.getEditor() == JPercentField.class) return DecimalFormat.getPercentInstance().format(obj);
-            if (field.getEditor() == JListField.class) return ReflectionUtils.createInstance(
-                    field.field.getAnnotation(Options.class).value()).get().getText(obj);
+            if (field.getEditor() == JListField.class)
+                //noinspection unchecked
+                return ReflectionUtils.createSingleton(field.field.getAnnotation(Options.class).value()).getText(obj);
             if (field.getEditor() == JBoxInfoTable.class) return "Box infos (" + ((Map) obj).size() + ")";
             if (field.getEditor() == JNpcInfoTable.class) return "Npc infos (" + ((Map) obj).size() + ")";
             if (field.getEditor() == JFileOpener.class) return Strings.fileName((String) obj);

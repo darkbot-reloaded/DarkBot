@@ -15,14 +15,22 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ReflectionUtils {
 
+    private static Map<Class, Object> SINGLETON_INSTANCES = new HashMap<>();
+
     public static <T> T createInstance(Class<T> clazz) {
         return createInstance(clazz, null, null);
+    }
+
+    public static <T> T createSingleton(Class<T> clazz) {
+        return (T) SINGLETON_INSTANCES.computeIfAbsent(clazz, ReflectionUtils::createInstance);
     }
 
     public static <T, P> T createInstance(Class<T> clazz, Class<P> paramTyp, P param) {

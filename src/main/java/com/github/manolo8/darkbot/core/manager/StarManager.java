@@ -197,13 +197,6 @@ public class StarManager {
         return INSTANCE.starSystem.vertexSet();
     }
 
-    public static class MapSupplier implements Supplier<OptionList> {
-        @Override
-        public OptionList<Integer> get() {
-            return new MapList();
-        }
-    }
-
     public static class MapList extends OptionList<Integer> {
 
         @Override

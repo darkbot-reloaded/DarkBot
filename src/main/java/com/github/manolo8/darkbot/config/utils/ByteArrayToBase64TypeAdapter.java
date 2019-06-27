@@ -1,4 +1,4 @@
-package com.github.manolo8.darkbot.utils;
+package com.github.manolo8.darkbot.config.utils;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

@@ -4,28 +4,23 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ModuleSupplier implements Supplier<OptionList> {
+public class ModuleSupplier extends OptionList<Integer> {
 
-    private static final List<String> MODULES = Arrays.asList("Collect", "Loot", "Loot & Collect", "Event", "Custom");
-    private static final OptionList<Integer> MODULE_OPTIONS = new OptionList<Integer>() {
-        @Override
-        public Integer getValue(String text) {
-            return MODULES.indexOf(text);
-        }
-
-        @Override
-        public String getText(Integer value) {
-            return MODULES.get(value);
-        }
-
-        @Override
-        public List<String> getOptions() {
-            return MODULES;
-        }
-    };
+    private static final List<String> MODULES = Arrays.asList("Collector", "Npc Killer", "Kill & Collect", "Experiment zones", "Custom");
 
     @Override
-    public OptionList<Integer> get() {
-        return MODULE_OPTIONS;
+    public Integer getValue(String text) {
+        return MODULES.indexOf(text);
     }
+
+    @Override
+    public String getText(Integer value) {
+        return MODULES.get(value);
+    }
+
+    @Override
+    public List<String> getOptions() {
+        return MODULES;
+    }
+
 }

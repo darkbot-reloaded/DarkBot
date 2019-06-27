@@ -47,7 +47,7 @@ public class Config {
 
         @Option("Working map")
         @Editor(JListField.class)
-        @Options(StarManager.MapSupplier.class)
+        @Options(StarManager.MapList.class)
         public int WORKING_MAP = 26;
         @Option(value = "Offensive config", description = "Used to kill NPCs")
         public ShipConfig OFFENSIVE = new ShipConfig(1, '8');
@@ -108,12 +108,14 @@ public class Config {
             public int RUN_FURTHEST_PORT = 1500;
         }
 
-        public @Option("Roaming") Roaming ROAMING = new Roaming();
+        public @Option("Roaming & Preferred area behaviour") Roaming ROAMING = new Roaming();
         public static class Roaming {
             @Option("Keep roaming towards same point until reached")
             public boolean KEEP = false;
             @Option("Roam to preferred zones in order")
             public boolean SEQUENTIAL = false;
+            @Option(value = "Only kill NPCs in preferred area", description = "Only select and kill NPCs when they are inside a preferred area")
+            public boolean ONLY_KILL_PREFERRED = false;
         }
     }
 
@@ -123,13 +125,17 @@ public class Config {
         public @Option("Auto cloack") boolean AUTO_CLOACK;
         public @Option("Auto cloack key") Character AUTO_CLOACK_KEY;
 
+        @Option(value = "Collect while killing radius", description = "Resource collection radius while killing NPCs")
+        @Num(max = 10000, step = 50)
+        public int RADIUS = 400;
+
         @Option("Resources")
         @Editor(JBoxInfoTable.class)
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy<>();
     }
 
-    public @Option("Loot") Loot LOOT = new Loot();
+    public @Option("Npc killer") Loot LOOT = new Loot();
     public static class Loot {
         public @Option(value = "Sab", description = "Auto sab npcs to survive longer") Sab SAB = new Sab();
         public static class Sab {
@@ -148,9 +154,6 @@ public class Config {
         @Option(value = "Run config to chase", description = "Use run config to follow escaping npcs")
         public boolean RUN_CONFIG_IN_CIRCLE = true;
 
-        @Option(value = "Only kill in preferred area", description = "Only select and kill NPCs when they are inside a preferred area")
-        public boolean ONLY_KILL_PREFERRED = false;
-
         @Option(value = "Group similar NPCs", description = "Group NPCs in the same GG in the NPC table")
         public boolean GROUP_NPCS = true;
         @Option("Npcs")
@@ -163,14 +166,7 @@ public class Config {
         public int NPC_DISTANCE_IGNORE = 3000;
     }
 
-    public @Option("Loot & collect") LootNCollect LOOT_COLLECT = new LootNCollect();
-    public static class LootNCollect {
-        @Option(value = "Collect radius", description = "Resource collection radius while killing NPCs")
-        @Num(max = 10000, step = 50)
-        public int RADIUS = 400;
-    }
-
-    public @Option("Event") Event EVENT = new Event();
+    public @Option("Experiments event") Event EVENT = new Event();
     public static class Event {
         @Option(value = "Complete event progress", description = "If the bot should click on the event progress")
         public boolean PROGRESS = true;
@@ -203,8 +199,6 @@ public class Config {
             @Option(value = "GUI Button size", description = "Change tab in config & resize main window to update.")
             @Num(min = 1, max = 20, step = 1)
             public int BUTTON_SIZE = 4;
-            @Option("Use darcula theme")
-            public boolean USE_DARCULA_THEME = true;
 
             public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
         }
@@ -241,7 +235,7 @@ public class Config {
         }
 
         public int CONFIG = 1;
-        public Character FORMATION = '9';
+        public Character FORMATION;
 
         @Override
         public String toString() {

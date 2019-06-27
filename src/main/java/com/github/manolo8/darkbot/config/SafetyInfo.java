@@ -1,13 +1,15 @@
 package com.github.manolo8.darkbot.config;
 
+import com.github.manolo8.darkbot.config.utils.Ignorable;
 import com.github.manolo8.darkbot.core.entities.BasePoint;
 import com.github.manolo8.darkbot.core.entities.BattleStation;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.Portal;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class SafetyInfo {
+public class SafetyInfo implements Serializable, Ignorable {
     public enum Type {
         PORTAL("Port"), CBS("CBS"), BASE("Base");
         public static Type of(Entity entity) {
@@ -33,11 +35,26 @@ public class SafetyInfo {
         this.x = x;
         this.y = y;
         this.diameter = type == Type.BASE ? 1500 : 500;
-        this.runMode = type == Type.PORTAL && ((Portal) entity).target != null  && !((Portal) entity).target.gg
+        this.runMode = type == Type.PORTAL && ((Portal) entity).target != null && !((Portal) entity).target.gg
                 ? RunMode.ALWAYS : RunMode.NEVER;
         if (type == Type.PORTAL) jumpMode = JumpMode.ESCAPING;
         if (type == Type.CBS) cbsMode = CbsMode.ALLY;
         this.entity = entity;
+    }
+
+    @Override
+    public boolean ignore() {
+        return diameter == (type == Type.BASE ? 1500 : 500) &&
+                (type != Type.PORTAL ? runMode == RunMode.NEVER :
+                        (entity != null && ((Portal) entity).target != null
+                                && runMode == (((Portal) entity).target.gg ? RunMode.NEVER : RunMode.ALWAYS))) &&
+                jumpMode == (type == Type.PORTAL ? JumpMode.ESCAPING : null) &&
+                cbsMode == (type == Type.CBS ? CbsMode.ALLY : null);
+    }
+
+    @Override
+    public boolean writeAsNull() {
+        return false;
     }
 
     // Running reasons this safety can be selected

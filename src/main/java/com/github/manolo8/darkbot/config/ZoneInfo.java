@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.config;
 
+import com.github.manolo8.darkbot.config.utils.Ignorable;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.FixedTwoOptHeuristicTSP;
@@ -13,7 +14,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ZoneInfo implements Serializable {
+public class ZoneInfo implements Serializable, Ignorable {
     private static final byte[] MASKS = new byte[8];
     static {
         for (int i = 0; i < MASKS.length; i++) MASKS[i] = (byte) (1 << i);
@@ -30,6 +31,20 @@ public class ZoneInfo implements Serializable {
     public ZoneInfo(int resolution) {
         this.resolution = resolution;
         data = new byte[((resolution * resolution) + 7) / 8];
+    }
+
+    @Override
+    public boolean ignore() {
+        if (!changed) return zones.isEmpty();
+        for (int x = 0; x < resolution; x++)
+            for (int y = 0; y < resolution; y++)
+                if (get(x, y)) return false;
+        return true;
+    }
+
+    @Override
+    public boolean writeAsNull() {
+        return true;
     }
 
     public void setResolution(int resolution) {

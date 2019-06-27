@@ -21,7 +21,7 @@ public class JFileOpener extends JLabel implements OptionEditor {
     };
 
     public JFileOpener() {
-        this.setPreferredSize(new Dimension(1000, 0)); // Make it wide, otherwise text gets cut when updated
+        this.setPreferredSize(new Dimension(400, 0)); // Make it wide, otherwise text gets cut when updated
     }
 
     @Override

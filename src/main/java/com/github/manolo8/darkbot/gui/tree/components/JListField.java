@@ -31,7 +31,8 @@ public class JListField extends JComboBox<String> implements OptionEditor {
     @Override
     public void edit(ConfigField field) {
         this.field = null;
-        this.options = ReflectionUtils.createInstance(field.field.getAnnotation(Options.class).value()).get();
+        //noinspection unchecked
+        this.options = ReflectionUtils.createSingleton(field.field.getAnnotation(Options.class).value());
         setModel(options);
 
         setSelectedItem(options.getText(field.get()));

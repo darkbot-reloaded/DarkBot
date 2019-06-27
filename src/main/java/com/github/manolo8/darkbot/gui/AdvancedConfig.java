@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui;
 
+import com.bulenkov.darcula.ui.DarculaTreeUI;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.tree.ConfigTree;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
@@ -13,6 +14,7 @@ import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
 import sun.swing.DefaultLookup;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.plaf.TreeUI;
@@ -23,7 +25,7 @@ import java.awt.*;
 public class AdvancedConfig extends JPanel {
 
     public static final int ROW_HEIGHT = 18;
-    public static final int HEADER_HEIGHT = 22;
+    public static final int HEADER_HEIGHT = 24;
 
     private Config config;
     private ConfigTree treeModel;
@@ -45,10 +47,23 @@ public class AdvancedConfig extends JPanel {
 
     private JComponent setupUI() {
         JTree configTree = new JTree(this.treeModel = new ConfigTree(config));
+        configTree.setUI(new DarculaTreeUI(){
+            @Override
+            protected int getRowX(int row, int depth) { // The UI overrides these, and forces 8px.
+                return totalChildIndent * (depth + depthOffset);
+            }
+            @Override
+            public int getRightChildIndent() {
+                return rightChildIndent;
+            }
+        });
         configTree.setEditable(true);
         configTree.setFocusable(false);
         configTree.setRootVisible(false);
         configTree.setShowsRootHandles(true);
+        configTree.setToggleClickCount(1);
+        ((BasicTreeUI) configTree.getUI()).setLeftChildIndent(8);
+        ((BasicTreeUI) configTree.getUI()).setRightChildIndent(10);
         configTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
         ToolTipManager.sharedInstance().registerComponent(configTree);

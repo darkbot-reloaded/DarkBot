@@ -151,7 +151,8 @@ public class SafetyFinder {
         escape = getEscape();
         if (escape == Escaping.NONE || escape == Escaping.WAITING) return;
 
-        if (escape != oldEscape || safety == null || safety.entity == null || safety.entity.removed) {
+        if (jumpState == JumpState.CURRENT_MAP &&
+                (escape != oldEscape || safety == null || safety.entity == null || safety.entity.removed)) {
             safety = getSafety();
         }
         if (safety == null) {

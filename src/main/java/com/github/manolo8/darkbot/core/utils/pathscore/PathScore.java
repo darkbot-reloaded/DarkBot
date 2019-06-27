@@ -4,8 +4,8 @@
 //import com.github.manolo8.darkbot.core.entities.Npc;
 //import com.github.manolo8.darkbot.core.manager.MapManager;
 //
-//import java.util.List;
-//import java.util.Random;
+//import java.utils.List;
+//import java.utils.Random;
 //
 //public class PathScore {
 //
