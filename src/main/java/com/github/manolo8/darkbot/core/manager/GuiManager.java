@@ -176,7 +176,7 @@ public class GuiManager implements Manager {
 
             if (lastDeath == -1) lastDeath = System.currentTimeMillis();
 
-            if (System.currentTimeMillis() - lastDeath > main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE ||
+            if (System.currentTimeMillis() - lastDeath < main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE ||
                     !tryRevive()) return false;
 
             lastDeath = -1;
