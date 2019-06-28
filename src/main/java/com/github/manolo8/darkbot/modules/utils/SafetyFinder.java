@@ -82,7 +82,7 @@ public class SafetyFinder {
 
     public String status() {
         return "Escaping " + simplify(escape) + (safety == null ? "" : " " + safety +
-                (escape.shouldJump(safety) ? " " + simplify(jumpState) + (jumpState == JumpState.RETURNING ? " " + prevMap : "") : ""));
+                (safety.type == SafetyInfo.Type.PORTAL ? " " + simplify(jumpState) + (jumpState == JumpState.RETURNING ? " " + prevMap : "") : ""));
     }
 
     private String simplify(Object obj) {
@@ -106,6 +106,7 @@ public class SafetyFinder {
             if (escape == Escaping.NONE || safety == null) return true;
 
             if (hero.locationInfo.distance(safety.x, safety.y) > safety.radius()) {
+                moveToSafety();
                 hero.runMode();
                 return false;
             }
@@ -160,7 +161,6 @@ public class SafetyFinder {
             return;
         }
 
-        moveToSafety();
         if (oldEscape != escape && escape == Escaping.ENEMY) castDefensiveAbility();
     }
 
@@ -205,7 +205,7 @@ public class SafetyFinder {
         Location safeLoc = new Location(safety.x, safety.y);
 
         double angle = safeLoc.angle(hero.locationInfo.now) + Math.random() * 0.2 - 0.1;
-        drive.move(Location.of(safeLoc, angle, -safety.radius() * (0.3 + (0.65 * Math.random())))); // 30%-95% radius
+        drive.move(Location.of(safeLoc, angle, -safety.radius() * (0.3 + (0.60 * Math.random())))); // 30%-90% radius
     }
 
     private void castDefensiveAbility() {
