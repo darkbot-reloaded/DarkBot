@@ -44,7 +44,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta 23";
+    public static final String VERSION = "1.13.11 beta 24";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -262,8 +262,7 @@ public class Main extends Thread {
         if (configClass != null) {
             Object storedConfig = config.CUSTOM_CONFIGS.get(module.id());
 
-            moduleConfig = configClass.isInstance(storedConfig) ? configClass.cast(storedConfig) :
-                    storedConfig instanceof LinkedTreeMap ? Main.GSON.fromJson(Main.GSON.toJsonTree(storedConfig), configClass) :
+            moduleConfig = storedConfig != null ? Main.GSON.fromJson(Main.GSON.toJsonTree(storedConfig), configClass) :
                             ReflectionUtils.createInstance(configClass);
             config.CUSTOM_CONFIGS.put(module.id(), moduleConfig);
 

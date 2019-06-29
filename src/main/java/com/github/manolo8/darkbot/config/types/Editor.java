@@ -11,4 +11,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Editor {
     Class<? extends OptionEditor> value();
+    boolean shared() default false;
 }

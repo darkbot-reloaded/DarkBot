@@ -131,7 +131,7 @@ public class DarkBotAPI implements IDarkBotAPI {
     }
 
     public void handleRefresh() {
-        if (config.MISCELLANEOUS.FOCUS_ON_RELOAD) USER_32.SetForegroundWindow(window);
+        USER_32.SetForegroundWindow(window);
         refresh();
     }
 

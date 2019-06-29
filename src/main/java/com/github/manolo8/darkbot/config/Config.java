@@ -129,8 +129,8 @@ public class Config {
         @Num(max = 10000, step = 50)
         public int RADIUS = 400;
 
-        @Option("Resources")
-        @Editor(JBoxInfoTable.class)
+        @Option()
+        @Editor(value = JBoxInfoTable.class, shared = true)
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy<>();
     }
@@ -156,8 +156,8 @@ public class Config {
 
         @Option(value = "Group similar NPCs", description = "Group NPCs in the same GG in the NPC table")
         public boolean GROUP_NPCS = true;
-        @Option("Npcs")
-        @Editor(JNpcInfoTable.class)
+        @Option()
+        @Editor(value = JNpcInfoTable.class, shared = true)
         public Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
         public transient Lazy<String> MODIFIED_NPC = new Lazy<>();
 
@@ -211,9 +211,7 @@ public class Config {
         @Option("Repair Drone Percentage")
         @Editor(JPercentField.class)
         public double REPAIR_DRONE_PERCENTAGE = 0.9;
-        @Option("Focus browser window on reload")
-        public boolean FOCUS_ON_RELOAD = true;
-        @Option(value = "Start or pause clicking on map", description = "Left click to start/pause. Right click to move ship")
+        @Option(value = "Start/pause clicking map", description = "Left click to start/pause. Right click to move ship.")
         public boolean MAP_START_STOP = false;
         @Option(value = "Confirm exiting", description = "Confirm before exiting the bot")
         public boolean CONFIRM_EXIT = true;
@@ -222,8 +220,6 @@ public class Config {
         public int MIN_TICK = 15;
         @Option(value = "Developer stuff shown", description = "Enabling this WILL make your bot use more cpu.")
         public boolean DEV_STUFF = false;
-        //@Option("Full debug & memory trace (Don't enable)")
-        public boolean FULL_DEBUG = false;
     }
 
     public static class ShipConfig {

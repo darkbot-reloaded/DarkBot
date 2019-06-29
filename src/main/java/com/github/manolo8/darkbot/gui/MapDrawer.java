@@ -303,7 +303,7 @@ public class MapDrawer extends JPanel {
 
         if (distance > 500) {
             last = hero.locationInfo.now.copy();
-        } else if (distance > 40) {
+        } else if (distance > 100) {
             positions.put(System.currentTimeMillis(), new Line(last, last = heroLocation.copy()));
         }
         positions.headMap(System.currentTimeMillis() - config.MISCELLANEOUS.DISPLAY.TRAIL_LENGTH * 1000).clear();

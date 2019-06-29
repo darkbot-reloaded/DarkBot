@@ -32,6 +32,8 @@ public abstract class InfoTable<T extends TableModel> extends JTable implements 
 
         component.add(new JSearchField<>(sorter, extraFilters()), "grow, wrap");
         component.add(new JScrollPane(this), "grow, span");
+
+        component.setPreferredSize(new Dimension(550, 270));
     }
 
     protected RowFilter<T, Integer> extraFilters() {

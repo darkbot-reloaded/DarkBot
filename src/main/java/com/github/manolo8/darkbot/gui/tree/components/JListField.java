@@ -1,14 +1,16 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
 import com.github.manolo8.darkbot.config.tree.ConfigField;
-import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.config.types.Options;
+import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class JListField extends JComboBox<String> implements OptionEditor {
 
@@ -20,6 +22,12 @@ public class JListField extends JComboBox<String> implements OptionEditor {
         putClientProperty("JComboBox.isTableCellEditor", true);
         addActionListener(e -> {
             if (field != null) field.set(options.getValue((String) getSelectedItem()));
+        });
+        addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                showPopup();
+            }
         });
     }
 
@@ -33,9 +41,12 @@ public class JListField extends JComboBox<String> implements OptionEditor {
         this.field = null;
         //noinspection unchecked
         this.options = ReflectionUtils.createSingleton(field.field.getAnnotation(Options.class).value());
-        setModel(options);
 
-        setSelectedItem(options.getText(field.get()));
+        if (getModel() != options) setModel(options);
+
+        Object option = options.getText(field.get());
+        if (getSelectedItem() != option) setSelectedItem(option);
+
         this.field = field;
     }
 

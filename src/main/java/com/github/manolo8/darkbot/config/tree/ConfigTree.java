@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.config.tree;
 
 import com.github.manolo8.darkbot.config.Config;
 
+import javax.swing.*;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
@@ -9,7 +10,9 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ConfigTree implements TreeModel {
 
@@ -32,7 +35,7 @@ public class ConfigTree implements TreeModel {
         }
 
         this.root.children = newChildren;
-        updateListeners();
+        SwingUtilities.invokeLater(this::updateListeners);
     }
 
     private void updateListeners() {

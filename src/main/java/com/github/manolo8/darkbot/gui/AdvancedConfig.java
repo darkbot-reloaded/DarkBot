@@ -5,19 +5,9 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.tree.ConfigTree;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
-import com.github.manolo8.darkbot.gui.tree.components.JBoolField;
-import com.github.manolo8.darkbot.gui.tree.components.JCharField;
-import com.github.manolo8.darkbot.gui.tree.components.JNumberField;
-import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
-import com.github.manolo8.darkbot.gui.tree.components.JStringField;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
-import sun.swing.DefaultLookup;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
-import javax.swing.plaf.TreeUI;
 import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
@@ -25,7 +15,7 @@ import java.awt.*;
 public class AdvancedConfig extends JPanel {
 
     public static final int ROW_HEIGHT = 18;
-    public static final int HEADER_HEIGHT = 24;
+    public static final int HEADER_HEIGHT = 26;
 
     private Config config;
     private ConfigTree treeModel;
@@ -69,17 +59,17 @@ public class AdvancedConfig extends JPanel {
         ToolTipManager.sharedInstance().registerComponent(configTree);
 
         TreeRenderer renderer = new TreeRenderer();
-        configTree.setCellRenderer(renderer);
         TreeEditor editor = new TreeEditor(configTree, renderer);
-        editor.addEditor(new JCharField(), Character.class);
-        editor.addEditor(new JBoolField(), boolean.class);
-        editor.addEditor(new JNumberField(), double.class, int.class);
-        editor.addEditor(new JStringField(), String.class);
-        editor.addEditor(new JShipConfigField(), Config.ShipConfig.class);
-
+        configTree.setCellRenderer(renderer);
         configTree.setCellEditor(editor);
 
-        treeModel.addTreeModelListener((SimpleTreeListener) e -> unfoldTopLevelTree(configTree));
+        treeModel.addTreeModelListener((SimpleTreeListener) e -> {
+            unfoldTopLevelTree(configTree);
+            SwingUtilities.invokeLater(() -> {
+                configTree.validate();
+                configTree.repaint();
+            });
+        });
         unfoldTopLevelTree(configTree);
 
         JScrollPane scrollPane = new JScrollPane(configTree);

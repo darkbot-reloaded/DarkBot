@@ -46,4 +46,9 @@ public class ConfigField {
         return editor == null ? null : editor.value();
     }
 
+    public boolean isSharedEditor() {
+        Editor editor = field.getAnnotation(Editor.class);
+        return editor != null && editor.shared();
+    }
+
 }

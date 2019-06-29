@@ -20,8 +20,6 @@ public class JBoxInfoTable extends InfoTable<JBoxInfoTable.BoxTableModel> implem
     public JBoxInfoTable(Config.Collect collect) {
         super(new BoxTableModel(collect.BOX_INFOS, collect.ADDED_BOX));
 
-        super.getComponent().setPreferredSize(new Dimension(500, 400));
-
         getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(1, SortOrder.DESCENDING),
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
     }

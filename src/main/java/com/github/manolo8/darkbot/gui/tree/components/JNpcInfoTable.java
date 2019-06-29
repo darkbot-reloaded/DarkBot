@@ -36,7 +36,7 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel> implem
     public JNpcInfoTable(Config.Loot config) {
         super(new NpcTableModel(config));
 
-        super.getComponent().setPreferredSize(new Dimension(550, 400));
+        super.getComponent().setPreferredSize(new Dimension(550, 270));
 
         getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(3, SortOrder.DESCENDING),
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
@@ -76,7 +76,7 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel> implem
 
     @Override
     public JComponent getComponent() {
-        ((NpcTableModel) getModel()).updateTable();
+        ((NpcTableModel) getModel()).refreshTable();
         return super.getComponent();
     }
 
@@ -84,13 +84,22 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel> implem
         private static final Class[] TYPES = new Class[]{String.class, Double.class, Integer.class, Boolean.class, Character.class, ExtraNpcInfo.class};
 
         private Config.Loot config;
+        private boolean grouped;
         private java.util.Map<String, Collection<NpcInfo>> NPC_INFOS = new HashMap<>();
 
         NpcTableModel(Config.Loot config) {
             super(new Object[]{"Name", "Radius", "Priority", "Kill", "Ammo Key", "Extra"}, 0);
             this.config = config;
+            this.grouped = config.GROUP_NPCS;
             updateTable();
             config.MODIFIED_NPC.add(n -> updateEntry(n, config.NPC_INFOS.get(n)));
+        }
+
+        public void refreshTable() {
+            if (grouped != config.GROUP_NPCS) {
+                grouped = config.GROUP_NPCS;
+                updateTable();
+            }
         }
 
         public void updateTable() {

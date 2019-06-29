@@ -10,7 +10,6 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 public class JShipConfigField extends JPanel implements OptionEditor {
@@ -19,12 +18,10 @@ public class JShipConfigField extends JPanel implements OptionEditor {
     private FormationField formation = new FormationField();
 
     private Config.ShipConfig editing;
-    private long valueSet;
 
     public JShipConfigField() {
-        super(new MigLayout("ins 0, gap 0", "[]5[][]10[]5[]"));
+        super(new MigLayout("ins 0, gap 0", "[][]10[]5[]"));
 
-        add(new JLabel("Config"));
         add(config1);
         add(config2);
         add(new JLabel("Formation"));
@@ -53,7 +50,6 @@ public class JShipConfigField extends JPanel implements OptionEditor {
         formation.setText(Objects.toString(conf.FORMATION, ""));
         formation.requestFocus();
 
-        valueSet = System.currentTimeMillis();
         this.editing = conf;
     }
 
@@ -76,11 +72,6 @@ public class JShipConfigField extends JPanel implements OptionEditor {
             setFocusable(false);
 
             addActionListener(a -> setConfig(config));
-        }
-
-        @Override
-        protected void processMouseEvent(MouseEvent e) {
-            if (System.currentTimeMillis() - valueSet > 10) super.processMouseEvent(e);
         }
 
         @Override

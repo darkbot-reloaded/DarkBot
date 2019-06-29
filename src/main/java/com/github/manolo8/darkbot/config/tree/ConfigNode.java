@@ -15,12 +15,13 @@ import javax.swing.tree.TreeNode;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
 public abstract class ConfigNode {
-    private final ConfigNode parent;
+    private final Parent parent;
     public final String name;
     public final String description;
 
@@ -35,6 +36,10 @@ public abstract class ConfigNode {
         int levels = 0;
         while((node = node.parent) != null) levels++;
         return levels;
+    }
+
+    public String getLongestSibling() {
+        return parent.longestChild;
     }
 
     ConfigNode(Parent parent, Option option) {
@@ -62,6 +67,7 @@ public abstract class ConfigNode {
     
     static class Parent extends ConfigNode {
         ConfigNode[] children;
+        String longestChild;
 
         Parent(Parent parent, String name, String description) {
             super(parent, name, description);
@@ -69,6 +75,11 @@ public abstract class ConfigNode {
 
         Parent addChildren(Function<Parent, ConfigNode[]> children) {
             this.children = children.apply(this);
+            longestChild = Arrays.stream(this.children)
+                    .filter(c -> c instanceof Leaf)
+                    .map(c -> c.name)
+                    .filter(name -> !name.isEmpty())
+                    .max(Comparator.comparingInt(String::length)).orElse(null);
             return this;
         }
     }
