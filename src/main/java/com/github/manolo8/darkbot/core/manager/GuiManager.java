@@ -190,13 +190,16 @@ public class GuiManager implements Manager {
         } else if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
             validTime = System.currentTimeMillis();
             return false;
-        } else if (main.hero.locationInfo.isLoaded() && (main.hero.locationInfo.isMoving() ||
-                System.currentTimeMillis() - main.hero.drive.lastMoved > 20 * 1000)) {
+        } else if (main.hero.locationInfo.isLoaded()
+                && (main.hero.locationInfo.isMoving() || System.currentTimeMillis() - main.hero.drive.lastMoved > 20 * 1000)
+                && (main.hero.health.hpIncreasedIn(30_000) || main.hero.health.hpDecreasedIn(30_000) || main.hero.health.hpPercent() == 1)
+                && (main.hero.health.shIncreasedIn(30_000) || main.hero.health.shDecreasedIn(30_000) || main.hero.health.shieldPercent() == 1 || main.hero.health.shieldPercent() == 0)) {
             validTime = System.currentTimeMillis() - main.pingManager.ping;
         }
 
         checkInvalid();
 
+        lastDeath = -1;
         return main.hero.locationInfo.isLoaded();
     }
 

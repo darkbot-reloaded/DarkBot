@@ -31,6 +31,7 @@ public class SafetyFinder {
     private SafetyInfo safety;
     private Escaping escape = Escaping.NONE;
     private boolean refreshing;
+    private long escapingSince = -1;
     private long lastTick;
 
     public enum Escaping {
@@ -93,6 +94,13 @@ public class SafetyFinder {
      * @return True if it's safe to keep working, false if the safety is working.
      */
     public boolean tick() {
+        if (escape == Escaping.WAITING) {
+            if (escapingSince == -1) escapingSince = System.currentTimeMillis();
+
+            long escapeTime = System.currentTimeMillis() - escapingSince;
+            if (escapeTime > 121_000) escapingSince = -1;
+            if (escapeTime > 120_000) return false; // Over 2 min waiting? Try ticking module a bit to move.
+        }
         // If no tick occurred for a while, means safety finder should have reset (Probably died)
         if (System.currentTimeMillis() - lastTick > 2500) {
             escape = Escaping.NONE;
