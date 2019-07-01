@@ -44,7 +44,6 @@ public class TreeEditor extends DefaultTreeCellEditor {
         }
 
         this.label.setFont(renderer.getFont());
-        this.label.setPreferredSize(new Dimension(150, AdvancedConfig.ROW_HEIGHT));
         this.panel.add(label);
         panel.setOpaque(false);
         defaultEditor.getComponent().setOpaque(false);
@@ -75,7 +74,7 @@ public class TreeEditor extends DefaultTreeCellEditor {
 
         ConfigNode node = ((ConfigNode) value);
         label.setText(node.name);
-        label.setPreferredSize(new Dimension(getWidthFor(node, label), AdvancedConfig.ROW_HEIGHT));
+        label.setPreferredSize(new Dimension(getWidthFor(node, label), 0));
 
         if (currentEditor != null) panel.remove(currentEditor.getComponent());
         if (leaf) {

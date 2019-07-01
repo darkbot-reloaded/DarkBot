@@ -51,10 +51,10 @@ public class Config {
         public int WORKING_MAP = 26;
         @Option(value = "Offensive config", description = "Used to kill NPCs")
         public ShipConfig OFFENSIVE = new ShipConfig(1, '8');
-        @Option(value = "Run config", description = "Used to run to safety or switch around maps")
-        public ShipConfig RUN = new ShipConfig(2, '9');
         @Option(value = "Roam config", description = "Used to roam around the map, searching for NPCs")
         public ShipConfig ROAM = new ShipConfig(1, '9');
+        @Option(value = "Run config", description = "Used to run to safety or switch around maps")
+        public ShipConfig RUN = new ShipConfig(2, '9');
 
         public @Option("Safety") Safety SAFETY = new Safety();
         public static class Safety {

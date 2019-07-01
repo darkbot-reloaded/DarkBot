@@ -14,6 +14,7 @@ import java.awt.*;
 
 public class AdvancedConfig extends JPanel {
 
+    public static final int EDITOR_HEIGHT = 17;
     public static final int ROW_HEIGHT = 18;
     public static final int HEADER_HEIGHT = 26;
 
@@ -82,7 +83,7 @@ public class AdvancedConfig extends JPanel {
     }
 
     public static Dimension forcePreferredHeight(Dimension preferred) {
-        preferred.height = ROW_HEIGHT;
+        preferred.height = EDITOR_HEIGHT;
         return preferred;
     }
 

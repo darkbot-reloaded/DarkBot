@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import java.awt.*;
-import java.util.Objects;
 
 public class TreeRenderer extends DefaultTreeCellRenderer {
 
@@ -36,7 +35,7 @@ public class TreeRenderer extends DefaultTreeCellRenderer {
     @Override
     public Dimension getPreferredSize() {
         Dimension d = super.getPreferredSize();
-        d.height = depth <= 1 ? AdvancedConfig.HEADER_HEIGHT : AdvancedConfig.ROW_HEIGHT;
+        d.height = depth <= 1 ? AdvancedConfig.HEADER_HEIGHT : AdvancedConfig.EDITOR_HEIGHT + 2;
         return d;
     }
 

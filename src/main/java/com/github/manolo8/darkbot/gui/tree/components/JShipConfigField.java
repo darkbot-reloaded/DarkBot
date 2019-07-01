@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,11 +19,12 @@ public class JShipConfigField extends JPanel implements OptionEditor {
     private Config.ShipConfig editing;
 
     public JShipConfigField() {
-        super(new MigLayout("ins 0, gap 0", "[][]10[]5[]"));
+        super(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        setOpaque(false);
 
         add(config1);
         add(config2);
-        add(new JLabel("Formation"));
+        add(new JLabel("      Formation  "));
         add(formation);
     }
 
@@ -58,25 +58,16 @@ public class JShipConfigField extends JPanel implements OptionEditor {
         return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
-    @Override
-    public Dimension getMaximumSize() {
-        return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
-    }
-
     private class ConfigButton extends JButton {
         ConfigButton(int config) {
             super(config + "");
             putClientProperty("JButton.buttonType", "square");
-            setBorder(BorderFactory.createLineBorder(Gray._80));
-            setMaximumSize(new Dimension(1000, AdvancedConfig.ROW_HEIGHT));
+            setBorder(BorderFactory.createLineBorder(Gray._90));
+            //noinspection SuspiciousNameCombination
+            setPreferredSize(new Dimension(AdvancedConfig.EDITOR_HEIGHT, AdvancedConfig.EDITOR_HEIGHT));
             setFocusable(false);
 
             addActionListener(a -> setConfig(config));
-        }
-
-        @Override
-        public Insets getInsets() {
-            return new Insets(5, 5, 5, 5);
         }
     }
 

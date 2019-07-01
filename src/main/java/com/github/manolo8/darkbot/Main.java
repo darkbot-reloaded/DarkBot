@@ -26,6 +26,7 @@ import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import com.github.manolo8.darkbot.modules.MapModule;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
@@ -44,7 +45,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta 24";
+    public static final String VERSION = "1.13.11 beta 25";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -175,7 +176,12 @@ public class Main extends Thread {
         while (true) {
             time = System.currentTimeMillis();
 
-            tick();
+            try {
+                tick();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Time.sleep(1000);
+            }
 
             double tickTime = System.currentTimeMillis() - time;
             avgTick = ((avgTick * 9) + tickTime) / 10;

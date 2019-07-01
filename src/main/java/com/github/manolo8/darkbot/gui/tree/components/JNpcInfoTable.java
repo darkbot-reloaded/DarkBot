@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
+import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
@@ -44,7 +45,7 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel> implem
         setDefaultEditor(ExtraNpcInfo.class, new ExtraNpcInfoEditor());
         setDefaultEditor(Double.class, new TableDoubleEditor());
 
-        mapFilter = new JComboBox<>();
+        mapFilter = new JListField<>();
 
         mapFilter.addActionListener(e -> {
             if (mapFilter.getSelectedItem() == null) return;

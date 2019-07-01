@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
+import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.TableCharEditor;
@@ -31,7 +32,9 @@ public abstract class InfoTable<T extends TableModel> extends JTable implements 
         component = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][]", "[][grow]"));
 
         component.add(new JSearchField<>(sorter, extraFilters()), "grow, wrap");
-        component.add(new JScrollPane(this), "grow, span");
+        JScrollPane pane = new JScrollPane(this);
+        pane.setBorder(BorderFactory.createLineBorder(Gray._90));
+        component.add(pane, "grow, span");
 
         component.setPreferredSize(new Dimension(550, 270));
     }

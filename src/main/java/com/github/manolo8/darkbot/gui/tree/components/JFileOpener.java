@@ -32,8 +32,7 @@ public class JFileOpener extends JButton implements OptionEditor {
 
     public JFileOpener() {
         putClientProperty("JButton.buttonType", "square");
-        setBorder(BorderFactory.createLineBorder(Gray._80));
-        //this.setOpaque(false);
+        setBorder(BorderFactory.createLineBorder(Gray._90));
         addActionListener(e -> {
             if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 field.set(fc.getSelectedFile().getAbsolutePath());
@@ -51,7 +50,12 @@ public class JFileOpener extends JButton implements OptionEditor {
     public void edit(ConfigField field) {
         this.field = field;
         setText(Strings.fileName(field.get()));
-        setPreferredSize(new Dimension(getFontMetrics(getFont()).stringWidth(getText()) + 20, 0));
+    }
+
+    @Override
+    public void setText(String text) {
+        super.setText(text);
+        setPreferredSize(new Dimension(getFontMetrics(getFont()).stringWidth(getText()) + 16, 0));
     }
 
     @Override

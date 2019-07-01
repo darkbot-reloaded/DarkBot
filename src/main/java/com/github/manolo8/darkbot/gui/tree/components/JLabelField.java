@@ -22,7 +22,9 @@ public class JLabelField extends JLabel implements OptionEditor {
 
     @Override
     public Dimension getPreferredSize() {
-        return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
+        Dimension d = super.getPreferredSize();
+        d.height = AdvancedConfig.ROW_HEIGHT;
+        return d;
     }
 
 }

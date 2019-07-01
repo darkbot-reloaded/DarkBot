@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
 
 public class JBoolField extends JCheckBox implements OptionEditor {
 
