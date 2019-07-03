@@ -19,14 +19,7 @@ import java.io.File;
 
 public class JFileOpener extends JButton implements OptionEditor {
 
-    private final JFileChooser fc = new JFileChooser(new File(".")) {
-        @Override
-        protected JDialog createDialog(Component parent) throws HeadlessException {
-            JDialog dialog = super.createDialog(parent);
-            dialog.setAlwaysOnTop(true);
-            return dialog;
-        }
-    };
+    private JFileChooser fc;
 
     private ConfigField field;
 
@@ -34,6 +27,16 @@ public class JFileOpener extends JButton implements OptionEditor {
         putClientProperty("JButton.buttonType", "square");
         setBorder(BorderFactory.createLineBorder(Gray._90));
         addActionListener(e -> {
+            if (fc == null) {
+                fc = new JFileChooser(new File(".")) {
+                    @Override
+                    protected JDialog createDialog(Component parent) throws HeadlessException {
+                        JDialog dialog = super.createDialog(parent);
+                        dialog.setAlwaysOnTop(true);
+                        return dialog;
+                    }
+                };
+            }
             if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 field.set(fc.getSelectedFile().getAbsolutePath());
                 setText(Strings.fileName(field.get()));

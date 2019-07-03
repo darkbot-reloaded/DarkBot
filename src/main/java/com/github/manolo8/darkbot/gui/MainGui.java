@@ -20,7 +20,7 @@ public class MainGui extends JFrame {
     private ExitConfirmation exitConfirmation;
     private MapDrawer mapDrawer;
 
-    private static final Image ICON = UIUtils.getImage("icon");
+    public static final Image ICON = UIUtils.getImage("icon");
 
     public MainGui(Main main) throws HeadlessException {
         super("DarkBot");
@@ -35,13 +35,17 @@ public class MainGui extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(640, 480);
         setLocationRelativeTo(null);
-        setAlwaysOnTop(main.config.MISCELLANEOUS.DISPLAY.ALWAYS_ON_TOP);
         setIconImage(ICON);
 
         setComponentPosition();
 
         WindowUtils.setupUndecorated(this, mainPanel);
         setVisible(true);
+
+        setAlwaysOnTop(true);
+        toFront();
+        requestFocus();
+        setAlwaysOnTop(main.config.MISCELLANEOUS.DISPLAY.ALWAYS_ON_TOP);
     }
 
     private void setComponentPosition() {

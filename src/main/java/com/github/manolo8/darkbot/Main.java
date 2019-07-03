@@ -41,7 +41,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta 26";
+    public static final String VERSION = "1.13.11 beta 29";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -94,6 +94,7 @@ public class Main extends Thread {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
+        // You'll have to comment out this line when compiling
         new DiscordUtils().setupOauth();
 
         new ConfigEntity(config);
@@ -122,8 +123,8 @@ public class Main extends Thread {
 
         status.add(this::onRunningToggle);
 
-        form = new MainGui(this);
         backpage = new BackpageManager(this);
+        form = new MainGui(this);
 
         if (failedConfig) popupMessage("Error",
                 "Failed to load config. Default config will be used, config won't be save.", JOptionPane.ERROR_MESSAGE);

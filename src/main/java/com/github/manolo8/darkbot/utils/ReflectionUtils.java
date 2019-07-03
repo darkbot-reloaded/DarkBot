@@ -38,13 +38,13 @@ public class ReflectionUtils {
             if (paramTyp != null) {
                 try {
                     return clazz.getConstructor(paramTyp).newInstance(param);
-                } catch (NoSuchMethodException ignore) {
-                }
+                } catch (NoSuchMethodException ignore) {}
             }
             return clazz.getConstructor().newInstance();
-        } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
             throw new RuntimeException("No default constructor found for " + clazz.getName());
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Error creating instance of " + clazz.getName(), e);
         }
     }
 
