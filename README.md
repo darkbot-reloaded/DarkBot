@@ -7,3 +7,5 @@ How to run:
 - Add Run/Debug configuration:
   -> Main class: com.github.manolo8.darkbot.Bot
   -> Vm options: -Djava.library.path=./lib
+
+Distribution & support for the bot can be found over at discord: https://discord.gg/bEFgxCy
