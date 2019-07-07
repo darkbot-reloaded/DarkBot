@@ -37,7 +37,10 @@ public class ExtraButton extends TitleBarButton<JFrame> {
             if ((e.getModifiers() & InputEvent.BUTTON3_MASK) != 0) SystemUtils.toClipboard(url);
             else SystemUtils.openUrl(url);
         });
-        reload.addActionListener(e -> API.handleRefresh());
+        reload.addActionListener(e -> {
+            System.out.println("Triggering refresh: user requested");
+            API.handleRefresh();
+        });
         discord.addActionListener(e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT"));
         copySid.addActionListener(e -> SystemUtils.toClipboard(main.statsManager.sid));
 

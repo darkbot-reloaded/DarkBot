@@ -73,7 +73,7 @@ public class Config {
             @Option(value = "Repair config", description = "Used to repair after run formation shields are full")
             public ShipConfig REPAIR = new ShipConfig(1, '9');
             @Option("Max deaths")
-            @Num(min = 1, max = 999)
+            @Num(min = 1, max = 9999)
             public int MAX_DEATHS = 10;
             @Option("Revive location")
             @Editor(JListField.class)

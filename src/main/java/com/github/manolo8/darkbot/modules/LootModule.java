@@ -143,14 +143,18 @@ public class LootModule implements Module {
             direction.toAngle(targetLoc, angle += 0.3, distance += 2);
         if (distance >= 10000) direction.toAngle(targetLoc, angle, 500);
 
-        if (config.LOOT.RUN_CONFIG_IN_CIRCLE && target.health.hpPercent() < 0.25 &&
-                heroLoc.distance(direction) > target.npcInfo.radius * 2) {
-            hero.runMode();
-        } else {
-            hero.attackMode();
-        }
+        setConfig(direction);
 
         drive.move(direction);
+    }
+
+    public void setConfig(Location direction) {
+        if (!attack.hasTarget()) hero.roamMode();
+        else if (config.LOOT.RUN_CONFIG_IN_CIRCLE
+                && attack.target.health.hpPercent() < 0.25
+                && hero.locationInfo.now.distance(direction) > attack.target.npcInfo.radius * 2) hero.runMode();
+        else if (hero.locationInfo.now.distance(direction) > attack.target.npcInfo.radius * 3) hero.roamMode();
+        else hero.attackMode();
     }
 
     private boolean isAttackedByOthers(Npc npc) {

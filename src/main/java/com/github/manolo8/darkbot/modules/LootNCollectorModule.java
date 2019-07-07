@@ -64,7 +64,7 @@ public class LootNCollectorModule implements Module {
                         || lootModule.attack.target.health.hpPercent() < 0.25) {
                     lootModule.moveToAnSafePosition();
                 } else {
-                    hero.attackMode();
+                    lootModule.setConfig(collectorModule.current.locationInfo.now);
                     collectorModule.tryCollectNearestBox();
                 }
 

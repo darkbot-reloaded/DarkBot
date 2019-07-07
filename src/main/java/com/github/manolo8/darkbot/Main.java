@@ -41,7 +41,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11 beta 31";
+    public static final String VERSION = "1.13.11";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -216,6 +216,7 @@ public class Main extends Thread {
                 System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
 
         if (!module.canRefresh()) return;
+        System.out.println("Triggering refresh: time arrived & module allows refresh");
         API.handleRefresh();
         lastRefresh = System.currentTimeMillis();
     }

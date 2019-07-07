@@ -148,7 +148,8 @@ public class GuiManager implements Manager {
     }
 
     private void checkInvalid() {
-        if (System.currentTimeMillis() - validTime > 90 * 1000 + (main.hero.map.id == -1 ? 180 * 1000 : 0)) {
+        if (System.currentTimeMillis() - validTime > 90_000 + (main.hero.map.id == -1 ? 180_000 : 0)) {
+            System.out.println("Triggering refresh: gui manger was invalid for too long");
             API.handleRefresh();
             validTime = System.currentTimeMillis();
         }
@@ -166,28 +167,34 @@ public class GuiManager implements Manager {
         } else if (connecting.visible) {
 
             if (connecting.lastUpdatedIn(30000)) {
+                System.out.println("Triggering refresh: connection window stuck for too long");
                 API.handleRefresh();
                 connecting.reset();
             }
 
             return false;
-        } else if (isDead()) {
+        }
+
+        if (isDead()) {
             main.hero.drive.stop(false);
 
             if (lastDeath == -1) lastDeath = System.currentTimeMillis();
 
-            if (System.currentTimeMillis() - lastDeath < main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE ||
-                    !tryRevive()) return false;
+            if (System.currentTimeMillis() - lastDeath < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000)
+                    || !tryRevive()) return false;
 
             lastDeath = -1;
 
-            if (deaths >= main.config.GENERAL.SAFETY.MAX_DEATHS)
-                main.setRunning(false);
-            else
-                checkInvalid();
+            if (deaths >= main.config.GENERAL.SAFETY.MAX_DEATHS) main.setRunning(false);
+            else checkInvalid();
 
             return false;
-        } else if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
+        } else {
+            lastDeath = -1;
+        }
+
+
+        if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
             validTime = System.currentTimeMillis();
             return false;
         } else if (main.hero.locationInfo.isLoaded()
@@ -199,7 +206,6 @@ public class GuiManager implements Manager {
 
         checkInvalid();
 
-        lastDeath = -1;
         return main.hero.locationInfo.isLoaded();
     }
 

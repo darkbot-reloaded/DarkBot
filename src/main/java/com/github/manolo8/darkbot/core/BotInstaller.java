@@ -160,6 +160,7 @@ public class BotInstaller {
 
     private void checkInvalid() {
         if (timer != 0 && System.currentTimeMillis() - timer > 180000) {
+            System.out.println("Triggering refresh: bot installer was invalid for too long");
             API.handleRefresh();
             timer = System.currentTimeMillis();
         }
