@@ -22,15 +22,34 @@ import java.util.Map;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ReflectionUtils {
+    private ReflectionUtils() {};
 
-    private static Map<Class, Object> SINGLETON_INSTANCES = new HashMap<>();
+    /** A map from primitive types to their corresponding wrapper types. */
+    private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER;
+    static {
+        Map<Class<?>, Class<?>> primitiveToWrapper = new HashMap<>(16);
+        primitiveToWrapper.put(boolean.class, Boolean.class);
+        primitiveToWrapper.put(byte.class, Byte.class);
+        primitiveToWrapper.put(char.class, Character.class);
+        primitiveToWrapper.put(double.class, Double.class);
+        primitiveToWrapper.put(float.class, Float.class);
+        primitiveToWrapper.put(int.class, Integer.class);
+        primitiveToWrapper.put(long.class, Long.class);
+        primitiveToWrapper.put(short.class, Short.class);
+        primitiveToWrapper.put(void.class, Void.class);
+
+        PRIMITIVE_TO_WRAPPER = Collections.unmodifiableMap(primitiveToWrapper);
+    }
+
+    private static Map<Class<?>, Object> SINGLETON_INSTANCES = new HashMap<>();
+
+    public static <T> T createSingleton(Class<T> clazz) {
+        //noinspection unchecked
+        return (T) SINGLETON_INSTANCES.computeIfAbsent(clazz, ReflectionUtils::createInstance);
+    }
 
     public static <T> T createInstance(Class<T> clazz) {
         return createInstance(clazz, null, null);
-    }
-
-    public static <T> T createSingleton(Class<T> clazz) {
-        return (T) SINGLETON_INSTANCES.computeIfAbsent(clazz, ReflectionUtils::createInstance);
     }
 
     public static <T, P> T createInstance(Class<T> clazz, Class<P> paramTyp, P param) {
@@ -96,6 +115,29 @@ public class ReflectionUtils {
         if (!f.exists()) return;
         if (f.isDirectory()) for (File c : f.listFiles()) deleteFolder(c);
         if (!f.delete()) throw new FileNotFoundException("Failed to delete folders. No permission?: " + f);
+    }
+
+    public static Object get(Field field, Object obj) {
+        try {
+            return field.get(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void set(Field field, Object obj, Object value) {
+        try {
+            field.set(obj, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static <T> Class<T> wrapped(Class<T> type) {
+        if (!type.isPrimitive()) return type;
+        //noinspection unchecked
+        return (Class<T>) PRIMITIVE_TO_WRAPPER.get(type);
     }
 
 }

@@ -18,6 +18,7 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
+import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.DiscordUtils;
 import com.github.manolo8.darkbot.modules.CollectorModule;
 import com.github.manolo8.darkbot.modules.EventModule;
@@ -42,7 +43,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.12";
+    public static final String VERSION = "1.13.13 beta";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -127,7 +128,7 @@ public class Main extends Thread {
         backpage = new BackpageManager(this);
         form = new MainGui(this);
 
-        if (failedConfig) popupMessage("Error",
+        if (failedConfig) Popups.showMessageAsync("Error",
                 "Failed to load config. Default config will be used, config won't be save.", JOptionPane.ERROR_MESSAGE);
 
         checkModule();
@@ -310,11 +311,11 @@ public class Main extends Thread {
                 try {
                     CustomModule m = getCustomModule();
                     if (m != null) {
-                        popupMessage("Success", "Successfully loaded custom module",  JOptionPane.INFORMATION_MESSAGE);
+                        Popups.showMessageAsync("Success", "Successfully loaded custom module",  JOptionPane.INFORMATION_MESSAGE);
                         return m;
                     }
                 } catch (Exception e) {
-                    popupMessage("Error compiling module", e.getMessage(), JOptionPane.ERROR_MESSAGE);
+                    Popups.showMessageAsync("Error compiling module", e.getMessage(), JOptionPane.ERROR_MESSAGE);
                     e.printStackTrace();
                 }
                 form.setCustomConfig(null, null);
@@ -323,32 +324,22 @@ public class Main extends Thread {
         }
     }
 
-    private void popupMessage(String title, String content, int type) {
-        SwingUtilities.invokeLater(() -> {
-            JOptionPane pane = new JOptionPane(content, type);
-            JDialog dialog = pane.createDialog(title);
-            dialog.setIconImage(form.getIconImage());
-            dialog.setAlwaysOnTop(true);
-            dialog.setVisible(true);
-        });
-    }
-
     private CustomModule getCustomModule() throws Exception {
         String customModule = config.GENERAL.CUSTOM_MODULE;
         if (customModule == null || customModule.isEmpty()) {
-            popupMessage("Warning", "No custom module file selected", JOptionPane.WARNING_MESSAGE);
+            Popups.showMessageAsync("Warning", "No custom module file selected", JOptionPane.WARNING_MESSAGE);
             return null;
         }
         File file = new File(customModule);
         if (!file.exists()) {
-            popupMessage("Warning", "Custom module file doesn't exist", JOptionPane.WARNING_MESSAGE);
+            Popups.showMessageAsync("Warning", "Custom module file doesn't exist", JOptionPane.WARNING_MESSAGE);
             return null;
         }
         Class<?> newModule = ReflectionUtils.compileModule(file);
         Module module = (Module) ReflectionUtils.createInstance(newModule);
         if (module instanceof CustomModule) return (CustomModule) module;
 
-        popupMessage("Warning", "The custom module is outdated, and can't be loaded", JOptionPane.WARNING_MESSAGE);
+        Popups.showMessageAsync("Warning", "The custom module is outdated, and can't be loaded", JOptionPane.WARNING_MESSAGE);
         return null;
     }
 

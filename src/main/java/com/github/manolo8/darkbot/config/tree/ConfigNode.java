@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.config.tree;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
 import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
+import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
@@ -102,6 +103,7 @@ public abstract class ConfigNode {
             }
             if (field.getEditor() == JBoxInfoTable.class) return "Box infos (" + ((Map) obj).size() + ")";
             if (field.getEditor() == JNpcInfoTable.class) return "Npc infos (" + ((Map) obj).size() + ")";
+            if (field.getEditor() == JActionTable.class)  return "Action infos (" + ((Map) obj).size() + ")";
             if (field.getEditor() == JFileOpener.class) return Strings.fileName((String) obj);
             return Objects.toString(obj, "(unset)");
         }

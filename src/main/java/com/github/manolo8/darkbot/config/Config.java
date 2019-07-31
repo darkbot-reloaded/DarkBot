@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
@@ -229,6 +230,14 @@ public class Config {
         public int MIN_TICK = 15;
         @Option(value = "Developer stuff shown", description = "Enabling this WILL make your bot use more cpu.")
         public boolean DEV_STUFF = false;
+    }
+
+    public /*@Option("Extra actions")*/ ExtraActions EXTRA = new ExtraActions();
+    public static class ExtraActions {
+        @Option()
+        @Editor(value = JActionTable.class, shared = true)
+        public Map<String, ActionInfo> ACTION_INFOS = new HashMap<>();
+        public transient Lazy<String> MODIFIED_ACTIONS = new Lazy<>();
     }
 
     public static class ShipConfig {
