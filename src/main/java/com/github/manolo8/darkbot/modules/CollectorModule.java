@@ -30,7 +30,7 @@ public class CollectorModule implements Module {
 
     private long invisibleTime;
 
-    Box current;
+    public Box current;
 
     private long waiting;
 
@@ -175,18 +175,21 @@ public class CollectorModule implements Module {
     }
 
     public void findBox() {
-        LocationInfo locationInfo = hero.locationInfo;
+        LocationInfo heroLoc = hero.locationInfo;
 
-        Box best = boxes.stream()
+        Box best = boxes
+                .stream()
                 .filter(this::canCollect)
-                .min(Comparator.comparingDouble(locationInfo::distance)).orElse(null);
+                .min(Comparator.<Box>comparingInt(b -> b.boxInfo.priority)
+                        .thenComparingDouble(heroLoc::distance)).orElse(null);
         this.current = current == null || best == null || current.isCollected() || isBetter(best) ? best : current;
     }
 
     private boolean canCollect(Box box) {
         return box.boxInfo.collect
                 && !box.isCollected()
-                && (drive.canMove(box.locationInfo.now));
+                && drive.canMove(box.locationInfo.now)
+                && (!box.type.equals("FROM_SHIP") || main.statsManager.deposit < main.statsManager.depositTotal);
     }
 
     private Location findClosestEnemyAndAddToDangerousList() {
@@ -198,7 +201,7 @@ public class CollectorModule implements Module {
                 if (ship.isInTimer()) {
                     return ship.locationInfo.now;
                 } else if (ship.isAttacking(hero)) {
-                    ship.setTimerTo(400_000);
+                    ship.setTimerTo(config.GENERAL.RUNNING.REMEMBER_ENEMIES_FOR * 1000);
                     return ship.locationInfo.now;
                 }
 

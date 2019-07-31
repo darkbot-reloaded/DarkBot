@@ -12,10 +12,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.util.HashMap;
+import java.util.Map;
 
-public class JListField<T> extends JComboBox<T> implements OptionEditor {
+public class JListField extends JComboBox<String> implements OptionEditor {
 
-    private OptionList<Object> options;
+    private Map<Class<? extends OptionList<?>>, OptionList<?>> optionInstances = new HashMap<>();
+    private OptionList<?> options;
     private ConfigField field;
 
     public JListField() {
@@ -41,10 +44,10 @@ public class JListField<T> extends JComboBox<T> implements OptionEditor {
     @Override
     public void edit(ConfigField field) {
         this.field = null;
-        //noinspection unchecked
-        this.options = ReflectionUtils.createSingleton(field.field.getAnnotation(Options.class).value());
+        options = optionInstances.computeIfAbsent(
+                field.field.getAnnotation(Options.class).value(), ReflectionUtils::createInstance);
 
-        if (getModel() != options) setModel((ComboBoxModel<T>) options);
+        if (getModel() != options) setModel(options);
 
         Object option = options.getText(field.get());
         if (getSelectedItem() != option) setSelectedItem(option);

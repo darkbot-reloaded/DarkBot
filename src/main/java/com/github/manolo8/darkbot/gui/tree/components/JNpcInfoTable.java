@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
-import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
@@ -40,12 +39,13 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel> implem
         super.getComponent().setPreferredSize(new Dimension(550, 270));
 
         getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(3, SortOrder.DESCENDING),
+                new RowSorter.SortKey(2, SortOrder.ASCENDING),
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
 
         setDefaultEditor(ExtraNpcInfo.class, new ExtraNpcInfoEditor());
         setDefaultEditor(Double.class, new TableDoubleEditor());
 
-        mapFilter = new JListField<>();
+        mapFilter = new JComboBox<>();
 
         mapFilter.addActionListener(e -> {
             if (mapFilter.getSelectedItem() == null) return;

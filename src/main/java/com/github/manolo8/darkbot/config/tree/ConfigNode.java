@@ -96,9 +96,10 @@ public abstract class ConfigNode {
         public String toString() {
             Object obj = field.get();
             if (field.getEditor() == JPercentField.class) return DecimalFormat.getPercentInstance().format(obj);
-            if (field.getEditor() == JListField.class)
-                //noinspection unchecked
-                return ReflectionUtils.createSingleton(field.field.getAnnotation(Options.class).value()).getText(obj);
+            if (field.getEditor() == JListField.class) {
+                OptionList options = ReflectionUtils.createSingleton(field.field.getAnnotation(Options.class).value());
+                return options.getText(obj);
+            }
             if (field.getEditor() == JBoxInfoTable.class) return "Box infos (" + ((Map) obj).size() + ")";
             if (field.getEditor() == JNpcInfoTable.class) return "Npc infos (" + ((Map) obj).size() + ")";
             if (field.getEditor() == JFileOpener.class) return Strings.fileName((String) obj);

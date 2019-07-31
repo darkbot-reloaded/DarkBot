@@ -63,7 +63,7 @@ public class MapModule implements Module, MapChange {
         double distance = current.locationInfo.distance(hero);
         hero.runMode();
 
-        if (distance < 100) hero.jumpPortal(current);
+        if (distance < 200) hero.jumpPortal(current);
         else if (current.locationInfo.isLoaded() && !drive.movingTo().equals(current.locationInfo.now)) drive.move(current);
     }
 

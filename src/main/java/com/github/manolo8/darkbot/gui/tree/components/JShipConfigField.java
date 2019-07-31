@@ -72,13 +72,12 @@ public class JShipConfigField extends JPanel implements OptionEditor {
     }
 
     private class FormationField extends JCharField {
-
         @Override
         protected void setValue(Character value) {
             if (editing == null) return;
             editing.FORMATION = value;
             ConfigEntity.changed();
         }
-
     }
+
 }

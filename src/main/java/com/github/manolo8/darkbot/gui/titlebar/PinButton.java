@@ -24,7 +24,7 @@ public class PinButton extends TitleBarButton<JFrame> {
     }
 
     protected void setBackground() {
-        if (frame.isAlwaysOnTop()) {
+        if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.DISPLAY.ALWAYS_ON_TOP) {
             setBackground(actionColor.darker());
             setIcon(UNPIN);
         } else {

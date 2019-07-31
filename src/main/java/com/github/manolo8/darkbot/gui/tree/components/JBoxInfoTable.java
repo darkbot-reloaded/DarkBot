@@ -21,22 +21,23 @@ public class JBoxInfoTable extends InfoTable<JBoxInfoTable.BoxTableModel> implem
         super(new BoxTableModel(collect.BOX_INFOS, collect.ADDED_BOX));
 
         getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(1, SortOrder.DESCENDING),
+                new RowSorter.SortKey(3, SortOrder.ASCENDING),
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
     }
 
     protected static class BoxTableModel extends DefaultTableModel {
-        private static final Class[] TYPES = new Class[]{String.class, Boolean.class, Integer.class};
+        private static final Class[] TYPES = new Class[]{String.class, Boolean.class, Integer.class, Integer.class};
 
         private Map<String, BoxInfo> BOX_INFOS;
 
         BoxTableModel(Map<String, BoxInfo> BOX_INFOS, Lazy<String> added) {
-            super(new String[]{"Name", "Collect", "Wait (ms)"}, 0);
+            super(new String[]{"Name", "Collect", "Wait (ms)", "Priority"}, 0);
             (this.BOX_INFOS = BOX_INFOS).forEach(this::addEntry);
             added.add(n -> addEntry(n, BOX_INFOS.get(n)));
         }
 
         private void addEntry(String name, BoxInfo info) {
-            addRow(new Object[]{name, info.collect, info.waitTime});
+            addRow(new Object[]{name, info.collect, info.waitTime, info.priority});
         }
 
         @Override
@@ -55,6 +56,7 @@ public class JBoxInfoTable extends InfoTable<JBoxInfoTable.BoxTableModel> implem
             BoxInfo info = BOX_INFOS.get((String) this.getValueAt(row, 0));
             if (column == 1) info.collect = (Boolean) value;
             else if (column == 2) info.waitTime = (Integer) value;
+            else if (column == 3) info.priority = (Integer) value;
 
             ConfigEntity.changed();
         }

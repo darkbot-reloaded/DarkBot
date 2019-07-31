@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.tree;
 
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.tree.ConfigNode;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
@@ -11,9 +12,11 @@ import com.github.manolo8.darkbot.gui.tree.components.JNumberField;
 import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
 import com.github.manolo8.darkbot.gui.tree.components.JStringField;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import javafx.scene.control.TreeCell;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellEditor;
+import javax.swing.tree.TreeCellEditor;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
@@ -22,8 +25,11 @@ import java.util.Map;
 
 public class TreeEditor extends DefaultTreeCellEditor {
 
+    // Standard editors for specific data types
     private Map<Class, OptionEditor> editorsByType = new HashMap<>();
+    // Editors shared between diff TreeEditor instances
     private Map<Class<? extends OptionEditor>, OptionEditor> sharedEditors = new HashMap<>();
+    // Editors for specific @Editor annotations in fields
     private Map<Class<? extends OptionEditor>, OptionEditor> editorsByClass = new HashMap<>();
     private OptionEditor defaultEditor = new JLabelField();
 
@@ -32,16 +38,7 @@ public class TreeEditor extends DefaultTreeCellEditor {
     private OptionEditor currentEditor = null;
 
     public TreeEditor(JTree tree, TreeRenderer renderer) {
-        this(tree, renderer, true);
-    }
-
-    private TreeEditor(JTree tree, TreeRenderer renderer, boolean createDelegate) {
         super(tree, renderer);
-        if (createDelegate) {
-            TreeEditor delegateEditor = new TreeEditor(tree, renderer, false);
-            delegateEditor.sharedEditors = this.sharedEditors;
-            renderer.setDelegateEditor(delegateEditor);
-        }
 
         this.label.setFont(renderer.getFont());
         this.panel.add(label);
@@ -53,6 +50,15 @@ public class TreeEditor extends DefaultTreeCellEditor {
         addEditor(new JNumberField(), double.class, int.class);
         addEditor(new JStringField(), String.class);
         addEditor(new JShipConfigField(), Config.ShipConfig.class);
+    }
+
+    /**
+     * Shared editors are used by several tree editors, to keep consistency of the marked settings.
+     * Used by NPC / BOX tables, so that filters stay consistent.
+     */
+    public TreeEditor sharingEditors(TreeEditor other) {
+        this.sharedEditors = other.sharedEditors;
+        return this;
     }
 
     private void addEditor(OptionEditor editor, Class... types) {
@@ -93,7 +99,11 @@ public class TreeEditor extends DefaultTreeCellEditor {
 
     private int getWidthFor(ConfigNode node, JLabelField label) {
         if (node.name.isEmpty()) return 0;
-        return label.getFontMetrics(label.getFont()).stringWidth(node.getLongestSibling()) + 10;
+        if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.DISPLAY.HIDE_EDITORS) {
+            return label.getFontMetrics(label.getFont()).stringWidth(node.name) + 5;
+        } else {
+            return label.getFontMetrics(label.getFont()).stringWidth(node.getLongestSibling()) + 10;
+        }
     }
 
     @Override

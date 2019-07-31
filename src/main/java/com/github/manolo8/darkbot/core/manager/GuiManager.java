@@ -194,13 +194,14 @@ public class GuiManager implements Manager {
         }
 
 
+        HeroManager hero = main.hero;
         if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
             validTime = System.currentTimeMillis();
             return false;
-        } else if (main.hero.locationInfo.isLoaded()
-                && (main.hero.locationInfo.isMoving() || System.currentTimeMillis() - main.hero.drive.lastMoved > 20 * 1000)
-                && (main.hero.health.hpIncreasedIn(30_000) || main.hero.health.hpDecreasedIn(30_000) || main.hero.health.hpPercent() == 1)
-                && (main.hero.health.shIncreasedIn(30_000) || main.hero.health.shDecreasedIn(30_000) || main.hero.health.shieldPercent() == 1 || main.hero.health.shieldPercent() == 0)) {
+        } else if (hero.locationInfo.isLoaded()
+                && (hero.locationInfo.isMoving() || System.currentTimeMillis() - hero.drive.lastMoved > 20 * 1000)
+                && (hero.health.hpIncreasedIn(30_000) || hero.health.hpDecreasedIn(30_000) || hero.health.hpPercent() == 1 || (hero.hasTarget() && hero.isAttacking(hero.target)))
+                && (hero.health.shIncreasedIn(30_000) || hero.health.shDecreasedIn(30_000) || hero.health.shieldPercent() == 1 || hero.health.shieldPercent() == 0)) {
             validTime = System.currentTimeMillis() - main.pingManager.ping;
         }
 

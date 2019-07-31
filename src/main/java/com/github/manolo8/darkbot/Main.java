@@ -38,10 +38,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.11";
+    public static final String VERSION = "1.13.12 beta 5";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -187,6 +188,11 @@ public class Main extends Thread {
 
         tickingModule = running && guiManager.canTickModule();
         if (tickingModule) tickRunning();
+        else if (!running && (!hero.hasTarget() || !mapManager.isTarget(hero.target))) {
+            hero.setTarget(Stream.concat(mapManager.entities.ships.stream(), mapManager.entities.npcs.stream())
+                    .filter(mapManager::isTarget)
+                    .findFirst().orElse(null));
+        }
 
         pingManager.tick();
         //if (config.MISCELLANEOUS.DEV_STUFF && mapManager.width > 0)

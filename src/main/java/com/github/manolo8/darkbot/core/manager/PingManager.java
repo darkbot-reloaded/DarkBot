@@ -42,6 +42,8 @@ public class PingManager implements Manager {
             currentIndex = lastPings.size;
 
             lastCheck = System.currentTimeMillis();
+            if (ping < 0 || ping > 30_000)
+                System.out.println("Weird ping value (outside of 0-20K): " + ping);
         }
     }
 

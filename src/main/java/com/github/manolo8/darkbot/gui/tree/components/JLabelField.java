@@ -27,4 +27,21 @@ public class JLabelField extends JLabel implements OptionEditor {
         return d;
     }
 
+    /**
+     * No-op methods improve performance when using this as a cell renderer, and they are not needed anyways.
+     */
+    public void validate() {}
+    public void invalidate() {}
+    public void revalidate() {}
+    public void repaint(long tm, int x, int y, int width, int height) {}
+    public void repaint(Rectangle r) {}
+    public void repaint() {}
+    public void firePropertyChange(String propertyName, byte oldValue, byte newValue) {}
+    public void firePropertyChange(String propertyName, char oldValue, char newValue) {}
+    public void firePropertyChange(String propertyName, short oldValue, short newValue) {}
+    public void firePropertyChange(String propertyName, int oldValue, int newValue) {}
+    public void firePropertyChange(String propertyName, long oldValue, long newValue) {}
+    public void firePropertyChange(String propertyName, float oldValue, float newValue) {}
+    public void firePropertyChange(String propertyName, double oldValue, double newValue) {}
+    public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {}
 }

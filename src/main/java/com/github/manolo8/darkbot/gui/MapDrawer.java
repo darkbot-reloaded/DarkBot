@@ -283,14 +283,11 @@ public class MapDrawer extends JPanel {
         drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20);
 
         if (hero.target != null && !hero.target.removed) {
-            Ship ship = hero.target;
-
-            if (ship instanceof Npc) {
-                g2.setColor(ENEMIES);
-                g2.setFont(FONT_MID);
-                String name = ((Npc) ship).playerInfo.username;
-                drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40, Align.MID);
-            }
+            if (hero.target instanceof Npc || hero.target.playerInfo.isEnemy()) g2.setColor(this.ENEMIES);
+            else g2.setColor(this.ALLIES);
+            g2.setFont(FONT_MID);
+            String name = hero.target.playerInfo.username;
+            drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40, Align.MID);
 
             drawHealth(g2, hero.target.health, mid + 10, height - 34, mid - 20);
         }

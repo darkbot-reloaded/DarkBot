@@ -247,7 +247,7 @@ public class SafetyFinder {
     }
 
     private boolean isAttackingOrTimer(Ship ship) {
-        if (ship.isAttacking(hero)) ship.setTimerTo(400_000);
+        if (ship.isAttacking(hero)) ship.setTimerTo(RUNNING.REMEMBER_ENEMIES_FOR * 1000);
         return ship.isInTimer();
     }
 

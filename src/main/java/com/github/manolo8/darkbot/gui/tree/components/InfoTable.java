@@ -7,7 +7,6 @@ import com.github.manolo8.darkbot.gui.utils.TableCharEditor;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
@@ -17,7 +16,7 @@ public abstract class InfoTable<T extends TableModel> extends JTable implements 
 
     private JComponent component;
 
-    InfoTable(T model) {
+    public InfoTable(T model) {
         super(model);
         getColumnModel().getColumn(0).setPreferredWidth(200);
         putClientProperty("ConfigTree", true);

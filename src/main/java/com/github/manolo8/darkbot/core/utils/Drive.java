@@ -85,7 +85,9 @@ public class Drive {
                 click(next);
             }
         } else {
-            paths.removeFirst();
+            synchronized (Main.UPDATE_LOCKER) {
+                paths.removeFirst();
+            }
             if (paths.isEmpty()) {
                 if (this.endLoc.equals(lastRandomMove)) lastRandomMove = null;
                 this.endLoc = this.tempDest = null;
@@ -136,7 +138,7 @@ public class Drive {
         }
 
         endLoc = tempDest = null;
-        if (!paths.isEmpty()) paths.clear();
+        if (!paths.isEmpty()) paths = new LinkedList<>();
     }
 
     public void clickCenter(boolean single, Location aim) {

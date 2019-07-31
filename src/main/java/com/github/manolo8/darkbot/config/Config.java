@@ -15,6 +15,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.JTimeField;
 
+import java.lang.annotation.Native;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,6 +92,9 @@ public class Config {
         public static class Running {
             @Option("Run from enemies")
             public boolean RUN_FROM_ENEMIES = true;
+            @Option(value = "Remember enemies for", description = "How long to run in sight from enemies that shot you")
+            @Num(max = 24 * 60 * 60, step = 300)
+            public int REMEMBER_ENEMIES_FOR = 300;
             @Option("Run from enemies in sight")
             public boolean RUN_FROM_ENEMIES_SIGHT = false;
             @Option(value = "Stop running when out of sight", description = "Will stop running if the enemy isn't attacking and is no longer on sight")
@@ -151,6 +155,9 @@ public class Config {
         @Option(value = "Offensive ability min health", description = "Min NPC health to use ability")
         @Num(min = 50_000, max = 5_000_000, step = 50_000)
         public int SHIP_ABILITY_MIN = 150_000;
+        @Option(value = "Smart circling iterations", description = "Max moves to look ahead to change circle direction")
+        @Num(max = 50, step = 1)
+        public int MAX_CIRCLE_ITERATIONS = 5;
         @Option(value = "Run config to chase", description = "Use run config to follow escaping npcs")
         public boolean RUN_CONFIG_IN_CIRCLE = true;
 
@@ -199,6 +206,8 @@ public class Config {
             @Option(value = "GUI Button size", description = "Change tab in config & resize main window to update.")
             @Num(min = 1, max = 20, step = 1)
             public int BUTTON_SIZE = 4;
+            @Option(value = "Hide config editors until click", description = "Use text-based config tree, which is less resource intensive")
+            public boolean HIDE_EDITORS = false;
 
             public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
         }

@@ -8,9 +8,12 @@ import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
 
 import javax.swing.*;
+import javax.swing.plaf.LayerUI;
 import javax.swing.plaf.basic.BasicTreeUI;
+import javax.swing.tree.DefaultTreeCellEditor;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.event.MouseWheelEvent;
 
 public class AdvancedConfig extends JPanel {
 
@@ -61,6 +64,8 @@ public class AdvancedConfig extends JPanel {
 
         TreeRenderer renderer = new TreeRenderer();
         TreeEditor editor = new TreeEditor(configTree, renderer);
+
+        renderer.setDelegateEditor(new TreeEditor(configTree, renderer).sharingEditors(editor));
         configTree.setCellRenderer(renderer);
         configTree.setCellEditor(editor);
 
@@ -75,7 +80,8 @@ public class AdvancedConfig extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(configTree);
         scrollPane.setBorder(null);
-        return scrollPane;
+        scrollPane.getVerticalScrollBar().setUnitIncrement(25);
+        return new JLayer<>(scrollPane, new WheelScrollLayerUI());
     }
 
     private void unfoldTopLevelTree(JTree configTree) {
@@ -85,6 +91,33 @@ public class AdvancedConfig extends JPanel {
     public static Dimension forcePreferredHeight(Dimension preferred) {
         preferred.height = EDITOR_HEIGHT;
         return preferred;
+    }
+
+    // http://java-swing-tips.blogspot.jp/2014/09/forward-mouse-wheel-scroll-event-in.html
+    class WheelScrollLayerUI extends LayerUI<JScrollPane> {
+        @Override
+        public void installUI(JComponent c) {
+            super.installUI(c);
+            if (c instanceof JLayer) ((JLayer) c).setLayerEventMask(AWTEvent.MOUSE_WHEEL_EVENT_MASK);
+        }
+
+        @Override
+        public void uninstallUI(JComponent c) {
+            if (c instanceof JLayer) ((JLayer) c).setLayerEventMask(0);
+            super.uninstallUI(c);
+        }
+
+        @Override
+        protected void processMouseWheelEvent(MouseWheelEvent e, JLayer<? extends JScrollPane> l) {
+            Component child = e.getComponent();
+            JScrollPane parent = l.getView();
+            if (!(child instanceof JScrollPane) || child.equals(parent)) return;
+            BoundedRangeModel m = ((JScrollPane) child).getVerticalScrollBar().getModel();
+            int dir = e.getWheelRotation(), extent = m.getExtent(),
+                    minimum = m.getMinimum(), maximum = m.getMaximum(), value = m.getValue();
+            if (value + extent >= maximum && dir > 0 || value <= minimum && dir < 0)
+                parent.dispatchEvent(SwingUtilities.convertMouseEvent(child, e, parent));
+        }
     }
 
 }
