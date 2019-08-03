@@ -11,19 +11,18 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class NpcAttacker {
 
-    private MapManager mapManager;
-    private Config config;
-    private HeroManager hero;
-    private Drive drive;
-
+    protected MapManager mapManager;
+    protected Config config;
+    protected HeroManager hero;
+    protected Drive drive;
 
     public Npc target;
-    private Long ability;
+    protected Long ability;
 
-    private long laserTime;
-    private long fixTimes;
-    private long clickDelay;
-    private boolean sab;
+    protected long laserTime;
+    protected long fixTimes;
+    protected long clickDelay;
+    protected boolean sab;
 
     public NpcAttacker(Main main) {
         this.mapManager = main.mapManager;
@@ -62,7 +61,7 @@ public class NpcAttacker {
         tryAttackOrFix();
     }
 
-    private void lockAndSetTarget() {
+    void lockAndSetTarget() {
         if (hero.locationInfo.distance(target) > 700 || System.currentTimeMillis() - clickDelay < 400) return;
         hero.setTarget(target);
         setRadiusAndClick(true);
@@ -72,7 +71,7 @@ public class NpcAttacker {
         if (config.LOOT.SHIP_ABILITY != null) ability = clickDelay + 4000;
     }
 
-    private void tryAttackOrFix() {
+    protected void tryAttackOrFix() {
         boolean bugged = hero.isAttacking(target) && !target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 650
                 && System.currentTimeMillis() > (laserTime + fixTimes * 5000);
         boolean sabChanged = shouldSab() != sab;
@@ -84,6 +83,12 @@ public class NpcAttacker {
                 fixTimes++;
             }
         }
+    }
+
+    public double modifyRadius(double radius) {
+        if (target != hero.target || !hero.isAttacking(target) || castingAbility()) return Math.min(550, radius);
+        if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) return Math.min(600, radius);
+        return radius;
     }
 
     private boolean shouldSab() {

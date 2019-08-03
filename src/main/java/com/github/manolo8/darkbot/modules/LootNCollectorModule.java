@@ -10,18 +10,13 @@ import com.github.manolo8.darkbot.core.utils.Drive;
 
 public class LootNCollectorModule implements Module {
 
-    private final LootModule lootModule;
-    private final CollectorModule collectorModule;
+    protected LootModule lootModule = new LootModule();
+    protected CollectorModule collectorModule = new CollectorModule();
 
     protected PetManager pet;
     protected HeroManager hero;
     protected Drive drive;
     protected Config config;
-
-    public LootNCollectorModule() {
-        this.lootModule = new LootModule();
-        this.collectorModule = new CollectorModule();
-    }
 
     @Override
     public void install(Main main) {

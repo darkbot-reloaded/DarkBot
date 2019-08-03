@@ -138,7 +138,7 @@ public class CollectorModule implements Module {
         }
     }
 
-    private void checkInvisibility() {
+    public void checkInvisibility() {
         if (config.COLLECT.AUTO_CLOACK
                 && !hero.invisible
                 && System.currentTimeMillis() - invisibleTime > 60000

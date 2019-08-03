@@ -126,12 +126,8 @@ public class LootModule implements Module {
         double radius = target.npcInfo.radius;
         boolean noCircle = target.npcInfo.extra.noCircle;
 
-        if (target != hero.target || attack.castingAbility()) radius = Math.min(500, radius);
-        if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) radius = Math.min(radius, 600);
-        /*if (target.playerInfo.username.contains("Invoke")) {
-            if (hero.health.shieldPercent() < 0.35) radius = 1000;
-            noCircle = hero.health.shieldPercent() > 0.8 && !hero.health.hpDecreasedIn(7000);
-        }*/
+        radius = attack.modifyRadius(radius);
+        if (radius > 750) noCircle = false;
 
         double angleDiff;
         if (noCircle) {
@@ -177,7 +173,6 @@ public class LootModule implements Module {
     private double score(Location loc) {
         return (drive.canMove(loc) ? 0 : -1000) - npcs.stream() // Consider barrier as bad as 1000 radius units.
                 .filter(n -> attack.target != n)
-                //.mapToDouble(n -> Math.max(0, (n.playerInfo.username.contains("Invoke") ? 1200 : n.npcInfo.radius) - n.locationInfo.now.distance(loc)))
                 .mapToDouble(n -> Math.max(0, n.npcInfo.radius - n.locationInfo.now.distance(loc)))
                 .sum();
     }
@@ -188,12 +183,7 @@ public class LootModule implements Module {
                 && attack.target.health.hpPercent() < 0.25
                 && hero.locationInfo.now.distance(direction) > attack.target.npcInfo.radius * 2) hero.runMode();
         else if (hero.locationInfo.now.distance(direction) > attack.target.npcInfo.radius * 3) hero.roamMode();
-        /*else if (attack.target.playerInfo.username.contains("Invoke") && Math.abs(attack.target.locationInfo.now.distance(direction) - 1000) < 10) {
-            Config.ShipConfig ring = new Config.ShipConfig();
-            ring.CONFIG = 1;
-            ring.FORMATION = '0';
-            hero.setMode(ring);
-        }*/ else hero.attackMode();
+        else hero.attackMode();
     }
 
     private boolean isAttackedByOthers(Npc npc) {
