@@ -14,8 +14,9 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public class GenericTableModel<T> extends DefaultTableModel {
-    private final Class[] TYPES;
     private final Field[] FIELDS;
+    private final String[] TOOLTIPS;
+    private final Class[] TYPES;
 
     private Map<String, T> table = new HashMap<>();
 
@@ -26,11 +27,20 @@ public class GenericTableModel<T> extends DefaultTableModel {
                 .filter(f -> f.getAnnotation(Option.class) != null)
                 .toArray(Field[]::new);
 
+        TOOLTIPS = prepend(clazz, Arrays.stream(FIELDS))
+                .map(annotated -> annotated.getAnnotation(Option.class))
+                .map(Option::description)
+                .toArray(String[]::new);
+
         TYPES = prepend(String.class, Arrays.stream(FIELDS).map(Field::getType)
                 .map(ReflectionUtils::wrapped)).toArray(Class[]::new);
 
         config.forEach(this::updateEntry);
         if (modified != null) modified.add(n -> updateEntry(n, config.get(n)));
+    }
+
+    public String getToolTipAt(int column) {
+        return TOOLTIPS[column];
     }
 
     protected void updateEntry(String name, T data) {
@@ -78,8 +88,8 @@ public class GenericTableModel<T> extends DefaultTableModel {
     }
 
     private static String[] getNames(Class clazz) {
-        return prepend((Option) clazz.getAnnotation(Option.class),
-                Arrays.stream(clazz.getDeclaredFields()).map(f -> f.getAnnotation(Option.class)))
+        return prepend(clazz, Arrays.stream(clazz.getDeclaredFields()))
+                .map(annotated -> annotated.getAnnotation(Option.class))
                 .filter(Objects::nonNull)
                 .map(Option::value)
                 .toArray(String[]::new);

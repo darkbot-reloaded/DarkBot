@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.TableCharEditor;
+import com.github.manolo8.darkbot.gui.utils.ToolTipHeader;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
@@ -72,6 +73,9 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
         setDefaultEditor(Character.class, CHAR_EDITOR);
 
         setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
+        if (model instanceof GenericTableModel) {
+            setTableHeader(new ToolTipHeader(getColumnModel(), (GenericTableModel) model));
+        }
         getTableHeader().setReorderingAllowed(false);
 
         TableRowSorter<T> sorter = new TableRowSorter<>((T) getModel());

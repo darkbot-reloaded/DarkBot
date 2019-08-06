@@ -1,30 +1,26 @@
 package com.github.manolo8.darkbot.config;
 
-import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.config.types.Option;
-import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Option("Name")
+@Option(value = "Name", description = "Npc names, npcs ending in * are grouped")
 public class NpcInfo {
 
-    @Option("Radius")
+    @Option(value = "Radius", description = "Distance to keep from this npc")
     public double radius;
-    @Option("Priority")
+    @Option(value = "Priority", description = "#1 priority will be targeted before #2 priority")
     public int priority;
-    @Option("Kill")
+    @Option(value = "Kill", description = "If this npc should be killed")
     public boolean kill;
-    @Option("Ammo key")
+    @Option(value = "Ammo key", description = "Special ammo for this npc, if unset, default is used")
     public Character attackKey;
 
-    @Option("Extra")
-    //@Editor()
+    @Option(value = "Extra", description = "Several extra flags for the npc")
     public ExtraNpcInfo extra = new ExtraNpcInfo();
 
     public static class ExtraNpcInfo {

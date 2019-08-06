@@ -71,8 +71,11 @@ public class PingManager implements Manager {
                 if (API.readMemoryInt(address + 12) != 0 || API.readMemoryInt(address + 36) != 0)
                     continue;
 
-                pingAddress = API.readMemoryLong(address + 40);
-                lastPings.update(pingAddress);
+                address = API.readMemoryLong(address + 40);
+                if (API.readMemoryInt(address + 64) == 0) continue;
+
+                this.lastPings.update(pingAddress = address);
+                break;
             }
         }
     }
