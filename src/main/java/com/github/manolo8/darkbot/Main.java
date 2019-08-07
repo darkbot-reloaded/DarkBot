@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.13 beta 4";
+    public static final String VERSION = "1.13.13 beta 5";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -115,13 +115,15 @@ public class Main extends Thread {
         status.add(this::onRunningToggle);
 
         backpage = new BackpageManager(this);
+
+        moduleHandler = new ModuleHandler();
+        moduleHandler.reloadModules();
+
         form = new MainGui(this);
 
         if (failedConfig) Popups.showMessageAsync("Error",
                 "Failed to load config. Default config will be used, config won't be save.", JOptionPane.ERROR_MESSAGE);
 
-        moduleHandler = new ModuleHandler();
-        moduleHandler.reloadModules();
         checkModule();
         start();
         API.createWindow();
