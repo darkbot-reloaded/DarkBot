@@ -1,9 +1,9 @@
 package com.github.manolo8.darkbot;
 
-import com.bulenkov.darcula.DarculaLaf;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
@@ -17,15 +17,10 @@ import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.extensions.ModuleHandler;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.utils.DiscordUtils;
-import com.github.manolo8.darkbot.modules.CollectorModule;
-import com.github.manolo8.darkbot.modules.EventModule;
-import com.github.manolo8.darkbot.modules.LootModule;
-import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import com.github.manolo8.darkbot.modules.MapModule;
-import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
@@ -43,7 +38,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.13 beta 3";
+    public static final String VERSION = "1.13.13 beta 4";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -68,7 +63,9 @@ public class Main extends Thread {
 
     public Config config;
     private boolean failedConfig;
-    private int moduleId;
+
+    private final ModuleHandler moduleHandler;
+    private String moduleId;
     public Module module;
 
     public long lastRefresh;
@@ -90,14 +87,6 @@ public class Main extends Thread {
         /*if (config.MISCELLANEOUS.FULL_DEBUG)
             API = (IDarkBotAPI) Proxy.newProxyInstance(Main.class.getClassLoader(), new Class[]{IDarkBotAPI.class}, IDarkBotAPI.getLoggingHandler((DarkBotAPI) API));
         */
-
-        try {
-            UIManager.setLookAndFeel(new DarculaLaf());
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
-        // You'll have to comment out this line when compiling
-        new DiscordUtils().setupOauth();
 
         new ConfigEntity(config);
 
@@ -131,6 +120,8 @@ public class Main extends Thread {
         if (failedConfig) Popups.showMessageAsync("Error",
                 "Failed to load config. Default config will be used, config won't be save.", JOptionPane.ERROR_MESSAGE);
 
+        moduleHandler = new ModuleHandler();
+        moduleHandler.reloadModules();
         checkModule();
         start();
         API.createWindow();
@@ -231,6 +222,7 @@ public class Main extends Thread {
     public <A extends Module> A setModule(A module) {
         module.install(this);
         if (module instanceof CustomModule) installCustomModule((CustomModule<?>) module);
+        else form.setCustomConfig(null, null);
         this.module = module;
         return module;
     }
@@ -246,6 +238,8 @@ public class Main extends Thread {
             config.CUSTOM_CONFIGS.put(module.id(), moduleConfig);
 
             form.setCustomConfig(module.name(), moduleConfig);
+        } else {
+            form.setCustomConfig(null, null);
         }
         module.install(this, moduleConfig);
     }
@@ -259,7 +253,7 @@ public class Main extends Thread {
     private void onRunningToggle(boolean running) {
         lastRefresh = System.currentTimeMillis();
         if (running && module instanceof MapModule) {
-            moduleId = -1;
+            moduleId = null;
             checkModule();
         }
     }
@@ -294,53 +288,8 @@ public class Main extends Thread {
     }
 
     private void checkModule() {
-        if (module == null || moduleId != config.GENERAL.CURRENT_MODULE) {
-            Module module = getModule(moduleId = config.GENERAL.CURRENT_MODULE);
-            setModule(module);
-        }
-    }
-
-    private Module getModule(int id) {
-        if (id != 4) form.setCustomConfig(null, null);
-        switch (id) {
-            case 0: return new CollectorModule();
-            case 1: return new LootModule();
-            case 2: return new LootNCollectorModule();
-            case 3: return new EventModule();
-            case 4: {
-                try {
-                    CustomModule m = getCustomModule();
-                    if (m != null) {
-                        Popups.showMessageAsync("Success", "Successfully loaded custom module",  JOptionPane.INFORMATION_MESSAGE);
-                        return m;
-                    }
-                } catch (Exception e) {
-                    Popups.showMessageAsync("Error compiling module", e.getMessage(), JOptionPane.ERROR_MESSAGE);
-                    e.printStackTrace();
-                }
-                form.setCustomConfig(null, null);
-            }
-            default: return new CollectorModule();
-        }
-    }
-
-    private CustomModule getCustomModule() throws Exception {
-        String customModule = config.GENERAL.CUSTOM_MODULE;
-        if (customModule == null || customModule.isEmpty()) {
-            Popups.showMessageAsync("Warning", "No custom module file selected", JOptionPane.WARNING_MESSAGE);
-            return null;
-        }
-        File file = new File(customModule);
-        if (!file.exists()) {
-            Popups.showMessageAsync("Warning", "Custom module file doesn't exist", JOptionPane.WARNING_MESSAGE);
-            return null;
-        }
-        Class<?> newModule = ReflectionUtils.compileModule(file);
-        Module module = (Module) ReflectionUtils.createInstance(newModule);
-        if (module instanceof CustomModule) return (CustomModule) module;
-
-        Popups.showMessageAsync("Warning", "The custom module is outdated, and can't be loaded", JOptionPane.WARNING_MESSAGE);
-        return null;
+        if (module == null || !moduleId.equals(config.GENERAL.CURRENT_MODULE))
+            setModule(moduleHandler.getModule(moduleId = config.GENERAL.CURRENT_MODULE));
     }
 
     private void sleepMax(long time, int total) {

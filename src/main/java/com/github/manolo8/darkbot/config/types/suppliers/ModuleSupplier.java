@@ -4,18 +4,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ModuleSupplier extends OptionList<Integer> {
+public class ModuleSupplier extends OptionList<String> {
 
-    private static final List<String> MODULES = Arrays.asList("Collector", "Npc Killer", "Kill & Collect", "Experiment zones", "Custom");
+    public static List<String> MODULES = Arrays.asList("Collector", "Npc Killer", "Kill & Collect", "Experiment zones", "Custom");
 
     @Override
-    public Integer getValue(String text) {
-        return MODULES.indexOf(text);
+    public String getValue(String text) {
+        return text;
     }
 
     @Override
-    public String getText(Integer value) {
-        return MODULES.get(value);
+    public String getText(String value) {
+        return value;
     }
 
     @Override

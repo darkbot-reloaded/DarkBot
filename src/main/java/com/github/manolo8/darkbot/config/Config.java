@@ -41,11 +41,7 @@ public class Config {
         @Option("Module")
         @Editor(JListField.class)
         @Options(ModuleSupplier.class)
-        public int CURRENT_MODULE = 2;
-
-        @Option("Custom Module")
-        @Editor(JFileOpener.class)
-        public String CUSTOM_MODULE;
+        public String CURRENT_MODULE = null;
 
         @Option("Working map")
         @Editor(JListField.class)
