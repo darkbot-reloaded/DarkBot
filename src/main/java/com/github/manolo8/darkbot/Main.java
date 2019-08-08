@@ -8,7 +8,9 @@ import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.core.itf.CustomModule;
+import com.github.manolo8.darkbot.extensions.behaviours.BehaviourHandler;
+import com.github.manolo8.darkbot.extensions.modules.ConfigurableModule;
+import com.github.manolo8.darkbot.extensions.modules.CustomModule;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
@@ -17,7 +19,8 @@ import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
-import com.github.manolo8.darkbot.extensions.ModuleHandler;
+import com.github.manolo8.darkbot.extensions.modules.ModuleHandler;
+import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.MapModule;
@@ -38,7 +41,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.13 beta 5";
+    public static final String VERSION = "1.13.13 beta 7";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -64,7 +67,9 @@ public class Main extends Thread {
     public Config config;
     private boolean failedConfig;
 
+    private final PluginHandler pluginHandler;
     private final ModuleHandler moduleHandler;
+    private final BehaviourHandler behaviourHandler;
     private String moduleId;
     public Module module;
 
@@ -116,8 +121,11 @@ public class Main extends Thread {
 
         backpage = new BackpageManager(this);
 
-        moduleHandler = new ModuleHandler();
-        moduleHandler.reloadModules();
+        pluginHandler = new PluginHandler();
+        moduleHandler = new ModuleHandler(pluginHandler);
+        behaviourHandler = new BehaviourHandler(pluginHandler);
+
+        pluginHandler.updatePlugins();
 
         form = new MainGui(this);
 
@@ -223,26 +231,28 @@ public class Main extends Thread {
 
     public <A extends Module> A setModule(A module) {
         module.install(this);
-        if (module instanceof CustomModule) installCustomModule((CustomModule<?>) module);
+        if (module instanceof ConfigurableModule) installCustomModule((ConfigurableModule<?>) module);
         else form.setCustomConfig(null, null);
         this.module = module;
         return module;
     }
 
-    private <C> void installCustomModule(CustomModule<C> module) {
-        Class<C> configClass = module.configuration();
-        C moduleConfig = null;
-        if (configClass != null) {
-            Object storedConfig = config.CUSTOM_CONFIGS.get(module.id());
+    private void installCustomModule(ConfigurableModule module) {
+        CustomModule customMod = module.getClass().getAnnotation(CustomModule.class);
+        Class<?> configClass;
+        Object moduleConfig = null;
+        if (customMod != null && (configClass = customMod.configuration()) != Void.class) {
+            Object storedConfig = config.CUSTOM_CONFIGS.get(module.getClass().getCanonicalName());
 
             moduleConfig = storedConfig != null ? Main.GSON.fromJson(Main.GSON.toJsonTree(storedConfig), configClass) :
                             ReflectionUtils.createInstance(configClass);
-            config.CUSTOM_CONFIGS.put(module.id(), moduleConfig);
+            config.CUSTOM_CONFIGS.put(module.getClass().getCanonicalName(), moduleConfig);
 
-            form.setCustomConfig(module.name(), moduleConfig);
+            form.setCustomConfig(customMod.name(), moduleConfig);
         } else {
             form.setCustomConfig(null, null);
         }
+        //noinspection unchecked
         module.install(this, moduleConfig);
     }
 
@@ -290,8 +300,8 @@ public class Main extends Thread {
     }
 
     private void checkModule() {
-        if (module == null || !moduleId.equals(config.GENERAL.CURRENT_MODULE))
-            setModule(moduleHandler.getModule(moduleId = config.GENERAL.CURRENT_MODULE));
+        if (module == null || moduleId == null || !moduleId.equals(config.GENERAL.CURRENT_MODULE))
+            setModule(moduleHandler.getFeature(moduleId = config.GENERAL.CURRENT_MODULE));
     }
 
     private void sleepMax(long time, int total) {

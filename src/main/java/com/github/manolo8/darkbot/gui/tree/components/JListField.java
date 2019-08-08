@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.types.Options;
 import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
+import com.github.manolo8.darkbot.gui.utils.ToolTipListRenderer;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
@@ -34,6 +35,7 @@ public class JListField extends JComboBox<String> implements OptionEditor {
                 showPopup();
             }
         });
+        setRenderer(new ToolTipListRenderer(this));
     }
 
     @Override
@@ -58,6 +60,11 @@ public class JListField extends JComboBox<String> implements OptionEditor {
     @Override
     public Dimension getPreferredSize() {
         return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
+    }
+
+    public String getToolTipFor(String value) {
+        if (options == null) return null;
+        return options.getTooltip(value);
     }
 
 }
