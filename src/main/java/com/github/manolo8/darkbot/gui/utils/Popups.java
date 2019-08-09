@@ -9,11 +9,15 @@ public class Popups {
     public static void showMessageAsync(String title, String content, int type) {
         SwingUtilities.invokeLater(() -> {
             JOptionPane pane = new JOptionPane(content, type);
-            JDialog dialog = pane.createDialog(title);
-            dialog.setIconImage(MainGui.ICON);
-            dialog.setAlwaysOnTop(true);
-            dialog.setVisible(true);
+            showMessageSync(title, pane);
         });
+    }
+
+    public static void showMessageSync(String title, JOptionPane pane) {
+        JDialog dialog = pane.createDialog(title);
+        dialog.setIconImage(MainGui.ICON);
+        dialog.setAlwaysOnTop(true);
+        dialog.setVisible(true);
     }
 
 }

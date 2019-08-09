@@ -28,7 +28,7 @@ public class TreeRenderer extends DefaultTreeCellRenderer {
         if (!leaf || ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.DISPLAY.HIDE_EDITORS) {
             String text = node.name;
             if (leaf) {
-                String val = Objects.toString(value, "");
+                String val = Objects.toString(node.toString(), "(unset)");
                 if (!text.isEmpty() && !val.isEmpty()) text += ": ";
                 text += val;
             }

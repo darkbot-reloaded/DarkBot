@@ -13,6 +13,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
+import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class Config {
         @Option("Module")
         @Editor(JListField.class)
         @Options(ModuleSupplier.class)
-        public String CURRENT_MODULE = null;
+        public String CURRENT_MODULE = LootNCollectorModule.class.getCanonicalName();
 
         @Option("Working map")
         @Editor(JListField.class)

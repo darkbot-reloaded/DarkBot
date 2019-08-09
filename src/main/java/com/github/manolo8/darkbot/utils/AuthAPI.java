@@ -21,9 +21,16 @@ public interface AuthAPI {
 
     /**
      * If the user didn't authenticate beforehand, it will prompt the user to authenticate.
-     * @return If the user is a donor in the official darkbot discord server.
+     * @return true if the user is a donor in the official darkbot discord server, false otherwise.
      */
     boolean isDonor();
+
+    /**
+     * If the user didn't authenticate beforehand, it will prompt the user to authenticate.
+     * Will prompt the user to join the discord & donate if he hasn't done so yet.
+     * @return true if the user is a donor in the official darkbot discord server, false otherwise.
+     */
+    boolean requireDonor();
 
     class AuthAPIImpl implements AuthAPI {
         public void setupAuth() {}
@@ -31,6 +38,9 @@ public interface AuthAPI {
             return false;
         }
         public boolean isDonor() {
+            return false;
+        }
+        public boolean requireDonor() {
             return false;
         }
     }

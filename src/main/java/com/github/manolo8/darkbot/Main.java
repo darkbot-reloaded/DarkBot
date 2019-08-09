@@ -37,11 +37,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.13 beta 7";
+    public static final String VERSION = "1.13.13 beta 8";
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -67,7 +68,7 @@ public class Main extends Thread {
     public Config config;
     private boolean failedConfig;
 
-    private final PluginHandler pluginHandler;
+    public final PluginHandler pluginHandler;
     private final ModuleHandler moduleHandler;
     private final BehaviourHandler behaviourHandler;
     private String moduleId;
@@ -230,9 +231,15 @@ public class Main extends Thread {
     }
 
     public <A extends Module> A setModule(A module) {
+        return setModule(module, false);
+    }
+
+    public <A extends Module> A setModule(A module, boolean setConfig) {
         module.install(this);
-        if (module instanceof ConfigurableModule) installCustomModule((ConfigurableModule<?>) module);
-        else form.setCustomConfig(null, null);
+        if (setConfig) {
+            if (module instanceof ConfigurableModule) installCustomModule((ConfigurableModule<?>) module);
+            else form.setCustomConfig(null, null);
+        }
         this.module = module;
         return module;
     }
@@ -300,8 +307,8 @@ public class Main extends Thread {
     }
 
     private void checkModule() {
-        if (module == null || moduleId == null || !moduleId.equals(config.GENERAL.CURRENT_MODULE))
-            setModule(moduleHandler.getFeature(moduleId = config.GENERAL.CURRENT_MODULE));
+        if (module == null || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE))
+            setModule(moduleHandler.getFeature(moduleId = config.GENERAL.CURRENT_MODULE), true);
     }
 
     private void sleepMax(long time, int total) {

@@ -69,7 +69,7 @@ public class ConfigGui extends JFrame {
 
     private void setComponentPosition() {
         mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][grow]"));
-        mainPanel.add(new ConfigTitleBar(this, tabbedPane.getHeader()), "grow, span");
+        mainPanel.add(new ConfigTitleBar(this, tabbedPane.getHeader(), main), "grow, span");
 
         tabbedPane.addTab("General", advancedPane);
         tabbedPane.addTab("Preferred Zones", preferredZones);
