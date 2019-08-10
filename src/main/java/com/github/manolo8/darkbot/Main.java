@@ -21,6 +21,7 @@ import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.modules.ModuleHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
+import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.MapModule;
@@ -42,7 +43,8 @@ import java.util.stream.Stream;
 
 public class Main extends Thread {
 
-    public static final String VERSION = "1.13.13 beta 8";
+    public static final String VERSION_STRING = "1.13.13 beta 9";
+    public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()

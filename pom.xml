@@ -81,7 +81,6 @@
                         <phase>clean</phase>
                         <configuration>
                             <file>${basedir}/lib/darcula.jar</file>
-                            <repositoryLayout>default</repositoryLayout>
                             <groupId>com.bulenkov</groupId>
                             <artifactId>darcula</artifactId>
                             <version>1.0.0</version>

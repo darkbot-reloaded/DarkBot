@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
+import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.extensions.util.Version;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -59,7 +61,27 @@ public class PluginHandler {
         }
         PluginDefinition plugin = GSON.fromJson(new InputStreamReader(jar.getInputStream(plJson), StandardCharsets.UTF_8), PluginDefinition.class);
 
+        testCompatibility(plugin);
         return new Plugin(plugin, plFile.toURI().toURL());
     }
+
+    private void testCompatibility(PluginDefinition plugin) {
+        String pluginVer = plugin.name + " v" + plugin.version + " by " + plugin.author;
+
+        if (plugin.minVersion.compareTo(plugin.supportedVersion) > 0)
+            throw new IllegalStateException(pluginVer + " minimum version can't higher than supported version");
+
+        String supportedRange = "DarkBot v" + (plugin.minVersion.compareTo(plugin.supportedVersion) == 0 ?
+                plugin.minVersion : plugin.minVersion + "-v" + plugin.supportedVersion);
+
+        if (Main.VERSION.compareTo(plugin.minVersion) < 0)
+            throw new IllegalArgumentException(pluginVer + " requires " + supportedRange);
+
+        if (Main.VERSION.compareTo(plugin.supportedVersion) > 0)
+            System.out.println(pluginVer + " is made for " + supportedRange + ", so it may not work on DarkBot v" + Main.VERSION);
+        else
+            System.out.println(pluginVer + " is made for " + supportedRange + ", so it should work fine on DarkBot v" + Main.VERSION);
+    }
+
 
 }

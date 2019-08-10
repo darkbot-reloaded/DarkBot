@@ -29,7 +29,7 @@ public class LootModule implements Module {
 
     private Config config;
 
-    NpcAttacker attack;
+    protected NpcAttacker attack;
     private long refreshing;
     private SafetyFinder safety;
 

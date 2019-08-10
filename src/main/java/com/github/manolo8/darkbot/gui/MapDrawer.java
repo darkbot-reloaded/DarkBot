@@ -256,7 +256,7 @@ public class MapDrawer extends JPanel {
         drawString(g2, running, mid, height / 2 + 35, Align.MID);
 
         g2.setFont(FONT_SMALL);
-        String info = "v" + Main.VERSION + " - Refresh: " +
+        String info = "v" + Main.VERSION_STRING + " - Refresh: " +
                 (main.isRunning() ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00") +
                 "/" + Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000);
         drawString(g2, info, 5, 12, Align.LEFT);
