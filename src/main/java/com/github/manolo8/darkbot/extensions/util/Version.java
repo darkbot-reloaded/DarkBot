@@ -6,6 +6,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,6 +52,24 @@ public class Version implements Comparable<Version> {
         if (beta != o.beta) return Integer.compare(beta, o.beta);
         if (alpha != o.alpha) return Integer.compare(alpha, o.alpha);
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Version v = (Version) o;
+        return major == v.major &&
+                minor == v.minor &&
+                patch == v.patch &&
+                revision == v.revision &&
+                beta == v.beta &&
+                alpha == v.alpha;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(major, minor, patch, revision, beta, alpha);
     }
 
     @Override

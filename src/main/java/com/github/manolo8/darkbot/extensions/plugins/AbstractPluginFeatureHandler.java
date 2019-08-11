@@ -58,6 +58,7 @@ public abstract class AbstractPluginFeatureHandler<T> implements PluginListener 
     protected abstract T getDefault();
 
     public T getFeature(String id) {
+        if (pluginHandler.isLoading) return getDefault();
         Class<? extends T> featureClass = FEATURE_CLASSES_BY_ID.get(id);
         if (featureClass == null) {
             Popups.showMessageAsync("Error", "Failed to find feature " + id + ", using default", JOptionPane.ERROR_MESSAGE);

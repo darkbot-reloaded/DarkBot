@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.extensions.plugins.AbstractPluginFeatureHandle
 import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.modules.CollectorModule;
+import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.EventModule;
 import com.github.manolo8.darkbot.modules.LootModule;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
@@ -43,7 +44,7 @@ public class ModuleHandler extends AbstractPluginFeatureHandler<Module> {
 
     @Override
     protected Module getDefault() {
-        return new LootNCollectorModule();
+        return new DummyModule();
     }
 
 }

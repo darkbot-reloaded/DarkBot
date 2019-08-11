@@ -21,9 +21,11 @@ import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.modules.ModuleHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
+import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.MapModule;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.github.manolo8.darkbot.utils.Time;
@@ -41,9 +43,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class Main extends Thread {
+public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.13 beta 9";
+    public static final String VERSION_STRING = "1.13.13 beta 10";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
@@ -129,6 +131,7 @@ public class Main extends Thread {
         behaviourHandler = new BehaviourHandler(pluginHandler);
 
         pluginHandler.updatePlugins();
+        pluginHandler.addListener(this);
 
         form = new MainGui(this);
 
@@ -265,6 +268,14 @@ public class Main extends Thread {
         module.install(this, moduleConfig);
     }
 
+    @Override
+    public void beforeLoad() {
+        setModule(new DummyModule(), true);
+    }
+
+    @Override
+    public void afterLoad() {}
+
     public void setRunning(boolean running) {
         if (this.running == running) return;
         status.send(running);
@@ -309,7 +320,7 @@ public class Main extends Thread {
     }
 
     private void checkModule() {
-        if (module == null || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE))
+        if (module == null || module instanceof DummyModule || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE))
             setModule(moduleHandler.getFeature(moduleId = config.GENERAL.CURRENT_MODULE), true);
     }
 
