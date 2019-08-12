@@ -24,7 +24,7 @@ public class MainButton extends JButton implements SimpleMouseListener, ActionLi
         this(icon, null);
     }
 
-    private MainButton(Icon icon, String text) {
+    protected MainButton(Icon icon, String text) {
         super(text, icon);
         putClientProperty("JButton.buttonType", "square");
         setBorder(UIUtils.getBorder());

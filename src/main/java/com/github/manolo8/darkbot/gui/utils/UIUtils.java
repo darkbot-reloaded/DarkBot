@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.utils;
 
 import com.bulenkov.iconloader.util.Gray;
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.titlebar.CloseButton;
 
@@ -12,13 +13,17 @@ import java.awt.*;
 
 public class UIUtils {
 
+    public static final Color GREEN = Color.decode("#3D6E3D"),
+            YELLOW = Color.decode("#6E6E28"),
+            RED = Color.decode("#6E2B28");
+
     public static ImageIcon getIcon(String name) {
-        return new ImageIcon(new ImageIcon(CloseButton.class.getResource("/" + name + ".png")).getImage()
+        return new ImageIcon(new ImageIcon(UIUtils.class.getResource("/" + name + ".png")).getImage()
                 .getScaledInstance(16, 16, Image.SCALE_SMOOTH));
     }
 
     public static Image getImage(String name) {
-        return new ImageIcon(CloseButton.class.getResource("/" + name + ".png")).getImage();
+        return new ImageIcon(UIUtils.class.getResource("/" + name + ".png")).getImage();
     }
 
     public static Insets getInsetConfig(boolean textPadding) {

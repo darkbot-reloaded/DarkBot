@@ -167,14 +167,6 @@ public class Config {
         public int NPC_DISTANCE_IGNORE = 3000;
     }
 
-    public @Option("Experiments event") Event EVENT = new Event();
-    public static class Event {
-        @Option(value = "Complete event progress", description = "If the bot should click on the event progress")
-        public boolean PROGRESS = true;
-        @Option(value = "Map switching", description = "Switch between Exp zone 2-x maps")
-        public boolean MAP_SWITCHING = true;
-    }
-
     public @Option("Pet") PetSettings PET = new PetSettings();
     public static class PetSettings {
         @Option("Use pet")

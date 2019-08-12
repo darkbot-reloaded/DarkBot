@@ -7,11 +7,10 @@ import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.modules.CollectorModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
-import com.github.manolo8.darkbot.modules.EventModule;
 import com.github.manolo8.darkbot.modules.LootModule;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 
-public class ModuleHandler extends AbstractPluginFeatureHandler<Module> {
+public class ModuleHandler extends AbstractPluginFeatureHandler<Module, CustomModule> {
 
     public ModuleHandler(PluginHandler pluginHandler) {
         super(pluginHandler);
@@ -19,10 +18,9 @@ public class ModuleHandler extends AbstractPluginFeatureHandler<Module> {
 
     @Override
     protected void registerDefaults() {
-        register("Collector", "Resource-only collector module. Can cloack.", CollectorModule.class);
-        register("Npc Killer", "Npc-only module. Will never pick up resources.", LootModule.class);
-        register("Kill & Collect", "Kills npcs and collects resources at the same time.", LootNCollectorModule.class);
-        register("Experiment zones", "Used for the plutus dark orbit event", EventModule.class);
+        registerFeature(CollectorModule.class);
+        registerFeature(LootModule.class);
+        registerFeature(LootNCollectorModule.class);
     }
 
     @Override
@@ -31,15 +29,15 @@ public class ModuleHandler extends AbstractPluginFeatureHandler<Module> {
     }
 
     @Override
-    protected void registerFeature(Class<Module> module) {
+    protected void registerFeature(Class<? extends Module> module) {
         CustomModule cm = module.getAnnotation(CustomModule.class);
         if (cm == null) throw new IllegalArgumentException("Can't load custom module not annotated with @CustomModule");
-        register(cm.name(), cm.description(), module);
+        register(module, cm);
     }
 
     @Override
     protected void afterRegistration() {
-        ModuleSupplier.updateModules(FEATURE_NAMES_BY_ID, FEATURE_DESCRIPTIONS_BY_ID);
+        ModuleSupplier.updateModules(FEATURES_BY_ID);
     }
 
     @Override

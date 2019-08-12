@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.components;
 
-import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
@@ -23,11 +22,20 @@ public class TabbedPane extends JPanel {
         setBorder(UIUtils.getPartialBorder(true));
     }
 
-    public void addTab(String name, JComponent component) {
-        Tab tab = new Tab(name, component);
-        header.add(tab);
-        if (current == null) selectTab(tab);
+    public void addTab(Icon icon, String name, JComponent component) {
+        addTab(new Tab(icon, name, component), true);
     }
+
+    public MainButton addHiddenTab(Icon icon, String name, JComponent component) {
+        return addTab(new Tab(icon, name, component), false);
+    }
+
+    private Tab addTab(Tab tab, boolean inHeader) {
+        if (inHeader) header.add(tab);
+        if (current == null) selectTab(tab);
+        return tab;
+    }
+
 
     private void selectTab(Tab tab) {
         Tab old = current;
@@ -49,8 +57,8 @@ public class TabbedPane extends JPanel {
 
         private final JComponent component;
 
-        private Tab(String name, JComponent component) {
-            super(name);
+        private Tab(Icon icon, String name, JComponent component) {
+            super(icon, name);
             this.component = component;
         }
 

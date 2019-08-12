@@ -18,14 +18,14 @@ public class ExitConfirmation extends JPanel {
         setToolTipText("Confirm exiting the bot, can be disabled in settings > miscellaneous");
     }
 
-    private class Question extends JLabel {
+    private static class Question extends JLabel {
         private Question(String text) {
             super(text);
             setBorder(UIUtils.getBorderWithInsets(true));
         }
     }
 
-    private class YesButton extends MainButton {
+    private static class YesButton extends MainButton {
 
         private YesButton() {
             super("Yes");

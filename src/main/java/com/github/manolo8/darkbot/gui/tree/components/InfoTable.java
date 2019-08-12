@@ -116,7 +116,7 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
     private class AddButton extends MainButton {
         AddButton() {
             super(UIUtils.getIcon("add"));
-            super.actionColor = Color.decode("#3D6E3D");
+            super.actionColor = UIUtils.GREEN;
         }
 
         @Override
@@ -135,7 +135,7 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
     private class RemoveButton extends MainButton {
         RemoveButton() {
             super(UIUtils.getIcon("remove"));
-            super.actionColor = Color.decode("#6E2B28");
+            super.actionColor = UIUtils.RED;
         }
 
         @Override

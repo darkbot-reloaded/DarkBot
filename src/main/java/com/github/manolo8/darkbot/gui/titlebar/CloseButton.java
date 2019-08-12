@@ -10,7 +10,7 @@ public class CloseButton extends TitleBarButton<MainGui> {
 
     CloseButton(MainGui main) {
         super(UIUtils.getIcon("close"), main);
-        super.actionColor = Color.decode("#6E2B28");
+        super.actionColor = UIUtils.RED;
     }
 
     @Override

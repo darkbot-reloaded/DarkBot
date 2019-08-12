@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
+import com.github.manolo8.darkbot.extensions.modules.CustomModule;
 
 import java.util.Comparator;
 import java.util.List;
@@ -17,6 +18,7 @@ import static com.github.manolo8.darkbot.Main.API;
 import static java.lang.Math.cos;
 import static java.lang.StrictMath.sin;
 
+@CustomModule(name = "Collector", description = "Resource-only collector module. Can cloack.")
 public class CollectorModule implements Module {
 
     private Main main;

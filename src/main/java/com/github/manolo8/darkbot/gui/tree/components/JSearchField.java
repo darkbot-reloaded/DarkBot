@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 
 import javax.swing.*;
 import javax.swing.table.TableRowSorter;
@@ -9,7 +10,6 @@ import java.util.Arrays;
 import java.util.regex.PatternSyntaxException;
 
 public class JSearchField<M> extends JTextField {
-    private static final Color ERROR = Color.decode("#6E2B28");
 
     private final TableRowSorter<? extends M> sorter;
     private final RowFilter<M, Integer> extraFilter;
@@ -29,7 +29,7 @@ public class JSearchField<M> extends JTextField {
 
             setBackground(null);
         } catch (PatternSyntaxException e) {
-            setBackground(ERROR);
+            setBackground(UIUtils.RED);
         }
     }
 

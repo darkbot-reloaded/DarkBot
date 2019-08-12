@@ -3,10 +3,14 @@ package com.github.manolo8.darkbot.gui;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.components.TabbedPane;
+import com.github.manolo8.darkbot.gui.plugins.PluginDisplay;
 import com.github.manolo8.darkbot.gui.safety.SafetiesEditor;
 import com.github.manolo8.darkbot.gui.titlebar.ConfigTitleBar;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
+import com.sun.javaws.IconUtil;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -28,7 +32,8 @@ public class ConfigGui extends JFrame {
     private ZoneEditor preferredZones;
     private ZoneEditor avoidedZones;
     private SafetiesEditor safeEditor;
-    private JPanel ggPane;
+    private MainButton pluginTab;
+    private PluginDisplay pluginDisplay;
 
     private Lazy<Boolean> stateChange = new Lazy<>();
 
@@ -64,33 +69,28 @@ public class ConfigGui extends JFrame {
         preferredZones = new ZoneEditor();
         avoidedZones = new ZoneEditor();
         safeEditor = new SafetiesEditor();
-        ggPane = new JPanel();
+        pluginDisplay = new PluginDisplay();
     }
 
     private void setComponentPosition() {
-        mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][grow]"));
-        mainPanel.add(new ConfigTitleBar(this, tabbedPane.getHeader(), main), "grow, span");
+        tabbedPane.addTab(null, "General", advancedPane);
+        tabbedPane.addTab(null, "Preferred Zones", preferredZones);
+        tabbedPane.addTab(null, "Avoided Zones", avoidedZones);
+        tabbedPane.addTab(null, "Safety places", safeEditor);
+        pluginTab = tabbedPane.addHiddenTab(UIUtils.getIcon("plugins"), null, pluginDisplay);
 
-        tabbedPane.addTab("General", advancedPane);
-        tabbedPane.addTab("Preferred Zones", preferredZones);
-        tabbedPane.addTab("Avoided Zones", avoidedZones);
-        tabbedPane.addTab("Safety places", safeEditor);
-        //tabbedPane.addTab("GG", ggPane);
+        mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][grow]"));
+        mainPanel.add(new ConfigTitleBar(this, tabbedPane.getHeader(), pluginTab, main), "grow, span");
 
         mainPanel.add(tabbedPane, "grow, span");
-
-        // GG
-        ggPane.setLayout(new BoxLayout(ggPane, BoxLayout.Y_AXIS));
     }
 
     private void setComponentData() {
-        for (String string : main.starManager.getGGMaps())
-            ggPane.add(new JCheckBox(string));
-
         advancedPane.setEditingConfig(config);
         preferredZones.setup(main, config.PREFERRED);
         avoidedZones.setup(main, config.AVOIDED);
         safeEditor.setup(main);
+        pluginDisplay.setup(main, pluginTab);
     }
 
     void setCustomConfig(String name, Object config) {

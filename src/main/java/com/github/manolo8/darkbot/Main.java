@@ -45,7 +45,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.13 beta 10";
+    public static final String VERSION_STRING = "1.13.13 beta 11";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
@@ -73,8 +73,8 @@ public class Main extends Thread implements PluginListener {
     private boolean failedConfig;
 
     public final PluginHandler pluginHandler;
-    private final ModuleHandler moduleHandler;
-    private final BehaviourHandler behaviourHandler;
+    public final ModuleHandler moduleHandler;
+    public final BehaviourHandler behaviourHandler;
     private String moduleId;
     public Module module;
 
@@ -274,7 +274,9 @@ public class Main extends Thread implements PluginListener {
     }
 
     @Override
-    public void afterLoad() {}
+    public void afterLoadComplete() {
+        moduleId = null;
+    }
 
     public void setRunning(boolean running) {
         if (this.running == running) return;
@@ -320,7 +322,7 @@ public class Main extends Thread implements PluginListener {
     }
 
     private void checkModule() {
-        if (module == null || module instanceof DummyModule || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE))
+        if (module == null || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE))
             setModule(moduleHandler.getFeature(moduleId = config.GENERAL.CURRENT_MODULE), true);
     }
 

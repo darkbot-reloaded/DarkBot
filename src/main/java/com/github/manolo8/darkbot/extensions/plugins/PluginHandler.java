@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.extensions.util.Version;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -26,10 +25,10 @@ public class PluginHandler {
     public static final Path PLUGIN_PATH = PLUGIN_FOLDER.toPath(),
             PLUGIN_UPDATE_PATH = PLUGIN_UPDATE_FOLDER.toPath();
 
-    public boolean isLoading;
-
     public URLClassLoader PLUGIN_CLASS_LOADER;
     public List<Plugin> LOADED_PLUGINS = new ArrayList<>();
+    public List<Plugin> FAILED_PLUGINS = new ArrayList<>();
+    public List<PluginLoadingException> LOADING_EXCEPTIONS = new ArrayList<>();
 
     private static List<PluginListener> LISTENERS = new ArrayList<>();
 
@@ -43,77 +42,84 @@ public class PluginHandler {
     }
 
     public void updatePlugins() {
-        isLoading = true;
-        LISTENERS.forEach(PluginListener::beforeLoad);
+        synchronized (this) {
+            LISTENERS.forEach(PluginListener::beforeLoad);
 
-        if (PLUGIN_CLASS_LOADER != null) {
-            try {
-                PLUGIN_CLASS_LOADER.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (PLUGIN_CLASS_LOADER != null) {
+                try {
+                    PLUGIN_CLASS_LOADER.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }
 
-        for (File plugin : getJars("plugins/updates")) {
-            Path plPath = plugin.toPath();
+            for (File plugin : getJars("plugins/updates")) {
+                Path plPath = plugin.toPath();
+                try {
+                    Files.move(plPath, PLUGIN_PATH.resolve(plPath.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+                } catch (Exception e) {
+                    LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to update plugin: " + plPath.getFileName(), e));
+                    e.printStackTrace();
+                }
+            }
             try {
-                Files.move(plPath, PLUGIN_PATH.resolve(plPath.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+                loadPlugins(getJars("plugins"));
             } catch (Exception e) {
-                System.err.println("Failed to update plugin " + plPath);
-                e.printStackTrace();
+                LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugins", e));
             }
+            LISTENERS.forEach(PluginListener::afterLoad);
         }
-        try {
-            loadPlugins(getJars("plugins"));
-        } catch (Exception e) {
-            System.err.println("Failed to load plugins");
-            e.printStackTrace();
-        }
-        LISTENERS.forEach(PluginListener::afterLoad);
-        isLoading = false;
+        LISTENERS.forEach(PluginListener::afterLoadComplete);
     }
 
     private void loadPlugins(File[] pluginFiles) {
         LOADED_PLUGINS.clear();
-        for (File plugin : pluginFiles) {
+        FAILED_PLUGINS.clear();
+        LOADING_EXCEPTIONS.clear();
+        for (File pluginFile : pluginFiles) {
+            Plugin pl = null;
             try {
-                LOADED_PLUGINS.add(loadPlugin(plugin));
+                pl = new Plugin(pluginFile.toURI().toURL());
+                loadPlugin(pl);
+                if (pl.canLoad()) LOADED_PLUGINS.add(pl);
+                else FAILED_PLUGINS.add(pl);
+            } catch (PluginLoadingException e) {
+                LOADING_EXCEPTIONS.add(e);
             } catch (Exception e) {
-                System.err.println("Could not load plugin: " + plugin.getName());
-                e.printStackTrace();
+                LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugin", e, pl));
             }
         }
         PLUGIN_CLASS_LOADER = new URLClassLoader(LOADED_PLUGINS.stream().map(Plugin::getJar).toArray(URL[]::new));
     }
 
-    private Plugin loadPlugin(File plFile) throws IOException {
-        JarFile jar = new JarFile(plFile);
+    private void loadPlugin(Plugin plugin) throws IOException, PluginLoadingException {
+        JarFile jar = new JarFile(plugin.getJar().getFile());
         ZipEntry plJson = jar.getEntry("plugin.json");
         if (plJson == null) {
-            throw new IllegalArgumentException("missing plugin.json");
+            throw new PluginLoadingException("The plugin is missing a plugin.json in the jar root", plugin);
         }
-        PluginDefinition plugin = GSON.fromJson(new InputStreamReader(jar.getInputStream(plJson), StandardCharsets.UTF_8), PluginDefinition.class);
+        PluginDefinition plDef = GSON.fromJson(new InputStreamReader(jar.getInputStream(plJson), StandardCharsets.UTF_8), PluginDefinition.class);
+        plugin.setDefinition(plDef);
 
         testCompatibility(plugin);
-        return new Plugin(plugin, plFile.toURI().toURL());
     }
 
-    private void testCompatibility(PluginDefinition plugin) {
-        String pluginVer = plugin.name + " v" + plugin.version + " by " + plugin.author;
+    private void testCompatibility(Plugin plugin) {
+        PluginDefinition pd = plugin.getDefinition();
 
-        if (plugin.minVersion.compareTo(plugin.supportedVersion) > 0)
-            throw new IllegalStateException(pluginVer + " minimum version can't higher than supported version");
+        if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
+            plugin.addFailure("Invalid plugin.json",
+                    "The minimum version " + pd.minVersion  + " is higher than the supported version " + pd.supportedVersion);
 
-        String supportedRange = "DarkBot v" + (plugin.minVersion.compareTo(plugin.supportedVersion) == 0 ?
-                plugin.minVersion : plugin.minVersion + "-v" + plugin.supportedVersion);
+        String supportedRange = "DarkBot v" + (pd.minVersion.compareTo(pd.supportedVersion) == 0 ?
+                pd.minVersion : pd.minVersion + "-v" + pd.supportedVersion);
 
-        if (Main.VERSION.compareTo(plugin.minVersion) < 0)
-            throw new IllegalArgumentException(pluginVer + " requires " + supportedRange);
+        if (Main.VERSION.compareTo(pd.minVersion) < 0)
+            plugin.addFailure("Min required version is " + pd.minVersion, "This plugin supports " + supportedRange);
 
-        if (Main.VERSION.compareTo(plugin.supportedVersion) > 0)
-            System.out.println(pluginVer + " is made for " + supportedRange + ", so it may not work on DarkBot v" + Main.VERSION);
-        else
-            System.out.println(pluginVer + " is made for " + supportedRange + ", so it should work fine on DarkBot v" + Main.VERSION);
+        if (Main.VERSION.compareTo(pd.supportedVersion) > 0)
+            plugin.addWarning("Supported version is older than current",
+                    "The plugin is made for " + supportedRange + ", so it may not work on Darkbot v" + Main.VERSION);
     }
 
 
