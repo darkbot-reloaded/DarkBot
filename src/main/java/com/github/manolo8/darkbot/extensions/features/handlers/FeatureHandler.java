@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.extensions.features.handlers;
 
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.extensions.features.decorators.FeatureDecorator;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import java.lang.reflect.Type;

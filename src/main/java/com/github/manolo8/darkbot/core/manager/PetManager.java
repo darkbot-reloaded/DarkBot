@@ -1,8 +1,12 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
+import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.objects.Gui;
+
+import java.util.List;
 
 public class PetManager extends Gui {
 
@@ -12,11 +16,14 @@ public class PetManager extends Gui {
     private long activeUntil;
     private int moduleStatus = -2; // -2 no module, -1 selecting module, >= 0 module selected
     private Main main;
+    private List<Ship> ships;
+    private Ship target;
     private Pet pet;
     private boolean enabled = false;
 
     PetManager(Main main) {
         this.main = main;
+        this.ships = main.mapManager.entities.ships;
         this.pet = main.hero.pet;
     }
 
@@ -30,8 +37,15 @@ public class PetManager extends Gui {
             show(false);
             return;
         }
-        if (moduleStatus != main.config.PET.MODULE && show(true)) this.selectModule();
+        updatePetTarget();
+        int module = (target == null || target instanceof Npc || target.playerInfo.isEnemy()) ? main.config.PET.MODULE : 0;
+        if (moduleStatus != module && show(true)) this.selectModule();
         else if (moduleSelected()) show(false);
+    }
+
+    private void updatePetTarget() {
+        if (target == null || !pet.isAttacking(target))
+            target = ships.stream().filter(s -> pet.isAttacking(s)).findFirst().orElse(null);
     }
 
     public void setEnabled(boolean enabled) {

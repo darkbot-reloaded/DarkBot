@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.google.gson.JsonElement;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
@@ -20,8 +19,10 @@ public class ConfigurableDecorator extends FeatureDecorator<Configurable> {
     @Override
     protected void load(Configurable obj) {
         String id = obj.getClass().getCanonicalName();
-        Class<?> configClass = findConfigType(obj.getClass());
+        Type[] configParams = ReflectionUtils.findGenericParameters(obj.getClass(), Configurable.class);
         // FIXME: add issue to feature
+        if (configParams == null || configParams.length == 0) return;
+        Class<?> configClass = (Class) configParams[0];
         if (configClass == null) return;
 
         Object config = toConfig(CUSTOM_CONFIGS.get(id), configClass);
@@ -35,18 +36,6 @@ public class ConfigurableDecorator extends FeatureDecorator<Configurable> {
     protected void unload(Configurable obj) {
         String id = obj.getClass().getCanonicalName();
         CUSTOM_CONFIGS.put(id, toJsonElement(CUSTOM_CONFIGS.get(id)));
-    }
-
-    private Class findConfigType(Class clazz) {
-        for (Type itf : clazz.getGenericInterfaces()) {
-            if (!(itf instanceof ParameterizedType)) continue;
-            ParameterizedType paramType = (ParameterizedType) itf;
-            if (paramType.getRawType() == Configurable.class)
-                return (Class) paramType.getActualTypeArguments()[0];
-        }
-        Class parent = clazz.getSuperclass();
-        if (parent != null) return findConfigType(parent);
-        return null;
     }
 
     private JsonElement toJsonElement(Object config) {

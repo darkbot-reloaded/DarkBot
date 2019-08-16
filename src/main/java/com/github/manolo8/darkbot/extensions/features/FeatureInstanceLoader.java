@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.core.itf.Installable;
 import com.github.manolo8.darkbot.extensions.features.decorators.ConfigurableDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.FeatureDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstallableDecorator;
+import com.github.manolo8.darkbot.extensions.features.decorators.InstructionProviderDecorator;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import java.util.Arrays;
@@ -22,7 +23,8 @@ class FeatureInstanceLoader {
     FeatureInstanceLoader(Main main) {
         FEATURE_DECORATORS = Arrays.asList(
                 new InstallableDecorator(main),
-                new ConfigurableDecorator(main.config.CUSTOM_CONFIGS));
+                new ConfigurableDecorator(main.config.CUSTOM_CONFIGS),
+                new InstructionProviderDecorator());
     }
 
     <T> T loadFeature(Class<T> clazz) {
