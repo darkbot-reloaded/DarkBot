@@ -1,12 +1,9 @@
 package com.github.manolo8.darkbot.config.types.suppliers;
 
 import com.github.manolo8.darkbot.extensions.features.Feature;
-import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.extensions.modules.CustomModule;
 
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

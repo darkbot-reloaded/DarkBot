@@ -4,29 +4,25 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
-import com.github.manolo8.darkbot.modules.CollectorModule;
-import com.github.manolo8.darkbot.modules.LootModule;
-import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FeatureRegistry implements PluginListener {
 
-    protected final PluginHandler pluginHandler;
-    protected final Map<String, FeatureDefinition<?>> FEATURES_BY_ID = new LinkedHashMap<>();
-    protected final FeatureLoader featureLoader;
-
-    private final List<Class<?>> DEFAULT_FEATURES = Arrays.asList(CollectorModule.class, LootModule.class, LootNCollectorModule.class);
+    private final PluginHandler pluginHandler;
+    private final Map<String, FeatureDefinition<?>> FEATURES_BY_ID = new LinkedHashMap<>();
+    private final FeatureInstanceLoader featureLoader;
+    private final FeatureRegisterHandler registryHandler;
 
     public FeatureRegistry(Main main, PluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
-        this.featureLoader = new FeatureLoader(main);
+        this.featureLoader = new FeatureInstanceLoader(main);
+        this.registryHandler = new FeatureRegisterHandler(this);
         pluginHandler.addListener(this);
     }
 
@@ -38,8 +34,8 @@ public class FeatureRegistry implements PluginListener {
                 .filter(Objects::nonNull)
                 .forEach(featureLoader::unloadFeature);
         FEATURES_BY_ID.clear();
-
-        for (Class<?> feature : DEFAULT_FEATURES) registerNativeFeature(feature);
+        registryHandler.getNativeFeatures().forEach(this::registerNativeFeature);
+        registryHandler.beforeLoading();
     }
 
     @Override
@@ -47,6 +43,7 @@ public class FeatureRegistry implements PluginListener {
         pluginHandler.LOADED_PLUGINS.forEach(pl ->
                 Arrays.stream(pl.getDefinition().features)
                         .forEach(feature -> registerPluginFeature(pl, feature)));
+        registryHandler.afterLoading();
     }
 
     private void registerNativeFeature(Class<?> clazz) {
@@ -82,23 +79,21 @@ public class FeatureRegistry implements PluginListener {
         return getFeature(id);
     }
 
-    public <T> List<FeatureDefinition<T>> getFeatures(Class<T> type) {
+    public <T> Stream<FeatureDefinition<T>> getFeatures(Class<T> type) {
         //noinspection unchecked
         return FEATURES_BY_ID
                 .values()
                 .stream()
                 .filter(FeatureDefinition::canLoad)
                 .filter(fd -> type.isAssignableFrom(fd.getClazz()))
-                .map(fd -> (FeatureDefinition<T>) fd)
-                .collect(Collectors.toList());
+                .map(fd -> (FeatureDefinition<T>) fd);
     }
 
-    public List<FeatureDefinition<?>> getFeatures(Plugin plugin) {
+    public Stream<FeatureDefinition<?>> getFeatures(Plugin plugin) {
         return FEATURES_BY_ID
                 .values()
                 .stream()
-                .filter(fd -> fd.getPlugin() == plugin)
-                .collect(Collectors.toList());
+                .filter(fd -> fd.getPlugin() == plugin);
     }
 
 

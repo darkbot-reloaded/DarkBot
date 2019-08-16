@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.extensions.plugins;
 import com.github.manolo8.darkbot.Main;
 import com.google.gson.Gson;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -42,6 +43,10 @@ public class PluginHandler {
     }
 
     public void updatePlugins() {
+        SwingUtilities.invokeLater(this::updatePluginsSync);
+    }
+
+    public void updatePluginsSync() {
         synchronized (this) {
             LISTENERS.forEach(PluginListener::beforeLoad);
 

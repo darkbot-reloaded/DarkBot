@@ -10,7 +10,6 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.extensions.features.Feature;
-import com.github.manolo8.darkbot.extensions.modules.CustomModule;
 
 import java.util.Comparator;
 import java.util.List;

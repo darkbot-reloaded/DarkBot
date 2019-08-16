@@ -17,6 +17,8 @@ public class InstallableDecorator extends FeatureDecorator<Installable> {
     }
 
     @Override
-    protected void unload(Installable obj) {}
+    protected void unload(Installable obj) {
+        obj.uninstall();
+    }
 
 }

@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.extensions.features;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.itf.Configurable;
+import com.github.manolo8.darkbot.core.itf.Installable;
 import com.github.manolo8.darkbot.extensions.features.decorators.ConfigurableDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.FeatureDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstallableDecorator;
@@ -9,17 +11,21 @@ import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import java.util.Arrays;
 import java.util.List;
 
-public class FeatureLoader {
+/**
+ * Takes care of creating instances of features, and calling relevant setup or tear down methods.
+ * e.g. calling {@link Installable#install(Main main)} or {@link Configurable#setConfig(Object config)}
+ */
+class FeatureInstanceLoader {
 
     private final List<FeatureDecorator<?>> FEATURE_DECORATORS;
 
-    public FeatureLoader(Main main) {
+    FeatureInstanceLoader(Main main) {
         FEATURE_DECORATORS = Arrays.asList(
                 new InstallableDecorator(main),
                 new ConfigurableDecorator(main.config.CUSTOM_CONFIGS));
     }
 
-    public <T> T loadFeature(Class<T> clazz) {
+    <T> T loadFeature(Class<T> clazz) {
         T feature = ReflectionUtils.createInstance(clazz);
         for (FeatureDecorator<?> decorator : FEATURE_DECORATORS) {
             decorator.tryLoad(feature);
@@ -27,7 +33,7 @@ public class FeatureLoader {
         return feature;
     }
 
-    public <T> void unloadFeature(T feature) {
+    <T> void unloadFeature(T feature) {
         for (FeatureDecorator<?> decorator : FEATURE_DECORATORS) {
             decorator.tryUnload(feature);
         }

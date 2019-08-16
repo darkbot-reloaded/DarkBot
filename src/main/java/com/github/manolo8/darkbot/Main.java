@@ -9,8 +9,6 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.itf.Configurable;
-import com.github.manolo8.darkbot.extensions.features.Feature;
-import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
@@ -19,7 +17,9 @@ import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
-import com.github.manolo8.darkbot.extensions.modules.ModuleHandler;
+import com.github.manolo8.darkbot.extensions.features.Feature;
+import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
+import com.github.manolo8.darkbot.extensions.features.handlers.ModuleHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.extensions.util.Version;
@@ -126,9 +126,8 @@ public class Main extends Thread implements PluginListener {
 
         pluginHandler = new PluginHandler();
         featureRegistry = new FeatureRegistry(this, pluginHandler);
-        pluginHandler.addListener(new ModuleHandler(featureRegistry));
 
-        pluginHandler.updatePlugins();
+        pluginHandler.updatePluginsSync();
         pluginHandler.addListener(this);
 
         form = new MainGui(this);
@@ -252,7 +251,7 @@ public class Main extends Thread implements PluginListener {
 
     @Override
     public void beforeLoad() {
-        setModule(new DummyModule(), true);
+        if (module != null) setModule(new DummyModule(), true);
     }
 
     @Override

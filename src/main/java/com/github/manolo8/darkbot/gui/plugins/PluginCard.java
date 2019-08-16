@@ -2,8 +2,6 @@ package com.github.manolo8.darkbot.gui.plugins;
 
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
-import com.github.manolo8.darkbot.extensions.modules.CustomModule;
-import com.github.manolo8.darkbot.extensions.modules.ModuleHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
 import com.github.manolo8.darkbot.gui.tree.components.JLabel;
@@ -15,7 +13,6 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.util.Arrays;
 
 public class PluginCard extends JPanel {
 
@@ -28,12 +25,10 @@ public class PluginCard extends JPanel {
             ERROR_COLOR = new Color(UIUtils.RED.getRGB() + ALPHA, true);
 
     private Plugin plugin;
-    private FeatureRegistry featureRegistry;
 
     public PluginCard(Plugin plugin, FeatureRegistry featureRegistry) {
         super(new MigLayout(new LC().fillX().wrapAfter(1).insetsAll("7px"), new AC(), new AC().noGrid(1)));
         this.plugin = plugin;
-        this.featureRegistry = featureRegistry;
         setColor();
 
         PluginDefinition definition = plugin.getDefinition();
@@ -44,9 +39,7 @@ public class PluginCard extends JPanel {
         add(new JLabel("by " + definition.author), "gapleft 5px, wrap");
         add(new IssueList(plugin.getIssues()), "dock east");
 
-        featureRegistry.getFeatures(plugin)
-                .forEach(fd -> add(getFeature(fd)));
-        //add(new JLabel(Arrays.toString(definition.modules)));
+        featureRegistry.getFeatures(plugin).forEach(fd -> add(getFeature(fd)));
     }
 
     private JCheckBox getFeature(FeatureDefinition feature) {
