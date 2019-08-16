@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -83,6 +84,10 @@ public class ConfigEntity {
 
     public Set<SafetyInfo> getOrCreateSafeties() {
         return config.SAFETY.computeIfAbsent(MapManager.id, id -> new HashSet<>());
+    }
+
+    public PluginInfo getPluginInfo(PluginDefinition plugin) {
+        return config.PLUGIN_INFOS.computeIfAbsent(plugin.name + "_by_" + plugin.author, id -> new PluginInfo());
     }
 
     public static void changed() {

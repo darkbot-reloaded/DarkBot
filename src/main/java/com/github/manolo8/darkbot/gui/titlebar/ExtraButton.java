@@ -11,8 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 
-import static com.github.manolo8.darkbot.Main.API;
-
 public class ExtraButton extends TitleBarButton<JFrame> {
 
     private JPopupMenu extraOptions = new JPopupMenu("Extra Options");
@@ -39,7 +37,7 @@ public class ExtraButton extends TitleBarButton<JFrame> {
         });
         reload.addActionListener(e -> {
             System.out.println("Triggering refresh: user requested");
-            API.handleRefresh();
+            Main.API.handleRefresh();
         });
         discord.addActionListener(e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT"));
         copySid.addActionListener(e -> SystemUtils.toClipboard(main.statsManager.sid));

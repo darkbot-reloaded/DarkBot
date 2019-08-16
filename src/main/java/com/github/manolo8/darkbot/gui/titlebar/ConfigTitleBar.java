@@ -15,7 +15,7 @@ public class ConfigTitleBar extends JPanel implements SimpleMouseListener {
         add(tabs);
         add(new DragArea(frame), "grow");
         add(plugins, "grow");
-        add(new ReloadButton(frame, main.pluginHandler), "grow");
+        add(new PluginReloadButton(frame, main.pluginHandler), "grow");
         add(new HideButton(frame), "grow");
     }
 

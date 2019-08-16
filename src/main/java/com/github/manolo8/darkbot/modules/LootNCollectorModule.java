@@ -7,9 +7,10 @@ import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.PetManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
+import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.modules.CustomModule;
 
-@CustomModule(name = "Kill & Collect", description = "Kills npcs and collects resources at the same time.")
+@Feature(name = "Kill & Collect", description = "Kills npcs and collects resources at the same time.")
 public class LootNCollectorModule implements Module {
 
     protected LootModule lootModule = new LootModule();

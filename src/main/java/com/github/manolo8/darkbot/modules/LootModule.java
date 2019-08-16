@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
+import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.modules.CustomModule;
 import com.github.manolo8.darkbot.modules.utils.NpcAttacker;
 import com.github.manolo8.darkbot.modules.utils.SafetyFinder;
@@ -18,7 +19,7 @@ import java.util.List;
 import static java.lang.Double.min;
 import static java.lang.Math.random;
 
-@CustomModule(name = "Npc Killer", description = "Npc-only module. Will never pick up resources.")
+@Feature(name = "Npc Killer", description = "Npc-only module. Will never pick up resources.")
 public class LootModule implements Module {
 
     private Main main;

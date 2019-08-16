@@ -1,6 +1,10 @@
 package com.github.manolo8.darkbot.utils;
 
+import com.github.manolo8.darkbot.core.itf.Configurable;
+
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,13 +27,6 @@ public class ReflectionUtils {
         primitiveToWrapper.put(void.class, Void.class);
 
         PRIMITIVE_TO_WRAPPER = Collections.unmodifiableMap(primitiveToWrapper);
-    }
-
-    private static Map<Class<?>, Object> SINGLETON_INSTANCES = new HashMap<>();
-
-    public static <T> T createSingleton(Class<T> clazz) {
-        //noinspection unchecked
-        return (T) SINGLETON_INSTANCES.computeIfAbsent(clazz, ReflectionUtils::createInstance);
     }
 
     public static <T> T createInstance(Class<T> clazz) {
@@ -72,6 +69,25 @@ public class ReflectionUtils {
         if (!type.isPrimitive()) return type;
         //noinspection unchecked
         return (Class<T>) PRIMITIVE_TO_WRAPPER.get(type);
+    }
+
+    public static Type[] findGenericParameters(Class clazz, Class generic) {
+        Type[] params;
+        for (Type itf : clazz.getGenericInterfaces()) {
+            if ((params = getTypes(itf, generic)) != null) return params;
+        }
+        if ((params = getTypes(clazz.getGenericSuperclass(), generic)) != null) return params;
+
+        Class parent = clazz.getSuperclass();
+        if (parent != null) return findGenericParameters(generic, parent);
+        return null;
+    }
+
+    private static Type[] getTypes(Type type, Class expected) {
+        if (!(type instanceof ParameterizedType)) return null;
+        ParameterizedType paramType = (ParameterizedType) type;
+        if (paramType.getRawType() == expected) return paramType.getActualTypeArguments();
+        return null;
     }
 
 }

@@ -1,13 +1,15 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
-import com.github.manolo8.darkbot.extensions.behaviours.BehaviourHandler;
+import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
+import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.modules.CustomModule;
 import com.github.manolo8.darkbot.extensions.modules.ModuleHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
-import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.gui.tree.components.JLabel;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import net.miginfocom.layout.AC;
+import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -26,52 +28,40 @@ public class PluginCard extends JPanel {
             ERROR_COLOR = new Color(UIUtils.RED.getRGB() + ALPHA, true);
 
     private Plugin plugin;
-    private ModuleHandler moduleHandler;
-    private BehaviourHandler behaviourHandler;
+    private FeatureRegistry featureRegistry;
 
-    public PluginCard(Plugin plugin, ModuleHandler moduleHandler, BehaviourHandler behaviourHandler) {
-        super(new MigLayout());
+    public PluginCard(Plugin plugin, FeatureRegistry featureRegistry) {
+        super(new MigLayout(new LC().fillX().wrapAfter(1).insetsAll("7px"), new AC(), new AC().noGrid(1)));
         this.plugin = plugin;
-        this.moduleHandler = moduleHandler;
-        this.behaviourHandler = behaviourHandler;
+        this.featureRegistry = featureRegistry;
         setColor();
 
         PluginDefinition definition = plugin.getDefinition();
 
+
         add(new JLabel(definition.name), "split 3");
         add(new JLabel("v" + definition.version.toString()), "gapleft 5px");
         add(new JLabel("by " + definition.author), "gapleft 5px, wrap");
-        plugin.getIssues()
-                .stream()
-                .map(this::getError)
-                .forEach(err -> this.add(err, "wrap"));
-        Arrays.stream(definition.modules).forEach(m -> add(getModule(m)));
+        add(new IssueList(plugin.getIssues()), "dock east");
+
+        featureRegistry.getFeatures(plugin)
+                .forEach(fd -> add(getFeature(fd)));
         //add(new JLabel(Arrays.toString(definition.modules)));
     }
 
-    private JLabel getError(PluginIssue pluginIssue) {
-        JLabel label = new JLabel(pluginIssue.getMessage());
-        label.setToolTipText(pluginIssue.getDescription());
-        return label;
-    }
-
-    private JCheckBox getModule(String id) {
-        CustomModule module = moduleHandler.getFeatureDefinition(id);
-        String name = module == null ? id.substring(id.lastIndexOf(".") + 1) : module.name();
-        String tooltip = module == null ? "The module class couldn't be loaded" : module.description();
-
-        JCheckBox checkBox = new JCheckBox(name);
-        if (!tooltip.isEmpty()) checkBox.setToolTipText(tooltip);
-        if (module == null) checkBox.setBackground(ERROR_COLOR);
+    private JCheckBox getFeature(FeatureDefinition feature) {
+        JCheckBox checkBox = new JCheckBox(feature.getName());
+        if (!feature.getDescription().isEmpty()) checkBox.setToolTipText(feature.getDescription());
+        if (feature.getIssues().hasIssues()) checkBox.setBackground(ERROR_COLOR);
         else checkBox.setOpaque(false);
         return checkBox;
     }
 
     private void setColor() {
-        if (!plugin.canLoad()) {
+        if (!plugin.getIssues().canLoad()) {
             setBorder(ERROR_BORDER);
             setBackground(ERROR_COLOR);
-        } else if (!plugin.getIssues().isEmpty()) {
+        } else if (plugin.getIssues().hasIssues()) {
             setBorder(WARNING_BORDER);
             setBackground(WARNING_COLOR);
         } else {

@@ -31,6 +31,8 @@ public class Config {
 
     public Map<String, Object> CUSTOM_CONFIGS = new HashMap<>();
 
+    public Map<String, PluginInfo> PLUGIN_INFOS = new HashMap<>();
+
     public transient boolean changed;
 
     public @Option("General") General GENERAL = new General();

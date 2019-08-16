@@ -18,6 +18,6 @@ public class DummyModule implements Module {
 
     @Override
     public String status() {
-        return "Waiting module";
+        return "Waiting module - Select a module in config";
     }
 }

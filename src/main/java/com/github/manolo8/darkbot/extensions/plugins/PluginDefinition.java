@@ -16,7 +16,5 @@ public class PluginDefinition {
     // Latest tested version this plugin runs on
     public Version supportedVersion;
     // Array of fully qualified class names of modules
-    public String[] modules = NULL_ARRAY;
-    // Array of fully qualified class names of behaviours
-    public String[] behaviours = NULL_ARRAY;
+    public String[] features = NULL_ARRAY;
 }

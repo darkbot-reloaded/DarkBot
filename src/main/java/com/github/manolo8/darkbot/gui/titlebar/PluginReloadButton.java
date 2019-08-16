@@ -7,11 +7,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class ReloadButton extends TitleBarButton<JFrame> {
+public class PluginReloadButton extends TitleBarButton<JFrame> {
 
     private PluginHandler pluginHandler;
 
-    ReloadButton(JFrame frame, PluginHandler pluginHandler) {
+    PluginReloadButton(JFrame frame, PluginHandler pluginHandler) {
         super(UIUtils.getIcon("reload"), frame);
         setToolTipText("Reload plugins");
         this.pluginHandler = pluginHandler;

@@ -1,4 +1,4 @@
-package com.github.manolo8.darkbot.extensions.behaviours;
+package com.github.manolo8.darkbot.extensions.features;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,8 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface CustomBehaviour {
+public @interface Feature {
     String name();
     String description();
-    Class<?> configuration() default Void.class;
 }

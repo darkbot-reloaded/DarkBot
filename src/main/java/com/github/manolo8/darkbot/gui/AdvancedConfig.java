@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui;
 import com.bulenkov.darcula.ui.DarculaTreeUI;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.tree.ConfigTree;
+import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
@@ -15,7 +16,7 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.MouseWheelEvent;
 
-public class AdvancedConfig extends JPanel {
+public class AdvancedConfig extends JPanel implements PluginListener {
 
     public static final int EDITOR_HEIGHT = 17;
     public static final int ROW_HEIGHT = 18;
@@ -30,9 +31,22 @@ public class AdvancedConfig extends JPanel {
     }
 
     void setEditingConfig(Config config) {
+        if (config == null) return;
         removeAll();
         this.config = config;
         add(setupUI());
+        this.revalidate();
+        this.repaint();
+    }
+
+    @Override
+    public void beforeLoad() {
+        removeAll();
+    }
+
+    @Override
+    public void afterLoad() {
+        setEditingConfig(config);
     }
 
     public void setCustomConfig(String name, Object config) {

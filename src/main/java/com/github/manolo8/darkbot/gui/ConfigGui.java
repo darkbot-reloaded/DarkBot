@@ -10,7 +10,6 @@ import com.github.manolo8.darkbot.gui.safety.SafetiesEditor;
 import com.github.manolo8.darkbot.gui.titlebar.ConfigTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
-import com.sun.javaws.IconUtil;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -87,6 +86,7 @@ public class ConfigGui extends JFrame {
 
     private void setComponentData() {
         advancedPane.setEditingConfig(config);
+        main.pluginHandler.addListener(advancedPane);
         preferredZones.setup(main, config.PREFERRED);
         avoidedZones.setup(main, config.AVOIDED);
         safeEditor.setup(main);

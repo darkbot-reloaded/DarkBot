@@ -81,7 +81,7 @@ public class PluginHandler {
             try {
                 pl = new Plugin(pluginFile.toURI().toURL());
                 loadPlugin(pl);
-                if (pl.canLoad()) LOADED_PLUGINS.add(pl);
+                if (pl.getIssues().canLoad()) LOADED_PLUGINS.add(pl);
                 else FAILED_PLUGINS.add(pl);
             } catch (PluginLoadingException e) {
                 LOADING_EXCEPTIONS.add(e);
@@ -108,17 +108,18 @@ public class PluginHandler {
         PluginDefinition pd = plugin.getDefinition();
 
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
-            plugin.addFailure("Invalid plugin.json",
+            plugin.getIssues().addFailure("Invalid plugin.json",
                     "The minimum version " + pd.minVersion  + " is higher than the supported version " + pd.supportedVersion);
 
         String supportedRange = "DarkBot v" + (pd.minVersion.compareTo(pd.supportedVersion) == 0 ?
                 pd.minVersion : pd.minVersion + "-v" + pd.supportedVersion);
 
         if (Main.VERSION.compareTo(pd.minVersion) < 0)
-            plugin.addFailure("Min required version is " + pd.minVersion, "This plugin supports " + supportedRange);
+            plugin.getIssues().addFailure("Invalid min version",
+                    "This plugin requires " + supportedRange + ", so it can't run on Darkbot v" + Main.VERSION);
 
         if (Main.VERSION.compareTo(pd.supportedVersion) > 0)
-            plugin.addWarning("Supported version is older than current",
+            plugin.getIssues().addWarning("Plugin may need update",
                     "The plugin is made for " + supportedRange + ", so it may not work on Darkbot v" + Main.VERSION);
     }
 

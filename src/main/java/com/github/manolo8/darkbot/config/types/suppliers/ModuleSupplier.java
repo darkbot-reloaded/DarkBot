@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.config.types.suppliers;
 
+import com.github.manolo8.darkbot.extensions.features.Feature;
+import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.modules.CustomModule;
 
 import javax.swing.event.ListDataEvent;
@@ -15,12 +17,12 @@ import java.util.stream.Collectors;
 
 public class ModuleSupplier extends OptionList<String> {
     private static Set<ModuleSupplier> INSTANCES = Collections.newSetFromMap(new WeakHashMap<>());
-    private static Map<String, CustomModule> MODULES_BY_ID;
+    private static Map<String, Feature> MODULES_BY_ID;
     private static List<String> MODULE_NAMES;
 
-    public static void updateModules(Map<String, CustomModule> MODULES_BY_ID) {
-        ModuleSupplier.MODULES_BY_ID = MODULES_BY_ID;
-        MODULE_NAMES = MODULES_BY_ID.values().stream().map(CustomModule::name).collect(Collectors.toList());
+    public static void updateModules(Map<String, Feature> FEATURES) {
+        ModuleSupplier.MODULES_BY_ID = FEATURES;
+        MODULE_NAMES = MODULES_BY_ID.values().stream().map(Feature::name).collect(Collectors.toList());
         INSTANCES.forEach(model -> {
             ListDataEvent ev = new ListDataEvent(model, ListDataEvent.CONTENTS_CHANGED, 0, MODULES_BY_ID.size());
             Arrays.stream(model.dataListeners.getListeners(ListDataListener.class))
@@ -45,12 +47,14 @@ public class ModuleSupplier extends OptionList<String> {
 
     @Override
     public String getTooltipFromVal(String id) {
-        return MODULES_BY_ID.get(id).description();
+        Feature feature = MODULES_BY_ID.get(id);
+        return feature == null ? null : feature.description();
     }
 
     @Override
     public String getText(String id) {
-        return MODULES_BY_ID.get(id).name();
+        Feature feature = MODULES_BY_ID.get(id);
+        return feature == null ? null : feature.name();
     }
 
     @Override

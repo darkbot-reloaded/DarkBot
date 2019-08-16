@@ -18,6 +18,10 @@ public class PluginLoadingException extends Exception {
         super(message, cause);
     }
 
+    public PluginLoadingException(String message) {
+        super(message);
+    }
+
     public Plugin getPlugin() {
         return plugin;
     }

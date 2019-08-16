@@ -1,17 +1,18 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
+import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.config.PluginInfo;
+
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Plugin {
 
     private final URL jar;
 
     private PluginDefinition definition;
-    private List<PluginIssue> issues = new ArrayList<>();
-    private boolean canLoad = true;
+    private PluginInfo info;
+    private IssueHandler issues = new IssueHandler();
 
     public Plugin(URL jar) {
         this.jar = jar;
@@ -23,26 +24,18 @@ public class Plugin {
 
     public void setDefinition(PluginDefinition definition) {
         this.definition = definition;
+        info = ConfigEntity.INSTANCE.getPluginInfo(definition);
     }
 
     public PluginDefinition getDefinition() {
         return definition;
     }
 
-    public void addWarning(String message, String description) {
-        this.issues.add(new PluginIssue(message, description, false));
+    public PluginInfo getInfo() {
+        return info;
     }
 
-    public void addFailure(String message, String description) {
-        this.issues.add(new PluginIssue(message, description, true));
-        canLoad = false;
-    }
-
-    public boolean canLoad() {
-        return canLoad;
-    }
-
-    public List<PluginIssue> getIssues() {
+    public IssueHandler getIssues() {
         return issues;
     }
 

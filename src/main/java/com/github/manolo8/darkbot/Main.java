@@ -8,9 +8,9 @@ import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.extensions.behaviours.BehaviourHandler;
-import com.github.manolo8.darkbot.extensions.modules.ConfigurableModule;
-import com.github.manolo8.darkbot.extensions.modules.CustomModule;
+import com.github.manolo8.darkbot.core.itf.Configurable;
+import com.github.manolo8.darkbot.extensions.features.Feature;
+import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
@@ -27,7 +27,6 @@ import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.MapModule;
-import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -45,7 +44,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.13 beta 11";
+    public static final String VERSION_STRING = "1.13.13 beta 12";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
@@ -73,8 +72,7 @@ public class Main extends Thread implements PluginListener {
     private boolean failedConfig;
 
     public final PluginHandler pluginHandler;
-    public final ModuleHandler moduleHandler;
-    public final BehaviourHandler behaviourHandler;
+    public final FeatureRegistry featureRegistry;
     private String moduleId;
     public Module module;
 
@@ -127,8 +125,8 @@ public class Main extends Thread implements PluginListener {
         backpage = new BackpageManager(this);
 
         pluginHandler = new PluginHandler();
-        moduleHandler = new ModuleHandler(pluginHandler);
-        behaviourHandler = new BehaviourHandler(pluginHandler);
+        featureRegistry = new FeatureRegistry(this, pluginHandler);
+        pluginHandler.addListener(new ModuleHandler(featureRegistry));
 
         pluginHandler.updatePlugins();
         pluginHandler.addListener(this);
@@ -138,7 +136,6 @@ public class Main extends Thread implements PluginListener {
         if (failedConfig) Popups.showMessageAsync("Error",
                 "Failed to load config. Default config will be used, config won't be save.", JOptionPane.ERROR_MESSAGE);
 
-        checkModule();
         start();
         API.createWindow();
     }
@@ -167,6 +164,7 @@ public class Main extends Thread implements PluginListener {
 
     private void tick() {
         status.tick();
+        checkModule();
 
         if (isInvalid())
             invalidTick();
@@ -176,7 +174,6 @@ public class Main extends Thread implements PluginListener {
         form.tick();
 
         checkConfig();
-        checkModule();
     }
 
     private boolean isInvalid() {
@@ -239,33 +236,18 @@ public class Main extends Thread implements PluginListener {
         return setModule(module, false);
     }
 
-    public <A extends Module> A setModule(A module, boolean setConfig) {
+    private <A extends Module> A setModule(A module, boolean setConfig) {
         module.install(this);
         if (setConfig) {
-            if (module instanceof ConfigurableModule) installCustomModule((ConfigurableModule<?>) module);
-            else form.setCustomConfig(null, null);
+            if (module instanceof Configurable) {
+                String name = module.getClass().getAnnotation(Feature.class).name();
+                form.setCustomConfig(name, config.CUSTOM_CONFIGS.get(module.getClass().getCanonicalName()));
+            } else {
+                form.setCustomConfig(null, null);
+            }
         }
         this.module = module;
         return module;
-    }
-
-    private void installCustomModule(ConfigurableModule module) {
-        CustomModule customMod = module.getClass().getAnnotation(CustomModule.class);
-        Class<?> configClass;
-        Object moduleConfig = null;
-        if (customMod != null && (configClass = customMod.configuration()) != Void.class) {
-            Object storedConfig = config.CUSTOM_CONFIGS.get(module.getClass().getCanonicalName());
-
-            moduleConfig = storedConfig != null ? Main.GSON.fromJson(Main.GSON.toJsonTree(storedConfig), configClass) :
-                            ReflectionUtils.createInstance(configClass);
-            config.CUSTOM_CONFIGS.put(module.getClass().getCanonicalName(), moduleConfig);
-
-            form.setCustomConfig(customMod.name(), moduleConfig);
-        } else {
-            form.setCustomConfig(null, null);
-        }
-        //noinspection unchecked
-        module.install(this, moduleConfig);
     }
 
     @Override
@@ -275,7 +257,7 @@ public class Main extends Thread implements PluginListener {
 
     @Override
     public void afterLoadComplete() {
-        moduleId = null;
+        moduleId = "(none)";
     }
 
     public void setRunning(boolean running) {
@@ -287,8 +269,7 @@ public class Main extends Thread implements PluginListener {
     private void onRunningToggle(boolean running) {
         lastRefresh = System.currentTimeMillis();
         if (running && module instanceof MapModule) {
-            moduleId = null;
-            checkModule();
+            moduleId = "(none)";
         }
     }
 
@@ -322,8 +303,15 @@ public class Main extends Thread implements PluginListener {
     }
 
     private void checkModule() {
-        if (module == null || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE))
-            setModule(moduleHandler.getFeature(moduleId = config.GENERAL.CURRENT_MODULE), true);
+        if (module == null || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE)) {
+            Module module = featureRegistry.getFeature(moduleId = config.GENERAL.CURRENT_MODULE, Module.class)
+                .orElseGet(() -> {
+                    String name = moduleId.substring(moduleId.lastIndexOf(".") + 1);
+                    Popups.showMessageAsync("Error", "Failed to load module " + name + ", using default", JOptionPane.ERROR_MESSAGE);
+                    return new DummyModule();
+                });
+            setModule(module, true);
+        }
     }
 
     private void sleepMax(long time, int total) {

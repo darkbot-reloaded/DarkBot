@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
-import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
@@ -54,7 +53,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
                 Stream.concat(
                         pluginHandler.FAILED_PLUGINS.stream(),
                         pluginHandler.LOADED_PLUGINS.stream()
-                ).map(pl -> new PluginCard(pl, main.moduleHandler, main.behaviourHandler))
+                ).map(pl -> new PluginCard(pl, main.featureRegistry))
         ).forEach(pluginPanel::add);
         pluginTab.setIcon(UIUtils.getIcon(pluginHandler.LOADING_EXCEPTIONS.isEmpty() && pluginHandler.FAILED_PLUGINS.isEmpty() ? "plugins" : "plugins_warn"));
         validate();
