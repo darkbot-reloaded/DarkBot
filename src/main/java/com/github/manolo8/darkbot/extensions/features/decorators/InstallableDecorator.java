@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.extensions.features.decorators;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Installable;
+import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 
 public class InstallableDecorator extends FeatureDecorator<Installable> {
 
@@ -12,7 +13,7 @@ public class InstallableDecorator extends FeatureDecorator<Installable> {
     }
 
     @Override
-    protected void load(Installable obj) {
+    protected void load(FeatureDefinition<Installable> fd, Installable obj) {
         obj.install(main);
     }
 

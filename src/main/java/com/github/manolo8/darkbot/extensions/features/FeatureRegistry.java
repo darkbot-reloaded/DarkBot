@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FeatureRegistry implements PluginListener {
@@ -52,7 +53,11 @@ public class FeatureRegistry implements PluginListener {
 
     private void registerPluginFeature(Plugin plugin, String clazzName) {
         try {
-            FEATURES_BY_ID.put(clazzName, new FeatureDefinition<>(plugin, (Class<?>) pluginHandler.PLUGIN_CLASS_LOADER.loadClass(clazzName)));
+            Class<?> feature = pluginHandler.PLUGIN_CLASS_LOADER.loadClass(clazzName);
+            FeatureDefinition<?> fd = new FeatureDefinition<>(plugin, feature);
+            fd.addStatusListener(def -> registryHandler.onStatusUpdate());
+            fd.getIssues().addListener(iss -> registryHandler.onStatusUpdate());
+            FEATURES_BY_ID.put(clazzName, fd);
         } catch (ClassNotFoundException e) {
             plugin.getIssues().addWarning("Feature failed to load", clazzName + " couldn't be registered properly: " + e.getMessage());
         }
@@ -60,16 +65,18 @@ public class FeatureRegistry implements PluginListener {
 
     public <T> Optional<T> getFeature(String id) {
         synchronized (pluginHandler) {
+            FeatureDefinition<T> feature = getFeatureDefinition(id);
             try {
-                FeatureDefinition<T> feature = getFeatureDefinition(id);
                 if (feature == null || !feature.canLoad()) return Optional.empty();
 
                 T instance = feature.getInstance();
                 if (instance != null) return Optional.of(instance);
 
-                feature.setInstance(instance = featureLoader.loadFeature(feature.getClazz()));
+                feature.setInstance(instance = featureLoader.loadFeature(feature));
                 return Optional.of(instance);
             } catch (Exception e) {
+                feature.getIssues().addFailure("Failed to load", Arrays.stream(e.getStackTrace()).map(Objects::toString).collect(Collectors.joining("<br>", "<html>", "</html>")));
+                e.printStackTrace();
                 return Optional.empty();
             }
         }

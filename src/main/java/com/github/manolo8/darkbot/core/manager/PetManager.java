@@ -44,7 +44,7 @@ public class PetManager extends Gui {
     }
 
     private void updatePetTarget() {
-        if (target == null || !pet.isAttacking(target))
+        if (target == null || target.removed || !pet.isAttacking(target))
             target = ships.stream().filter(s -> pet.isAttacking(s)).findFirst().orElse(null);
     }
 

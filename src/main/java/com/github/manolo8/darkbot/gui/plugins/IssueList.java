@@ -6,21 +6,23 @@ import com.github.manolo8.darkbot.gui.tree.components.JLabel;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import java.awt.*;
 
-public class IssueList extends JPanel {
+class IssueList extends JPanel {
 
-    private IssueHandler issues;
+    IssueList(IssueHandler issues, boolean inline) {
+        super(new MigLayout((inline ? "ins 0," : "") + "wrap 1", "[right]", "[top]"));
 
-    public IssueList(IssueHandler issues) {
-        super(new MigLayout(issues.hasIssues() ? "wrap 1" : "ins 0", "[right]", "[top]"));
-        this.issues = issues;
         setOpaque(false);
-        setupUI();
+        setBackground(Color.BLUE);
+        setupUI(issues);
+        issues.addListener(this::setupUI);
     }
 
-    private void setupUI() {
+    private void setupUI(IssueHandler issues) {
         removeAll();
-        this.issues.getIssues().stream().map(this::getError).forEachOrdered(this::add);
+        issues.getIssues().stream().map(this::getError).forEachOrdered(this::add);
+        setVisible(issues.hasIssues());
     }
 
     private JLabel getError(PluginIssue pluginIssue) {

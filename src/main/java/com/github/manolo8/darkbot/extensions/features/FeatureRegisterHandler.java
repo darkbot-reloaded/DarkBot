@@ -26,11 +26,11 @@ public class FeatureRegisterHandler {
         );
     }
 
-    protected Stream<Class> getNativeFeatures() {
+    Stream<Class> getNativeFeatures() {
         return FEATURE_HANDLERS.stream().flatMap(fr -> Arrays.stream(fr.getNativeFeatures()));
     }
 
-    protected void beforeLoading() {
+    void beforeLoading() {
         FEATURE_HANDLERS.forEach(this::beforeLoad);
     }
 
@@ -38,12 +38,20 @@ public class FeatureRegisterHandler {
         registerer.beforeLoading(featureRegistry.getFeatures(registerer.getHandledType()));
     }
 
-    protected void afterLoading() {
+    void afterLoading() {
         FEATURE_HANDLERS.forEach(this::afterLoad);
     }
 
     private <T> void afterLoad(FeatureHandler<T> registerer) {
         registerer.afterLoading(featureRegistry.getFeatures(registerer.getHandledType()));
+    }
+
+    void onStatusUpdate() {
+        FEATURE_HANDLERS.forEach(this::statusUpdate);
+    }
+
+    private <T> void statusUpdate(FeatureHandler<T> registerer) {
+        registerer.statusUpdate(featureRegistry.getFeatures(registerer.getHandledType()));
     }
 
 }

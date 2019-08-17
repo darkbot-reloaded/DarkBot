@@ -48,7 +48,11 @@ public class PluginHandler {
 
     public void updatePluginsSync() {
         synchronized (this) {
+            LOADED_PLUGINS.clear();
+            FAILED_PLUGINS.clear();
+            LOADING_EXCEPTIONS.clear();
             LISTENERS.forEach(PluginListener::beforeLoad);
+            System.gc();
 
             if (PLUGIN_CLASS_LOADER != null) {
                 try {
@@ -71,6 +75,7 @@ public class PluginHandler {
                 loadPlugins(getJars("plugins"));
             } catch (Exception e) {
                 LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugins", e));
+                e.printStackTrace();
             }
             LISTENERS.forEach(PluginListener::afterLoad);
         }
@@ -78,27 +83,26 @@ public class PluginHandler {
     }
 
     private void loadPlugins(File[] pluginFiles) {
-        LOADED_PLUGINS.clear();
-        FAILED_PLUGINS.clear();
-        LOADING_EXCEPTIONS.clear();
         for (File pluginFile : pluginFiles) {
             Plugin pl = null;
             try {
-                pl = new Plugin(pluginFile.toURI().toURL());
+                pl = new Plugin(pluginFile, pluginFile.toURI().toURL());
                 loadPlugin(pl);
                 if (pl.getIssues().canLoad()) LOADED_PLUGINS.add(pl);
                 else FAILED_PLUGINS.add(pl);
             } catch (PluginLoadingException e) {
                 LOADING_EXCEPTIONS.add(e);
+                e.printStackTrace();
             } catch (Exception e) {
                 LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugin", e, pl));
+                e.printStackTrace();
             }
         }
         PLUGIN_CLASS_LOADER = new URLClassLoader(LOADED_PLUGINS.stream().map(Plugin::getJar).toArray(URL[]::new));
     }
 
     private void loadPlugin(Plugin plugin) throws IOException, PluginLoadingException {
-        JarFile jar = new JarFile(plugin.getJar().getFile());
+        JarFile jar = new JarFile(plugin.getFile());
         ZipEntry plJson = jar.getEntry("plugin.json");
         if (plJson == null) {
             throw new PluginLoadingException("The plugin is missing a plugin.json in the jar root", plugin);
@@ -125,7 +129,7 @@ public class PluginHandler {
 
         if (Main.VERSION.compareTo(pd.supportedVersion) > 0)
             plugin.getIssues().addWarning("Plugin may need update",
-                    "The plugin is made for " + supportedRange + ", so it may not work on Darkbot v" + Main.VERSION);
+                    "The plugin is made for " + supportedRange + ", so it may not work on DarkBot v" + Main.VERSION);
     }
 
 

@@ -26,5 +26,6 @@ public abstract class FeatureHandler<T> {
     public abstract Class[] getNativeFeatures();
     public abstract void beforeLoading(Stream<FeatureDefinition<T>> features);
     public abstract void afterLoading(Stream<FeatureDefinition<T>> features);
+    public abstract void statusUpdate(Stream<FeatureDefinition<T>> features);
 
 }

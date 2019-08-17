@@ -21,7 +21,11 @@ public class ExceptionCard extends JPanel {
         setBackground(ERROR_COLOR);
 
         if (exception.getPlugin() != null) add(new JLabel(exception.getPlugin().getName()));
-        add(new JLabel(exception.getMessage()));
+        JLabel label = new JLabel(exception.getMessage());
+        if (exception.getCause() != null) {
+            label.setToolTipText(exception.getCause().toString());
+        }
+        add(label);
     }
 
 }

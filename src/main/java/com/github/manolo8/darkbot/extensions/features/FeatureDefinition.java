@@ -1,7 +1,12 @@
 package com.github.manolo8.darkbot.extensions.features;
 
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class FeatureDefinition<T> {
 
@@ -13,6 +18,8 @@ public class FeatureDefinition<T> {
     private final String id;
     private final String name;
     private final String description;
+
+    private final List<Consumer<FeatureDefinition<T>>> listeners = new ArrayList<>();
 
     private T instance;
 
@@ -64,8 +71,23 @@ public class FeatureDefinition<T> {
         this.instance = instance;
     }
 
+    public void setStatus(boolean enabled) {
+        if (enabled) plugin.getInfo().DISABLED_FEATURES.remove(id);
+        else plugin.getInfo().DISABLED_FEATURES.add(id);
+        ConfigEntity.changed();
+        listeners.forEach(l -> l.accept(this));
+    }
+
+    public void addStatusListener(Consumer<FeatureDefinition<T>> listener) {
+        listeners.add(listener);
+    }
+
+    public boolean isEnabled() {
+        return plugin == null || !plugin.getInfo().DISABLED_FEATURES.contains(id);
+    }
+
     public boolean canLoad() {
-        return issues.canLoad() && (plugin == null || !plugin.getInfo().DISABLED_FEATURES.contains(id));
+        return issues.canLoad() && isEnabled();
     }
 
 }

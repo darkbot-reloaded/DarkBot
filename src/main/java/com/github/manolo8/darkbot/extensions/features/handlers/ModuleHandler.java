@@ -7,6 +7,8 @@ import com.github.manolo8.darkbot.modules.CollectorModule;
 import com.github.manolo8.darkbot.modules.LootModule;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 
+import java.util.LinkedHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,12 +23,21 @@ public class ModuleHandler extends FeatureHandler<Module> {
 
     @Override
     public void beforeLoading(Stream<FeatureDefinition<Module>> modules) {
-        ModuleSupplier.updateModules(modules.collect(Collectors.toMap(FeatureDefinition::getId, FeatureDefinition::getFeature)));
+        doUpdate(modules);
     }
 
     @Override
     public void afterLoading(Stream<FeatureDefinition<Module>> modules) {
-        ModuleSupplier.updateModules(modules.collect(Collectors.toMap(FeatureDefinition::getId, FeatureDefinition::getFeature)));
+        doUpdate(modules);
+    }
+
+    @Override
+    public void statusUpdate(Stream<FeatureDefinition<Module>> modules) {
+        doUpdate(modules);
+    }
+
+    private void doUpdate(Stream<FeatureDefinition<Module>> modules) {
+        ModuleSupplier.updateModules(modules.collect(Collectors.toMap(FeatureDefinition::getId, Function.identity(), (a, b) -> a, LinkedHashMap::new)));
     }
 
 }

@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.extensions.features.decorators;
 
+import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import java.lang.reflect.Type;
@@ -16,11 +17,12 @@ public abstract class FeatureDecorator<T> {
         handledType = (Class<T>) types[0];
     }
 
-    public final void tryLoad(Object obj) {
+    public final <F> void tryLoad(FeatureDefinition<F> fd, F obj) {
         if (!handledType.isInstance(obj)) return;
-        load(handledType.cast(obj));
+        //noinspection unchecked
+        load((FeatureDefinition<T>) fd, (T) obj);
     }
-    protected abstract void load(T obj);
+    protected abstract void load(FeatureDefinition<T> fd, T obj);
 
     public final void tryUnload(Object obj) {
         if (!handledType.isInstance(obj)) return;

@@ -27,10 +27,10 @@ class FeatureInstanceLoader {
                 new InstructionProviderDecorator());
     }
 
-    <T> T loadFeature(Class<T> clazz) {
-        T feature = ReflectionUtils.createInstance(clazz);
+    <T> T loadFeature(FeatureDefinition<T> featureDefinition) {
+        T feature = ReflectionUtils.createInstance(featureDefinition.getClazz());
         for (FeatureDecorator<?> decorator : FEATURE_DECORATORS) {
-            decorator.tryLoad(feature);
+            decorator.tryLoad(featureDefinition, feature);
         }
         return feature;
     }

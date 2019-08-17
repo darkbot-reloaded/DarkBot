@@ -8,14 +8,20 @@ import java.net.URL;
 
 public class Plugin {
 
+    private final File file;
     private final URL jar;
 
     private PluginDefinition definition;
     private PluginInfo info;
     private IssueHandler issues = new IssueHandler();
 
-    public Plugin(URL jar) {
+    public Plugin(File file, URL jar) {
+        this.file = file;
         this.jar = jar;
+    }
+
+    public File getFile() {
+        return file;
     }
 
     public URL getJar() {

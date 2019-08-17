@@ -1,13 +1,9 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
-import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
+import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
-import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
-import com.github.manolo8.darkbot.gui.tree.components.JLabel;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
-import net.miginfocom.layout.AC;
-import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -24,37 +20,24 @@ public class PluginCard extends JPanel {
             WARNING_COLOR = new Color(UIUtils.YELLOW.getRGB() + ALPHA, true),
             ERROR_COLOR = new Color(UIUtils.RED.getRGB() + ALPHA, true);
 
-    private Plugin plugin;
+    PluginCard(Plugin plugin, FeatureRegistry featureRegistry) {
+        super(new MigLayout("fillx", "[]", "[nogrid]"));
+        setColor(plugin.getIssues());
+        plugin.getIssues().addListener(this::setColor);
 
-    public PluginCard(Plugin plugin, FeatureRegistry featureRegistry) {
-        super(new MigLayout(new LC().fillX().wrapAfter(1).insetsAll("7px"), new AC(), new AC().noGrid(1)));
-        this.plugin = plugin;
-        setColor();
+        add(new IssueList(plugin.getIssues(), false), "dock east");
+        add(new PluginName(plugin.getDefinition()), "dock north");
 
-        PluginDefinition definition = plugin.getDefinition();
-
-
-        add(new JLabel(definition.name), "split 3");
-        add(new JLabel("v" + definition.version.toString()), "gapleft 5px");
-        add(new JLabel("by " + definition.author), "gapleft 5px, wrap");
-        add(new IssueList(plugin.getIssues()), "dock east");
-
-        featureRegistry.getFeatures(plugin).forEach(fd -> add(getFeature(fd)));
+        featureRegistry.getFeatures(plugin)
+                .map(FeatureDisplay::new)
+                .forEach(this::add);
     }
 
-    private JCheckBox getFeature(FeatureDefinition feature) {
-        JCheckBox checkBox = new JCheckBox(feature.getName());
-        if (!feature.getDescription().isEmpty()) checkBox.setToolTipText(feature.getDescription());
-        if (feature.getIssues().hasIssues()) checkBox.setBackground(ERROR_COLOR);
-        else checkBox.setOpaque(false);
-        return checkBox;
-    }
-
-    private void setColor() {
-        if (!plugin.getIssues().canLoad()) {
+    private void setColor(IssueHandler issues) {
+        if (!issues.canLoad()) {
             setBorder(ERROR_BORDER);
             setBackground(ERROR_COLOR);
-        } else if (plugin.getIssues().hasIssues()) {
+        } else if (issues.hasIssues()) {
             setBorder(WARNING_BORDER);
             setBackground(WARNING_COLOR);
         } else {
