@@ -26,7 +26,7 @@ public class Config {
     public Map<Integer, ZoneInfo> AVOIDED = new HashMap<>();
     public Map<Integer, ZoneInfo> PREFERRED = new HashMap<>();
     public Map<Integer, Set<SafetyInfo>> SAFETY = new HashMap<>();
-    public transient Lazy<SafetyInfo> ADDED_SAFETY = new Lazy<>();
+    public transient Lazy<SafetyInfo> ADDED_SAFETY = new Lazy.NoCache<>();
     // DEFINED AREAS
 
     public Map<String, Object> CUSTOM_CONFIGS = new HashMap<>();
@@ -132,7 +132,7 @@ public class Config {
         @Option()
         @Editor(value = JBoxInfoTable.class, shared = true)
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
-        public transient Lazy<String> ADDED_BOX = new Lazy<>();
+        public transient Lazy<String> ADDED_BOX = new Lazy.NoCache<>();
     }
 
     public @Option("Npc killer") Loot LOOT = new Loot();
@@ -162,7 +162,7 @@ public class Config {
         @Option()
         @Editor(value = JNpcInfoTable.class, shared = true)
         public Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
-        public transient Lazy<String> MODIFIED_NPC = new Lazy<>();
+        public transient Lazy<String> MODIFIED_NPC = new Lazy.NoCache<>();
 
         @Option("Ignore npcs further than")
         @Num(min = 1000, max = 20000, step = 500)
@@ -224,7 +224,7 @@ public class Config {
         @Option()
         @Editor(value = JActionTable.class, shared = true)
         public Map<String, ActionInfo> ACTION_INFOS = new HashMap<>();
-        public transient Lazy<String> MODIFIED_ACTIONS = new Lazy<>();
+        public transient Lazy<String> MODIFIED_ACTIONS = new Lazy.NoCache<>();
     }
 
     public static class ShipConfig {

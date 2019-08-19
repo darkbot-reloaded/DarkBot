@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.github.manolo8.darkbot.core.utils.Lazy;
+
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -10,7 +10,7 @@ public class IssueHandler {
     private final IssueHandler parent;
 
     private final Set<PluginIssue> issues = new TreeSet<>();
-    private final List<Consumer<IssueHandler>> listeners = new ArrayList<>();
+    private final Lazy<IssueHandler> listener = new Lazy.NoCache<>();
     private boolean canLoad = true;
 
     public IssueHandler() {
@@ -23,17 +23,17 @@ public class IssueHandler {
 
     public void addWarning(String message, String description) {
         this.issues.add(new PluginIssue(message, description, false));
-        listeners.forEach(c -> c.accept(this));
+        listener.send(this);
     }
 
     public void addFailure(String message, String description) {
         this.issues.add(new PluginIssue(message, description, true));
         canLoad = false;
-        listeners.forEach(c -> c.accept(this));
+        listener.send(this);
     }
 
     public void addListener(Consumer<IssueHandler> listener) {
-        listeners.add(listener);
+        this.listener.add(listener);
     }
 
     public Set<PluginIssue> getIssues() {

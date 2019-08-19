@@ -30,6 +30,7 @@ public class GenericTableModel<T> extends DefaultTableModel {
         TOOLTIPS = prepend(clazz, Arrays.stream(FIELDS))
                 .map(annotated -> annotated.getAnnotation(Option.class))
                 .map(Option::description)
+                .map(s -> s.isEmpty() ? null : s)
                 .toArray(String[]::new);
 
         TYPES = prepend(String.class, Arrays.stream(FIELDS).map(Field::getType)

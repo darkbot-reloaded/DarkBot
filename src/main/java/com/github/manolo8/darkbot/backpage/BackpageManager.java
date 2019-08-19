@@ -45,7 +45,6 @@ public class BackpageManager extends Thread {
                 continue;
             }
 
-
             if (System.currentTimeMillis() > sidNextUpdate) {
                 int waitTime = sidCheck();
                 sidLastUpdate = System.currentTimeMillis();
@@ -64,11 +63,7 @@ public class BackpageManager extends Thread {
                     checkDrones = System.currentTimeMillis() + 300_000;
                     e.printStackTrace();
                 }
-
             }
-
-
-            if (sidStatus == 302) break;
         }
     }
 

@@ -32,7 +32,7 @@ public class MapManager implements Manager {
     long eventAddress;
 
     public static int id = -1;
-    public Lazy<Map> mapChange = new Lazy<>();
+    public Lazy<Map> mapChange = new Lazy.NoCache<>();
 
     public ZoneInfo preferred;
     public ZoneInfo avoided;

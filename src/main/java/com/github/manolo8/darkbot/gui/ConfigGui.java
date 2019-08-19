@@ -34,7 +34,7 @@ public class ConfigGui extends JFrame {
     private MainButton pluginTab;
     private PluginDisplay pluginDisplay;
 
-    private Lazy<Boolean> stateChange = new Lazy<>();
+    private Lazy<Boolean> stateChange = new Lazy.NoCache<>();
 
     public ConfigGui(Main main) throws HeadlessException {
         super("DarkBot - Config");
