@@ -30,7 +30,22 @@ public class JNumberField extends JSpinner implements OptionEditor {
     public void edit(ConfigField field) {
         this.field = null;
         Num number = field.field.getAnnotation(Num.class);
-        setModel(new SpinnerNumberModel((Number) field.get(), number.min(), number.max(), number.step()));
+        Number value = field.get();
+        if (value == null) {
+            System.err.println("Null value in number config, using min as default: " + field.field);
+            value = number.min();
+        }
+
+        SpinnerNumberModel model;
+        try {
+            model = new SpinnerNumberModel(value, number.min(), number.max(), number.step());
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            System.err.println("Failed to create editor for field, ignoring min & max: " + field.field);
+
+            model = new SpinnerNumberModel(value, null, null, number.step());
+        }
+        setModel(model);
         setPreferredSize(new Dimension(25 + (String.valueOf(number.max()).length() * 9), AdvancedConfig.EDITOR_HEIGHT));
         this.field = field;
     }

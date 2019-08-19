@@ -1,7 +1,5 @@
 package com.github.manolo8.darkbot.config.tree;
 
-import com.github.manolo8.darkbot.config.Config;
-
 import javax.swing.*;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -10,9 +8,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ConfigTree implements TreeModel {
 
@@ -20,7 +16,7 @@ public class ConfigTree implements TreeModel {
     private ConfigNode[] originalChildren;
     private List<TreeModelListener> listeners = new ArrayList<>();
 
-    public ConfigTree(Config config) {
+    public ConfigTree(Object config) {
         this.root = ConfigNode.rootingFrom(null, "Root", config);
         this.originalChildren = root.children;
     }

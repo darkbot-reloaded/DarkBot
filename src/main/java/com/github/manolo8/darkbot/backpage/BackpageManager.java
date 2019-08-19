@@ -1,12 +1,13 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.backpage.HangarManager;
+import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 public class BackpageManager extends Thread {
     private final Main main;
@@ -27,6 +28,8 @@ public class BackpageManager extends Thread {
     private long sidNextUpdate = sidLastUpdate;
     private int sidStatus = -1;
     private long checkDrones = Long.MAX_VALUE;
+
+    private List<Task> tasks;
 
     public BackpageManager(Main main) {
         super("BackpageManager");
@@ -63,6 +66,10 @@ public class BackpageManager extends Thread {
                     checkDrones = System.currentTimeMillis() + 300_000;
                     e.printStackTrace();
                 }
+            }
+
+            synchronized (main.pluginHandler) {
+                tasks.forEach(Task::tick);
             }
         }
     }
@@ -111,6 +118,10 @@ public class BackpageManager extends Thread {
             e.printStackTrace();
         }
         return data;
+    }
+
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
     }
 
     public synchronized String sidStatus() {

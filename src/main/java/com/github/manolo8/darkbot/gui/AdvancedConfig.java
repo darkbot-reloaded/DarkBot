@@ -22,7 +22,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     public static final int ROW_HEIGHT = 18;
     public static final int HEADER_HEIGHT = 26;
 
-    private Config config;
+    private Object config;
     private ConfigTree treeModel;
 
     public AdvancedConfig() {
@@ -30,7 +30,12 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         setLayout(new BorderLayout());
     }
 
-    void setEditingConfig(Config config) {
+    public AdvancedConfig(Object config) {
+        this();
+        setEditingConfig(config);
+    }
+
+    void setEditingConfig(Object config) {
         if (config == null) return;
         removeAll();
         this.config = config;
@@ -108,7 +113,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     }
 
     // http://java-swing-tips.blogspot.jp/2014/09/forward-mouse-wheel-scroll-event-in.html
-    class WheelScrollLayerUI extends LayerUI<JScrollPane> {
+    static class WheelScrollLayerUI extends LayerUI<JScrollPane> {
         @Override
         public void installUI(JComponent c) {
             super.installUI(c);

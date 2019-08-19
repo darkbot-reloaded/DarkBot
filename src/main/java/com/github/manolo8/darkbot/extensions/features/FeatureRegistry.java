@@ -23,7 +23,7 @@ public class FeatureRegistry implements PluginListener {
     public FeatureRegistry(Main main, PluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
         this.featureLoader = new FeatureInstanceLoader(main);
-        this.registryHandler = new FeatureRegisterHandler(this);
+        this.registryHandler = new FeatureRegisterHandler(main, this);
         pluginHandler.addListener(this);
     }
 
@@ -36,7 +36,7 @@ public class FeatureRegistry implements PluginListener {
                 .forEach(featureLoader::unloadFeature);
         FEATURES_BY_ID.clear();
         registryHandler.getNativeFeatures().forEach(this::registerNativeFeature);
-        registryHandler.beforeLoading();
+        registryHandler.update();
     }
 
     @Override
@@ -44,7 +44,7 @@ public class FeatureRegistry implements PluginListener {
         pluginHandler.LOADED_PLUGINS.forEach(pl ->
                 Arrays.stream(pl.getDefinition().features)
                         .forEach(feature -> registerPluginFeature(pl, feature)));
-        registryHandler.afterLoading();
+        registryHandler.update();
     }
 
     private void registerNativeFeature(Class<?> clazz) {
@@ -55,15 +55,15 @@ public class FeatureRegistry implements PluginListener {
         try {
             Class<?> feature = pluginHandler.PLUGIN_CLASS_LOADER.loadClass(clazzName);
             FeatureDefinition<?> fd = new FeatureDefinition<>(plugin, feature);
-            fd.addStatusListener(def -> registryHandler.onStatusUpdate());
-            fd.getIssues().addListener(iss -> registryHandler.onStatusUpdate());
+            fd.addStatusListener(def -> registryHandler.update());
+            fd.getIssues().addListener(iss -> registryHandler.update());
             FEATURES_BY_ID.put(clazzName, fd);
         } catch (ClassNotFoundException e) {
             plugin.getIssues().addWarning("Feature failed to load", clazzName + " couldn't be registered properly: " + e.getMessage());
         }
     }
 
-    public <T> Optional<T> getFeature(String id) {
+    private <T> Optional<T> getFeature(String id) {
         synchronized (pluginHandler) {
             FeatureDefinition<T> feature = getFeatureDefinition(id);
             try {
@@ -75,7 +75,10 @@ public class FeatureRegistry implements PluginListener {
                 feature.setInstance(instance = featureLoader.loadFeature(feature));
                 return Optional.of(instance);
             } catch (Exception e) {
-                feature.getIssues().addFailure("Failed to load", Arrays.stream(e.getStackTrace()).map(Objects::toString).collect(Collectors.joining("<br>", "<html>", "</html>")));
+                feature.getIssues().addFailure("Failed to load", Stream.concat(
+                        e.getMessage() == null ? Stream.empty() : Stream.of("<strong>" + e.getMessage() + "</strong>"),
+                        Arrays.stream(e.getStackTrace())
+                ).map(Objects::toString).collect(Collectors.joining("<br>", "<html>", "</html>")));
                 e.printStackTrace();
                 return Optional.empty();
             }
@@ -84,6 +87,10 @@ public class FeatureRegistry implements PluginListener {
 
     public <T> Optional<T> getFeature(String id, Class<T> type) {
         return getFeature(id);
+    }
+
+    public <T> Optional<T> getFeature(FeatureDefinition<T> fd) {
+        return getFeature(fd.getId());
     }
 
     public <T> Stream<FeatureDefinition<T>> getFeatures(Class<T> type) {

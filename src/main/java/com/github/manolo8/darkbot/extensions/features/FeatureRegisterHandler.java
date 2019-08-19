@@ -1,7 +1,10 @@
 package com.github.manolo8.darkbot.extensions.features;
 
+import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.extensions.features.handlers.BehaviourHandler;
 import com.github.manolo8.darkbot.extensions.features.handlers.FeatureHandler;
 import com.github.manolo8.darkbot.extensions.features.handlers.ModuleHandler;
+import com.github.manolo8.darkbot.extensions.features.handlers.TaskHandler;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,10 +22,12 @@ public class FeatureRegisterHandler {
     private final List<FeatureHandler<?>> FEATURE_HANDLERS;
 
 
-    public FeatureRegisterHandler(FeatureRegistry featureRegistry) {
+    public FeatureRegisterHandler(Main main, FeatureRegistry featureRegistry) {
         this.featureRegistry = featureRegistry;
         this.FEATURE_HANDLERS = Arrays.asList(
-                new ModuleHandler()
+                new ModuleHandler(),
+                new BehaviourHandler(main, featureRegistry),
+                new TaskHandler(main, featureRegistry)
         );
     }
 
@@ -30,28 +35,12 @@ public class FeatureRegisterHandler {
         return FEATURE_HANDLERS.stream().flatMap(fr -> Arrays.stream(fr.getNativeFeatures()));
     }
 
-    void beforeLoading() {
-        FEATURE_HANDLERS.forEach(this::beforeLoad);
+    void update() {
+        FEATURE_HANDLERS.forEach(this::update);
     }
 
-    private <T> void beforeLoad(FeatureHandler<T> registerer) {
-        registerer.beforeLoading(featureRegistry.getFeatures(registerer.getHandledType()));
-    }
-
-    void afterLoading() {
-        FEATURE_HANDLERS.forEach(this::afterLoad);
-    }
-
-    private <T> void afterLoad(FeatureHandler<T> registerer) {
-        registerer.afterLoading(featureRegistry.getFeatures(registerer.getHandledType()));
-    }
-
-    void onStatusUpdate() {
-        FEATURE_HANDLERS.forEach(this::statusUpdate);
-    }
-
-    private <T> void statusUpdate(FeatureHandler<T> registerer) {
-        registerer.statusUpdate(featureRegistry.getFeatures(registerer.getHandledType()));
+    private <T> void update(FeatureHandler<T> registerer) {
+        registerer.update(featureRegistry.getFeatures(registerer.getHandledType()));
     }
 
 }

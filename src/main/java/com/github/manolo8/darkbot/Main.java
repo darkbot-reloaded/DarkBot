@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
+import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
@@ -39,12 +40,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.13 beta 16";
+    public static final String VERSION_STRING = "1.13.13 beta 17";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
@@ -73,6 +76,7 @@ public class Main extends Thread implements PluginListener {
 
     public final PluginHandler pluginHandler;
     public final FeatureRegistry featureRegistry;
+    private List<Behaviour> behaviours = new ArrayList<>();
     private String moduleId;
     public Module module;
 
@@ -207,6 +211,9 @@ public class Main extends Thread implements PluginListener {
         guiManager.pet.tick();
         checkRefresh();
         module.tick();
+        synchronized (pluginHandler) {
+            behaviours.forEach(Behaviour::tick);
+        }
         checkPetBug();
     }
 
@@ -299,6 +306,10 @@ public class Main extends Thread implements PluginListener {
 
     public boolean isRunning() {
         return running;
+    }
+
+    public void setBehaviours(List<Behaviour> behaviours) {
+        this.behaviours = behaviours;
     }
 
     private void checkModule() {

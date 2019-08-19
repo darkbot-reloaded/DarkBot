@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
@@ -20,7 +21,7 @@ public class PluginCard extends JPanel {
             WARNING_COLOR = new Color(UIUtils.YELLOW.getRGB() + ALPHA, true),
             ERROR_COLOR = new Color(UIUtils.RED.getRGB() + ALPHA, true);
 
-    PluginCard(Plugin plugin, FeatureRegistry featureRegistry) {
+    PluginCard(Main main, Plugin plugin, FeatureRegistry featureRegistry) {
         super(new MigLayout("fillx", "[]", "[nogrid]"));
         setColor(plugin.getIssues());
         plugin.getIssues().addListener(this::setColor);
@@ -29,7 +30,7 @@ public class PluginCard extends JPanel {
         add(new PluginName(plugin.getDefinition()), "dock north");
 
         featureRegistry.getFeatures(plugin)
-                .map(FeatureDisplay::new)
+                .map(f -> new FeatureDisplay(main, f))
                 .forEach(this::add);
     }
 

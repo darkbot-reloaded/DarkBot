@@ -53,7 +53,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
                 Stream.concat(
                         pluginHandler.FAILED_PLUGINS.stream(),
                         pluginHandler.LOADED_PLUGINS.stream()
-                ).map(pl -> new PluginCard(pl, main.featureRegistry))
+                ).map(pl -> new PluginCard(main, pl, main.featureRegistry))
         ).forEach(pluginPanel::add);
         pluginTab.setIcon(UIUtils.getIcon(pluginHandler.LOADING_EXCEPTIONS.isEmpty() && pluginHandler.FAILED_PLUGINS.isEmpty() ? "plugins" : "plugins_warn"));
         validate();

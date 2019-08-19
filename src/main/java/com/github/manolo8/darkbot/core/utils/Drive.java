@@ -72,8 +72,8 @@ public class Drive {
         newPath |= !next.equals(lastSegment);
         lastSegment = next;
 
-        boolean diffAngle = MathUtils.angleDiff(heroLoc.angle, next.angle(last)) > 0.01;
-        if (hero.timeTo(now.distance(next)) > 100 || (diffAngle && heroLoc.isMoving())) {
+        if (hero.timeTo(now.distance(next)) > 100) {
+            boolean diffAngle = MathUtils.angleDiff(heroLoc.angle, next.angle(last)) > 0.015;
             if (heroLoc.isMoving() && !diffAngle) {
                 if (System.currentTimeMillis() - lastClick > 2000) click(next);
                 return;

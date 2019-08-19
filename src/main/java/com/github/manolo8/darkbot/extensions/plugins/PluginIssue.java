@@ -6,7 +6,6 @@ public class PluginIssue implements Comparable<PluginIssue> {
 
     private final String message, description;
     private final boolean preventsLoading;
-    private final long timestamp = System.currentTimeMillis();
 
     public PluginIssue(String message, String description, boolean preventsLoading) {
         Objects.requireNonNull(message, "Message must not be null");
@@ -45,7 +44,8 @@ public class PluginIssue implements Comparable<PluginIssue> {
 
     @Override
     public int compareTo(PluginIssue o) {
-        int comp = Boolean.compare(preventsLoading, o.preventsLoading);
-        return comp == 0 ? Long.compare(timestamp, o.timestamp) : comp;
+        if (preventsLoading != o.preventsLoading) return Boolean.compare(preventsLoading, o.preventsLoading);
+        if (!message.equals(o.message)) return message.compareTo(o.message);
+        return description.compareTo(o.description);
     }
 }
