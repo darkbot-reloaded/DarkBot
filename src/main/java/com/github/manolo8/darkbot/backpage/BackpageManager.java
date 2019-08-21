@@ -41,7 +41,7 @@ public class BackpageManager extends Thread {
     @Override
     public void run() {
         while (true) {
-            Time.sleep(5000);
+            Time.sleep(100);
 
             if (isInvalid()) {
                 sidStatus = -1;

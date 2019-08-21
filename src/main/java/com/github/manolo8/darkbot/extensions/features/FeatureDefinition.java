@@ -68,6 +68,7 @@ public class FeatureDefinition<T> {
 
     public void setInstance(T instance) {
         this.instance = instance;
+        listener.send(this);
     }
 
     public void setStatus(boolean enabled) {

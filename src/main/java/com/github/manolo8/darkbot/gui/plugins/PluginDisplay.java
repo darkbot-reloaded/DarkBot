@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -35,7 +36,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
 
     private JComponent setupUI() {
         pluginPanel = new JPanel(new MigLayout("wrap 1, fillx", "[fill]", ""));
-        JScrollPane scrollPane = new JScrollPane(pluginPanel);
+        JScrollPane scrollPane = new JScrollPane(pluginPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         return scrollPane;

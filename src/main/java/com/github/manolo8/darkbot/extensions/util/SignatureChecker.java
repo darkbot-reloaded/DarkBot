@@ -1,7 +1,5 @@
 package com.github.manolo8.darkbot.extensions.util;
 
-import sun.security.util.SignatureFileVerifier;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.CodeSigner;

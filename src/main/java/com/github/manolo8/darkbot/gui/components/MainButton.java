@@ -9,10 +9,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 
-public class MainButton extends JButton implements SimpleMouseListener, ActionListener {
+public class MainButton extends MainIcon implements SimpleMouseListener, ActionListener {
 
     protected Color actionColor = new Color(50, 53, 55);
-    private Color def;
+    protected Color def;
 
     private boolean hovering, pressing;
 
@@ -25,10 +25,7 @@ public class MainButton extends JButton implements SimpleMouseListener, ActionLi
     }
 
     protected MainButton(Icon icon, String text) {
-        super(text, icon);
-        putClientProperty("JButton.buttonType", "square");
-        setBorder(UIUtils.getBorder());
-
+        super(icon, text);
         this.def = getBackground();
         addMouseListener(this);
         addActionListener(this);
@@ -36,11 +33,6 @@ public class MainButton extends JButton implements SimpleMouseListener, ActionLi
 
     @Override
     public void actionPerformed(ActionEvent e) {}
-
-    @Override
-    public Insets getInsets() {
-        return UIUtils.getInsetConfig(getText() != null && !getText().isEmpty());
-    }
 
     @Override
     public void mouseEntered(MouseEvent e) {
@@ -66,9 +58,14 @@ public class MainButton extends JButton implements SimpleMouseListener, ActionLi
         setBackground();
     }
 
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        setBackground();
+    }
+
     protected void setBackground() {
-        if (pressing) setBackground(actionColor.darker());
-        else if (hovering) setBackground(actionColor);
+        if (isEnabled() && pressing) setBackground(actionColor.darker());
+        else if (isEnabled() && hovering) setBackground(actionColor);
         else setBackground(def);
     }
 

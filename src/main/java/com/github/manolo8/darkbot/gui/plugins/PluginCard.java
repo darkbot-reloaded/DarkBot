@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.itf.Configurable;
+import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
@@ -22,16 +24,25 @@ public class PluginCard extends JPanel {
             ERROR_COLOR = new Color(UIUtils.RED.getRGB() + ALPHA, true);
 
     PluginCard(Main main, Plugin plugin, FeatureRegistry featureRegistry) {
-        super(new MigLayout("fillx", "[]", "[nogrid]"));
+        super(new MigLayout("fillx, gapy 0, ins 0 0 5px 0", "5px[]0px[]10px[]10px[grow]", "[]"));
         setColor(plugin.getIssues());
         plugin.getIssues().addListener(this::setColor);
 
         add(new IssueList(plugin.getIssues(), false), "dock east");
         add(new PluginName(plugin.getDefinition()), "dock north");
 
-        featureRegistry.getFeatures(plugin)
-                .map(f -> new FeatureDisplay(main, f))
-                .forEach(this::add);
+        featureRegistry.getFeatures(plugin).forEach(fd -> this.addFeature(main, fd));
+    }
+
+    private void addFeature(Main main, FeatureDefinition feature) {
+        add(new FeatureTypeButton(feature), "growx");
+        if (Configurable.class.isAssignableFrom(feature.getClazz())) {
+            add(new FeatureConfigButton(main.config, (FeatureDefinition<Configurable>) feature));
+        } else {
+            add(new JLabel());
+        }
+        add(new FeatureCheckbox(feature));
+        add(new IssueList(feature.getIssues(), true), "hidemode 2, wrap");
     }
 
     private void setColor(IssueHandler issues) {
