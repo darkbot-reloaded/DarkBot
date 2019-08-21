@@ -15,7 +15,6 @@ class IssueList extends JPanel {
         super(new MigLayout((inline ? "ins 0, gapx 5px, " : "") + "wrap 1", "[right]", "[top]"));
 
         setOpaque(false);
-        setBackground(Color.BLUE);
         setupUI(issues);
         issues.addListener(this::setupUI);
     }
@@ -23,7 +22,7 @@ class IssueList extends JPanel {
     private void setupUI(IssueHandler issues) {
         removeAll();
         issues.getIssues().stream().map(this::getError).forEachOrdered(this::add);
-        setVisible(issues.hasIssues());
+        setVisible(!issues.getIssues().isEmpty());
     }
 
     private JLabel getError(PluginIssue pluginIssue) {

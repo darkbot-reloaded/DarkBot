@@ -135,7 +135,7 @@ public class PluginHandler {
                     "This plugin requires " + supportedRange + ", so it can't run on Darkbot v" + Main.VERSION);
 
         if (Main.VERSION.compareTo(pd.supportedVersion) > 0)
-            plugin.getIssues().addWarning("Plugin may need update",
+            plugin.getIssues().addInfo("Plugin may need update",
                     "The plugin is made for " + supportedRange + ", so it may not work on DarkBot v" + Main.VERSION);
     }
 

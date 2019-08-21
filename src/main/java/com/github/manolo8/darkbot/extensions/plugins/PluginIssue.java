@@ -4,15 +4,20 @@ import java.util.Objects;
 
 public class PluginIssue implements Comparable<PluginIssue> {
 
-    private final String message, description;
-    private final boolean preventsLoading;
+    public enum Level {
+        INFO, WARNING, ERROR;
+    }
 
-    public PluginIssue(String message, String description, boolean preventsLoading) {
+    private final String message, description;
+    private final Level level;
+
+    public PluginIssue(String message, String description, Level level) {
         Objects.requireNonNull(message, "Message must not be null");
         Objects.requireNonNull(description, "Description must not be null");
+        Objects.requireNonNull(level, "Description must not be null");
         this.message = message;
         this.description = description;
-        this.preventsLoading = preventsLoading;
+        this.level = level;
     }
 
     public String getMessage() {
@@ -24,7 +29,11 @@ public class PluginIssue implements Comparable<PluginIssue> {
     }
 
     public boolean preventsLoading() {
-        return preventsLoading;
+        return level == Level.ERROR;
+    }
+
+    public Level getLevel() {
+        return level;
     }
 
     @Override
@@ -32,19 +41,19 @@ public class PluginIssue implements Comparable<PluginIssue> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PluginIssue that = (PluginIssue) o;
-        return preventsLoading == that.preventsLoading &&
+        return level == that.level &&
                 message.equals(that.message) &&
                 description.equals(that.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(message, description, preventsLoading);
+        return Objects.hash(message, description, level);
     }
 
     @Override
     public int compareTo(PluginIssue o) {
-        if (preventsLoading != o.preventsLoading) return Boolean.compare(preventsLoading, o.preventsLoading);
+        if (level != o.level) return o.level.compareTo(level); // Severe levels first
         if (!message.equals(o.message)) return message.compareTo(o.message);
         return description.compareTo(o.description);
     }

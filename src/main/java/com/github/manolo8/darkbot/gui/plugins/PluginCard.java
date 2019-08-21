@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
+import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
@@ -46,10 +47,10 @@ public class PluginCard extends JPanel {
     }
 
     private void setColor(IssueHandler issues) {
-        if (!issues.canLoad()) {
+        if (issues.getLevel() == PluginIssue.Level.ERROR) {
             setBorder(ERROR_BORDER);
             setBackground(ERROR_COLOR);
-        } else if (issues.hasIssues()) {
+        } else if (issues.getLevel() == PluginIssue.Level.WARNING) {
             setBorder(WARNING_BORDER);
             setBackground(WARNING_COLOR);
         } else {

@@ -18,6 +18,7 @@ public class FeatureConfigButton extends MainButton {
 
     FeatureConfigButton(Config config, FeatureDefinition<Configurable> feature) {
         super(UIUtils.getIcon("config"));
+        setDisabledIcon(UIUtils.getIcon("config_unloaded"));
         this.config = config;
         this.feature = feature;
         updateStatus(feature);
@@ -37,8 +38,11 @@ public class FeatureConfigButton extends MainButton {
             Popups.showMessageAsync("Can't edit config", "Config not available for unloaded feature\n" +
                     "Enable the feature and load it, then try again.", JOptionPane.INFORMATION_MESSAGE);
         } else {
-            Popups.showMessageSync(feature.getName(),
-                    new JOptionPane(new AdvancedConfig(this.config.CUSTOM_CONFIGS.get(feature.getId()))));
+            JOptionPane options = new JOptionPane(new AdvancedConfig(this.config.CUSTOM_CONFIGS.get(feature.getId())),
+                    JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
+            options.setBorder(null);
+            Popups.showMessageSync(feature.getName(), options);
+            setBackground();
         }
     }
 

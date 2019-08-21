@@ -11,7 +11,6 @@ public class IssueHandler {
 
     private final Set<PluginIssue> issues = new TreeSet<>();
     private final Lazy<IssueHandler> listener = new Lazy.NoCache<>();
-    private boolean canLoad = true;
 
     public IssueHandler() {
         this(null);
@@ -21,14 +20,20 @@ public class IssueHandler {
         this.parent = parent;
     }
 
+    public void addInfo(String message, String description) {
+        add(message, description, PluginIssue.Level.INFO);
+    }
+
     public void addWarning(String message, String description) {
-        this.issues.add(new PluginIssue(message, description, false));
-        listener.send(this);
+        add(message, description, PluginIssue.Level.WARNING);
     }
 
     public void addFailure(String message, String description) {
-        this.issues.add(new PluginIssue(message, description, true));
-        canLoad = false;
+        add(message, description, PluginIssue.Level.ERROR);
+    }
+
+    public void add(String message, String description, PluginIssue.Level level) {
+        this.issues.add(new PluginIssue(message, description, level));
         listener.send(this);
     }
 
@@ -40,12 +45,15 @@ public class IssueHandler {
         return issues;
     }
 
-    public boolean hasIssues() {
-        return !issues.isEmpty();
+    /**
+     * @return The highest issue level.
+     */
+    public PluginIssue.Level getLevel() {
+        return issues.isEmpty() ? null : issues.iterator().next().getLevel();
     }
 
     public boolean canLoad() {
-        return canLoad && (parent == null || parent.canLoad());
+        return getLevel() != PluginIssue.Level.ERROR && (parent == null || parent.canLoad());
     }
 
 

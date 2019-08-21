@@ -7,8 +7,10 @@ import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
+import com.sun.org.apache.regexp.internal.RE;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.plaf.LayerUI;
 import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.DefaultTreeCellEditor;
@@ -24,6 +26,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
     private Object config;
     private ConfigTree treeModel;
+    private boolean packed = false;
 
     public AdvancedConfig() {
         setBorder(BorderFactory.createEmptyBorder());
@@ -32,6 +35,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
     public AdvancedConfig(Object config) {
         this();
+        packed = true;
         setEditingConfig(config);
     }
 
@@ -100,6 +104,12 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         JScrollPane scrollPane = new JScrollPane(configTree);
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(25);
+
+        if (packed) {
+            configTree.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 3));
+            Dimension treeSize = configTree.getPreferredSize();
+            scrollPane.setPreferredSize(new Dimension(treeSize.width + 15, Math.min(400, treeSize.height)));
+        }
         return new JLayer<>(scrollPane, new WheelScrollLayerUI());
     }
 
