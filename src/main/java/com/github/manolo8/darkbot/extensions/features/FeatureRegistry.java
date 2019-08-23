@@ -1,8 +1,10 @@
 package com.github.manolo8.darkbot.extensions.features;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
+import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 
 import java.util.Arrays;
@@ -75,14 +77,15 @@ public class FeatureRegistry implements PluginListener {
                 feature.setInstance(instance = featureLoader.loadFeature(feature));
                 return Optional.of(instance);
             } catch (Exception e) {
-                feature.getIssues().addFailure("Failed to load", Stream.concat(
-                        e.getMessage() == null ? Stream.empty() : Stream.of("<strong>" + e.getMessage() + "</strong>"),
-                        Arrays.stream(e.getStackTrace())
-                ).map(Objects::toString).collect(Collectors.joining("<br>", "<html>", "</html>")));
+                feature.getIssues().addFailure("Failed to load", IssueHandler.createDescription(e));
                 e.printStackTrace();
                 return Optional.empty();
             }
         }
+    }
+
+    public <T> Optional<T> getFeature(Class<T> feature) {
+        return getFeature(feature.getCanonicalName(), feature);
     }
 
     public <T> Optional<T> getFeature(String id, Class<T> type) {
@@ -110,6 +113,9 @@ public class FeatureRegistry implements PluginListener {
                 .filter(fd -> fd.getPlugin() == plugin);
     }
 
+    public <T> FeatureDefinition<T> getFeatureDefinition(T feature) {
+        return getFeatureDefinition(feature.getClass().getCanonicalName());
+    }
 
     public <T> FeatureDefinition<T> getFeatureDefinition(String id) {
         synchronized (pluginHandler) {

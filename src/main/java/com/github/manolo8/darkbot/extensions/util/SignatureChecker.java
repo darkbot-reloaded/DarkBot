@@ -2,9 +2,11 @@ package com.github.manolo8.darkbot.extensions.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.CodeSigner;
+import java.security.cert.Certificate;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -14,9 +16,9 @@ public class SignatureChecker {
 
     private static final String META_INF = "META-INF/";
     private static final String SIG_PREFIX = META_INF + "SIG-";
+    private static final KnownCerts KNOWN_CERTS = new KnownCerts();
 
-
-    public static boolean verifyJar(JarFile jf) throws IOException {
+    public static Boolean verifyJar(JarFile jf) throws IOException {
         Vector<JarEntry> entriesVec = new Vector<>();
         byte[] buffer = new byte[8192];
 
@@ -35,32 +37,35 @@ public class SignatureChecker {
 
         Manifest man = jf.getManifest();
 
-        if (man == null) return false;
+        if (man == null) return null;
         Enumeration<JarEntry> e = entriesVec.elements();
+
+        // Used to cache allowed certs, no longer needing to check pub byte array for them
+        Set<Certificate> allowedCerts = new HashSet<>();
 
         while (e.hasMoreElements()) {
             JarEntry je = e.nextElement();
             String name = je.getName();
-            CodeSigner[] signers = je.getCodeSigners();
+            if (je.isDirectory() || signatureRelated(name)) continue;
 
-            boolean isSigned = (signers != null);
-            if (!je.isDirectory() && !isSigned && !signatureRelated(name)) {
-                return false;
-            }
-
-            // TODO: check if the signature is known and accepted.
-            /*int inStoreOrScope = inKeyStore(signers);
-
-            boolean inStore = (inStoreOrScope & IN_KEYSTORE) != 0;
-            boolean inScope = (inStoreOrScope & IN_SCOPE) != 0;
-
-            notSignedByAlias |= (inStoreOrScope & NOT_ALIAS) != 0;
-            if (keystore != null) {
-                aliasNotInStore |= isSigned && (!inStore && !inScope);
-            }*/
+            Boolean signed = checkCertificates(je.getCertificates(), allowedCerts);
+            if (signed == null) return null;
+            if (!signed) return false;
         }
-
         return true;
+    }
+
+    private static Boolean checkCertificates(Certificate[] certs, Set<Certificate> allowedCerts) {
+        if (certs == null || certs.length == 0) return null;
+        for (Certificate cert : certs) {
+            if (allowedCerts.contains(cert)) return true;
+            ByteArray bytes = new ByteArray(cert.getPublicKey().getEncoded());
+            if (KNOWN_CERTS.test(bytes)){
+                 allowedCerts.add(cert);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -2,9 +2,13 @@ package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.core.utils.Lazy;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class IssueHandler {
     private final IssueHandler parent;
@@ -32,6 +36,13 @@ public class IssueHandler {
         add(message, description, PluginIssue.Level.ERROR);
     }
 
+    public static String createDescription(Exception e) {
+        return Stream.concat(
+                e.getMessage() == null ? Stream.empty() : Stream.of("<strong>" + e.getMessage() + "</strong>"),
+                Arrays.stream(e.getStackTrace())
+        ).map(Objects::toString).collect(Collectors.joining("<br>", "<html>", "</html>"));
+    }
+
     public void add(String message, String description, PluginIssue.Level level) {
         this.issues.add(new PluginIssue(message, description, level));
         listener.send(this);
@@ -55,7 +66,5 @@ public class IssueHandler {
     public boolean canLoad() {
         return getLevel() != PluginIssue.Level.ERROR && (parent == null || parent.canLoad());
     }
-
-
 
 }

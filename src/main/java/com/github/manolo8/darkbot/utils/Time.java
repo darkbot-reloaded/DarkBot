@@ -31,7 +31,7 @@ public class Time {
         return builder.toString();
     }
 
-    public static void sleep(int millis) {
+    public static void sleep(long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException ignore) {}

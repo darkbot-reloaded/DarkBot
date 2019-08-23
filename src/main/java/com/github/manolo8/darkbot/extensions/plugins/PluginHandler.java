@@ -141,10 +141,13 @@ public class PluginHandler {
 
     private void testSignature(Plugin plugin, JarFile jar) throws IOException {
         try {
-            if (!SignatureChecker.verifyJar(jar)) {
-                plugin.getIssues().addWarning("Plugin not signed",
+            Boolean signatureValid = SignatureChecker.verifyJar(jar);
+            if (signatureValid == null)
+                plugin.getIssues().addFailure("Plugin not signed",
                         "This plugin hasn't been signed or has an invalid signature");
-            }
+            else if (!signatureValid)
+                plugin.getIssues().addFailure("Unknown signature",
+                        "This plugin has been signed with an untrusted certificate.");
         } catch (SecurityException e) {
             plugin.getIssues().addFailure("Invalid signature", "The plugin has an invalid signature or has been tampered with");
         }

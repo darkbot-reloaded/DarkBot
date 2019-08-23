@@ -38,7 +38,7 @@ public class HangarManager {
         if (this.lastChangeHangar <= System.currentTimeMillis() - 40000 && backpageManager.sidStatus().contains("OK")) {
             String url = "indexInternal.es?action=internalDock&subAction=changeHangar&hangarId=" + hangarID;
             try {
-                backpageManager.getConnection(url).getResponseCode();
+                backpageManager.getConnection(url, 2000).getResponseCode();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -50,12 +50,10 @@ public class HangarManager {
 
     public Boolean checkDrones() {
         updateHangars();
-        Time.sleep(2000);
         updateDrones();
         boolean repaired = !drones.isEmpty();
         for (Drone drone : drones) {
             if (drone.getDamage() / 100d >= main.config.MISCELLANEOUS.REPAIR_DRONE_PERCENTAGE) {
-                Time.sleep(2000);
                 repaired &= repairDrone(drone);
             }
         }

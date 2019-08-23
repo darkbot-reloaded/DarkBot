@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.extensions.features;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
@@ -31,6 +32,12 @@ public class FeatureDefinition<T> {
         this.id = clazz.getCanonicalName();
         this.name = feature.name();
         this.description = feature.description();
+
+        if (plugin != null
+                && !plugin.getInfo().ENABLED_FEATURES.contains(id)
+                && !plugin.getInfo().DISABLED_FEATURES.contains(id)) {
+            setStatusInternal(Module.class.isAssignableFrom(clazz));
+        }
     }
 
     public Plugin getPlugin() {
@@ -72,10 +79,16 @@ public class FeatureDefinition<T> {
     }
 
     public void setStatus(boolean enabled) {
-        if (enabled) plugin.getInfo().DISABLED_FEATURES.remove(id);
-        else plugin.getInfo().DISABLED_FEATURES.add(id);
-        ConfigEntity.changed();
-        listener.send(this);
+        if (setStatusInternal(enabled)) {
+            ConfigEntity.changed();
+            listener.send(this);
+        }
+    }
+
+
+    private boolean setStatusInternal(boolean enabled) {
+        if (enabled) return plugin.getInfo().ENABLED_FEATURES.add(id) | plugin.getInfo().DISABLED_FEATURES.remove(id);
+        else return plugin.getInfo().ENABLED_FEATURES.remove(id) | plugin.getInfo().DISABLED_FEATURES.add(id);
     }
 
     public void addStatusListener(Consumer<FeatureDefinition<T>> listener) {
@@ -83,7 +96,7 @@ public class FeatureDefinition<T> {
     }
 
     public boolean isEnabled() {
-        return plugin == null || !plugin.getInfo().DISABLED_FEATURES.contains(id);
+        return plugin == null || plugin.getInfo().ENABLED_FEATURES.contains(id);
     }
 
     public boolean canLoad() {

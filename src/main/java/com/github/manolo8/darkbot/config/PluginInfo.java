@@ -6,5 +6,6 @@ import java.util.Set;
 public class PluginInfo {
 
     public Set<String> DISABLED_FEATURES = new HashSet<>();
+    public Set<String> ENABLED_FEATURES = new HashSet<>();
 
 }

@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Task;
+import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
 
@@ -23,6 +24,7 @@ public class BackpageManager extends Thread {
 
     private String sid;
     private String instance;
+    private long lastRequest;
 
     private long sidLastUpdate = System.currentTimeMillis();
     private long sidNextUpdate = sidLastUpdate;
@@ -69,7 +71,15 @@ public class BackpageManager extends Thread {
             }
 
             synchronized (main.pluginHandler) {
-                tasks.forEach(Task::tick);
+                for (Task task : tasks) {
+                    try {
+                        task.tick();
+                    } catch (Exception e) {
+                        main.featureRegistry.getFeatureDefinition(task)
+                                .getIssues()
+                                .addWarning("Failed to tick", IssueHandler.createDescription(e));
+                    }
+                }
             }
         }
     }
@@ -96,22 +106,29 @@ public class BackpageManager extends Thread {
     }
 
     private int sidKeepAlive() throws Exception {
-        return getConnection("indexInternal.es?action=" + getRandomAction()).getResponseCode();
+        return getConnection("indexInternal.es?action=" + getRandomAction(), 5000).getResponseCode();
     }
 
-    public HttpURLConnection getConnection(String params) throws Exception{
+    public HttpURLConnection getConnection(String params, int minWait) throws Exception {
+        if (System.currentTimeMillis() < lastRequest + minWait)
+            Time.sleep(System.currentTimeMillis() - (lastRequest + minWait));
+        return getConnection(params);
+    }
+
+    public HttpURLConnection getConnection(String params) throws Exception {
         if (isInvalid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         HttpURLConnection conn = (HttpURLConnection) new URL(this.instance + params)
                 .openConnection();
         conn.setInstanceFollowRedirects(false);
         conn.setRequestProperty("Cookie", "dosid=" + this.sid);
+        lastRequest = System.currentTimeMillis();
         return conn;
     }
 
     public String getDataInventory(String params) {
         String data = null;
         try {
-            HttpURLConnection conn = getConnection(params);
+            HttpURLConnection conn = getConnection(params, 2500);
             conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
             data = Base64Utils.base64Decode(conn.getInputStream());
         } catch (Exception e) {

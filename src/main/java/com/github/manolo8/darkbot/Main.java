@@ -19,8 +19,10 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
+import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.features.handlers.ModuleHandler;
+import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.extensions.util.Version;
@@ -47,7 +49,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.13 beta 18";
+    public static final String VERSION_STRING = "1.13.13 beta 19";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
@@ -210,9 +212,22 @@ public class Main extends Thread implements PluginListener {
     private void tickRunning() {
         guiManager.pet.tick();
         checkRefresh();
-        module.tick();
         synchronized (pluginHandler) {
-            behaviours.forEach(Behaviour::tick);
+            try {
+                module.tick();
+            } catch (Exception e) {
+                FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
+                if (modDef != null) modDef.getIssues().addWarning("Failed to tick", IssueHandler.createDescription(e));
+            }
+            for (Behaviour behaviour : behaviours) {
+                try {
+                    behaviour.tick();
+                } catch (Exception e) {
+                    featureRegistry.getFeatureDefinition(behaviour)
+                            .getIssues()
+                            .addFailure("Failed to tick", IssueHandler.createDescription(e));
+                }
+            }
         }
         checkPetBug();
     }
