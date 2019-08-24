@@ -70,7 +70,7 @@ public class BackpageManager extends Thread {
                 }
             }
 
-            synchronized (main.pluginHandler) {
+            synchronized (main.pluginHandler.getBackgroundLock()) {
                 for (Task task : tasks) {
                     try {
                         task.tick();
@@ -110,8 +110,7 @@ public class BackpageManager extends Thread {
     }
 
     public HttpURLConnection getConnection(String params, int minWait) throws Exception {
-        if (System.currentTimeMillis() < lastRequest + minWait)
-            Time.sleep(System.currentTimeMillis() - (lastRequest + minWait));
+        Time.sleep(lastRequest + minWait - System.currentTimeMillis());
         return getConnection(params);
     }
 

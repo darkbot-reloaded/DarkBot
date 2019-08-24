@@ -40,6 +40,11 @@ public class PluginHandler {
         LISTENERS.add(listener);
     }
 
+    private final Object BACKGROUND_LOCK = new Object();
+    public Object getBackgroundLock() {
+        return BACKGROUND_LOCK;
+    }
+
     private File[] getJars(String folder) {
         File[] jars = new File(folder).listFiles((dir, name) -> name.endsWith(".jar"));
         return jars != null ? jars : new File[0];
@@ -50,37 +55,39 @@ public class PluginHandler {
     }
 
     public void updatePluginsSync() {
-        synchronized (this) {
-            LOADED_PLUGINS.clear();
-            FAILED_PLUGINS.clear();
-            LOADING_EXCEPTIONS.clear();
-            LISTENERS.forEach(PluginListener::beforeLoad);
-            System.gc();
+        synchronized (getBackgroundLock()) {
+            synchronized (this) {
+                LOADED_PLUGINS.clear();
+                FAILED_PLUGINS.clear();
+                LOADING_EXCEPTIONS.clear();
+                LISTENERS.forEach(PluginListener::beforeLoad);
+                System.gc();
 
-            if (PLUGIN_CLASS_LOADER != null) {
-                try {
-                    PLUGIN_CLASS_LOADER.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (PLUGIN_CLASS_LOADER != null) {
+                    try {
+                        PLUGIN_CLASS_LOADER.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
 
-            for (File plugin : getJars("plugins/updates")) {
-                Path plPath = plugin.toPath();
+                for (File plugin : getJars("plugins/updates")) {
+                    Path plPath = plugin.toPath();
+                    try {
+                        Files.move(plPath, PLUGIN_PATH.resolve(plPath.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+                    } catch (Exception e) {
+                        LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to update plugin: " + plPath.getFileName(), e));
+                        e.printStackTrace();
+                    }
+                }
                 try {
-                    Files.move(plPath, PLUGIN_PATH.resolve(plPath.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+                    loadPlugins(getJars("plugins"));
                 } catch (Exception e) {
-                    LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to update plugin: " + plPath.getFileName(), e));
+                    LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugins", e));
                     e.printStackTrace();
                 }
+                LISTENERS.forEach(PluginListener::afterLoad);
             }
-            try {
-                loadPlugins(getJars("plugins"));
-            } catch (Exception e) {
-                LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugins", e));
-                e.printStackTrace();
-            }
-            LISTENERS.forEach(PluginListener::afterLoad);
         }
         LISTENERS.forEach(PluginListener::afterLoadComplete);
     }
