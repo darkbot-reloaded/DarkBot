@@ -42,8 +42,10 @@ public class ReflectionUtils {
             }
             return clazz.getConstructor().newInstance();
         } catch (NoSuchMethodException e) {
+            e.printStackTrace();
             throw new RuntimeException("No default constructor found for " + clazz.getName());
         } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
             throw new RuntimeException("Error creating instance of " + clazz.getName(), e);
         }
     }

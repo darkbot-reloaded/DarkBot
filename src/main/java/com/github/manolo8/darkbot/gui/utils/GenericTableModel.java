@@ -45,18 +45,30 @@ public class GenericTableModel<T> extends DefaultTableModel {
     }
 
     protected void updateEntry(String name, T data) {
-        if (table.containsKey(name) && table.get(name) != data) removeEntry(name);
-        if (data != null && !table.containsKey(name)) addEntry(name, data);
+        if (data == null) {
+            if (table.containsKey(name)) removeEntry(name);
+        } else {
+            if (table.containsKey(name)) updateEntryRow(name, data);
+            else addEntry(name, data);
+        }
     }
 
-    protected void addEntry(String name, T data) {
-        if (table.containsKey(name)) return; // Already in table
+    private void addEntry(String name, T data) {
         table.put(name, data);
         addRow(prepend(name, Arrays.stream(FIELDS).map(f -> ReflectionUtils.get(f, data))).toArray(Object[]::new));
     }
 
-    protected void removeEntry(String name) {
-        if (!table.containsKey(name)) return; // Not in table
+    private void updateEntryRow(String name, T data) {
+        table.put(name, data);
+        for (int row = 0; row < getRowCount(); row++) {
+            if (!getValueAt(row, 0).equals(name)) continue;
+            for (int field = 0; field < FIELDS.length;) {
+                setValueAt(ReflectionUtils.get(FIELDS[field], data), row, ++field);
+            }
+        }
+    }
+
+    private void removeEntry(String name) {
         table.remove(name);
 
         for (int i = 0; i < getRowCount(); i++) {
