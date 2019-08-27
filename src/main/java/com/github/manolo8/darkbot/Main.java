@@ -21,7 +21,6 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
-import com.github.manolo8.darkbot.extensions.features.handlers.ModuleHandler;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
@@ -49,7 +48,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.13 beta 21";
+    public static final String VERSION_STRING = "1.13.13";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()

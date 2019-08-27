@@ -2,9 +2,13 @@ package com.github.manolo8.darkbot.utils;
 
 import com.github.manolo8.darkbot.core.itf.Configurable;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +31,16 @@ public class ReflectionUtils {
         primitiveToWrapper.put(void.class, Void.class);
 
         PRIMITIVE_TO_WRAPPER = Collections.unmodifiableMap(primitiveToWrapper);
+    }
+
+    public static <T> T createInstance(String className, String jarUrl) {
+        try {
+            URLClassLoader loader = new URLClassLoader(new URL[]{new File(jarUrl).toURI().toURL()});
+            return createInstance((Class<T>) loader.loadClass(className));
+        } catch (MalformedURLException | ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to find class: " + className);
+        }
     }
 
     public static <T> T createInstance(Class<T> clazz) {

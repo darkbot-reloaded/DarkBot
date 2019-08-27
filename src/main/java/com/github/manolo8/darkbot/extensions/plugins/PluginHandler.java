@@ -1,14 +1,14 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.extensions.util.SignatureChecker;
+import com.github.manolo8.darkbot.utils.AuthAPI;
 import com.google.gson.Gson;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -18,7 +18,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 public class PluginHandler {
@@ -118,7 +117,7 @@ public class PluginHandler {
                 throw new PluginLoadingException("The plugin is missing a plugin.json in the jar root", plugin);
             }
             try (InputStreamReader isr = new InputStreamReader(jar.getInputStream(plJson), StandardCharsets.UTF_8)) {
-                PluginDefinition plDef = GSON.fromJson(isr, PluginDefinition.class);
+                PluginDefinition plDef = GSON.fromJson(isr, (Type) PluginDefinition.class);
                 plugin.setDefinition(plDef);
             }
 
@@ -148,7 +147,7 @@ public class PluginHandler {
 
     private void testSignature(Plugin plugin, JarFile jar) throws IOException {
         try {
-            Boolean signatureValid = SignatureChecker.verifyJar(jar);
+            Boolean signatureValid = AuthAPI.getInstance().checkPluginJarSignature(jar);
             if (signatureValid == null)
                 plugin.getIssues().addFailure("Plugin not signed",
                         "This plugin hasn't been signed or has an invalid signature");

@@ -1,10 +1,16 @@
 package com.github.manolo8.darkbot.utils;
 
+import java.io.IOException;
+import java.util.jar.JarFile;
+
 public interface AuthAPI {
 
+
+    String VERIFIER_PATH = "verifier.jar";
+    AuthAPI INSTANCE = ReflectionUtils.createInstance("eu.darkbot.verifier.AuthAPIImpl", VERIFIER_PATH);
+
     static AuthAPI getInstance() {
-        // To run in dev mode, comment discord utils and use an AuthAPIImpl.
-        return DiscordUtils.get();
+        return INSTANCE;
     }
 
     /**
@@ -32,17 +38,12 @@ public interface AuthAPI {
      */
     boolean requireDonor();
 
-    class AuthAPIImpl implements AuthAPI {
-        public void setupAuth() {}
-        public boolean isAuthenticated() {
-            return false;
-        }
-        public boolean isDonor() {
-            return false;
-        }
-        public boolean requireDonor() {
-            return false;
-        }
-    }
+    /**
+     * Checks if a jar file has been signed by an authorized key
+     * @param jarFile The jar file to check
+     * @throws IOException If the file can't be found or read.
+     * @return true if signed & known signature, null if not signed, false if signed by untrusted key.
+     */
+    Boolean checkPluginJarSignature(JarFile jarFile) throws IOException;
 
 }
