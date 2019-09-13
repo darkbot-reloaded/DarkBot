@@ -168,7 +168,11 @@ public class MapManager implements Manager {
         temp = API.readMemoryLong(temp + 216);
         temp = API.readMemoryLong(temp + 200);
         temp = API.readMemoryLong(temp + 48);
-        return API.readMemoryInt(temp + 40) == 1;
+        int lockStatus = API.readMemoryInt(temp + 40);
+        // 1 = selected & owned
+        // 2 = selected & someone else owns it
+        // Weird numbers (negative or positive) and usually big, while selecting or no npc selected.
+        return lockStatus == 1 || lockStatus < 0 || lockStatus > 10;
     }
 
 }

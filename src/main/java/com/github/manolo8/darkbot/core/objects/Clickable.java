@@ -23,6 +23,7 @@ public class Clickable extends Updatable {
     public void setRadius(int radius) {
         if (this.radius == radius || isInvalid()) return;
         if (defRadius == -1) this.defRadius = this.radius;
+        if (defRadius <= 0) return;
         API.writeMemoryInt(address + 40, this.radius = radius);
     }
 

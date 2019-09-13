@@ -8,24 +8,36 @@ public class Health extends Updatable {
 
     public int hp;
     public int maxHp;
+    public int hull;
+    public int maxHull;
     public int shield;
     public int maxShield;
 
-    private long hpLastIncreased, hpLastDecreased, shieldLastIncreased, shieldLastDecreased;
+    private long hpLastIncreased, hpLastDecreased,
+            hullLastIncreased, hullLastDecreased,
+            shieldLastIncreased, shieldLastDecreased;
 
     @Override
     public void update() {
 
-        int hpLast = hp, maxHpLast = maxHp, shieldLast = shield, maxShieldLast = maxShield;
+        int hpLast = hp, maxHpLast = maxHp,
+                hullLast = hp, maxHullLast = maxHp,
+                shieldLast = shield, maxShieldLast = maxShield;
 
         hp = readIntFromIntHolder(48);
         maxHp = readIntFromIntHolder(56);
+        hull = readIntFromIntHolder(64);
+        maxHull  = readIntFromIntHolder(72);
         shield = readIntFromIntHolder(80);
         maxShield = readIntFromIntHolder(88);
 
         if (maxHpLast == maxHp && hpLast != hp) {
             if (hpLast > hp) hpLastDecreased = System.currentTimeMillis();
             else hpLastIncreased = System.currentTimeMillis();
+        }
+        if (maxHullLast == maxHull && hullLast != hull) {
+            if (hullLast > hull) hullLastDecreased = System.currentTimeMillis();
+            else hullLastIncreased = System.currentTimeMillis();
         }
         if (maxShieldLast == maxShield && shieldLast != shield) {
             if (shieldLast > shield) shieldLastDecreased = System.currentTimeMillis();
@@ -53,6 +65,13 @@ public class Health extends Updatable {
         return System.currentTimeMillis() - hpLastIncreased < time;
     }
 
+    public boolean hullDecreasedIn(int time) {
+        return System.currentTimeMillis() - hullLastDecreased < time;
+    }
+
+    public boolean hullIncreasedIn(int time) {
+        return System.currentTimeMillis() - hullLastIncreased < time;
+    }
 
     public boolean shDecreasedIn(int time) {
         return System.currentTimeMillis() - shieldLastDecreased < time;

@@ -11,21 +11,21 @@ public class Gui extends Updatable {
 
     public boolean visible;
 
-    private Point minimized;
-    private LocationInfo size;
-    private LocationInfo pos;
+    protected Point pos;
+    protected Point size;
+    protected Point minimized;
 
     public int x;
     public int y;
     public int width;
     public int height;
 
-    private long time;
-    private long update;
+    protected long time;
+    protected long update;
 
     public Gui() {
-        this.size = new LocationInfo(0);
-        this.pos = new LocationInfo(0);
+        this.size = new Point();
+        this.pos = new Point();
         this.minimized = new Point();
 
         update();
@@ -33,20 +33,28 @@ public class Gui extends Updatable {
 
     public void update() {
         if (address == 0) return;
-        size.update(API.readMemoryLong(addressInfo + 10 * 8));
         pos.update(API.readMemoryLong(addressInfo + 9 * 8));
+        size.update(API.readMemoryLong(addressInfo + 10 * 8));
+        // 11 * 8 = FeatureDefinitionVo
+        // 12 * 8 = help text
+        // 13 * 8 = tool tip
         minimized.update(API.readMemoryLong(addressInfo + 14 * 8));
 
         size.update();
         pos.update();
         minimized.update();
 
-        width = (int) Math.round(size.now.x);
-        height = (int) Math.round(size.now.y);
-        x = (int) Math.round((MapManager.clientWidth - size.now.x) * 0.01 * pos.now.x);
-        y = (int) Math.round((MapManager.clientHeight - size.now.y) * 0.01 * pos.now.y);
+        width = (int) Math.round(size.x);
+        height = (int) Math.round(size.y);
+        // Set pos relative to window size
+        x = (int) Math.round((MapManager.clientWidth - size.x) * 0.01 * pos.x);
+        y = (int) Math.round((MapManager.clientHeight - size.y) * 0.01 * pos.y);
 
-        visible = API.readMemoryBoolean(addressInfo + 32);
+        visible = API.readMemoryBoolean(addressInfo + 32); // Maximized
+        // API.readMemoryBoolean(addressInfo + 36); // Toggle maximize (set to true/false when pressing H to show/hide)
+        // API.readMemoryBoolean(addressInfo + 40); // Maximized changed (set to true when toggling maximized)
+        // API.readMemoryBoolean(addressInfo + 44); // Settings on server
+        // API.readMemoryBoolean(addressInfo + 48); // show on top
     }
 
     @Override

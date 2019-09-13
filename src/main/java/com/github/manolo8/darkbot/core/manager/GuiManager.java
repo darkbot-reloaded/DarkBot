@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Gui;
+import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.swf.Dictionary;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
@@ -27,11 +28,12 @@ public class GuiManager implements Manager {
     private long guiAddress;
     private long mainAddress;
 
-    private final Gui lostConnection;
-    private final Gui connecting;
-    private final Gui quests;
-    public final Gui eventProgress;
-    public final Gui oreTrade;
+    private final Gui lostConnection = new Gui();
+    private final Gui connecting = new Gui();
+    private final Gui quests = new Gui();
+    private final Gui targetedOffers = new TargetedOfferGui();
+    public final Gui eventProgress = new Gui();
+    public final Gui oreTrade = new Gui();
     public final PetManager pet;
 
     private LoadStatus checks = LoadStatus.WAITING;
@@ -53,11 +55,6 @@ public class GuiManager implements Manager {
         this.validTime = System.currentTimeMillis();
         this.guis = new Dictionary(0);
 
-        this.lostConnection = new Gui();
-        this.connecting = new Gui();
-        this.quests = new Gui();
-        this.eventProgress = new Gui();
-        this.oreTrade = new Gui();
         this.pet = new PetManager(main);
 
         this.main.status.add(value -> validTime = System.currentTimeMillis());
@@ -65,10 +62,10 @@ public class GuiManager implements Manager {
 
     @Override
     public void install(BotInstaller botInstaller) {
-
         this.guis.addLazy("lost_connection", lostConnection::update);
         this.guis.addLazy("connection", connecting::update);
         this.guis.addLazy("quests", this.quests::update);
+        this.guis.addLazy("targetedOffers", this.targetedOffers::update);
         this.guis.addLazy("eventProgress", this.eventProgress::update);
         this.guis.addLazy("ore_trade", this.oreTrade::update);
         this.guis.addLazy("pet", this.pet::update);
@@ -103,6 +100,7 @@ public class GuiManager implements Manager {
         lostConnection.update();
         connecting.update();
         quests.update();
+        targetedOffers.update();
         eventProgress.update();
         oreTrade.update();
         pet.update();
@@ -112,6 +110,7 @@ public class GuiManager implements Manager {
             if (checks == LoadStatus.CLICKING_AMMO) API.keyboardClick(main.config.LOOT.AMMO_KEY);
             checks = LoadStatus.values()[checks.ordinal() + 1];
         }
+        targetedOffers.show(false);
     }
 
     private void tryReconnect(Gui gui) {
