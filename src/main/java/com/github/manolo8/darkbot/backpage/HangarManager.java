@@ -1,8 +1,7 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.backpage.entities.Drone;
-import com.github.manolo8.darkbot.backpage.entities.Hangar;
+import com.github.manolo8.darkbot.backpage.entities.*;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.*;
@@ -20,18 +19,28 @@ public class HangarManager {
     private static final Gson GSON = new Gson();
     private static final JsonParser JSON_PARSER = new JsonParser();
     private static final Type DRONE_LIST = new TypeToken<List<Drone>>(){}.getType();
+    private static final Type ITEMINFO_LIST = new TypeToken<List<ItemInfo>>(){}.getType();
+    private static final Type ITEM_LIST = new TypeToken<List<Item>>(){}.getType();
+    private static final Type SHIPINFO_LIST = new TypeToken<List<ShipInfo>>(){}.getType();
 
     private final Main main;
     private final BackpageManager backpageManager;
     private long lastChangeHangar = 0;
     private List<Hangar> hangars;
     private List<Drone> drones;
+    private List<Item> items;
+    private List<ItemInfo> itemInfos;
+    private List<ShipInfo> shipInfos;
+    private long lastUpdateHangarData = 0;
 
     public HangarManager(Main main, BackpageManager backpageManager) {
         this.main = main;
         this.backpageManager = backpageManager;
         this.hangars = new ArrayList<>();
         this.drones = new ArrayList<>();
+        this.items = new ArrayList<>();
+        this.itemInfos = new ArrayList<>();
+        this.shipInfos = new ArrayList<>();
     }
 
     public boolean changeHangar(String hangarID) {
@@ -49,8 +58,7 @@ public class HangarManager {
     }
 
     public Boolean checkDrones() {
-        updateHangars();
-        updateDrones();
+        updateHangarData();
         boolean repaired = !drones.isEmpty();
         for (Drone drone : drones) {
             if (drone.getDamage() / 100d >= main.config.MISCELLANEOUS.REPAIR_DRONE_PERCENTAGE) {
@@ -58,20 +66,6 @@ public class HangarManager {
             }
         }
         return repaired;
-    }
-
-    public void updateDrones() {
-        String hangarID = getActiveHangar();
-        if (hangarID == null) return;
-
-        String encodeParams = Base64Utils.base64Encode("{\"params\":{\"hi\":" + hangarID + "}}");
-        String url = "flashAPI/inventory.php?action=getHangar&params="+encodeParams;
-        String json = this.backpageManager.getDataInventory(url);
-
-        forEachHangar(json, h -> {
-            if (!h.get("hangar_is_active").getAsBoolean()) return;
-            this.drones = GSON.fromJson(h.get("general").getAsJsonObject().get("drones"), DRONE_LIST);
-        });
     }
 
     private boolean repairDrone(Drone drone) {
@@ -97,22 +91,7 @@ public class HangarManager {
         if (hangarData == null) return;
 
         hangars.clear();
-        forEachHangar(hangarData, h -> hangars.add(GSON.fromJson(h, Hangar.class)));
-    }
-
-    private void forEachHangar(String json, Consumer<JsonObject> hangarConsumer) {
-        try {
-            JsonElement hangars = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject()
-                    .get("ret").getAsJsonObject().get("hangars");
-            if (hangars instanceof JsonArray) {
-                hangars.getAsJsonArray().forEach(h -> hangarConsumer.accept(h.getAsJsonObject()));
-            } else {
-                hangars.getAsJsonObject().entrySet().forEach(h -> hangarConsumer.accept(h.getValue().getAsJsonObject()));
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to iterate hangars: " + json);
-            throw e;
-        }
+        forEachRet(hangarData, h -> hangars.add(GSON.fromJson(h, Hangar.class)),"hangars");
     }
 
     public String getActiveHangar() {
@@ -120,5 +99,78 @@ public class HangarManager {
             if (hangar.hangarIsActive()) return hangar.getHangarId();
         }
         return null;
+    }
+
+    public void updateHangarData(int maxExpiryTime){
+        if (System.currentTimeMillis() > lastUpdateHangarData + maxExpiryTime){
+            updateHangarData();
+        }
+    }
+
+    public void updateHangarData() {
+        updateHangars();
+        String hangarID = getActiveHangar();
+        if (hangarID == null) return;
+
+        String encodeParams = Base64Utils.base64Encode("{\"params\":{\"hi\":" + hangarID + "}}");
+        String json = this.backpageManager.getDataInventory("flashAPI/inventory.php?action=getHangar&params=" + encodeParams);
+
+        if (json != null) {
+            updateDrones(json);
+            updateItems(json);
+            updateItemInfos(json);
+            updateShipsInfo(json);
+            lastUpdateHangarData = System.currentTimeMillis();
+        }
+    }
+
+    private void updateDrones(String json) {
+        forEachRet(json, h -> {
+            if (!h.get("hangar_is_active").getAsBoolean()) return;
+            this.drones = GSON.fromJson(h.get("general").getAsJsonObject().get("drones"), DRONE_LIST);
+        },"hangars");
+    }
+
+    private void updateItemInfos(String json) {
+        forEachRet(json, h -> this.itemInfos = GSON.fromJson(h, ITEMINFO_LIST),"itemInfo");
+    }
+
+    private void updateItems(String json) {
+        forEachRet(json, h -> this.items = GSON.fromJson(h, ITEM_LIST),"items");
+    }
+
+    private void updateShipsInfo(String json) {
+        forEachRet(json, h -> this.shipInfos = GSON.fromJson(h, SHIPINFO_LIST),"shipInfo");
+    }
+
+    private void forEachRet(String json, Consumer<JsonObject> consumer, String key) {
+        try {
+            JsonElement val = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject()
+                    .get("ret").getAsJsonObject().get(key);
+            if (val instanceof JsonArray) {
+                val.getAsJsonArray().forEach(i -> consumer.accept(i.getAsJsonObject()));
+            } else {
+                val.getAsJsonObject().entrySet().forEach(i -> consumer.accept(((JsonElement)i.getValue()).getAsJsonObject()));
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to iterate " + key + ": " + json);
+            throw e;
+        }
+    }
+
+    public List<Drone> getDrones() {
+        return drones;
+    }
+
+    public List<Item> getItems() {
+        return items;
+    }
+
+    public List<ItemInfo> getItemInfos() {
+        return itemInfos;
+    }
+
+    public List<ShipInfo> getShipInfos() {
+        return shipInfos;
     }
 }
