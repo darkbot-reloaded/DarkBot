@@ -132,15 +132,18 @@ public class HangarManager {
     }
 
     private void updateItemInfos(String json) {
-        forEachRet(json, h -> this.itemInfos = GSON.fromJson(h, ITEMINFO_LIST),"itemInfo");
+        JsonArray itemInfoArr = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject().get("ret").getAsJsonObject().get("itemInfo").getAsJsonArray();
+        this.itemInfos = GSON.fromJson(itemInfoArr, ITEMINFO_LIST);
     }
 
     private void updateItems(String json) {
-        forEachRet(json, h -> this.items = GSON.fromJson(h, ITEM_LIST),"items");
+        JsonArray itemInfoArr = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject().get("ret").getAsJsonObject().get("items").getAsJsonArray();
+        this.items = GSON.fromJson(itemInfoArr, ITEM_LIST);
     }
 
     private void updateShipsInfo(String json) {
-        forEachRet(json, h -> this.shipInfos = GSON.fromJson(h, SHIPINFO_LIST),"shipInfo");
+        JsonArray itemInfoArr = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject().get("ret").getAsJsonObject().get("shipInfo").getAsJsonArray();
+        this.shipInfos = GSON.fromJson(itemInfoArr, SHIPINFO_LIST);
     }
 
     private void forEachRet(String json, Consumer<JsonObject> consumer, String key) {
