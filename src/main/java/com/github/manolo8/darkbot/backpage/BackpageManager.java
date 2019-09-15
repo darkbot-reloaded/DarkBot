@@ -12,7 +12,7 @@ import java.util.List;
 
 public class BackpageManager extends Thread {
     private final Main main;
-    private final HangarManager hangarManager;
+    public final HangarManager hangarManager;
     private static final int SECOND = 1000, MINUTE = 60 * SECOND;
 
     private static final String[] ACTIONS = new String[] {
