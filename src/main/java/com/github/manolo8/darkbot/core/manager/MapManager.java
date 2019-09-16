@@ -165,14 +165,15 @@ public class MapManager implements Manager {
 
     public boolean isCurrentTargetOwned() {
         long temp = API.readMemoryLong(viewAddressStatic);
-        temp = API.readMemoryLong(temp + 216);
-        temp = API.readMemoryLong(temp + 200);
-        temp = API.readMemoryLong(temp + 48);
-        int lockStatus = API.readMemoryInt(temp + 40);
+        temp = API.readMemoryLong(temp + 216); //
+        temp = API.readMemoryLong(temp + 200); //
+        temp = API.readMemoryLong(temp + 48); // get _target
+        int lockStatus = API.readMemoryInt(temp + 40); // IntHolder.value
         // 1 = selected & owned
         // 2 = selected & someone else owns it
-        // Weird numbers (negative or positive) and usually big, while selecting or no npc selected.
-        return lockStatus == 1 || lockStatus < 0 || lockStatus > 10;
+        // 3 = ?
+        // 4 = ?
+        return lockStatus == 1 || lockStatus < 1 || lockStatus > 4;
     }
 
 }
