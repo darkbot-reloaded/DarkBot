@@ -50,7 +50,7 @@ public class Portal extends Entity {
     }
 
     // Holds the search criteria portals in the star manager
-    private class PortalMatcher {
+    private static class PortalMatcher {
         private int searchType, searchX, searchY;
 
         PortalMatcher(int searchType, int searchX, int searchY) {

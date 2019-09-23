@@ -55,7 +55,8 @@ public class ConfigEntity {
     }
 
     public void updateSafetyFor(Entity entity) {
-        if (!entity.locationInfo.isLoaded()) return;
+        if (!entity.locationInfo.isLoaded() ||
+                (entity.locationInfo.now.x == 0 && entity.locationInfo.now.y == 0)) return;
         SafetyInfo.Type type = SafetyInfo.Type.of(entity);
         if (type == null) return;
 

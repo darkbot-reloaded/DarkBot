@@ -44,7 +44,8 @@ public class SafetyInfo implements Serializable, Ignorable {
 
     @Override
     public boolean ignore() {
-        return diameter == (type == Type.BASE ? 1500 : 500) &&
+        return (x == 0 && y == 0) ||
+                diameter == (type == Type.BASE ? 1500 : 500) &&
                 (type != Type.PORTAL ? runMode == RunMode.NEVER :
                         (entity != null && ((Portal) entity).target != null
                                 && runMode == (((Portal) entity).target.gg ? RunMode.NEVER : RunMode.ALWAYS))) &&
