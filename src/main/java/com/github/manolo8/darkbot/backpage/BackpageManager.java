@@ -13,11 +13,13 @@ import java.util.List;
 public class BackpageManager extends Thread {
     private final Main main;
     public final HangarManager hangarManager;
+    public final GalaxyManager galaxyManager;
     private static final int SECOND = 1000, MINUTE = 60 * SECOND;
 
     private static final String[] ACTIONS = new String[] {
             "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"
     };
+
     private static String getRandomAction() {
         return ACTIONS[(int) (Math.random() * ACTIONS.length)];
     }
@@ -37,6 +39,7 @@ public class BackpageManager extends Thread {
         super("BackpageManager");
         this.main = main;
         this.hangarManager = new HangarManager(main, this);
+        this.galaxyManager = new GalaxyManager(main, this);
         start();
     }
 
