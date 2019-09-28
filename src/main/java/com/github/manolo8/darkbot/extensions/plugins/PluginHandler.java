@@ -137,7 +137,7 @@ public class PluginHandler {
                 pd.minVersion : pd.minVersion + "-v" + pd.supportedVersion);
 
         if (Main.VERSION.compareTo(pd.minVersion) < 0)
-            plugin.getIssues().addFailure("Invalid min version",
+            plugin.getIssues().addFailure("Bot update required",
                     "This plugin requires " + supportedRange + ", so it can't run on Darkbot v" + Main.VERSION);
 
         if (Main.VERSION.compareTo(pd.supportedVersion) > 0)

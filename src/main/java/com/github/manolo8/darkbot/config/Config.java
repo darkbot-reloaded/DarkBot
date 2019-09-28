@@ -58,43 +58,43 @@ public class Config {
 
         public @Option("Safety") Safety SAFETY = new Safety();
         public static class Safety {
-            @Option("Run to repair at")
+            @Option(value = "Run to repair at", description = "Even if shooting an npc, run away when under this hp")
             @Editor(JPercentField.class)
             public double REPAIR_HP = 0.4;
-            @Option("Run to repair when not killing npcs")
+            @Option(value = "Run to repair when not killing npcs", description = "Hp to run at when just roaming the map")
             @Editor(JPercentField.class)
             public double REPAIR_HP_NO_NPC = 0.5;
-            @Option("Repair until")
+            @Option(value = "Repair until health", description = "Minimum health to stop repairing")
             @Editor(JPercentField.class)
             public double REPAIR_TO_HP = 0.95;
-            @Option("Repair until shield")
+            @Option(value = "Repair until shield", description = "Minimum shield to stop repairing")
             @Editor(JPercentField.class)
             public double REPAIR_TO_SHIELD = 1;
             @Option(value = "Repair config", description = "Used to repair after run formation shields are full")
             public ShipConfig REPAIR = new ShipConfig(1, '9');
-            @Option("Max deaths")
+            @Option(value = "Max deaths", description = "Max amount of deaths, if reached, bot is paused")
             @Num(min = 1, max = 9999)
             public int MAX_DEATHS = 10;
-            @Option("Revive location")
+            @Option(value = "Revive location", description = "Where to revive the ship")
             @Editor(JListField.class)
             @Options(ReviveSpotSupplier.class)
             public long REVIVE_LOCATION = 1L;
-            @Option("Wait before revive (sec)")
+            @Option(value = "Wait before revive (sec)", description = "Seconds to wait before reviving")
             @Num(min = 2, max = 60, step = 10)
             public int WAIT_BEFORE_REVIVE = 3;
-            @Option("Wait after revive (sec)")
+            @Option(value = "Wait after revive (sec)", description = "Seconds to wait after reviving, lets ship repair")
             @Num(min = 3, max = 15 * 60, step = 10)
             public int WAIT_AFTER_REVIVE = 90;
         }
 
         public @Option("Running") Running RUNNING = new Running();
         public static class Running {
-            @Option("Run from enemies")
+            @Option(value = "Run from enemies", description = "If bot should run from enemies who attack you, or have attacked you recently")
             public boolean RUN_FROM_ENEMIES = true;
             @Option(value = "Remember enemies for", description = "How long to run in sight from enemies that shot you")
             @Num(max = 24 * 60 * 60, step = 300)
             public int REMEMBER_ENEMIES_FOR = 300;
-            @Option("Run from enemies in sight")
+            @Option(value = "Run from enemies in sight", description = "Run from enemies as soon as they enter your minimap")
             public boolean RUN_FROM_ENEMIES_SIGHT = false;
             @Option(value = "Stop running when out of sight", description = "Will stop running if the enemy isn't attacking and is no longer on sight")
             public boolean STOP_RUNNING_NO_SIGHT = true;
@@ -208,7 +208,7 @@ public class Config {
         @Option(value = "Refresh every", description = "Every how many minutes to refresh")
         @Num(max = 60 * 12, step = 10)
         public int REFRESH_TIME = 0;
-        @Option("Repair Drone Percentage")
+        @Option(value = "Repair Drone Percentage", description = "Drones are repaired if above this percentage")
         @Editor(JPercentField.class)
         public double REPAIR_DRONE_PERCENTAGE = 0.9;
         @Option(value = "Start/pause clicking map", description = "Left click to start/pause. Right click to move ship.")

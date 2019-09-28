@@ -3,11 +3,13 @@ package com.github.manolo8.darkbot.gui.plugins;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.gui.tree.components.JLabel;
+import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 
 class IssueList extends JPanel {
 
@@ -33,6 +35,17 @@ class IssueList extends JPanel {
             label.setFont(baseFont.deriveFont(baseFont.getStyle() | Font.BOLD));
         }
         label.setToolTipText(pluginIssue.getDescription());
+        label.addMouseListener(new SimpleMouseListener() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                ToolTipManager ttm = ToolTipManager.sharedInstance();
+                int oldDelay = ttm.getInitialDelay();
+                ttm.setInitialDelay(0);
+                ttm.mouseMoved(new MouseEvent(label, 0, 0, 0, e.getX(), e.getY(), 0, false));
+                SwingUtilities.invokeLater(() -> ttm.setInitialDelay(oldDelay));
+            }
+        });
+        label.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return label;
     }
 
