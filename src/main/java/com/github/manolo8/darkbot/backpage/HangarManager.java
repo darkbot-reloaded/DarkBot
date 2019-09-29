@@ -19,6 +19,7 @@ public class HangarManager {
     private static final Type ITEMINFO_LIST = new TypeToken<List<ItemInfo>>(){}.getType();
     private static final Type ITEM_LIST = new TypeToken<List<Item>>(){}.getType();
     private static final Type SHIPINFO_LIST = new TypeToken<List<ShipInfo>>(){}.getType();
+    private static final Type STRING_LIST = new TypeToken<List<String>>(){}.getType();
 
     private final Main main;
     private final BackpageManager backpageManager;
@@ -28,6 +29,8 @@ public class HangarManager {
     private List<Item> items;
     private List<ItemInfo> itemInfos;
     private List<ShipInfo> shipInfos;
+    private List<String> types;
+    private List<String> lootIds;
     private long lastHangarDataUpdate = 0;
 
     HangarManager(Main main, BackpageManager backpageManager) {
@@ -109,14 +112,17 @@ public class HangarManager {
         String json = this.backpageManager.getDataInventory("flashAPI/inventory.php?action=getHangar&params=" + encodeParams);
 
         if (json != null) {
-            JsonObject ret = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject().get("ret").getAsJsonObject();
+            JsonObject data = JSON_PARSER.parse(json).getAsJsonObject().getAsJsonObject("data");
+            JsonObject ret = data.getAsJsonObject("ret");
             forEachHangar(ret, h -> {
                 if (!h.get("hangar_is_active").getAsBoolean()) return;
-                this.drones = GSON.fromJson(h.get("general").getAsJsonObject().get("drones"), DRONE_LIST);
+                this.drones = GSON.fromJson(h.getAsJsonObject("general").get("drones"), DRONE_LIST);
             });
-            this.items = GSON.fromJson(ret.get("items").getAsJsonArray(), ITEM_LIST);
-            this.itemInfos = GSON.fromJson(ret.get("itemInfo").getAsJsonArray(), ITEMINFO_LIST);
-            this.shipInfos = GSON.fromJson(ret.get("shipInfo").getAsJsonArray(), SHIPINFO_LIST);
+            this.items = GSON.fromJson(ret.get("items"), ITEM_LIST);
+            this.itemInfos = GSON.fromJson(ret.get("itemInfo"), ITEMINFO_LIST);
+            this.shipInfos = GSON.fromJson(ret.get("shipInfo"), SHIPINFO_LIST);
+            this.types = GSON.fromJson(data.getAsJsonObject("map").get("types"), STRING_LIST);
+            this.lootIds = GSON.fromJson(data.getAsJsonObject("map").get("lootIds"), STRING_LIST);
             lastHangarDataUpdate = System.currentTimeMillis();
         }
     }
@@ -146,5 +152,13 @@ public class HangarManager {
 
     public List<ShipInfo> getShipInfos() {
         return shipInfos;
+    }
+
+    public List<String> getTypes() {
+        return types;
+    }
+
+    public List<String> getLootIds() {
+        return lootIds;
     }
 }
