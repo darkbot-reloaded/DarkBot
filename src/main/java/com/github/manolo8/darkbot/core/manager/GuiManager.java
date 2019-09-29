@@ -8,6 +8,8 @@ import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.swf.Dictionary;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -15,7 +17,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class GuiManager implements Manager {
 
     private final Main main;
-    private final Dictionary guis;
+    private final Dictionary guis = new Dictionary(0);
 
     private long reconnectTime;
     private long lastDeath = -1;
@@ -28,12 +30,15 @@ public class GuiManager implements Manager {
     private long guiAddress;
     private long mainAddress;
 
-    private final Gui lostConnection = new Gui();
-    private final Gui connecting = new Gui();
-    private final Gui quests = new Gui();
-    private final Gui targetedOffers = new TargetedOfferGui();
-    public final Gui eventProgress = new Gui();
-    public final Gui oreTrade = new Gui();
+    private List<Gui> registeredGuis = new ArrayList<>();
+
+    public final Gui lostConnection = register("lost_connection");
+    public final Gui connecting = register("connecting");
+    public final Gui quests = register("quests");
+    public final Gui targetedOffers = register("targetedOffers", new TargetedOfferGui());
+    public final Gui logout = register("logout");
+    public final Gui eventProgress =  register("eventProgress");
+    public final Gui oreTrade =  register("ore_trade");
     public final PetManager pet;
 
     private LoadStatus checks = LoadStatus.WAITING;
@@ -53,23 +58,26 @@ public class GuiManager implements Manager {
         this.main = main;
 
         this.validTime = System.currentTimeMillis();
-        this.guis = new Dictionary(0);
 
-        this.pet = new PetManager(main);
+        this.pet = register("pet", new PetManager(main));
 
         this.main.status.add(value -> validTime = System.currentTimeMillis());
     }
 
+    public Gui register(String key) {
+        return register(key, new Gui());
+    }
+
+    public <T extends Gui> T register(String key, T gui) {
+        @SuppressWarnings("UnnecessaryLocalVariable")
+        Gui guiFix = gui; // Workaround for a java compiler assertion bug having issues with types
+        this.guis.addLazy(key, guiFix::update);
+        this.registeredGuis.add(guiFix);
+        return gui;
+    }
+
     @Override
     public void install(BotInstaller botInstaller) {
-        this.guis.addLazy("lost_connection", lostConnection::update);
-        this.guis.addLazy("connection", connecting::update);
-        this.guis.addLazy("quests", this.quests::update);
-        this.guis.addLazy("targetedOffers", this.targetedOffers::update);
-        this.guis.addLazy("eventProgress", this.eventProgress::update);
-        this.guis.addLazy("ore_trade", this.oreTrade::update);
-        this.guis.addLazy("pet", this.pet::update);
-
         botInstaller.screenManagerAddress.add(value -> screenAddress = value);
         botInstaller.mainAddress.add(value -> mainAddress = value);
 
@@ -85,11 +93,7 @@ public class GuiManager implements Manager {
             guis.update(API.readMemoryLong(guiAddress + 112));
 
             repairAddress = 0;
-            lostConnection.reset();
-            connecting.reset();
-            eventProgress.reset();
-            oreTrade.reset();
-            pet.reset();
+            registeredGuis.forEach(Gui::reset);
             checks = LoadStatus.WAITING;
         });
     }
@@ -97,14 +101,7 @@ public class GuiManager implements Manager {
     public void tick() {
         guis.update();
 
-        lostConnection.update();
-        connecting.update();
-        quests.update();
-        targetedOffers.update();
-        eventProgress.update();
-        oreTrade.update();
-        pet.update();
-
+        registeredGuis.forEach(Gui::update);
 
         if (checks != LoadStatus.DONE && checks.canAdvance.test(quests)) {
             if (checks == LoadStatus.CLICKING_AMMO) API.keyboardClick(main.config.LOOT.AMMO_KEY);

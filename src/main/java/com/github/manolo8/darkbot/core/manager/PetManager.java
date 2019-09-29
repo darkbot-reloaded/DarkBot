@@ -39,7 +39,7 @@ public class PetManager extends Gui {
         }
         updatePetTarget();
         int module = (target == null || target instanceof Npc || target.playerInfo.isEnemy()) ? main.config.PET.MODULE : 0;
-        if (moduleStatus != module && show(true)) this.selectModule();
+        if (moduleStatus != module && show(true)) this.selectModule(module);
         else if (moduleSelected()) show(false);
     }
 
@@ -73,14 +73,14 @@ public class PetManager extends Gui {
         }
     }
 
-    private void selectModule() {
+    private void selectModule(int module) {
         if (System.currentTimeMillis() - this.selectModuleTime > 1000L) {
             if (moduleStatus != -1) {
                 click(MODULES_X_MAX - 5, MODULE_Y);
                 this.moduleStatus = -1;
             } else {
-                click(MODULES_X_MAX - 30, MODULE_Y + 40 + (20 * this.main.config.PET.MODULE));
-                this.moduleStatus = this.main.config.PET.MODULE;
+                click(MODULES_X_MAX - 30, MODULE_Y + 40 + (20 * module));
+                this.moduleStatus = module;
             }
             this.selectModuleTime = System.currentTimeMillis();
         }

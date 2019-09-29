@@ -1,19 +1,15 @@
 package com.github.manolo8.darkbot.gui;
 
 import com.bulenkov.darcula.ui.DarculaTreeUI;
-import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.tree.ConfigTree;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
-import com.sun.org.apache.regexp.internal.RE;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import javax.swing.plaf.LayerUI;
 import javax.swing.plaf.basic.BasicTreeUI;
-import javax.swing.tree.DefaultTreeCellEditor;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.MouseWheelEvent;

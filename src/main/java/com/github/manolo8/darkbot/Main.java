@@ -28,7 +28,7 @@ import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DummyModule;
-import com.github.manolo8.darkbot.modules.MapModule;
+import com.github.manolo8.darkbot.modules.TemporalModule;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -196,8 +196,10 @@ public class Main extends Thread implements PluginListener {
         statsManager.tick();
 
         tickingModule = running && guiManager.canTickModule();
-        if (tickingModule) tickRunning();
-        else if (!running && (!hero.hasTarget() || !mapManager.isTarget(hero.target))) {
+        if (running && guiManager.canTickModule()) tickRunning();
+        else tickLogic(false);
+
+        if (!running && (!hero.hasTarget() || !mapManager.isTarget(hero.target))) {
             hero.setTarget(Stream.concat(mapManager.entities.ships.stream(), mapManager.entities.npcs.stream())
                     .filter(mapManager::isTarget)
                     .findFirst().orElse(null));
@@ -211,16 +213,24 @@ public class Main extends Thread implements PluginListener {
     private void tickRunning() {
         guiManager.pet.tick();
         checkRefresh();
+        tickLogic(true);
+        checkPetBug();
+    }
+
+
+    private void tickLogic(boolean running) {
         synchronized (pluginHandler) {
             try {
-                module.tick();
+                if (running) module.tick();
+                else module.tickStopped();
             } catch (Exception e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
                 if (modDef != null) modDef.getIssues().addWarning("Failed to tick", IssueHandler.createDescription(e));
             }
             for (Behaviour behaviour : behaviours) {
                 try {
-                    behaviour.tick();
+                    if (running) behaviour.tick();
+                    else behaviour.tickStopped();
                 } catch (Exception e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
@@ -228,7 +238,6 @@ public class Main extends Thread implements PluginListener {
                 }
             }
         }
-        checkPetBug();
     }
 
     private void checkConfig() {
@@ -288,7 +297,7 @@ public class Main extends Thread implements PluginListener {
 
     private void onRunningToggle(boolean running) {
         lastRefresh = System.currentTimeMillis();
-        if (running && module instanceof MapModule) {
+        if (running && module instanceof TemporalModule) {
             moduleId = "(none)";
         }
     }

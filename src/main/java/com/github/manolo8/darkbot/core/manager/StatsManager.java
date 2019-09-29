@@ -3,10 +3,13 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.modules.DisconnectModule;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class StatsManager implements Manager {
+
+    private Main main;
 
     private long address;
     private long settingsAddress;
@@ -31,7 +34,8 @@ public class StatsManager implements Manager {
     public volatile String instance;
 
     public StatsManager(Main main) {
-        main.status.add(this::toggle);
+        this.main = main;
+        this.main.status.add(this::toggle);
     }
 
     @Override
@@ -103,7 +107,12 @@ public class StatsManager implements Manager {
 
     private void updateHonor(double honor) {
         if (honor == 0) return;
-        if (this.honor != 0) earnedHonor += honor - this.honor;
+        double honorDiff = honor - this.honor;
+        if (honorDiff < -10_000) {
+            System.out.println("Paused bot, lost " + honorDiff + " honor.");
+            main.setModule(new DisconnectModule(true));
+        }
+        if (this.honor != 0) earnedHonor += honorDiff;
         this.honor = honor;
     }
 
