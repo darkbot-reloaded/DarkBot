@@ -16,7 +16,7 @@ public class GalaxyManager {
     private Main main;
     private long lastGatesUpdate;
 
-    public GalaxyManager(Main main, BackpageManager backpageManager) {
+    GalaxyManager(Main main, BackpageManager backpageManager) {
         this.main = main;
         this.backpageManager = backpageManager;
         this.galaxyInfo = new GalaxyInfo();
@@ -26,48 +26,35 @@ public class GalaxyManager {
         return galaxyInfo;
     }
 
-    public long lastGatesUpdate() {
-        return System.currentTimeMillis() - lastGatesUpdate;
-    }
-
-    /**
-     * @param spinAmount amount of energy to spin {1, 5, 10, 100}
-     * @return returns response code of connection
-     */
-    public int performGateSpin(SpinGate gate, boolean multiplier, int spinAmount, int minWait) {
+    public void performGateSpin(SpinGate gate, boolean multiplier, int spinAmount, int minWait) {
         String params = "flashinput/galaxyGates.php?userID=" + main.hero.id + "&action=multiEnergy&sid=" + main.statsManager.sid + gate.getParam();
 
         if (galaxyInfo.getSamples() != null && galaxyInfo.getSamples() > 0) params = params + "&sample=1";
         if (multiplier) params = params + "&multiplier=1";
         if (spinAmount > 4) params = params + "&spinamount=" + spinAmount;
 
-        return parseGalaxyInfo(params, minWait);
+        handleRequest(params, -1, minWait);
     }
 
-    public int updateGalaxyInfo(int minWait) {
-        int responseCode = parseGalaxyInfo("flashinput/galaxyGates.php?userID=" + main.hero.id + "&action=init&sid=" + main.statsManager.sid, minWait);
-        lastGatesUpdate = System.currentTimeMillis();
-        return responseCode;
+    public void updateGalaxyInfo(int expiryTime) {
+        handleRequest("flashinput/galaxyGates.php?userID=" + main.hero.id + "&action=init&sid=" + main.statsManager.sid, expiryTime, 2500);
     }
 
-    private int parseGalaxyInfo(String params, int minWait) {
-        Element rootElement = null;
-        int responseCode = -1;
+    private void handleRequest(String params, int expiryTime, int minWait) {
+        if (System.currentTimeMillis() > lastGatesUpdate + expiryTime) {
+            try {
+                SAXReader reader = new SAXReader();
 
-        try {
-            SAXReader reader = new SAXReader();
+                HttpURLConnection conn = backpageManager.getConnection(params, minWait);
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0");
 
-            HttpURLConnection conn = backpageManager.getConnection(params, minWait);
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-
-            Document document = reader.read(conn.getInputStream());
-            responseCode = conn.getResponseCode();
-            if ((rootElement = document.getRootElement()) == null) return responseCode;
-        } catch (Exception e) {
-            e.printStackTrace();
+                Document document = reader.read(conn.getInputStream());
+                if (document.getRootElement() == null) return;
+                galaxyInfo.updateGalaxyInfo(document.getRootElement());
+                lastGatesUpdate = System.currentTimeMillis();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        galaxyInfo.updateGalaxyInfo(rootElement);
-
-        return responseCode;
     }
 }

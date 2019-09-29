@@ -3,15 +3,12 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.entities.*;
 import com.github.manolo8.darkbot.utils.Base64Utils;
-import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class HangarManager {
@@ -25,15 +22,15 @@ public class HangarManager {
 
     private final Main main;
     private final BackpageManager backpageManager;
-    private long lastChangeHangar = 0;
+    private long lastHangarChange = 0;
     private List<Hangar> hangars;
     private List<Drone> drones;
     private List<Item> items;
     private List<ItemInfo> itemInfos;
     private List<ShipInfo> shipInfos;
-    private long lastUpdateHangarData = 0;
+    private long lastHangarDataUpdate = 0;
 
-    public HangarManager(Main main, BackpageManager backpageManager) {
+    HangarManager(Main main, BackpageManager backpageManager) {
         this.main = main;
         this.backpageManager = backpageManager;
         this.hangars = new ArrayList<>();
@@ -43,22 +40,22 @@ public class HangarManager {
         this.shipInfos = new ArrayList<>();
     }
 
-    public boolean changeHangar(String hangarID) {
-        if (this.lastChangeHangar <= System.currentTimeMillis() - 40000 && backpageManager.sidStatus().contains("OK")) {
-            String url = "indexInternal.es?action=internalDock&subAction=changeHangar&hangarId=" + hangarID;
+    public boolean changeHangar(String hangarId) {
+        if (this.lastHangarChange <= System.currentTimeMillis() - 12_000 && backpageManager.sidStatus().contains("OK")) {
+            String url = "indexInternal.es?action=internalDock&subAction=changeHangar&hangarId=" + hangarId;
             try {
                 backpageManager.getConnection(url, 2000).getResponseCode();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            this.lastChangeHangar = System.currentTimeMillis();
+            this.lastHangarChange = System.currentTimeMillis();
             return true;
         }
         return false;
     }
 
     public Boolean checkDrones() {
-        updateHangarData();
+        updateHangarData(500);
         boolean repaired = !drones.isEmpty();
         for (Drone drone : drones) {
             if (drone.getDamage() / 100d >= main.config.MISCELLANEOUS.REPAIR_DRONE_PERCENTAGE) {
@@ -86,77 +83,51 @@ public class HangarManager {
 
     public void updateHangars() {
         String params = "flashAPI/inventory.php?action=getHangarList";
-        String hangarData = backpageManager.getDataInventory(params);
+        String json = backpageManager.getDataInventory(params);
 
-        if (hangarData == null) return;
+        if (json == null) return;
 
+        JsonObject ret = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject().get("ret").getAsJsonObject();
         hangars.clear();
-        forEachRet(hangarData, h -> hangars.add(GSON.fromJson(h, Hangar.class)),"hangars");
+        forEachHangar(ret, h -> hangars.add(GSON.fromJson(h, Hangar.class)));
     }
 
     public String getActiveHangar() {
-        for (Hangar hangar : hangars) {
-            if (hangar.hangarIsActive()) return hangar.getHangarId();
-        }
-        return null;
+        return hangars.stream().filter(Hangar::hangarIsActive).findFirst().map(Hangar::getHangarId).orElse(null);
     }
 
-    public void updateHangarData(int maxExpiryTime){
-        if (System.currentTimeMillis() > lastUpdateHangarData + maxExpiryTime){
-            updateHangarData();
-        }
+    public void updateHangarData(int expiryTime) {
+        if (System.currentTimeMillis() > lastHangarDataUpdate + expiryTime) updateHangarData();
     }
 
-    public void updateHangarData() {
+    private void updateHangarData() {
         updateHangars();
-        String hangarID = getActiveHangar();
-        if (hangarID == null) return;
+        String hangarId = getActiveHangar();
+        if (hangarId == null) return;
 
-        String encodeParams = Base64Utils.base64Encode("{\"params\":{\"hi\":" + hangarID + "}}");
+        String encodeParams = Base64Utils.base64Encode("{\"params\":{\"hi\":" + hangarId + "}}");
         String json = this.backpageManager.getDataInventory("flashAPI/inventory.php?action=getHangar&params=" + encodeParams);
 
         if (json != null) {
-            updateDrones(json);
-            updateItems(json);
-            updateItemInfos(json);
-            updateShipsInfo(json);
-            lastUpdateHangarData = System.currentTimeMillis();
+            JsonObject ret = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject().get("ret").getAsJsonObject();
+            forEachHangar(ret, h -> {
+                if (!h.get("hangar_is_active").getAsBoolean()) return;
+                this.drones = GSON.fromJson(h.get("general").getAsJsonObject().get("drones"), DRONE_LIST);
+            });
+            this.items = GSON.fromJson(ret.get("items").getAsJsonArray(), ITEM_LIST);
+            this.itemInfos = GSON.fromJson(ret.get("itemInfo").getAsJsonArray(), ITEMINFO_LIST);
+            this.shipInfos = GSON.fromJson(ret.get("shipInfo").getAsJsonArray(), SHIPINFO_LIST);
+            lastHangarDataUpdate = System.currentTimeMillis();
         }
     }
 
-    private void updateDrones(String json) {
-        forEachRet(json, h -> {
-            if (!h.get("hangar_is_active").getAsBoolean()) return;
-            this.drones = GSON.fromJson(h.get("general").getAsJsonObject().get("drones"), DRONE_LIST);
-        },"hangars");
-    }
-
-    private void updateItemInfos(String json) {
-        JsonArray itemInfoArr = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject().get("ret").getAsJsonObject().get("itemInfo").getAsJsonArray();
-        this.itemInfos = GSON.fromJson(itemInfoArr, ITEMINFO_LIST);
-    }
-
-    private void updateItems(String json) {
-        JsonArray itemInfoArr = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject().get("ret").getAsJsonObject().get("items").getAsJsonArray();
-        this.items = GSON.fromJson(itemInfoArr, ITEM_LIST);
-    }
-
-    private void updateShipsInfo(String json) {
-        JsonArray itemInfoArr = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject().get("ret").getAsJsonObject().get("shipInfo").getAsJsonArray();
-        this.shipInfos = GSON.fromJson(itemInfoArr, SHIPINFO_LIST);
-    }
-
-    private void forEachRet(String json, Consumer<JsonObject> consumer, String key) {
+    private void forEachHangar(JsonObject ret, Consumer<JsonObject> consumer) {
         try {
-            JsonElement val = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject()
-                    .get("ret").getAsJsonObject().get(key);
-            if (val instanceof JsonArray) {
-                val.getAsJsonArray().forEach(i -> consumer.accept(i.getAsJsonObject()));
-            } else {
-                val.getAsJsonObject().entrySet().forEach(i -> consumer.accept(((JsonElement)i.getValue()).getAsJsonObject()));
-            }
+            JsonElement val = ret.get("hangars");
+            if (val instanceof JsonArray) val.getAsJsonArray().forEach(i -> consumer.accept(i.getAsJsonObject()));
+            else val.getAsJsonObject().entrySet().forEach(i -> consumer.accept(i.getValue().getAsJsonObject()));
         } catch (Exception e) {
-            System.err.println("Failed to iterate " + key + ": " + json);
+            System.err.println("Failed to iterate hangars: " + ret);
             throw e;
         }
     }
