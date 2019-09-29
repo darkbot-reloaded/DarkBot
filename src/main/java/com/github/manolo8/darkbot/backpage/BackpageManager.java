@@ -77,7 +77,7 @@ public class BackpageManager extends Thread {
                 for (Task task : tasks) {
                     try {
                         task.tick();
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
                                 .addWarning("Failed to tick", IssueHandler.createDescription(e));

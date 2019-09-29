@@ -33,7 +33,7 @@ public class LootNCollectorModule implements Module {
 
     @Override
     public String status() {
-        return "Loot: " + lootModule.status() + " - Collect: " + collectorModule.status();
+        return "Kill: " + lootModule.status() + " - Collect: " + collectorModule.status();
     }
 
     @Override

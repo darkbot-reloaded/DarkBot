@@ -48,7 +48,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.15 beta";
+    public static final String VERSION_STRING = "1.13.15 beta 2";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
@@ -223,7 +223,7 @@ public class Main extends Thread implements PluginListener {
             try {
                 if (running) module.tick();
                 else module.tickStopped();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
                 if (modDef != null) modDef.getIssues().addWarning("Failed to tick", IssueHandler.createDescription(e));
             }
@@ -231,7 +231,7 @@ public class Main extends Thread implements PluginListener {
                 try {
                     if (running) behaviour.tick();
                     else behaviour.tickStopped();
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
                             .addFailure("Failed to tick", IssueHandler.createDescription(e));

@@ -102,7 +102,7 @@ public class PluginHandler {
             } catch (PluginLoadingException e) {
                 LOADING_EXCEPTIONS.add(e);
                 e.printStackTrace();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugin", e, pl));
                 e.printStackTrace();
             }

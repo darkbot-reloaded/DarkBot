@@ -75,7 +75,7 @@ public class FeatureRegistry implements PluginListener {
 
                     feature.setInstance(instance = featureLoader.loadFeature(feature));
                     return Optional.of(instance);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     feature.getIssues().addFailure("Failed to load", IssueHandler.createDescription(e));
                     e.printStackTrace();
                     return Optional.empty();

@@ -36,11 +36,13 @@ public class IssueHandler {
         add(message, description, PluginIssue.Level.ERROR);
     }
 
-    public static String createDescription(Exception e) {
+    public static String createDescription(Throwable e) {
         return Stream.concat(
                 e.getMessage() == null ? Stream.empty() : Stream.of("<strong>" + e.getMessage() + "</strong>"),
                 Arrays.stream(e.getStackTrace())
-        ).map(Objects::toString).collect(Collectors.joining("<br>", "<html>", "</html>"));
+        ).map(Objects::toString)
+                .limit(100)
+                .collect(Collectors.joining("<br>", "<html>", "</html>"));
     }
 
     public void add(String message, String description, PluginIssue.Level level) {
