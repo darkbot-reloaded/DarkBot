@@ -46,7 +46,11 @@ public class DisconnectModule extends TemporalModule {
         if (!logout.visible) logoutStart = System.currentTimeMillis();
         logout.show(true);
         // Prevent bug where logout gets to 0 and doesn't log out, just force a reload
-        if (System.currentTimeMillis() - logoutStart > 25_000) Main.API.refresh();
+        if (System.currentTimeMillis() - logoutStart > 25_000) {
+            logoutStart = System.currentTimeMillis() + 90_000;
+            System.out.println("Disconnect module, refreshing due to logout not finishing bug.");
+            Main.API.handleRefresh();
+        }
     }
 
     @Override

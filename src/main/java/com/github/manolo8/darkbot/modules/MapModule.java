@@ -8,21 +8,26 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.utils.Drive;
 
+import java.util.List;
+
 public class MapModule extends TemporalModule implements MapChange {
 
     private Main main;
     private HeroManager hero;
+    private List<Portal> portals;
     private Drive drive;
     private StarManager star;
 
     private Portal current;
     private Map target;
+    private int lastPortals;
     private long lastMapChange;
 
     @Override
     public void install(Main main) {
         super.install(main);
         this.hero = main.hero;
+        this.portals = main.mapManager.entities.portals;
         this.drive = main.hero.drive;
         this.star = main.starManager;
         this.main = main;
@@ -45,8 +50,11 @@ public class MapModule extends TemporalModule implements MapChange {
 
     @Override
     public void tick() {
-        if (current == null || current.removed)
+        if (hero.map == target) return;
+        if (current == null || current.removed || lastPortals != portals.size()) {
             current = star.next(hero, target);
+            lastPortals = portals.size();
+        }
 
         if (current == null) {
             if (System.currentTimeMillis() - lastMapChange > 3000) goBack();
@@ -65,8 +73,14 @@ public class MapModule extends TemporalModule implements MapChange {
     @Override
     public void onMapChange() {
         lastMapChange = System.currentTimeMillis();
-        current = null;
+        lastPortals = -1;
         if (hero.map == target) goBack();
     }
 
+    @Override
+    protected void goBack() {
+        super.goBack();
+        current = null;
+        lastPortals = -1;
+    }
 }

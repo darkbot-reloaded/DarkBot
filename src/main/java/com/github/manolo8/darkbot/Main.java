@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
+import com.github.manolo8.darkbot.core.DarkFlash;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
@@ -48,7 +49,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.15 beta 3";
+    public static final String VERSION_STRING = "1.13.15 beta 6";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
@@ -96,7 +97,12 @@ public class Main extends Thread implements PluginListener {
         this.config = new Config();
         loadConfig();
 
-        API = new DarkBotAPI(config);
+        int dialogResult = JOptionPane.showConfirmDialog(null, "Wanna try new browserless flash (sid-login only)?", "Warning", JOptionPane.YES_NO_OPTION);
+        if (dialogResult == JOptionPane.YES_OPTION){
+            API = new DarkFlash();
+        } else {
+            API = new DarkBotAPI();
+        }
         /*if (config.MISCELLANEOUS.FULL_DEBUG)
             API = (IDarkBotAPI) Proxy.newProxyInstance(Main.class.getClassLoader(), new Class[]{IDarkBotAPI.class}, IDarkBotAPI.getLoggingHandler((DarkBotAPI) API));
         */

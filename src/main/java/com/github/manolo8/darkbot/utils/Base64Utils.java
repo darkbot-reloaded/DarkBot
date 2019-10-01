@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public class Base64Utils{
+public class Base64Utils {
 
     public static String base64Decode(InputStream input) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(input));

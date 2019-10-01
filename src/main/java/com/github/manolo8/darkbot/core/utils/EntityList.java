@@ -25,7 +25,7 @@ public class EntityList extends Updatable {
     private final Main main;
     private final Array entitiesAddress;
     public final List<List<? extends Entity>> allEntities;
-    private final HashSet<Integer> ids;
+    private final Set<Integer> ids;
 
     public final List<Obstacle> obstacles;
 
@@ -95,14 +95,11 @@ public class EntityList extends Updatable {
     private void refreshEntities() {
 
         entitiesAddress.update();
-        Set<Long> newFound = new HashSet<>();
-
         for (int i = 0; i < entitiesAddress.size; i++) {
             long found = entitiesAddress.elements[i];
 
             int id = API.readMemoryInt(found + 56);
             if (!ids.add(id)) continue;
-            newFound.add(found);
 
             int rnd = API.readMemoryInt(found + 112);
             int hullId = API.readMemoryInt(found + 116);
