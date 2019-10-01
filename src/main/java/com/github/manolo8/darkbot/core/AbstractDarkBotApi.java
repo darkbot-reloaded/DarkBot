@@ -13,7 +13,6 @@ import java.util.Arrays;
 public abstract class AbstractDarkBotApi implements IDarkBotAPI {
 
     protected static final User32 USER_32 = User32.INSTANCE;
-    protected volatile WinDef.HWND window;
 
     @Override
     public void keyboardClick(Character ch) {
@@ -37,24 +36,6 @@ public abstract class AbstractDarkBotApi implements IDarkBotAPI {
 
         return width == 0 ? new String(bytes, StandardCharsets.ISO_8859_1) : new String(bytes, StandardCharsets.UTF_16LE);
     }
-
-    private int x, y, w, h;
-    public void setVisible(boolean visible) {
-        if (!visible) {
-            WinDef.RECT rect = new WinDef.RECT();
-            USER_32.GetWindowRect(window, rect);
-            x = rect.left;
-            y = rect.top;
-            w = Math.abs(rect.right - rect.left);
-            h = Math.abs(rect.bottom - rect.top);
-        }
-        int minX = Arrays.stream(GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices())
-                .mapToInt(g -> g.getDefaultConfiguration().getBounds().x).min().orElse(0);
-
-        USER_32.MoveWindow(window, visible ? x : minX - w, y, w, h, true);
-        if (visible) USER_32.SetForegroundWindow(window);
-    }
-
 
     public void handleRefresh() {
         refresh();

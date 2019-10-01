@@ -20,6 +20,7 @@ public class VisibilityButton extends TitleBarButton<JFrame> {
     @Override
     public void actionPerformed(ActionEvent e) {
         API.setVisible(visible = !visible);
+        API.setRender(visible);
         setIcon(visible ? HIDE : SHOW);
     }
 

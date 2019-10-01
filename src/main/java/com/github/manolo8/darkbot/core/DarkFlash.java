@@ -9,6 +9,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,9 +94,6 @@ public class DarkFlash extends AbstractDarkBotApi {
         System.out.println("Params: " + params);
         System.out.println("Url: " + url);
         new Thread(() -> this.loadSWF(preloader, params, url)).start();
-        new Thread(() -> {
-            while ((window = USER_32.FindWindow(null, "DarkPlayer")) == null || !USER_32.IsWindow(window)) Time.sleep(100);
-        }).start();
     }
 
     private native void loadSWF(String preloader, String params, String url);
@@ -128,6 +127,10 @@ public class DarkFlash extends AbstractDarkBotApi {
     public native long[] queryMemoryLong(long value, int maxQuantity);
 
     public native long[] queryMemory(byte[] query, int maxQuantity);
+
+    public native void setVisible(boolean flag);
+
+    public native void setRender(boolean flag);
 
     static {
         System.loadLibrary("DarkFlash");

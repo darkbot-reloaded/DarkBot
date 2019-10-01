@@ -38,6 +38,8 @@ public interface IDarkBotAPI {
 
     void setVisible(boolean visible);
 
+    void setRender(boolean visible);
+
     void handleRefresh();
 
     void refresh();

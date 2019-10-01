@@ -1,8 +1,14 @@
 package com.github.manolo8.darkbot.core;
 
 import com.github.manolo8.darkbot.utils.Time;
+import com.sun.jna.platform.win32.WinDef;
+
+import java.awt.*;
+import java.util.Arrays;
 
 public class DarkBotAPI extends AbstractDarkBotApi {
+
+    protected volatile WinDef.HWND window;
 
     static {
         System.loadLibrary("DarkBot");
@@ -47,6 +53,25 @@ public class DarkBotAPI extends AbstractDarkBotApi {
     public native long[] queryMemoryLong(long value, int maxQuantity);
 
     public native long[] queryMemory(byte[] query, int maxQuantity);
+
+    private int x, y, w, h;
+    public void setVisible(boolean visible) {
+        if (!visible) {
+            WinDef.RECT rect = new WinDef.RECT();
+            USER_32.GetWindowRect(window, rect);
+            x = rect.left;
+            y = rect.top;
+            w = Math.abs(rect.right - rect.left);
+            h = Math.abs(rect.bottom - rect.top);
+        }
+        int minX = Arrays.stream(GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices())
+                .mapToInt(g -> g.getDefaultConfiguration().getBounds().x).min().orElse(0);
+
+        USER_32.MoveWindow(window, visible ? x : minX - w, y, w, h, true);
+        if (visible) USER_32.SetForegroundWindow(window);
+    }
+
+    public void setRender(boolean render) {}
 
     public void handleRefresh() {
         USER_32.SetForegroundWindow(window);
