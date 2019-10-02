@@ -7,6 +7,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class ShipInfo extends Updatable {
 
     public int speed;
+    public double angle;
     public long target;
     private long keepTargetTime;
 
@@ -17,6 +18,7 @@ public class ShipInfo extends Updatable {
             target = newTarget;
             if (target != 0) keepTargetTime = System.currentTimeMillis() + 500;
         }
+        angle = Math.toRadians(API.readMemoryInt(API.readMemoryLong(address + 48) + 32));
         speed = API.readMemoryInt(API.readMemoryLong(address + 72) + 40);
     }
 

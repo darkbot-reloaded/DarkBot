@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.core.objects.Health;
 import com.github.manolo8.darkbot.core.objects.PlayerInfo;
 import com.github.manolo8.darkbot.core.objects.ShipInfo;
+import com.github.manolo8.darkbot.utils.MathUtils;
 
 import java.util.HashMap;
 
@@ -33,6 +34,10 @@ public class Ship extends Entity {
 
     public boolean isAttacking(Ship other) {
         return shipInfo.target == other.address;
+    }
+
+    public boolean isAiming(Ship other) {
+        return MathUtils.angleDiff(shipInfo.angle,locationInfo.now.angle(other.locationInfo.now)) < 0.2;
     }
 
     @Override
