@@ -1,75 +1,22 @@
 package com.github.manolo8.darkbot.core;
 
-import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.utils.Time;
-import net.miginfocom.swing.MigLayout;
-
-import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class DarkFlash extends AbstractDarkBotApi {
-    private static final Pattern DATA_PATTERN = Pattern.compile("\"src\": \"([^\"]*)\".*}, \\{(.*)}");
+    private LoginData loginData;
 
-    @Override
-    public void refresh() {
-        this.reloadSWF();
-        Time.sleep(2000);
+    public DarkFlash(LoginData loginData) {
+        this.loginData = loginData;
     }
 
     @Override
     public void createWindow() {
-        JPanel panel = new JPanel(new MigLayout("ins 0", "[]3px[]10px[]3px[]"));
-        JTextField sv = new JTextField(5), sid = new JTextField(20);
-        panel.add(new JLabel("Server"));
-        panel.add(sv);
-        panel.add(new JLabel("SID"));
-        panel.add(sid);
-
-        JButton login = new JButton("Log in");
-        login.addActionListener(event -> performLogin(panel, sv.getText(), sid.getText()));
-
-        JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{login}, login);
-        Popups.showMessageSync("Sid Login", pane);
+        System.out.println(loginData);
+        setCookie(loginData.url, "dosid=" + loginData.sid);
+        new Thread(() -> this.loadSWF(loginData.preloaderUrl, loginData.params, loginData.url)).start();
     }
 
-    private void performLogin(JPanel panel, String sv, String sid) {
-        String url = "https://" + sv + ".darkorbit.com/";
-        sid = "dosid=" + sid;
-        String preloader;
-        String params;
-
-        try {
-            HttpURLConnection conn = (HttpURLConnection) new URL(url + "indexInternal.es?action=internalMapRevolution")
-                    .openConnection();
-            conn.setInstanceFollowRedirects(false);
-            conn.setRequestProperty("Cookie", sid);
-
-            String flashEmbed = new BufferedReader(new InputStreamReader(conn.getInputStream()))
-                    .lines()
-                    .filter(l -> l.contains("flashembed("))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("SID couldn't be used to log in"));
-
-            Matcher m = DATA_PATTERN.matcher(flashEmbed);
-            if (m.find()) {
-                preloader = m.group(1);
-                params = m.group(2).replaceAll("\"", "").replaceAll(",", "&").replaceAll(": ", "=");
-            } else throw new IllegalArgumentException("SID couldn't be used to log in");
-        } catch (Exception e) {
-            Popups.showMessageAsync("Error", e.getMessage(), JOptionPane.ERROR_MESSAGE);
-            throw new RuntimeException(e);
-        }
-
-        setCookie(url, sid);
-        load(preloader, params, url);
-        SwingUtilities.getWindowAncestor(panel).setVisible(false);
+    @Override
+    public void refresh() {
+        this.reloadSWF();
     }
 
     @Override
@@ -88,13 +35,6 @@ public class DarkFlash extends AbstractDarkBotApi {
     }
 
     public native void setCookie(String url, String cookie);
-
-    public void load(String preloader, String params, String url) {
-        System.out.println("Preloader: " + preloader);
-        System.out.println("Params: " + params);
-        System.out.println("Url: " + url);
-        new Thread(() -> this.loadSWF(preloader, params, url)).start();
-    }
 
     private native void loadSWF(String preloader, String params, String url);
 
@@ -134,5 +74,28 @@ public class DarkFlash extends AbstractDarkBotApi {
 
     static {
         System.loadLibrary("DarkFlash");
+    }
+
+    public static class LoginData {
+        private final String sv, sid, preloaderUrl, params, url;
+
+        public LoginData(String sv, String sid, String preloaderUrl, String params, String url) {
+            this.sv = sv;
+            this.sid = sid;
+            this.preloaderUrl = preloaderUrl;
+            this.params = params;
+            this.url = url;
+        }
+
+        @Override
+        public String toString() {
+            return "LoginData{" +
+                    "sv='" + sv + '\'' +
+                    ", sid='" + sid + '\'' +
+                    ", preloaderUrl='" + preloaderUrl + '\'' +
+                    ", params='" + params + '\'' +
+                    ", url='" + url + '\'' +
+                    '}';
+        }
     }
 }

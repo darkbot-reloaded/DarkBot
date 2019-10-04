@@ -30,6 +30,7 @@ import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.TemporalModule;
+import com.github.manolo8.darkbot.utils.LoginUtils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -97,12 +98,12 @@ public class Main extends Thread implements PluginListener {
         this.config = new Config();
         loadConfig();
 
-        int dialogResult = JOptionPane.showConfirmDialog(null, "Wanna try new browserless flash (sid-login only)?", "Warning", JOptionPane.YES_NO_OPTION);
-        if (dialogResult == JOptionPane.YES_OPTION){
-            API = new DarkFlash();
-        } else {
-            API = new DarkBotAPI();
-        }
+        /*int dialogResult = JOptionPane.showConfirmDialog(null, "Wanna try new browserless flash (sid-login only)?", "Warning", JOptionPane.YES_NO_OPTION);
+        if (dialogResult == JOptionPane.YES_OPTION) {
+            API = new DarkFlash(new LoginUtils().performSidLogin().getLoginData());
+        } else {*/
+        API = new DarkBotAPI();
+        /*}*/
         /*if (config.MISCELLANEOUS.FULL_DEBUG)
             API = (IDarkBotAPI) Proxy.newProxyInstance(Main.class.getClassLoader(), new Class[]{IDarkBotAPI.class}, IDarkBotAPI.getLoggingHandler((DarkBotAPI) API));
         */

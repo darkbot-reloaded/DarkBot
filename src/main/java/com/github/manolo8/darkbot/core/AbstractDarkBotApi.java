@@ -1,9 +1,7 @@
 package com.github.manolo8.darkbot.core;
 
 import com.sun.jna.platform.win32.User32;
-import com.sun.jna.platform.win32.WinDef;
 
-import java.awt.*;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
