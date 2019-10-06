@@ -21,8 +21,9 @@ public class ExtraButton extends TitleBarButton<JFrame> {
 
         JMenuItem home = new JMenuItem("HOME"),
                 reload = new JMenuItem("RELOAD"),
-                discord = new JMenuItem("DISCORD"),//, UIUtils.getIcon("discord")),
-                copySid = new JMenuItem("COPY SID");
+                copySid = new JMenuItem("COPY SID"),
+                discord = new JMenuItem("DISCORD");
+
 
         extraOptions.add(home);
         extraOptions.add(reload);

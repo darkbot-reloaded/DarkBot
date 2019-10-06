@@ -10,6 +10,7 @@ public class LocationInfo extends Updatable {
 
     public final Location now;
     public final Location last;
+    public final Location past;
 
     private long lastUpdate;
     public double angle;
@@ -20,6 +21,7 @@ public class LocationInfo extends Updatable {
 
         this.now = new Location();
         this.last = new Location();
+        this.past = new Location();
     }
 
     public LocationInfo(double x, double y) {
@@ -36,7 +38,8 @@ public class LocationInfo extends Updatable {
 
         // Update only if both x and y changed, or >100 ms since last update
         if ((newX == now.x || newY == now.y) && System.currentTimeMillis() - lastUpdate < 100) return;
-        lastUpdate = System.currentTimeMillis();
+        past.x = last.x;
+        past.y = last.y;
 
         last.x = now.x;
         last.y = now.y;
@@ -45,9 +48,11 @@ public class LocationInfo extends Updatable {
         now.y = newY;
 
         if (isMoving() && !(last.x == 0 && last.y == 0)) {
-            angle = now.angle(last);
-            speed = now.distance(last) * 10;
+            angle = now.angle(past);
+            speed = now.distance(last) / (System.currentTimeMillis() - lastUpdate);
         }
+
+        lastUpdate = System.currentTimeMillis();
     }
 
     public Location destinationInTime(long time) {
@@ -55,7 +60,7 @@ public class LocationInfo extends Updatable {
         Location destination = new Location();
 
         if (last.x != 0 && last.y != 0) {
-            double move = speed * (time / 1000d);
+            double move = speed * time;
 
             destination.x = now.x + Math.cos(angle) * move;
             destination.y = now.y + Math.sin(angle) * move;

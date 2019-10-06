@@ -117,15 +117,15 @@ public class EntityList extends Updatable {
                 portals.add(whenAdd(main.starManager.getOrCreate(id, rnd, (int) loc.now.x, (int) loc.now.y), found));
             } else if (id <= 150000950 && id >= 150000532 && hullId < 255 && hullId >= 0) {
                 battleStations.add(whenAdd(new BattleStation(id, hullId), found));
-            // 1-1: 000-022  1-4: 023
-            // 2-1: 024-046  2-4: 047
-            // 3-1: 048-070  3-4: 071
-            // 1-5: 072      1-8: 073-095
-            // 2-5: 096      2-8: 097-119
-            // 3-5: 120      3-8: 121-143
-            // 1-BL: 144  2-BL: 145  3-BL: 146
-            // 5-2: 147
             } else if (id <= 150000147 && id >= 150000000) {
+                // 1-1: 000-022  1-4: 023
+                // 2-1: 024-046  2-4: 047
+                // 3-1: 048-070  3-4: 071
+                // 1-5: 072      1-8: 073-095
+                // 2-5: 096      2-8: 097-119
+                // 3-5: 120      3-8: 121-143
+                // 1-BL: 144  2-BL: 145  3-BL: 146
+                // 5-2: 147
                 this.basePoints.add(whenAdd(new BasePoint(id), found));
             } else {
                 int npc = API.readMemoryInt(found + 112);
