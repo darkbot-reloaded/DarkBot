@@ -11,12 +11,6 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.utils.MathUtils;
-import org.jgrapht.Graph;
-import org.jgrapht.alg.tour.PalmerHamiltonianCycle;
-import org.jgrapht.generate.CompleteGraphGenerator;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleWeightedGraph;
 
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -38,8 +32,9 @@ public class Drive {
     public PathFinder pathFinder;
     public LinkedList<PathPoint> paths = new LinkedList<>();
 
-    private Location tempDest, endLoc, lastSegment;
+    private Location tempDest, endLoc, lastSegment = new Location();
 
+    private long lastDirChange;
     private long lastClick;
     public long lastMoved;
 
@@ -70,18 +65,25 @@ public class Drive {
         Location now = heroLoc.now, last = heroLoc.last, next = current();
         if (next == null) return;
         newPath |= !next.equals(lastSegment);
+        if (newPath) {
+            // If direction roughly similar, and changed dir little ago, ignore change
+            // This smooths out paths in short distances
+            if (next.distance(lastSegment) + (System.currentTimeMillis() - lastDirChange) < 500) return;
+            lastDirChange = System.currentTimeMillis();
+        }
         lastSegment = next;
 
         if (hero.timeTo(now.distance(next)) > 100) {
-            boolean diffAngle = MathUtils.angleDiff(heroLoc.angle, next.angle(last)) > 0.015;
-            if (heroLoc.isMoving() && !diffAngle) {
-                if (System.currentTimeMillis() - lastClick > 2000) click(next);
+            double dirAngle = next.angle(last),
+                    maxDiff = Math.max(0.02, MathUtils.angleDiff(next.angle(Location.of(heroLoc.last, dirAngle + (Math.PI / 2), 100)), dirAngle));
+            if (heroLoc.isMoving() && MathUtils.angleDiff(heroLoc.angle, dirAngle) < maxDiff) {
+                if (System.currentTimeMillis() - lastDirChange > 2000) click(next);
                 return;
             }
 
-            if (!force && heroLoc.isMoving() && !newPath && System.currentTimeMillis() - lastClick > 350) stop(false);
+            if (!force && heroLoc.isMoving() && System.currentTimeMillis() - lastDirChange > 350) stop(false);
             else {
-                if (!newPath && System.currentTimeMillis() - lastClick > 300) tempDest = endLoc; // Re-calculate path next tick
+                if (!newPath && System.currentTimeMillis() - lastDirChange > 300) tempDest = endLoc; // Re-calculate path next tick
                 click(next);
             }
         } else {

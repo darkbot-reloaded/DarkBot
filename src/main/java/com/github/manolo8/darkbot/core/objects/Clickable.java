@@ -37,7 +37,7 @@ public class Clickable extends Updatable {
      * @return prevent swf crash
      */
     private boolean isInvalid() {
-        return defRadius <= 0 || defPriority <= 0 || address == 0 || API.readMemoryLong(address) != confirm;
+        return defRadius <= 0 || address == 0 || API.readMemoryLong(address) != confirm;
     }
 
     @Override
