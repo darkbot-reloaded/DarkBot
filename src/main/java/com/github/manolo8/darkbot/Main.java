@@ -50,7 +50,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.15 beta 6";
+    public static final String VERSION_STRING = "1.13.15 beta 7";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
@@ -98,15 +98,10 @@ public class Main extends Thread implements PluginListener {
         this.config = new Config();
         loadConfig();
 
-        /*int dialogResult = JOptionPane.showConfirmDialog(null, "Wanna try new browserless flash (sid-login only)?", "Warning", JOptionPane.YES_NO_OPTION);
-        if (dialogResult == JOptionPane.YES_OPTION) {
-            API = new DarkFlash(new LoginUtils().performSidLogin().getLoginData());
-        } else {*/
-        API = new DarkBotAPI();
-        /*}*/
-        /*if (config.MISCELLANEOUS.FULL_DEBUG)
-            API = (IDarkBotAPI) Proxy.newProxyInstance(Main.class.getClassLoader(), new Class[]{IDarkBotAPI.class}, IDarkBotAPI.getLoggingHandler((DarkBotAPI) API));
-        */
+        if (config.API == 0) API = new DarkBotAPI();
+        else if (config.API == 1) API = new DarkFlash(new LoginUtils().performSidLogin().getLoginData());
+        //else if (config.API == 2) API = new
+        else throw new IllegalArgumentException("API not found: " + config.API);
 
         new ConfigEntity(config);
 

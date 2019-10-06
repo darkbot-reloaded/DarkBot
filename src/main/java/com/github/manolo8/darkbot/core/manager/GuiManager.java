@@ -33,7 +33,7 @@ public class GuiManager implements Manager {
     private List<Gui> registeredGuis = new ArrayList<>();
 
     public final Gui lostConnection = register("lost_connection");
-    public final Gui connecting = register("connecting");
+    public final Gui connecting = register("connection");
     public final Gui quests = register("quests");
     public final Gui targetedOffers = register("targetedOffers", new TargetedOfferGui());
     public final Gui logout = register("logout");
