@@ -14,6 +14,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
+import com.github.manolo8.darkbot.utils.MathUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,15 +59,11 @@ public class Config {
 
         public @Option("Safety") Safety SAFETY = new Safety();
         public static class Safety {
-            @Option(value = "Run to repair at", description = "Even if shooting an npc, run away when under this hp")
-            @Editor(JPercentField.class)
-            public double REPAIR_HP = 0.4;
-            @Option(value = "Run to repair when not killing npcs", description = "Hp to run at when just roaming the map")
+            @Option(value = "Keep health between", description = "Even if shooting an npc, run away when under this hp")
+            public PercentRange REPAIR_HP_RANGE = new PercentRange(0.4, 0.95);
+            @Option(value = "Repair when roaming & hp under", description = "Hp to run at when just roaming the map")
             @Editor(JPercentField.class)
             public double REPAIR_HP_NO_NPC = 0.5;
-            @Option(value = "Repair until health", description = "Minimum health to stop repairing")
-            @Editor(JPercentField.class)
-            public double REPAIR_TO_HP = 0.95;
             @Option(value = "Repair until shield", description = "Minimum shield to stop repairing")
             @Editor(JPercentField.class)
             public double REPAIR_TO_SHIELD = 1;
@@ -232,19 +229,33 @@ public class Config {
     public int API = 0;
 
     public static class ShipConfig {
-        public ShipConfig() {}
+        public int CONFIG = 1;
+        public Character FORMATION;
 
-        ShipConfig(int CONFIG, Character FORMATION) {
+        public ShipConfig() {}
+        public ShipConfig(int CONFIG, Character FORMATION) {
             this.CONFIG = CONFIG;
             this.FORMATION = FORMATION;
         }
 
-        public int CONFIG = 1;
-        public Character FORMATION;
-
         @Override
         public String toString() {
             return "Config: " + CONFIG + "   Formation: " + Objects.toString(FORMATION, "(unset)");
+        }
+    }
+
+    public static class PercentRange {
+        public double min, max;
+
+        public PercentRange() {}
+        public PercentRange(double min, double max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        @Override
+        public String toString() {
+            return Math.round(min * 100) + "%-" + Math.round(max * 100) + "%";
         }
     }
 }

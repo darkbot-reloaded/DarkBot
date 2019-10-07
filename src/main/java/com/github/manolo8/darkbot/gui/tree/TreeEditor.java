@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JBoolField;
 import com.github.manolo8.darkbot.gui.tree.components.JCharField;
 import com.github.manolo8.darkbot.gui.tree.components.JLabelField;
 import com.github.manolo8.darkbot.gui.tree.components.JNumberField;
+import com.github.manolo8.darkbot.gui.tree.components.JRangeField;
 import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
 import com.github.manolo8.darkbot.gui.tree.components.JStringField;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
@@ -47,6 +48,7 @@ public class TreeEditor extends DefaultTreeCellEditor {
         addEditor(new JNumberField(), double.class, int.class);
         addEditor(new JStringField(), String.class);
         addEditor(new JShipConfigField(), Config.ShipConfig.class);
+        addEditor(new JRangeField(), Config.PercentRange.class);
     }
 
     /**
