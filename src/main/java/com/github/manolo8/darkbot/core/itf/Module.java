@@ -14,4 +14,8 @@ public interface Module extends Installable, Tickable, RefreshHandler {
         return null;
     }
 
+    default String stoppedStatus() {
+        return null;
+    }
+
 }
