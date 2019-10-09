@@ -66,17 +66,18 @@ public class Drive {
         if (next == null) return;
         newPath |= !next.equals(lastSegment);
         if (newPath) {
-            // If direction roughly similar, and changed dir little ago, ignore change
+            // If direction roughly similar, and changed dir little ago, and you're still gonna be moving, ignore change
             // This smooths out paths in short distances
-            if (next.distance(lastSegment) + (System.currentTimeMillis() - lastDirChange) < 500) return;
+            if (next.distance(lastSegment) + (System.currentTimeMillis() - lastDirChange) < 500 &&
+                    hero.timeTo(now.distance(lastSegment)) > 50) return;
             lastDirChange = System.currentTimeMillis();
         }
         lastSegment = next;
 
-        if (hero.timeTo(now.distance(next)) > 100) {
+        if (newPath || hero.timeTo(now.distance(next)) > 100) {
             double dirAngle = next.angle(last),
                     maxDiff = Math.max(0.02, MathUtils.angleDiff(next.angle(Location.of(heroLoc.last, dirAngle + (Math.PI / 2), 100)), dirAngle));
-            if (heroLoc.isMoving() && MathUtils.angleDiff(heroLoc.angle, dirAngle) < maxDiff) {
+            if (!newPath && heroLoc.isMoving() && MathUtils.angleDiff(heroLoc.angle, dirAngle) < maxDiff) {
                 if (System.currentTimeMillis() - lastDirChange > 2000) click(next);
                 return;
             }
