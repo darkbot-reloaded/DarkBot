@@ -15,12 +15,19 @@ public class PingManager implements Manager {
     public int ping = -1;
     private int currSize;
 
-    private long lastCheck = System.currentTimeMillis();
+    private long lastCheck = System.currentTimeMillis() + 60_000;
     private volatile long time;
 
     @Override
     public void install(BotInstaller botInstaller) {
-        botInstaller.invalid.add(value -> reset());
+        botInstaller.invalid.add(value -> {
+            reset();
+            lastCheck = System.currentTimeMillis() + 60_000;
+        });
+    }
+
+    public long lastPingUpdate() {
+        return lastCheck;
     }
 
     public void tick() {
