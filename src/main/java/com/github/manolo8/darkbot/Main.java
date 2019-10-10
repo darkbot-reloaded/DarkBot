@@ -28,6 +28,7 @@ import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.TemporalModule;
 import com.github.manolo8.darkbot.utils.LoginUtils;
@@ -258,9 +259,14 @@ public class Main extends Thread implements PluginListener {
                 System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
 
         if (!module.canRefresh()) return;
-        System.out.println("Triggering refresh: time arrived & module allows refresh");
-        API.handleRefresh();
         lastRefresh = System.currentTimeMillis();
+        if (config.MISCELLANEOUS.PAUSE_FOR > 0) {
+            System.out.println("Pausing (logging off): time arrived & module allows refresh");
+            setModule(new DisconnectModule(config.MISCELLANEOUS.PAUSE_FOR * 60 * 1000L, "taking a break"));
+        } else {
+            System.out.println("Triggering refresh: time arrived & module allows refresh");
+            API.handleRefresh();
+        }
     }
 
     public <A extends Module> A setModule(A module) {

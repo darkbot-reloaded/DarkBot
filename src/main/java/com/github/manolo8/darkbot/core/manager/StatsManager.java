@@ -110,7 +110,7 @@ public class StatsManager implements Manager {
         double honorDiff = honor - this.honor;
         if (honorDiff < -10_000) {
             System.out.println("Paused bot, lost " + honorDiff + " honor.");
-            main.setModule(new DisconnectModule(true));
+            main.setModule(new DisconnectModule(null, "lost honor"));
         }
         if (this.honor != 0) earnedHonor += honorDiff;
         this.honor = honor;

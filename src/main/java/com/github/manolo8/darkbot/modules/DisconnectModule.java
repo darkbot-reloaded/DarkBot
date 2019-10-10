@@ -4,10 +4,12 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.modules.utils.SafetyFinder;
+import com.github.manolo8.darkbot.utils.Time;
 
 public class DisconnectModule extends TemporalModule {
 
-    private final boolean stopBot;
+    private final Long pauseTime;
+    private final String reason;
 
     private Main main;
     private HeroManager hero;
@@ -17,8 +19,15 @@ public class DisconnectModule extends TemporalModule {
     private Gui logout;
     private long logoutStart;
 
-    public DisconnectModule(boolean stopBot) {
-        this.stopBot = stopBot;
+    private Long pauseUntil = null;
+    private boolean refreshing = false;
+
+    /**
+     * @param pauseTime null for infinite pause, otherwise pause for that amount of MS.
+     */
+    public DisconnectModule(Long pauseTime, String reason) {
+        this.reason = reason;
+        this.pauseTime = pauseTime;
     }
 
     @Override
@@ -39,6 +48,11 @@ public class DisconnectModule extends TemporalModule {
 
     @Override
     public void tick() {
+        // Just in case refresh was super quick, don't go back to normal tick.
+        if (refreshing) {
+            tickStopped();
+            return;
+        }
         main.guiManager.pet.setEnabled(false);
         safety.setRefreshing(true);
         safety.tick();
@@ -55,14 +69,35 @@ public class DisconnectModule extends TemporalModule {
 
     @Override
     public void tickStopped() {
-        if (lostConnection.visible) {
-            if (stopBot) main.setRunning(false);
-            else goBack();
+        if (main.isRunning()) {
+            if (!lostConnection.visible) return;
+            // Bot done. Pause "forever" (unless a behaviour restarts it).
+            if (pauseTime == null) main.setRunning(false);
+            else if (pauseTime == 0) goBack();
+            else {
+                pauseUntil = System.currentTimeMillis() + pauseTime;
+                main.setRunning(false);
+            }
+        } else if (pauseUntil != null && System.currentTimeMillis() > pauseUntil - 10_000) {
+            if (!refreshing) {
+                System.out.println("Disconnect module, refreshing after pause, getting back to work.");
+                Main.API.handleRefresh();
+                refreshing = true;
+            } else if (System.currentTimeMillis() > pauseUntil) {
+                goBack();
+                main.setRunning(true);
+            }
         }
     }
 
     @Override
     public String status() {
-        return "Disconnecting: " + safety.status();
+        return "Disconnecting (" + reason + "): " + safety.status();
+    }
+
+    @Override
+    public String stoppedStatus() {
+        if (pauseUntil == null) return  "Disconnected (" + reason + ")";
+        else return "Paused (" + reason + "), reconnecting in " + Time.toString(Math.max(0, pauseUntil - System.currentTimeMillis()));
     }
 }

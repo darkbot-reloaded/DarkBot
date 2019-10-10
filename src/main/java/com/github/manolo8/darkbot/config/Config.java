@@ -204,7 +204,10 @@ public class Config {
         public int ZONE_RESOLUTION = 30;
         @Option(value = "Refresh every", description = "Every how many minutes to refresh")
         @Num(max = 60 * 12, step = 10)
-        public int REFRESH_TIME = 0;
+        public int REFRESH_TIME = 60;
+        @Option(value = "Pause after refresh", description = "How many minutes to pause for after a refresh")
+        @Num(max = 60 * 12, step = 10)
+        public int PAUSE_FOR = 5;
         @Option(value = "Repair Drone Percentage", description = "Drones are repaired if above this percentage")
         @Editor(JPercentField.class)
         public double REPAIR_DRONE_PERCENTAGE = 0.9;
