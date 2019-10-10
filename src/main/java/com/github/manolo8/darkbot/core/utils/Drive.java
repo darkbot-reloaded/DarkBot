@@ -105,7 +105,7 @@ public class Drive {
     }
 
     private void click(Location loc) {
-        if (System.currentTimeMillis() - lastClick > 300) {
+        if (System.currentTimeMillis() - lastClick > 150) {
             lastClick = System.currentTimeMillis();
             mouse.clickLoc(loc);
         }
