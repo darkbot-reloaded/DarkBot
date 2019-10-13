@@ -5,7 +5,6 @@ import java.util.jar.JarFile;
 
 public interface AuthAPI {
 
-
     String VERIFIER_PATH = "verifier.jar";
     AuthAPI INSTANCE = ReflectionUtils.createInstance("eu.darkbot.verifier.AuthAPIImpl", VERIFIER_PATH);
 
