@@ -11,7 +11,7 @@ public class DarkBotAPI extends AbstractDarkBotApi {
     protected volatile WinDef.HWND window;
 
     static {
-        System.loadLibrary("DarkBot");
+        System.loadLibrary("lib/DarkBot");
     }
 
     public void createWindow() {
