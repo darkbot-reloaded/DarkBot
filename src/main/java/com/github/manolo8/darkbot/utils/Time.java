@@ -1,7 +1,12 @@
 package com.github.manolo8.darkbot.utils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class Time {
-    
+
+    private static final DateTimeFormatter FILENAME_FRIENDLY_DATE = DateTimeFormatter.ofPattern("uuuu-MM-dd_HH-mm-ss_SSS");
+
     public static String toString(Integer time) {
         if (time == null) return "-";
         return toString(time.intValue());
@@ -31,11 +36,15 @@ public class Time {
         return builder.toString();
     }
 
+    public static String filenameFriendly() {
+        return LocalDateTime.now().format(FILENAME_FRIENDLY_DATE);
+    }
+
     public static void sleep(long millis) {
         if (millis <= 0) return;
         try {
             Thread.sleep(millis);
         } catch (InterruptedException ignore) {}
     }
-    
+
 }
