@@ -24,6 +24,10 @@ public class Lazy<C> {
         this.consumers.add(consumer);
     }
 
+    public void remove(Consumer<C> consumer) {
+        this.consumers.remove(consumer);
+    }
+
     /**
      * In general, if value is 0, is not loaded or not working!
      *

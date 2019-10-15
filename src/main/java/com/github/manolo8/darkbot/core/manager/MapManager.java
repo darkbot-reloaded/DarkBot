@@ -7,7 +7,6 @@ import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
-import com.github.manolo8.darkbot.core.itf.MapChange;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.swf.Array;
 import com.github.manolo8.darkbot.core.utils.EntityList;
@@ -88,23 +87,19 @@ public class MapManager implements Manager {
     private void update(long address) {
         mapAddress = address;
 
-        internalWidth = API.readMemoryInt(address + 68);
-        internalHeight = API.readMemoryInt(address + 72);
+        internalWidth = API.readMemoryInt(address + 68) + 300;
+        internalHeight = API.readMemoryInt(address + 72) + 300;
         int currMap = API.readMemoryInt(address + 76);
-        if (currMap != id) {
+        boolean switched = currMap != id;
+        if (switched) {
             id = currMap;
             main.hero.map = main.starManager.byId(id);
             preferred = ConfigEntity.INSTANCE.getOrCreatePreferred();
             avoided = ConfigEntity.INSTANCE.getOrCreateAvoided();
             safeties = ConfigEntity.INSTANCE.getOrCreateSafeties();
-
-            mapChange.send(main.hero.map);
-
-            if (main.module instanceof MapChange) {
-                ((MapChange) main.module).onMapChange();
-            }
         }
         entities.update(address);
+        if (switched) mapChange.send(main.hero.map);
     }
 
     private void checkMirror() {
