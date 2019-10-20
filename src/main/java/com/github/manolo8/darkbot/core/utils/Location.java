@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.core.utils;
 
+import java.util.Objects;
+
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import static java.lang.StrictMath.atan2;
@@ -57,13 +59,16 @@ public class Location {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Location) {
-            Location location = (Location) obj;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Location location = (Location) o;
+        return Double.compare(location.x, x) == 0 &&
+                Double.compare(location.y, y) == 0;
+    }
 
-            return location.x == x && location.y == y;
-        }
-
-        return false;
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
     }
 }

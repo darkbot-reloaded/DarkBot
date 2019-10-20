@@ -74,7 +74,7 @@ public class Drive {
         }
         lastSegment = next;
 
-        if (newPath || hero.timeTo(now.distance(next)) > 100) {
+        if (newPath || hero.timeTo(now.distance(next)) > 25) {
             double dirAngle = next.angle(last),
                     maxDiff = Math.max(0.02, MathUtils.angleDiff(next.angle(Location.of(heroLoc.last, dirAngle + (Math.PI / 2), 100)), dirAngle));
             if (!newPath && heroLoc.isMoving() && MathUtils.angleDiff(heroLoc.angle, dirAngle) < maxDiff) {
@@ -157,7 +157,8 @@ public class Drive {
     }
 
     public void move(double x, double y) {
-        tempDest = endLoc = new Location(x, y);
+        Location newDir = new Location(x, y);
+        if (movingTo().distance(newDir) > 10) tempDest = endLoc = newDir;
     }
 
     private Location lastRandomMove;

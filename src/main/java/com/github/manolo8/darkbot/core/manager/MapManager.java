@@ -38,7 +38,7 @@ public class MapManager implements Manager {
     public Set<SafetyInfo> safeties;
 
     public static int internalWidth = 21000;
-    public static int internalHeight = 13100;
+    public static int internalHeight = 13500;
 
     public static int clientWidth;
     public static int clientHeight;
@@ -87,8 +87,8 @@ public class MapManager implements Manager {
     private void update(long address) {
         mapAddress = address;
 
-        internalWidth = API.readMemoryInt(address + 68) + 300;
-        internalHeight = API.readMemoryInt(address + 72) + 300;
+        internalWidth = API.readMemoryInt(address + 68);
+        internalHeight = API.readMemoryInt(address + 72) + 400;
         int currMap = API.readMemoryInt(address + 76);
         boolean switched = currMap != id;
         if (switched) {
