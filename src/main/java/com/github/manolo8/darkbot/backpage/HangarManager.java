@@ -45,7 +45,14 @@ public class HangarManager {
 
     public boolean changeHangar(String hangarId) {
         if (this.lastHangarChange <= System.currentTimeMillis() - 12_000 && backpageManager.sidStatus().contains("OK")) {
-            String url = "indexInternal.es?action=internalDock&subAction=changeHangar&hangarId=" + hangarId;
+            String token = "";
+            try {
+                token = backpageManager.getReloadToken(backpageManager.getConnection("indexInternal.es?action=internalDock").getInputStream());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (token == null || token.isEmpty()) return false;
+            String url = "indexInternal.es?action=internalDock&subAction=changeHangar&hangarId=" + hangarId + "&reloadToken="+token;
             try {
                 backpageManager.getConnection(url, 2000).getResponseCode();
             } catch (Exception e) {
