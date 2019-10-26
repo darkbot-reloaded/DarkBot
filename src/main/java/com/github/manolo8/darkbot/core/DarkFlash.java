@@ -1,7 +1,12 @@
 package com.github.manolo8.darkbot.core;
 
+import com.github.manolo8.darkbot.utils.Time;
+import com.sun.jna.platform.win32.WinDef;
+
 public class DarkFlash extends AbstractDarkBotApi {
     private LoginData loginData;
+
+    protected volatile WinDef.HWND window;
 
     public DarkFlash(LoginData loginData) {
         this.loginData = loginData;
@@ -10,8 +15,16 @@ public class DarkFlash extends AbstractDarkBotApi {
     @Override
     public void createWindow() {
         System.out.println(loginData);
-        setCookie(loginData.url, "dosid=" + loginData.sid);
+        setCookie(loginData.url, loginData.sid);
         new Thread(() -> this.loadSWF(loginData.preloaderUrl, loginData.params, loginData.url)).start();
+        new Thread(() -> {
+            while ((window = USER_32.FindWindow(null, "DarkPlayer")) == null || !USER_32.IsWindow(window)) Time.sleep(100);
+            WinDef.RECT rect = new WinDef.RECT();
+            USER_32.GetWindowRect(window, rect);
+            USER_32.MoveWindow(window, rect.left, rect.top, 1280, 800, true);
+            setVisible(true);
+            setRender(true);
+        }).start();
     }
 
     @Override
@@ -73,7 +86,7 @@ public class DarkFlash extends AbstractDarkBotApi {
     public native void setRender(boolean flag);
 
     static {
-        System.loadLibrary("DarkFlash");
+        System.loadLibrary("lib/DarkFlash");
     }
 
     public static class LoginData {

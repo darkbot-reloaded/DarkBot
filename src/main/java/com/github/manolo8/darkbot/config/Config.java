@@ -229,6 +229,8 @@ public class Config {
         public Map<String, ActionInfo> ACTION_INFOS = new HashMap<>();
         public transient Lazy<String> MODIFIED_ACTIONS = new Lazy.NoCache<>();
     }
+    @Option("API - experimental")
+    @Num(min = 0, max = 1, step = 1)
     public int API = 0;
 
     public static class ShipConfig {

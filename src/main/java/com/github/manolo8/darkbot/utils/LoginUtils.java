@@ -52,6 +52,7 @@ public class LoginUtils {
             HttpURLConnection conn = (HttpURLConnection) new URL(url + "indexInternal.es?action=internalMapRevolution")
                     .openConnection();
             conn.setInstanceFollowRedirects(false);
+            //conn.addRequestProperty("User-Agent", "Mozilla/5.0");
             conn.setRequestProperty("Cookie", sid);
 
             String flashEmbed = new BufferedReader(new InputStreamReader(conn.getInputStream()))
