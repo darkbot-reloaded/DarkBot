@@ -15,7 +15,7 @@ public class Bot {
         if (System.console() == null
                 && Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")) {
             PrintStream output = new PrintStream(new FileOutputStream("logs/" + Time.filenameFriendly() + ".log"));
-            System.setOut(output);
+            System.setOut(new Time.PrintStreamWithDate(output));
             System.setErr(output);
         }
         try {
