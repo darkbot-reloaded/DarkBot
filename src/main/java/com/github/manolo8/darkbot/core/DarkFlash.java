@@ -14,7 +14,6 @@ public class DarkFlash extends AbstractDarkBotApi {
 
     @Override
     public void createWindow() {
-        System.out.println(loginData);
         setCookie(loginData.url, loginData.sid);
         new Thread(() -> this.loadSWF(loginData.preloaderUrl, loginData.params, loginData.url)).start();
         new Thread(() -> {

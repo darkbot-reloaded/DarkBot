@@ -99,10 +99,10 @@ public class Main extends Thread implements PluginListener {
         this.config = new Config();
         loadConfig();
 
-        if (config.API == 0) API = new DarkBotAPI();
-        else if (config.API == 1) API = new DarkFlash(new LoginUtils().performSidLogin().getLoginData());
+        if (config.MISCELLANEOUS.API == 0) API = new DarkBotAPI();
+        else if (config.MISCELLANEOUS.API == 1) API = new DarkFlash(new LoginUtils().performSidLogin().getLoginData());
         //else if (config.API == 2) API = new
-        else throw new IllegalArgumentException("API not found: " + config.API);
+        else throw new IllegalArgumentException("API not found: " + config.MISCELLANEOUS.API);
 
         new ConfigEntity(config);
 

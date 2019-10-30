@@ -220,6 +220,9 @@ public class Config {
         public int MIN_TICK = 15;
         @Option(value = "Developer stuff shown", description = "Enabling this WILL make your bot use more cpu.")
         public boolean DEV_STUFF = false;
+        @Option("API - experimental")
+        @Num(min = 0, max = 1, step = 1)
+        public int API = 0;
     }
 
     public /*@Option("Extra actions")*/ ExtraActions EXTRA = new ExtraActions();
@@ -229,9 +232,6 @@ public class Config {
         public Map<String, ActionInfo> ACTION_INFOS = new HashMap<>();
         public transient Lazy<String> MODIFIED_ACTIONS = new Lazy.NoCache<>();
     }
-    @Option("API - experimental")
-    @Num(min = 0, max = 1, step = 1)
-    public int API = 0;
 
     public static class ShipConfig {
         public int CONFIG = 1;
