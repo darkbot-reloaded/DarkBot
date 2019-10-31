@@ -26,8 +26,14 @@ public class Item {
 
     @SerializedName("Q")
     private int quantity;
+    
+    @SerializedName("SL")
+    private int shieldUpgradeLevel;
+    
+    @SerializedName("DL")
+    private int damageUpgradeLevel;
 
-    public Item(int lootId, String equipedConfi, String itemId, String equipedHangar, String equipedTarget, int level, String loads, int quantity) {
+    public Item(int lootId, String equipedConfi, String itemId, String equipedHangar, String equipedTarget, int level, String loads, int quantity, int shieldUpgradeLevel, int damageUpgradeLevel) {
         this.lootId = lootId;
         this.equipedConfi = equipedConfi;
         this.itemId = itemId;
@@ -36,6 +42,8 @@ public class Item {
         this.level = level;
         this.loads = loads;
         this.quantity = quantity;
+        this.shieldUpgradeLevel = shieldUpgradeLevel;
+        this.damageUpgradeLevel = damageUpgradeLevel;
     }
 
     public int getLoot() {
@@ -69,5 +77,12 @@ public class Item {
     public int getQuantity() {
         return this.quantity;
     }
-
+    
+    public int getShieldUpgradeLevel() {
+        return this.shieldUpgradeLevel;
+    }
+    
+    public int getDamageUpgradeLevel() {
+        return this.damageUpgradeLevel;
+    }
 }
