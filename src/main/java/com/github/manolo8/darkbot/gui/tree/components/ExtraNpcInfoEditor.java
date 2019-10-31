@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
+import com.github.manolo8.darkbot.config.NpcExtraFlag;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.gui.utils.JCheckBoxMenuItemNoClose;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
@@ -11,7 +12,10 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
-import java.util.function.Consumer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ExtraNpcInfoEditor extends AbstractCellEditor implements TableCellEditor {
 
@@ -19,35 +23,14 @@ public class ExtraNpcInfoEditor extends AbstractCellEditor implements TableCellE
     private Collection<NpcInfo> infos;
     private JLabel button = new JLabel();
 
-    private JCheckBoxMenuItemNoClose
-            noCircle = new JCheckBoxMenuItemNoClose("No circle", update(s -> infos.forEach(info -> info.extra.noCircle = s))),
-            ignoreOwnership = new JCheckBoxMenuItemNoClose("Ignore ownership", update(s -> infos.forEach(info -> info.extra.ignoreOwnership = s))),
-            ignoreAttacked = new JCheckBoxMenuItemNoClose("Ignore attacked", update(s -> infos.forEach(info -> info.extra.ignoreAttacked = s))),
-            passive = new JCheckBoxMenuItemNoClose("Passive", update(s -> infos.forEach(info -> info.extra.passive = s))),
-            attackSecond = new JCheckBoxMenuItemNoClose("Attack second", update(s -> infos.forEach(info -> info.extra.attackSecond = s)));
-
+    private Map<String, JMenuFlag> options = new HashMap<>();
     private JPopupMenu extraOptions = new JPopupMenu("Extra options");
 
-    private Consumer<Boolean> update(Consumer<Boolean> bool) {
-        return bool.andThen(s -> button.setText(curr.toString()));
-    }
     private int tooltipDelay = -1;
 
     ExtraNpcInfoEditor() {
         button.setOpaque(false);
         button.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
-
-        extraOptions.add(noCircle);
-        extraOptions.add(ignoreOwnership);
-        extraOptions.add(ignoreAttacked);
-        extraOptions.add(passive);
-        extraOptions.add(attackSecond);
-
-        noCircle.setToolTipText("Don't circle the npc, just stay inside the radius");
-        ignoreOwnership.setToolTipText("Continue killing the npc even if it has a white lock");
-        ignoreAttacked.setToolTipText("Select the npc even if other players are already shooting it");
-        passive.setToolTipText("Be passive towards this npc, only shoot if npc is shooting you");
-        attackSecond.setToolTipText("<html>Only shoot if others are attacking already.<br><strong>Must</strong> also select ignore attacked & ignore ownership</html>");
 
         button.addMouseListener(new MouseAdapter() {
             @Override
@@ -68,6 +51,15 @@ public class ExtraNpcInfoEditor extends AbstractCellEditor implements TableCellE
         });
     }
 
+    private void updateMenuEntries() {
+        if (NpcInfo.NPC_FLAGS.keySet().equals(options.keySet())) return;
+        extraOptions.removeAll();
+        options = NpcInfo.NPC_FLAGS.values().stream()
+                .map(JMenuFlag::new)
+                .peek(extraOptions::add)
+                .collect(Collectors.toMap(fl -> fl.flag, Function.identity()));
+    }
+
     public Object getCellEditorValue() {
         return curr;
     }
@@ -77,15 +69,26 @@ public class ExtraNpcInfoEditor extends AbstractCellEditor implements TableCellE
         infos = curr.infos;
         button.setText(curr.toString());
 
+        updateMenuEntries();
+
         NpcInfo info = infos.iterator().next();
-
-        noCircle.setSelected(info.extra.noCircle);
-        ignoreOwnership.setSelected(info.extra.ignoreOwnership);
-        ignoreAttacked.setSelected(info.extra.ignoreAttacked);
-        passive.setSelected(info.extra.passive);
-        attackSecond.setSelected(info.extra.attackSecond);
-
+        options.values().forEach(option -> option.setSelected(info.extra.has(option.flag)));
         return button;
+    }
+
+    private class JMenuFlag extends JCheckBoxMenuItemNoClose {
+
+        private final String flag;
+
+        JMenuFlag(NpcExtraFlag flag) {
+            super(flag.getName());
+            this.flag = flag.getId();
+            if (flag.getDescription() != null) setToolTipText(flag.getDescription());
+            addActionListener(a -> {
+                infos.forEach(info -> info.extra.set(this.flag, isSelected()));
+                button.setText(curr.toString());
+            });
+        }
     }
 
 }

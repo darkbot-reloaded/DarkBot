@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.core.itf.Configurable;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
@@ -58,6 +59,9 @@ public class ReflectionUtils {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
             throw new RuntimeException("No default constructor found for " + clazz.getName());
+        } catch (InvocationTargetException e) {
+            e.getCause().getStackTrace();
+            throw new RuntimeException("Error creating instance of " + clazz.getName(), e.getCause());
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
             throw new RuntimeException("Error creating instance of " + clazz.getName(), e);

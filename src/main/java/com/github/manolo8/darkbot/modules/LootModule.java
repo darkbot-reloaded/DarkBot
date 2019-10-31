@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.modules;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Module;
@@ -102,14 +103,14 @@ public class LootModule implements Module {
                 attack.target.setTimerTo(1000);
                 hero.setTarget(attack.target = null);
             }
-        } else if (!(attack.target.npcInfo.extra.ignoreOwnership || main.mapManager.isCurrentTargetOwned())
+        } else if (!(attack.target.npcInfo.extra.has(NpcExtra.IGNORE_OWNERSHIP) || main.mapManager.isCurrentTargetOwned())
                 || (hero.locationInfo.distance(attack.target) > config.LOOT.NPC_DISTANCE_IGNORE) // Too far away from ship
                 || (closestDist > 650 && attack.target.health.hpPercent() > 0.90)   // Too far into obstacle and full hp
                 || (closestDist > 500 && !attack.target.locationInfo.isMoving() // Inside obstacle, waiting & and regen shields
                         && (attack.target.health.shIncreasedIn(1000) || attack.target.health.shieldPercent() > 0.99))) {
             attack.target.setTimerTo(5000);
             hero.setTarget(attack.target = null);
-        } else if (attack.target.playerInfo.username.contains("Invoke") && attack.target.npcInfo.extra.passive
+        } else if (attack.target.playerInfo.username.contains("Invoke") && attack.target.npcInfo.extra.has(NpcExtra.PASSIVE)
                 && attack.target == hero.target && !attack.castingAbility()) {
             attack.target.setTimerTo(600_000);
             hero.setTarget(attack.target = null);
@@ -126,7 +127,7 @@ public class LootModule implements Module {
         double distance = heroLoc.distance(target.locationInfo.now);
         double angle = targetLoc.angle(heroLoc);
         double radius = target.npcInfo.radius;
-        boolean noCircle = target.npcInfo.extra.noCircle;
+        boolean noCircle = target.npcInfo.extra.has(NpcExtra.NO_CIRCLE);
 
         radius = attack.modifyRadius(radius);
         if (radius > 750) noCircle = false;
@@ -192,7 +193,7 @@ public class LootModule implements Module {
         for (Ship ship : this.ships) {
             if (ship.address == hero.address || ship.address == hero.pet.address
                     || !ship.isAttacking(npc)) continue;
-            if (!npc.npcInfo.extra.ignoreAttacked) npc.setTimerTo(20_000);
+            if (!npc.npcInfo.extra.has(NpcExtra.IGNORE_ATTACKED)) npc.setTimerTo(20_000);
             return true;
         }
         return false;
@@ -215,9 +216,9 @@ public class LootModule implements Module {
     private boolean shouldKill(Npc n) {
         boolean attacked = this.isAttackedByOthers(n);
         return n.npcInfo.kill && !n.isInTimer() &&
-                (n.npcInfo.extra.ignoreAttacked || !attacked) && // Either ignore attacked, or not being attacked
-                (!n.npcInfo.extra.attackSecond || attacked) &&   // Either don't want to attack second, or being attacked
-                (n.playerInfo.username.contains("Invoke") || !n.npcInfo.extra.passive || n.isAttacking(hero));
+                (n.npcInfo.extra.has(NpcExtra.IGNORE_ATTACKED) || !attacked) && // Either ignore attacked, or not being attacked
+                (!n.npcInfo.extra.has(NpcExtra.ATTACK_SECOND) || attacked) &&   // Either don't want to attack second, or being attacked
+                (n.playerInfo.username.contains("Invoke") || !n.npcInfo.extra.has(NpcExtra.PASSIVE) || n.isAttacking(hero));
     }
 
 }

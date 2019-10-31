@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.extensions.features.decorators.ConfigurableDec
 import com.github.manolo8.darkbot.extensions.features.decorators.FeatureDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstallableDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstructionProviderDecorator;
+import com.github.manolo8.darkbot.extensions.features.decorators.NpcExtraDecorator;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import java.util.Arrays;
@@ -24,7 +25,8 @@ class FeatureInstanceLoader {
         FEATURE_DECORATORS = Arrays.asList(
                 new InstallableDecorator(main),
                 new ConfigurableDecorator(main.config.CUSTOM_CONFIGS),
-                new InstructionProviderDecorator());
+                new InstructionProviderDecorator(),
+                new NpcExtraDecorator());
     }
 
     <T> T loadFeature(FeatureDefinition<T> featureDefinition) {

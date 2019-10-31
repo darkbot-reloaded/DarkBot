@@ -1,12 +1,15 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.types.Option;
+import com.github.manolo8.darkbot.core.itf.NpcExtraProvider;
+import com.github.manolo8.darkbot.extensions.features.Feature;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Option(value = "Name", description = "Npc names, npcs ending in * are grouped")
 public class NpcInfo {
@@ -20,25 +23,56 @@ public class NpcInfo {
     @Option(value = "Ammo key", description = "Special ammo for this npc, if unset, default is used")
     public Character attackKey;
 
+    public static transient Map<String, NpcExtraFlag> NPC_FLAGS = new LinkedHashMap<>();
+
     @Option(value = "Extra", description = "Several extra flags for the npc")
     public ExtraNpcInfo extra = new ExtraNpcInfo();
 
     public static class ExtraNpcInfo {
+        // TODO: remove in a few versions.
         public boolean noCircle;
         public boolean ignoreOwnership;
         public boolean ignoreAttacked;
         public boolean attackSecond;
         public boolean passive;
+        private boolean updated;
 
-        @Override
+        private Set<String> flags = new HashSet<>();
+
+        public boolean has(NpcExtraFlag flag) {
+            return has(flag.getId());
+        }
+
+        public boolean has(String flagId) {
+            return flags.contains(flagId);
+        }
+
+        public void set(NpcExtraFlag flag, boolean set) {
+            set(flag.getId(), set);
+        }
+
+        public void set(String flagId, boolean set) {
+            if (set) flags.add(flagId);
+            else flags.remove(flagId);
+        }
+
+        private void update() {
+            if (!updated) {
+                updated = true;
+                set(NpcExtra.NO_CIRCLE, noCircle);
+                set(NpcExtra.IGNORE_OWNERSHIP, ignoreOwnership);
+                set(NpcExtra.IGNORE_ATTACKED, ignoreAttacked);
+                set(NpcExtra.PASSIVE, passive);
+                set(NpcExtra.ATTACK_SECOND, attackSecond);
+            }
+        }
+
         public String toString() {
-            return Stream.of(
-                    noCircle ? "NC" : null,
-                    ignoreOwnership ? "IO" : null,
-                    ignoreAttacked ? "IA" : null,
-                    passive ? "P" : null,
-                    attackSecond ? "AS" : null
-            ).filter(Objects::nonNull).collect(Collectors.joining(","));
+            update();
+            return flags.stream().map(NPC_FLAGS::get)
+                    .filter(Objects::nonNull)
+                    .map(NpcExtraFlag::getShortName)
+                    .collect(Collectors.joining(","));
         }
     }
 
@@ -49,11 +83,7 @@ public class NpcInfo {
         this.priority = other.priority;
         this.kill = other.kill;
         this.attackKey = other.attackKey;
-
-        this.extra.noCircle = other.extra.noCircle;
-        this.extra.ignoreOwnership = other.extra.ignoreOwnership;
-        this.extra.ignoreAttacked = other.extra.ignoreAttacked;
-        this.extra.attackSecond = other.extra.attackSecond;
-        this.extra.passive = other.extra.passive;
+        this.extra.update();
+        this.extra.flags = new HashSet<>(other.extra.flags);
     }
 }

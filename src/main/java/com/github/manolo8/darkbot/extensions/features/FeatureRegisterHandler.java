@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.extensions.features.handlers.BehaviourHandler;
 import com.github.manolo8.darkbot.extensions.features.handlers.FeatureHandler;
 import com.github.manolo8.darkbot.extensions.features.handlers.ModuleHandler;
+import com.github.manolo8.darkbot.extensions.features.handlers.NpcExtraHandler;
 import com.github.manolo8.darkbot.extensions.features.handlers.TaskHandler;
 
 import java.util.Arrays;
@@ -27,7 +28,8 @@ public class FeatureRegisterHandler {
         this.FEATURE_HANDLERS = Arrays.asList(
                 new ModuleHandler(),
                 new BehaviourHandler(main, featureRegistry),
-                new TaskHandler(main, featureRegistry)
+                new TaskHandler(main, featureRegistry),
+                new NpcExtraHandler(featureRegistry)
         );
     }
 
