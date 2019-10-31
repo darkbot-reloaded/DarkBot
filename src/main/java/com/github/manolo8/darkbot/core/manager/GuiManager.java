@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
+import com.github.manolo8.darkbot.core.objects.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.swf.Dictionary;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
@@ -38,8 +39,8 @@ public class GuiManager implements Manager {
     public final Gui targetedOffers = register("targetedOffers", new TargetedOfferGui());
     public final Gui logout = register("logout");
     public final Gui eventProgress =  register("eventProgress");
-    public final Gui oreTrade =  register("ore_trade");
     public final PetManager pet;
+    public final OreTradeGui oreTrade;
 
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
@@ -60,6 +61,7 @@ public class GuiManager implements Manager {
         this.validTime = System.currentTimeMillis();
 
         this.pet = register("pet", new PetManager(main));
+        this.oreTrade = register("ore_trade", new OreTradeGui(main));
 
         this.main.status.add(value -> validTime = System.currentTimeMillis());
     }
