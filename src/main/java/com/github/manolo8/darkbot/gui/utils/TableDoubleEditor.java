@@ -20,6 +20,7 @@ public class TableDoubleEditor extends DefaultCellEditor {
         tf.addActionListener(delegate = new EditorDelegate() {
             public void setValue(Object value) {
                 tf.setText(value == null ? "" : nf.format(value));
+                tf.selectAll();
             }
 
             public Object getCellEditorValue() {
