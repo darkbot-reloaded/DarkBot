@@ -95,7 +95,7 @@ public class HangarManager {
         String params = "flashAPI/inventory.php?action=getHangarList";
         String json = backpageManager.getDataInventory(params);
 
-        if (json == null) return;
+        if (json == null || !json.contains("'isError':0") || !json.contains("\"isError\":0")) return;
 
         JsonObject ret = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject().get("ret").getAsJsonObject();
         hangars.clear();
