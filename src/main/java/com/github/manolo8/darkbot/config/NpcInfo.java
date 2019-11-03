@@ -83,7 +83,7 @@ public class NpcInfo {
         this.priority = other.priority;
         this.kill = other.kill;
         this.attackKey = other.attackKey;
-        this.extra.update();
+        other.extra.update();
         this.extra.flags = new HashSet<>(other.extra.flags);
     }
 }
