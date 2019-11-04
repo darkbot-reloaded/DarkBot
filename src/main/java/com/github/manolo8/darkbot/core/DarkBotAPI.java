@@ -17,6 +17,7 @@ public class DarkBotAPI extends AbstractDarkBotApi {
     public void createWindow() {
         new Thread(() -> {
             createWindow0();
+            System.out.println("Browser window exited, exiting");
             System.exit(0);
         }, "BotBrowser").start();
         new Thread(() -> {

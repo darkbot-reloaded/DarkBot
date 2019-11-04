@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.tree;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.tree.ConfigNode;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
+import com.github.manolo8.darkbot.utils.I18n;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -24,14 +25,14 @@ public class TreeRenderer extends DefaultTreeCellRenderer {
         ConfigNode node = (ConfigNode) value;
         depth = node.getDepth();
 
-        setToolTipText(node.description.isEmpty() ? null : node.description);
-        if (!leaf || ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.DISPLAY.HIDE_EDITORS) {
-            String text = node.name;
+        if (!leaf || ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.HIDE_EDITORS) {
+            String text = I18n.getOrDefault(node.key, node.name);
             if (leaf) {
                 String val = Objects.toString(node.toString(), "(unset)");
                 if (!text.isEmpty() && !val.isEmpty()) text += ": ";
                 text += val;
             }
+            setToolTipText(I18n.getOrDefault(node.key + ".desc", node.description));
             super.getTreeCellRendererComponent(tree, text, sel, expanded, leaf, row, hasFocus);
             return this;
         } else {

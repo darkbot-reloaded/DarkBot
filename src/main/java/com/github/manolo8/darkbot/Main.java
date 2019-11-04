@@ -99,10 +99,10 @@ public class Main extends Thread implements PluginListener {
         this.config = new Config();
         loadConfig();
 
-        if (config.MISCELLANEOUS.API == 0) API = new DarkBotAPI();
-        else if (config.MISCELLANEOUS.API == 1) API = new DarkFlash(new LoginUtils().performSidLogin().getLoginData());
+        if (config.BOT_SETTINGS.API == 0) API = new DarkBotAPI();
+        else if (config.BOT_SETTINGS.API == 1) API = new DarkFlash(new LoginUtils().performSidLogin().getLoginData());
         //else if (config.API == 2) API = new
-        else throw new IllegalArgumentException("API not found: " + config.MISCELLANEOUS.API);
+        else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API);
 
         new ConfigEntity(config);
 
@@ -165,7 +165,7 @@ public class Main extends Thread implements PluginListener {
             avgTick = ((avgTick * 9) + tickTime) / 10;
 
             sleepMax(time, botInstaller.invalid.value ? 1000 :
-                    Math.max(config.MISCELLANEOUS.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
+                    Math.max(config.BOT_SETTINGS.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
         }
     }
 
@@ -209,8 +209,6 @@ public class Main extends Thread implements PluginListener {
         }
 
         pingManager.tick();
-        //if (config.MISCELLANEOUS.DEV_STUFF && mapManager.width > 0)
-        //    API.pixelsAndDisplay(0, 0, (int) mapManager.width, (int) mapManager.height);
     }
 
     private void tickRunning() {

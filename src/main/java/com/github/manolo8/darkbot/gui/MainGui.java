@@ -23,7 +23,7 @@ public class MainGui extends JFrame {
     public static final Image ICON = UIUtils.getImage("icon");
 
     public MainGui(Main main) throws HeadlessException {
-        super("DarkBot" + (main.config.MISCELLANEOUS.API == 1 ? " - By Manolo8" : ""));
+        super("DarkBot" + (main.config.BOT_SETTINGS.API == 1 ? " - By Manolo8" : ""));
 
         this.configGui = new ConfigGui(main);
         configGui.setIconImage(ICON);
@@ -45,7 +45,7 @@ public class MainGui extends JFrame {
         setAlwaysOnTop(true);
         toFront();
         requestFocus();
-        setAlwaysOnTop(main.config.MISCELLANEOUS.DISPLAY.ALWAYS_ON_TOP);
+        setAlwaysOnTop(main.config.BOT_SETTINGS.DISPLAY.ALWAYS_ON_TOP);
     }
 
     private void setComponentPosition() {
@@ -73,8 +73,11 @@ public class MainGui extends JFrame {
     }
 
     public void tryClose() {
-        if (main.config.MISCELLANEOUS.CONFIRM_EXIT) exitConfirmation.setVisible(true);
-        else System.exit(0);
+        if (main.config.BOT_SETTINGS.CONFIRM_EXIT) exitConfirmation.setVisible(true);
+        else {
+            System.out.println("Exit button pressed, exiting");
+            System.exit(0);
+        }
     }
 
     public void tick() {

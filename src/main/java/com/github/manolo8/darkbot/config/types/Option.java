@@ -10,4 +10,5 @@ import java.lang.annotation.Target;
 public @interface Option {
     String value() default "";
     String description() default "";
+    String key() default "";
 }

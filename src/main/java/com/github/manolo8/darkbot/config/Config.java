@@ -178,56 +178,48 @@ public class Config {
         public int MODULE = 1;
     }
 
-    public @Option("Miscellaneous") Miscellaneous MISCELLANEOUS = new Miscellaneous();
+    public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();
     public static class Miscellaneous {
-        public @Option("Display") Display DISPLAY = new Display();
+        @Num(max = 60 * 12, step = 10)
+        public @Option int REFRESH_TIME = 60;
+        @Num(max = 60 * 12, step = 10)
+        public @Option int PAUSE_FOR = 5;
+        @Editor(JPercentField.class)
+        public @Option double REPAIR_DRONE_PERCENTAGE = 0.9;
+    }
+
+    public @Option BotSettings BOT_SETTINGS = new BotSettings();
+    public static class BotSettings {
+        @Option public String lang = "en";
+
+        public @Option Display DISPLAY = new Display();
         public static class Display {
-            @Option(value = "Show usernames", description = "Show usernames on minimap")
-            public boolean SHOW_NAMES;
-            @Option(value = "Hide name", description = "Hide hero name in the map")
-            public boolean HIDE_NAME;
-            @Option(value = "Trail length", description = "Amount of time the trail should be in the map in seconds")
+            public @Option boolean SHOW_NAMES;
+            public @Option boolean HIDE_NAME;
             @Num(max = 300, step = 1)
-            public int TRAIL_LENGTH = 15;
-            @Option(value = "Show zones in main map", description = "Tick to show avoided/preferred zones on map")
-            public boolean SHOW_ZONES = true;
-            @Option(value = "GUI Button size", description = "Change tab in config & resize main window to update.")
+            public @Option int TRAIL_LENGTH = 15;
+            public @Option boolean SHOW_ZONES = true;
             @Num(min = 1, max = 20, step = 1)
-            public int BUTTON_SIZE = 4;
-            @Option(value = "Hide config editors until click", description = "Use text-based config tree, which is less resource intensive")
-            public boolean HIDE_EDITORS = false;
+            public @Option int BUTTON_SIZE = 4;
+            public @Option boolean HIDE_EDITORS = false;
 
             public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
         }
-        @Option(value = "Zone precision", description = "Amount of map subdivisions when selecting zones")
         @Num(min = 10, max = 300)
-        public int ZONE_RESOLUTION = 30;
-        @Option(value = "Refresh every", description = "Every how many minutes to refresh")
-        @Num(max = 60 * 12, step = 10)
-        public int REFRESH_TIME = 60;
-        @Option(value = "Pause after refresh", description = "How many minutes to pause for after a refresh")
-        @Num(max = 60 * 12, step = 10)
-        public int PAUSE_FOR = 5;
-        @Option(value = "Repair Drone Percentage", description = "Drones are repaired if above this percentage")
-        @Editor(JPercentField.class)
-        public double REPAIR_DRONE_PERCENTAGE = 0.9;
-        @Option(value = "Start/pause clicking map", description = "Left click to start/pause. Right click to move ship.")
-        public boolean MAP_START_STOP = false;
-        @Option(value = "Confirm exiting", description = "Confirm before exiting the bot")
-        public boolean CONFIRM_EXIT = true;
-        @Option(value = "Minimum tick time")
+        public @Option int ZONE_RESOLUTION = 30;
+        public @Option boolean MAP_START_STOP = false;
+        public @Option boolean CONFIRM_EXIT = true;
         @Num(min = 10, max = 250)
-        public int MIN_TICK = 15;
-        @Option(value = "Developer stuff shown", description = "Enabling this WILL make your bot use more cpu.")
-        public boolean DEV_STUFF = false;
-        @Option("API - experimental")
-        @Num(min = 0, max = 1, step = 1)
+        public @Option int MIN_TICK = 15;
+        public @Option boolean DEV_STUFF = false;
+        //@Option("API - experimental")
+        //@Num(min = 0, max = 1, step = 1)
         public int API = 0;
     }
 
     public /*@Option("Extra actions")*/ ExtraActions EXTRA = new ExtraActions();
     public static class ExtraActions {
-        @Option()
+        @Option
         @Editor(value = JActionTable.class, shared = true)
         public Map<String, ActionInfo> ACTION_INFOS = new HashMap<>();
         public transient Lazy<String> MODIFIED_ACTIONS = new Lazy.NoCache<>();

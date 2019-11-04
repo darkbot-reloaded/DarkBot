@@ -15,7 +15,7 @@ public class ExitConfirmation extends JPanel {
         add(new YesButton());
         add(new CancelButton());
         setVisible(false);
-        setToolTipText("Confirm exiting the bot, can be disabled in settings > miscellaneous");
+        setToolTipText("Confirm exiting the bot, can be disabled in settings > bot settings");
     }
 
     private static class Question extends JLabel {
@@ -33,6 +33,7 @@ public class ExitConfirmation extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            System.out.println("Exit confirmation button pressed, exiting");
             System.exit(0);
         }
     }

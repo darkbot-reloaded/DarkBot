@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.utils.Strings;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.tree.TreeNode;
@@ -25,11 +26,16 @@ public abstract class ConfigNode {
     private final Parent parent;
     public final String name;
     public final String description;
+    public final String key;
 
-    ConfigNode(Parent parent, String name, String description) {
+    ConfigNode(Parent parent, String name, String description, String key) {
         this.parent = parent;
         this.name = name;
-        this.description = description;
+        this.description = description.isEmpty() ? description : null;
+        this.key = key.isEmpty() ? null
+                : parent == null ? key
+                : parent.key == null ? null
+                : parent.key + "." + key;
     }
 
     public int getDepth() {
@@ -43,12 +49,12 @@ public abstract class ConfigNode {
         return parent.longestChild;
     }
 
-    ConfigNode(Parent parent, Option option) {
-        this(parent, option.value(), option.description());
+    ConfigNode(Parent parent, Option option, String fieldName) {
+        this(parent, option.value(), option.description(), option.key().isEmpty() ? fieldName.toLowerCase() : option.key());
     }
 
-    static ConfigNode.Parent rootingFrom(Parent parent, String name, Object root) {
-        return new Parent(parent, name, "").addChildren(p -> Arrays.stream(root.getClass().getFields())
+    static ConfigNode.Parent rootingFrom(Parent parent, String name, Object root, String baseKey) {
+        return new Parent(parent, name, "", baseKey).addChildren(p -> Arrays.stream(root.getClass().getFields())
                 .filter(f -> f.getAnnotation(Option.class) != null)
                 .map(f -> ConfigNode.of(p, new ConfigField(root, f))).toArray(ConfigNode[]::new));
     }
@@ -61,7 +67,7 @@ public abstract class ConfigNode {
         if (children.length == 0) return new Leaf(parent, field);
         Object obj = field.get();
         Option op = field.field.getAnnotation(Option.class);
-        return new Parent(parent, op.value(), op.description()).addChildren(p -> Arrays.stream(children)
+        return new Parent(parent, op.value(), op.description(), op.key().isEmpty() ? field.field.getName().toLowerCase() : op.key()).addChildren(p -> Arrays.stream(children)
                 .map(f -> ConfigNode.of(p, new ConfigField(obj, f))).toArray(ConfigNode[]::new));
 
     }
@@ -70,15 +76,15 @@ public abstract class ConfigNode {
         ConfigNode[] children;
         String longestChild;
 
-        Parent(Parent parent, String name, String description) {
-            super(parent, name, description);
+        Parent(Parent parent, String name, String description, String key) {
+            super(parent, name, description, key);
         }
 
         Parent addChildren(Function<Parent, ConfigNode[]> children) {
             this.children = children.apply(this);
             longestChild = Arrays.stream(this.children)
                     .filter(c -> c instanceof Leaf)
-                    .map(c -> c.name)
+                    .map(c -> I18n.getOrDefault(c.key, c.name))
                     .filter(name -> !name.isEmpty())
                     .max(Comparator.comparingInt(String::length)).orElse(null);
             return this;
@@ -89,7 +95,7 @@ public abstract class ConfigNode {
         public final ConfigField field;
 
         Leaf(Parent parent, ConfigField field) {
-            super(parent, field.field.getAnnotation(Option.class));
+            super(parent, field.field.getAnnotation(Option.class), field.field.getName());
             this.field = field;
         }
 

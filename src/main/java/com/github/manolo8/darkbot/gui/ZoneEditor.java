@@ -88,7 +88,7 @@ public class ZoneEditor extends MapDrawer {
     void setup(Main main, Map<Integer, ZoneInfo> zonesByMap) {
         super.setup(main);
         main.mapManager.mapChange.add(map -> {
-            zoneInfo = zonesByMap.computeIfAbsent(map.id, id -> new ZoneInfo(config.MISCELLANEOUS.ZONE_RESOLUTION));
+            zoneInfo = zonesByMap.computeIfAbsent(map.id, id -> new ZoneInfo(config.BOT_SETTINGS.ZONE_RESOLUTION));
             ZoneEditor.this.repaint();
         });
         zoneInfo = zonesByMap.get(-1);
@@ -106,7 +106,7 @@ public class ZoneEditor extends MapDrawer {
 
         if (zoneInfo == null) return;
 
-        int res = config.MISCELLANEOUS.ZONE_RESOLUTION;
+        int res = config.BOT_SETTINGS.ZONE_RESOLUTION;
         if (zoneInfo.resolution != res) zoneInfo.setResolution(res);
         drawCustomZones(g2);
         drawGrid(g2, res);

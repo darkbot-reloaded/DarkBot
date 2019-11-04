@@ -17,7 +17,7 @@ public class ConfigTree implements TreeModel {
     private List<TreeModelListener> listeners = new ArrayList<>();
 
     public ConfigTree(Object config) {
-        this.root = ConfigNode.rootingFrom(null, "Root", config);
+        this.root = ConfigNode.rootingFrom(null, "Root", config, "config");
         this.originalChildren = root.children;
     }
 
@@ -27,7 +27,7 @@ public class ConfigTree implements TreeModel {
         if (customConfig == null) newChildren = originalChildren;
         else {
             newChildren = Arrays.copyOf(originalChildren, originalChildren.length + 1);
-            newChildren[originalChildren.length] = ConfigNode.rootingFrom(root, name, customConfig);
+            newChildren[originalChildren.length] = ConfigNode.rootingFrom(root, name, customConfig, "custom");
         }
 
         this.root.children = newChildren;

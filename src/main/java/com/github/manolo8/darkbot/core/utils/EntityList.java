@@ -148,7 +148,7 @@ public class EntityList extends Updatable {
             }
         }
 
-        /*if (main.config.MISCELLANEOUS.DEV_STUFF) {
+        /*if (main.config.BOT_SETTINGS.DEV_STUFF) {
             long[] addr = Arrays.copyOf(entitiesAddress.elements, entitiesAddress.size);
             Arrays.sort(addr);
 

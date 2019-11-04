@@ -27,7 +27,7 @@ public class UIUtils {
     }
 
     public static Insets getInsetConfig(boolean textPadding) {
-        int inset = ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.DISPLAY.BUTTON_SIZE;
+        int inset = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.BUTTON_SIZE;
         return new Insets(inset, inset + (textPadding ? 4 : 0), inset, inset + (textPadding ? 4 : 0));
     }
 

@@ -113,7 +113,7 @@ public class MapDrawer extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (main.config.MISCELLANEOUS.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) {
+                if (main.config.BOT_SETTINGS.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) {
                     main.setRunning(!main.isRunning());
                     repaint();
                     return;
@@ -124,7 +124,7 @@ public class MapDrawer extends JPanel {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (main.config.MISCELLANEOUS.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) return;
+                if (main.config.BOT_SETTINGS.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) return;
                 hero.drive.move(undoTranslateX(e.getX()), undoTranslateY(e.getY()));
             }
         });
@@ -156,7 +156,7 @@ public class MapDrawer extends JPanel {
 
         synchronized (Main.UPDATE_LOCKER) {
             drawZones(g2);
-            if (config.MISCELLANEOUS.DISPLAY.SHOW_ZONES) drawCustomZones(g2);
+            if (config.BOT_SETTINGS.DISPLAY.SHOW_ZONES) drawCustomZones(g2);
             drawInfos(g2);
             drawHealth(g2);
             drawTrail(g2);
@@ -165,7 +165,7 @@ public class MapDrawer extends JPanel {
             drawHero(g2);
         }
 
-        if (config.MISCELLANEOUS.DEV_STUFF) {
+        if (config.BOT_SETTINGS.DEV_STUFF) {
             g2.setFont(FONT_TINY);
             g2.setColor(TEXT_DARK);
             synchronized (Main.UPDATE_LOCKER) {
@@ -197,7 +197,7 @@ public class MapDrawer extends JPanel {
                 "cargo " + statsManager.deposit + "/" + statsManager.depositTotal,
                 "death " + guiManager.deaths + '/' + config.GENERAL.SAFETY.MAX_DEATHS);
 
-        if (hovering && main.config.MISCELLANEOUS.MAP_START_STOP) drawActionButton(g2);
+        if (hovering && main.config.BOT_SETTINGS.MAP_START_STOP) drawActionButton(g2);
     }
 
     protected Graphics2D setupDraw(Graphics g) {
@@ -280,7 +280,7 @@ public class MapDrawer extends JPanel {
     private void drawHealth(Graphics2D g2) {
         g2.setColor(TEXT);
         g2.setFont(FONT_MID);
-        if (!config.MISCELLANEOUS.DISPLAY.HIDE_NAME)
+        if (!config.BOT_SETTINGS.DISPLAY.HIDE_NAME)
             drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40, Align.MID);
         drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20);
 
@@ -305,7 +305,7 @@ public class MapDrawer extends JPanel {
         } else if (distance > 100) {
             positions.put(System.currentTimeMillis(), new Line(last, last = heroLocation.copy()));
         }
-        positions.headMap(System.currentTimeMillis() - config.MISCELLANEOUS.DISPLAY.TRAIL_LENGTH * 1000).clear();
+        positions.headMap(System.currentTimeMillis() - config.BOT_SETTINGS.DISPLAY.TRAIL_LENGTH * 1000).clear();
 
         if (positions.isEmpty()) return;
 
@@ -359,7 +359,7 @@ public class MapDrawer extends JPanel {
             Location loc = ship.locationInfo.now;
             g2.setColor(ship.playerInfo.isEnemy() ? ENEMIES : ALLIES);
             drawEntity(g2, ship.locationInfo.now, false);
-            if (config.MISCELLANEOUS.DISPLAY.SHOW_NAMES)
+            if (config.BOT_SETTINGS.DISPLAY.SHOW_NAMES)
                 drawString(g2, ship.playerInfo.username, translateX(loc.x), translateY(loc.y) - 5, Align.MID);
         }
 
@@ -371,7 +371,7 @@ public class MapDrawer extends JPanel {
             drawEntity(g2, hero.target.locationInfo.now, true);
         }
 
-        if (!config.MISCELLANEOUS.DEV_STUFF) return;
+        if (!config.BOT_SETTINGS.DEV_STUFF) return;
 
         g2.setColor(UNKNOWN);
         for (Entity entity : mapManager.entities.unknown) {
@@ -529,18 +529,18 @@ public class MapDrawer extends JPanel {
     }
 
     protected int gridToMapX(int x) {
-        return x * width / config.MISCELLANEOUS.ZONE_RESOLUTION;
+        return x * width / config.BOT_SETTINGS.ZONE_RESOLUTION;
     }
 
     protected int gridToMapY(int y) {
-        return y * height / config.MISCELLANEOUS.ZONE_RESOLUTION;
+        return y * height / config.BOT_SETTINGS.ZONE_RESOLUTION;
     }
 
     protected int mapToGridX(int x) {
-        return (x + 1) * config.MISCELLANEOUS.ZONE_RESOLUTION / width;
+        return (x + 1) * config.BOT_SETTINGS.ZONE_RESOLUTION / width;
     }
 
     protected int mapToGridY(int y) {
-        return (y + 1) * config.MISCELLANEOUS.ZONE_RESOLUTION / height;
+        return (y + 1) * config.BOT_SETTINGS.ZONE_RESOLUTION / height;
     }
 }

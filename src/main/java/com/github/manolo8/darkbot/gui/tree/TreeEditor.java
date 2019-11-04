@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JNumberField;
 import com.github.manolo8.darkbot.gui.tree.components.JRangeField;
 import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
 import com.github.manolo8.darkbot.gui.tree.components.JStringField;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
@@ -78,7 +79,7 @@ public class TreeEditor extends DefaultTreeCellEditor {
                                                 boolean expanded, boolean leaf, int row) {
 
         ConfigNode node = ((ConfigNode) value);
-        label.setText(node.name);
+        label.setText(I18n.getOrDefault(node.key, node.name));
         label.setPreferredSize(new Dimension(getWidthFor(node, label), 0));
 
         if (currentEditor != null) panel.remove(currentEditor.getComponent());
@@ -92,13 +93,13 @@ public class TreeEditor extends DefaultTreeCellEditor {
             if (expanded) tree.collapseRow(row);
             else tree.expandRow(row);
         }
-        panel.setToolTipText(node.description.isEmpty() ? null : node.description);
+        panel.setToolTipText(I18n.getOrDefault(node.key + ".desc", node.description));
         return panel;
     }
 
     private int getWidthFor(ConfigNode node, JLabelField label) {
-        if (node.name.isEmpty()) return 0;
-        if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.DISPLAY.HIDE_EDITORS) {
+        if (I18n.getOrDefault(node.key, node.name).isEmpty()) return 0;
+        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.HIDE_EDITORS) {
             return label.getFontMetrics(label.getFont()).stringWidth(node.name) + 5;
         } else {
             return label.getFontMetrics(label.getFont()).stringWidth(node.getLongestSibling()) + 10;

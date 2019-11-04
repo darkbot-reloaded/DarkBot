@@ -19,12 +19,12 @@ public class PinButton extends TitleBarButton<JFrame> {
     @Override
     public void actionPerformed(ActionEvent e) {
         frame.setAlwaysOnTop(!frame.isAlwaysOnTop());
-        ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.DISPLAY.ALWAYS_ON_TOP = frame.isAlwaysOnTop();
+        ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.ALWAYS_ON_TOP = frame.isAlwaysOnTop();
         ConfigEntity.changed();
     }
 
     protected void setBackground() {
-        if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.DISPLAY.ALWAYS_ON_TOP) {
+        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.ALWAYS_ON_TOP) {
             setBackground(actionColor.darker());
             setIcon(UNPIN);
         } else {

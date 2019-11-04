@@ -76,11 +76,11 @@ public class ConfigEntity {
     }
 
     public ZoneInfo getOrCreatePreferred() {
-        return config.PREFERRED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.MISCELLANEOUS.ZONE_RESOLUTION));
+        return config.PREFERRED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.BOT_SETTINGS.ZONE_RESOLUTION));
     }
 
     public ZoneInfo getOrCreateAvoided() {
-        return config.AVOIDED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.MISCELLANEOUS.ZONE_RESOLUTION));
+        return config.AVOIDED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.BOT_SETTINGS.ZONE_RESOLUTION));
     }
 
     public Set<SafetyInfo> getOrCreateSafeties() {
