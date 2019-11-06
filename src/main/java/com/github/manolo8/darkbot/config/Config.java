@@ -38,26 +38,16 @@ public class Config {
 
     public @Option("General") General GENERAL = new General();
     public static class General {
-        @Option("Module")
-        @Editor(JListField.class)
         @Options(ModuleSupplier.class)
-        public String CURRENT_MODULE = LootNCollectorModule.class.getCanonicalName();
-
-        @Option("Working map")
-        @Editor(JListField.class)
+        public @Option @Editor(JListField.class) String CURRENT_MODULE = LootNCollectorModule.class.getCanonicalName();
         @Options(StarManager.MapList.class)
-        public int WORKING_MAP = 26;
-        @Option(value = "Offensive config", description = "Used to kill NPCs")
-        public ShipConfig OFFENSIVE = new ShipConfig(1, '8');
-        @Option(value = "Roam config", description = "Used to roam around the map, searching for NPCs")
-        public ShipConfig ROAM = new ShipConfig(1, '9');
-        @Option(value = "Run config", description = "Used to run to safety or switch around maps")
-        public ShipConfig RUN = new ShipConfig(2, '9');
-        @Option(value = "Check formation", description = "Checking formation every X seconds, set 0 to disable")
-        @Num(max = 3600)
-        public int FORMATION_CHECK = 180;
+        public @Option @Editor(JListField.class) int WORKING_MAP = 26;
+        public @Option ShipConfig OFFENSIVE = new ShipConfig(1, '8');
+        public @Option ShipConfig ROAM = new ShipConfig(1, '9');
+        public @Option ShipConfig RUN = new ShipConfig(2, '9');
+        public @Option @Num(max = 3600) int FORMATION_CHECK = 180;
 
-        public @Option("Safety") Safety SAFETY = new Safety();
+        public @Option Safety SAFETY = new Safety();
         public static class Safety {
             @Option(value = "Keep health between", description = "Even if shooting an npc, run away when under this hp")
             public PercentRange REPAIR_HP_RANGE = new PercentRange(0.4, 0.95);
@@ -84,7 +74,7 @@ public class Config {
             public int WAIT_AFTER_REVIVE = 90;
         }
 
-        public @Option("Running") Running RUNNING = new Running();
+        public @Option Running RUNNING = new Running();
         public static class Running {
             @Option(value = "Run from enemies", description = "If bot should run from enemies who attack you, or have attacked you recently")
             public boolean RUN_FROM_ENEMIES = true;
@@ -108,113 +98,84 @@ public class Config {
             public int RUN_FURTHEST_PORT = 1500;
         }
 
-        public @Option("Roaming & Preferred area behaviour") Roaming ROAMING = new Roaming();
+        public @Option Roaming ROAMING = new Roaming();
         public static class Roaming {
-            @Option("Keep roaming towards same point until reached")
-            public boolean KEEP = false;
-            @Option("Roam to preferred zones in order")
-            public boolean SEQUENTIAL = false;
-            @Option(value = "Only kill NPCs in preferred area", description = "Only select and kill NPCs when they are inside a preferred area")
-            public boolean ONLY_KILL_PREFERRED = false;
+            public @Option boolean KEEP = true;
+            public @Option boolean SEQUENTIAL = false;
+            public @Option boolean ONLY_KILL_PREFERRED = false;
         }
     }
 
-    public @Option("Collect") Collect COLLECT = new Collect();
+    public @Option Collect COLLECT = new Collect();
     public static class Collect {
-        public @Option("Stay away from enemies") boolean STAY_AWAY_FROM_ENEMIES;
-        public @Option("Auto cloack") boolean AUTO_CLOACK;
-        public @Option("Auto cloack key") Character AUTO_CLOACK_KEY;
+        public @Option boolean STAY_AWAY_FROM_ENEMIES;
+        public @Option boolean AUTO_CLOACK;
+        public @Option Character AUTO_CLOACK_KEY;
+        public @Option @Num(max = 10000, step = 50) int RADIUS = 400;
 
-        @Option(value = "Collect while killing radius", description = "Resource collection radius while killing NPCs")
-        @Num(max = 10000, step = 50)
-        public int RADIUS = 400;
-
-        @Option()
+        @Option
         @Editor(value = JBoxInfoTable.class, shared = true)
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy.NoCache<>();
     }
 
-    public @Option("Npc killer") Loot LOOT = new Loot();
+    public @Option Loot LOOT = new Loot();
     public static class Loot {
-        public @Option(value = "Sab", description = "Auto sab npcs to survive longer") Sab SAB = new Sab();
+        public @Option Sab SAB = new Sab();
         public static class Sab {
-            public @Option("Enabled") boolean ENABLED = false;
-            public @Option("Key") Character KEY = '2';
-            public @Option("Ship under") @Editor(JPercentField.class) double PERCENT = 0.8;
-            public @Option("NPC min shield") @Num(min = 500, max = 100000, step = 500) int NPC_AMOUNT = 12000;
+            public @Option boolean ENABLED = false;
+            public @Option Character KEY = '2';
+            public @Option @Editor(JPercentField.class) double PERCENT = 0.8;
+            public @Option @Num(min = 500, max = 100000, step = 500) int NPC_AMOUNT = 12000;
         }
-        public @Option("Ammo key") Character AMMO_KEY = '1';
+        public @Option Character AMMO_KEY = '1';
+        public @Option Character SHIP_ABILITY;
+        public @Option @Num(min = 50_000, max = 5_000_000, step = 50_000) int SHIP_ABILITY_MIN = 150_000;
+        public @Option @Num(max = 10, step = 1) int MAX_CIRCLE_ITERATIONS = 5;
+        public @Option boolean RUN_CONFIG_IN_CIRCLE = true;
 
-        @Option(value = "Offensive ability key")
-        public Character SHIP_ABILITY;
-        @Option(value = "Offensive ability min health", description = "Min NPC health to use ability")
-        @Num(min = 50_000, max = 5_000_000, step = 50_000)
-        public int SHIP_ABILITY_MIN = 150_000;
-        @Option(value = "Smart circling iterations", description = "Max moves to look ahead to change circle direction")
-        @Num(max = 50, step = 1)
-        public int MAX_CIRCLE_ITERATIONS = 5;
-        @Option(value = "Run config to chase", description = "Use run config to follow escaping npcs")
-        public boolean RUN_CONFIG_IN_CIRCLE = true;
-
-        @Option(value = "Group similar NPCs", description = "Group NPCs in the same GG in the NPC table")
-        public boolean GROUP_NPCS = true;
-        @Option()
+        public @Option boolean GROUP_NPCS = true;
         @Editor(value = JNpcInfoTable.class, shared = true)
-        public Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
+        public @Option Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
         public transient Lazy<String> MODIFIED_NPC = new Lazy.NoCache<>();
 
-        @Option("Ignore npcs further than")
-        @Num(min = 1000, max = 20000, step = 500)
-        public int NPC_DISTANCE_IGNORE = 3000;
+        public @Option @Num(min = 1000, max = 20000, step = 500) int NPC_DISTANCE_IGNORE = 3000;
     }
 
-    public @Option("Pet") PetSettings PET = new PetSettings();
+    public @Option PetSettings PET = new PetSettings();
     public static class PetSettings {
-        @Option("Use pet")
-        public boolean ENABLED = false;
-        @Option(value = "# of module to use", description = "0 -> Passive, 1 -> Guard module, then whatever's next")
-        @Num(max = 8, step = 1)
-        public int MODULE = 1;
+        public @Option boolean ENABLED = false;
+        public @Option @Num(max = 8, step = 1) int MODULE = 1;
     }
 
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();
     public static class Miscellaneous {
-        @Num(max = 60 * 12, step = 10)
-        public @Option int REFRESH_TIME = 60;
-        @Num(max = 60 * 12, step = 10)
-        public @Option int PAUSE_FOR = 5;
-        @Editor(JPercentField.class)
-        public @Option double REPAIR_DRONE_PERCENTAGE = 0.9;
+        public @Option @Num(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
+        public @Option @Num(max = 60 * 12, step = 10) int PAUSE_FOR = 5;
+        public @Option @Editor(JPercentField.class) double REPAIR_DRONE_PERCENTAGE = 0.9;
     }
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
     public static class BotSettings {
-        @Option public String lang = "en";
+        public @Option String lang = "en";
+        public @Option @Num(min = 10, max = 300) int ZONE_RESOLUTION = 30;
+        public @Option boolean MAP_START_STOP = false;
+        public @Option boolean CONFIRM_EXIT = true;
+        public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
+        public @Option boolean DEV_STUFF = false;
+        public /*@Option @Num(min = 0, max = 1, step = 1) */ int API = 0;
 
         public @Option Display DISPLAY = new Display();
         public static class Display {
             public @Option boolean SHOW_NAMES;
             public @Option boolean HIDE_NAME;
-            @Num(max = 300, step = 1)
-            public @Option int TRAIL_LENGTH = 15;
+            public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
             public @Option boolean SHOW_ZONES = true;
-            @Num(min = 1, max = 20, step = 1)
-            public @Option int BUTTON_SIZE = 4;
+            public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
             public @Option boolean HIDE_EDITORS = false;
 
             public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
         }
-        @Num(min = 10, max = 300)
-        public @Option int ZONE_RESOLUTION = 30;
-        public @Option boolean MAP_START_STOP = false;
-        public @Option boolean CONFIRM_EXIT = true;
-        @Num(min = 10, max = 250)
-        public @Option int MIN_TICK = 15;
-        public @Option boolean DEV_STUFF = false;
-        //@Option("API - experimental")
-        //@Num(min = 0, max = 1, step = 1)
-        public int API = 0;
     }
 
     public /*@Option("Extra actions")*/ ExtraActions EXTRA = new ExtraActions();
