@@ -3,7 +3,9 @@ package com.github.manolo8.darkbot.utils;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class I18n {
@@ -18,7 +20,7 @@ public class I18n {
     }
     private static void load(Properties props, URL resource) {
         try {
-            props.load(resource.openStream());
+            props.load(new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8));
         } catch (IOException e) {
             System.err.print("Failed to load translations: " + resource);
             e.printStackTrace();
