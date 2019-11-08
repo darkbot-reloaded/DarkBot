@@ -36,7 +36,7 @@ public class Config {
 
     public transient boolean changed;
 
-    public @Option("General") General GENERAL = new General();
+    public @Option General GENERAL = new General();
     public static class General {
         @Options(ModuleSupplier.class)
         public @Option @Editor(JListField.class) String CURRENT_MODULE = LootNCollectorModule.class.getCanonicalName();
@@ -49,53 +49,26 @@ public class Config {
 
         public @Option Safety SAFETY = new Safety();
         public static class Safety {
-            @Option(value = "Keep health between", description = "Even if shooting an npc, run away when under this hp")
-            public PercentRange REPAIR_HP_RANGE = new PercentRange(0.4, 0.95);
-            @Option(value = "Repair when roaming & hp under", description = "Hp to run at when just roaming the map")
-            @Editor(JPercentField.class)
-            public double REPAIR_HP_NO_NPC = 0.5;
-            @Option(value = "Repair until shield", description = "Minimum shield to stop repairing")
-            @Editor(JPercentField.class)
-            public double REPAIR_TO_SHIELD = 1;
-            @Option(value = "Repair config", description = "Used to repair after run formation shields are full")
-            public ShipConfig REPAIR = new ShipConfig(1, '9');
-            @Option(value = "Max deaths", description = "Max amount of deaths, if reached, bot is paused")
-            @Num(min = 1, max = 9999)
-            public int MAX_DEATHS = 10;
-            @Option(value = "Revive location", description = "Where to revive the ship")
-            @Editor(JListField.class)
-            @Options(ReviveSpotSupplier.class)
-            public long REVIVE_LOCATION = 1L;
-            @Option(value = "Wait before revive (sec)", description = "Seconds to wait before reviving")
-            @Num(min = 2, max = 60, step = 10)
-            public int WAIT_BEFORE_REVIVE = 3;
-            @Option(value = "Wait after revive (sec)", description = "Seconds to wait after reviving, lets ship repair")
-            @Num(min = 3, max = 15 * 60, step = 10)
-            public int WAIT_AFTER_REVIVE = 90;
+            public @Option PercentRange REPAIR_HP_RANGE = new PercentRange(0.4, 0.95);
+            public @Option @Editor(JPercentField.class) double REPAIR_HP_NO_NPC = 0.5;
+            public @Option @Editor(JPercentField.class) double REPAIR_TO_SHIELD = 1;
+            public @Option ShipConfig REPAIR = new ShipConfig(1, '9');
+            public @Option @Num(min = 1, max = 9999) int MAX_DEATHS = 10;
+            public @Option @Editor(JListField.class) @Options(ReviveSpotSupplier.class) long REVIVE_LOCATION = 1L;
+            public @Option @Num(min = 2, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 3;
+            public @Option @Num(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
         }
 
         public @Option Running RUNNING = new Running();
         public static class Running {
-            @Option(value = "Run from enemies", description = "If bot should run from enemies who attack you, or have attacked you recently")
-            public boolean RUN_FROM_ENEMIES = true;
-            @Option(value = "Remember enemies for", description = "How long to run in sight from enemies that shot you")
-            @Num(max = 24 * 60 * 60, step = 300)
-            public int REMEMBER_ENEMIES_FOR = 300;
-            @Option(value = "Run from enemies in sight", description = "Run from enemies as soon as they enter your minimap")
-            public boolean RUN_FROM_ENEMIES_SIGHT = false;
-            @Option(value = "Stop running when out of sight", description = "Will stop running if the enemy isn't attacking and is no longer on sight")
-            public boolean STOP_RUNNING_NO_SIGHT = true;
-            @Option(value = "Max sight distance", description = "No longer consider enemies in sight if further away than this")
-            @Num(min = 500, max = 20000, step = 500)
-            public int MAX_SIGHT_DISTANCE = 4000;
-            @Option(value = "Ship ability", description = "Clicked when running away")
-            public Character SHIP_ABILITY;
-            @Option(value = "Ship ability min distance", description = "Minimum distance to safety to use ability")
-            @Num(max = 20000, step = 500)
-            public int SHIP_ABILITY_MIN = 1500;
-            @Option(value = "Closest port distance max", description = "Run to port further away from enemy, unless port dist under max")
-            @Num(max = 20000, step = 500)
-            public int RUN_FURTHEST_PORT = 1500;
+            public @Option boolean RUN_FROM_ENEMIES = true;
+            public @Option @Num(max = 24 * 60 * 60, step = 300) int REMEMBER_ENEMIES_FOR = 300;
+            public @Option boolean RUN_FROM_ENEMIES_SIGHT = false;
+            public @Option boolean STOP_RUNNING_NO_SIGHT = true;
+            public @Option @Num(min = 500, max = 20000, step = 500) int MAX_SIGHT_DISTANCE = 4000;
+            public @Option Character SHIP_ABILITY;
+            public @Option @Num(max = 20000, step = 500) int SHIP_ABILITY_MIN = 1500;
+            public @Option @Num(max = 20000, step = 500) int RUN_FURTHEST_PORT = 1500;
         }
 
         public @Option Roaming ROAMING = new Roaming();
