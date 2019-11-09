@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.AuthAPI;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.google.gson.Gson;
 
 import javax.swing.*;

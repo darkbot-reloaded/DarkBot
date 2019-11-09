@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
+import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
 import com.github.manolo8.darkbot.core.manager.StarManager;
@@ -13,10 +14,12 @@ import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
+import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import com.github.manolo8.darkbot.utils.MathUtils;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -125,12 +128,12 @@ public class Config {
     public static class Miscellaneous {
         public @Option @Num(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
         public @Option @Num(max = 60 * 12, step = 10) int PAUSE_FOR = 5;
-        public @Option @Editor(JPercentField.class) double REPAIR_DRONE_PERCENTAGE = 0.9;
+        public @Option @Editor(JPercentField.class) double DRONE_REPAIR_PERCENTAGE = 0.9;
     }
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
     public static class BotSettings {
-        public @Option String lang = "en";
+        public @Option @Editor(LangEditor.class) @Options(LanguageSupplier.class) Locale lang = Locale.ENGLISH;
         public @Option @Num(min = 10, max = 300) int ZONE_RESOLUTION = 30;
         public @Option boolean MAP_START_STOP = false;
         public @Option boolean CONFIRM_EXIT = true;

@@ -11,6 +11,8 @@ import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.HashMap;
@@ -20,15 +22,13 @@ public class JListField extends JComboBox<String> implements OptionEditor {
 
     private Map<Class<? extends OptionList<?>>, OptionList<?>> optionInstances = new HashMap<>();
     private OptionList<?> options;
-    private ConfigField field;
+    protected ConfigField field;
 
     public JListField() {
         putClientProperty("ConfigTree", true);
         putClientProperty("JComboBox.isTableCellEditor", true);
         setBorder(BorderFactory.createLineBorder(Gray._90));
-        addActionListener(e -> {
-            if (field != null) field.set(options.getValue((String) getSelectedItem()));
-        });
+        addActionListener(this::updateValue);
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -36,6 +36,10 @@ public class JListField extends JComboBox<String> implements OptionEditor {
             }
         });
         setRenderer(new ToolTipListRenderer(this));
+    }
+
+    protected void updateValue(ActionEvent event) {
+        if (field != null) field.set(options.getValue((String) getSelectedItem()));
     }
 
     @Override

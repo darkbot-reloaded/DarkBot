@@ -6,19 +6,28 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Properties;
 
 public class I18n {
 
-    private static String lang = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.lang;
     private static Properties props = new Properties();
     static {
-        load(props,I18n.class.getResource("/translations.properties"));
-        if (!lang.equals("en")) {
-            load(props,I18n.class.getResource("/translations_" + lang + ".properties"));
-        }
+        reloadProps();
     }
-    private static void load(Properties props, URL resource) {
+    public static void reloadProps() {
+        props.clear();
+        Locale lang = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.lang;
+        loadProp(props, "/translations.properties");
+        if (!lang.toLanguageTag().equals("en"))
+            loadProp(props, "/translations_" + lang.toLanguageTag() + ".properties");
+    }
+    private static void loadProp(Properties props, String file) {
+        URL resource = I18n.class.getResource(file);
+        if (resource == null) {
+            System.out.println("Couldn't find " + file + ", using defaults only");
+            return;
+        }
         try {
             props.load(new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8));
         } catch (IOException e) {

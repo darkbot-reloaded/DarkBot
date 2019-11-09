@@ -50,7 +50,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     }
 
     @Override
-    public void afterLoad() {
+    public void afterLoadComplete() {
         setEditingConfig(config);
     }
 

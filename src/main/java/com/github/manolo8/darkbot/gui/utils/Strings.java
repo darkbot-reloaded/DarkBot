@@ -10,4 +10,8 @@ public class Strings {
         return split > 0 ? path.substring(split + 1) : path;
     }
 
+    public static String capitalize(String str) {
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
+
 }

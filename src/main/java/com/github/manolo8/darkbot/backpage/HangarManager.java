@@ -68,7 +68,7 @@ public class HangarManager {
         updateHangarData(500);
         boolean repaired = !drones.isEmpty();
         for (Drone drone : drones) {
-            if (drone.getDamage() / 100d >= main.config.MISCELLANEOUS.REPAIR_DRONE_PERCENTAGE) {
+            if (drone.getDamage() / 100d >= main.config.MISCELLANEOUS.DRONE_REPAIR_PERCENTAGE) {
                 repaired &= repairDrone(drone);
             }
         }
