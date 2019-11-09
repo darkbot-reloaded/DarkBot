@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.config.types.suppliers;
 
 import com.github.manolo8.darkbot.gui.utils.Strings;
+import com.github.manolo8.darkbot.utils.I18n;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class LanguageSupplier extends OptionList<Locale> {
 
-    private static final List<Locale> LOCALES = Arrays.asList(Locale.ENGLISH, Locale.forLanguageTag("hu"));
+    private static final List<Locale> LOCALES = I18n.SUPPORTED_LOCALES;
     private static final List<String> LOCALE_NAMES = LOCALES.stream()
             .map(Locale::getDisplayName).map(Strings::capitalize).collect(Collectors.toList());
 
