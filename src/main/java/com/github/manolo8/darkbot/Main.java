@@ -141,8 +141,9 @@ public class Main extends Thread implements PluginListener {
 
         form = new MainGui(this);
 
-        if (failedConfig) Popups.showMessageAsync("Error",
-                "Failed to load config. Default config will be used, config won't be save.", JOptionPane.ERROR_MESSAGE);
+        if (failedConfig) Popups.showMessageAsync("Error", "Failed to load config file.\n" +
+                "The bot will use the default config and won't save.\n" +
+                "Delete config.json file (will erase configs) & restart the bot.", JOptionPane.ERROR_MESSAGE);
 
         API.createWindow();
         start();
