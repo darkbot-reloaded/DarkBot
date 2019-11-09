@@ -80,7 +80,7 @@ public class TreeEditor extends DefaultTreeCellEditor {
 
         ConfigNode node = ((ConfigNode) value);
         label.setText(I18n.getOrDefault(node.key, node.name));
-        label.setPreferredSize(new Dimension(getWidthFor(node, label), 0));
+        label.setPreferredSize(new Dimension(getWidthFor(node, label.getFontMetrics(label.getFont())), 0));
 
         if (currentEditor != null) panel.remove(currentEditor.getComponent());
         if (leaf) {
@@ -97,13 +97,14 @@ public class TreeEditor extends DefaultTreeCellEditor {
         return panel;
     }
 
-    private int getWidthFor(ConfigNode node, JLabelField label) {
+    private int getWidthFor(ConfigNode node, FontMetrics font) {
         if (I18n.getOrDefault(node.key, node.name).isEmpty()) return 0;
-        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.HIDE_EDITORS) {
-            return label.getFontMetrics(label.getFont()).stringWidth(node.name) + 5;
-        } else {
-            return label.getFontMetrics(label.getFont()).stringWidth(node.getLongestSibling()) + 10;
-        }
+        int width = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.HIDE_EDITORS ?
+                font.stringWidth(I18n.getOrDefault(node.key, node.name)) + 5 :
+                font.stringWidth(node.getLongestSibling()) + 10;
+        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DEV_STUFF)
+            System.out.println("Width for " + node.key + ": " + width);
+        return width;
     }
 
     @Override

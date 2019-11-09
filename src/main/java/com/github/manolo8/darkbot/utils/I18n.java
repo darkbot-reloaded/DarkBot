@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Properties;
 
 public class I18n {
@@ -23,6 +24,7 @@ public class I18n {
             loadProp(props, "/translations_" + lang.toLanguageTag() + ".properties");
     }
     private static void loadProp(Properties props, String file) {
+        System.out.println("Loading translations for: " + file);
         URL resource = I18n.class.getResource(file);
         if (resource == null) {
             System.out.println("Couldn't find " + file + ", using defaults only");
@@ -31,7 +33,7 @@ public class I18n {
         try {
             props.load(new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8));
         } catch (IOException e) {
-            System.err.print("Failed to load translations: " + resource);
+            System.err.println("Failed to load translations: " + file);
             e.printStackTrace();
         }
     }
@@ -39,6 +41,10 @@ public class I18n {
     private I18n() {}
 
     public static String getOrDefault(String key, String fallback) {
+        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DEV_STUFF) {
+            System.out.println("Getting translation for " + Objects.toString(key, "null") +
+                    (key == null ? "" : ": " + Objects.toString(props.get(key), "null")));
+        }
         if (key == null) return fallback;
         String res = (String) props.get(key);
         return res != null ? res : fallback;

@@ -13,11 +13,11 @@ import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
-import javax.swing.tree.TreeNode;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -67,7 +67,7 @@ public abstract class ConfigNode {
         if (children.length == 0) return new Leaf(parent, field);
         Object obj = field.get();
         Option op = field.field.getAnnotation(Option.class);
-        return new Parent(parent, op.value(), op.description(), op.key().isEmpty() ? field.field.getName().toLowerCase() : op.key()).addChildren(p -> Arrays.stream(children)
+        return new Parent(parent, op.value(), op.description(), op.key().isEmpty() ? field.field.getName().toLowerCase(Locale.ROOT) : op.key()).addChildren(p -> Arrays.stream(children)
                 .map(f -> ConfigNode.of(p, new ConfigField(obj, f))).toArray(ConfigNode[]::new));
 
     }

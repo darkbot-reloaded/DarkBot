@@ -28,7 +28,9 @@ public class JListField extends JComboBox<String> implements OptionEditor {
         putClientProperty("ConfigTree", true);
         putClientProperty("JComboBox.isTableCellEditor", true);
         setBorder(BorderFactory.createLineBorder(Gray._90));
-        addActionListener(this::updateValue);
+        addActionListener(event -> {
+            if (field != null) updateValue();
+        });
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -38,8 +40,8 @@ public class JListField extends JComboBox<String> implements OptionEditor {
         setRenderer(new ToolTipListRenderer(this));
     }
 
-    protected void updateValue(ActionEvent event) {
-        if (field != null) field.set(options.getValue((String) getSelectedItem()));
+    protected void updateValue() {
+        field.set(options.getValue((String) getSelectedItem()));
     }
 
     @Override
