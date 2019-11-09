@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
+import com.github.manolo8.darkbot.gui.utils.SpinnerNumberMinMaxFix;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,12 +39,12 @@ public class JNumberField extends JSpinner implements OptionEditor {
 
         SpinnerNumberModel model;
         try {
-            model = new SpinnerNumberModel(value, number.min(), number.max(), number.step());
+            model = new SpinnerNumberMinMaxFix(value, number.min(), number.max(), number.step());
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
             System.err.println("Failed to create editor for field, ignoring min & max: " + field.field);
 
-            model = new SpinnerNumberModel(value, null, null, number.step());
+            model = new SpinnerNumberMinMaxFix(value, null, null, number.step());
         }
         setModel(model);
         setPreferredSize(new Dimension(25 + (String.valueOf(number.max()).length() * 9), AdvancedConfig.EDITOR_HEIGHT));

@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
+import com.github.manolo8.darkbot.gui.utils.SpinnerNumberMinMaxFix;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,7 +37,7 @@ public class JRangeField extends JPanel implements OptionEditor {
     }
 
     private JSpinner createPercentSpinner() {
-        JSpinner spinner = new JSpinner(new SpinnerNumberModel(0, 0, 1, 0.05)) {
+        JSpinner spinner = new JSpinner(new SpinnerNumberMinMaxFix(0, 0, 1, 0.05)) {
             @Override
             public Dimension getPreferredSize() {
                 return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
