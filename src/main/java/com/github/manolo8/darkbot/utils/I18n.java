@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 public class I18n {
 
-    public static final List<Locale> SUPPORTED_LOCALES = Stream.of("en", "hu", "cs", "pl", "fr").map(Locale::new)
+    public static final List<Locale> SUPPORTED_LOCALES = Stream.of("en", "hu", "cs", "pl", "fr", "pt").map(Locale::new)
             .sorted(Comparator.comparing(Locale::getDisplayName)).collect(Collectors.toList());
     private static final Properties props = new Properties();
     static {
