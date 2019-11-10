@@ -216,6 +216,7 @@ public class MapDrawer extends JPanel {
 
     protected void drawZones(Graphics2D g2) {
         for (Barrier barrier : mapManager.entities.barriers) {
+            if (!barrier.use()) continue;
             Area area = barrier.getZone();
             g2.setColor(this.BARRIER);
             g2.fillRect(

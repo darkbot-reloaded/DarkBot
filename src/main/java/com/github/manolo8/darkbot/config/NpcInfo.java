@@ -39,6 +39,13 @@ public class NpcInfo {
 
         private Set<String> flags = new HashSet<>();
 
+        public ExtraNpcInfo() {}
+
+        public ExtraNpcInfo(Set<NpcExtraFlag> flags) {
+            this.updated = true;
+            flags.forEach(fl -> this.set(fl, true));
+        }
+
         public boolean has(NpcExtraFlag flag) {
             return has(flag.getId());
         }
@@ -77,6 +84,14 @@ public class NpcInfo {
     }
 
     public Set<Integer> mapList = new HashSet<>();
+
+    public void set(Double radius, Integer priority, Boolean kill, Character attackKey, ExtraNpcInfo extra) {
+        if (radius != null) this.radius = radius;
+        if (priority != null) this.priority = priority;
+        if (kill != null) this.kill = kill;
+        if (attackKey != null) this.attackKey = attackKey;
+        if (extra != null) this.extra = extra;
+    }
 
     public void copyOf(NpcInfo other) {
         this.radius = other.radius;

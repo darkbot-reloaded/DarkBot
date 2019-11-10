@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.core.itf.Obstacle;
+import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
 
@@ -40,6 +41,7 @@ public class Barrier
 
     @Override
     public boolean use() {
-        return true;
+        return area.minX > 0 || area.maxX < MapManager.internalWidth ||
+                area.minY > 0 || area.maxY < MapManager.internalHeight;
     }
 }
