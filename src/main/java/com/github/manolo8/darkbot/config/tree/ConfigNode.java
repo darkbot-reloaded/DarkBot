@@ -28,14 +28,14 @@ public abstract class ConfigNode {
     public final String description;
     public final String key;
 
-    ConfigNode(Parent parent, String name, String description, String key) {
+    ConfigNode(Parent parent, String name, String description, String key, String field) {
         this.parent = parent;
         this.name = name;
         this.description = description.isEmpty() ? description : null;
-        this.key = key.isEmpty() ? null
-                : parent == null ? key
+        this.key = !key.isEmpty() ? key
+                : parent == null ? field.toLowerCase(Locale.ROOT)
                 : parent.key == null ? null
-                : parent.key + "." + key;
+                : parent.key + "." + field.toLowerCase(Locale.ROOT);
     }
 
     public int getDepth() {
@@ -49,12 +49,8 @@ public abstract class ConfigNode {
         return parent.longestChild;
     }
 
-    ConfigNode(Parent parent, Option option, String fieldName) {
-        this(parent, option.value(), option.description(), option.key().isEmpty() ? fieldName.toLowerCase() : option.key());
-    }
-
     static ConfigNode.Parent rootingFrom(Parent parent, String name, Object root, String baseKey) {
-        return new Parent(parent, name, "", baseKey).addChildren(p -> Arrays.stream(root.getClass().getFields())
+        return new Parent(parent, name, "", baseKey, null).addChildren(p -> Arrays.stream(root.getClass().getFields())
                 .filter(f -> f.getAnnotation(Option.class) != null)
                 .map(f -> ConfigNode.of(p, new ConfigField(root, f))).toArray(ConfigNode[]::new));
     }
@@ -67,7 +63,8 @@ public abstract class ConfigNode {
         if (children.length == 0) return new Leaf(parent, field);
         Object obj = field.get();
         Option op = field.field.getAnnotation(Option.class);
-        return new Parent(parent, op.value(), op.description(), op.key().isEmpty() ? field.field.getName().toLowerCase(Locale.ROOT) : op.key()).addChildren(p -> Arrays.stream(children)
+        return new Parent(parent, op.value(), op.description(), op.key(), field.field.getName())
+                .addChildren(p -> Arrays.stream(children)
                 .map(f -> ConfigNode.of(p, new ConfigField(obj, f))).toArray(ConfigNode[]::new));
 
     }
@@ -76,8 +73,8 @@ public abstract class ConfigNode {
         ConfigNode[] children;
         String longestChild;
 
-        Parent(Parent parent, String name, String description, String key) {
-            super(parent, name, description, key);
+        Parent(Parent parent, String name, String description, String key, String field) {
+            super(parent, name, description, key, field);
         }
 
         Parent addChildren(Function<Parent, ConfigNode[]> children) {
@@ -94,9 +91,13 @@ public abstract class ConfigNode {
     public static class Leaf extends ConfigNode {
         public final ConfigField field;
 
-        Leaf(Parent parent, ConfigField field) {
-            super(parent, field.field.getAnnotation(Option.class), field.field.getName());
+        Leaf(Parent parent, ConfigField field, Option option) {
+            super(parent, option.value(), option.description(), option.key(), field.field.getName());
             this.field = field;
+        }
+
+        Leaf(Parent parent, ConfigField field) {
+            this(parent, field, field.field.getAnnotation(Option.class));
         }
 
         @Override
