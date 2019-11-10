@@ -41,9 +41,9 @@ public class NpcInfo {
 
         public ExtraNpcInfo() {}
 
-        public ExtraNpcInfo(Set<NpcExtraFlag> flags) {
+        public ExtraNpcInfo(NpcExtraFlag... flags) {
             this.updated = true;
-            flags.forEach(fl -> this.set(fl, true));
+            for (NpcExtraFlag flag : flags) set(flag, true);
         }
 
         public boolean has(NpcExtraFlag flag) {
