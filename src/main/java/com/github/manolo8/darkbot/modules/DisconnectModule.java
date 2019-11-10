@@ -42,6 +42,11 @@ public class DisconnectModule extends TemporalModule {
     }
 
     @Override
+    public void uninstall() {
+        safety.uninstall();
+    }
+
+    @Override
     public boolean canRefresh() {
         return false;
     }

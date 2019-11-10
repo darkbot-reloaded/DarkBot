@@ -51,6 +51,11 @@ public class LootModule implements Module {
     }
 
     @Override
+    public void uninstall() {
+        safety.uninstall();
+    }
+
+    @Override
     public String status() {
         return safety.state() != SafetyFinder.Escaping.NONE ? safety.status() :
                 attack.hasTarget() ? attack.status() : "Roaming";

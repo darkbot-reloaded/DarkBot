@@ -15,6 +15,7 @@ import com.github.manolo8.darkbot.modules.MapModule;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class SafetyFinder {
@@ -26,7 +27,8 @@ public class SafetyFinder {
     private List<Ship> ships;
     private HeroManager hero;
     private Drive drive;
-    private MapModule mapModule;
+    private MapTraveler mapTraveler;
+    private Consumer<Map> listener = this::onMapChange;
 
     private SafetyInfo safety;
     private Escaping escape = Escaping.NONE;
@@ -62,14 +64,20 @@ public class SafetyFinder {
         this.ships = main.mapManager.entities.ships;
         this.hero = main.hero;
         this.drive = main.hero.drive;
-        this.mapModule = new MapModule();
-        mapModule.install(main);
-        mapManager.mapChange.add(m -> {
-            if (safety != null && safety.type == SafetyInfo.Type.PORTAL) {
-                if (jumpState == JumpState.JUMPING) jumpState = JumpState.JUMPED;
-                else if (jumpState == JumpState.RETURNING && m == prevMap) jumpState = JumpState.RETURNED;
-            }
-        });
+        this.mapTraveler = new MapTraveler(main);
+        mapManager.mapChange.add(listener);
+    }
+
+    public void uninstall() {
+        mapTraveler.uninstall();
+        mapManager.mapChange.remove(listener);
+    }
+
+    private void onMapChange(Map map) {
+        if (safety != null && safety.type == SafetyInfo.Type.PORTAL) {
+            if (jumpState == JumpState.JUMPING) jumpState = JumpState.JUMPED;
+            else if (jumpState == JumpState.RETURNING && map == prevMap) jumpState = JumpState.RETURNED;
+        }
     }
 
     public void setRefreshing(boolean refreshing) {
@@ -134,12 +142,13 @@ public class SafetyFinder {
                 return false;
             case JUMPED:
                 if (hero.health.hpDecreasedIn(100) || safety.jumpMode != SafetyInfo.JumpMode.ALWAYS_OTHER_SIDE
-                        || (!refreshing && doneRepairing()))
+                        || (!refreshing && doneRepairing())) {
                     jumpState = JumpState.RETURNING;
+                    mapTraveler.setTarget(prevMap);
+                }
                 break;
             case RETURNING:
-                mapModule.setTarget(prevMap);
-                mapModule.tick();
+                if (mapTraveler.isDone()) mapTraveler.tick();
                 return false;
         }
 
