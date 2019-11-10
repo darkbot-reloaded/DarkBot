@@ -6,16 +6,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class I18n {
 
-    public static final List<Locale> SUPPORTED_LOCALES = Stream.of("en", "hu", "cs", "pl").map(Locale::new).collect(Collectors.toList());
+    public static final List<Locale> SUPPORTED_LOCALES = Stream.of("en", "hu", "cs", "pl", "fr").map(Locale::new)
+            .sorted(Comparator.comparing(Locale::getDisplayName)).collect(Collectors.toList());
     private static final Properties props = new Properties();
     static {
         reloadProps();
@@ -48,10 +49,6 @@ public class I18n {
     private I18n() {}
 
     public static String getOrDefault(String key, String fallback) {
-        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DEV_STUFF) {
-            System.out.println("Getting translation for " + Objects.toString(key, "null") +
-                    (key == null ? "" : ": " + Objects.toString(props.get(key), "null")));
-        }
         if (key == null) return fallback;
         String res = (String) props.get(key);
         return res != null ? res : fallback;

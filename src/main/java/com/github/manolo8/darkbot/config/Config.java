@@ -133,7 +133,7 @@ public class Config {
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
     public static class BotSettings {
-        public @Option @Editor(LangEditor.class) @Options(LanguageSupplier.class) Locale lang = Locale.ENGLISH;
+        public @Option @Editor(LangEditor.class) @Options(LanguageSupplier.class) Locale lang = Locale.getDefault();
         public @Option @Num(min = 10, max = 300) int ZONE_RESOLUTION = 30;
         public @Option boolean MAP_START_STOP = false;
         public @Option boolean CONFIRM_EXIT = true;

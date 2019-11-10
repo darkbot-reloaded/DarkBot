@@ -99,12 +99,9 @@ public class TreeEditor extends DefaultTreeCellEditor {
 
     private int getWidthFor(ConfigNode node, FontMetrics font) {
         if (I18n.getOrDefault(node.key, node.name).isEmpty()) return 0;
-        int width = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.HIDE_EDITORS ?
+        return ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.HIDE_EDITORS ?
                 font.stringWidth(I18n.getOrDefault(node.key, node.name)) + 5 :
                 font.stringWidth(node.getLongestSibling()) + 10;
-        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DEV_STUFF)
-            System.out.println("Width for " + node.key + ": " + width);
-        return width;
     }
 
     @Override
