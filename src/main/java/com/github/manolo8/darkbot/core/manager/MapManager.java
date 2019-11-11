@@ -88,7 +88,8 @@ public class MapManager implements Manager {
         mapAddress = address;
 
         internalWidth = API.readMemoryInt(address + 68);
-        internalHeight = API.readMemoryInt(address + 72) + 400;
+        internalHeight = API.readMemoryInt(address + 72);
+        if (internalHeight == 13100) internalHeight = 13500;
         int currMap = API.readMemoryInt(address + 76);
         boolean switched = currMap != id;
         if (switched) {
