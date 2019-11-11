@@ -139,11 +139,13 @@ public class LootModule implements Module {
 
         double angleDiff;
         if (noCircle) {
-            if (targetLoc.distance(direction) <= radius) {
+            double dist = targetLoc.distance(direction);
+            double minRad = Math.max(0, Math.min(radius - 200, radius * 0.5));
+            if (dist <= radius && dist >= minRad) {
                 setConfig(direction);
                 return;
             }
-            distance = 100 + random() * (radius - 110);
+            distance = minRad + random() * (radius - minRad - 10);
             angleDiff = (random() * 0.1) - 0.05;
         } else {
             double maxRadFix = target.npcInfo.radius / 2,

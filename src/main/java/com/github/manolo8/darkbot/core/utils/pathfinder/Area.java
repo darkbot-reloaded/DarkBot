@@ -91,4 +91,8 @@ public class Area {
         changed = true;
     }
 
+    public double size() {
+        return (maxX - minX) * (maxY - minY);
+    }
+
 }

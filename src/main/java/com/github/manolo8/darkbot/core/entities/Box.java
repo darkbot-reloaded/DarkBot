@@ -7,7 +7,7 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class Box extends Entity {
 
-    private long collectedUntil, reset = 7_000;
+    private long collectedUntil, reset = 0;
     public String type;
 
     public BoxInfo boxInfo;
