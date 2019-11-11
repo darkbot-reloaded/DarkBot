@@ -42,6 +42,6 @@ public class Barrier
     @Override
     public boolean use() {
         return area.minX > 0 || area.minY > 0 ||
-                area.size() / (MapManager.internalWidth * MapManager.internalHeight) < 0.95;
+                area.maxX < MapManager.internalWidth || area.maxY < MapManager.internalHeight;
     }
 }
