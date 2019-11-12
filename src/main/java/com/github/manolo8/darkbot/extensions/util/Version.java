@@ -32,8 +32,8 @@ public class Version implements Comparable<Version> {
         patch = getInt(matcher, 4);
         revision = getInt(matcher, 6);
         beta = getInt(matcher, 8);
-        if (beta == -1) beta = Integer.MAX_VALUE;
         alpha = getInt(matcher, 10);
+        if (beta == -1 && alpha == -1) beta = Integer.MAX_VALUE;
         if (alpha == -1) alpha = Integer.MAX_VALUE;
     }
 
