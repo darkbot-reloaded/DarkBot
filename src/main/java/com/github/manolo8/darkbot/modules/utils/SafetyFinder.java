@@ -148,7 +148,8 @@ public class SafetyFinder {
                 }
                 break;
             case RETURNING:
-                if (mapTraveler.isDone()) mapTraveler.tick();
+                if (mapTraveler.isDone()) mapTraveler.setTarget(prevMap);
+                mapTraveler.tick();
                 return false;
         }
 
