@@ -54,4 +54,11 @@ public class I18n {
         return res != null ? res : fallback;
     }
 
+    public static String get(String key) {
+        if (key == null) throw new IllegalArgumentException("Translation key must not be null");
+        String res = (String) props.get(key);
+        if (res == null) return "Missing " + key;
+        return res;
+    }
+
 }
