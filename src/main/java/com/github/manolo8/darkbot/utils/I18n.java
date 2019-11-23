@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -59,6 +60,10 @@ public class I18n {
         String res = (String) props.get(key);
         if (res == null) return "Missing " + key;
         return res;
+    }
+
+    public static String get(String key, Object... arguments) {
+        return MessageFormat.format(get(key), arguments);
     }
 
 }

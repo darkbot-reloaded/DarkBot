@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.modules;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.modules.utils.MapTraveler;
+import com.github.manolo8.darkbot.utils.I18n;
 
 public class MapModule extends TemporalModule {
 
@@ -20,7 +21,9 @@ public class MapModule extends TemporalModule {
 
     @Override
     public String status() {
-        return "Traveling to " + traveler.target.name + (traveler.current != null ? ", next map: " + traveler.current.target.name : "");
+        return traveler.current != null ?
+                I18n.get("module.map_travel.status.has_next", traveler.target.name, traveler.current.target.name) :
+                I18n.get("module.map_travel.status.no_next", traveler.target.name);
     }
 
     @Override

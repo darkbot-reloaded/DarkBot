@@ -5,22 +5,24 @@ import com.github.manolo8.darkbot.core.entities.BasePoint;
 import com.github.manolo8.darkbot.core.entities.BattleStation;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.Portal;
+import com.github.manolo8.darkbot.utils.I18n;
 
 import java.io.Serializable;
+import java.util.Locale;
 import java.util.Objects;
 
 public class SafetyInfo implements Serializable, Ignorable {
     public enum Type {
-        PORTAL("Port"), CBS("CBS"), BASE("Base");
+        PORTAL, CBS, BASE;
         public static Type of(Entity entity) {
             if (entity instanceof Portal) return PORTAL;
             if (entity instanceof BattleStation) return CBS;
             if (entity instanceof BasePoint) return BASE;
             return null;
         }
-        String text;
-        Type(String text) {this.text = text;}
-        public String toString() {return text;}
+        public String toString() {
+            return I18n.getOrDefault("gui.safety_places.type." + name().toLowerCase(Locale.ROOT), name());
+        }
     }
 
     public Type type;
@@ -60,39 +62,30 @@ public class SafetyInfo implements Serializable, Ignorable {
 
     // Running reasons this safety can be selected
     public enum RunMode {
-        ALWAYS("Always"),
-        ENEMY_FLEE_ONLY("Fleeing (Enemy on sight)"),
-        REPAIR_ONLY("Repairing (No enemies)"),
-        REFRESH("Refresh"),
-        NEVER("Never");
-        String text;
-        RunMode(String text) {this.text = text;}
-        public String toString() {return text;}
+        ALWAYS, ENEMY_FLEE_ONLY, REPAIR_ONLY, REFRESH, NEVER;
+        public String toString() {
+            return I18n.getOrDefault("gui.safety_places.run_mode." + name().toLowerCase(Locale.ROOT), name());
+        }
     }
     public RunMode runMode = RunMode.ALWAYS;
 
     // PORTAL
     // Condition to jump
     public enum JumpMode {
-        NEVER("Never"),
-        ESCAPING("Escaping (Enemy shooting)"),
-        FLEEING("Fleeing (Enemy on sight)"),
-        REPAIRING("Repairing"),
-        ALWAYS("Always"),
-        ALWAYS_OTHER_SIDE("Always (repair on other side)");
-        String text;
-        JumpMode(String text) {this.text = text;}
-        public String toString() {return text;}
+        NEVER, ESCAPING, FLEEING, REPAIRING, ALWAYS, ALWAYS_OTHER_SIDE;
+        public String toString() {
+            return I18n.getOrDefault("gui.safety_places.jump_mode." + name().toLowerCase(Locale.ROOT), name());
+        }
     }
     public JumpMode jumpMode;
 
     // CBS
     // Condition to run to CBS
     public enum CbsMode {
-        ALLY("Ally CBS"), ALLY_NEUTRAL("Ally or empty");
-        String text;
-        CbsMode(String text) {this.text = text;}
-        public String toString() {return text;}
+        ALLY, ALLY_NEUTRAL;
+        public String toString() {
+            return I18n.getOrDefault("gui.safety_places.cbs_mode." + name().toLowerCase(Locale.ROOT), name());
+        }
     }
     public CbsMode cbsMode;
 

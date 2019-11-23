@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.components;
 
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -11,11 +12,11 @@ public class ExitConfirmation extends JPanel {
     public ExitConfirmation() {
         super(new MigLayout("ins 0, gap 0, fill", "[grow][][]", "[]"));
 
-        add(new Question("Are you sure you want to exit?"), "grow");
+        add(new Question(I18n.get("gui.exit")), "grow");
         add(new YesButton());
         add(new CancelButton());
         setVisible(false);
-        setToolTipText("Confirm exiting the bot, can be disabled in settings > bot settings");
+        setToolTipText(I18n.get("gui.exit.desc"));
     }
 
     private static class Question extends JLabel {
@@ -28,7 +29,7 @@ public class ExitConfirmation extends JPanel {
     private static class YesButton extends MainButton {
 
         private YesButton() {
-            super("Yes");
+            super(I18n.get("gui.exit.yes_button"));
         }
 
         @Override
@@ -41,7 +42,7 @@ public class ExitConfirmation extends JPanel {
     private class CancelButton extends MainButton {
 
         private CancelButton() {
-            super("Cancel");
+            super(I18n.get("gui.exit.cancel_button"));
         }
 
         @Override

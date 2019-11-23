@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
+import com.github.manolo8.darkbot.utils.I18n;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -59,7 +60,7 @@ public class FeatureRegistry implements PluginListener {
             fd.getIssues().addListener(iss -> registryHandler.update());
             FEATURES_BY_ID.put(clazzName, fd);
         } catch (ClassNotFoundException e) {
-            plugin.getIssues().addWarning("Feature failed to load", clazzName + " couldn't be registered properly: " + e.getMessage());
+            plugin.getIssues().addWarning(I18n.get("gui.plugins.feature_failed_to_load"), I18n.get("gui.plugins.feature_failed_to_load.desc", clazzName, e.getMessage()));
         }
     }
 
@@ -76,7 +77,7 @@ public class FeatureRegistry implements PluginListener {
                     feature.setInstance(instance = featureLoader.loadFeature(feature));
                     return Optional.of(instance);
                 } catch (Throwable e) {
-                    feature.getIssues().addFailure("Failed to load", IssueHandler.createDescription(e));
+                    feature.getIssues().addFailure(I18n.get("gui.plugins.failed_to_load"), IssueHandler.createDescription(e));
                     e.printStackTrace();
                     return Optional.empty();
                 }

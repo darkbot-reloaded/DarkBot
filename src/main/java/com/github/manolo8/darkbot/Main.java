@@ -141,9 +141,7 @@ public class Main extends Thread implements PluginListener {
 
         form = new MainGui(this);
 
-        if (failedConfig) Popups.showMessageAsync("Error", "Failed to load config file.\n" +
-                "The bot will use the default config and won't save.\n" +
-                "Delete config.json file (will erase configs) & restart the bot.", JOptionPane.ERROR_MESSAGE);
+        if (failedConfig) Popups.showMessageAsync("Error", I18n.get("config.failed_load_config"), JOptionPane.ERROR_MESSAGE);
 
         API.createWindow();
         start();
@@ -228,7 +226,7 @@ public class Main extends Thread implements PluginListener {
                 else module.tickStopped();
             } catch (Throwable e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
-                if (modDef != null) modDef.getIssues().addWarning("Failed to tick", IssueHandler.createDescription(e));
+                if (modDef != null) modDef.getIssues().addWarning(I18n.get("gui.plugins.failed_to_tick"), IssueHandler.createDescription(e));
             }
             for (Behaviour behaviour : behaviours) {
                 try {
@@ -237,7 +235,7 @@ public class Main extends Thread implements PluginListener {
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
-                            .addFailure("Failed to tick", IssueHandler.createDescription(e));
+                            .addFailure(I18n.get("gui.plugins.failed_to_tick"), IssueHandler.createDescription(e));
                 }
             }
         }
@@ -262,7 +260,7 @@ public class Main extends Thread implements PluginListener {
         lastRefresh = System.currentTimeMillis();
         if (config.MISCELLANEOUS.PAUSE_FOR > 0) {
             System.out.println("Pausing (logging off): time arrived & module allows refresh");
-            setModule(new DisconnectModule(config.MISCELLANEOUS.PAUSE_FOR * 60 * 1000L, "taking a break"));
+            setModule(new DisconnectModule(config.MISCELLANEOUS.PAUSE_FOR * 60 * 1000L, I18n.get("gui.map.break_reason")));
         } else {
             System.out.println("Triggering refresh: time arrived & module allows refresh");
             API.handleRefresh();
@@ -348,7 +346,7 @@ public class Main extends Thread implements PluginListener {
             Module module = featureRegistry.getFeature(moduleId = config.GENERAL.CURRENT_MODULE, Module.class)
                 .orElseGet(() -> {
                     String name = moduleId.substring(moduleId.lastIndexOf(".") + 1);
-                    Popups.showMessageAsync("Error", "Failed to load module " + name + ", using default", JOptionPane.ERROR_MESSAGE);
+                    Popups.showMessageAsync("Error", I18n.get("config.module_load_failed.content", name), JOptionPane.ERROR_MESSAGE);
                     return new DummyModule();
                 });
             setModule(module, true);

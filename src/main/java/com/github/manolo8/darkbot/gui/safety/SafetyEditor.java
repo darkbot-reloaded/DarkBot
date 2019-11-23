@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.safety;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.SafetyInfo;
+import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -22,9 +23,9 @@ class SafetyEditor extends JPanel {
         diameterEditor = new JSlider(50, 8000);
         edit(null);
 
-        add(new JLabel(" [All]  Use condition"));
-        add(new JLabel(" [Portal]  Jump condition"));
-        add(new JLabel(" [CBS]  Use condition"));
+        add(new JLabel(I18n.get("gui.safety_places.run_mode")));
+        add(new JLabel(I18n.get("gui.safety_places.jump_mode")));
+        add(new JLabel(I18n.get("gui.safety_places.cbs_mode")));
         add(runEditor, "grow");
         add(jumpEditor, "grow");
         add(cbsEditor, "grow");

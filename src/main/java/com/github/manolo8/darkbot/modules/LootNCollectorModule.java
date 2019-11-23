@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.PetManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.extensions.features.Feature;
+import com.github.manolo8.darkbot.utils.I18n;
 
 @Feature(name = "Kill & Collect", description = "Kills npcs and collects resources at the same time.")
 public class LootNCollectorModule implements Module {
@@ -33,7 +34,7 @@ public class LootNCollectorModule implements Module {
 
     @Override
     public String status() {
-        return "Kill: " + lootModule.status() + " - Collect: " + collectorModule.status();
+        return I18n.get("module.kill_n_collect.status", lootModule.status(), collectorModule.status());
     }
 
     @Override

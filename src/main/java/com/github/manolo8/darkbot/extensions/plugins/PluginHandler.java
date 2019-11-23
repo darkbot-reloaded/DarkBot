@@ -131,32 +131,33 @@ public class PluginHandler {
         PluginDefinition pd = plugin.getDefinition();
 
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
-            plugin.getIssues().addFailure("Invalid plugin.json",
-                    "The minimum version " + pd.minVersion  + " is higher than the supported version " + pd.supportedVersion);
+            plugin.getIssues().addFailure(I18n.get("gui.plugins.compatibility.invalid_json"),
+                    I18n.get("gui.plugins.compatibility.invalid_json.desc,", pd.minVersion, pd.supportedVersion));
 
         String supportedRange = "DarkBot v" + (pd.minVersion.compareTo(pd.supportedVersion) == 0 ?
                 pd.minVersion : pd.minVersion + "-v" + pd.supportedVersion);
 
         if (Main.VERSION.compareTo(pd.minVersion) < 0)
-            plugin.getIssues().addFailure("Bot update required",
-                    "This plugin requires " + supportedRange + ", so it can't run on Darkbot v" + Main.VERSION);
+            plugin.getIssues().addFailure(I18n.get("gui.plugins.compatibility.bot_update"),
+                    I18n.get("gui.plugins.compatibility.bot_update.desc", supportedRange, Main.VERSION));
 
         if (Main.VERSION.compareTo(pd.supportedVersion) > 0)
-            plugin.getIssues().addInfo("Plugin may need update",
-                    "The plugin is made for " + supportedRange + ", so it may not work on DarkBot v" + Main.VERSION);
+            plugin.getIssues().addInfo(I18n.get("gui.plugins.compatibility.plugin_update"),
+                    I18n.get("gui.plugins.compatibility.plugin_update.desc", supportedRange, Main.VERSION));
     }
 
     private void testSignature(Plugin plugin, JarFile jar) throws IOException {
         try {
             Boolean signatureValid = AuthAPI.getInstance().checkPluginJarSignature(jar);
             if (signatureValid == null)
-                plugin.getIssues().addFailure("Plugin not signed",
-                        "This plugin hasn't been signed or has an invalid signature");
+                plugin.getIssues().addFailure(I18n.get("gui.plugins.signature.plugin_not_signed"),
+                        I18n.get("gui.plugins.signature.plugin_not_signed.desc"));
             else if (!signatureValid)
-                plugin.getIssues().addFailure("Unknown signature",
-                        "This plugin has been signed with an untrusted certificate.");
+                plugin.getIssues().addFailure(I18n.get("gui.plugins.signature.unknown_signature"),
+                        I18n.get("gui.plugins.signature.unknown_signature.desc"));
         } catch (SecurityException e) {
-            plugin.getIssues().addFailure("Invalid signature", "The plugin has an invalid signature or has been tampered with");
+            plugin.getIssues().addFailure(I18n.get("gui.plugins.signature.invalid_signature"),
+                    I18n.get("gui.plugins.signature.invalid_signature.desc"));
         }
     }
 

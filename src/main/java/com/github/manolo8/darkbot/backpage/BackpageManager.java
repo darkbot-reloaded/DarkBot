@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 
 import java.io.BufferedReader;
@@ -85,7 +86,7 @@ public class BackpageManager extends Thread {
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
-                                .addWarning("Failed to tick", IssueHandler.createDescription(e));
+                                .addWarning(I18n.get("gui.plugins.failed_to_tick"), IssueHandler.createDescription(e));
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -14,7 +15,7 @@ public class VisibilityButton extends TitleBarButton<JFrame> {
 
     VisibilityButton(JFrame frame) {
         super(HIDE, frame);
-        setToolTipText("Show/Hide browser");
+        setToolTipText(I18n.get("gui.visibility_button"));
     }
 
     @Override

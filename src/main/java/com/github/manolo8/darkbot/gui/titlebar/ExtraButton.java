@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.titlebar;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.SystemUtils;
 
 import javax.swing.*;
@@ -19,10 +20,10 @@ public class ExtraButton extends TitleBarButton<JFrame> {
     ExtraButton(Main main, JFrame frame) {
         super(UIUtils.getIcon("hamburger"), frame);
 
-        JMenuItem home = new JMenuItem("HOME"),
-                reload = new JMenuItem("RELOAD"),
-                copySid = new JMenuItem("COPY SID"),
-                discord = new JMenuItem("DISCORD");
+        JMenuItem home = new JMenuItem(I18n.get("gui.hamburger_button.home")),
+                reload = new JMenuItem(I18n.get("gui.hamburger_button.reload")),
+                copySid = new JMenuItem(I18n.get("gui.hamburger_button.copy_sid")),
+                discord = new JMenuItem(I18n.get("gui.hamburger_button.discord"));
 
 
         extraOptions.add(home);

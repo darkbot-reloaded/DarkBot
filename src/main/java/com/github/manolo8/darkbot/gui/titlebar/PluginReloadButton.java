@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +14,7 @@ public class PluginReloadButton extends TitleBarButton<JFrame> {
 
     PluginReloadButton(JFrame frame, PluginHandler pluginHandler) {
         super(UIUtils.getIcon("reload"), frame);
-        setToolTipText("Reload plugins");
+        setToolTipText(I18n.get("gui.plugin_reload_button"));
         this.pluginHandler = pluginHandler;
     }
 
