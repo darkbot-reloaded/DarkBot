@@ -30,14 +30,14 @@ public class FeatureConfigButton extends MainButton {
         boolean enabled = feature.canLoad() && feature.getInstance() != null;
 
         this.setEnabled(enabled);
-        setToolTipText(enabled ? I18n.get("gui.plugins.config_button.enabled.desc") : I18n.get("gui.plugins.config_button.disabled.desc"));
+        setToolTipText(enabled ? I18n.get("plugins.config_button.enabled.desc") : I18n.get("plugins.config_button.disabled.desc"));
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (feature.getInstance() == null) {
-            Popups.showMessageAsync(I18n.get("gui.plugins.config_button.popup"),
-                    I18n.get("gui.plugins.config_button.popup.desc"), JOptionPane.INFORMATION_MESSAGE);
+            Popups.showMessageAsync(I18n.get("plugins.config_button.popup"),
+                    I18n.get("plugins.config_button.popup.desc"), JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane options = new JOptionPane(new AdvancedConfig(this.config.CUSTOM_CONFIGS.get(feature.getId())),
                     JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);

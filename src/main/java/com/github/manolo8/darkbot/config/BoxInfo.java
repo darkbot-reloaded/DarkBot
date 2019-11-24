@@ -2,12 +2,12 @@ package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.types.Option;
 
-@Option(value = "Resource", description = "Boxes or other resources the bot has seen")
+@Option(key = "config.collect.box_table.resource")
 public class BoxInfo {
-    @Option(value = "Collect", description = "If the resource should be collected")
+    @Option(key = "config.collect.box_table.collect")
     public boolean collect;
-    @Option(value = "Wait (ms)", description = "Time to wait to pick up resource, in milliseconds")
+    @Option(key = "config.collect.box_table.wait")
     public int waitTime;
-    @Option(value = "Priority", description = "#1 priority will be collected before #2 priority")
+    @Option(key = "config.collect.box_table.priority")
     public int priority;
 }

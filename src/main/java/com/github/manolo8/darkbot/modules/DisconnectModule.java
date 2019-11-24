@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.modules.utils.SafetyFinder;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 
 public class DisconnectModule extends TemporalModule {
@@ -97,12 +98,12 @@ public class DisconnectModule extends TemporalModule {
 
     @Override
     public String status() {
-        return "Disconnecting (" + reason + "): " + safety.status();
+        return I18n.get("module.disconnect.status", reason, safety.status());
     }
 
     @Override
     public String stoppedStatus() {
-        if (pauseUntil == null) return  "Disconnected (" + reason + ")";
-        else return "Paused (" + reason + "), reconnecting in " + Time.toString(Math.max(0, pauseUntil - System.currentTimeMillis()));
+        if (pauseUntil == null) return I18n.get("module.disconnect.status_stopped", reason);
+        else  return I18n.get("module.disconnect.status_paused", reason, Time.toString(Math.max(0, pauseUntil - System.currentTimeMillis())));
     }
 }

@@ -7,8 +7,10 @@ import java.util.List;
 
 public class ReviveSpotSupplier extends OptionList<Long> {
 
-    private static final List<String> LOCATIONS = Arrays.asList(I18n.get("config.types.suppliers.spot_supplier.base"),
-                    I18n.get("config.types.suppliers.spot_supplier.portal"), I18n.get("config.types.suppliers.spot_supplier.spot"));
+    private static final List<String> LOCATIONS = Arrays.asList(
+            I18n.get("config.general.safety.revive_location.list.base"),
+            I18n.get("config.general.safety.revive_location.list.portal"),
+            I18n.get("config.general.safety.revive_location.list.spot"));
 
     @Override
     public Long getValue(String text) {

@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.gui.safety.SafetiesEditor;
 import com.github.manolo8.darkbot.gui.titlebar.ConfigTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -72,11 +73,11 @@ public class ConfigGui extends JFrame {
     }
 
     private void setComponentPosition() {
-        tabbedPane.addTab(null, "General", advancedPane);
-        tabbedPane.addTab(null, "Preferred Zones", preferredZones);
-        tabbedPane.addTab(null, "Avoided Zones", avoidedZones);
-        tabbedPane.addTab(null, "Safety places", safeEditor);
-        pluginTab = tabbedPane.addHiddenTab(UIUtils.getIcon("plugins"), null, pluginDisplay);
+        tabbedPane.addTab(null, "tabs.general", advancedPane);
+        tabbedPane.addTab(null, "tabs.preferred_zones", preferredZones);
+        tabbedPane.addTab(null, "tabs.avoided_zones", avoidedZones);
+        tabbedPane.addTab(null, "tabs.safety_places", safeEditor);
+        pluginTab = tabbedPane.addHiddenTab(UIUtils.getIcon("plugins"), "tabs.plugins", pluginDisplay);
 
         mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][grow]"));
         mainPanel.add(new ConfigTitleBar(this, tabbedPane.getHeader(), pluginTab, main), "grow, span");

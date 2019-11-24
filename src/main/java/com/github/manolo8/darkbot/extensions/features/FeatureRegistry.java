@@ -60,7 +60,7 @@ public class FeatureRegistry implements PluginListener {
             fd.getIssues().addListener(iss -> registryHandler.update());
             FEATURES_BY_ID.put(clazzName, fd);
         } catch (ClassNotFoundException e) {
-            plugin.getIssues().addWarning(I18n.get("gui.plugins.feature_failed_to_load"), I18n.get("gui.plugins.feature_failed_to_load.desc", clazzName, e.getMessage()));
+            plugin.getIssues().addWarning(I18n.get("bot.issue.feature.failed_to_load"), I18n.get("bot.issue.feature.failed_to_load.desc", clazzName, e.getMessage()));
         }
     }
 
@@ -77,7 +77,7 @@ public class FeatureRegistry implements PluginListener {
                     feature.setInstance(instance = featureLoader.loadFeature(feature));
                     return Optional.of(instance);
                 } catch (Throwable e) {
-                    feature.getIssues().addFailure(I18n.get("gui.plugins.failed_to_load"), IssueHandler.createDescription(e));
+                    feature.getIssues().addFailure(I18n.get("bot.issue.feature.failed_to_load"), IssueHandler.createDescription(e));
                     e.printStackTrace();
                     return Optional.empty();
                 }

@@ -23,9 +23,9 @@ class SafetyEditor extends JPanel {
         diameterEditor = new JSlider(50, 8000);
         edit(null);
 
-        add(new JLabel(I18n.get("gui.safety_places.run_mode")));
-        add(new JLabel(I18n.get("gui.safety_places.jump_mode")));
-        add(new JLabel(I18n.get("gui.safety_places.cbs_mode")));
+        add(new JLabel(I18n.get("safety_places.run_mode")));
+        add(new JLabel(I18n.get("safety_places.jump_mode")));
+        add(new JLabel(I18n.get("safety_places.cbs_mode")));
         add(runEditor, "grow");
         add(jumpEditor, "grow");
         add(cbsEditor, "grow");

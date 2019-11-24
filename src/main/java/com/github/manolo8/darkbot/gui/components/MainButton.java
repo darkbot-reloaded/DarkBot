@@ -9,7 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 
-public class MainButton extends MainIcon implements SimpleMouseListener, ActionListener {
+public class MainButton extends JButton implements SimpleMouseListener, ActionListener {
 
     protected Color actionColor = new Color(50, 53, 55);
     protected Color def;
@@ -25,10 +25,19 @@ public class MainButton extends MainIcon implements SimpleMouseListener, ActionL
     }
 
     protected MainButton(Icon icon, String text) {
-        super(icon, text);
+        this(icon, text, null);
+    }
+
+    protected MainButton(Icon icon, String text, String description) {
+        super(text, icon);
+        putClientProperty("JButton.buttonType", "square");
+        setBorder(UIUtils.getBorder());
+
         this.def = getBackground();
         addMouseListener(this);
         addActionListener(this);
+        setBackground();
+        if (description != null && !description.isEmpty()) setToolTipText(description);
     }
 
     @Override
@@ -61,6 +70,11 @@ public class MainButton extends MainIcon implements SimpleMouseListener, ActionL
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
         setBackground();
+    }
+
+    @Override
+    public Insets getInsets() {
+        return UIUtils.getInsetConfig(getText() != null && !getText().isEmpty());
     }
 
     protected void setBackground() {

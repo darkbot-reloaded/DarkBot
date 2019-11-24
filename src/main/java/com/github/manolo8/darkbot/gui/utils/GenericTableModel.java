@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.utils;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.table.DefaultTableModel;
@@ -29,7 +30,7 @@ public class GenericTableModel<T> extends DefaultTableModel {
 
         TOOLTIPS = prepend(clazz, Arrays.stream(FIELDS))
                 .map(annotated -> annotated.getAnnotation(Option.class))
-                .map(Option::description)
+                .map(op -> I18n.getOrDefault(op.key() + ".desc", op.description()))
                 .map(s -> s.isEmpty() ? null : s)
                 .toArray(String[]::new);
 
@@ -104,7 +105,7 @@ public class GenericTableModel<T> extends DefaultTableModel {
         return prepend(clazz, Arrays.stream(clazz.getDeclaredFields()))
                 .map(annotated -> annotated.getAnnotation(Option.class))
                 .filter(Objects::nonNull)
-                .map(Option::value)
+                .map(op -> I18n.getOrDefault(op.key(), op.value()))
                 .toArray(String[]::new);
     }
 

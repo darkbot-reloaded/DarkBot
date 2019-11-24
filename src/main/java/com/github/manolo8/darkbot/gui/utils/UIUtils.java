@@ -1,12 +1,11 @@
 package com.github.manolo8.darkbot.gui.utils;
 
 import com.bulenkov.iconloader.util.Gray;
-import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.gui.titlebar.CloseButton;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
@@ -15,7 +14,8 @@ public class UIUtils {
 
     public static final Color GREEN = Color.decode("#3D6E3D"),
             YELLOW = Color.decode("#6E6E28"),
-            RED = Color.decode("#6E2B28");
+            RED = Color.decode("#6E2B28"),
+            SELECTED_BLUE = new Color(74, 136, 199);
 
     public static ImageIcon getIcon(String name) {
         return new ImageIcon(new ImageIcon(UIUtils.class.getResource("/" + name + ".png")).getImage()
@@ -44,8 +44,12 @@ public class UIUtils {
         return BorderFactory.createLineBorder(Gray._100);
     }
 
-    public static Border getPartialBorder(boolean connectTop) {
-        return new MatteBorder(connectTop ? 0 : 1, 1, connectTop ? 1 : 0, 1, Gray._100);
+    public static Border getPartialBorder(int top, int left, int bottom, int right) {
+        return new MatteBorder(top, left, bottom, right, Gray._100);
+    }
+
+    public static Border getTabBorder(boolean selected) {
+        return new CompoundBorder(getPartialBorder(1, 0, 0, 0), new MatteBorder(0, 0, 2, 0, selected ? SELECTED_BLUE : Gray._128));
     }
 
 }

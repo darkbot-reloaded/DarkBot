@@ -1,29 +1,32 @@
 package com.github.manolo8.darkbot.gui.components;
 
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TabbedPane extends JPanel {
 
     private Tab current;
 
-    private JPanel header = new JPanel(new MigLayout("ins 0, gap 0"));
+    private List<JComponent> header = new ArrayList<>();
 
-    public JPanel getHeader() {
+    public List<JComponent> getHeader() {
         return header;
     }
 
     public TabbedPane() {
         super(new MigLayout("ins 0, gap 0, fill", "[grow]", "[grow]"));
-        setBorder(UIUtils.getPartialBorder(true));
+        setBorder(UIUtils.getPartialBorder(0, 1, 1, 1));
     }
 
-    public void addTab(Icon icon, String name, JComponent component) {
-        addTab(new Tab(icon, name, component), true);
+    public void addTab(Icon icon, String key, JComponent component) {
+        addTab(new Tab(icon, key, component), true);
     }
 
     public MainButton addHiddenTab(Icon icon, String name, JComponent component) {
@@ -50,15 +53,16 @@ public class TabbedPane extends JPanel {
         repaint();
     }
 
-    private static final Border UNSELECTED = UIUtils.getBorder(),
-            SELECTED = UIUtils.getPartialBorder(false);
+    private static final Border UNSELECTED = UIUtils.getTabBorder(false),
+            SELECTED = UIUtils.getTabBorder(true);
 
     private class Tab extends MainButton {
 
         private final JComponent component;
 
-        private Tab(Icon icon, String name, JComponent component) {
-            super(icon, name);
+        private Tab(Icon icon, String key, JComponent component) {
+            super(icon, I18n.getOrDefault(key, null),
+                    key == null ? null : I18n.getOrDefault(key + ".desc", null));
             this.component = component;
         }
 
@@ -68,13 +72,7 @@ public class TabbedPane extends JPanel {
         }
 
         protected void setBackground() {
-            if (current == this) {
-                //super.setBackground();
-                setBorder(SELECTED);
-            } else {
-                //setBackground(actionColor.darker());
-                setBorder(UNSELECTED);
-            }
+            setBorder(current == this ? SELECTED : UNSELECTED);
             super.setBackground();
         }
 

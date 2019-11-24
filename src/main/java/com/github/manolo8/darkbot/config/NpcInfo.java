@@ -11,21 +11,21 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Option(value = "Name", description = "Npc names, npcs ending in * are grouped")
+@Option(key = "config.loot.npc_table.name")
 public class NpcInfo {
 
-    @Option(value = "Radius", description = "Distance to keep from this npc")
+    @Option(key = "config.loot.npc_table.radius")
     public double radius;
-    @Option(value = "Priority", description = "#1 priority will be targeted before #2 priority")
+    @Option(key = "config.loot.npc_table.priority")
     public int priority;
-    @Option(value = "Kill", description = "If this npc should be killed")
+    @Option(key = "config.loot.npc_table.kill")
     public boolean kill;
-    @Option(value = "Ammo key", description = "Special ammo for this npc, if unset, default is used")
+    @Option(key = "config.loot.npc_table.attack_key")
     public Character attackKey;
 
     public static transient Map<String, NpcExtraFlag> NPC_FLAGS = new LinkedHashMap<>();
 
-    @Option(value = "Extra", description = "Several extra flags for the npc")
+    @Option(key = "config.loot.npc_table.extra")
     public ExtraNpcInfo extra = new ExtraNpcInfo();
 
     public static class ExtraNpcInfo {

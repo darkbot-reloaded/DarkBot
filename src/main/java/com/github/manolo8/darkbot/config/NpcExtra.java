@@ -11,17 +11,17 @@ public enum NpcExtra implements NpcExtraFlag {
 
     @Override
     public String getShortName() {
-        return I18n.getOrDefault("config.npc_table.extra." + name().toLowerCase(Locale.ROOT) + ".short", name());
+        return I18n.getOrDefault("config.loot.npc_table.extra." + name().toLowerCase(Locale.ROOT) + ".short", name());
     }
 
     @Override
     public String getName() {
-        return I18n.getOrDefault("config.npc_table.extra." + name().toLowerCase(Locale.ROOT), name());
+        return I18n.getOrDefault("config.loot.npc_table.extra." + name().toLowerCase(Locale.ROOT), name());
     }
 
     @Override
     public String getDescription() {
-        return I18n.getOrDefault("config.npc_table.extra." + name().toLowerCase(Locale.ROOT) + ".desc", name());
+        return I18n.getOrDefault("config.loot.npc_table.extra." + name().toLowerCase(Locale.ROOT) + ".desc", name());
     }
 
     @Feature(name = "Npc extra flag provider", description = "Provides default npc extra flags")

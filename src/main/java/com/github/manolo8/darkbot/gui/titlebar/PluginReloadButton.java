@@ -14,7 +14,7 @@ public class PluginReloadButton extends TitleBarButton<JFrame> {
 
     PluginReloadButton(JFrame frame, PluginHandler pluginHandler) {
         super(UIUtils.getIcon("reload"), frame);
-        setToolTipText(I18n.get("gui.plugin_reload_button"));
+        setToolTipText(I18n.get("plugins.reload"));
         this.pluginHandler = pluginHandler;
     }
 

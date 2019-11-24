@@ -21,7 +21,7 @@ public class SafetyInfo implements Serializable, Ignorable {
             return null;
         }
         public String toString() {
-            return I18n.getOrDefault("gui.safety_places.type." + name().toLowerCase(Locale.ROOT), name());
+            return I18n.getOrDefault("safety_places.type." + name().toLowerCase(Locale.ROOT), name());
         }
     }
 
@@ -64,7 +64,7 @@ public class SafetyInfo implements Serializable, Ignorable {
     public enum RunMode {
         ALWAYS, ENEMY_FLEE_ONLY, REPAIR_ONLY, REFRESH, NEVER;
         public String toString() {
-            return I18n.getOrDefault("gui.safety_places.run_mode." + name().toLowerCase(Locale.ROOT), name());
+            return I18n.getOrDefault("safety_places.run_mode." + name().toLowerCase(Locale.ROOT), name());
         }
     }
     public RunMode runMode = RunMode.ALWAYS;
@@ -74,7 +74,7 @@ public class SafetyInfo implements Serializable, Ignorable {
     public enum JumpMode {
         NEVER, ESCAPING, FLEEING, REPAIRING, ALWAYS, ALWAYS_OTHER_SIDE;
         public String toString() {
-            return I18n.getOrDefault("gui.safety_places.jump_mode." + name().toLowerCase(Locale.ROOT), name());
+            return I18n.getOrDefault("safety_places.jump_mode." + name().toLowerCase(Locale.ROOT), name());
         }
     }
     public JumpMode jumpMode;
@@ -84,7 +84,7 @@ public class SafetyInfo implements Serializable, Ignorable {
     public enum CbsMode {
         ALLY, ALLY_NEUTRAL;
         public String toString() {
-            return I18n.getOrDefault("gui.safety_places.cbs_mode." + name().toLowerCase(Locale.ROOT), name());
+            return I18n.getOrDefault("safety_places.cbs_mode." + name().toLowerCase(Locale.ROOT), name());
         }
     }
     public CbsMode cbsMode;

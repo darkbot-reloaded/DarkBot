@@ -38,7 +38,7 @@ public class IssueHandler {
 
     public static String createDescription(Throwable e) {
         return Stream.concat(
-                e.getMessage() == null ? Stream.empty() : Stream.of("<strong>" + e.getMessage() + "</strong>"),
+                Stream.of("<strong>" + e.toString() + "</strong>"),
                 Arrays.stream(e.getStackTrace())
         ).map(Objects::toString)
                 .limit(100)

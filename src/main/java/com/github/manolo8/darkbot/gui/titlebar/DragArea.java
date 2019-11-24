@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.titlebar;
 
+import com.github.manolo8.darkbot.gui.ConfigGui;
 import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
@@ -17,7 +18,7 @@ public class DragArea extends JPanel implements SimpleMouseListener {
     DragArea(JFrame main) {
         this.frame = main;
 
-        setBorder(UIUtils.getBorder());
+        setBorder(main instanceof ConfigGui ? UIUtils.getPartialBorder(1, 0, 1, 0) : UIUtils.getBorder());
         addMouseListener(this);
         addMouseMotionListener(this);
     }

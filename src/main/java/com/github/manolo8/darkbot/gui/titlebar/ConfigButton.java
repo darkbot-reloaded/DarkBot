@@ -16,7 +16,7 @@ public class ConfigButton extends TitleBarButton<MainGui> {
             visible = v;
             setBackground();
         });
-        setToolTipText(I18n.get("gui.config_button.desc"));
+        setToolTipText(I18n.get("gui.config_button"));
     }
 
     @Override

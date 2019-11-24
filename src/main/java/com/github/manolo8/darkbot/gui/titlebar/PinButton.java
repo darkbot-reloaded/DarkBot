@@ -13,7 +13,7 @@ public class PinButton extends TitleBarButton<JFrame> {
 
     PinButton(JFrame frame) {
         super(PIN, frame);
-        setToolTipText(I18n.get("gui.pin_button.desc"));
+        setToolTipText(I18n.get("gui.pin_button"));
         setBackground();
     }
 

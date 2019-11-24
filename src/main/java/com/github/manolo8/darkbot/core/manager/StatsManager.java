@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
+import com.github.manolo8.darkbot.utils.I18n;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -110,7 +111,7 @@ public class StatsManager implements Manager {
         double honorDiff = honor - this.honor;
         if (honorDiff < -10_000) {
             System.out.println("Paused bot, lost " + honorDiff + " honor.");
-            main.setModule(new DisconnectModule(null, "lost honor"));
+            main.setModule(new DisconnectModule(null, I18n.get("module.disconnect.reason.honor")));
         }
         if (this.honor != 0) earnedHonor += honorDiff;
         this.honor = honor;
