@@ -139,11 +139,15 @@ public class EntityList extends Updatable {
                     } else if (npc == 0 && found != main.hero.address && found != main.hero.pet.address) {
                         ships.add(whenAdd(new Ship(id), found));
                     }
+                } else if (id >= 100000101 && id <= 100000104) {
+                    this.npcs.add(whenAdd(new MapNpc(id), found)); // LoW map relays
                 } else {
                     Entity entity = whenAdd(new Entity(id), found);
                     if (entity.clickable.defRadius == 150) {
-                        npcs.add(whenAdd(new MapNpc(id), found));
-                    } else unknown.add(entity);
+                        npcs.add(whenAdd(new MapNpc(id), found)); // Experiment zone beacons
+                    } else {
+                        unknown.add(entity);
+                    }
                 }
             }
         }
