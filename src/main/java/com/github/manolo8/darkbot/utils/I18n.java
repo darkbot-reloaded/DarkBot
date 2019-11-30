@@ -17,19 +17,24 @@ import java.util.stream.Stream;
 public class I18n {
 
     public static final List<Locale> SUPPORTED_LOCALES = Stream.of(
-            "bg", "cs", "de", "en", "es", "fr", "hu", "it", "pl", "pt", "ro", "ru", "tr", "uk"
+            "bg", "cs", "de", "el", "en", "es", "fr", "hu", "it", "pl", "pt", "ro", "ru", "tr", "uk"
     ).map(Locale::new).sorted(Comparator.comparing(Locale::getDisplayName)).collect(Collectors.toList());
     private static final Properties props = new Properties();
+    private static Locale locale;
     static {
         reloadProps();
     }
 
     public static void reloadProps() {
         props.clear();
-        Locale locale = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.lang;
+        locale = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.lang;
 
         loadResource(props, getLangFile(Locale.ENGLISH));
         if (!locale.equals(Locale.ENGLISH)) loadResource(props, getLangFile(locale));
+    }
+
+    public static Locale getLocale() {
+        return locale;
     }
 
     private static URL getLangFile(Locale locale) {
