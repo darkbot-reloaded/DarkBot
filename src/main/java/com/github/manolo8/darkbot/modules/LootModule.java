@@ -33,8 +33,8 @@ public class LootModule implements Module {
     private Config config;
 
     protected NpcAttacker attack;
-    private long refreshing;
-    private SafetyFinder safety;
+    protected SafetyFinder safety;
+    protected long refreshing;
 
     @Override
     public void install(Main main) {

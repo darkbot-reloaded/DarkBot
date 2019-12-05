@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.extensions.features.Feature;
+import com.github.manolo8.darkbot.modules.utils.SafetyFinder;
 
 import java.util.Comparator;
 import java.util.List;
@@ -36,15 +37,15 @@ public class CollectorModule implements Module {
 
     private long waiting;
 
-    private int DISTANCE_FROM_DANGEROUS;
+    protected SafetyFinder safety;
+    protected long refreshing;
 
-    public CollectorModule() {
-        DISTANCE_FROM_DANGEROUS = 1500;
-    }
+    private int DISTANCE_FROM_DANGEROUS = 1500;
 
     @Override
     public void install(Main main) {
         this.main = main;
+        this.safety = new SafetyFinder(main);
 
         this.hero = main.hero;
         this.drive = main.hero.drive;
@@ -52,6 +53,11 @@ public class CollectorModule implements Module {
         this.config = main.config;
         this.boxes = main.mapManager.entities.boxes;
         this.ships = main.mapManager.entities.ships;
+    }
+
+    @Override
+    public void uninstall() {
+        safety.uninstall();
     }
 
     @Override
@@ -70,7 +76,7 @@ public class CollectorModule implements Module {
     @Override
     public void tick() {
 
-        if (isNotWaiting() && checkCurrentMap()) {
+        if (isNotWaiting() && checkDangerousAndCurrentMap()) {
             main.guiManager.pet.setEnabled(true);
             checkInvisibility();
             checkDangerous();
@@ -83,19 +89,17 @@ public class CollectorModule implements Module {
         }
     }
 
+    private boolean checkDangerousAndCurrentMap() {
+        safety.setRefreshing(System.currentTimeMillis() <= refreshing);
+        return safety.tick() && checkMap();
+    }
 
-    private boolean checkCurrentMap() {
-        boolean mapWrong = config.GENERAL.WORKING_MAP != hero.map.id;
-
-        if (mapWrong) {
-
-            hero.runMode();
-
-            main.setModule(new MapModule()).setTarget(main.starManager.byId(main.config.GENERAL.WORKING_MAP));
-
+    private boolean checkMap() {
+        if (this.config.GENERAL.WORKING_MAP != this.hero.map.id && !main.mapManager.entities.portals.isEmpty()) {
+            this.main.setModule(new MapModule())
+                    .setTarget(this.main.starManager.byId(this.main.config.GENERAL.WORKING_MAP));
             return false;
         }
-
         return true;
     }
 
