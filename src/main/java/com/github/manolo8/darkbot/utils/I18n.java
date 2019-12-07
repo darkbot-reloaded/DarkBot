@@ -27,7 +27,7 @@ public class I18n {
 
     public static void reloadProps() {
         props.clear();
-        locale = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.lang;
+        locale = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.LOCALE;
 
         loadResource(props, getLangFile(Locale.ENGLISH));
         if (!locale.equals(Locale.ENGLISH)) loadResource(props, getLangFile(locale));
@@ -55,21 +55,24 @@ public class I18n {
 
     private I18n() {}
 
+    public static String get(String key) {
+        if (key == null) throw new IllegalArgumentException("Translation key must not be null");
+        String res = (String) props.get(key);
+        return res != null ? res : "Missing " + key;
+    }
+
     public static String getOrDefault(String key, String fallback) {
         if (key == null) return fallback;
         String res = (String) props.get(key);
         return res != null ? res : fallback;
     }
 
-    public static String get(String key) {
-        if (key == null) throw new IllegalArgumentException("Translation key must not be null");
-        String res = (String) props.get(key);
-        if (res == null) return "Missing " + key;
-        return res;
-    }
-
     public static String get(String key, Object... arguments) {
         return MessageFormat.format(get(key), arguments);
+    }
+
+    public static String getOrDefault(String key, String fallback, Object... arguments) {
+        return MessageFormat.format(getOrDefault(key, fallback), arguments);
     }
 
 }

@@ -69,6 +69,9 @@ public class StatsManager implements Manager {
         }
     }
 
+    public int getLevel() {
+        return Math.max(1, (int) (Math.log(experience / 10_000) / Math.log(2)) + 2);
+    }
 
     public void toggle(boolean running) {
         lastStatus = running;

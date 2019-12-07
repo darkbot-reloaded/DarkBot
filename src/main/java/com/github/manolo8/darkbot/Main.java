@@ -25,6 +25,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
+import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
 import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
@@ -52,7 +53,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.16 beta 4";
+    public static final String VERSION_STRING = "1.13.16 beta 5";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
@@ -99,13 +100,14 @@ public class Main extends Thread implements PluginListener {
         super("Main");
         this.config = new Config();
         loadConfig();
+        new ConfigEntity(config);
+
+        VerifierChecker.getAuthApi().setupAuth();
 
         if (config.BOT_SETTINGS.API == 0) API = new DarkBotAPI();
         else if (config.BOT_SETTINGS.API == 1) API = new DarkFlash(new LoginUtils().performSidLogin().getLoginData());
         //else if (config.API == 2) API = new
         else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API);
-
-        new ConfigEntity(config);
 
         botInstaller = new BotInstaller();
         status = new Lazy.Sync<>();
