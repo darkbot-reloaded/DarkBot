@@ -78,14 +78,18 @@ public class Drive {
             double dirAngle = next.angle(last),
                     maxDiff = Math.max(0.02, MathUtils.angleDiff(next.angle(Location.of(heroLoc.last, dirAngle + (Math.PI / 2), 100)), dirAngle));
             if (!newPath && heroLoc.isMoving() && MathUtils.angleDiff(heroLoc.angle, dirAngle) < maxDiff) {
-                if (System.currentTimeMillis() - lastDirChange > 2000) click(next);
+                if (System.currentTimeMillis() - lastDirChange > 2000) {
+                    click(next);
+                    lastDirChange =  System.currentTimeMillis();
+                }
                 return;
             }
 
             if (!force && heroLoc.isMoving() && System.currentTimeMillis() - lastDirChange > 350) stop(false);
             else {
                 if (!newPath && System.currentTimeMillis() - lastDirChange > 300) tempDest = endLoc; // Re-calculate path next tick
-                click(next);
+                if (now.distance(next) < 100) click(Location.of(heroLoc.now, heroLoc.now.angle(next), 150));
+                else click(next);
             }
         } else {
             synchronized (Main.UPDATE_LOCKER) {

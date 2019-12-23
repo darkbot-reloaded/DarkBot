@@ -53,7 +53,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.16 beta 5";
+    public static final String VERSION_STRING = "1.13.16 beta 7";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()

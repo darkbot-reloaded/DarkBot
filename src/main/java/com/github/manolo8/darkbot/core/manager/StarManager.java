@@ -140,6 +140,23 @@ public class StarManager {
                 .addMap(158, "R-Zone 9").addMap(159, "R-Zone 10")
                 .addMap(420, "WarGame 1").addMap(421, "WarGame 2").addMap(422, "WarGame 3")
                 .addMap(423, "WarGame 4").addMap(423, "WarGame 5").addMap(423, "WarGame 6");
+                // Winter laberynth
+        mapBuild.addMap(430, "ATLAS A")
+                .addMap(431, "ATLAS B")
+                .addMap(432, "ATLAS C")
+                .addMap(433, "Cygni")
+                .addMap(434, "Helvetios")
+                .addMap(435, "Eridani")
+                .addMap(436, "Sirius")
+                .addMap(437, "Sadatoni")
+                .addMap(438, "Persei")
+                .addMap(439, "Volantis")
+                .addMap(440, "Alcyone")
+                .addMap(441, "Auriga")
+                .addMap(442, "Bootes")
+                .addMap(443, "Aquila")
+                .addMap(444, "Orion")
+                .addMap(445, "Maia");
 
         starSystem = mapBuild.build();
     }
