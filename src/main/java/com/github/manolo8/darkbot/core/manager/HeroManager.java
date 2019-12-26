@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
@@ -112,8 +113,10 @@ public class HeroManager extends Ship implements Manager {
         }
     }
 
-    public boolean attackMode() {
-        return setMode(this.main.config.GENERAL.OFFENSIVE);
+    public boolean attackMode(Npc target) {
+        Config.ShipConfig config = this.main.config.GENERAL.OFFENSIVE;
+        if (target.npcInfo.attackFormation != null) config.FORMATION = target.npcInfo.attackFormation;
+        return setMode(config);
     }
 
     public boolean runMode() {

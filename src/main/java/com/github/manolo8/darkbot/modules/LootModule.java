@@ -193,7 +193,7 @@ public class LootModule implements Module {
                 && attack.target.health.hpPercent() < 0.25
                 && hero.locationInfo.now.distance(direction) > attack.target.npcInfo.radius * 2) hero.runMode();
         else if (hero.locationInfo.now.distance(direction) > attack.target.npcInfo.radius * 3) hero.roamMode();
-        else hero.attackMode();
+        else hero.attackMode(attack.target);
     }
 
     private boolean isAttackedByOthers(Npc npc) {

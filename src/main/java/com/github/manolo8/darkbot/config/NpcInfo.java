@@ -22,6 +22,8 @@ public class NpcInfo {
     public boolean kill;
     @Option(key = "config.loot.npc_table.attack_key")
     public Character attackKey;
+    @Option(key = "config.loot.npc_table.attack_formation")
+    public Character attackFormation;
 
     public static transient Map<String, NpcExtraFlag> NPC_FLAGS = new LinkedHashMap<>();
 
@@ -35,6 +37,7 @@ public class NpcInfo {
         public boolean ignoreAttacked;
         public boolean attackSecond;
         public boolean passive;
+        public boolean useRsb;
         private boolean updated;
 
         private Set<String> flags = new HashSet<>();
@@ -71,6 +74,7 @@ public class NpcInfo {
                 set(NpcExtra.IGNORE_ATTACKED, ignoreAttacked);
                 set(NpcExtra.PASSIVE, passive);
                 set(NpcExtra.ATTACK_SECOND, attackSecond);
+                set(NpcExtra.USE_RSB, useRsb);
             }
         }
 
@@ -86,10 +90,15 @@ public class NpcInfo {
     public Set<Integer> mapList = new HashSet<>();
 
     public void set(Double radius, Integer priority, Boolean kill, Character attackKey, ExtraNpcInfo extra) {
+        set(radius, priority, kill, attackKey, null, extra);
+    }
+
+    public void set(Double radius, Integer priority, Boolean kill, Character attackKey, Character attackFormation, ExtraNpcInfo extra) {
         if (radius != null) this.radius = radius;
         if (priority != null) this.priority = priority;
         if (kill != null) this.kill = kill;
         if (attackKey != null) this.attackKey = attackKey;
+        if (attackFormation != null) this.attackFormation = attackFormation;
         if (extra != null) this.extra = extra;
     }
 
@@ -98,6 +107,7 @@ public class NpcInfo {
         this.priority = other.priority;
         this.kill = other.kill;
         this.attackKey = other.attackKey;
+        this.attackFormation = other.attackFormation;
         other.extra.update();
         this.extra.flags = new HashSet<>(other.extra.flags);
     }

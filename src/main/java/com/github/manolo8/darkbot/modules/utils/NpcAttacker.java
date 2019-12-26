@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.modules.utils;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
@@ -22,7 +23,9 @@ public class NpcAttacker {
     protected long laserTime;
     protected long fixTimes;
     protected long clickDelay;
+    protected long useRsbUntil;
     protected boolean sab;
+    protected boolean rsb;
 
     public NpcAttacker(Main main) {
         this.mapManager = main.mapManager;
@@ -75,10 +78,10 @@ public class NpcAttacker {
         boolean bugged = hero.isAttacking(target)
                 && (!hero.isAiming(target) || (!target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 650))
                 && System.currentTimeMillis() > (laserTime + fixTimes * 3000);
-        boolean sabChanged = shouldSab() != sab;
-        if ((sabChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
+        boolean ammoChanged = shouldSab() != sab || shouldRsb() != rsb;
+        if ((ammoChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
             laserTime = System.currentTimeMillis() + 750;
-            if (!bugged || sabChanged) API.keyboardClick(getAttackKey());
+            if (!bugged || ammoChanged) API.keyboardClick(getAttackKey());
             else {
                 setRadiusAndClick(false);
                 fixTimes++;
@@ -97,7 +100,15 @@ public class NpcAttacker {
                 && target.health.shield > config.LOOT.SAB.NPC_AMOUNT;
     }
 
+    private boolean shouldRsb() {
+        if (!config.LOOT.RSB.ENABLED || !target.npcInfo.extra.has(NpcExtra.USE_RSB)) return false;
+        if (useRsbUntil < System.currentTimeMillis() - config.LOOT.RSB.AMMO_REFRESH) useRsbUntil = System.currentTimeMillis();
+
+        return useRsbUntil > System.currentTimeMillis() - 50;
+    }
+
     private char getAttackKey() {
+        if (rsb = shouldRsb()) return this.config.LOOT.RSB.KEY;
         if (sab = shouldSab()) return this.config.LOOT.SAB.KEY;
         return this.target == null || this.target.npcInfo.attackKey == null ?
                 this.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;

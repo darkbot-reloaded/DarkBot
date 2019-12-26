@@ -98,11 +98,17 @@ public class Config {
     public @Option Loot LOOT = new Loot();
     public static class Loot {
         public @Option Sab SAB = new Sab();
+        public @Option Rsb RSB = new Rsb();
         public static class Sab {
             public @Option boolean ENABLED = false;
             public @Option Character KEY = '2';
             public @Option @Editor(JPercentField.class) double PERCENT = 0.8;
             public @Option @Num(min = 500, max = 100000, step = 500) int NPC_AMOUNT = 12000;
+        }
+        public static class Rsb {
+            public @Option boolean ENABLED = false;
+            public @Option Character KEY = '3';
+            public @Option @Num(min = 500, max = 60_000, step = 500) int AMMO_REFRESH = 3500;
         }
         public @Option Character AMMO_KEY = '1';
         public @Option Character SHIP_ABILITY;

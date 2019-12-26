@@ -119,7 +119,7 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
                 return;
             }
             NPC_INFOS.put(name, infoGroup);
-            addRow(new Object[]{name, info.radius, info.priority, info.kill, info.attackKey, new ExtraNpcInfoList(infoGroup)});
+            addRow(new Object[]{name, info.radius, info.priority, info.kill, info.attackKey, info.attackFormation, new ExtraNpcInfoList(infoGroup)});
         }
 
         private String simplifyName(String name) {
@@ -143,6 +143,7 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
                 else if (column == 2) info.priority = (Integer) value;
                 else if (column == 3) info.kill = (Boolean) value;
                 else if (column == 4) info.attackKey = (Character) value;
+                else if (column == 5) info.attackFormation = (Character) value;
             });
             ConfigEntity.changed();
         }
