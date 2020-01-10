@@ -28,6 +28,7 @@ public class SafetyFinder {
     private HeroManager hero;
     private Drive drive;
     private MapTraveler mapTraveler;
+    private PortalJumper jumper;
     private Consumer<Map> listener = this::onMapChange;
 
     private SafetyInfo safety;
@@ -65,6 +66,7 @@ public class SafetyFinder {
         this.hero = main.hero;
         this.drive = main.hero.drive;
         this.mapTraveler = new MapTraveler(main);
+        this.jumper = new PortalJumper(hero);
         mapManager.mapChange.add(listener);
     }
 
@@ -132,13 +134,14 @@ public class SafetyFinder {
             case CURRENT_MAP:
                 if (escape.shouldJump(safety)
                         // Also jump if taking damage & you would jump away from enemy.
-                        || (hero.health.hpDecreasedIn(200) && Escaping.ENEMY.shouldJump(safety)))
+                        || (hero.health.hpDecreasedIn(200) && Escaping.ENEMY.shouldJump(safety))) {
                     jumpState = JumpState.JUMPING;
+                    drive.stop(false);
+                }
                 break;
             case JUMPING:
                 prevMap = hero.map;
-                drive.stop(false);
-                hero.jumpPortal((Portal) safety.entity);
+                jumper.jump((Portal) safety.entity);
                 return false;
             case JUMPED:
                 if (hero.health.hpDecreasedIn(100) || safety.jumpMode != SafetyInfo.JumpMode.ALWAYS_OTHER_SIDE

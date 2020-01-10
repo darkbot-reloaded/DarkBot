@@ -19,11 +19,11 @@ public class MapTraveler {
     private Drive drive;
     private StarManager star;
     private Consumer<Map> listener = this::onMapChange;
+    private PortalJumper jumper;
 
     public Portal current;
     public Map target;
     private int lastPortals;
-    private long lastJumpStart;
     private long shipTpWait = -1, mapChangeWait = -1;
     private boolean done;
 
@@ -33,6 +33,7 @@ public class MapTraveler {
         this.drive = main.hero.drive;
         this.star = main.starManager;
         this.main = main;
+        this.jumper = new PortalJumper(hero);
         main.mapManager.mapChange.add(listener);
     }
 
@@ -65,7 +66,7 @@ public class MapTraveler {
         if (current == null || current.removed || lastPortals != portals.size()) {
             current = star.next(hero, target);
             lastPortals = portals.size();
-            lastJumpStart = 0;
+            jumper.reset();
         }
 
         if (current == null) {
@@ -79,14 +80,7 @@ public class MapTraveler {
         hero.runMode();
 
         if (!moveToCurrent()) return;
-        hero.jumpPortal(current);
-
-        if (lastJumpStart == 0) {
-            lastJumpStart = System.currentTimeMillis();
-        } else if (System.currentTimeMillis() - lastJumpStart > 5_000) {
-            hero.drive.clickCenter(true, current.locationInfo.now);
-            lastJumpStart = System.currentTimeMillis();
-        }
+        jumper.jump(current);
     }
 
     private boolean moveToCurrent() {
