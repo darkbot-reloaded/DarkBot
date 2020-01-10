@@ -113,10 +113,15 @@ public class HeroManager extends Ship implements Manager {
         }
     }
 
+    public boolean attackMode() {
+        return setMode(main.config.GENERAL.OFFENSIVE);
+    }
+
     public boolean attackMode(Npc target) {
+        if (target == null) return attackMode();
         Config.ShipConfig config = this.main.config.GENERAL.OFFENSIVE;
-        if (target.npcInfo.attackFormation != null) config.FORMATION = target.npcInfo.attackFormation;
-        return setMode(config);
+        return setMode(config.CONFIG, target.npcInfo.attackFormation != null ?
+                target.npcInfo.attackFormation : config.FORMATION);
     }
 
     public boolean runMode() {
@@ -127,24 +132,32 @@ public class HeroManager extends Ship implements Manager {
         return setMode(main.config.GENERAL.ROAM);
     }
 
-    public boolean isInMode(Config.ShipConfig config) {
-        return this.config == config.CONFIG && this.formation == config.FORMATION;
+    public boolean setMode(Config.ShipConfig config) {
+        return setMode(config.CONFIG, config.FORMATION);
     }
 
-    public boolean setMode(Config.ShipConfig config) {
+    public boolean setMode(int con, Character form) {
         int formationCheck = main.config.GENERAL.FORMATION_CHECK;
 
-        if (this.config != config.CONFIG && System.currentTimeMillis() - configTime > 5500L) {
+        if (this.config != con && System.currentTimeMillis() - configTime > 5500L) {
             Main.API.keyboardClick('c');
             this.configTime = System.currentTimeMillis();
         }
         boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000;
 
-        if ((this.formation != config.FORMATION || checkFormation) && System.currentTimeMillis() - formationTime > 3500L) {
-            Main.API.keyboardClick(this.formation = config.FORMATION);
+        if ((this.formation != form || checkFormation) && System.currentTimeMillis() - formationTime > 3500L) {
+            Main.API.keyboardClick(this.formation = form);
             if (formation != null) this.formationTime = System.currentTimeMillis();
         }
-        return isInMode(config);
+        return isInMode(con, form);
+    }
+
+    public boolean isInMode(Config.ShipConfig config) {
+        return isInMode(config.CONFIG, config.FORMATION);
+    }
+
+    public boolean isInMode(int config, int formation) {
+        return this.config == config && this.formation == formation;
     }
 
 }
