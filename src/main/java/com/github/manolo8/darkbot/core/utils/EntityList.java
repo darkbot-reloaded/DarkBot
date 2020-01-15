@@ -111,7 +111,7 @@ public class EntityList extends Updatable {
                 noCloack.add(whenAdd(new NoCloack(id), found));
             } else if (id < 0 && rnd == 3) {
                 boxes.add(whenAdd(new Box(id), found));
-            } else if (150000156 <= id && id <= 150000514) {
+            } else if (150000156 <= id && id <= 150000526) {
                 LocationInfo loc = new LocationInfo(API.readMemoryLong(found + 64));
                 loc.update();
                 portals.add(whenAdd(main.starManager.getOrCreate(id, rnd, (int) loc.now.x, (int) loc.now.y), found));
