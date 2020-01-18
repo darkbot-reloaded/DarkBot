@@ -119,7 +119,7 @@ public class StarManager {
                 .addGG(412, "GoP 3").accessOnlyBy(24, "GoP 2")
                 .addGG(413, "GoP 4").accessOnlyBy(24, "GoP 3")
                 .addGG(414, "GoP 5").accessOnlyBy(24, "GoP 4")
-                .addGG(415, "GoP Final").accessBy(24, "GoP 5");
+                .addGG(415, "GoP Final").accessOnlyBy(24, "GoP 5").exitBy(1);
                 // Special (No direct access)
         mapBuild.addMap(42, "???")
                 .addMap(61, "MMO Invasion").addMap(62, "EIC Invasion").addMap(63, "VRU Invasion")

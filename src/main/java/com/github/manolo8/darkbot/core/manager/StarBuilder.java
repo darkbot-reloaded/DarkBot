@@ -13,7 +13,7 @@ import java.util.List;
 
 public class StarBuilder {
 
-    private class TempMap {
+    private static class TempMap {
         private int id;
         private String name;
         private boolean isGG;
@@ -26,15 +26,16 @@ public class StarBuilder {
         }
     }
 
-    private class TempPort {
-        private int x, y, factionId;
-        private String targetMap;
+    private static class TempPort {
+        private final int x, y, type, factionId;
+        private final String targetMap;
 
-        TempPort(int x, int y, String targetMap, int factionId) {
+        TempPort(int x, int y, int type, int factionId, String targetMap) {
             this.x = x;
             this.y = y;
-            this.targetMap = targetMap;
+            this.type = type;
             this.factionId = factionId;
+            this.targetMap = targetMap;
         }
     }
 
@@ -70,13 +71,13 @@ public class StarBuilder {
     }
 
     protected StarBuilder addPortal(int x, int y, String targetMap) {
-        current.ports.add(new TempPort(x, y, targetMap, -1));
+        current.ports.add(new TempPort(x, y, -1, -1, targetMap));
         return this;
     }
 
     @SuppressWarnings("SameParameterValue")
     protected StarBuilder addPortal(int x, int y, String targetMap, int factionId) {
-        current.ports.add(new TempPort(x, y, targetMap, factionId));
+        current.ports.add(new TempPort(x, y, -1, factionId, targetMap));
         return this;
     }
 
@@ -96,6 +97,14 @@ public class StarBuilder {
         return this;
     }
 
+    /**
+     * Adds an exit portal to a galaxy gate map
+     */
+    protected StarBuilder exitBy(int type) {
+        current.ports.add(new TempPort(-1, -1, type, -1, "Home Map"));
+        return this;
+    }
+
     public Graph<Map, Portal> build() {
         DirectedPseudograph<Map, Portal> graph = new DirectedPseudograph<>(Portal.class);
         HashMap<String, Map> mapsByName = new HashMap<>();
@@ -108,7 +117,7 @@ public class StarBuilder {
         for (TempMap map : maps) {
             for (TempPort port : map.ports) {
                 Map target = mapsByName.get(port.targetMap);
-                graph.addEdge(mapsByName.get(map.name), target, new Portal(-1, port.x, port.y, target, port.factionId));
+                graph.addEdge(mapsByName.get(map.name), target, new Portal(port.type, port.x, port.y, target, port.factionId));
             }
         }
 
