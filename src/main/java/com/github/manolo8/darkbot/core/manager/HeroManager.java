@@ -156,7 +156,7 @@ public class HeroManager extends Ship implements Manager {
         return isInMode(config.CONFIG, config.FORMATION);
     }
 
-    public boolean isInMode(int config, int formation) {
+    public boolean isInMode(int config, Character formation) {
         return this.config == config && this.formation == formation;
     }
 
