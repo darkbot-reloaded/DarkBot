@@ -15,7 +15,7 @@ public class Dictionary extends Updatable {
 
     private HashMap<String, Lazy<Long>> lazy;
 
-    private Entry[] elements;
+    public Entry[] elements;
     private String[] checks;
 
     public int size;
@@ -157,10 +157,10 @@ public class Dictionary extends Updatable {
         this.lastFix = 0;
     }
 
-    private class Entry {
+    public static class Entry {
 
-        String key;
-        long value;
+        public String key;
+        public long value;
 
         public Entry(String key, long value) {
             this.key = key;
