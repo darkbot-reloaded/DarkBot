@@ -104,7 +104,7 @@ public class StarManager {
                 .addGG(303, "GG ς 4").accessOnlyBy(82, "GG ς 3")
                 .addGG(304, "GG ς 5").accessBy(82, "GG ς 4")
                 .addGG(200, "LoW").accessOnlyBy(34, "1-3", "2-3", "3-3")
-                .addGG(229, "Quarantine Zone").accessOnlyBy(84, "1-7", "2-7", "3-7")
+                .addGG(229, "Quarantine Zone", "QZ").accessOnlyBy(84, "1-7", "2-7", "3-7")
                 .addGG(227, "GG VoT 1").accessOnlyBy(81, "1-4", "2-4", "3-4")
                 .addGG(230, "GG VoT 2").accessOnlyBy(81, "GG VoT 1")
                 .addGG(231, "GG VoT 3").accessOnlyBy(81, "GG VoT 2")
