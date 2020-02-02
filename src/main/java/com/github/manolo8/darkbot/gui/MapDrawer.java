@@ -14,6 +14,7 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.gui.trail.Line;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 
 import javax.swing.*;
@@ -253,13 +254,16 @@ public class MapDrawer extends JPanel {
 
     private void drawInfos(Graphics2D g2) {
         g2.setColor(TEXT_DARK);
-        String running = (main.isRunning() ? "RUNNING " : "WAITING ") + Time.toString(statsManager.runningTime());
-        drawString(g2, running, mid, height / 2 + 35, Align.MID);
+        String status = I18n.get(
+                (main.isRunning() ? "gui.map.running" : "gui.map.waiting"),
+                Time.toString(statsManager.runningTime()));
+        drawString(g2, status, mid, height / 2 + 35, Align.MID);
 
         g2.setFont(FONT_SMALL);
-        String info = "v" + Main.VERSION_STRING + " - Refresh: " +
-                (main.isRunning() ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00") +
-                "/" + Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000);
+        String info = I18n.get("gui.map.info",
+                Main.VERSION_STRING,
+                (main.isRunning() ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"),
+                Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000));
         drawString(g2, info, 5, 12, Align.LEFT);
         if (main.module != null) {
             drawString(g2, main.tickingModule ? main.module.status() : main.module.stoppedStatus(), 5, 12 + 15, Align.LEFT);
