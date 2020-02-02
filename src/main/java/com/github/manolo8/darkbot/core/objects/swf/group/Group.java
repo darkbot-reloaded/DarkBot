@@ -19,6 +19,10 @@ public class Group extends Updatable {
 
     private Array array = new Array(0);
 
+    public boolean isValid() {
+        return id != 0 && size != 0 && maxSize == 8;
+    }
+
     @Override
     public void update() {
         id        = API.readMemoryInt(address + 0x1F);
@@ -26,18 +30,22 @@ public class Group extends Updatable {
         maxSize   = API.readMemoryInt(address + 0x27);
         canInvite = API.readMemoryBoolean(address + 0x2B);
 
-        selectedMember.update(API.readMemoryLong(address + 0x3F));
-        selectedMember.update();
+        if (!isValid()) return;
 
         array.update(API.readMemoryLong(address + 0x37));
         array.update();
 
-        members.clear();
+        if (members.size() != array.size) {
+            members.clear();
+        }
         for (int i = 0; i < array.elements.length; i++) {
-            GroupMember groupMember = new GroupMember();
+            while (members.size() <= i) members.add(new GroupMember());
+            GroupMember groupMember = members.get(i);
             groupMember.update(array.elements[i]);
             groupMember.update();
-            members.add(groupMember);
         }
+
+        long selectedAddr = API.readMemoryLong(address + 0x3F);
+        selectedMember = members.stream().filter(m -> m.address == selectedAddr).findFirst().orElse(null);
     }
 }

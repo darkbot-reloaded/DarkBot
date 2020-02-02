@@ -18,6 +18,7 @@ import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
+import com.github.manolo8.darkbot.core.objects.swf.group.GroupManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
@@ -73,6 +74,7 @@ public class Main extends Thread implements PluginListener {
     public final GuiManager guiManager;
     public final StatsManager statsManager;
     public final PingManager pingManager;
+    public final GroupManager groupManager;
     public final BackpageManager backpage;
 
     public final Lazy.Sync<Boolean> status;
@@ -118,12 +120,14 @@ public class Main extends Thread implements PluginListener {
         guiManager = new GuiManager(this);
         statsManager = new StatsManager(this);
         pingManager = new PingManager();
+        groupManager = new GroupManager();
 
         botInstaller.add(guiManager);
         botInstaller.add(mapManager);
         botInstaller.add(hero);
         botInstaller.add(statsManager);
         botInstaller.add(pingManager);
+        botInstaller.add(groupManager);
 
         botInstaller.init();
 
@@ -199,6 +203,7 @@ public class Main extends Thread implements PluginListener {
         hero.tick();
         mapManager.tick();
         statsManager.tick();
+        groupManager.tick();
 
         tickingModule = running && guiManager.canTickModule();
         if (running && guiManager.canTickModule()) tickRunning();

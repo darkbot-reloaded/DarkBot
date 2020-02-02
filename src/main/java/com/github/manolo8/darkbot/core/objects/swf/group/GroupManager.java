@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.core.objects.swf.group;
 
+import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.Dictionary;
 
@@ -10,14 +12,30 @@ import java.util.Objects;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class GroupManager extends Updatable {
+public class GroupManager extends Updatable implements Manager {
+    private long eventAddress = -1;
+
     public Group group = new Group();
     public List<Invite> invites = new ArrayList<>();
 
     private Dictionary dictionary = new Dictionary(0);
 
     @Override
-    public void update() {// API.readMemoryLong(API.readMemoryLong(MapManager.eventAddress) + 0x48) == this.address
+    public void install(BotInstaller botInstaller) {
+        botInstaller.screenManagerAddress.add(value -> this.eventAddress = value + 200);
+    }
+
+    public void tick() {
+        if (eventAddress == -1) return;
+
+        update(API.readMemoryLong(API.readMemoryLong(eventAddress) + 0x48));
+        update();
+    }
+
+    @Override
+    public void update() {
+        if (this.address == 0) return;
+
         group.update(API.readMemoryLong(address + 0x30));
         group.update();
 

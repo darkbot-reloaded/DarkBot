@@ -27,7 +27,7 @@ public class StarManager {
         String[] HOME_MAPS = new String[]{"1-1", "2-1", "3-1"};
 
         StarBuilder mapBuild = new StarBuilder();
-        mapBuild.addMap(-1, I18n.get("gui.map.loading"))
+        mapBuild.addMap(-1, I18n.get("gui.map.loading"), "?")
                 .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1");
                 // MMO
         mapBuild.addMap(1, "1-1").addPortal(18500, 11500, "1-2").addPortal(10500, 6750, "Experiment Zone 1")
@@ -71,10 +71,10 @@ public class StarManager {
                 .addMap(307, "2BL").addPortal(9893,   862, "1BL").addPortal(  593,  5884, "2-8").addPortal(20377,  7996, "3BL")
                 .addMap(308, "3BL").addPortal(1545, 12210, "1BL").addPortal(19400, 11854, "2BL").addPortal(14027,  3181, "3-8");
                 // EX
-        mapBuild.addMap(401, "Experiment Zone 1").addPortal(1200, 1100, "Home Map")
-                .addMap(402, "Experiment Zone 2-1").addPortal(1200, 1100, "1-5")
-                .addMap(403, "Experiment Zone 2-2").addPortal(1200, 1100, "2-5")
-                .addMap(404, "Experiment Zone 2-3").addPortal(1200, 1100, "3-5");
+        mapBuild.addMap(401, "Experiment Zone 1", "EZ1").addPortal(1200, 1100, "Home Map")
+                .addMap(402, "Experiment Zone 2-1", "EZ 2-1").addPortal(1200, 1100, "1-5")
+                .addMap(403, "Experiment Zone 2-2", "EZ 2-2").addPortal(1200, 1100, "2-5")
+                .addMap(404, "Experiment Zone 2-3", "EZ 2-3").addPortal(1200, 1100, "3-5");
                 // GG
         mapBuild.addGG(51, "GG α").accessBy(2, HOME_MAPS)
                 .addGG(52, "GG β").accessBy(3, HOME_MAPS)
@@ -90,11 +90,11 @@ public class StarManager {
                 .addGG(73, "GG ζ 3").accessBy(54, "GG ζ 2")
                 .addGG(74, "GG κ").accessBy(70, HOME_MAPS)
                 .addGG(75, "GG λ").accessBy(71, HOME_MAPS)
-                .addGG(76, "GG Kronos").accessBy(72, HOME_MAPS)
-                .addGG(77, "GG Cold Wave (Easy)").accessBy(73, "1-4", "2-4", "3-4")
-                .addGG(78, "GG Cold Wave (Hard)").accessBy(73, "1-4", "2-4", "3-4")
-                .addGG(203, "GG Hades").accessBy(74, HOME_MAPS)
-                .addGG(223, "Devolarium Attack")    // (No access), missing type ID (HOME_MAPS)
+                .addGG(76, "GG Kronos", "GG K").accessBy(72, HOME_MAPS)
+                .addGG(77, "GG Cold Wave (Easy)", "GG Cold").accessBy(73, "1-4", "2-4", "3-4")
+                .addGG(78, "GG Cold Wave (Hard)", "GG Cold").accessBy(73, "1-4", "2-4", "3-4")
+                .addGG(203, "GG Hades", "Hades").accessBy(74, HOME_MAPS)
+                .addGG(223, "Devolarium Attack", "DA") // (No access), missing type ID (HOME_MAPS)
                 .addGG(225, "GG PET Attack (easy)") // (No access)
                 .addGG(226, "GG PET Attack (hard)") // (No access)
                 .addGG(228, "Permafrost Fissure")   // (No access), missing type ID (HOME_MAPS)
@@ -213,6 +213,10 @@ public class StarManager {
 
     public static Collection<Map> getAllMaps() {
         return INSTANCE.starSystem.vertexSet();
+    }
+
+    public static StarManager getInstance() {
+        return INSTANCE;
     }
 
     public static class MapList extends OptionList<Integer> {

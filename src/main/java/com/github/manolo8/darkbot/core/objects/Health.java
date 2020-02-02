@@ -1,10 +1,11 @@
 package com.github.manolo8.darkbot.core.objects;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Health extends Updatable {
+public class Health extends Updatable implements HealthHolder {
 
     public int hp;
     public int maxHp;
@@ -81,4 +82,34 @@ public class Health extends Updatable {
         return System.currentTimeMillis() - shieldLastIncreased < time;
     }
 
+
+    @Override
+    public int getHp() {
+        return hp;
+    }
+
+    @Override
+    public int getMaxHp() {
+        return maxHp;
+    }
+
+    @Override
+    public int getHull() {
+        return hull;
+    }
+
+    @Override
+    public int getMaxHull() {
+        return maxHull;
+    }
+
+    @Override
+    public int getShield() {
+        return shield;
+    }
+
+    @Override
+    public int getMaxShield() {
+        return maxShield;
+    }
 }

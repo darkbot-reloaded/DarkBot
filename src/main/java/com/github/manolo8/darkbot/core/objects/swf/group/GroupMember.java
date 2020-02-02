@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.core.objects.swf.group;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Location;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -19,6 +21,23 @@ public class GroupMember extends Updatable {
     public boolean isLocked; // is selected by hero
     public String username;
 
+    public String getMap() {
+        return StarManager.getInstance().byId(mapId).shortName;
+    }
+
+    public String getUsername() {
+        return username != null ? username : "...";
+    }
+
+    public String getDisplayText() {
+        return getMap() + " " + getUsername() + " ";
+    }
+
+    @Override
+    public void update(long address) {
+        super.update(address);
+    }
+
     @Override
     public void update() {
         location.set(API.readMemoryInt(address + 0x38), API.readMemoryInt(address + 0x3C));
@@ -34,6 +53,8 @@ public class GroupMember extends Updatable {
         isLeader   = API.readMemoryBoolean(address + 0x50);
         isAttacked = API.readMemoryBoolean(address + 0x44);
         isLocked   = API.readMemoryBoolean(address + 0x60);
-        username   = API.readMemoryString(API.readMemoryLong(address + 0x68));
+        username = API.readMemoryString(API.readMemoryLong(address + 0x68));
+        if (username != null && (username.isEmpty() || username.equals("ERROR")))
+            username = null;
     }
 }

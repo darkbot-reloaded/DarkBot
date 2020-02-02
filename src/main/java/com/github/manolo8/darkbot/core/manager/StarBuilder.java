@@ -15,13 +15,17 @@ public class StarBuilder {
 
     private static class TempMap {
         private int id;
-        private String name;
+        private String name, shortName;
         private boolean isGG;
         private List<TempPort> ports = new ArrayList<>();
 
         TempMap(int id, String name, boolean isGG) {
+            this(id, name, name, isGG);
+        }
+        TempMap(int id, String name, String shortName, boolean isGG) {
             this.id = id;
             this.name = name;
+            this.shortName = shortName;
             this.isGG = isGG;
         }
     }
@@ -60,8 +64,20 @@ public class StarBuilder {
         return setCurrent(new TempMap(id, name, false));
     }
 
+    protected StarBuilder addMap(int id, String name, String shortName) {
+        return setCurrent(new TempMap(id, name, shortName, false));
+    }
+
     protected StarBuilder addGG(int id, String name) {
-        return setCurrent(new TempMap(id, name, true));
+        String shortName = name;
+        if (name.matches("GG .{0,3} [0-9]+")) {
+            shortName = name.substring(0, name.lastIndexOf(" "));
+        }
+        return setCurrent(new TempMap(id, name, shortName, true));
+    }
+
+    protected StarBuilder addGG(int id, String name, String shortName) {
+        return setCurrent(new TempMap(id, name, shortName, true));
     }
 
     private StarBuilder setCurrent(TempMap map) {
@@ -109,7 +125,7 @@ public class StarBuilder {
         DirectedPseudograph<Map, Portal> graph = new DirectedPseudograph<>(Portal.class);
         HashMap<String, Map> mapsByName = new HashMap<>();
         for (TempMap tmpMap : maps) {
-            Map map = new Map(tmpMap.id, tmpMap.name, tmpMap.name.startsWith("4-"), tmpMap.isGG);
+            Map map = new Map(tmpMap.id, tmpMap.name, tmpMap.shortName, tmpMap.name.startsWith("4-"), tmpMap.isGG);
             mapsByName.put(map.name, map);
             graph.addVertex(map);
         }

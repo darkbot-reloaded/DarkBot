@@ -8,6 +8,8 @@ import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.*;
 import com.github.manolo8.darkbot.core.manager.*;
 import com.github.manolo8.darkbot.core.objects.Health;
+import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
+import com.github.manolo8.darkbot.core.objects.swf.group.Group;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
@@ -26,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -59,7 +62,7 @@ public class MapDrawer extends JPanel {
 
     private Color BASES = Color.decode("#00D14E");
     private Color UNKNOWN = Color.decode("#7C05D1");
-    private Color STATS_BACKGROUND = new Color(38, 50, 56, 128);
+    private Color TEXTS_BACKGROUND = new Color(38, 50, 56, 128);
 
     private Color ACTION_BUTTON = new Color(255, 255, 255, 160);
     private Color DARKEN_BACK = new Color(0, 0, 0, 96);
@@ -175,7 +178,7 @@ public class MapDrawer extends JPanel {
                         .filter(e -> e.locationInfo.isLoaded())
                         .collect(Collectors.toList());
 
-                g2.setColor(STATS_BACKGROUND);
+                g2.setColor(TEXTS_BACKGROUND);
                 for (Entity e : entities) {
                     Location loc = e.locationInfo.now;
                     int strWidth = g2.getFontMetrics().stringWidth(e.toString());
@@ -190,7 +193,26 @@ public class MapDrawer extends JPanel {
             }
         }
 
-        drawStats(g2,
+        Group group = main.groupManager.group;
+        if (group != null && group.isValid()) {
+            drawBackgrounded(g2, 28, Align.RIGHT,
+                    (x, y, w, member) -> {
+                        Font f = g2.getFont();
+                        if (member.isLeader)
+                            g2.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
+
+                        g2.drawString(member.getDisplayText(), x, y + 14);
+                        g2.setFont(f);
+
+                        drawHealth(g2, member.memberInfo, x, y + 18, w / 2 - 3, 4);
+                        if (member.targetInfo.shipType != 0)
+                            drawHealth(g2, member.targetInfo, x + (w / 2) + 3, y + 18, w / 2 - 3, 4);
+                    },
+                    member -> g2.getFontMetrics().stringWidth(member.getDisplayText()),
+                    group.members.stream().filter(m -> m.id != hero.id).collect(Collectors.toList()));
+        }
+
+        drawBackgroundedText(g2, Align.LEFT,
                 "cre/h " + formatter.format(statsManager.earnedCredits()),
                 "uri/h " + formatter.format(statsManager.earnedUridium()),
                 "exp/h " + formatter.format(statsManager.earnedExperience()),
@@ -287,7 +309,7 @@ public class MapDrawer extends JPanel {
         g2.setFont(FONT_MID);
         if (!config.BOT_SETTINGS.DISPLAY.HIDE_NAME)
             drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40, Align.MID);
-        drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20);
+        drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20, 12);
 
         if (hero.target != null && !hero.target.removed) {
             if (hero.target instanceof Npc || hero.target.playerInfo.isEnemy()) g2.setColor(this.ENEMIES);
@@ -296,7 +318,7 @@ public class MapDrawer extends JPanel {
             String name = hero.target.playerInfo.username;
             drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40, Align.MID);
 
-            drawHealth(g2, hero.target.health, mid + 10, height - 34, mid - 20);
+            drawHealth(g2, hero.target.health, mid + 10, height - 34, mid - 20, 12);
         }
     }
 
@@ -440,14 +462,36 @@ public class MapDrawer extends JPanel {
         }
     }
 
-    private void drawStats(Graphics2D g2, String... stats) {
-        int top = getHeight() / 2 - (stats.length * 15) / 2,
-                width = Arrays.stream(stats).mapToInt(g2.getFontMetrics()::stringWidth).max().orElse(0);
-        g2.setColor(STATS_BACKGROUND);
-        g2.fillRect(0, top, width + 5, stats.length * 15 + 3);
-        g2.setColor(TEXT);
+    private void drawBackgroundedText(Graphics2D g2, Align align, String... texts) {
+        this.drawBackgrounded(g2, 15, align,
+                (x, y, h, str) -> g2.drawString(str, x, y + 14),
+                g2.getFontMetrics()::stringWidth,
+                Arrays.asList(texts));
+    }
+
+    private <T> void drawBackgrounded(Graphics2D g2, int lineHeight, Align align,
+                                      Renderer<T> renderer,
+                                      ToIntFunction<T> widthGetter,
+                                      Collection<T> toRender) {
         g2.setFont(FONT_SMALL);
-        for (String str : stats) g2.drawString(str, 2, top += 15);
+
+        int width = toRender.stream().mapToInt(widthGetter).max().orElse(0) + 8;
+        int height = toRender.size() * lineHeight + 4;
+        int top = getHeight() / 2 - height / 2;
+        int left = align == Align.RIGHT ? getWidth() - width : 0;
+
+        g2.setColor(TEXTS_BACKGROUND);
+        g2.fillRect(left, top, width, height);
+        g2.setColor(TEXT);
+        for (T render : toRender) {
+            renderer.render(left + 4, top, width - 8, render);
+            top += lineHeight;
+        }
+    }
+
+    @FunctionalInterface
+    private interface Renderer<T> {
+        void render(int x, int y, int w, T object);
     }
 
     protected void drawCustomZone(Graphics2D g2, ZoneInfo zoneInfo) {
@@ -478,20 +522,23 @@ public class MapDrawer extends JPanel {
                 translateX(safetyInfo.diameter), translateY(safetyInfo.diameter));
     }
 
-    private void drawHealth(Graphics2D g2, Health health, int x, int y, int width) {
-        int height = 12;
+    private void drawHealth(Graphics2D g2, HealthHolder health, int x, int y, int width, int height) {
+        boolean compact = height < 8;
+        int margin = compact ? 2 : 0;
         g2.setColor(HEALTH.darker());
         g2.fillRect(x, y, width, height);
         g2.setColor(SHIELD.darker());
-        g2.fillRect(x, y + height, width, height);
+        g2.fillRect(x, y + height + margin, width, height);
         g2.setColor(HEALTH);
         g2.fillRect(x, y, (int) (health.hpPercent() * width), height);
         g2.setColor(SHIELD);
-        g2.fillRect(x, y + height, (int) (health.shieldPercent() * width), height);
+        g2.fillRect(x, y + height + margin, (int) (health.shieldPercent() * width), height);
         g2.setColor(TEXT);
-        g2.setFont(FONT_SMALL);
-        drawString(g2, health.hp + "/" + health.maxHp, x + width / 2, y + height - 2, Align.MID);
-        drawString(g2, health.shield + "/" + health.maxShield, x + width / 2, y + height + height - 2, Align.MID);
+        if (!compact) {
+            g2.setFont(FONT_SMALL);
+            drawString(g2, health.getHp() + "/" + health.getMaxHp(), x + width / 2, y + height - 2, Align.MID);
+            drawString(g2, health.getShield() + "/" + health.getMaxShield(), x + width / 2, y + height + height - 2, Align.MID);
+        }
     }
 
     protected enum Align {
