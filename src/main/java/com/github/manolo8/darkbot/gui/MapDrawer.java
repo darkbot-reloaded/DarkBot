@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.core.manager.*;
 import com.github.manolo8.darkbot.core.objects.Health;
 import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 import com.github.manolo8.darkbot.core.objects.swf.group.Group;
+import com.github.manolo8.darkbot.core.objects.swf.group.GroupMember;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
@@ -23,10 +24,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.font.TextAttribute;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
@@ -51,6 +55,7 @@ public class MapDrawer extends JPanel {
     private Color PET = Color.decode("#004c8c");
     private Color PET_IN = Color.decode("#c56000");
     private Color HEALTH = Color.decode("#388e3c");
+    private Color NANO_HULL = Color.decode("#D0D024");
     private Color SHIELD = Color.decode("#0288d1");
     private Color METEROID = Color.decode("#AAAAAA");
     private Color BARRIER = new Color(255, 255, 255, 32);
@@ -193,23 +198,35 @@ public class MapDrawer extends JPanel {
             }
         }
 
-        Group group = main.groupManager.group;
-        if (group != null && group.isValid()) {
-            drawBackgrounded(g2, 28, Align.RIGHT,
-                    (x, y, w, member) -> {
-                        Font f = g2.getFont();
-                        if (member.isLeader)
-                            g2.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
+        synchronized (Main.UPDATE_LOCKER) {
+            Group group = main.groupManager.group;
+            if (group != null && group.isValid()) {
+                List<GroupMember> members;
+                synchronized (Main.UPDATE_LOCKER) {
+                    members = group.members.stream().filter(m -> m.id != hero.id).collect(Collectors.toList());
+                }
+                drawBackgrounded(g2, 28, Align.RIGHT,
+                        (x, y, w, member) -> {
+                            Font font = FONT_SMALL;
+                            Color color = TEXT;
 
-                        g2.drawString(member.getDisplayText(), x, y + 14);
-                        g2.setFont(f);
+                            Map<TextAttribute, Object> attrs = new HashMap<>();
+                            attrs.put(TextAttribute.WEIGHT, member.isLeader ? TextAttribute.WEIGHT_BOLD : TextAttribute.WEIGHT_REGULAR);
+                            attrs.put(TextAttribute.STRIKETHROUGH, member.isDead ? TextAttribute.STRIKETHROUGH_ON : false);
+                            attrs.put(TextAttribute.UNDERLINE, member.isLocked ? TextAttribute.UNDERLINE_ON : -1);
+                            if (member.isCloacked) color = color.darker();
 
-                        drawHealth(g2, member.memberInfo, x, y + 18, w / 2 - 3, 4);
-                        if (member.targetInfo.shipType != 0)
-                            drawHealth(g2, member.targetInfo, x + (w / 2) + 3, y + 18, w / 2 - 3, 4);
-                    },
-                    member -> g2.getFontMetrics().stringWidth(member.getDisplayText()),
-                    group.members.stream().filter(m -> m.id != hero.id).collect(Collectors.toList()));
+                            g2.setFont(font.deriveFont(attrs));
+                            g2.setColor(color);
+                            g2.drawString(member.getDisplayText(), x, y + 14);
+
+                            drawHealth(g2, member.memberInfo, x, y + 18, w / 2 - 3, 4);
+                            if (member.targetInfo.shipType != 0)
+                                drawHealth(g2, member.targetInfo, x + (w / 2) + 3, y + 18, w / 2 - 3, 4);
+                        },
+                        member -> Math.min(g2.getFontMetrics().stringWidth(member.getDisplayText()), 200),
+                        members);
+            }
         }
 
         drawBackgroundedText(g2, Align.LEFT,
@@ -523,21 +540,33 @@ public class MapDrawer extends JPanel {
     }
 
     private void drawHealth(Graphics2D g2, HealthHolder health, int x, int y, int width, int height) {
+        g2.setFont(FONT_SMALL);
+
         boolean compact = height < 8;
         int margin = compact ? 2 : 0;
+
+        int totalMaxHealth = health.getMaxHp() + health.getHull();
+        int hullWidth = totalMaxHealth == 0 ? 0 : (health.getHull() * width / totalMaxHealth);
+
         g2.setColor(HEALTH.darker());
         g2.fillRect(x, y, width, height);
-        g2.setColor(SHIELD.darker());
-        g2.fillRect(x, y + height + margin, width, height);
         g2.setColor(HEALTH);
-        g2.fillRect(x, y, (int) (health.hpPercent() * width), height);
-        g2.setColor(SHIELD);
-        g2.fillRect(x, y + height + margin, (int) (health.shieldPercent() * width), height);
+        g2.fillRect(x, y, hullWidth + (int) (health.hpPercent() * (width - hullWidth)), height);
+        g2.setColor(NANO_HULL);
+        g2.fillRect(x, y, hullWidth, height);
+
         g2.setColor(TEXT);
-        if (!compact) {
-            g2.setFont(FONT_SMALL);
-            drawString(g2, health.getHp() + "/" + health.getMaxHp(), x + width / 2, y + height - 2, Align.MID);
-            drawString(g2, health.getShield() + "/" + health.getMaxShield(), x + width / 2, y + height + height - 2, Align.MID);
+        if (!compact)
+            drawString(g2, (health.getHull() + health.getHp()) + "/" + totalMaxHealth, x + width / 2, y + height - 2, Align.MID);
+
+        if (health.getMaxShield() != 0) {
+            g2.setColor(SHIELD.darker());
+            g2.fillRect(x, y + height + margin, width, height);
+            g2.setColor(SHIELD);
+            g2.fillRect(x, y + height + margin, (int) (health.shieldPercent() * width), height);
+            g2.setColor(TEXT);
+            if (!compact)
+                drawString(g2, health.getShield() + "/" + health.getMaxShield(), x + width / 2, y + height + height - 2, Align.MID);
         }
     }
 

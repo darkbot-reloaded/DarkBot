@@ -1,10 +1,12 @@
 package com.github.manolo8.darkbot.core.objects.swf.group;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.Array;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -35,14 +37,14 @@ public class Group extends Updatable {
         array.update(API.readMemoryLong(address + 0x37));
         array.update();
 
-        if (members.size() != array.size) {
-            members.clear();
-        }
-        for (int i = 0; i < array.elements.length; i++) {
-            while (members.size() <= i) members.add(new GroupMember());
-            GroupMember groupMember = members.get(i);
-            groupMember.update(array.elements[i]);
-            groupMember.update();
+        synchronized (Main.UPDATE_LOCKER) {
+            if (members.size() > array.size) members.subList(0, array.size);
+            for (int i = 0; i < array.size; i++) {
+                while (members.size() <= i) members.add(new GroupMember());
+                GroupMember groupMember = members.get(i);
+                groupMember.update(array.elements[i]);
+                groupMember.update();
+            }
         }
 
         long selectedAddr = API.readMemoryLong(address + 0x3F);

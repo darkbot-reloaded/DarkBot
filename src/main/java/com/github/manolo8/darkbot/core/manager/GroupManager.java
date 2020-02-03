@@ -1,9 +1,11 @@
-package com.github.manolo8.darkbot.core.objects.swf.group;
+package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.Dictionary;
+import com.github.manolo8.darkbot.core.objects.swf.group.Group;
+import com.github.manolo8.darkbot.core.objects.swf.group.GroupMember;
 
 import java.util.ArrayList;
 import java.util.Arrays;

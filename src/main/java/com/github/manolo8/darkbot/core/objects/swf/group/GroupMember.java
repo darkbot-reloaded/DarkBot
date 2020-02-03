@@ -16,8 +16,10 @@ public class GroupMember extends Updatable {
     public int factionId;
     public int level;
     public int mapId;
-    public boolean isLeader;
     public boolean isAttacked;
+    public boolean isCloacked;
+    public boolean isLeader;
+    public boolean isDead;
     public boolean isLocked; // is selected by hero
     public String username;
 
@@ -50,10 +52,12 @@ public class GroupMember extends Updatable {
         factionId  = API.readMemoryInt(address + 0x24);
         level      = API.readMemoryInt(address + 0x28);
         mapId      = API.readMemoryInt(address + 0x34);
-        isLeader   = API.readMemoryBoolean(address + 0x50);
         isAttacked = API.readMemoryBoolean(address + 0x44);
+        isCloacked = API.readMemoryBoolean(address + 0x48);
+        isLeader   = API.readMemoryBoolean(address + 0x50);
+        isDead     = API.readMemoryBoolean(address + 0x54);
         isLocked   = API.readMemoryBoolean(address + 0x60);
-        username = API.readMemoryString(API.readMemoryLong(address + 0x68));
+        username   = API.readMemoryString(API.readMemoryLong(address + 0x68));
         if (username != null && (username.isEmpty() || username.equals("ERROR")))
             username = null;
     }
