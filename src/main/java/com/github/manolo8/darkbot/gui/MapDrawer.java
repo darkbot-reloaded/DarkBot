@@ -198,35 +198,33 @@ public class MapDrawer extends JPanel {
             }
         }
 
-        synchronized (Main.UPDATE_LOCKER) {
-            Group group = main.groupManager.group;
-            if (group != null && group.isValid()) {
-                List<GroupMember> members;
-                synchronized (Main.UPDATE_LOCKER) {
-                    members = group.members.stream().filter(m -> m.id != hero.id).collect(Collectors.toList());
-                }
-                drawBackgrounded(g2, 28, Align.RIGHT,
-                        (x, y, w, member) -> {
-                            Font font = FONT_SMALL;
-                            Color color = TEXT;
-
-                            Map<TextAttribute, Object> attrs = new HashMap<>();
-                            attrs.put(TextAttribute.WEIGHT, member.isLeader ? TextAttribute.WEIGHT_BOLD : TextAttribute.WEIGHT_REGULAR);
-                            attrs.put(TextAttribute.STRIKETHROUGH, member.isDead ? TextAttribute.STRIKETHROUGH_ON : false);
-                            attrs.put(TextAttribute.UNDERLINE, member.isLocked ? TextAttribute.UNDERLINE_ON : -1);
-                            if (member.isCloacked) color = color.darker();
-
-                            g2.setFont(font.deriveFont(attrs));
-                            g2.setColor(color);
-                            g2.drawString(member.getDisplayText(), x, y + 14);
-
-                            drawHealth(g2, member.memberInfo, x, y + 18, w / 2 - 3, 4);
-                            if (member.targetInfo.shipType != 0)
-                                drawHealth(g2, member.targetInfo, x + (w / 2) + 3, y + 18, w / 2 - 3, 4);
-                        },
-                        member -> Math.min(g2.getFontMetrics().stringWidth(member.getDisplayText()), 200),
-                        members);
+        Group group = main.groupManager.group;
+        if (group != null && group.isValid()) {
+            List<GroupMember> members;
+            synchronized (Main.UPDATE_LOCKER) {
+                members = group.members.stream().filter(m -> m.id != hero.id).collect(Collectors.toList());
             }
+            drawBackgrounded(g2, 28, Align.RIGHT,
+                    (x, y, w, member) -> {
+                        Font font = FONT_SMALL;
+                        Color color = TEXT;
+
+                        Map<TextAttribute, Object> attrs = new HashMap<>();
+                        attrs.put(TextAttribute.WEIGHT, member.isLeader ? TextAttribute.WEIGHT_BOLD : TextAttribute.WEIGHT_REGULAR);
+                        attrs.put(TextAttribute.STRIKETHROUGH, member.isDead ? TextAttribute.STRIKETHROUGH_ON : false);
+                        attrs.put(TextAttribute.UNDERLINE, member.isLocked ? TextAttribute.UNDERLINE_ON : -1);
+                        if (member.isCloacked) color = color.darker();
+
+                        g2.setFont(font.deriveFont(attrs));
+                        g2.setColor(color);
+                        g2.drawString(member.getDisplayText(), x, y + 14);
+
+                        drawHealth(g2, member.memberInfo, x, y + 18, w / 2 - 3, 4);
+                        if (member.targetInfo.shipType != 0)
+                            drawHealth(g2, member.targetInfo, x + (w / 2) + 3, y + 18, w / 2 - 3, 4);
+                    },
+                    member -> Math.min(g2.getFontMetrics().stringWidth(member.getDisplayText()), 200),
+                    members);
         }
 
         drawBackgroundedText(g2, Align.LEFT,
