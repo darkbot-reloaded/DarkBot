@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.objects.swf.group;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.Array;
+import com.github.manolo8.darkbot.core.objects.swf.VectorPtr;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public class Group extends Updatable {
     public int maxSize;
     public boolean canInvite; // is invite button triggered or no
 
-    private Array array = new Array(0);
+    private VectorPtr membersPtr = new VectorPtr(0);
 
     public boolean isValid() {
         return id != 0 && size != 0 && maxSize == 8;
@@ -33,15 +33,15 @@ public class Group extends Updatable {
 
         if (!isValid()) return;
 
-        array.update(API.readMemoryLong(address + 0x37));
-        array.update();
+        membersPtr.update(API.readMemoryLong(address + 0x37));
+        membersPtr.update();
 
         synchronized (Main.UPDATE_LOCKER) {
             if (members.size() > array.size) members = members.subList(0, array.size);
             for (int i = 0; i < array.size; i++) {
                 while (members.size() <= i) members.add(new GroupMember());
                 GroupMember groupMember = members.get(i);
-                groupMember.update(array.elements[i]);
+                groupMember.update(membersPtr.elements[i]);
                 groupMember.update();
             }
         }

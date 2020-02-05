@@ -3,7 +3,7 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
-import com.github.manolo8.darkbot.core.objects.swf.Array;
+import com.github.manolo8.darkbot.core.objects.swf.VectorPtr;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -16,12 +16,12 @@ public class Entity extends Updatable {
 
     public boolean removed;
 
-    public Array traits;
+    public VectorPtr traits;
 
     public Entity() {
         this.locationInfo = new LocationInfo(0);
         this.clickable = new Clickable();
-        this.traits = new Array(0);
+        this.traits = new VectorPtr(0);
     }
 
     public Entity(int id) {

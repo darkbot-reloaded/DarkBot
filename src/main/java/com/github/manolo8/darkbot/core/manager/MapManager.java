@@ -8,7 +8,7 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
-import com.github.manolo8.darkbot.core.objects.swf.Array;
+import com.github.manolo8.darkbot.core.objects.swf.VectorPtr;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 
@@ -50,7 +50,7 @@ public class MapManager implements Manager {
     public double width;
     public double height;
 
-    private Array minimapLayers = new Array(0);
+    private VectorPtr minimapLayers = new VectorPtr(0);
 
     public MapManager(Main main) {
         this.main = main;
