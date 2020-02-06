@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.utils.ClickPoint;
 import com.github.manolo8.darkbot.core.utils.Location;
@@ -13,7 +12,7 @@ public class MouseManager extends Thread {
     private final Object LOCK = new Object();
     private ClickPoint clickPoint = new ClickPoint(0, 0);
     private Point point = new Point();
-    private volatile boolean waiting;
+    private volatile boolean waiting = true;
 
     private final MapManager map;
 
@@ -66,8 +65,8 @@ public class MouseManager extends Thread {
                     }
                 }
 
-                Main.API.writeMemoryDouble(point.address + 32L, (double) clickPoint.x);
-                Main.API.writeMemoryDouble(point.address + 40L, (double) clickPoint.y);
+                Main.API.writeMemoryDouble(point.address + 32L, clickPoint.x);
+                Main.API.writeMemoryDouble(point.address + 40L, clickPoint.y);
             }
         }
     }
