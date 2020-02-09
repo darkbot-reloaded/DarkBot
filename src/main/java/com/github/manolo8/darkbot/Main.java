@@ -54,7 +54,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.16";
+    public static final String VERSION_STRING = "1.13.17 alpha 1";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
@@ -74,7 +74,6 @@ public class Main extends Thread implements PluginListener {
     public final GuiManager guiManager;
     public final StatsManager statsManager;
     public final PingManager pingManager;
-    public final GroupManager groupManager;
     public final BackpageManager backpage;
 
     public final Lazy.Sync<Boolean> status;
@@ -120,14 +119,12 @@ public class Main extends Thread implements PluginListener {
         guiManager = new GuiManager(this);
         statsManager = new StatsManager(this);
         pingManager = new PingManager();
-        groupManager = new GroupManager();
 
         botInstaller.add(guiManager);
         botInstaller.add(mapManager);
         botInstaller.add(hero);
         botInstaller.add(statsManager);
         botInstaller.add(pingManager);
-        botInstaller.add(groupManager);
 
         botInstaller.init();
 
@@ -199,11 +196,10 @@ public class Main extends Thread implements PluginListener {
     }
 
     private void validTick() {
-        guiManager.tick();
         hero.tick();
         mapManager.tick();
+        guiManager.tick();
         statsManager.tick();
-        groupManager.tick();
 
         tickingModule = running && guiManager.canTickModule();
         if (running && guiManager.canTickModule()) tickRunning();
@@ -220,6 +216,7 @@ public class Main extends Thread implements PluginListener {
 
     private void tickRunning() {
         guiManager.pet.tick();
+        guiManager.group.tick();
         checkRefresh();
         tickLogic(true);
         checkPetBug();

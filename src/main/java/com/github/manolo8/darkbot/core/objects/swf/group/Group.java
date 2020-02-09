@@ -1,24 +1,28 @@
 package com.github.manolo8.darkbot.core.objects.swf.group;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.swf.VectorPtr;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Group extends Updatable {
-    public List<GroupMember> members = new ArrayList<>();
+public class Group extends UpdatableAuto {
+    private final HeroManager hero;
+
+    public GroupMember[] members = new GroupMember[0];
     public GroupMember selectedMember = new GroupMember();
 
     public int id;
     public int size;
     public int maxSize;
     public boolean canInvite; // is invite button triggered or no
+    public boolean isLeader;
 
     private VectorPtr membersPtr = new VectorPtr(0);
+
+    public Group(HeroManager hero) {
+        this.hero = hero;
+    }
 
     public boolean isValid() {
         return id != 0 && size != 0 && maxSize == 8;
@@ -33,20 +37,41 @@ public class Group extends Updatable {
 
         if (!isValid()) return;
 
+        long selectedAddr = API.readMemoryLong(address + 0x3F);
+
         membersPtr.update(API.readMemoryLong(address + 0x37));
         membersPtr.update();
 
-        synchronized (Main.UPDATE_LOCKER) {
-            if (members.size() > membersPtr.size) members = members.subList(0, membersPtr.size);
-            for (int i = 0; i < membersPtr.size; i++) {
-                while (members.size() <= i) members.add(new GroupMember());
-                GroupMember groupMember = members.get(i);
-                groupMember.update(membersPtr.elements[i]);
-                groupMember.update();
-            }
-        }
+        // The amount of other people on the group, always minus 1 (yourself)
+        int grpSize = Math.max(0, membersPtr.size - 1);
 
-        long selectedAddr = API.readMemoryLong(address + 0x3F);
-        selectedMember = members.stream().filter(m -> m.address == selectedAddr).findFirst().orElse(null);
+        if (members.length != grpSize) {
+            members = new GroupMember[grpSize];
+            for (int i = 0; i < members.length; i++) members[i] = new GroupMember();
+        }
+        selectedMember = null;
+        for (int i = 0, arrIdx = 0; i < members.length; i++, arrIdx++) {
+            GroupMember member = members[i];
+            member.update(membersPtr.elements[arrIdx]);
+            if (member.id == hero.id) {
+                this.isLeader = member.isLeader;
+                i--;
+            }
+            if (selectedAddr == member.address) selectedMember = member;
+        }
     }
+
+    public GroupMember getMember(int id) {
+        for (GroupMember member : members) {
+            if (member.id == id) return member;
+        }
+        return null;
+    }
+
+    public int indexOf(GroupMember member) {
+        for (int i = 0; i < size; i++)
+            if (members[i] == member) return i;
+        return -1;
+    }
+
 }

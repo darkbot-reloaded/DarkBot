@@ -41,6 +41,7 @@ public class GuiManager implements Manager {
     public final Gui eventProgress =  register("eventProgress");
     public final PetManager pet;
     public final OreTradeGui oreTrade;
+    public final GroupManager group;
 
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
@@ -62,6 +63,7 @@ public class GuiManager implements Manager {
 
         this.pet = register("pet", new PetManager(main));
         this.oreTrade = register("ore_trade", new OreTradeGui(main));
+        this.group = register("group", new GroupManager(main));
 
         this.main.status.add(value -> validTime = System.currentTimeMillis());
     }

@@ -130,6 +130,12 @@ public class Config {
         public @Option @Num(max = 8, step = 1) int MODULE = 1;
     }
 
+    public @Option GroupSettings GROUP = new GroupSettings();
+    public static class GroupSettings {
+        public @Option boolean ACCEPT_INVITES = false;
+        public /*@Option*/ boolean WHITELIST_INVITES = false; // TODO: make it an option
+    }
+
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();
     public static class Miscellaneous {
         public @Option @Num(max = 60 * 12, step = 10) int REFRESH_TIME = 60;

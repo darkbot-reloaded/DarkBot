@@ -198,12 +198,8 @@ public class MapDrawer extends JPanel {
             }
         }
 
-        Group group = main.groupManager.group;
+        Group group = main.guiManager.group.group;
         if (group != null && group.isValid()) {
-            List<GroupMember> members;
-            synchronized (Main.UPDATE_LOCKER) {
-                members = group.members.stream().filter(m -> m.id != hero.id).collect(Collectors.toList());
-            }
             drawBackgrounded(g2, 28, Align.RIGHT,
                     (x, y, w, member) -> {
                         Font font = FONT_SMALL;
@@ -224,7 +220,7 @@ public class MapDrawer extends JPanel {
                             drawHealth(g2, member.targetInfo, x + (w / 2) + 3, y + 18, w / 2 - 3, 4);
                     },
                     member -> Math.min(g2.getFontMetrics().stringWidth(member.getDisplayText()), 200),
-                    members);
+                    group.members);
         }
 
         drawBackgroundedText(g2, Align.LEFT,
@@ -481,17 +477,18 @@ public class MapDrawer extends JPanel {
         this.drawBackgrounded(g2, 15, align,
                 (x, y, h, str) -> g2.drawString(str, x, y + 14),
                 g2.getFontMetrics()::stringWidth,
-                Arrays.asList(texts));
+                texts);
     }
 
-    private <T> void drawBackgrounded(Graphics2D g2, int lineHeight, Align align,
-                                      Renderer<T> renderer,
-                                      ToIntFunction<T> widthGetter,
-                                      Collection<T> toRender) {
+    @SafeVarargs
+    private final <T> void drawBackgrounded(Graphics2D g2, int lineHeight, Align align,
+                                            Renderer<T> renderer,
+                                            ToIntFunction<T> widthGetter,
+                                            T... toRender) {
         g2.setFont(FONT_SMALL);
 
-        int width = toRender.stream().mapToInt(widthGetter).max().orElse(0) + 8;
-        int height = toRender.size() * lineHeight + 4;
+        int width = Arrays.stream(toRender).mapToInt(widthGetter).max().orElse(0) + 8;
+        int height = toRender.length * lineHeight + 4;
         int top = getHeight() / 2 - height / 2;
         int left = align == Align.RIGHT ? getWidth() - width : 0;
 

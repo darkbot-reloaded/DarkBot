@@ -1,11 +1,11 @@
 package com.github.manolo8.darkbot.core.objects.swf.group;
 
-import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class MemberInfo extends Updatable implements HealthHolder {
+public class MemberInfo extends UpdatableAuto implements HealthHolder {
     public int shipType;
     public int hp;
     public int maxHp;

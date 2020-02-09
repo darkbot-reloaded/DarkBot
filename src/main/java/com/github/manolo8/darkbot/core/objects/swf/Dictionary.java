@@ -153,6 +153,7 @@ public class Dictionary extends Updatable {
 
     @Override
     public void update(long address) {
+        if (address == this.address) return;
         super.update(address);
         this.lastFix = 0;
     }
