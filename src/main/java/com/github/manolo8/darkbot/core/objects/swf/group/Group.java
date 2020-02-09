@@ -37,8 +37,8 @@ public class Group extends Updatable {
         membersPtr.update();
 
         synchronized (Main.UPDATE_LOCKER) {
-            if (members.size() > array.size) members = members.subList(0, array.size);
-            for (int i = 0; i < array.size; i++) {
+            if (members.size() > membersPtr.size) members = members.subList(0, membersPtr.size);
+            for (int i = 0; i < membersPtr.size; i++) {
                 while (members.size() <= i) members.add(new GroupMember());
                 GroupMember groupMember = members.get(i);
                 groupMember.update(membersPtr.elements[i]);

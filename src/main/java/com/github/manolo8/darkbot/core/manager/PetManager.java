@@ -5,8 +5,11 @@ import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.objects.Gui;
+import com.github.manolo8.darkbot.core.objects.swf.VectorPtr;
 
 import java.util.List;
+
+import static com.github.manolo8.darkbot.Main.API;
 
 public class PetManager extends Gui {
 
@@ -86,4 +89,61 @@ public class PetManager extends Gui {
         }
     }
 
+    VectorPtr petPtr = VectorPtr.ofPet();
+    VectorPtr modules = VectorPtr.ofPetCheck();
+    private void petModules() {
+        petPtr.update(API.readMemoryLong(API.readMemoryLong(address + 72) + 64));
+        petPtr.update();
+
+        modules.update(API.readMemoryLong(API.readMemoryLong(API.readMemoryLong(petPtr.get(petPtr.size - 1) + 216) + 176) + 224));
+        modules.update();
+
+        long currentModule = currentModule();
+
+        for (int i = 0; i < modules.size; i++) {
+            int gearId = API.readMemoryInt(modules.get(i) + 172);
+            String gearName = API.readMemoryString(API.readMemoryLong(modules.get(i) + 200));
+            long checkAddr = API.readMemoryLong(API.readMemoryLong(modules.get(i) + 208) + 152);
+
+            if (currentModule != checkAddr) continue;
+
+            System.out.println("gearId = " + gearId);
+            System.out.println("gearName = " + gearName);
+            System.out.println("checkAddr = " + checkAddr);
+        }
+    }
+
+    VectorPtr ptr = VectorPtr.ofPetCheck();
+    VectorPtr currentModule = VectorPtr.ofPet();
+    private long currentModule() {
+        long temp = API.readMemoryLong(address + 400);
+        ptr.update(temp);
+        ptr.update();
+
+        for (int i = 0; i < ptr.size; i++) {
+            if (API.readMemoryInt(ptr.get(i) + 172) == 54) {
+                temp = ptr.get(i);
+                break;
+            }
+        }
+
+        ptr.update(API.readMemoryLong(temp + 184));
+        ptr.update();
+
+        for (int i = 0; i < ptr.size; i++) {
+            if (API.readMemoryInt(ptr.get(i) + 168) == 72) {
+                temp = ptr.get(i);
+                break;
+            }
+        }
+
+        currentModule.update(API.readMemoryLong(API.readMemoryLong(temp + 72) + 64));
+        currentModule.update();
+        temp = API.readMemoryLong(API.readMemoryLong(currentModule.get(0) + 216) + 176);
+
+        currentModule.update(API.readMemoryLong(API.readMemoryLong(temp + 72) + 64));
+        currentModule.update();
+
+        return API.readMemoryLong(API.readMemoryLong(currentModule.get(1) + 216) + 152);
+    }
 }
