@@ -15,7 +15,7 @@ public class Group extends UpdatableAuto {
     public int id;
     public int size;
     public int maxSize;
-    public boolean canInvite; // is invite button triggered or no
+    public boolean isOpen; // if the group is open to allowing anyone to invite
     public boolean isLeader;
 
     private VectorPtr membersPtr = new VectorPtr(0);
@@ -30,10 +30,10 @@ public class Group extends UpdatableAuto {
 
     @Override
     public void update() {
-        id        = API.readMemoryInt(address + 0x1F);
-        size      = API.readMemoryInt(address + 0x23);
-        maxSize   = API.readMemoryInt(address + 0x27);
-        canInvite = API.readMemoryBoolean(address + 0x2B);
+        id      = API.readMemoryInt(address + 0x1F);
+        size    = API.readMemoryInt(address + 0x23);
+        maxSize = API.readMemoryInt(address + 0x27);
+        isOpen  = API.readMemoryBoolean(address + 0x2B);
 
         if (!isValid()) return;
 

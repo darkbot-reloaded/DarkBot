@@ -28,6 +28,7 @@ public class GroupManager extends Gui {
     private MapManager mapManager;
 
     public Group group;
+    public boolean pinging; // If the pinging button is enabled & you're ready to ping
     public List<Invite> invites = new ArrayList<>();
 
     private Dictionary inviteDict = new Dictionary(0);
@@ -49,6 +50,7 @@ public class GroupManager extends Gui {
         long groupAddress = API.readMemoryLong(API.readMemoryLong(mapManager.eventAddress) + 0x48);
         group.update(API.readMemoryLong(groupAddress + 0x30));
 
+        pinging = API.readMemoryBoolean(groupAddress + 0x40);
         inviteDict.update(API.readMemoryLong(groupAddress + 0x48));
         inviteDict.update();
 
@@ -102,7 +104,7 @@ public class GroupManager extends Gui {
     }
 
     public boolean canInvite() {
-        return (!group.isValid() || group.canInvite) && invites.size() + group.size < 8;
+        return (!group.isValid() || group.isOpen) && invites.size() + group.size < 8;
     }
 
     private void click(GroupAction action) {
