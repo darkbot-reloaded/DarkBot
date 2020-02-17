@@ -16,13 +16,15 @@ import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
-import com.github.manolo8.darkbot.utils.MathUtils;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class Config {
 
@@ -32,6 +34,9 @@ public class Config {
     public Map<Integer, Set<SafetyInfo>> SAFETY = new HashMap<>();
     public transient Lazy<SafetyInfo> ADDED_SAFETY = new Lazy.NoCache<>();
     // DEFINED AREAS
+
+    public Map<Integer, PlayerInfo> PLAYER_INFOS = new HashMap<>();
+    public Queue<PlayerInfo> UNRESOLVED = new LinkedList<>();
 
     public Map<String, Object> CUSTOM_CONFIGS = new HashMap<>();
 

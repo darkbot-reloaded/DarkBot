@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.components.TabbedPane;
+import com.github.manolo8.darkbot.gui.players.PlayerEditor;
 import com.github.manolo8.darkbot.gui.plugins.PluginDisplay;
 import com.github.manolo8.darkbot.gui.safety.SafetiesEditor;
 import com.github.manolo8.darkbot.gui.titlebar.ConfigTitleBar;
@@ -32,6 +33,7 @@ public class ConfigGui extends JFrame {
     private ZoneEditor preferredZones;
     private ZoneEditor avoidedZones;
     private SafetiesEditor safeEditor;
+    private PlayerEditor playerEditor;
     private MainButton pluginTab;
     private PluginDisplay pluginDisplay;
 
@@ -69,6 +71,7 @@ public class ConfigGui extends JFrame {
         preferredZones = new ZoneEditor();
         avoidedZones = new ZoneEditor();
         safeEditor = new SafetiesEditor();
+        playerEditor = new PlayerEditor();
         pluginDisplay = new PluginDisplay();
     }
 
@@ -77,6 +80,7 @@ public class ConfigGui extends JFrame {
         tabbedPane.addTab(null, "tabs.preferred_zones", preferredZones);
         tabbedPane.addTab(null, "tabs.avoided_zones", avoidedZones);
         tabbedPane.addTab(null, "tabs.safety_places", safeEditor);
+        tabbedPane.addTab(null, "tabs.players", playerEditor);
         pluginTab = tabbedPane.addHiddenTab(UIUtils.getIcon("plugins"), "tabs.plugins", pluginDisplay);
 
         mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][grow]"));
@@ -91,6 +95,7 @@ public class ConfigGui extends JFrame {
         preferredZones.setup(main, config.PREFERRED);
         avoidedZones.setup(main, config.AVOIDED);
         safeEditor.setup(main);
+        playerEditor.setup(main);
         pluginDisplay.setup(main, pluginTab);
     }
 
