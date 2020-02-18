@@ -4,6 +4,9 @@ public class PlayerInfo {
     public String username;
     public int userId = -1;
 
+    public int retries = 0;
+    public long lastUpdate = 0;
+
     public boolean isWhitelisted;
 
     public PlayerInfo() {
@@ -15,6 +18,10 @@ public class PlayerInfo {
 
     public PlayerInfo(int userId) {
         this.userId = userId;
+    }
+
+    public boolean shouldWait() {
+        return System.currentTimeMillis() > lastUpdate + (retries * retries * 1000);
     }
 
     @Override
