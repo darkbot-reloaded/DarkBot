@@ -87,6 +87,8 @@ public class UsernameUpdater implements Task {
             } else {
                 config.PLAYER_INFOS.put(user.userId, new PlayerInfo(user.username, user.userId));
             }
+
+            config.PLAYER_UPDATED.send(user.userId);
         } else reQueue(user);
     }
 

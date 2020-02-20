@@ -7,7 +7,7 @@ public class PlayerInfo {
     public String username;
     public int userId;
 
-    public long lastUpdate = 0;
+    public long lastUpdate = System.currentTimeMillis();
 
     private Map<PlayerTag, Long> subscriptions = new HashMap<>();
 

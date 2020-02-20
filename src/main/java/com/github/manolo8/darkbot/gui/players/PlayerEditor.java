@@ -2,8 +2,8 @@ package com.github.manolo8.darkbot.gui.players;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.PlayerInfo;
+import com.github.manolo8.darkbot.config.UnresolvedPlayer;
 import com.github.manolo8.darkbot.gui.components.MainButton;
-import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -13,7 +13,6 @@ public class PlayerEditor extends JPanel {
 
     private JButton addPlayer;
     private JButton addUserId;
-    private JButton refresh;
     private JList<PlayerInfo> players;
 
     private DefaultListModel<PlayerInfo> playersModel;
@@ -21,30 +20,27 @@ public class PlayerEditor extends JPanel {
     private Main main;
 
     public PlayerEditor() {
-        super(new MigLayout("ins 0, gap 0, wrap 4, fill", "[grow][][][]", "[][grow]"));
+        super(new MigLayout("ins 0, gap 0, wrap 3, fill", "[grow][][]", "[][grow]"));
         initComponents();
         setComponentPosition();
     }
 
     private void initComponents() {
-        add(new JLabel("Add new user by: "));
         this.addPlayer = new AddPlayer();
         this.addUserId = new AddId();
-        this.refresh = new ReloadPlayers();
         this.players = new JList<>(playersModel = new DefaultListModel<>());
     }
 
     private void setComponentPosition() {
+        add(new JLabel("Add new user by: "));
         add(addPlayer, "grow");
         add(addUserId, "grow");
-        add(refresh, "grow");
         add(players, "span 4");
     }
 
     public void setup(Main main) {
         this.main = main;
-
-        refreshList();
+        this.main.config.PLAYER_UPDATED.add(i -> refreshList());
     }
 
     public void refreshList() {
@@ -62,7 +58,7 @@ public class PlayerEditor extends JPanel {
         public void actionPerformed(ActionEvent e) {
             String name = JOptionPane.showInputDialog(this, "Username:", "Add player", JOptionPane.QUESTION_MESSAGE);
             if (name == null) return;
-            main.config.UNRESOLVED.add(new PlayerInfo(name));
+            main.config.UNRESOLVED.add(new UnresolvedPlayer(name));
         }
     }
 
@@ -75,18 +71,8 @@ public class PlayerEditor extends JPanel {
         public void actionPerformed(ActionEvent e) {
             String id = JOptionPane.showInputDialog(this, "User ID:", "Add player", JOptionPane.QUESTION_MESSAGE);
             if (id == null) return;
-            main.config.UNRESOLVED.add(new PlayerInfo(Integer.parseInt(id)));
+            main.config.UNRESOLVED.add(new UnresolvedPlayer(Integer.parseInt(id)));
         }
     }
 
-    public class ReloadPlayers extends MainButton {
-        public ReloadPlayers() {
-            super(UIUtils.getIcon("reload"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            refreshList();
-        }
-    }
 }

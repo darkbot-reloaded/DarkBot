@@ -5,7 +5,7 @@ package com.github.manolo8.darkbot.config;
  */
 public class UnresolvedPlayer {
     public String username;
-    public int userId;
+    public int userId = -1;
 
     public int retries = 0;
     public long lastUpdate = 0;

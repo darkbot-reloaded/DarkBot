@@ -36,6 +36,7 @@ public class Config {
 
     public Map<Integer, PlayerInfo> PLAYER_INFOS = new HashMap<>();
     public Map<String, PlayerTag> PLAYER_TAGS = new HashMap<>();
+    public transient Lazy<Integer> PLAYER_UPDATED = new Lazy.NoCache<>();
 
     public Queue<UnresolvedPlayer> UNRESOLVED = new LinkedList<>();
 
