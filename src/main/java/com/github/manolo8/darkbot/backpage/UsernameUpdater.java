@@ -3,10 +3,12 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.PlayerInfo;
+import com.github.manolo8.darkbot.config.UnresolvedPlayer;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.Base62;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.IOUtils;
 
 import javax.swing.*;
@@ -32,7 +34,7 @@ public class UsernameUpdater implements Task {
 
     @Override
     public void tick() {
-        PlayerInfo user = config.UNRESOLVED.poll();
+        UnresolvedPlayer user = config.UNRESOLVED.poll();
         if (user == null || (user.userId == -1 && user.username == null)) return;
         if (user.shouldWait()) {
             reQueue(user);
@@ -59,15 +61,15 @@ public class UsernameUpdater implements Task {
 
             int id = response.getId();
             if (!byId && (Objects.equals(response.url, "false") || id == -1)) {
-                Popups.showMessageAsync("User not found", "Could not find the player named " + user.username +
-                        "\nTry adding the player by user ID instead", JOptionPane.WARNING_MESSAGE);
+                Popups.showMessageAsync(I18n.get("gui.players.not_found.title"),
+                        I18n.get("gui.players.not_found.by_name", user.username), JOptionPane.WARNING_MESSAGE);
                 return; // Don't re-queue
             }
 
             if (byId && (response.userName == null || response.userName.isEmpty())) {
                 if (user.username != null) return; // Probably just updating the player, ignore
-                Popups.showMessageAsync("User not found", "Could not find the player with id " + user.userId +
-                        "\nTry adding the player by name instead", JOptionPane.WARNING_MESSAGE);
+                Popups.showMessageAsync(I18n.get("gui.players.not_found.title"),
+                        I18n.get("gui.players.not_found.by_id", user.userId), JOptionPane.WARNING_MESSAGE);
                 return; // Don't re-queue
             }
 
@@ -82,14 +84,13 @@ public class UsernameUpdater implements Task {
             if (pl != null) {
                 pl.username = user.username;
                 pl.lastUpdate = System.currentTimeMillis();
-                pl.retries = 0;
             } else {
-                config.PLAYER_INFOS.put(user.userId, user);
+                config.PLAYER_INFOS.put(user.userId, new PlayerInfo(user.username, user.userId));
             }
         } else reQueue(user);
     }
 
-    private void reQueue(PlayerInfo user) {
+    private void reQueue(UnresolvedPlayer user) {
         user.retries++;
         user.lastUpdate = System.currentTimeMillis();
         config.UNRESOLVED.add(user);

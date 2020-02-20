@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
-import java.util.TreeMap;
 
 public class Config {
 
@@ -36,7 +35,9 @@ public class Config {
     // DEFINED AREAS
 
     public Map<Integer, PlayerInfo> PLAYER_INFOS = new HashMap<>();
-    public Queue<PlayerInfo> UNRESOLVED = new LinkedList<>();
+    public Map<String, PlayerTag> PLAYER_TAGS = new HashMap<>();
+
+    public Queue<UnresolvedPlayer> UNRESOLVED = new LinkedList<>();
 
     public Map<String, Object> CUSTOM_CONFIGS = new HashMap<>();
 
