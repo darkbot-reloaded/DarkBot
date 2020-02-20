@@ -35,11 +35,12 @@ public class PlayerEditor extends JPanel {
         add(new JLabel("Add new user by: "));
         add(addPlayer, "grow");
         add(addUserId, "grow");
-        add(players, "span 4");
+        add(players, "span 4, grow");
     }
 
     public void setup(Main main) {
         this.main = main;
+        main.config.PLAYER_INFOS.values().forEach(playersModel::addElement);
         this.main.config.PLAYER_UPDATED.add(i -> refreshList());
     }
 
