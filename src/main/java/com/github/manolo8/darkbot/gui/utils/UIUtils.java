@@ -15,6 +15,7 @@ public class UIUtils {
     public static final Color GREEN = Color.decode("#3D6E3D"),
             YELLOW = Color.decode("#6E6E28"),
             RED = Color.decode("#6E2B28"),
+            ACTION = new Color(50, 53, 55), // When hovering or clicking a btn
             SELECTED_BLUE = new Color(74, 136, 199);
 
     public static ImageIcon getIcon(String name) {

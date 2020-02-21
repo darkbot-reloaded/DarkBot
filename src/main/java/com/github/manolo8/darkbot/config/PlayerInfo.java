@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.config;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +32,10 @@ public class PlayerInfo {
         if (until != null && until > System.currentTimeMillis()) return true;
         subscriptions.remove(tag);
         return false;
+    }
+
+    public Collection<PlayerTag> getTags() {
+        return subscriptions.keySet();
     }
 
     @Override

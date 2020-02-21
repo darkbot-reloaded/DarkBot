@@ -11,7 +11,7 @@ import java.awt.event.MouseEvent;
 
 public class MainButton extends JButton implements SimpleMouseListener, ActionListener {
 
-    protected Color actionColor = new Color(50, 53, 55);
+    protected Color actionColor = UIUtils.ACTION;
     protected Color def;
 
     private boolean hovering, pressing;
