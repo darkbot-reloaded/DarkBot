@@ -92,7 +92,7 @@ public class PlayerEditor extends JPanel {
         public void actionPerformed(ActionEvent e) {
             String name = JOptionPane.showInputDialog(this, "Tag name", "Add player tag", JOptionPane.QUESTION_MESSAGE);
             if (name == null) return;
-            Color color = JColorChooser.showDialog(this, "Tag color", UIUtils.GREEN);
+            Color color = JColorChooser.showDialog(this, "Tag color", null);
             if (color == null) return;
             main.config.PLAYER_TAGS.put(name, new PlayerTag(name, color));
         }
