@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.UnresolvedPlayer;
 import com.github.manolo8.darkbot.core.itf.Task;
@@ -12,7 +13,9 @@ import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.IOUtils;
 
 import javax.swing.*;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.URLDecoder;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,8 +76,8 @@ public class UsernameUpdater implements Task {
                 return; // Don't re-queue
             }
 
-            if (byId) user.username = response.userName;
-            else user.userId = response.getId();
+            if (byId) user.username = response.getUsername();
+            else user.userId = id;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -89,6 +92,7 @@ public class UsernameUpdater implements Task {
             }
 
             config.PLAYER_UPDATED.send(user.userId);
+            config.changed = true;
         } else reQueue(user);
     }
 
@@ -102,6 +106,10 @@ public class UsernameUpdater implements Task {
         String result;
         String userName;
         String url;
+
+        private String getUsername() {
+            return URLDecoder.decode(userName);
+        }
 
         private int getId() {
             if (url == null) return -1;

@@ -5,56 +5,52 @@ import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.config.UnresolvedPlayer;
 import com.github.manolo8.darkbot.gui.components.MainButton;
+import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Comparator;
 
 public class PlayerEditor extends JPanel {
 
-    private JButton addPlayer;
-    private JButton addUserId;
-    private JButton addPlayerTag;
-    private JList<PlayerInfo> players;
-
     private DefaultListModel<PlayerInfo> playersModel;
-
     private Main main;
 
     public PlayerEditor() {
-        super(new MigLayout("ins 0, gap 0, wrap 3, fill", "[][]push[]", "[][grow]"));
-        initComponents();
-        setComponentPosition();
+        super(new MigLayout("ins 0, gap 0, wrap 4, fill", "[][][grow][]", "[][grow]"));
+
+        add(new AddPlayer(), "grow");
+        add(new AddId(), "grow");
+        add(new PlayerSearcher(this::refreshList), "grow");
+        add(new AddTag(), "grow");
+        add(createPlayerList(), "span 4, grow");
     }
 
-    private void initComponents() {
-        this.addPlayer = new AddPlayer();
-        this.addUserId = new AddId();
-        this.addPlayerTag = new AddTag();
-        this.players = new JList<>(playersModel = new DefaultListModel<>());
+    private JList<PlayerInfo> createPlayerList() {
+        JList<PlayerInfo> players = new JList<>(playersModel = new DefaultListModel<>());
         players.setSelectionBackground(UIUtils.ACTION);
         players.setCellRenderer(new PlayerRenderer());
-    }
-
-    private void setComponentPosition() {
-        add(addPlayer, "grow");
-        add(addUserId, "grow");
-        add(addPlayerTag, "grow");
-        add(players, "span 3, grow");
+        return players;
     }
 
     public void setup(Main main) {
         this.main = main;
         main.config.PLAYER_INFOS.values().forEach(playersModel::addElement);
-        this.main.config.PLAYER_UPDATED.add(i -> refreshList());
+        this.main.config.PLAYER_UPDATED.add(i -> refreshList(null));
     }
 
-    public void refreshList() {
+    public void refreshList(String filter) {
         if (main == null) return;
         playersModel.clear();
-        main.config.PLAYER_INFOS.values().forEach(playersModel::addElement);
+        main.config.PLAYER_INFOS
+                .values()
+                .stream()
+                .filter(pi -> pi.filter(filter))
+                .sorted(Comparator.comparing(pi -> pi.username))
+                .forEach(playersModel::addElement);
     }
 
     public class AddPlayer extends MainButton {
@@ -79,7 +75,11 @@ public class PlayerEditor extends JPanel {
         public void actionPerformed(ActionEvent e) {
             String id = JOptionPane.showInputDialog(this, "User ID:", "Add player", JOptionPane.QUESTION_MESSAGE);
             if (id == null) return;
-            main.config.UNRESOLVED.add(new UnresolvedPlayer(Integer.parseInt(id)));
+            try {
+                main.config.UNRESOLVED.add(new UnresolvedPlayer(Integer.parseInt(id.trim())));
+            } catch (NumberFormatException ex) {
+                Popups.showMessageAsync("Invalid user ID", id + " is not a valid number", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 

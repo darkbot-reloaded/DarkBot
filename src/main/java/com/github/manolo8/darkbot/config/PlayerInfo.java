@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.config;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class PlayerInfo {
@@ -36,6 +37,12 @@ public class PlayerInfo {
 
     public Collection<PlayerTag> getTags() {
         return subscriptions.keySet();
+    }
+
+    public boolean filter(String string) {
+        return string == null
+                || username.toLowerCase(Locale.ROOT).contains(string.toLowerCase(Locale.ROOT))
+                || String.valueOf(userId).contains(string);
     }
 
     @Override
