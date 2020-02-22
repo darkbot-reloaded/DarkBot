@@ -199,6 +199,7 @@ public class MapDrawer extends JPanel {
         }
 
         Group group = main.guiManager.group.group;
+        boolean hideNames = config.BOT_SETTINGS.DISPLAY.HIDE_GROUP_NAMES;
         if (group != null && group.isValid()) {
             drawBackgrounded(g2, 28, Align.RIGHT,
                     (x, y, w, member) -> {
@@ -213,13 +214,13 @@ public class MapDrawer extends JPanel {
 
                         g2.setFont(font.deriveFont(attrs));
                         g2.setColor(color);
-                        g2.drawString(member.getDisplayText(), x, y + 14);
+                        g2.drawString(member.getDisplayText(hideNames), x, y + 14);
 
                         drawHealth(g2, member.memberInfo, x, y + 18, w / 2 - 3, 4);
                         if (member.targetInfo.shipType != 0)
                             drawHealth(g2, member.targetInfo, x + (w / 2) + 3, y + 18, w / 2 - 3, 4);
                     },
-                    member -> Math.min(g2.getFontMetrics().stringWidth(member.getDisplayText()), 200),
+                    member -> Math.min(g2.getFontMetrics().stringWidth(member.getDisplayText(hideNames)), 200),
                     group.members);
         }
 

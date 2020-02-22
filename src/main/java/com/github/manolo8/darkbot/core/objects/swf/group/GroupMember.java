@@ -23,8 +23,8 @@ public class GroupMember extends PartialGroupMember {
         return StarManager.getInstance().byId(mapId).shortName;
     }
 
-    public String getDisplayText() {
-        return getMap() + " " + getUsername() + " ";
+    public String getDisplayText(boolean hideUsername) {
+        return getMap() + " " + (hideUsername ? "-Hidden-" : getUsername()) + " ";
     }
 
     @Override

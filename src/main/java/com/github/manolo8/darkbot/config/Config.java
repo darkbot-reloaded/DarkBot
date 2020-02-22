@@ -165,6 +165,7 @@ public class Config {
         public static class Display {
             public @Option boolean SHOW_NAMES;
             public @Option boolean HIDE_NAME;
+            public @Option boolean HIDE_GROUP_NAMES;
             public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
             public @Option boolean SHOW_ZONES = true;
             public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
