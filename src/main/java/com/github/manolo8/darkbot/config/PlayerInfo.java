@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.config;
 
+import com.github.manolo8.darkbot.Main;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
@@ -21,7 +23,7 @@ public class PlayerInfo {
     }
 
     public void setTag(PlayerTag tag, Long until) {
-        subscriptions.put(tag, until);
+        subscriptions.put(tag, until == null ? -1 : until);
     }
 
     public void removeTag(PlayerTag tag) {
@@ -30,7 +32,7 @@ public class PlayerInfo {
 
     public boolean hasTag(PlayerTag tag) {
         Long until = subscriptions.get(tag);
-        if (until != null && until > System.currentTimeMillis()) return true;
+        if (until != null && (until == -1 || until > System.currentTimeMillis())) return true;
         subscriptions.remove(tag);
         return false;
     }

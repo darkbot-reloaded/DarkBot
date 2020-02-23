@@ -10,7 +10,6 @@ import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Comparator;
 import java.util.List;
@@ -61,13 +60,12 @@ public class PlayerEditor extends JPanel {
         }
 
         if (tag == null) {
-            tag = createTag();
+            tag = PlayerTagUtils.createTag(this);
             if (tag == null) return;
+            main.config.PLAYER_TAGS.put(tag.name, tag);
         }
 
-        for (PlayerInfo p : players) {
-            p.setTag(tag, null);
-        }
+        for (PlayerInfo p : players) p.setTag(tag, null);
         main.config.changed = true;
         playerInfoList.updateUI();
     }
@@ -83,17 +81,6 @@ public class PlayerEditor extends JPanel {
         for (PlayerInfo p : players) p.removeTag(tag);
         main.config.changed = true;
         playerInfoList.updateUI();
-    }
-
-    public PlayerTag createTag() {
-        PlayerTag tag;
-        String name = JOptionPane.showInputDialog(this, "Tag name", "Add player tag", JOptionPane.QUESTION_MESSAGE);
-        if (name == null) return null;
-        Color color = JColorChooser.showDialog(this, "Tag color", null);
-        if (color == null) return null;
-        main.config.PLAYER_TAGS.put(name, tag = new PlayerTag(name, color));
-        main.config.changed = true;
-        return tag;
     }
 
     public void deleteTag(PlayerTag tag) {

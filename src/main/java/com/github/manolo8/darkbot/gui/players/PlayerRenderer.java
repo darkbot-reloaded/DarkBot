@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.gui.players;
 
 import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.PlayerTag;
-import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -18,19 +17,13 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
     private JLabel playername = new JLabel();
     private JLabel id = new JLabel();
 
-    PlayerTag tag1 = new PlayerTag("Invite", UIUtils.GREEN);
-    PlayerTag tag2 = new PlayerTag("Blacklisted", UIUtils.RED);
-
     private Map<PlayerTag, Tag> tagCache = new HashMap<>();
 
     public PlayerRenderer() {
-        super(new MigLayout("ins 5px 0px 5px, fill, gap 8px!", "[50px!][150px!]8px:push[]8px!", "[]"));
+        super(new MigLayout("ins 4px 0px 4px 5px, fill, gap 8px!, h 28px!", "[50px!][120px!]8px:push[]", "[]"));
         id.setFont(id.getFont().deriveFont(9f));
         id.setHorizontalAlignment(SwingConstants.RIGHT);
         id.setVerticalAlignment(SwingConstants.BOTTOM);
-
-        tagCache.put(tag1, new Tag(tag1));
-        tagCache.put(tag2, new Tag(tag2));
     }
 
     @Override
