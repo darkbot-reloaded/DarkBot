@@ -20,7 +20,7 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
     private Map<PlayerTag, Tag> tagCache = new HashMap<>();
 
     public PlayerRenderer() {
-        super(new MigLayout("ins 4px 0px 4px 5px, fill, gap 8px!, h 28px!", "[50px!][120px!]8px:push[]", "[]"));
+        super(new MigLayout("ins 4px 0px 4px 5px, fill, h 28px!", "[50px!]8px![120px!]8px:push[]8px!", "[]"));
         id.setFont(id.getFont().deriveFont(9f));
         id.setHorizontalAlignment(SwingConstants.RIGHT);
         id.setVerticalAlignment(SwingConstants.BOTTOM);

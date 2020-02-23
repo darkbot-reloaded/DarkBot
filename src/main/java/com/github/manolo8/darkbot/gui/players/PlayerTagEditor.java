@@ -53,7 +53,7 @@ public class PlayerTagEditor extends JPanel {
         }
 
         tags.removeAll();
-        for (PlayerTag tag : editor.main.config.PLAYER_TAGS.values()) {
+        for (PlayerTag tag : editor.main.config.PLAYER_TAGS) {
             tags.add(tagCache.computeIfAbsent(tag, TagEntry::new).setHandler(clicked));
         }
 

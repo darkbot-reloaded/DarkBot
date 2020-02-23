@@ -62,7 +62,7 @@ public class PlayerEditor extends JPanel {
         if (tag == null) {
             tag = PlayerTagUtils.createTag(this);
             if (tag == null) return;
-            main.config.PLAYER_TAGS.put(tag.name, tag);
+            main.config.PLAYER_TAGS.add(tag);
         }
 
         for (PlayerInfo p : players) p.setTag(tag, null);
@@ -90,7 +90,7 @@ public class PlayerEditor extends JPanel {
                 "Are you sure?",
                 JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION)
-            main.config.PLAYER_TAGS.remove(tag.name);
+            main.config.PLAYER_TAGS.remove(tag);
 
         for (PlayerInfo p : main.config.PLAYER_INFOS.values()) {
             p.removeTag(tag);

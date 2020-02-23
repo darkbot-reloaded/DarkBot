@@ -17,8 +17,10 @@ import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -35,7 +37,7 @@ public class Config {
     // DEFINED AREAS
 
     public Map<Integer, PlayerInfo> PLAYER_INFOS = new HashMap<>();
-    public Map<String, PlayerTag> PLAYER_TAGS = new HashMap<>();
+    public List<PlayerTag> PLAYER_TAGS = new ArrayList<>();
     public transient Lazy<Integer> PLAYER_UPDATED = new Lazy.NoCache<>();
 
     public Queue<UnresolvedPlayer> UNRESOLVED = new LinkedList<>();
