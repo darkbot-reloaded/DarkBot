@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -13,7 +14,7 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class Dictionary extends Updatable {
 
-    private HashMap<String, Lazy<Long>> lazy;
+    private Map<String, Lazy<Long>> lazy = new HashMap<>();
 
     public Entry[] elements;
     private String[] checks;
@@ -28,16 +29,7 @@ public class Dictionary extends Updatable {
     }
 
     public void addLazy(String key, Consumer<Long> consumer) {
-        if (lazy == null) lazy = new HashMap<>();
-
-        Lazy<Long> lazy = this.lazy.get(key);
-
-        if (lazy == null) {
-            lazy = new Lazy<>();
-            this.lazy.put(key, lazy);
-        }
-
-        lazy.add(consumer);
+        this.lazy.computeIfAbsent(key, k -> new Lazy<>()).add(consumer);
     }
 
     @Override
