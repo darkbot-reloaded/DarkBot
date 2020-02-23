@@ -72,6 +72,19 @@ public class PlayerEditor extends JPanel {
         playerInfoList.updateUI();
     }
 
+    public void removeTagFromPlayers(PlayerTag tag) {
+        if (tag == null) return;
+        List<PlayerInfo> players = playerInfoList.getSelectedValuesList();
+
+        if (players.isEmpty()) {
+            Popups.showMessageAsync("Select players first", "To remove tags from players, first select the players", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        for (PlayerInfo p : players) p.removeTag(tag);
+        main.config.changed = true;
+        playerInfoList.updateUI();
+    }
+
     public PlayerTag createTag() {
         PlayerTag tag;
         String name = JOptionPane.showInputDialog(this, "Tag name", "Add player tag", JOptionPane.QUESTION_MESSAGE);
