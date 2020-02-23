@@ -11,7 +11,7 @@ public class PlayerInfo {
 
     public long lastUpdate = System.currentTimeMillis();
 
-    private Map<PlayerTag, Long> subscriptions = new HashMap<>();
+    public Map<PlayerTag, Long> subscriptions = new HashMap<>();
 
     public PlayerInfo() {}
 

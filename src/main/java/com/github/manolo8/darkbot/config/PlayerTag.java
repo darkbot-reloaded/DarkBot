@@ -36,8 +36,8 @@ public class PlayerTag {
     public static class TagAdapter extends TypeAdapter<PlayerTag> {
         @Override
         public void write(JsonWriter writer, PlayerTag tag) throws IOException {
-            writer.value(String.format("%02x%02x%02x,%s",
-                    tag.color.getRed(), tag.color.getBlue(), tag.color.getGreen(), tag.name));
+            writer.value(String.format("#%02x%02x%02x,%s",
+                    tag.color.getRed(), tag.color.getGreen(), tag.color.getBlue(), tag.name));
         }
 
         @Override

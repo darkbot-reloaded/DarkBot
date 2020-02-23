@@ -68,7 +68,7 @@ public class ExtraButton extends TitleBarButton<JFrame> {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (keepClosed < System.currentTimeMillis()) extraOptions.show(this, getX(), getY() + getHeight() - 1);
+        if (keepClosed < System.currentTimeMillis()) extraOptions.show(this, 0, getHeight() - 1);
         else keepClosed = 0;
     }
 

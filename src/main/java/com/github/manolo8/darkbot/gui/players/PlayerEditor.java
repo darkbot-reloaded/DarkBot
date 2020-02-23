@@ -13,11 +13,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Comparator;
+import java.util.List;
 
 public class PlayerEditor extends JPanel {
-
+    private JList<PlayerInfo> playerInfoList;
     private DefaultListModel<PlayerInfo> playersModel;
-    private Main main;
+    protected Main main;
 
     public PlayerEditor() {
         super(new MigLayout("ins 0, gap 0, wrap 4, fill", "[][][grow][]", "[][grow]"));
@@ -25,15 +26,13 @@ public class PlayerEditor extends JPanel {
         add(new AddPlayer(), "grow");
         add(new AddId(), "grow");
         add(new PlayerSearcher(this::refreshList), "grow");
-        add(new AddTag(), "grow");
-        add(createPlayerList(), "span 4, grow");
-    }
+        add(new PlayerTagEditor(this), "grow");
 
-    private JList<PlayerInfo> createPlayerList() {
-        JList<PlayerInfo> players = new JList<>(playersModel = new DefaultListModel<>());
-        players.setSelectionBackground(UIUtils.ACTION);
-        players.setCellRenderer(new PlayerRenderer());
-        return players;
+        playerInfoList = new JList<>(playersModel = new DefaultListModel<>());
+        playerInfoList.setSelectionBackground(UIUtils.ACTION);
+        playerInfoList.setCellRenderer(new PlayerRenderer());
+
+        add(playerInfoList, "span 4, grow");
     }
 
     public void setup(Main main) {
@@ -51,6 +50,53 @@ public class PlayerEditor extends JPanel {
                 .filter(pi -> pi.filter(filter))
                 .sorted(Comparator.comparing(pi -> pi.username))
                 .forEach(playersModel::addElement);
+    }
+
+    public void addTagToPlayers(PlayerTag tag) {
+        List<PlayerInfo> players = playerInfoList.getSelectedValuesList();
+
+        if (players.isEmpty()) {
+            Popups.showMessageAsync("Select players first", "To add tags to players, first select the players", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        if (tag == null) {
+            tag = createTag();
+            if (tag == null) return;
+        }
+
+        for (PlayerInfo p : players) {
+            p.setTag(tag, null);
+        }
+        main.config.changed = true;
+        playerInfoList.updateUI();
+    }
+
+    public PlayerTag createTag() {
+        PlayerTag tag;
+        String name = JOptionPane.showInputDialog(this, "Tag name", "Add player tag", JOptionPane.QUESTION_MESSAGE);
+        if (name == null) return null;
+        Color color = JColorChooser.showDialog(this, "Tag color", null);
+        if (color == null) return null;
+        main.config.PLAYER_TAGS.put(name, tag = new PlayerTag(name, color));
+        main.config.changed = true;
+        return tag;
+    }
+
+    public void deleteTag(PlayerTag tag) {
+        if (tag == null) return;
+        int result = JOptionPane.showConfirmDialog(this,
+                "Do you want to delete the " + tag.name + " tag, and remove it from everyone?",
+                "Are you sure?",
+                JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION)
+            main.config.PLAYER_TAGS.remove(tag.name);
+
+        for (PlayerInfo p : main.config.PLAYER_INFOS.values()) {
+            p.removeTag(tag);
+        }
+        main.config.changed = true;
+        playerInfoList.updateUI();
     }
 
     public class AddPlayer extends MainButton {
@@ -80,21 +126,6 @@ public class PlayerEditor extends JPanel {
             } catch (NumberFormatException ex) {
                 Popups.showMessageAsync("Invalid user ID", id + " is not a valid number", JOptionPane.ERROR_MESSAGE);
             }
-        }
-    }
-
-    public class AddTag extends MainButton {
-        public AddTag() {
-            super(UIUtils.getIcon("add"), "Player tag");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            String name = JOptionPane.showInputDialog(this, "Tag name", "Add player tag", JOptionPane.QUESTION_MESSAGE);
-            if (name == null) return;
-            Color color = JColorChooser.showDialog(this, "Tag color", null);
-            if (color == null) return;
-            main.config.PLAYER_TAGS.put(name, new PlayerTag(name, color));
         }
     }
 

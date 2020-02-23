@@ -10,9 +10,10 @@ public class LogMediator extends UpdatableAuto {
     private ArrayObj arrayObj = new ArrayObj();
 
     public long lastLogPtr = 0;
-    public final Lazy<String> logs = new Lazy<>();
+    public final Lazy<String> logs = new Lazy.NoCache<>(); // Can't cache the value, same log could appear twice
 
     public LogMediator() {
+        logs.add(System.out::println);
     }
 
     public void update() {
