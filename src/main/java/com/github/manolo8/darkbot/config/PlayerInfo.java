@@ -1,7 +1,5 @@
 package com.github.manolo8.darkbot.config;
 
-import com.github.manolo8.darkbot.Main;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
@@ -43,8 +41,9 @@ public class PlayerInfo {
 
     public boolean filter(String string) {
         return string == null
-                || username.toLowerCase(Locale.ROOT).contains(string.toLowerCase(Locale.ROOT))
-                || String.valueOf(userId).contains(string);
+                || username.toLowerCase(Locale.ROOT).contains(string)
+                || String.valueOf(userId).contains(string)
+                || getTags().stream().anyMatch(tag -> tag.name.toLowerCase(Locale.ROOT).contains(string));
     }
 
     @Override

@@ -39,11 +39,11 @@ public class EntryArray extends Updatable {
                 index = API.readMemoryLong(table + offset) & FIX;
                 offset += 8;
             }
-            long value = API.readMemoryLong(table + offset) & FIX;
+            long value = API.readMemoryLong(table + offset);
             if (index == 0 || value == 0) continue;
 
             if (entries[i] == null) entries[i] = new Entry();
-            entries[i++].set(API.readMemoryString(index), value);
+            entries[i++].set(API.readMemoryString(index), value & FIX);
             index = 0;
         }
     }

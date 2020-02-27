@@ -63,6 +63,10 @@ public class ConfigTree implements TreeModel {
 
     @Override
     public void valueForPathChanged(TreePath path, Object newValue) {
+        TreeModelEvent event = new TreeModelEvent(this, path);
+        for (TreeModelListener listener : listeners) {
+            listener.treeNodesChanged(event);
+        }
     }
 
     @Override

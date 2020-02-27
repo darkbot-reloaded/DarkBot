@@ -34,6 +34,10 @@ public class PlayerTag {
         this.color = color;
     }
 
+    public boolean has(PlayerInfo playerInfo) {
+        return playerInfo != null && playerInfo.hasTag(this);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

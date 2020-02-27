@@ -9,29 +9,23 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class PlayerTagEditor extends JPanel {
     private PlayerEditor editor;
 
     private TagButton latestClicked;
-    private JPopupMenu tags = new JPopupMenu("Manage tags");
-
-    private Map<PlayerTag, TagEntry> tagCache = new HashMap<>();
+    private TagPopup tags;
 
     public PlayerTagEditor(PlayerEditor editor) {
         super(new MigLayout("ins 0, gap 0", "[][][]"));
         this.editor = editor;
 
-        add(new TagButton(UIUtils.getIcon("add"), null, editor::addTagToPlayers, true, false));
-        add(new TagButton(UIUtils.getIcon("remove"), null, editor::removeTagFromPlayers, false, false));
-        add(new TagButton(UIUtils.getIcon("close"), "Manage tags", editor::deleteTag, false, true));
-
-        tags.setBorder(UIUtils.getBorder());
+        add(new TagButton(UIUtils.getIcon("add"), null, editor::addTagToPlayers, "Add new tag", true, false));
+        add(new TagButton(UIUtils.getIcon("remove"), null, editor::removeTagFromPlayers, null, false, false));
+        add(new TagButton(UIUtils.getIcon("close"), "Manage tags", editor::deleteTag, null, false, true));
+        tags = new TagPopup(editor.main.config.PLAYER_TAGS, tag -> latestClicked.action.accept(tag));
         tags.addPopupMenuListener(new PopupMenuListenerAdapter() {
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
@@ -52,26 +46,22 @@ public class PlayerTagEditor extends JPanel {
             return;
         }
 
-        tags.removeAll();
-        for (PlayerTag tag : editor.main.config.PLAYER_TAGS) {
-            tags.add(tagCache.computeIfAbsent(tag, TagEntry::new).setHandler(clicked));
-        }
-
-        tags.addSeparator();
-        tags.add(tagCache.computeIfAbsent(null, TagEntry::new).setHandler(clicked));
-
-        tags.show(clicked, 0, getHeight() - 1);
+        tags.show(clicked, 0, getHeight() - 1, clicked.nullTag);
     }
 
     private class TagButton extends MainButton {
         private long keepClosed;
         private Consumer<PlayerTag> action;
+        private String nullTag;
 
         public TagButton(Icon icon, String text,
                          Consumer<PlayerTag> action,
-                         boolean leftBorder, boolean rightBorder) {
+                         String nullTag,
+                         boolean leftBorder,
+                         boolean rightBorder) {
             super(icon, text);
             this.action = action;
+            this.nullTag = nullTag;
             setBorder(UIUtils.getPartialBorder(1, leftBorder ? 1 : 0, 1, rightBorder ? 1 : 0));
         }
 
@@ -93,29 +83,4 @@ public class PlayerTagEditor extends JPanel {
         }
     }
 
-    private class TagEntry extends JMenuItem implements ActionListener {
-        private static final int ALPHA = 96;
-        private PlayerTag tag;
-        private TagButton handler;
-
-        TagEntry(PlayerTag tag) {
-            super(tag == null ? "Add new tag" : tag.name);
-            this.tag = tag;
-            setOpaque(true);
-            if (tag != null)
-                setBackground(UIUtils.blendColor(tag.color, ALPHA));
-            this.addActionListener(this);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            handler.action.accept(tag);
-        }
-
-        public TagEntry setHandler(TagButton handler) {
-            this.handler = handler;
-            return this;
-        }
-
-    }
 }

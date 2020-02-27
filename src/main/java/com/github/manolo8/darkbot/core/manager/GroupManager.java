@@ -2,11 +2,14 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.PlayerInfo;
+import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.swf.Dictionary;
 import com.github.manolo8.darkbot.core.objects.swf.group.Group;
 import com.github.manolo8.darkbot.core.objects.swf.group.GroupMember;
 import com.github.manolo8.darkbot.core.objects.swf.group.Invite;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +26,7 @@ public class GroupManager extends Gui {
     private static final int INVITE_WIDTH = 130;// Width used by invites, accept or cancel/decline buttons after it
 
     private Main main;
-    private Config.GroupSettings settings;
-    private List<Integer> whitelist; // FIXME: dummy empty whitelist
+    private Config.GroupSettings config;
     private MapManager mapManager;
 
     public Group group;
@@ -35,7 +37,7 @@ public class GroupManager extends Gui {
 
     public GroupManager(Main main) {
         this.main = main;
-        this.settings = main.config.GROUP;
+        this.config = main.config.GROUP;
         this.mapManager = main.mapManager;
 
         this.group = new Group(main.hero);
@@ -64,10 +66,11 @@ public class GroupManager extends Gui {
     }
 
     public void tick() {
-        if (settings.ACCEPT_INVITES && !invites.isEmpty() && !group.isValid()) {
+        if (config.ACCEPT_INVITES && !invites.isEmpty() && !group.isValid()) {
             if (show(true)) {
                 invites.stream()
-                        .filter(in -> in.incomming && (!settings.WHITELIST_INVITES || whitelist.contains(in.inviter.id)))
+                        .filter(in -> in.incomming && (config.WHITELIST_TAG == null ||
+                                config.WHITELIST_TAG.has(main.config.PLAYER_INFOS.get(in.inviter.id))))
                         .findFirst()
                         .ifPresent(this::accept);
             }

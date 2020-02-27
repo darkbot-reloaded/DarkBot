@@ -16,6 +16,7 @@ import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellEditor;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
@@ -50,6 +51,14 @@ public class TreeEditor extends DefaultTreeCellEditor {
         addEditor(new JStringField(), String.class);
         addEditor(new JShipConfigField(), Config.ShipConfig.class);
         addEditor(new JRangeField(), Config.PercentRange.class);
+    }
+
+    public JTree getTree() {
+        return tree;
+    }
+
+    public TreePath getLastPath() {
+        return lastPath;
     }
 
     /**

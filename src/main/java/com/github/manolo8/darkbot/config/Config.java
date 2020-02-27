@@ -11,16 +11,17 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
+import com.github.manolo8.darkbot.gui.tree.components.JFileOpener;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
+import com.github.manolo8.darkbot.gui.tree.components.JPlayerTagField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -37,7 +38,7 @@ public class Config {
     // DEFINED AREAS
 
     public Map<Integer, PlayerInfo> PLAYER_INFOS = new HashMap<>();
-    public List<PlayerTag> PLAYER_TAGS = new ArrayList<>();
+    public Set<PlayerTag> PLAYER_TAGS = new HashSet<>();
     public transient Lazy<Integer> PLAYER_UPDATED = new Lazy.NoCache<>();
 
     public Queue<UnresolvedPlayer> UNRESOLVED = new LinkedList<>();
@@ -142,7 +143,7 @@ public class Config {
     public @Option GroupSettings GROUP = new GroupSettings();
     public static class GroupSettings {
         public @Option boolean ACCEPT_INVITES = false;
-        public /*@Option*/ boolean WHITELIST_INVITES = false; // TODO: make it an option
+        public @Option @Editor(JPlayerTagField.class) PlayerTag WHITELIST_TAG = null;
     }
 
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();

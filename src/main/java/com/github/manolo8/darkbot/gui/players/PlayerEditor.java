@@ -13,6 +13,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 public class PlayerEditor extends JPanel {
     private JList<PlayerInfo> playerInfoList;
@@ -25,28 +26,31 @@ public class PlayerEditor extends JPanel {
         add(new AddPlayer(), "grow");
         add(new AddId(), "grow");
         add(new PlayerSearcher(this::refreshList), "grow");
-        add(new PlayerTagEditor(this), "grow");
 
         playerInfoList = new JList<>(playersModel = new DefaultListModel<>());
         playerInfoList.setSelectionBackground(UIUtils.ACTION);
         playerInfoList.setCellRenderer(new PlayerRenderer());
 
-        add(playerInfoList, "span 4, grow");
+        add(playerInfoList, "cell 0 1, span 4, grow");
     }
 
     public void setup(Main main) {
         this.main = main;
+
+        add(new PlayerTagEditor(this), "cell 3 0, grow");
+
         main.config.PLAYER_INFOS.values().forEach(playersModel::addElement);
-        this.main.config.PLAYER_UPDATED.add(i -> refreshList(null));
+        main.config.PLAYER_UPDATED.add(i -> refreshList(null));
     }
 
     public void refreshList(String filter) {
         if (main == null) return;
+        String query = filter == null ? null : filter.toLowerCase(Locale.ROOT);
         playersModel.clear();
         main.config.PLAYER_INFOS
                 .values()
                 .stream()
-                .filter(pi -> pi.filter(filter))
+                .filter(pi -> pi.filter(query))
                 .sorted(Comparator.comparing(pi -> pi.username))
                 .forEach(playersModel::addElement);
     }

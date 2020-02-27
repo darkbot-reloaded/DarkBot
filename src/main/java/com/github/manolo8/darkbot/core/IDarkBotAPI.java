@@ -16,6 +16,11 @@ public interface IDarkBotAPI {
 
     long readMemoryLong(long address);
 
+    default long readMemoryLong(long address, int... offsets) {
+        for (int offset : offsets) address = readMemoryLong(address + offset);
+        return address;
+    }
+
     int readMemoryInt(long address);
 
     boolean readMemoryBoolean(long address);
