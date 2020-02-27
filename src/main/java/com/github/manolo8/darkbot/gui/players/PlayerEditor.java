@@ -21,23 +21,24 @@ public class PlayerEditor extends JPanel {
     protected Main main;
 
     public PlayerEditor() {
-        super(new MigLayout("ins 0, gap 0, wrap 4, fill", "[][][grow][]", "[][grow]"));
-
-        add(new AddPlayer(), "grow");
-        add(new AddId(), "grow");
-        add(new PlayerSearcher(this::refreshList), "grow");
-
-        playerInfoList = new JList<>(playersModel = new DefaultListModel<>());
-        playerInfoList.setSelectionBackground(UIUtils.ACTION);
-        playerInfoList.setCellRenderer(new PlayerRenderer());
-
-        add(playerInfoList, "cell 0 1, span 4, grow");
+        super(new MigLayout("ins 0, gap 0, wrap 4, fill", "[][][grow][]", "[][grow,fill]"));
     }
 
     public void setup(Main main) {
         this.main = main;
 
-        add(new PlayerTagEditor(this), "cell 3 0, grow");
+        add(new AddPlayer(), "grow");
+        add(new AddId(), "grow");
+        add(new PlayerSearcher(this::refreshList), "grow");
+        add(new PlayerTagEditor(this), "grow");
+
+        playerInfoList = new JList<>(playersModel = new DefaultListModel<>());
+        playerInfoList.setSelectionBackground(UIUtils.ACTION);
+        playerInfoList.setCellRenderer(new PlayerRenderer());
+
+        JScrollPane scroll = new JScrollPane(playerInfoList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        add(scroll, "span, grow");
 
         main.config.PLAYER_INFOS.values().forEach(playersModel::addElement);
         main.config.PLAYER_UPDATED.add(i -> refreshList(null));
