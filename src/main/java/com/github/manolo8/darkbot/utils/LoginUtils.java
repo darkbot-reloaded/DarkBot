@@ -6,13 +6,17 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.HttpCookie;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LoginUtils {
+    private static final Pattern LOGIN_PATTERN = Pattern.compile("\"bgcdw_login_form\" action=\"(.*)\"");
     private static final Pattern DATA_PATTERN = Pattern.compile("\"src\": \"([^\"]*)\".*}, \\{(.*)}");
 
     private DarkFlash.LoginData loginData;
@@ -27,14 +31,14 @@ public class LoginUtils {
 
         JButton login = new JButton("Log in");
         login.addActionListener(event -> {
-            performLogin(sv.getText(), sid.getText());
+            setLoginData(sid.getText(), sv.getText() + ".darkorbit.com");
             SwingUtilities.getWindowAncestor(panel).setVisible(false);
         });
 
         JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{login}, login);
         Popups.showMessageSync("Sid Login", pane);
 
-        if (loginData == null) performSidLogin();
+        if (loginData == null) System.exit(0);
         return this;
     }
 
@@ -42,35 +46,66 @@ public class LoginUtils {
         return loginData;
     }
 
-    private void performLogin(String sv, String sid) {
-        String url = "https://" + sv + ".darkorbit.com/";
-        sid = "dosid=" + sid;
-        String preloader;
-        String params;
+    private void login(String username, String password) {
+        String loginUrl = getLoginUrl(HttpUtils.create("https://www.darkorbit.com/").getInputStream());
+        CookieManager cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
+        CookieHandler.setDefault(cookieManager);
 
-        try {
-            HttpURLConnection conn = (HttpURLConnection) new URL(url + "indexInternal.es?action=internalMapRevolution")
-                    .openConnection();
-            conn.setInstanceFollowRedirects(false);
-            //conn.addRequestProperty("User-Agent", "Mozilla/5.0");
-            conn.setRequestProperty("Cookie", sid);
+        HttpUtils.create(loginUrl)
+                .setParam("username", username)
+                .setParam("password", password)
+                .getAndCloseInputStream();
 
-            String flashEmbed = new BufferedReader(new InputStreamReader(conn.getInputStream()))
-                    .lines()
-                    .filter(l -> l.contains("flashembed("))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("SID couldn't be used to log in"));
+        CookieHandler.setDefault(null);
 
-            Matcher m = DATA_PATTERN.matcher(flashEmbed);
-            if (m.find()) {
-                preloader = m.group(1);
-                params = m.group(2).replaceAll("\"", "").replaceAll(",", "&").replaceAll(": ", "=");
-            } else throw new IllegalArgumentException("SID couldn't be used to log in");
-        } catch (Exception e) {
-            Popups.showMessageAsync("Error", e.getMessage(), JOptionPane.ERROR_MESSAGE);
-            throw new RuntimeException(e);
-        }
-        this.loginData = new DarkFlash.LoginData(sv, sid, preloader, params, url);
+        HttpCookie cookie = cookieManager.getCookieStore().getCookies().stream()
+                .filter(c -> c.getName().equalsIgnoreCase("dosid"))
+                .filter(c -> c.getDomain().matches(".*\\d+.*"))
+                .findFirst().orElseThrow(WrongCredentialsException::new);
+
+        setLoginData(cookie.getValue(), cookie.getDomain());
     }
 
+    private void setLoginData(String sid, String url) {
+        url = "https://" + url + "/";
+        sid = "dosid=" + sid;
+
+        InputStream in = HttpUtils.create(url + "indexInternal.es?action=internalMapRevolution")
+                .setFollowRedirects(false)
+                .setHeader("Cookie", sid)
+                .getInputStream();
+
+        String flashEmbed = new BufferedReader(new InputStreamReader(in))
+                .lines()
+                .filter(l -> l.contains("flashembed("))
+                .findFirst()
+                .orElseThrow(WrongCredentialsException::new);
+
+        Matcher m = DATA_PATTERN.matcher(flashEmbed);
+        if (m.find()) loginData = new DarkFlash.LoginData(sid, url, m.group(1), m.group(2)
+                .replaceAll("\"", "")
+                .replaceAll(",", "&")
+                .replaceAll(": ", "="));
+        else throw new WrongCredentialsException("Can't parse flashembed vars");
+    }
+
+    private String getLoginUrl(InputStream in) {
+        return new BufferedReader(new InputStreamReader(in)).lines()
+                .map(LOGIN_PATTERN::matcher)
+                .filter(Matcher::find)
+                .map(matcher -> matcher.group(1).replace("&amp;", "&"))
+                .findFirst().orElseThrow(WrongCredentialsException::new);
+    }
+
+    private static class WrongCredentialsException extends IllegalArgumentException {
+
+        public WrongCredentialsException() {
+            this("Wrong login data");
+        }
+
+        public WrongCredentialsException(String s) {
+            super(s);
+            Popups.showMessageAsync("Error", s, JOptionPane.ERROR_MESSAGE);
+        }
+    }
 }
