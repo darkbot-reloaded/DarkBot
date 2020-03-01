@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.backpage.entities.galaxy;
 
 import com.github.manolo8.darkbot.utils.XmlHelper;
-import org.dom4j.Element;
+import org.w3c.dom.Element;
 
 public class Item {
     private String date;
@@ -17,26 +17,20 @@ public class Item {
     private Integer total;
     private Integer multiplierUsed;
 
-    public Item(String date, String state, String type, Integer gateId, Integer duplicate, Integer partId, Integer itemId, Integer amount, Integer current, Integer total, Integer multiplierUsed) {
-        this.date = date;
-        this.state = state;
-        this.type = type;
-        this.gateId = gateId;
-        this.duplicate = duplicate;
-        this.partId = partId;
-        this.itemId = itemId;
-        this.amount = amount;
-        this.current = current;
-        this.total = total;
-        this.multiplierUsed = multiplierUsed;
-    }
+    Item update(Element e) {
+        this.date = e.getAttribute("date");
+        this.state = e.getAttribute("state");
+        this.type = e.getAttribute("type");
+        this.gateId = XmlHelper.attrToInt(e, "gate_id");
+        this.duplicate = XmlHelper.attrToInt(e, "duplicate");
+        this.partId = XmlHelper.attrToInt(e, "part_id");
+        this.itemId = XmlHelper.attrToInt(e, "item_id");
+        this.amount = XmlHelper.attrToInt(e, "amount");
+        this.current = XmlHelper.attrToInt(e, "current");
+        this.total = XmlHelper.attrToInt(e, "total");
+        this.multiplierUsed = XmlHelper.attrToInt(e, "multiplier_used");
 
-    public Item(Element e) {
-        this(e.attributeValue("date"), e.attributeValue("state"), e.attributeValue("type"),
-                XmlHelper.getAttrInt(e, "gate_id"), XmlHelper.getAttrInt(e, "duplicate"),
-                XmlHelper.getAttrInt(e, "part_id"), XmlHelper.getAttrInt(e, "item_id"),
-                XmlHelper.getAttrInt(e, "amount"), XmlHelper.getAttrInt(e, "current"),
-                XmlHelper.getAttrInt(e, "total"), XmlHelper.getAttrInt(e, "multiplier_used"));
+        return this;
     }
 
     public String getDate() {

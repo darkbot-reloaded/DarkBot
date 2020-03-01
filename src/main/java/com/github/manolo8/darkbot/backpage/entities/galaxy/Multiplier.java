@@ -1,21 +1,18 @@
 package com.github.manolo8.darkbot.backpage.entities.galaxy;
 
 import com.github.manolo8.darkbot.utils.XmlHelper;
-import org.dom4j.Element;
+import org.w3c.dom.Element;
 
 public class Multiplier {
     private String mode;
     private Integer state;
     private Integer value;
 
-    public Multiplier(String mode, Integer state, Integer value) {
-        this.mode = mode;
-        this.state = state;
-        this.value = value;
-    }
-
-    public Multiplier(Element e) {
-        this(e.attributeValue("mode"), XmlHelper.getAttrInt(e, "state"), XmlHelper.getAttrInt(e, "value"));
+    Multiplier update(Element e) {
+        this.mode = e.getAttribute("mode");
+        this.state = XmlHelper.attrToInt(e, "state");
+        this.value = XmlHelper.attrToInt(e, "value");
+        return this;
     }
 
     public String getMode() {
@@ -28,6 +25,10 @@ public class Multiplier {
 
     public Integer getValue() {
         return value;
+    }
+
+    boolean alreadyInList(String mode) {
+        return this.mode.equals(mode);
     }
 
     @Override

@@ -1,18 +1,15 @@
 package com.github.manolo8.darkbot.backpage.entities.galaxy;
 
-import org.dom4j.Element;
+import com.github.manolo8.darkbot.utils.XmlHelper;
+import org.w3c.dom.Element;
 
 public class EnergyCost {
     private String mode;
     private Integer value;
 
-    public EnergyCost(String mode, Integer value) {
-        this.mode = mode;
-        this.value = value;
-    }
-
-    public EnergyCost(Element e) {
-        this(e.attributeValue("mode"), Integer.parseInt(e.getText()));
+    public void update(Element e) {
+        this.mode = e.getAttribute("mode");
+        this.value = XmlHelper.valueToInt(e);
     }
 
     public String getMode() {

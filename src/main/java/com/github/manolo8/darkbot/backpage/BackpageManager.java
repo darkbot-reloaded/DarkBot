@@ -45,7 +45,7 @@ public class BackpageManager extends Thread {
         super("BackpageManager");
         this.main = main;
         this.hangarManager = new HangarManager(main, this);
-        this.galaxyManager = new GalaxyManager(main, this);
+        this.galaxyManager = new GalaxyManager(main);
         start();
     }
 

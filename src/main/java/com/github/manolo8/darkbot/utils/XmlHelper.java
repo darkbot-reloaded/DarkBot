@@ -1,28 +1,28 @@
 package com.github.manolo8.darkbot.utils;
 
-import org.dom4j.Element;
-
-import java.util.stream.Stream;
+import org.w3c.dom.Element;
 
 public class XmlHelper {
 
-    public static Integer getAttrInt(Element e, String attr) {
-        String value = e.attributeValue(attr);
-        if (value == null || value.isEmpty()) return null;
-        return Integer.parseInt(value);
+    public static boolean hasAnyElement(Element e, String name) {
+        return e.getElementsByTagName(name).getLength() > 0;
     }
 
-    public static Integer getValueInt(Element e, String child) {
-        String value = e.elementText(child);
-        if (value == null || value.isEmpty()) return null;
-        else return Integer.parseInt(value);
+    public static Element getElement(Element e, String name) {
+        return (Element) e.getElementsByTagName(name).item(0);
     }
 
-    public static boolean hasChild(Element e, String child) {
-        return e.elementIterator(child).hasNext();
+    public static Integer attrToInt(Element e, String attr) {
+        String value = e.getAttribute(attr);
+        return value == null || value.isEmpty() ? null : Integer.parseInt(value);
     }
 
-    public static Stream<Element> childrenOf(Element e, String child) {
-        return e.elementIterator(child).next().elements().stream();
+    public static Integer valueToInt(Element e, String name) {
+        return valueToInt(getElement(e, name));
+    }
+
+    public static Integer valueToInt(Element e) {
+        String value = e.getTextContent();
+        return value == null || value.isEmpty() ? null : Integer.parseInt(value);
     }
 }
