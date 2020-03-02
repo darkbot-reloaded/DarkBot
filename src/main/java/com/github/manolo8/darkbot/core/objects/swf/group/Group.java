@@ -10,6 +10,7 @@ public class Group extends UpdatableAuto {
     private final HeroManager hero;
 
     public GroupMember[] members = new GroupMember[0];
+    private GroupMember overflowMember = new GroupMember();
     public GroupMember selectedMember = new GroupMember();
 
     public int id;
@@ -50,8 +51,8 @@ public class Group extends UpdatableAuto {
             for (int i = 0; i < members.length; i++) members[i] = new GroupMember();
         }
         selectedMember = null;
-        for (int i = 0, arrIdx = 0; i < members.length; i++, arrIdx++) {
-            GroupMember member = members[i];
+        for (int i = 0, arrIdx = 0; arrIdx < membersPtr.size; i++, arrIdx++) {
+            GroupMember member = i < members.length ? members[i] : overflowMember;
             member.update(membersPtr.elements[arrIdx]);
             if (member.id == hero.id) {
                 this.isLeader = member.isLeader;

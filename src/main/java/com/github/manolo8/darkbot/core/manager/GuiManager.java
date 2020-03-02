@@ -18,7 +18,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class GuiManager implements Manager {
 
     private final Main main;
-    private final Dictionary guis = new Dictionary(0);
+    private final Dictionary guis = new Dictionary();
 
     private long reconnectTime;
     private long lastDeath = -1;

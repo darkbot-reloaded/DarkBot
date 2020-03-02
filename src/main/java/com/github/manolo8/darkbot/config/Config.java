@@ -4,6 +4,8 @@ import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
+import com.github.manolo8.darkbot.config.types.Tag;
+import com.github.manolo8.darkbot.config.types.TagDefault;
 import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
@@ -143,7 +145,10 @@ public class Config {
     public @Option GroupSettings GROUP = new GroupSettings();
     public static class GroupSettings {
         public @Option boolean ACCEPT_INVITES = false;
-        public @Option @Editor(JPlayerTagField.class) PlayerTag WHITELIST_TAG = null;
+        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.ALL) PlayerTag WHITELIST_TAG = null;
+        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag INVITE_TAG = null;
+        public @Option boolean OPEN_INVITES = false;
+        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag KICK_TAG = null;
     }
 
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();

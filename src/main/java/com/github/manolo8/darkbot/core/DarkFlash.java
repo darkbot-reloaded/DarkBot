@@ -6,8 +6,6 @@ import com.sun.jna.platform.win32.WinDef;
 public class DarkFlash extends AbstractDarkBotApi {
     private LoginData loginData;
 
-    protected volatile WinDef.HWND window;
-
     public DarkFlash(LoginData loginData) {
         this.loginData = loginData;
     }

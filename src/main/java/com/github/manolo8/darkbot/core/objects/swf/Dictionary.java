@@ -16,20 +16,24 @@ public class Dictionary extends Updatable {
 
     private Map<String, Lazy<Long>> lazy = new HashMap<>();
 
-    public Entry[] elements;
+    private Entry[] elements;
     private String[] checks;
 
     public int size;
 
     private int lastFix;
 
-    public Dictionary(long address) {
-        this.address = address;
+    public Dictionary() {
+        this.address = 0;
         this.elements = new Entry[0];
     }
 
     public void addLazy(String key, Consumer<Long> consumer) {
         this.lazy.computeIfAbsent(key, k -> new Lazy<>()).add(consumer);
+    }
+
+    public Entry get(int i) {
+        return elements[i];
     }
 
     @Override

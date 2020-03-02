@@ -12,6 +12,8 @@ public interface IDarkBotAPI {
 
     void keyboardClick(Character ch);
 
+    void sendText(String string);
+
     double readMemoryDouble(long address);
 
     long readMemoryLong(long address);

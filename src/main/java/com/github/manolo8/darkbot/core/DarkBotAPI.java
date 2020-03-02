@@ -8,8 +8,6 @@ import java.util.Arrays;
 
 public class DarkBotAPI extends AbstractDarkBotApi {
 
-    protected volatile WinDef.HWND window;
-
     static {
         System.loadLibrary("lib/DarkBot");
     }
