@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
+import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.SystemUtils;
@@ -12,7 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 
-public class ExtraButton extends TitleBarButton<JFrame> {
+public class ExtraButton extends TitleBarButton<JFrame> implements SimpleMouseListener {
 
     private JPopupMenu extraOptions = new JPopupMenu("Extra Options");
     private long keepClosed;
@@ -52,17 +53,16 @@ public class ExtraButton extends TitleBarButton<JFrame> {
                 keepClosed = System.currentTimeMillis() + 100;
             }
         });
+        addMouseListener(this);
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        super.mousePressed(e);
         if (keepClosed > System.currentTimeMillis()) keepClosed = Long.MAX_VALUE;
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        super.mouseExited(e);
         keepClosed = 0;
     }
 

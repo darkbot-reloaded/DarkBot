@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot;
 
-import com.bulenkov.darcula.DarculaLaf;
-import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
+import com.formdev.flatlaf.FlatDarkLaf;
 import com.github.manolo8.darkbot.utils.Time;
 
 import javax.swing.*;
@@ -20,7 +19,9 @@ public class Bot {
         }
         try {
             UIManager.getFont("Label.font"); // Prevents a linux crash
-            UIManager.setLookAndFeel(new DarculaLaf());
+            UIManager.setLookAndFeel(new FlatDarkLaf());
+            UIManager.put("Button.arc", 0 );
+            UIManager.put("Component.arc", 0 );
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }

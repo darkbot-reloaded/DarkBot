@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.components.MainButton;
+import com.github.manolo8.darkbot.gui.components.MainToggleButton;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
@@ -12,7 +13,7 @@ import com.github.manolo8.darkbot.utils.I18n;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
-public class FeatureConfigButton extends MainButton {
+public class FeatureConfigButton extends MainToggleButton {
 
     private Config config;
     private FeatureDefinition<Configurable> feature;
@@ -26,7 +27,7 @@ public class FeatureConfigButton extends MainButton {
         feature.addStatusListener(this::updateStatus);
     }
 
-    private void updateStatus(FeatureDefinition feature) {
+    private void updateStatus(FeatureDefinition<?> feature) {
         boolean enabled = feature.canLoad() && feature.getInstance() != null;
 
         this.setEnabled(enabled);
@@ -43,7 +44,6 @@ public class FeatureConfigButton extends MainButton {
                     JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
             options.setBorder(null);
             Popups.showMessageSync(feature.getName(), options);
-            setBackground();
         }
     }
 

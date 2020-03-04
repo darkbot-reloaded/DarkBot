@@ -24,7 +24,6 @@ public class FeatureTypeButton extends MainButton {
     private FeatureDefinition<?> feature;
     private String description;
     private boolean hasInstructions;
-    private boolean enabled;
 
     FeatureTypeButton(FeatureDefinition<?> feature) {
         super("");
@@ -43,20 +42,15 @@ public class FeatureTypeButton extends MainButton {
         feature.addStatusListener(this::updateStatus);
     }
 
-    private void updateStatus(FeatureDefinition feature) {
-        enabled = feature.canLoad() && feature.getInstance() != null && hasInstructions;
-        setToolTipText(description + (hasInstructions ? (enabled ? "Show instructions" : "Feature not loaded, info unavailable") : ""));
+    private void updateStatus(FeatureDefinition<?> feature) {
+        setEnabled(feature.canLoad() && feature.getInstance() != null && hasInstructions);
+        setToolTipText(description + (hasInstructions ? (isEnabled() ? "Show instructions" : "Feature not loaded, info unavailable") : ""));
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (!enabled || !hasInstructions) return;
+        if (!isEnabled() || !hasInstructions) return;
         ((InstructionProvider) feature.getInstance()).showInstructions();
-    }
-
-    protected void setBackground() {
-        if (!enabled) setBackground(def);
-        else super.setBackground();
     }
 
 }

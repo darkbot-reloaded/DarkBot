@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.players;
 import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
+import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
@@ -49,7 +50,7 @@ public class PlayerTagEditor extends JPanel {
         tags.show(clicked, 0, getHeight() - 1, clicked.nullTag);
     }
 
-    private class TagButton extends MainButton {
+    private class TagButton extends MainButton implements SimpleMouseListener {
         private long keepClosed;
         private Consumer<PlayerTag> action;
         private String nullTag;
@@ -63,17 +64,16 @@ public class PlayerTagEditor extends JPanel {
             this.action = action;
             this.nullTag = nullTag;
             setBorder(UIUtils.getPartialBorder(1, leftBorder ? 1 : 0, 1, rightBorder ? 1 : 0));
+            addMouseListener(this);
         }
 
         @Override
         public void mousePressed(MouseEvent e) {
-            super.mousePressed(e);
             if (keepClosed > System.currentTimeMillis()) keepClosed = Long.MAX_VALUE;
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
-            super.mouseExited(e);
             keepClosed = 0;
         }
 

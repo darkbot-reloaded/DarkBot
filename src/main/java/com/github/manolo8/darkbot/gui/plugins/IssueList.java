@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.gui.plugins;
 
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
-import com.github.manolo8.darkbot.gui.tree.components.JLabel;
 import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;

@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
 import com.github.manolo8.darkbot.extensions.plugins.PluginLoadingException;
-import com.github.manolo8.darkbot.gui.tree.components.JLabel;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 

@@ -31,7 +31,7 @@ public abstract class ConfigNode {
     ConfigNode(Parent parent, String name, String description, String key, String field) {
         this.parent = parent;
         this.name = name;
-        this.description = description.isEmpty() ? description : null;
+        this.description = !description.isEmpty() ? description : null;
         this.key = !key.isEmpty() ? key
                 : parent == null ? field.toLowerCase(Locale.ROOT)
                 : parent.key == null ? null

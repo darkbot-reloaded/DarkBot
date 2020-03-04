@@ -1,15 +1,14 @@
 package com.github.manolo8.darkbot.gui;
 
-import com.bulenkov.darcula.ui.DarculaTreeUI;
 import com.github.manolo8.darkbot.config.tree.ConfigTree;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
+import com.github.manolo8.darkbot.gui.tree.EditorManager;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
 
 import javax.swing.*;
 import javax.swing.plaf.LayerUI;
-import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.MouseWheelEvent;
@@ -60,33 +59,20 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
     private JComponent setupUI() {
         JTree configTree = new JTree(this.treeModel = new ConfigTree(config));
-        configTree.setUI(new DarculaTreeUI(){
-            @Override
-            protected int getRowX(int row, int depth) { // The UI overrides these, and forces 8px.
-                return totalChildIndent * (depth + depthOffset);
-            }
-            @Override
-            public int getRightChildIndent() {
-                return rightChildIndent;
-            }
-        });
         configTree.setEditable(true);
-        configTree.setFocusable(false);
         configTree.setRootVisible(false);
         configTree.setShowsRootHandles(true);
         configTree.setToggleClickCount(1);
-        ((BasicTreeUI) configTree.getUI()).setLeftChildIndent(8);
-        ((BasicTreeUI) configTree.getUI()).setRightChildIndent(10);
+        configTree.setRowHeight(0);
         configTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
         ToolTipManager.sharedInstance().registerComponent(configTree);
 
-        TreeRenderer renderer = new TreeRenderer();
-        TreeEditor editor = new TreeEditor(configTree, renderer);
+        EditorManager editors = new EditorManager();
 
-        renderer.setDelegateEditor(new TreeEditor(configTree, renderer).sharingEditors(editor));
+        TreeRenderer renderer = new TreeRenderer(editors);
         configTree.setCellRenderer(renderer);
-        configTree.setCellEditor(editor);
+        configTree.setCellEditor(new TreeEditor(configTree, renderer, new EditorManager(editors)));
 
         treeModel.addTreeModelListener((SimpleTreeListener) e -> {
             unfoldTopLevelTree(configTree);
