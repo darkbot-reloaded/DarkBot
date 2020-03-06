@@ -13,10 +13,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 
-public class ExtraButton extends TitleBarButton<JFrame> implements SimpleMouseListener {
+public class ExtraButton extends TitleBarToggleButton<JFrame> {
 
     private JPopupMenu extraOptions = new JPopupMenu("Extra Options");
-    private long keepClosed;
 
     ExtraButton(Main main, JFrame frame) {
         super(UIUtils.getIcon("hamburger"), frame);
@@ -50,26 +49,14 @@ public class ExtraButton extends TitleBarButton<JFrame> implements SimpleMouseLi
         extraOptions.addPopupMenuListener(new PopupMenuListenerAdapter() {
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-                keepClosed = System.currentTimeMillis() + 100;
+                setSelected(false);
             }
         });
-        addMouseListener(this);
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        if (keepClosed > System.currentTimeMillis()) keepClosed = Long.MAX_VALUE;
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-        keepClosed = 0;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (keepClosed < System.currentTimeMillis()) extraOptions.show(this, 0, getHeight() - 1);
-        else keepClosed = 0;
+        if (isSelected()) extraOptions.show(this, 0, getHeight() - 1);
     }
 
 }

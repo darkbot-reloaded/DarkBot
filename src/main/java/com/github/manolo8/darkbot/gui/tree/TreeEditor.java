@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.utils.I18n;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellEditor;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -13,19 +14,12 @@ import java.util.EventObject;
 
 public class TreeEditor extends DefaultTreeCellEditor {
 
-    private EditorManager editors;
+    private final TreeCell treeCell;
 
-    private JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-    private JLabelField label = new JLabelField();
-    private OptionEditor currentEditor = null;
+    public TreeEditor(JTree tree, EditorManager editors) {
+        super(tree, new DefaultTreeCellRenderer());
 
-    public TreeEditor(JTree tree, TreeRenderer renderer, EditorManager editors) {
-        super(tree, renderer);
-        this.editors = editors;
-
-        this.label.setFont(renderer.getFont());
-        this.panel.add(label);
-        panel.setOpaque(false);
+        this.treeCell = new TreeCell(editors);
     }
 
     public JTree getTree() {
@@ -35,24 +29,8 @@ public class TreeEditor extends DefaultTreeCellEditor {
     @Override
     public Component getTreeCellEditorComponent(JTree tree, Object value, boolean isSelected,
                                                 boolean expanded, boolean leaf, int row) {
-
-        ConfigNode node = ((ConfigNode) value);
-        label.setText(I18n.getOrDefault(node.key, node.name));
-        label.setPreferredSize(new Dimension(editors.getWidthFor(node, label.getFontMetrics(label.getFont())), 0));
-
-        if (currentEditor != null) panel.remove(currentEditor.getComponent());
-        if (leaf) {
-            ConfigNode.Leaf option = (ConfigNode.Leaf) node;
-            currentEditor = editors.getEditor(option.field);
-            currentEditor.edit(option.field);
-            panel.add(currentEditor.getComponent());
-        } else {
-            currentEditor = null;
-            if (expanded) tree.collapseRow(row);
-            else tree.expandRow(row);
-        }
-        panel.setToolTipText(I18n.getOrDefault(node.key + ".desc", node.description));
-        return panel;
+        treeCell.setEditing((ConfigNode) value);
+        return treeCell;
     }
 
     @Override

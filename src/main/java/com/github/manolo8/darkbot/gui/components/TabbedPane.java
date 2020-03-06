@@ -45,10 +45,8 @@ public class TabbedPane extends JPanel {
         current = tab;
         if (old != null) {
             remove(old.component);
-            old.setBackground();
         }
         add(tab.component, "grow");
-        tab.setBackground();
         revalidate();
         repaint();
     }
@@ -69,11 +67,6 @@ public class TabbedPane extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             selectTab(this);
-        }
-
-        protected void setBackground() {
-            setBorder(current == this ? SELECTED : UNSELECTED);
-            super.setBackground();
         }
 
     }

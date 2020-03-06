@@ -16,7 +16,6 @@ public class PlayerSearcher extends JTextField {
     private static final Border MARGIN_BORDER = new EmptyBorder(0, SEARCH_ICON.getIconWidth() + 6, 0, 6);
 
     public PlayerSearcher(Consumer<String> filterChange) {
-        setBorder(UIUtils.getBorder());
         getDocument().addDocumentListener((GeneralDocumentListener) e -> filterChange.accept(getText()));
     }
 

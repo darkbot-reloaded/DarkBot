@@ -72,4 +72,8 @@ public class JPlayerTagField extends JButton implements OptionEditor {
         return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
+    @Override
+    public boolean isDefaultButton() {
+        return false;
+    }
 }

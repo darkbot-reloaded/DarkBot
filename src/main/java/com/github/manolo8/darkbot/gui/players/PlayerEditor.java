@@ -37,7 +37,6 @@ public class PlayerEditor extends JPanel {
         playerInfoList.setCellRenderer(new PlayerRenderer());
 
         JScrollPane scroll = new JScrollPane(playerInfoList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
         add(scroll, "span, grow");
 
         main.config.PLAYER_INFOS.values().forEach(playersModel::addElement);

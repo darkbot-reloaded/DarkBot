@@ -70,9 +70,8 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
         EditorManager editors = new EditorManager();
 
-        TreeRenderer renderer = new TreeRenderer(editors);
-        configTree.setCellRenderer(renderer);
-        configTree.setCellEditor(new TreeEditor(configTree, renderer, new EditorManager(editors)));
+        configTree.setCellRenderer(new TreeRenderer(editors));
+        configTree.setCellEditor(new TreeEditor(configTree, new EditorManager(editors)));
 
         treeModel.addTreeModelListener((SimpleTreeListener) e -> {
             unfoldTopLevelTree(configTree);

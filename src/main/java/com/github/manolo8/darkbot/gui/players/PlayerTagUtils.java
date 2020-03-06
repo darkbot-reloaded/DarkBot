@@ -1,14 +1,12 @@
 package com.github.manolo8.darkbot.gui.players;
 
-import com.bulenkov.darcula.ui.DarculaSliderUI;
-import com.bulenkov.iconloader.util.GraphicsConfig;
-import com.bulenkov.iconloader.util.GraphicsUtil;
+import com.formdev.flatlaf.ui.FlatSliderUI;
+import com.formdev.flatlaf.util.UIScale;
 import com.github.manolo8.darkbot.config.PlayerTag;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
 import java.util.stream.IntStream;
 
 public class PlayerTagUtils {
@@ -17,7 +15,7 @@ public class PlayerTagUtils {
         JPanel panel = new JPanel(new MigLayout("ins 0, wrap 2", "[]3px[grow]"));
         JTextField name = new JTextField(20);
         JSlider color = new JSlider(0, 255);
-        color.setUI(new PlayerTagUtils.ColoredSliderUI(color, 0.6f, 0.6f));
+        color.setUI(new PlayerTagUtils.ColoredSliderUI(0.6f, 0.6f));
 
         panel.add(new JLabel("Tag "));
         panel.add(name, "grow");
@@ -39,49 +37,30 @@ public class PlayerTagUtils {
         return PlayerTag.getTag(name.getText(), Color.getHSBColor(color.getValue() / 255f, 0.6f, 0.6f));
     }
 
-    public static class ColoredSliderUI extends DarculaSliderUI {
+    public static class ColoredSliderUI extends FlatSliderUI {
+        private static final int TRACK_HEIGHT = 8;
+        private static final int THUMB_WIDTH = 20;
         private Color[] gradient;
-        public ColoredSliderUI(JSlider slider, float sat, float val) {
-            super(slider);
+        public ColoredSliderUI(float sat, float val) {
             gradient = IntStream.rangeClosed(0, 255).mapToObj(i -> Color.getHSBColor(i / 255f, sat, val)).toArray(Color[]::new);
         }
 
+        protected Dimension getThumbSize() {
+            return new Dimension(UIScale.scale(THUMB_WIDTH), UIScale.scale(THUMB_WIDTH));
+        }
+
         public void paintTrack(Graphics g2d) {
-            Graphics2D g = (Graphics2D) g2d;
-            Rectangle trackBounds = trackRect;
-            final GraphicsConfig config = GraphicsUtil.setupAAPainting(g);
-
-            int height = 8;
-            int cy = (trackBounds.height / 2) - height / 2;
-
-            g.translate(trackBounds.x, trackBounds.y + cy);
+            int drawY = trackRect.y + (trackRect.height / 2) - TRACK_HEIGHT / 2;
             for (int i = 0; i < trackRect.width; i++) {
-                g.setColor(gradient[(int) (i * 255f / trackRect.width)]);
-                g.drawRect(i, 0, 1, height);
+                g2d.setColor(gradient[(int) (i * 255f / trackRect.width)]);
+                g2d.drawRect(trackRect.x + i, drawY, 1, TRACK_HEIGHT);
             }
-
-            g.translate(-trackBounds.x, -(trackBounds.y + cy));
-
-            config.restore();
         }
 
         @Override
         public void paintThumb(Graphics g) {
-            final GraphicsConfig config = GraphicsUtil.setupAAPainting(g);
-            Rectangle knobBounds = thumbRect;
-            int w = knobBounds.width;
-            int h = knobBounds.height;
-
-            g.translate(knobBounds.x, knobBounds.y);
-
-            double r = slider.getOrientation() == JSlider.HORIZONTAL ? h : w;
-            g.setColor(getThumbBorderColor());
-            ((Graphics2D) g).fill(new Ellipse2D.Double(0, 0, r, r));
             g.setColor(gradient[slider.getValue()]);
-            ((Graphics2D) g).fill(new Ellipse2D.Double(1, 1, r - 2, r - 2));
-
-            g.translate(-knobBounds.x, -knobBounds.y);
-            config.restore();
+            g.fillOval( thumbRect.x, thumbRect.y, thumbRect.width, thumbRect.height );
         }
     }
 

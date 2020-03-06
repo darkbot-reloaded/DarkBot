@@ -47,7 +47,7 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
         updateMapList(config.NPC_INFOS.values());
 
         mapFilter.setSelectedIndex(0);
-        getComponent().add(mapFilter, "cell 0 0");
+        getComponent().add(mapFilter, "grow, cell 1 0");
     }
 
     private void updateMapList(Collection<NpcInfo> npcInfos) {

@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
-import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.components.MainButton;
@@ -81,12 +80,10 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
         TableRowSorter<T> sorter = new TableRowSorter<>((T) getModel());
         setRowSorter(sorter);
 
-        component = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][]5px[][]", "[][grow]"));
+        component = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][][][]", "[][grow]"));
 
-        component.add(new JSearchField<>(sorter, extraFilters()), "grow, wrap");
-        JScrollPane pane = new JScrollPane(this);
-        pane.setBorder(BorderFactory.createLineBorder(Gray._90));
-        component.add(pane, "grow, span");
+        component.add(new JSearchField<>(sorter, extraFilters()), "grow, cell 0 0");
+        component.add(new JScrollPane(this), "grow, span, cell 0 1");
 
         if (data != null && listener != null) {
             this.data = data;
