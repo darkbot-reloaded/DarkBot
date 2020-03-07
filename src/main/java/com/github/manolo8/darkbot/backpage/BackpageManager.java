@@ -82,7 +82,7 @@ public class BackpageManager extends Thread {
             synchronized (main.pluginHandler.getBackgroundLock()) {
                 for (Task task : tasks) {
                     try {
-                        task.tick();
+                        task.tickTask();
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()

@@ -54,7 +54,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final String VERSION_STRING = "1.13.17 alpha 5";
+    public static final String VERSION_STRING = "1.13.17 alpha 6";
     public static final Version VERSION = new Version(VERSION_STRING);
 
     public static final Gson GSON = new GsonBuilder()
@@ -230,7 +230,7 @@ public class Main extends Thread implements PluginListener {
     private void tickLogic(boolean running) {
         synchronized (pluginHandler) {
             try {
-                if (running) module.tick();
+                if (running) module.tickModule();
                 else module.tickStopped();
             } catch (Throwable e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
@@ -238,7 +238,7 @@ public class Main extends Thread implements PluginListener {
             }
             for (Behaviour behaviour : behaviours) {
                 try {
-                    if (running) behaviour.tick();
+                    if (running) behaviour.tickBehaviour();
                     else behaviour.tickStopped();
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)

@@ -29,7 +29,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
         this.pluginTab = pluginTab;
         this.pluginHandler = main.pluginHandler;
         add(setupUI());
-        afterLoadComplete();
+        refreshUI();
         pluginHandler.addListener(this);
     }
 
@@ -42,13 +42,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
         return scrollPane;
     }
 
-    @Override
-    public void beforeLoad() {
-        pluginPanel.removeAll();
-    }
-
-    @Override
-    public void afterLoadComplete() {
+    private void refreshUI() {
         Stream.concat(
                 pluginHandler.LOADING_EXCEPTIONS.stream().map(ExceptionCard::new),
                 Stream.concat(
@@ -59,6 +53,16 @@ public class PluginDisplay extends JPanel implements PluginListener {
         pluginTab.setIcon(UIUtils.getIcon(pluginHandler.LOADING_EXCEPTIONS.isEmpty() && pluginHandler.FAILED_PLUGINS.isEmpty() ? "plugins" : "plugins_warn"));
         validate();
         repaint();
+    }
+
+    @Override
+    public void beforeLoad() {
+        pluginPanel.removeAll();
+    }
+
+    @Override
+    public void afterLoadComplete() {
+        SwingUtilities.invokeLater(this::refreshUI);
     }
 
 }

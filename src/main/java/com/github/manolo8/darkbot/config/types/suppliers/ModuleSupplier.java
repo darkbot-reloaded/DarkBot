@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.config.types.suppliers;
 
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
+import com.github.manolo8.darkbot.modules.TemporalModule;
 
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
@@ -19,7 +20,9 @@ public class ModuleSupplier extends OptionList<String> {
 
     public static void updateModules(Map<String, FeatureDefinition> modules) {
         ModuleSupplier.MODULES_BY_ID = modules;
-        MODULE_NAMES = MODULES_BY_ID.values().stream().map(FeatureDefinition::getName).collect(Collectors.toList());
+        MODULE_NAMES = MODULES_BY_ID.values().stream()
+                .filter(m -> !TemporalModule.class.isAssignableFrom(m.getClazz()))
+                .map(FeatureDefinition::getName).collect(Collectors.toList());
         INSTANCES.forEach(model -> {
             ListDataEvent ev = new ListDataEvent(model, ListDataEvent.CONTENTS_CHANGED, 0, MODULES_BY_ID.size());
             Arrays.stream(model.dataListeners.getListeners(ListDataListener.class))
