@@ -30,7 +30,7 @@ public class TreeCell extends JPanel {
     }
 
     public void setEditing(ConfigNode node) {
-        minHeight = getMinHeight(node.getDepth());
+        minHeight = getMinHeight(node);
         nameWidth = editors.getWidthFor(node, name.getFontMetrics(name.getFont()));
 
         name.setText(I18n.getOrDefault(node.key, node.name));
@@ -57,11 +57,11 @@ public class TreeCell extends JPanel {
 
     /**
      * Minimum height based on the depth. Lower depth nodes should be taller
-     * @param depth the current depth
+     * @param node The node to get height for
      * @return the minimum height the component should have
      */
-    private int getMinHeight(int depth) {
-        return depth <= 1 ? AdvancedConfig.HEADER_HEIGHT : AdvancedConfig.ROW_HEIGHT;
+    private int getMinHeight(ConfigNode node) {
+        return node instanceof ConfigNode.Leaf || node.getDepth() > 1 ?  AdvancedConfig.ROW_HEIGHT : AdvancedConfig.HEADER_HEIGHT;
     }
 
     private class TreeCellLayout implements LayoutManager {
@@ -89,7 +89,7 @@ public class TreeCell extends JPanel {
 
             int height = Math.max(minHeight, editorSize.height);
             parent.getComponent(0).setBounds(0, 0, nameWidth, height);
-            parent.getComponent(1).setBounds(nameWidth, 0, editorSize.width, editorSize.height);
+            parent.getComponent(1).setBounds(nameWidth, (height - editorSize.height) / 2, editorSize.width, editorSize.height);
         }
     }
 

@@ -30,12 +30,7 @@ public class JBoolField extends JCheckBox implements OptionEditor {
     }
 
     @Override
-    public Dimension getPreferredSize() {
-        return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
-    }
-
-    @Override
     public Insets getInsets() {
-        return new Insets(0, 0, 0, 0);
+        return new Insets(0, -1, 0, 0);
     }
 }

@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.utils;
 
-import com.bulenkov.iconloader.util.Gray;
 import com.formdev.flatlaf.ui.FlatBorder;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 
@@ -15,6 +14,7 @@ public class UIUtils {
             YELLOW = Color.decode("#6E6E28"),
             RED = Color.decode("#6E2B28"),
             BACKGROUND = UIManager.getColor("Viewport.background"), // Normal background of things
+            BORDER = UIManager.getColor("Component.borderColor"), // Normal border of things
             ACTION = new Color(50, 53, 55); // When hovering or clicking a btn
 
     public static ImageIcon getIcon(String name) {
@@ -53,7 +53,7 @@ public class UIUtils {
     }
 
     public static Border getPartialBorder(int top, int left, int bottom, int right) {
-        return new MatteBorder(top, left, bottom, right, Gray._100);
+        return new MatteBorder(top, left, bottom, right, BORDER);
     }
 
 }

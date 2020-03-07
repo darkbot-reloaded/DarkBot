@@ -29,12 +29,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.bulenkov</groupId>
-            <artifactId>darcula</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
             <version>0.27</version>
@@ -83,29 +77,6 @@
                     <target>8</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>3.0.0-M1</version>
-                <executions>
-                    <execution>
-                        <id>hack-binary</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <file>${basedir}/lib/darcula.jar</file>
-                            <groupId>com.bulenkov</groupId>
-                            <artifactId>darcula</artifactId>
-                            <version>1.0.0</version>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
@@ -168,7 +139,7 @@
                                 <option>-dontwarn</option>
                                 <option>-keepattributes Signature</option>
                                 <option>-keep class com.github.manolo8.** { *; }</option>
-                                <option>-keep class com.bulenkov.** { *; }</option>
+                                <option>-keep class com.formdev.** { *; }</option>
                                 <option>-keep class com.sun.jna.* { *; }</option>
                             </options>
                             <libs>
