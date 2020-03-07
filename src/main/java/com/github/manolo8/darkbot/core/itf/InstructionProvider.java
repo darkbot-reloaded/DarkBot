@@ -10,7 +10,13 @@ public interface InstructionProvider {
     String instructions();
 
     default void showInstructions() {
-        Popups.showMessageAsync(I18n.get("module.instructions.title"), instructions(), JOptionPane.INFORMATION_MESSAGE);
+        Object display = instructionsDisplay();
+        if (display == null) display = instructions();
+        Popups.showMessageAsync(I18n.get("module.instructions.title"), display, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    default JComponent instructionsDisplay() {
+        return null;
     }
 
 }

@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public class Popups {
 
-    public static void showMessageAsync(String title, String content, int type) {
+    public static void showMessageAsync(String title, Object content, int type) {
         showMessageAsync(title, new JOptionPane(content, type));
     }
     public static void showMessageAsync(String title, JOptionPane pane) {

@@ -95,8 +95,7 @@ public class GroupManager extends Gui {
                 .filter(in -> in.incomming && (config.WHITELIST_TAG == null ||
                         config.WHITELIST_TAG.has(main.config.PLAYER_INFOS.get(in.inviter.id))))
                 .findFirst()
-                .ifPresent(inv -> pending = () ->
-                        clickBtn(MARGIN_WIDTH + INVITE_WIDTH, 0, HEADER_HEIGHT + BUTTON_HEIGHT, invites.indexOf(inv)));
+                .ifPresent(inv -> pending = () -> acceptInvite(inv));
     }
 
     public void tryOpenInvites() {
@@ -118,6 +117,12 @@ public class GroupManager extends Gui {
             };
             break;
         }*/
+    }
+
+    public void acceptInvite(Invite inv) {
+        int idx = invites.indexOf(inv);
+        if (idx > 0)
+            clickBtn(MARGIN_WIDTH + INVITE_WIDTH, 0, HEADER_HEIGHT + BUTTON_HEIGHT, idx);
     }
 
     public void kick(int id) {
