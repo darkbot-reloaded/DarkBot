@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.titlebar;
 
-import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.components.MainToggleButton;
 
 import javax.swing.*;

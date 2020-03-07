@@ -5,8 +5,8 @@ import java.util.Objects;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import static java.lang.StrictMath.atan2;
-import static java.lang.StrictMath.sin;
 import static java.lang.StrictMath.cos;
+import static java.lang.StrictMath.sin;
 
 public class Location {
 

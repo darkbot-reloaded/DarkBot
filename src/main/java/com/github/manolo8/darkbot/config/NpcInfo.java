@@ -1,8 +1,6 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.types.Option;
-import com.github.manolo8.darkbot.core.itf.NpcExtraProvider;
-import com.github.manolo8.darkbot.extensions.features.Feature;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;

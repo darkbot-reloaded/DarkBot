@@ -1,7 +1,16 @@
 package com.github.manolo8.darkbot.core.utils;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.entities.*;
+import com.github.manolo8.darkbot.core.entities.Barrier;
+import com.github.manolo8.darkbot.core.entities.BasePoint;
+import com.github.manolo8.darkbot.core.entities.BattleStation;
+import com.github.manolo8.darkbot.core.entities.Box;
+import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.MapNpc;
+import com.github.manolo8.darkbot.core.entities.NoCloack;
+import com.github.manolo8.darkbot.core.entities.Npc;
+import com.github.manolo8.darkbot.core.entities.Portal;
+import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;

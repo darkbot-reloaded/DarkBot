@@ -3,10 +3,8 @@ package com.github.manolo8.darkbot.config.types.suppliers;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.utils.I18n;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class LanguageSupplier extends OptionList<Locale> {

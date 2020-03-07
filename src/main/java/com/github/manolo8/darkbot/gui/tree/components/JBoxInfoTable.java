@@ -2,19 +2,11 @@ package com.github.manolo8.darkbot.gui.tree.components;
 
 import com.github.manolo8.darkbot.config.BoxInfo;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.config.NpcInfo;
-import com.github.manolo8.darkbot.config.tree.ConfigField;
-import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import java.awt.*;
 import java.util.Arrays;
-import java.util.Map;
 
 public class JBoxInfoTable extends InfoTable<GenericTableModel, BoxInfo> implements OptionEditor {
 

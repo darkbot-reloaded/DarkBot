@@ -2,8 +2,6 @@ package com.github.manolo8.darkbot.core.objects.swf;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 
-import java.util.ArrayList;
-
 import static com.github.manolo8.darkbot.Main.API;
 
 public class ArrayObj extends UpdatableAuto {

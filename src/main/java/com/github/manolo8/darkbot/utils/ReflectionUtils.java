@@ -1,7 +1,5 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.core.itf.Configurable;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

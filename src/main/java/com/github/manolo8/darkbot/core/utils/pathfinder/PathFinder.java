@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.core.utils.Location;
 
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import static java.lang.Math.cos;

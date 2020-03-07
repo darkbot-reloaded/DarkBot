@@ -3,8 +3,6 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.objects.Map;
 import org.jgrapht.Graph;
-import org.jgrapht.graph.AsUndirectedGraph;
-import org.jgrapht.graph.AsUnmodifiableGraph;
 import org.jgrapht.graph.DirectedPseudograph;
 
 import java.util.ArrayList;

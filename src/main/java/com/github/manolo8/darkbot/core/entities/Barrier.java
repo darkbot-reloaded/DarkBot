@@ -2,10 +2,7 @@ package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.manager.MapManager;
-import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
-
-import static com.github.manolo8.darkbot.Main.API;
 
 public class Barrier
         extends Zone

@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.gui.titlebar;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
-import com.sun.jna.platform.win32.WinBase;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

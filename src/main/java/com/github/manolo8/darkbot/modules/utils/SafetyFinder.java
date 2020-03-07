@@ -11,7 +11,6 @@ import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
-import com.github.manolo8.darkbot.modules.MapModule;
 
 import java.util.Comparator;
 import java.util.List;

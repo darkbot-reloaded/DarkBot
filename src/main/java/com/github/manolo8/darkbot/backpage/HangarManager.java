@@ -1,9 +1,17 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.backpage.entities.*;
+import com.github.manolo8.darkbot.backpage.entities.Drone;
+import com.github.manolo8.darkbot.backpage.entities.Hangar;
+import com.github.manolo8.darkbot.backpage.entities.Item;
+import com.github.manolo8.darkbot.backpage.entities.ItemInfo;
+import com.github.manolo8.darkbot.backpage.entities.ShipInfo;
 import com.github.manolo8.darkbot.utils.Base64Utils;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;

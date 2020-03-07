@@ -1,8 +1,7 @@
 package com.github.manolo8.darkbot.gui.utils.window;
 
-import java.awt.*;
-
 import javax.swing.*;
+import java.awt.*;
 
 public class FrameResize extends JComponent {
 
