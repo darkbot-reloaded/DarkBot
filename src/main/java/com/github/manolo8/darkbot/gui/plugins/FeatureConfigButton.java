@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.plugins;
 
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.itf.Configurable;
+import com.github.manolo8.darkbot.core.itf.InstructionProvider;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.components.MainToggleButton;
@@ -39,11 +40,24 @@ public class FeatureConfigButton extends MainToggleButton {
             Popups.showMessageAsync(I18n.get("plugins.config_button.popup"),
                     I18n.get("plugins.config_button.popup.desc"), JOptionPane.INFORMATION_MESSAGE);
         } else {
-            JOptionPane options = new JOptionPane(new AdvancedConfig(this.config.CUSTOM_CONFIGS.get(feature.getId())),
+            Object paneMessage = new AdvancedConfig(this.config.CUSTOM_CONFIGS.get(feature.getId()));
+
+            JComponent instructions = getInstructions();
+            if (instructions != null) paneMessage = new Object[]{instructions, paneMessage};
+
+            JOptionPane options = new JOptionPane(paneMessage,
                     JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
             options.setBorder(BorderFactory.createEmptyBorder(0, 0, -4, 0));
             Popups.showMessageSync(feature.getName(), options);
         }
+    }
+
+    private JComponent getInstructions() {
+        Object instance = feature.getInstance();
+        if (instance instanceof InstructionProvider) {
+            return ((InstructionProvider) instance).beforeConfig();
+        }
+        return null;
     }
 
 }
