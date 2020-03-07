@@ -8,7 +8,9 @@ public interface Module extends Installable, Tickable, RefreshHandler {
 
     boolean canRefresh();
 
-    void tick();
+    default void tickModule() {
+        tick();
+    }
 
     default String status() {
         return null;
