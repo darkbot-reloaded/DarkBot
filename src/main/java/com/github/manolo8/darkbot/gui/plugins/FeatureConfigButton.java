@@ -41,7 +41,7 @@ public class FeatureConfigButton extends MainToggleButton {
         } else {
             JOptionPane options = new JOptionPane(new AdvancedConfig(this.config.CUSTOM_CONFIGS.get(feature.getId())),
                     JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
-            options.setBorder(null);
+            options.setBorder(BorderFactory.createEmptyBorder(0, 0, -4, 0));
             Popups.showMessageSync(feature.getName(), options);
         }
     }

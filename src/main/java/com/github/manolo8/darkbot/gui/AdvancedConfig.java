@@ -87,7 +87,6 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         scrollPane.getVerticalScrollBar().setUnitIncrement(25);
 
         if (packed) {
-            configTree.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 3));
             Dimension treeSize = configTree.getPreferredSize();
             scrollPane.setPreferredSize(new Dimension(treeSize.width + 15, Math.min(400, treeSize.height)));
         }
