@@ -59,9 +59,9 @@ public class EditorManager {
 
     public int getWidthFor(ConfigNode node, FontMetrics font) {
         if (I18n.getOrDefault(node.key, node.name).isEmpty()) return 0;
-        return ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.HIDE_EDITORS || !(node instanceof ConfigNode.Leaf) ?
-                font.stringWidth(I18n.getOrDefault(node.key, node.name)) + 5 :
-                font.stringWidth(node.getLongestSibling()) + 10;
+        return node instanceof ConfigNode.Leaf ?
+                font.stringWidth(node.getLongestSibling()) + 10 :
+                font.stringWidth(I18n.getOrDefault(node.key, node.name)) + 5;
     }
 
 }

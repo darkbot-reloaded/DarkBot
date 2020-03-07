@@ -30,6 +30,7 @@ public class JPlayerTagField extends JButton implements OptionEditor {
             if (field != null) {
                 field.set(tag);
                 setEditing(tag);
+                JPlayerTagField.this.revalidate();
             }
         });
     }

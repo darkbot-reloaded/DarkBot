@@ -106,18 +106,18 @@ public class GroupManager extends Gui {
     }
 
     public void tryQueueSendInvite() {
-        if (pending != null || !canInvite() || config.INVITE_TAG == null) return;
+        /*if (pending != null || !canInvite() || config.INVITE_TAG == null) return;
 
         for (PlayerInfo value : configRoot.PLAYER_INFOS.values()) {
             if (!config.INVITE_TAG.has(value)) continue;
 
-            /*pending = () -> {
+            pending = () -> {
                 click(MARGIN_WIDTH + (INVITE_WIDTH / 2), HEADER_HEIGHT + getGroupHeight() - (BUTTON_HEIGHT / 2));
                 API.sendText(value.username);
                 click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), HEADER_HEIGHT + getGroupHeight() - (BUTTON_HEIGHT / 2));
-            };*/
+            };
             break;
-        }
+        }*/
     }
 
     public void kick(int id) {

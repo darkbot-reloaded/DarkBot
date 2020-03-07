@@ -145,9 +145,9 @@ public class Config {
     public static class GroupSettings {
         public @Option boolean ACCEPT_INVITES = false;
         public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.ALL) PlayerTag WHITELIST_TAG = null;
-        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag INVITE_TAG = null;
+        //public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag INVITE_TAG = null;
         public @Option boolean OPEN_INVITES = false;
-        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag KICK_TAG = null;
+        //public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag KICK_TAG = null;
     }
 
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();
@@ -176,7 +176,6 @@ public class Config {
             public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
             public @Option boolean SHOW_ZONES = true;
             public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
-            public @Option boolean HIDE_EDITORS = false;
 
             public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
         }
