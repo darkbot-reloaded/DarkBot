@@ -23,7 +23,7 @@ public class JShipConfigField extends JPanel implements OptionEditor {
 
         add(config1);
         add(config2);
-        add(new JLabel("      Formation  "));
+        add(new javax.swing.JLabel("      Formation  "));
         add(formation);
     }
 

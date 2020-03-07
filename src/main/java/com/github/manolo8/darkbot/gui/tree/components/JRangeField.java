@@ -31,7 +31,7 @@ public class JRangeField extends JPanel implements OptionEditor {
             }
         });
         add(min);
-        add(new JLabel(" - "));
+        add(new javax.swing.JLabel(" - "));
         add(max);
     }
 

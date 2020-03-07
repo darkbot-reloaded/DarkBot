@@ -21,7 +21,7 @@ public class ExtraNpcInfoEditor extends AbstractCellEditor implements TableCellE
 
     private JNpcInfoTable.ExtraNpcInfoList curr;
     private Collection<NpcInfo> infos;
-    private JLabel button = new JLabel();
+    private javax.swing.JLabel button = new javax.swing.JLabel();
 
     private Map<String, JMenuFlag> options = new HashMap<>();
     private JPopupMenu extraOptions = new JPopupMenu("Extra options");

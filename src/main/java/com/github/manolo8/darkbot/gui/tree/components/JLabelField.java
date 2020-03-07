@@ -8,7 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
-public class JLabelField extends JLabel implements OptionEditor {
+public class JLabelField extends javax.swing.JLabel implements OptionEditor {
 
     @Override
     public JComponent getComponent() {
