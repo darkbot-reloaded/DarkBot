@@ -1,12 +1,11 @@
 package com.github.manolo8.darkbot.gui.utils;
 
 import com.bulenkov.iconloader.util.Gray;
+import com.formdev.flatlaf.ui.FlatBorder;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 
@@ -15,9 +14,8 @@ public class UIUtils {
     public static final Color GREEN = Color.decode("#3D6E3D"),
             YELLOW = Color.decode("#6E6E28"),
             RED = Color.decode("#6E2B28"),
-            BACKGROUND = new Color(60, 63, 65), // Normal background of things
-            ACTION = new Color(50, 53, 55), // When hovering or clicking a btn
-            SELECTED_BLUE = new Color(74, 136, 199);
+            BACKGROUND = UIManager.getColor("Viewport.background"), // Normal background of things
+            ACTION = new Color(50, 53, 55); // When hovering or clicking a btn
 
     public static ImageIcon getIcon(String name) {
         return new ImageIcon(new ImageIcon(UIUtils.class.getResource("/" + name + ".png")).getImage()
@@ -34,7 +32,7 @@ public class UIUtils {
     }
 
     public static Border getBorderWithInsets(boolean textPadding) {
-        return new LineBorder(Gray._100) {
+        return new FlatBorder() {
             @Override
             public Insets getBorderInsets(Component c, Insets insets) {
                 return getInsetConfig(textPadding);
@@ -43,7 +41,7 @@ public class UIUtils {
     }
 
     public static Border getBorder() {
-        return BorderFactory.createLineBorder(Gray._100);
+        return new FlatBorder();
     }
 
     public static Color blendColor(Color color, int alpha) {
@@ -56,10 +54,6 @@ public class UIUtils {
 
     public static Border getPartialBorder(int top, int left, int bottom, int right) {
         return new MatteBorder(top, left, bottom, right, Gray._100);
-    }
-
-    public static Border getTabBorder(boolean selected) {
-        return new CompoundBorder(getPartialBorder(1, 0, 0, 0), new MatteBorder(0, 0, 2, 0, selected ? SELECTED_BLUE : Gray._128));
     }
 
 }

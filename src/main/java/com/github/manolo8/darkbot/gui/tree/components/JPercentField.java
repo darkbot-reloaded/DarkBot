@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
-import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
@@ -14,8 +13,6 @@ public class JPercentField extends JSpinner implements OptionEditor {
 
     public JPercentField() {
         super(new SpinnerNumberModel(0, 0, 1, 0.05));
-        putClientProperty("ConfigTree", true);
-        setBorder(BorderFactory.createLineBorder(Gray._90));
         setEditor(new JSpinner.NumberEditor(this, "0%"));
 
         addChangeListener(e -> {

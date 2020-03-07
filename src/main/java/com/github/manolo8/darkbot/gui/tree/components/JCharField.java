@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
-import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
@@ -12,8 +11,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.util.Objects;
 
 public class JCharField extends JTextField implements OptionEditor {
@@ -29,20 +26,15 @@ public class JCharField extends JTextField implements OptionEditor {
     private ConfigField field;
 
     public JCharField() {
-        putClientProperty("ConfigTree", true);
-        setBorder(BorderFactory.createLineBorder(Gray._90));
+        super(1);
+        setMargin(new Insets(0, 3, 0, 3));
+        putClientProperty("JComboBox.isTableCellEditor", true); // Make L&F further reduce margin/border
+
         ((AbstractDocument) getDocument()).setDocumentFilter(SINGLE_CHAR_DOCUMENT);
         getDocument().addDocumentListener((GeneralDocumentListener) e -> setValue(getValue()));
-        setPreferredSize(new Dimension(20, AdvancedConfig.EDITOR_HEIGHT)); // Set 20 px wide
-        setMaximumSize(new Dimension(1000, AdvancedConfig.EDITOR_HEIGHT)); // Force height, required to match size
         setHorizontalAlignment(CENTER);
-        //setCaretColor(new Color(0, 0, 0, 0));
-        addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                select(getDocument().getLength(), getDocument().getLength());
-            }
-        });
+        setCaretColor(new Color(0, 0, 0, 0));
+        setHighlighter(null);
     }
 
     @Override

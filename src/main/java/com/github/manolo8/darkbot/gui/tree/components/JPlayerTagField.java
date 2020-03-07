@@ -52,7 +52,7 @@ public class JPlayerTagField extends JButton implements OptionEditor {
     private void setEditing(PlayerTag tag) {
         if (tag == null) {
             setText("(" + unset + ")");
-            setBorder(UIUtils.getBorder());
+            setBorder(null);
             setBackground(UIUtils.BACKGROUND);
         } else {
             setText(tag.name);

@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
-import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
@@ -62,7 +61,6 @@ public class JShipConfigField extends JPanel implements OptionEditor {
         ConfigButton(int config) {
             super(config + "");
             putClientProperty("JButton.buttonType", "square");
-            setBorder(BorderFactory.createLineBorder(Gray._90));
             //noinspection SuspiciousNameCombination
             setPreferredSize(new Dimension(AdvancedConfig.EDITOR_HEIGHT, AdvancedConfig.EDITOR_HEIGHT));
             setFocusable(false);

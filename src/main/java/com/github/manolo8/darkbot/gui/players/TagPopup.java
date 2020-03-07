@@ -22,7 +22,6 @@ public class TagPopup extends JPopupMenu {
 
     public TagPopup(Collection<PlayerTag> playerTags, Consumer<PlayerTag> callback) {
         super("Player tags");
-        setBorder(UIUtils.getBorder());
         this.playerTags = playerTags;
         this.callback = callback;
     }

@@ -15,7 +15,6 @@ public class JStringField extends JTextField implements OptionEditor {
     private ConfigField field;
 
     public JStringField() {
-        putClientProperty("ConfigTree", true);
         this.getDocument().addDocumentListener((GeneralDocumentListener) e ->  {
             if (field != null) field.set(getValue());
         });

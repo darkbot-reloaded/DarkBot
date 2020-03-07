@@ -51,9 +51,6 @@ public class TabbedPane extends JPanel {
         repaint();
     }
 
-    private static final Border UNSELECTED = UIUtils.getTabBorder(false),
-            SELECTED = UIUtils.getTabBorder(true);
-
     private class Tab extends MainButton {
 
         private final JComponent component;

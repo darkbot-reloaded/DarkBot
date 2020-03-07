@@ -68,7 +68,6 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
     public InfoTable(T model, Map<String, E> data, Lazy<String> listener, Supplier<E> supplier) {
         super(model);
         getColumnModel().getColumn(0).setPreferredWidth(200);
-        putClientProperty("ConfigTree", true);
         setDefaultEditor(Character.class, CHAR_EDITOR);
 
         setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);

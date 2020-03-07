@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
-import com.bulenkov.iconloader.util.Gray;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.Options;
 import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
@@ -11,8 +10,6 @@ import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.HashMap;
@@ -25,9 +22,7 @@ public class JListField extends JComboBox<String> implements OptionEditor {
     protected ConfigField field;
 
     public JListField() {
-        putClientProperty("ConfigTree", true);
         putClientProperty("JComboBox.isTableCellEditor", true);
-        setBorder(BorderFactory.createLineBorder(Gray._90));
         addActionListener(event -> {
             if (field != null) updateValue();
         });

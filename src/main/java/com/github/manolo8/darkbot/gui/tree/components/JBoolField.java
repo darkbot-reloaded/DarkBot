@@ -12,7 +12,6 @@ public class JBoolField extends JCheckBox implements OptionEditor {
     private ConfigField field;
 
     public JBoolField() {
-        putClientProperty("ConfigTree", true);
         super.addChangeListener(e -> {
             if (field != null) field.set(this.isSelected());
         });

@@ -1,13 +1,10 @@
 package com.github.manolo8.darkbot.gui.tree;
 
 import com.github.manolo8.darkbot.config.tree.ConfigNode;
-import com.github.manolo8.darkbot.gui.tree.components.JLabelField;
-import com.github.manolo8.darkbot.utils.I18n;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellEditor;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
