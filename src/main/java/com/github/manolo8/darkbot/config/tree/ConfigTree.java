@@ -16,6 +16,8 @@ public class ConfigTree implements TreeModel {
     private ConfigNode[] originalChildren;
     private List<TreeModelListener> listeners = new ArrayList<>();
 
+    private String filter;
+
     public ConfigTree(Object config) {
         this.root = ConfigNode.rootingFrom(null, "Root", config, "config");
         this.originalChildren = root.children;
@@ -34,6 +36,15 @@ public class ConfigTree implements TreeModel {
         SwingUtilities.invokeLater(this::updateListeners);
     }
 
+    public void setFilter(String filter) {
+        this.filter = filter;
+        updateListeners();
+    }
+
+    public boolean isUnfiltered()  {
+        return filter == null || filter.isEmpty();
+    }
+
     private void updateListeners() {
         TreeModelEvent event = new TreeModelEvent(this, (TreeNode[]) null, null, null);
         for (TreeModelListener listener : listeners) {
@@ -48,12 +59,21 @@ public class ConfigTree implements TreeModel {
 
     @Override
     public Object getChild(Object parent, int index) {
-        return ((ConfigNode.Parent) parent).children[index];
+        if (isUnfiltered()) return ((ConfigNode.Parent) parent).children[index];
+        return Arrays.stream(((ConfigNode.Parent) parent).children)
+                .filter(n -> n.match(filter))
+                .skip(index)
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public int getChildCount(Object parent) {
-        return ((ConfigNode.Parent) parent).children.length;
+        return isLeaf(parent) ? 0 :
+                isUnfiltered() ? ((ConfigNode.Parent) parent).children.length :
+                        (int) Arrays.stream(((ConfigNode.Parent) parent).children)
+                                .filter(n -> n.match(filter))
+                                .count();
     }
 
     @Override
@@ -72,8 +92,12 @@ public class ConfigTree implements TreeModel {
     @Override
     public int getIndexOfChild(Object parentObj, Object child) {
         ConfigNode.Parent parent = (ConfigNode.Parent) parentObj;
-        for (int i = 0; i < parent.children.length; i++) {
-            if (parent.children[i] == child) return i;
+        int idx = -1;
+        for (ConfigNode ch : parent.children) {
+            if (isUnfiltered() || ch.match(filter)) {
+                idx++;
+                if (ch == child) return idx;
+            }
         }
         return -1;
     }

@@ -2,10 +2,12 @@ package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.config.tree.ConfigTree;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
+import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.tree.EditorManager;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.plaf.LayerUI;
@@ -21,15 +23,14 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
     private Object config;
     private ConfigTree treeModel;
-    private boolean packed = false;
+    private boolean packed = false; // If this is a packed config in a floating window
 
     public AdvancedConfig() {
-        setBorder(BorderFactory.createEmptyBorder());
-        setLayout(new BorderLayout());
+        setLayout(new MigLayout("ins 0, gap 0, fill, wrap 1", "[]", "[][grow]"));
     }
 
     public AdvancedConfig(Object config) {
-        this();
+        setLayout(new BorderLayout());
         packed = true;
         setEditingConfig(config);
     }
@@ -38,7 +39,13 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         if (config == null) return;
         removeAll();
         this.config = config;
-        add(setupUI());
+        this.treeModel = new ConfigTree(config);
+        if (!packed) {
+            add(new SearchField(treeModel::setFilter), "grow");
+            add(setupUI(), "grow");
+        } else {
+            add(setupUI());
+        }
         this.revalidate();
         this.repaint();
     }
@@ -58,7 +65,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     }
 
     private JComponent setupUI() {
-        JTree configTree = new JTree(this.treeModel = new ConfigTree(config));
+        JTree configTree = new JTree(treeModel);
         configTree.setEditable(true);
         configTree.setRootVisible(false);
         configTree.setShowsRootHandles(true);

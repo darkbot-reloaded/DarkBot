@@ -49,6 +49,21 @@ public abstract class ConfigNode {
         return parent.longestChild;
     }
 
+    // Convenient for searching/filtering
+    public String convertToString() {
+        String n = I18n.getOrDefault(key, name);
+        String desc = I18n.getOrDefault(key + ".desc", description);
+
+        return (key != null ? key.substring(key.lastIndexOf(".") + 1) + " , " : "") +
+                (n != null ? n + " , " : "") +
+                (desc != null ? desc : "");
+    }
+
+    boolean match(String filter) {
+        return filter == null || filter.isEmpty() ||
+                convertToString().toLowerCase(Locale.ROOT).contains(filter.toLowerCase(Locale.ROOT));
+    }
+
     static ConfigNode.Parent rootingFrom(Parent parent, String name, Object root, String baseKey) {
         return new Parent(parent, name, "", baseKey, null).addChildren(p -> Arrays.stream(root.getClass().getFields())
                 .filter(f -> f.getAnnotation(Option.class) != null)
@@ -85,6 +100,10 @@ public abstract class ConfigNode {
                     .filter(name -> !name.isEmpty())
                     .max(Comparator.comparingInt(String::length)).orElse(null);
             return this;
+        }
+
+        boolean match(String filter) {
+            return super.match(filter) || Arrays.stream(children).anyMatch(n -> n.match(filter));
         }
     }
     

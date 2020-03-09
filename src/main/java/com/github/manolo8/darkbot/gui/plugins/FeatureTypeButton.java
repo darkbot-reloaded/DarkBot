@@ -20,21 +20,23 @@ public class FeatureTypeButton extends MainButton {
         FEATURE_TYPES.put(Behaviour.class, "Behaviour");
         FEATURE_TYPES.put(Task.class, "Task");
     }
+    private enum InstructionStatus {
+        NONE, UNSURE, YES
+    }
 
     private FeatureDefinition<?> feature;
     private String description;
-    private boolean hasInstructions;
+    private InstructionStatus instr;
 
     FeatureTypeButton(FeatureDefinition<?> feature) {
         super("");
         this.feature = feature;
-        this.hasInstructions = InstructionProvider.class.isAssignableFrom(feature.getClazz());
+        this.instr = InstructionProvider.class.isAssignableFrom(feature.getClazz()) ? InstructionStatus.UNSURE : InstructionStatus.NONE;
 
         description = FEATURE_TYPES.entrySet().stream()
                 .filter(e -> e.getKey().isAssignableFrom(feature.getClazz()))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.joining(","));
-        if (hasInstructions & !description.isEmpty()) description += " - ";
 
         setText(description.isEmpty() ? "-" : description.substring(0, 1));
 
@@ -43,13 +45,19 @@ public class FeatureTypeButton extends MainButton {
     }
 
     private void updateStatus(FeatureDefinition<?> feature) {
-        setEnabled(feature.canLoad() && feature.getInstance() != null && hasInstructions);
-        setToolTipText(description + (hasInstructions ? (isEnabled() ? "Show instructions" : "Feature not loaded, info unavailable") : ""));
+        if (instr == InstructionStatus.UNSURE && feature.getInstance() != null) {
+            InstructionProvider p = (InstructionProvider) feature.getInstance();
+            instr = p.instructions() == null && p.instructionsComponent() == null ? InstructionStatus.NONE : InstructionStatus.YES;
+        }
+        setEnabled(instr == InstructionStatus.YES);
+        setToolTipText(description +
+                (instr == InstructionStatus.NONE ? "" :
+                        " - " + (isEnabled() ? "Show instructions" : "Feature not loaded, info unavailable")));
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (!isEnabled() || !hasInstructions) return;
+        if (!isEnabled() || instr != InstructionStatus.YES) return;
         ((InstructionProvider) feature.getInstance()).showInstructions();
     }
 

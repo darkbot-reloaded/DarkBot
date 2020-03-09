@@ -1,7 +1,4 @@
-package com.github.manolo8.darkbot.gui.players;
-
-import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
-import com.github.manolo8.darkbot.gui.utils.UIUtils;
+package com.github.manolo8.darkbot.gui.utils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -10,12 +7,12 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.function.Consumer;
 
-public class PlayerSearcher extends JTextField {
+public class SearchField extends JTextField {
 
     private static final Icon SEARCH_ICON = UIUtils.getIcon("search");
     private static final Border MARGIN_BORDER = new EmptyBorder(0, SEARCH_ICON.getIconWidth() + 6, 0, 6);
 
-    public PlayerSearcher(Consumer<String> filterChange) {
+    public SearchField(Consumer<String> filterChange) {
         getDocument().addDocumentListener((GeneralDocumentListener) e -> filterChange.accept(getText()));
     }
 

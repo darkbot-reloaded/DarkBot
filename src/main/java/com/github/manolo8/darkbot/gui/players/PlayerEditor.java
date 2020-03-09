@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.config.UnresolvedPlayer;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
@@ -29,7 +30,7 @@ public class PlayerEditor extends JPanel {
 
         add(new AddPlayer(), "grow");
         add(new AddId(), "grow");
-        add(new PlayerSearcher(this::refreshList), "grow");
+        add(new SearchField(this::refreshList), "grow");
         add(new PlayerTagEditor(this), "grow");
 
         playerInfoList = new JList<>(playersModel = new DefaultListModel<>());

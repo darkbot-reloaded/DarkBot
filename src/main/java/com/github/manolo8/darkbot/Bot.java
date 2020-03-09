@@ -25,6 +25,6 @@ public class Bot {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-        new Main();
+        SwingUtilities.invokeLater(Main::new);
     }
 }
