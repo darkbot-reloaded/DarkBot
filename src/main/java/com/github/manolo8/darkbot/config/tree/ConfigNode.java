@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import com.github.manolo8.darkbot.utils.StringQuery;
 
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
@@ -23,7 +24,8 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public abstract class ConfigNode {
-    private final Parent parent;
+
+    protected final Parent parent;
     public final String name;
     public final String description;
     public final String key;
@@ -59,9 +61,15 @@ public abstract class ConfigNode {
                 (desc != null ? desc : "");
     }
 
-    boolean match(String filter) {
-        return filter == null || filter.isEmpty() ||
-                convertToString().toLowerCase(Locale.ROOT).contains(filter.toLowerCase(Locale.ROOT));
+    boolean isVisible(StringQuery query) {
+        if (match(query)) return true;
+        ConfigNode p = this;
+        while ((p = p.parent) != null) if (p.match(query)) return true;
+        return false;
+    }
+
+    protected boolean match(StringQuery query) {
+        return query.matches(convertToString());
     }
 
     static ConfigNode.Parent rootingFrom(Parent parent, String name, Object root, String baseKey) {
@@ -102,11 +110,12 @@ public abstract class ConfigNode {
             return this;
         }
 
-        boolean match(String filter) {
-            return super.match(filter) || Arrays.stream(children).anyMatch(n -> n.match(filter));
+        boolean isVisible(StringQuery filter) {
+            return super.isVisible(filter) || Arrays.stream(children).anyMatch(n -> n.match(filter));
         }
+
     }
-    
+
     public static class Leaf extends ConfigNode {
         public final ConfigField field;
 

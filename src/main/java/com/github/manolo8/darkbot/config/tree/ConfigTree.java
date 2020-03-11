@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.config.tree;
 
+import com.github.manolo8.darkbot.utils.StringQuery;
+
 import javax.swing.*;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -16,7 +18,7 @@ public class ConfigTree implements TreeModel {
     private ConfigNode[] originalChildren;
     private List<TreeModelListener> listeners = new ArrayList<>();
 
-    private String filter;
+    private StringQuery filter = new StringQuery();
 
     public ConfigTree(Object config) {
         this.root = ConfigNode.rootingFrom(null, "Root", config, "config");
@@ -37,12 +39,12 @@ public class ConfigTree implements TreeModel {
     }
 
     public void setFilter(String filter) {
-        this.filter = filter;
+        this.filter.query = filter;
         updateListeners();
     }
 
     public boolean isUnfiltered()  {
-        return filter == null || filter.isEmpty();
+        return filter.query == null || filter.query.isEmpty();
     }
 
     private void updateListeners() {
@@ -61,7 +63,7 @@ public class ConfigTree implements TreeModel {
     public Object getChild(Object parent, int index) {
         if (isUnfiltered()) return ((ConfigNode.Parent) parent).children[index];
         return Arrays.stream(((ConfigNode.Parent) parent).children)
-                .filter(n -> n.match(filter))
+                .filter(n -> n.isVisible(filter))
                 .skip(index)
                 .findFirst()
                 .orElse(null);
@@ -72,7 +74,7 @@ public class ConfigTree implements TreeModel {
         return isLeaf(parent) ? 0 :
                 isUnfiltered() ? ((ConfigNode.Parent) parent).children.length :
                         (int) Arrays.stream(((ConfigNode.Parent) parent).children)
-                                .filter(n -> n.match(filter))
+                                .filter(n -> n.isVisible(filter))
                                 .count();
     }
 
@@ -94,7 +96,7 @@ public class ConfigTree implements TreeModel {
         ConfigNode.Parent parent = (ConfigNode.Parent) parentObj;
         int idx = -1;
         for (ConfigNode ch : parent.children) {
-            if (isUnfiltered() || ch.match(filter)) {
+            if (isUnfiltered() || ch.isVisible(filter)) {
                 idx++;
                 if (ch == child) return idx;
             }
