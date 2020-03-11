@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 
 public class MainButton extends JButton implements ActionListener {
 
-    protected Color actionColor = UIUtils.ACTION;
+    protected Color actionColor; // Currently useless.
 
     public MainButton(String text) {
         this(null, text);

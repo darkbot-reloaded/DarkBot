@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -34,7 +35,6 @@ public class PlayerEditor extends JPanel {
         add(new PlayerTagEditor(this), "grow");
 
         playerInfoList = new JList<>(playersModel = new DefaultListModel<>());
-        playerInfoList.setSelectionBackground(UIUtils.ACTION);
         playerInfoList.setCellRenderer(new PlayerRenderer());
 
         JScrollPane scroll = new JScrollPane(playerInfoList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -64,7 +64,7 @@ public class PlayerEditor extends JPanel {
             if (tag == null) return;
             main.config.PLAYER_TAGS.add(tag);
         } else if (players.isEmpty()) {
-            Popups.showMessageAsync("Select players first", "Select the players you want to add the tag to", JOptionPane.INFORMATION_MESSAGE);
+            Popups.showMessageAsync(I18n.get("players.select_players.warn.title"), I18n.get("players.select_players.warn.add"), JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -78,7 +78,7 @@ public class PlayerEditor extends JPanel {
         List<PlayerInfo> players = playerInfoList.getSelectedValuesList();
 
         if (players.isEmpty()) {
-            Popups.showMessageAsync("Select players first", "To remove tags from players, first select the players", JOptionPane.INFORMATION_MESSAGE);
+            Popups.showMessageAsync(I18n.get("players.select_players.warn.title"), I18n.get("players.select_players.warn.remove"), JOptionPane.INFORMATION_MESSAGE);
             return;
         }
         for (PlayerInfo p : players) p.removeTag(tag);
@@ -89,12 +89,12 @@ public class PlayerEditor extends JPanel {
     public void deleteTag(PlayerTag tag) {
         if (tag == null) return;
         int result = JOptionPane.showConfirmDialog(this,
-                "Do you want to delete the " + tag.name + " tag, and remove it from everyone?",
-                "Are you sure?",
+                I18n.get("players.delete_tag.confirm.msg", tag.name),
+                I18n.get("players.delete_tag.confirm.title"),
                 JOptionPane.YES_NO_OPTION);
-        if (result == JOptionPane.YES_OPTION)
-            main.config.PLAYER_TAGS.remove(tag);
+        if (result != JOptionPane.YES_OPTION) return;
 
+        main.config.PLAYER_TAGS.remove(tag);
         for (PlayerInfo p : main.config.PLAYER_INFOS.values()) {
             p.removeTag(tag);
         }
@@ -104,12 +104,13 @@ public class PlayerEditor extends JPanel {
 
     public class AddPlayer extends MainButton {
         public AddPlayer() {
-            super(UIUtils.getIcon("add"), "User by name");
+            super(UIUtils.getIcon("add"), I18n.get("players.add_player.by_name"));
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            String name = JOptionPane.showInputDialog(this, "Username:", "Add player", JOptionPane.QUESTION_MESSAGE);
+            String name = JOptionPane.showInputDialog(this, I18n.get("players.add_player.username"),
+                    I18n.get("players.add_player"), JOptionPane.QUESTION_MESSAGE);
             if (name == null) return;
             main.config.UNRESOLVED.add(new UnresolvedPlayer(name));
         }
@@ -117,17 +118,19 @@ public class PlayerEditor extends JPanel {
 
     public class AddId extends MainButton {
         public AddId() {
-            super(UIUtils.getIcon("add"), "User by id");
+            super(UIUtils.getIcon("add"), I18n.get("players.add_player.by_id"));
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            String id = JOptionPane.showInputDialog(this, "User ID:", "Add player", JOptionPane.QUESTION_MESSAGE);
+            String id = JOptionPane.showInputDialog(this, I18n.get("players.add_player.user_id"),
+                    I18n.get("players.add_player"), JOptionPane.QUESTION_MESSAGE);
             if (id == null) return;
             try {
                 main.config.UNRESOLVED.add(new UnresolvedPlayer(Integer.parseInt(id.trim())));
             } catch (NumberFormatException ex) {
-                Popups.showMessageAsync("Invalid user ID", id + " is not a valid number", JOptionPane.ERROR_MESSAGE);
+                Popups.showMessageAsync(I18n.get("players.add_player.invalid_id"),
+                        I18n.get("players.add_player.invalid_id.no_number", id), JOptionPane.ERROR_MESSAGE);
             }
         }
     }

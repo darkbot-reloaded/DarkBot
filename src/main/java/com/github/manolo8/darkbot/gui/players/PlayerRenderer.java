@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.players;
 
 import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.PlayerTag;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -46,14 +47,14 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
     }
 
     private static class Tag extends JLabel {
-        private static final int ALPHA = 96 << 24;
+        private static final int ALPHA = 96;
         private static final Border MARGIN = new EmptyBorder(1, 5, 1, 5);
 
         public Tag(PlayerTag tag) {
             super(tag.name);
             setOpaque(true);
             setBorder(new CompoundBorder(BorderFactory.createLineBorder(tag.color), MARGIN));
-            setBackground(new Color(tag.color.getRGB() + ALPHA, true));
+            setBackground(UIUtils.blendColor(tag.color, ALPHA));
         }
     }
 

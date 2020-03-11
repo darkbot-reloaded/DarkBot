@@ -14,8 +14,8 @@ public class UIUtils {
             YELLOW = Color.decode("#6E6E28"),
             RED = Color.decode("#6E2B28"),
             BACKGROUND = UIManager.getColor("Viewport.background"), // Normal background of things
-            BORDER = UIManager.getColor("Component.borderColor"), // Normal border of things
-            ACTION = new Color(50, 53, 55); // When hovering or clicking a btn
+            BORDER = UIManager.getColor("Component.borderColor"); // Normal border of things
+            //ACTION = new Color(50, 53, 55); // When hovering or clicking a btn
 
     public static ImageIcon getIcon(String name) {
         return new ImageIcon(new ImageIcon(UIUtils.class.getResource("/" + name + ".png")).getImage()
