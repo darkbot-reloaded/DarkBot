@@ -59,15 +59,13 @@ public class PlayerEditor extends JPanel {
     public void addTagToPlayers(PlayerTag tag) {
         List<PlayerInfo> players = playerInfoList.getSelectedValuesList();
 
-        if (players.isEmpty()) {
-            Popups.showMessageAsync("Select players first", "To add tags to players, first select the players", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-
         if (tag == null) {
             tag = PlayerTagUtils.createTag(this);
             if (tag == null) return;
             main.config.PLAYER_TAGS.add(tag);
+        } else if (players.isEmpty()) {
+            Popups.showMessageAsync("Select players first", "Select the players you want to add the tag to", JOptionPane.INFORMATION_MESSAGE);
+            return;
         }
 
         for (PlayerInfo p : players) p.setTag(tag, null);

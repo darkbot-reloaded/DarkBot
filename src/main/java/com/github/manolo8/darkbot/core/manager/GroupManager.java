@@ -121,7 +121,7 @@ public class GroupManager extends Gui {
 
     public void acceptInvite(Invite inv) {
         int idx = invites.indexOf(inv);
-        if (idx > 0)
+        if (idx >= 0)
             clickBtn(MARGIN_WIDTH + INVITE_WIDTH, 0, HEADER_HEIGHT + BUTTON_HEIGHT, idx);
     }
 

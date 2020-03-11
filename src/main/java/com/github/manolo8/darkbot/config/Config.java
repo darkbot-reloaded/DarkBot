@@ -144,10 +144,10 @@ public class Config {
     public @Option GroupSettings GROUP = new GroupSettings();
     public static class GroupSettings {
         public @Option boolean ACCEPT_INVITES = false;
-        public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.ALL) PlayerTag WHITELIST_TAG = null;
-        //public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag INVITE_TAG = null;
+        public @Option @Tag(TagDefault.ALL) PlayerTag WHITELIST_TAG = null;
+        //public @Option @Tag(TagDefault.NONE) PlayerTag INVITE_TAG = null;
         public @Option boolean OPEN_INVITES = false;
-        //public @Option @Editor(JPlayerTagField.class) @Tag(TagDefault.NONE) PlayerTag KICK_TAG = null;
+        //public @Option @Tag(TagDefault.NONE) PlayerTag KICK_TAG = null;
     }
 
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();

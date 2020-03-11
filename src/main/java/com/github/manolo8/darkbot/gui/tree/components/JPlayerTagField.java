@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.gui.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.stream.IntStream;
 
 public class JPlayerTagField extends JButton implements OptionEditor {
 
