@@ -58,7 +58,7 @@ public class FeatureTypeButton extends MainButton {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (!isEnabled() || instr != InstructionStatus.YES) return;
-        ((InstructionProvider) feature.getInstance()).showInstructions();
+        ((InstructionProvider) feature.getInstance()).showInstructions(feature.getName());
     }
 
 }

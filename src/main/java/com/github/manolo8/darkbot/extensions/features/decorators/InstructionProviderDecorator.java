@@ -9,7 +9,7 @@ public class InstructionProviderDecorator extends FeatureDecorator<InstructionPr
 
     @Override
     protected void load(FeatureDefinition<InstructionProvider> fd, InstructionProvider obj) {
-        if (obj instanceof Module && !(obj instanceof TemporalModule)) obj.showInstructions();
+        if (obj instanceof Module && !(obj instanceof TemporalModule)) obj.showInstructions(fd.getName());
     }
 
     @Override

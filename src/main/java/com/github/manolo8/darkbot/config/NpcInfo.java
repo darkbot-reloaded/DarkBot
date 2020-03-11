@@ -29,21 +29,11 @@ public class NpcInfo {
     public ExtraNpcInfo extra = new ExtraNpcInfo();
 
     public static class ExtraNpcInfo {
-        // TODO: remove in a few versions.
-        public boolean noCircle;
-        public boolean ignoreOwnership;
-        public boolean ignoreAttacked;
-        public boolean attackSecond;
-        public boolean passive;
-        public boolean useRsb;
-        private boolean updated;
-
         private Set<String> flags = new HashSet<>();
 
         public ExtraNpcInfo() {}
 
         public ExtraNpcInfo(NpcExtraFlag... flags) {
-            this.updated = true;
             for (NpcExtraFlag flag : flags) set(flag, true);
         }
 
@@ -64,20 +54,7 @@ public class NpcInfo {
             else flags.remove(flagId);
         }
 
-        private void update() {
-            if (!updated) {
-                updated = true;
-                set(NpcExtra.NO_CIRCLE, noCircle);
-                set(NpcExtra.IGNORE_OWNERSHIP, ignoreOwnership);
-                set(NpcExtra.IGNORE_ATTACKED, ignoreAttacked);
-                set(NpcExtra.PASSIVE, passive);
-                set(NpcExtra.ATTACK_SECOND, attackSecond);
-                set(NpcExtra.USE_RSB, useRsb);
-            }
-        }
-
         public String toString() {
-            update();
             return flags.stream().map(NPC_FLAGS::get)
                     .filter(Objects::nonNull)
                     .map(NpcExtraFlag::getShortName)
@@ -106,7 +83,6 @@ public class NpcInfo {
         this.kill = other.kill;
         this.attackKey = other.attackKey;
         this.attackFormation = other.attackFormation;
-        other.extra.update();
         this.extra.flags = new HashSet<>(other.extra.flags);
     }
 }

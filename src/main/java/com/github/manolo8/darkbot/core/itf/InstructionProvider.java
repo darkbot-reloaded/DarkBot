@@ -26,12 +26,14 @@ public interface InstructionProvider {
     /**
      * Called when the user presses to display instructions or the module is loaded.
      * You usually would customize via {@link #instructions} or {@link #instructionsComponent} instead.
+     * @param featureName The name of the feature to display to show instructions for
      */
-    default void showInstructions() {
+    default void showInstructions(String featureName) {
         Object display = instructionsComponent();
         if (display == null) display = instructions();
         if (display == null) return; // If both text & component are null, do nothing
-        Popups.showMessageAsync(I18n.get("module.instructions.title"), display, JOptionPane.INFORMATION_MESSAGE);
+        Popups.showMessageAsync(I18n.get("module.instructions.title") + " - " + featureName,
+                display, JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**
