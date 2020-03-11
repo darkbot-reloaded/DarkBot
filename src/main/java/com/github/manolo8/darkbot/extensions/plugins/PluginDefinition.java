@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.extensions.plugins;
 import com.github.manolo8.darkbot.extensions.util.Version;
 
 import java.net.URI;
+import java.net.URL;
 
 public class PluginDefinition {
     private transient final String[] NULL_ARRAY = new String[0];
@@ -21,4 +22,8 @@ public class PluginDefinition {
     public String[] features = NULL_ARRAY;
     // Donation url
     public URI donation;
+    // URL to download the plugin from
+    public URL download;
+    // URI to get an updated plugin definition (a plugin.json)
+    public URL update;
 }
