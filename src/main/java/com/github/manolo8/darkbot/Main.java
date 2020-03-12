@@ -15,7 +15,7 @@ import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
-import com.github.manolo8.darkbot.core.manager.MediatorManager;
+import com.github.manolo8.darkbot.core.manager.FacadeManager;
 import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
@@ -71,7 +71,7 @@ public class Main extends Thread implements PluginListener {
     public final MapManager mapManager;
     public final StarManager starManager;
     public final HeroManager hero;
-    public final MediatorManager mediatorManager;
+    public final FacadeManager facadeManager;
     public final GuiManager guiManager;
     public final StatsManager statsManager;
     public final PingManager pingManager;
@@ -117,12 +117,12 @@ public class Main extends Thread implements PluginListener {
         starManager = new StarManager();
         mapManager = new MapManager(this);
         hero = new HeroManager(this);
-        mediatorManager = new MediatorManager(this);
+        facadeManager = new FacadeManager(this);
         guiManager = new GuiManager(this);
         statsManager = new StatsManager(this);
         pingManager = new PingManager();
 
-        botInstaller.add(mediatorManager);
+        botInstaller.add(facadeManager);
         botInstaller.add(guiManager);
         botInstaller.add(mapManager);
         botInstaller.add(hero);
@@ -201,7 +201,7 @@ public class Main extends Thread implements PluginListener {
     private void validTick() {
         hero.tick();
         mapManager.tick();
-        mediatorManager.tick();
+        facadeManager.tick();
         guiManager.tick();
         statsManager.tick();
 
