@@ -20,18 +20,32 @@ public class FacadeManager implements Manager {
 
     private final List<Updatable> updatables = new ArrayList<>();
 
-    public final LogMediator log = register("LogWindowMediator", new LogMediator());
+    public final LogMediator log = registerMediator("LogWindowMediator", new LogMediator());
 
 
     public FacadeManager(Main main) {
         this.main = main;
     }
 
-    public <T extends Updatable> T register(String key, T mediator) {
+    public <T extends Updatable> T registerCommand(String key, T mediator) {
         @SuppressWarnings("UnnecessaryLocalVariable")
         Updatable fix = mediator; // Workaround for a java compiler assertion bug having issues with types
         this.commands.addLazy(key, fix::update);
+        updatables.add(fix);
+        return mediator;
+    }
+
+    public <T extends Updatable> T registerProxy(String key, T mediator) {
+        @SuppressWarnings("UnnecessaryLocalVariable")
+        Updatable fix = mediator; // Workaround for a java compiler assertion bug having issues with types
         this.proxies.addLazy(key, fix::update);
+        updatables.add(fix);
+        return mediator;
+    }
+
+    public <T extends Updatable> T registerMediator(String key, T mediator) {
+        @SuppressWarnings("UnnecessaryLocalVariable")
+        Updatable fix = mediator; // Workaround for a java compiler assertion bug having issues with types
         this.mediators.addLazy(key, fix::update);
         updatables.add(fix);
         return mediator;
