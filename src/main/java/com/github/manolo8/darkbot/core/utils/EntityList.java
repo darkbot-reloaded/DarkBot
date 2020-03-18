@@ -115,11 +115,11 @@ public class EntityList extends Updatable {
                 noCloack.add(whenAdd(new NoCloack(id), found));
             } else if (id < 0 && rnd == 3) {
                 boxes.add(whenAdd(new Box(id), found));
-            } else if (150000156 <= id && id <= 150000526) {
+            } else if (150000156 <= id && id <= 150000582) {
                 LocationInfo loc = new LocationInfo(API.readMemoryLong(found + 64));
                 loc.update();
                 portals.add(whenAdd(main.starManager.getOrCreate(id, rnd, (int) loc.now.x, (int) loc.now.y), found));
-            } else if (150000532 <= id && id <= 150000950 && hullId < 255 && hullId >= 0) {
+            } else if (150000583 <= id && id <= 150000950 && hullId < 255 && hullId >= 0 && !main.hero.map.gg) {
                 battleStations.add(whenAdd(new BattleStation(id, hullId), found));
             } else if (id <= 150000147 && id >= 150000000) {
                 // 1-1: 000-022  1-4: 023

@@ -4,7 +4,8 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.mediators.LogMediator;
+import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
+import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
 import com.github.manolo8.darkbot.core.objects.swf.EntryArray;
 
 import java.util.ArrayList;
@@ -21,26 +22,27 @@ public class FacadeManager implements Manager {
     private final List<Updatable> updatables = new ArrayList<>();
 
     public final LogMediator log = registerMediator("LogWindowMediator", new LogMediator());
+    public final EscortProxy escort = registerProxy("payload_escort", new EscortProxy());
 
 
     public FacadeManager(Main main) {
         this.main = main;
     }
 
-    public <T extends Updatable> T registerCommand(String key, T mediator) {
+    public <T extends Updatable> T registerCommand(String key, T command) {
         @SuppressWarnings("UnnecessaryLocalVariable")
-        Updatable fix = mediator; // Workaround for a java compiler assertion bug having issues with types
+        Updatable fix = command; // Workaround for a java compiler assertion bug having issues with types
         this.commands.addLazy(key, fix::update);
         updatables.add(fix);
-        return mediator;
+        return command;
     }
 
-    public <T extends Updatable> T registerProxy(String key, T mediator) {
+    public <T extends Updatable> T registerProxy(String key, T proxy) {
         @SuppressWarnings("UnnecessaryLocalVariable")
-        Updatable fix = mediator; // Workaround for a java compiler assertion bug having issues with types
+        Updatable fix = proxy; // Workaround for a java compiler assertion bug having issues with types
         this.proxies.addLazy(key, fix::update);
         updatables.add(fix);
-        return mediator;
+        return proxy;
     }
 
     public <T extends Updatable> T registerMediator(String key, T mediator) {

@@ -104,6 +104,6 @@ public class DisconnectModule extends TemporalModule {
     @Override
     public String stoppedStatus() {
         if (pauseUntil == null) return I18n.get("module.disconnect.status_stopped", reason);
-        else  return I18n.get("module.disconnect.status_paused", reason, Time.toString(Math.max(0, pauseUntil - System.currentTimeMillis())));
+        else return I18n.get("module.disconnect.status_paused", reason, Time.toString(Math.max(0, pauseUntil - System.currentTimeMillis())));
     }
 }

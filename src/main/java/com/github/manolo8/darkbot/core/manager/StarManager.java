@@ -26,7 +26,8 @@ public class StarManager {
 
         StarBuilder mapBuild = new StarBuilder();
         mapBuild.addMap(-1, I18n.get("gui.map.loading"), "?")
-                .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1");
+                .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1")
+                .addGG(-3, "Escort GG").accessOnlyBy(54, 10500, 6500, "1-1", "2-1", "3-1", "1-8", "2-8", "3-8");
                 // MMO
         mapBuild.addMap(1, "1-1").addPortal(18500, 11500, "1-2").addPortal(10500, 6750, "Experiment Zone 1")
                 .addMap(2, "1-2").addPortal(2000, 2000, "1-1").addPortal(18500, 2000, "1-3").addPortal(18500, 11500, "1-4")
@@ -138,16 +139,16 @@ public class StarManager {
                 .addMap(158, "R-Zone 9").addMap(159, "R-Zone 10")
                 .addMap(420, "WarGame 1").addMap(421, "WarGame 2").addMap(422, "WarGame 3")
                 .addMap(423, "WarGame 4").addMap(423, "WarGame 5").addMap(423, "WarGame 6");
-                // Winter laberynth
-        mapBuild.addMap(430, "ATLAS A")
-                .addMap(431, "ATLAS B")
-                .addMap(432, "ATLAS C")
-                .addMap(433, "Cygni")
-                .addMap(434, "Helvetios")
-                .addMap(435, "Eridani")
-                .addMap(436, "Sirius")
-                .addMap(437, "Sadatoni")
-                .addMap(438, "Persei")
+                // Mimesis escort
+        mapBuild.addGG(430, "Escort VRU 1", "ESC-V1").exitBy(1)
+                .addGG(431, "Escort VRU 2", "ESC-V2").exitBy(1)
+                .addGG(432, "Escort VRU 3", "ESC-V3").exitBy(1)
+                .addGG(433, "Escort MMO 1", "ESC-M1").exitBy(1)
+                .addGG(434, "Escort MMO 2", "ESC-M2").exitBy(1)
+                .addGG(435, "Escort MMO 3", "ESC-M3").exitBy(1)
+                .addGG(436, "Escort EIC 1", "ESC-E1").exitBy(1)
+                .addGG(437, "Escort EIC 2", "ESC-E2").exitBy(1)
+                .addGG(438, "Escort EIC 3", "ESC-E3").exitBy(1)
                 .addMap(439, "Volantis")
                 .addMap(440, "Alcyone")
                 .addMap(441, "Auriga")

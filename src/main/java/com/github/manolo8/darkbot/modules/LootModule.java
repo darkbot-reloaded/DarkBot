@@ -83,12 +83,12 @@ public class LootModule implements Module {
         }
     }
 
-    boolean checkDangerousAndCurrentMap() {
+    protected boolean checkDangerousAndCurrentMap() {
         safety.setRefreshing(System.currentTimeMillis() <= refreshing);
         return safety.tick() && checkMap();
     }
 
-    private boolean checkMap() {
+    protected boolean checkMap() {
         if (this.config.GENERAL.WORKING_MAP != this.hero.map.id && !main.mapManager.entities.portals.isEmpty()) {
             this.main.setModule(new MapModule())
                     .setTarget(this.main.starManager.byId(this.main.config.GENERAL.WORKING_MAP));
@@ -97,11 +97,11 @@ public class LootModule implements Module {
         return true;
     }
 
-    boolean findTarget() {
+    protected boolean findTarget() {
         return (attack.target = closestNpc(hero.locationInfo.now)) != null;
     }
 
-    void ignoreInvalidTarget() {
+    protected void ignoreInvalidTarget() {
         double closestDist = drive.closestDistance(attack.target.locationInfo.now);
         if (!main.mapManager.isTarget(attack.target)) {
             if (closestDist > 600) {
@@ -122,8 +122,8 @@ public class LootModule implements Module {
         }
     }
 
-    private boolean backwards = false;
-    void moveToAnSafePosition() {
+    protected  boolean backwards = false;
+    protected void moveToAnSafePosition() {
         Npc target = attack.target;
         Location direction = drive.movingTo();
         Location heroLoc = hero.locationInfo.now;
@@ -166,7 +166,7 @@ public class LootModule implements Module {
         drive.move(direction);
     }
 
-    private Location getBestDir(Location targetLoc, double angle, double angleDiff, double distance) {
+    protected Location getBestDir(Location targetLoc, double angle, double angleDiff, double distance) {
         int iteration = 1;
         double forwardScore = 0, backScore = 0;
         do {
@@ -180,14 +180,14 @@ public class LootModule implements Module {
         return Location.of(targetLoc, angle + angleDiff * (backwards ? -1 : 1), distance);
     }
 
-    private double score(Location loc) {
+    protected double score(Location loc) {
         return (drive.canMove(loc) ? 0 : -1000) - npcs.stream() // Consider barrier as bad as 1000 radius units.
                 .filter(n -> attack.target != n)
                 .mapToDouble(n -> Math.max(0, n.npcInfo.radius - n.locationInfo.now.distance(loc)))
                 .sum();
     }
 
-    public void setConfig(Location direction) {
+    protected void setConfig(Location direction) {
         if (!attack.hasTarget()) hero.roamMode();
         else if (config.LOOT.RUN_CONFIG_IN_CIRCLE
                 && attack.target.health.hpPercent() < 0.25
@@ -196,7 +196,7 @@ public class LootModule implements Module {
         else hero.attackMode(attack.target);
     }
 
-    private boolean isAttackedByOthers(Npc npc) {
+    protected boolean isAttackedByOthers(Npc npc) {
         for (Ship ship : this.ships) {
             if (ship.address == hero.address || ship.address == hero.pet.address
                     || !ship.isAttacking(npc)) continue;
@@ -206,7 +206,7 @@ public class LootModule implements Module {
         return false;
     }
 
-    private Npc closestNpc(Location location) {
+    protected Npc closestNpc(Location location) {
         int extraPriority = attack.hasTarget() &&
                 (hero.target == attack.target || hero.locationInfo.distance(attack.target) < 600)
                 ? 20 - (int)(attack.target.health.hpPercent() * 10) : 0;
@@ -220,7 +220,7 @@ public class LootModule implements Module {
                         .thenComparing(n -> n.locationInfo.now.distance(location))).orElse(null);
     }
 
-    private boolean shouldKill(Npc n) {
+    protected boolean shouldKill(Npc n) {
         boolean attacked = this.isAttackedByOthers(n);
         return n.npcInfo.kill && !n.isInTimer() &&
                 (n.npcInfo.extra.has(NpcExtra.IGNORE_ATTACKED) || !attacked) && // Either ignore attacked, or not being attacked
