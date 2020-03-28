@@ -90,8 +90,8 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
             if (supplier != null) {
                 this.supplier = supplier;
                 getComponent().add(new AddButton(), "cell 2 0");
+                getComponent().add(new RemoveButton(), "cell 3 0");
             }
-            getComponent().add(new RemoveButton(), "cell 3 0");
         }
 
         component.setPreferredSize(new Dimension(550, 270));

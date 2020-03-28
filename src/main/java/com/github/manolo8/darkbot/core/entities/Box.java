@@ -22,7 +22,7 @@ public class Box extends Entity {
 
     public void setCollected() {
         collectedUntil = System.currentTimeMillis() + reset;
-        reset += reset < 15_000 ? 3_000 : 120_000;
+        reset += reset < 10_000 ? 2_000 : 120_000;
     }
 
     @Override
