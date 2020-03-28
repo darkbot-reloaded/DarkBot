@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
-import com.github.manolo8.darkbot.core.objects.swf.VectorInt;
+import com.github.manolo8.darkbot.core.objects.swf.IntArray;
 
 import java.util.Arrays;
 
@@ -10,7 +10,7 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class PingManager implements Manager {
 
-    private volatile VectorInt lastPings = null;
+    private volatile IntArray lastPings = null;
 
     public int ping = -1;
     private int currSize;
@@ -56,7 +56,7 @@ public class PingManager implements Manager {
 
         this.currSize = lastPings.size;
 
-        int ping = lastPings.elements[lastPings.size - 1];
+        int ping = lastPings.getLast();
         if (ping < -10 || ping > 50_000) return false;
 
         this.ping = ping;
@@ -78,8 +78,8 @@ public class PingManager implements Manager {
                 .distinct()
                 .filter(addr -> addr != 0) // Check array
                 .filter(addr -> API.readMemoryInt(addr + 64) > 0) // array size > 0
-                .mapToObj(VectorInt::new)
-                .peek(VectorInt::update)
+                .mapToObj(IntArray::ofVector)
+                .peek(IntArray::update)
                 .filter(vec -> vec.size > 0)
                 .filter(vec -> Arrays.stream(vec.elements).allMatch(ping -> ping > -1_000 && ping < 50_000))
                 .findAny()

@@ -1,4 +1,4 @@
-package com.github.manolo8.darkbot.core.objects.swf.group;
+package com.github.manolo8.darkbot.core.objects.group;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;

@@ -29,11 +29,11 @@ public class Box extends Entity {
     public void update(long address) {
         super.update(address);
 
-        if (traits.elements.length == 0) {
+        if (traits.size == 0) {
             boxInfo = new BoxInfo();
             return;
         }
-        long data = traits.elements[0];
+        long data = traits.get(0);
 
         data = API.readMemoryLong(data + 64);
         data = API.readMemoryLong(data + 32);

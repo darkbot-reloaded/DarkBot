@@ -14,7 +14,7 @@ import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
-import com.github.manolo8.darkbot.core.objects.swf.VectorPtr;
+import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,7 +27,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class EntityList extends Updatable {
 
     private final Main main;
-    private final VectorPtr entitiesAddress;
+    private final ObjArray entitiesAddress;
     public final List<List<? extends Entity>> allEntities;
     private final Set<Integer> ids;
 
@@ -46,7 +46,7 @@ public class EntityList extends Updatable {
     public EntityList(Main main) {
         this.main = main;
 
-        this.entitiesAddress = new VectorPtr(0);
+        this.entitiesAddress = ObjArray.ofVector();
         this.allEntities = new ArrayList<>();
 
         this.ids = new HashSet<>();
@@ -100,7 +100,7 @@ public class EntityList extends Updatable {
 
         entitiesAddress.update();
         for (int i = 0; i < entitiesAddress.size; i++) {
-            long found = entitiesAddress.elements[i];
+            long found = entitiesAddress.get(i);
 
             int id = API.readMemoryInt(found + 56);
             if (!ids.add(id)) continue;

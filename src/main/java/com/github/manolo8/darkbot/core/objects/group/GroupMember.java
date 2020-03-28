@@ -1,4 +1,4 @@
-package com.github.manolo8.darkbot.core.objects.swf.group;
+package com.github.manolo8.darkbot.core.objects.group;
 
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Location;

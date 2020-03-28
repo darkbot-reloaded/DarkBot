@@ -1,13 +1,13 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.ArrayObj;
+import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class LogMediator extends Updatable {
-    private ArrayObj arrayObj = new ArrayObj();
+    private ObjArray arrayObj = ObjArray.ofArrStr(true);
 
     public long lastLogPtr = 0;
     public final Lazy<String> logs = new Lazy.NoCache<>(); // Can't cache the value, same log could appear twice

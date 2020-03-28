@@ -8,9 +8,10 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
-import com.github.manolo8.darkbot.core.objects.swf.VectorPtr;
+import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.core.utils.Location;
 
 import java.util.Set;
 
@@ -50,7 +51,7 @@ public class MapManager implements Manager {
     public double width;
     public double height;
 
-    private VectorPtr minimapLayers = new VectorPtr(0);
+    private ObjArray minimapLayers = ObjArray.ofVector(true);
 
     public MapManager(Main main) {
         this.main = main;
@@ -133,22 +134,29 @@ public class MapManager implements Manager {
         height = boundMaxY - boundY;
     }
 
-    private void updateMinimap() {
+    private Location updateMinimap() {
         long temp = API.readMemoryLong(minimapAddressStatic); // Minimap
+        double minimapX = API.readMemoryInt(temp + 0xA8);
+
         temp = API.readMemoryLong(temp + 0xF8); // LayeredSprite
         temp = API.readMemoryLong(temp + 0xA8); // Vector<Layer>
         minimapLayers.update(temp);
-        minimapLayers.update();
 
         for (int i = 0; i < minimapLayers.size; i++) {
-            long layer = minimapLayers.elements[i]; // Seems to be offset by 1 for some reason.
+            long layer = minimapLayers.get(i); // Seems to be offset by 1 for some reason.
             long layerIdx = API.readMemoryInt(layer + 0xA8);
 
             if (layerIdx != Integer.MAX_VALUE) continue;
 
-            //Array layerObjects = new Array(API.readMemoryLong(layer + 0x58)); // 0x58 isn't right
-            //layerObjects.update();
+            int x = API.readMemoryInt(API.readMemoryLong(layer, 0x48, 0x20, 0x18) + 0x58);
+            int y = API.readMemoryInt(API.readMemoryLong(layer, 0x48, 0x20, 0x18) + 0x5C);
+
+            double scale = (internalWidth / minimapX) / 20;
+
+            return new Location(scale * x, scale * y);
         }
+
+        return null;
     }
 
     public boolean isTarget(Entity entity) {

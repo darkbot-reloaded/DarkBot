@@ -2,12 +2,11 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.swf.Dictionary;
-import com.github.manolo8.darkbot.core.objects.swf.group.Group;
-import com.github.manolo8.darkbot.core.objects.swf.group.GroupMember;
-import com.github.manolo8.darkbot.core.objects.swf.group.Invite;
+import com.github.manolo8.darkbot.core.objects.group.Group;
+import com.github.manolo8.darkbot.core.objects.group.GroupMember;
+import com.github.manolo8.darkbot.core.objects.group.Invite;
+import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +31,7 @@ public class GroupManager extends Gui {
     public boolean pinging; // If the pinging button is enabled & you're ready to ping
     public List<Invite> invites = new ArrayList<>();
 
-    private Dictionary inviteDict = new Dictionary();
+    private PairArray inviteDict = PairArray.ofDictionary(true);
 
     private long nextAction;
 
@@ -59,7 +58,6 @@ public class GroupManager extends Gui {
 
         pinging = API.readMemoryBoolean(groupAddress + 0x40);
         inviteDict.update(API.readMemoryLong(groupAddress + 0x48));
-        inviteDict.update();
 
         synchronized (Main.UPDATE_LOCKER) {
             if (invites.size() > inviteDict.size) invites = invites.subList(0, inviteDict.size);

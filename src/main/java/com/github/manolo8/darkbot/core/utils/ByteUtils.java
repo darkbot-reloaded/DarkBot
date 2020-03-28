@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.utils;
 
 public class ByteUtils {
+    public static final long FIX = 0xfffffffffff8L;
 
     public static int getInt(byte[] data, int offset) {
         return data.length < offset + 4 ? 0 : ((data[offset + 3]) << 24) |
@@ -21,11 +22,9 @@ public class ByteUtils {
     }
 
     public static byte[] getBytes(long... values) {
-
         byte[] b = new byte[values.length * 8];
 
         int i = 0;
-
         for (long value : values) {
             b[i++] = (byte) value;
             b[i++] = (byte) (value >> 8);

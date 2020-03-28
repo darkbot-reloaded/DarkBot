@@ -5,8 +5,9 @@ import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.swf.VectorPtr;
+import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -23,6 +24,8 @@ public class PetManager extends Gui {
     private Ship target;
     private Pet pet;
     private boolean enabled = false;
+    private List<Gear> gearList = new ArrayList<>();
+    private List<Gear> locatorList = new ArrayList<>();
 
     PetManager(Main main) {
         this.main = main;
@@ -51,12 +54,12 @@ public class PetManager extends Gui {
             target = ships.stream().filter(s -> pet.isAttacking(s)).findFirst().orElse(null);
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     private boolean active() {
@@ -89,61 +92,83 @@ public class PetManager extends Gui {
         }
     }
 
-    VectorPtr petPtr = VectorPtr.ofPet();
-    VectorPtr modules = VectorPtr.ofPetCheck();
+    private ObjArray gearsArr = ObjArray.ofArrObj();
     private void petModules() {
-        petPtr.update(API.readMemoryLong(API.readMemoryLong(address + 72) + 64));
-        petPtr.update();
+        gearsArr.update(API.readMemoryLong(API.readMemoryLong(getGearsSprite() + 176) + 224));
+        gearsArr.update();
 
-        modules.update(API.readMemoryLong(API.readMemoryLong(API.readMemoryLong(petPtr.get(petPtr.size - 1) + 216) + 176) + 224));
-        modules.update();
-
-        long currentModule = currentModule();
-
-        for (int i = 0; i < modules.size; i++) {
-            int gearId = API.readMemoryInt(modules.get(i) + 172);
-            String gearName = API.readMemoryString(API.readMemoryLong(modules.get(i) + 200));
-            long checkAddr = API.readMemoryLong(API.readMemoryLong(modules.get(i) + 208) + 152);
-
-            if (currentModule != checkAddr) continue;
-
-            System.out.println("gearId = " + gearId);
-            System.out.println("gearName = " + gearName);
-            System.out.println("checkAddr = " + checkAddr);
+        gearList.clear();
+        for (int i = 0; i < gearsArr.size; i++) {
+            gearList.add(new Gear().update(gearsArr.get(i)));
         }
     }
 
-    VectorPtr ptr = VectorPtr.ofPetCheck();
-    VectorPtr currentModule = VectorPtr.ofPet();
+    private ObjArray currSprite = ObjArray.ofSprite();
+    private ObjArray currentArr = ObjArray.ofArrObj();
     private long currentModule() {
         long temp = API.readMemoryLong(address + 400);
-        ptr.update(temp);
-        ptr.update();
+        currentArr.update(temp);
+        currentArr.update();
 
-        for (int i = 0; i < ptr.size; i++) {
-            if (API.readMemoryInt(ptr.get(i) + 172) == 54) {
-                temp = ptr.get(i);
+        for (int i = 0; i < currentArr.size; i++) {
+            if (API.readMemoryInt(currentArr.get(i) + 172) == 54) {
+                temp = currentArr.get(i);
                 break;
             }
         }
 
-        ptr.update(API.readMemoryLong(temp + 184));
-        ptr.update();
+        currentArr.update(API.readMemoryLong(temp + 184));
+        currentArr.update();
 
-        for (int i = 0; i < ptr.size; i++) {
-            if (API.readMemoryInt(ptr.get(i) + 168) == 72) {
-                temp = ptr.get(i);
+        for (int i = 0; i < currentArr.size; i++) {
+            if (API.readMemoryInt(currentArr.get(i) + 168) == 72) {
+                temp = currentArr.get(i);
                 break;
             }
         }
 
-        currentModule.update(API.readMemoryLong(API.readMemoryLong(temp + 72) + 64));
-        currentModule.update();
-        temp = API.readMemoryLong(API.readMemoryLong(currentModule.get(0) + 216) + 176);
+        currSprite.update(temp);
+        currSprite.update();
 
-        currentModule.update(API.readMemoryLong(API.readMemoryLong(temp + 72) + 64));
-        currentModule.update();
+        temp = API.readMemoryLong(API.readMemoryLong(currSprite.get(0) + 216) + 176);
 
-        return API.readMemoryLong(API.readMemoryLong(currentModule.get(1) + 216) + 152);
+        currSprite.update(temp);
+        currSprite.update();
+
+        return API.readMemoryLong(API.readMemoryLong(currSprite.get(1) + 216) + 152);
+    }
+
+    private ObjArray locatorArr = ObjArray.ofArrObj();
+    private void findLocatorNpc() {
+        locatorArr.update(API.readMemoryLong(getGearsSprite() + 168));
+        locatorArr.update();
+        locatorArr.update(API.readMemoryLong(locatorArr.get(0) + 224));
+        locatorArr.update();
+
+        locatorList.clear();
+        for (int i = 0; i < locatorArr.size; i++) {
+            locatorList.add(new Gear().update(locatorArr.get(i)));
+        }
+    }
+
+    private ObjArray sprite = ObjArray.ofSprite();
+    private long getGearsSprite() {
+        sprite.update(address);
+        sprite.update();
+        return API.readMemoryLong(sprite.getLast() + 216);
+    }
+
+    static class Gear {
+        public int id, parentId;
+        public long check;
+        public String name;
+
+        public Gear update(long address) {
+            this.id = API.readMemoryInt(address + 172);
+            this.parentId = API.readMemoryInt(address + 176); //assume, -1 if none
+            this.name = API.readMemoryString(API.readMemoryLong(address + 200));
+            this.check = API.readMemoryLong(API.readMemoryLong(address + 208) + 152);
+            return this;
+        }
     }
 }

@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
-import com.github.manolo8.darkbot.core.objects.swf.EntryArray;
+import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,15 +15,14 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class FacadeManager implements Manager {
     private final Main main;
-    private final EntryArray commands = new EntryArray();
-    private final EntryArray proxies = new EntryArray();
-    private final EntryArray mediators = new EntryArray();
+    private final PairArray commands  = PairArray.ofArray();
+    private final PairArray proxies   = PairArray.ofArray();
+    private final PairArray mediators = PairArray.ofArray();
 
     private final List<Updatable> updatables = new ArrayList<>();
 
     public final LogMediator log = registerMediator("LogWindowMediator", new LogMediator());
     public final EscortProxy escort = registerProxy("payload_escort", new EscortProxy());
-
 
     public FacadeManager(Main main) {
         this.main = main;
@@ -71,5 +70,4 @@ public class FacadeManager implements Manager {
 
         updatables.forEach(Updatable::update);
     }
-
 }

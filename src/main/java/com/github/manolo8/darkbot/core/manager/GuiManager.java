@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
-import com.github.manolo8.darkbot.core.objects.swf.Dictionary;
+import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class GuiManager implements Manager {
 
     private final Main main;
-    private final Dictionary guis = new Dictionary();
+    private final PairArray guis = PairArray.ofDictionary();
 
     private long reconnectTime;
     private long lastDeath = -1;
