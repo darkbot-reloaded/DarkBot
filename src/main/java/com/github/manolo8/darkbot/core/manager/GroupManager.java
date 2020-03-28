@@ -59,13 +59,7 @@ public class GroupManager extends Gui {
         pinging = API.readMemoryBoolean(groupAddress + 0x40);
         inviteDict.update(API.readMemoryLong(groupAddress + 0x48));
 
-        synchronized (Main.UPDATE_LOCKER) {
-            if (invites.size() > inviteDict.size) invites = invites.subList(0, inviteDict.size);
-            for (int i = 0; i < inviteDict.size; i++) {
-                while (invites.size() <= i) invites.add(new Invite(main.hero));
-                invites.get(i).update(inviteDict.get(i).value);
-            }
-        }
+        inviteDict.sync(invites, () -> new Invite(main.hero), null);
     }
 
     public void tick() {

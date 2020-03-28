@@ -43,24 +43,25 @@ public class IntArray extends Updatable {
     }
 
     public static IntArray ofVector(long address) {
-        return ofVector(false).setAddress(address);
+        IntArray ofVec = ofVector(false);
+        ofVec.update(address);
+        return ofVec;
     }
 
     public static IntArray ofVector(boolean autoUpdatable) {
         return new IntArray(0x40, 0x30, 0x4, false, autoUpdatable);
     }
 
-    public int getLast() {
-        return get(size - 1);
+    public int getSize() {
+        return Math.min(size, elements.length);
     }
 
     public int get(int idx) {
-        return idx >= 0 && idx < size && idx < elements.length ? elements[idx] : 0;
+        return idx >= 0 && idx < getSize() ? elements[idx] : 0;
     }
 
-    private IntArray setAddress(long address) {
-        update(address);
-        return this;
+    public int getLast() {
+        return get(getSize() - 1);
     }
 
     @Override

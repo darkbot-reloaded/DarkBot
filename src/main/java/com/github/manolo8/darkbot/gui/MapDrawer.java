@@ -487,18 +487,17 @@ public class MapDrawer extends JPanel {
         this.drawBackgrounded(g2, 15, align,
                 (x, y, h, str) -> g2.drawString(str, x, y + 14),
                 g2.getFontMetrics()::stringWidth,
-                texts);
+                Arrays.asList(texts));
     }
 
-    @SafeVarargs
-    private final <T> void drawBackgrounded(Graphics2D g2, int lineHeight, Align align,
-                                            Renderer<T> renderer,
-                                            ToIntFunction<T> widthGetter,
-                                            T... toRender) {
+    private <T> void drawBackgrounded(Graphics2D g2, int lineHeight, Align align,
+                                      Renderer<T> renderer,
+                                      ToIntFunction<T> widthGetter,
+                                      Collection<T> toRender) {
         g2.setFont(FONT_SMALL);
 
-        int width = Arrays.stream(toRender).mapToInt(widthGetter).max().orElse(0) + 8;
-        int height = toRender.length * lineHeight + 4;
+        int width = toRender.stream().mapToInt(widthGetter).max().orElse(0) + 8;
+        int height = toRender.size() * lineHeight + 4;
         int top = getHeight() / 2 - height / 2;
         int left = align == Align.RIGHT ? getWidth() - width : 0;
 

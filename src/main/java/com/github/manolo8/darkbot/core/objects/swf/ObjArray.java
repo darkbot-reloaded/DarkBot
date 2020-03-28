@@ -1,7 +1,13 @@
 package com.github.manolo8.darkbot.core.objects.swf;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.objects.group.GroupMember;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -9,7 +15,7 @@ import static com.github.manolo8.darkbot.Main.API;
  * Reads arrays in flash.
  * Instead of ArrayObj, VectorPtr & SpriteArray
  */
-public class ObjArray extends Updatable {
+public class ObjArray extends Updatable implements SwfPtrCollection {
     private final int sizeOffset, tableOffset, bytesOffset;
     private final boolean isSprite, autoUpdatable;
 
@@ -68,21 +74,25 @@ public class ObjArray extends Updatable {
         return new ObjArray(0x38, 0x30, 0x10, false, autoUpdatable);
     }
 
-    public long getLast() {
-        return get(getSize());
+    public int getSize() {
+        return Math.min(size, elements.length);
+    }
+
+    public long getPtr(int idx) {
+        return get(idx);
     }
 
     public long get(int idx) {
-        return idx >= 0 && idx < size && idx < elements.length ? elements[idx] : 0;
+        return idx >= 0 && idx < getSize() ? elements[idx] : 0;
+    }
+
+    public long getLast() {
+        return get(getSize() - 1);
     }
 
     public int indexOf(long value) {
-        for (int i = getSize(); i >= 0; i--) if (value == get(i)) return i;
+        for (int i = getSize() - 1; i >= 0; i--) if (value == get(i)) return i;
         return -1;
-    }
-
-    public int getSize() {
-        return this.size - 1;
     }
 
     @Override

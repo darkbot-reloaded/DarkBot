@@ -4,10 +4,14 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -15,7 +19,7 @@ import static com.github.manolo8.darkbot.Main.API;
  * Reads arrays with pair of values
  * Instead of EntryArray & Dictionary
  */
-public class PairArray extends Updatable {
+public class PairArray extends Updatable implements SwfPtrCollection {
     private final int sizeOffset, tableOffset;
     private final boolean isDictionary, autoUpdatable;
 
@@ -55,6 +59,14 @@ public class PairArray extends Updatable {
 
     public void addLazy(String key, Consumer<Long> consumer) {
         this.lazy.computeIfAbsent(key, k -> new Lazy<>()).add(consumer);
+    }
+
+    public int getSize() {
+        return Math.min(size, pairs.length);
+    }
+
+    public long getPtr(int idx) {
+        return get(idx).value;
     }
 
     public Pair get(int idx) {

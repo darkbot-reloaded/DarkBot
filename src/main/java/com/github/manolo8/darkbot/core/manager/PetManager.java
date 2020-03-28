@@ -1,11 +1,15 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Ship;
+import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.sun.deploy.config.AutoUpdater;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,10 +101,7 @@ public class PetManager extends Gui {
         gearsArr.update(API.readMemoryLong(API.readMemoryLong(getGearsSprite() + 176) + 224));
         gearsArr.update();
 
-        gearList.clear();
-        for (int i = 0; i < gearsArr.size; i++) {
-            gearList.add(new Gear().update(gearsArr.get(i)));
-        }
+        gearsArr.sync(gearList, Gear::new, null);
     }
 
     private ObjArray currSprite = ObjArray.ofSprite();
@@ -145,10 +146,7 @@ public class PetManager extends Gui {
         locatorArr.update(API.readMemoryLong(locatorArr.get(0) + 224));
         locatorArr.update();
 
-        locatorList.clear();
-        for (int i = 0; i < locatorArr.size; i++) {
-            locatorList.add(new Gear().update(locatorArr.get(i)));
-        }
+        locatorArr.sync(locatorList, Gear::new, null);
     }
 
     private ObjArray sprite = ObjArray.ofSprite();
@@ -158,17 +156,17 @@ public class PetManager extends Gui {
         return API.readMemoryLong(sprite.getLast() + 216);
     }
 
-    static class Gear {
+    static class Gear extends UpdatableAuto {
         public int id, parentId;
         public long check;
         public String name;
 
-        public Gear update(long address) {
+        @Override
+        public void update() {
             this.id = API.readMemoryInt(address + 172);
             this.parentId = API.readMemoryInt(address + 176); //assume, -1 if none
             this.name = API.readMemoryString(API.readMemoryLong(address + 200));
             this.check = API.readMemoryLong(API.readMemoryLong(address + 208) + 152);
-            return this;
         }
     }
 }
