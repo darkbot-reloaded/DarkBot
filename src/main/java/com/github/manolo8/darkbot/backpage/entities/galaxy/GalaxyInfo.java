@@ -4,8 +4,7 @@ import com.github.manolo8.darkbot.utils.XmlHelper;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class GalaxyInfo {
@@ -16,69 +15,30 @@ public class GalaxyInfo {
     private Integer spinSalePercentage;
     private Integer galaxyGateDay;
     private Integer bonusRewardsDay;
-    private EnergyCost energyCost = new EnergyCost();
+    private Integer energyCost;
 
-    private List<Multiplier> multipliers = new ArrayList<>();
-    private List<Gate> gates = new ArrayList<>();
     private List<Item> items = new ArrayList<>();
+    private Map<GalaxyGate, Gate> gates = new HashMap<>();
 
     public void update(Element e) {
-        this.money = XmlHelper.valueToInt(e, "money");
-        this.samples = XmlHelper.valueToInt(e, "samples");
-        this.selectedSpinAmount = XmlHelper.valueToInt(e, "spinamount_selected");
-        this.spinOnSale = XmlHelper.valueToInt(e, "spinOnSale");
-        this.spinSalePercentage = XmlHelper.valueToInt(e, "spinSalePercentage");
-        this.galaxyGateDay = XmlHelper.valueToInt(e, "galaxyGateDay");
-        this.bonusRewardsDay = XmlHelper.valueToInt(e, "bonusRewardsDay");
-        this.energyCost.update(XmlHelper.getElement(e, "energy_cost"));
-
-        if (XmlHelper.hasAnyElement(e, "multipliers")) updateMultipliersList(XmlHelper.getElement(e, "multipliers"));
-        if (XmlHelper.hasAnyElement(e, "gates")) updateGatesList(XmlHelper.getElement(e, "gates"));
-        if (XmlHelper.hasAnyElement(e, "items")) updateItemsList(XmlHelper.getElement(e, "items"));
-        else this.items.clear();
-    }
-
-    private void updateItemsList(Element e) {
-        NodeList list = e.getElementsByTagName("item");
         this.items.clear();
 
-        for (int i = 0; i < list.getLength(); i++) {
-            e = (Element) list.item(i);
-            this.items.add(new Item().update(e));
-        }
-    }
+        this.money              = XmlHelper.valueToInt(e, "money");
+        this.samples            = XmlHelper.valueToInt(e, "samples");
+        this.selectedSpinAmount = XmlHelper.valueToInt(e, "spinamount_selected");
+        this.spinOnSale         = XmlHelper.valueToInt(e, "spinOnSale");
+        this.spinSalePercentage = XmlHelper.valueToInt(e, "spinSalePercentage");
+        this.galaxyGateDay      = XmlHelper.valueToInt(e, "galaxyGateDay");
+        this.bonusRewardsDay    = XmlHelper.valueToInt(e, "bonusRewardsDay");
+        this.energyCost         = XmlHelper.valueToInt(XmlHelper.getElement(e, "energy_cost"));
 
-    private void updateGatesList(Element e) {
-        NodeList list = e.getElementsByTagName("gate");
+        if (XmlHelper.hasAnyElement(e, "gates"))       updateGates(XmlHelper.getElement(e, "gates"));
+        if (XmlHelper.hasAnyElement(e, "items"))       updateItems(XmlHelper.getElement(e, "items"));
+        if (XmlHelper.hasAnyElement(e, "multipliers")) updateMultipliers(XmlHelper.getElement(e, "multipliers"));
 
-        for (int i = 0; i < list.getLength(); i++) {
-            e = (Element) list.item(i);
-            Integer id = XmlHelper.attrToInt(e, "id");
-
-            int index = IntStream.range(0, gates.size())
-                    .filter(idx -> gates.get(idx).alreadyInList(id))
-                    .findFirst()
-                    .orElse(-1);
-
-            if (index == -1) gates.add(new Gate().update(e));
-            else gates.set(index, gates.get(index).update(e));
-        }
-    }
-
-    private void updateMultipliersList(Element e) {
-        NodeList list = e.getElementsByTagName("multiplier");
-
-        for (int i = 0; i < list.getLength(); i++) {
-            e = (Element) list.item(i);
-            String mode = e.getAttribute("mode");
-
-            int index = IntStream.range(0, multipliers.size())
-                    .filter(idx -> multipliers.get(idx).alreadyInList(mode))
-                    .findFirst()
-                    .orElse(-1);
-
-            if (index == -1) multipliers.add(new Multiplier().update(e));
-            else multipliers.set(index, multipliers.get(index).update(e));
+        if (XmlHelper.hasAnyElement(e, "setup")) {
+            Integer id = XmlHelper.attrToInt(XmlHelper.getElement(e, "setup"), "gate_id");
+            Optional.ofNullable(getGate(id)).ifPresent(Gate::onGatePrepare);
         }
     }
 
@@ -94,36 +54,74 @@ public class GalaxyInfo {
         return selectedSpinAmount;
     }
 
-    public Integer getSpinOnSale() {
-        return spinOnSale;
-    }
-
     public Integer getSpinSalePercentage() {
         return spinSalePercentage;
     }
 
-    public Integer getGalaxyGateDay() {
-        return galaxyGateDay;
-    }
-
-    public Integer getBonusRewardsDay() {
-        return bonusRewardsDay;
-    }
-
-    public EnergyCost getEnergyCost() {
+    public Integer getEnergyCost() {
         return energyCost;
     }
 
-    public List<Multiplier> getMultipliers() {
-        return multipliers;
+    public boolean isSpinOnSale() {
+        return spinOnSale != null && spinOnSale == 1;
     }
 
-    public List<Gate> getGates() {
-        return gates;
+    public boolean isGalaxyGateDay() {
+        return galaxyGateDay != null && galaxyGateDay == 1;
+    }
+
+    public boolean isBonusRewardsDay() {
+        return bonusRewardsDay != null && bonusRewardsDay == 1;
     }
 
     public List<Item> getItems() {
         return items;
+    }
+
+    public Gate getGate(Integer id) {
+        if (id == null) return null;
+        return Arrays.stream(GalaxyGate.values())
+                .filter(gate -> gate.getId() == id)
+                .findFirst()
+                .map(this::getGate).orElse(null);
+    }
+
+    public Gate getGate(GalaxyGate gate) {
+        return getGates().get(gate);
+    }
+
+    public Map<GalaxyGate, Gate> getGates() {
+        return gates;
+    }
+
+    private void updateItems(Element e) {
+        NodeList list = e.getElementsByTagName("item");
+
+        IntStream.range(0, list.getLength()).mapToObj(i -> (Element) list.item(i))
+                .forEach(item -> {
+                    Optional.ofNullable(getGate(XmlHelper.attrToInt(item, "gate_id"))).ifPresent(gate -> gate.update(item));
+                    this.items.add(new Item().update(item));
+                });
+    }
+
+    private void updateGates(Element e) {
+        NodeList list = e.getElementsByTagName("gate");
+
+        IntStream.range(0, list.getLength()).mapToObj(i -> (Element) list.item(i))
+                .forEach(gate -> Arrays.stream(GalaxyGate.values())
+                        .filter(g -> g.match(XmlHelper.attrToInt(gate, "id")))
+                        .findFirst()
+                        .ifPresent(g -> this.gates.computeIfAbsent(g, k -> new Gate()).update(gate)));
+    }
+
+    private void updateMultipliers(Element e) {
+        NodeList list = e.getElementsByTagName("multiplier");
+
+        IntStream.range(0, list.getLength()).mapToObj(i -> (Element) list.item(i))
+                .forEach(multiplier -> Arrays.stream(GalaxyGate.values())
+                        .filter(g -> g.match(multiplier.getAttribute("mode")))
+                        .findFirst()
+                        .ifPresent(g -> this.gates.computeIfAbsent(g, k -> new Gate()).setMultiplier(multiplier)));
     }
 
     @Override
@@ -136,10 +134,9 @@ public class GalaxyInfo {
                 ", spinSalePercentage=" + spinSalePercentage +
                 ", galaxyGateDay=" + galaxyGateDay +
                 ", bonusRewardsDay=" + bonusRewardsDay +
-                ", energyCosts=" + energyCost +
-                ", multipliers=" + multipliers +
-                ", gates=" + gates +
+                ", energyCost=" + energyCost +
                 ", items=" + items +
+                ", gates=" + gates +
                 '}';
     }
 }

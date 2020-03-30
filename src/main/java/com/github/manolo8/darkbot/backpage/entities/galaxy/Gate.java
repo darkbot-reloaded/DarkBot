@@ -14,23 +14,27 @@ public class Gate {
     private Integer currentWave;
     private Integer livesLeft;
     private Integer lifePrice;
+    private Integer multiplier = -1;
 
-    Gate update(Element e) {
-        this.state = e.getAttribute("state");
-        this.total = XmlHelper.attrToInt(e, "total");
-        this.current = XmlHelper.attrToInt(e, "current");
-        this.id = XmlHelper.attrToInt(e, "id");
-        this.prepared = XmlHelper.attrToInt(e, "prepared");
-        this.totalWave = XmlHelper.attrToInt(e, "totalWave");
-        this.currentWave = XmlHelper.attrToInt(e, "currentWave");
-        this.livesLeft = XmlHelper.attrToInt(e, "livesLeft");
-        this.lifePrice = XmlHelper.attrToInt(e, "lifePrice");
-
-        return this;
+    void update(Element e) {
+        setState      (e.getAttribute("state"));
+        setTotal      (XmlHelper.attrToInt(e, "total"));
+        setCurrent    (XmlHelper.attrToInt(e, "current"));
+        setId         (XmlHelper.attrToInt(e, "id"));
+        setId         (XmlHelper.attrToInt(e, "gate_id"));
+        setPrepared   (XmlHelper.attrToInt(e, "prepared"));
+        setTotalWave  (XmlHelper.attrToInt(e, "totalWave"));
+        setCurrentWave(XmlHelper.attrToInt(e, "currentWave"));
+        setLivesLeft  (XmlHelper.attrToInt(e, "livesLeft"));
+        setLifePrice  (XmlHelper.attrToInt(e, "lifePrice"));
     }
 
-    boolean alreadyInList(Integer id) {
-        return this.id.equals(id);
+    public boolean shouldStopSpinning() {
+        return getLivesLeft() > 0 && isFinished();
+    }
+
+    public boolean isFinished() {
+        return getCurrent().equals(getTotal());
     }
 
     public String getState() {
@@ -69,6 +73,59 @@ public class Gate {
         return lifePrice;
     }
 
+    /**
+     * @return -1 if was never assigned. Only for KRONOS actually
+     */
+    public Integer getMultiplier() {
+        return multiplier;
+    }
+
+    void onGatePrepare() {
+        this.state    = "on_progress";
+        this.current  = 0;
+        this.prepared = 1;
+    }
+
+    void setMultiplier(Element multiplier) {
+        this.multiplier = XmlHelper.attrToInt(multiplier, "value");
+    }
+
+    private void setState(String state) {
+        if (state != null) this.state = state;
+    }
+
+    private void setTotal(Integer total) {
+        if (total != null) this.total = total;
+    }
+
+    private void setCurrent(Integer current) {
+        if (current != null) this.current = current;
+    }
+
+    private void setId(Integer id) {
+        if (id != null) this.id = id;
+    }
+
+    private void setPrepared(Integer prepared) {
+        if (prepared != null) this.prepared = prepared;
+    }
+
+    private void setTotalWave(Integer totalWave) {
+        if (totalWave != null) this.totalWave = totalWave;
+    }
+
+    private void setCurrentWave(Integer currentWave) {
+        if (currentWave != null) this.currentWave = currentWave;
+    }
+
+    private void setLivesLeft(Integer livesLeft) {
+        if (livesLeft != null) this.livesLeft = livesLeft;
+    }
+
+    private void setLifePrice(Integer lifePrice) {
+        if (lifePrice != null) this.lifePrice = lifePrice;
+    }
+
     @Override
     public String toString() {
         return "Gate{" +
@@ -81,6 +138,7 @@ public class Gate {
                 ", currentWave=" + currentWave +
                 ", livesLeft=" + livesLeft +
                 ", lifePrice=" + lifePrice +
+                ", multiplier=" + multiplier +
                 '}';
     }
 }

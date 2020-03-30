@@ -63,6 +63,7 @@ public class BackpageManager extends Thread {
                 int waitTime = sidCheck();
                 sidLastUpdate = System.currentTimeMillis();
                 sidNextUpdate = sidLastUpdate + (int) (waitTime + waitTime * Math.random());
+                galaxyManager.initIfEmpty();
             }
 
             if (System.currentTimeMillis() > checkDrones) {
