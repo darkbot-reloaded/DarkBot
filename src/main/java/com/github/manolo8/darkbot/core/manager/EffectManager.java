@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.manager;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
@@ -17,6 +18,9 @@ public class EffectManager implements Manager {
 
     private ObjArray effectsPtr = ObjArray.ofVector(true);
     private Map<Long, List<Integer>> effects = new HashMap<>();
+
+    public EffectManager(Main main) {
+    }
 
     @Override
     public void install(BotInstaller botInstaller) {

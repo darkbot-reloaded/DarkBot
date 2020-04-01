@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.core.entities;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
@@ -8,6 +10,8 @@ import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Entity extends Updatable {
+
+    public Main main;
 
     public int id;
 
@@ -27,6 +31,10 @@ public class Entity extends Updatable {
     public Entity(int id) {
         this();
         this.id = id;
+    }
+
+    public void setMain(Main main) {
+        this.main = main;
     }
 
     public int getId() {
@@ -77,7 +85,16 @@ public class Entity extends Updatable {
         }
     }
 
-    public void added() {
+    public boolean hasEffect(EffectManager.Effect effect) {
+        return main != null && main.effectManager.hasEffect(this, effect);
+    }
+
+    public boolean hasEffect(int effect) {
+        return main != null && main.effectManager.hasEffect(this, effect);
+    }
+
+    public void added(Main main) {
+        this.main = main;
         removed = false;
     }
 

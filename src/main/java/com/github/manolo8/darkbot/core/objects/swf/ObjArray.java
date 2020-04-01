@@ -34,7 +34,7 @@ public class ObjArray extends Updatable implements SwfPtrCollection {
      * Probably for {@code Array<String>}
      */
     public static ObjArray ofArrStr() {
-        return ofArrStr(false);
+        return ofArrStr(true);
     }
 
     public static ObjArray ofArrStr(boolean autoUpdatable) {
@@ -45,7 +45,7 @@ public class ObjArray extends Updatable implements SwfPtrCollection {
      * Probably for {@code Array<Object>}
      */
     public static ObjArray ofArrObj() {
-        return ofArrObj(false);
+        return ofArrObj(true);
     }
 
     public static ObjArray ofArrObj(boolean autoUpdatable) {
@@ -56,7 +56,7 @@ public class ObjArray extends Updatable implements SwfPtrCollection {
      * Reads children array of Sprite {@code Sprite}
      */
     public static ObjArray ofSprite() {
-        return ofSprite(false);
+        return ofSprite(true);
     }
 
     public static ObjArray ofSprite(boolean autoUpdatable) {

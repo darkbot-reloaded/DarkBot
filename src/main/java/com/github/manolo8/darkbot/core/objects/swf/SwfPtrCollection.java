@@ -47,7 +47,8 @@ public interface SwfPtrCollection {
             }
             if (newItem) list.add(item);
         }
-        list.subList(0, listIdx);
+        while (list.size() > listIdx)
+            list.remove(list.size() - 1);
         return ignored;
     }
 }

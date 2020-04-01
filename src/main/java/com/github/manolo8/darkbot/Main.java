@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.itf.Module;
+import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
@@ -72,6 +73,7 @@ public class Main extends Thread implements PluginListener {
     public final StarManager starManager;
     public final HeroManager hero;
     public final FacadeManager facadeManager;
+    public final EffectManager effectManager;
     public final GuiManager guiManager;
     public final StatsManager statsManager;
     public final PingManager pingManager;
@@ -118,11 +120,13 @@ public class Main extends Thread implements PluginListener {
         mapManager = new MapManager(this);
         hero = new HeroManager(this);
         facadeManager = new FacadeManager(this);
+        effectManager = new EffectManager(this);
         guiManager = new GuiManager(this);
         statsManager = new StatsManager(this);
         pingManager = new PingManager();
 
         botInstaller.add(facadeManager);
+        botInstaller.add(effectManager);
         botInstaller.add(guiManager);
         botInstaller.add(mapManager);
         botInstaller.add(hero);
@@ -202,6 +206,7 @@ public class Main extends Thread implements PluginListener {
         hero.tick();
         mapManager.tick();
         facadeManager.tick();
+        effectManager.tick();
         guiManager.tick();
         statsManager.tick();
 

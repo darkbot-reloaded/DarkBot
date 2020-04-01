@@ -8,7 +8,9 @@ import com.github.manolo8.darkbot.config.types.Tag;
 import com.github.manolo8.darkbot.config.types.TagDefault;
 import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
+import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
+import com.github.manolo8.darkbot.core.manager.PetManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
@@ -138,7 +140,8 @@ public class Config {
     public @Option PetSettings PET = new PetSettings();
     public static class PetSettings {
         public @Option boolean ENABLED = false;
-        public @Option @Num(max = 8, step = 1) int MODULE = 1;
+        public @Deprecated int MODULE = 0; // Kept so plugins using it don't just break. They'll just be unable to use pet.
+        public @Option @Editor(JListField.class) @Options(PetGearSupplier.class) int MODULE_ID = 0;
     }
 
     public @Option GroupSettings GROUP = new GroupSettings();

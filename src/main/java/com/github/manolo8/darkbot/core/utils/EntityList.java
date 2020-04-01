@@ -181,7 +181,7 @@ public class EntityList extends Updatable {
 
     private <E extends Entity> E whenAdd(E entity, long address) {
 
-        entity.added();
+        entity.added(main);
         entity.update(address);
         entity.update();
 

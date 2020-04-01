@@ -41,8 +41,8 @@ public class Portal extends Entity {
     }
 
     @Override
-    public void added() {
-        super.added();
+    public void added(Main main) {
+        super.added(main);
         ConfigEntity.INSTANCE.updateSafetyFor(this);
     }
 

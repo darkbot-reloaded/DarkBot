@@ -1,15 +1,13 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.types.Option;
+import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Ship;
-import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import com.sun.deploy.config.AutoUpdater;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,13 +26,28 @@ public class PetManager extends Gui {
     private Ship target;
     private Pet pet;
     private boolean enabled = false;
+
+    private ObjArray guiSprites = ObjArray.ofSprite();
+
+    private ObjArray modulesArr = ObjArray.ofArrObj();
+    private ObjArray currentArr = ObjArray.ofArrObj();
+    private ObjArray currSpriteWrapper = ObjArray.ofSprite();
+    private ObjArray currSprite = ObjArray.ofSprite();
+
+    private ObjArray gearsArr = ObjArray.ofArrObj();
     private List<Gear> gearList = new ArrayList<>();
+
+    private ObjArray locatorWrapper = ObjArray.ofArrObj(), locatorNpcList = ObjArray.ofArrObj();
     private List<Gear> locatorList = new ArrayList<>();
+
+    private Gear current;
 
     PetManager(Main main) {
         this.main = main;
         this.ships = main.mapManager.entities.ships;
         this.pet = main.hero.pet;
+
+        PetGearSupplier.GEARS = gearList;
     }
 
     public void tick() {
@@ -48,8 +61,8 @@ public class PetManager extends Gui {
             return;
         }
         updatePetTarget();
-        int module = (target == null || target instanceof Npc || target.playerInfo.isEnemy()) ? main.config.PET.MODULE : 0;
-        if (moduleStatus != module && show(true)) this.selectModule(module);
+        int moduleId = (target == null || target instanceof Npc || target.playerInfo.isEnemy()) ? main.config.PET.MODULE_ID : 1;
+        if (moduleStatus != moduleId && show(true)) this.selectModule(moduleId);
         else if (moduleSelected()) show(false);
     }
 
@@ -83,80 +96,61 @@ public class PetManager extends Gui {
         }
     }
 
-    private void selectModule(int module) {
+    private int moduleIdToIndex(int moduleId) {
+        for (int i = 0; i < gearList.size(); i++) {
+            if (gearList.get(i).id == moduleId) return i;
+        }
+        return 0;
+    }
+
+    private void selectModule(int moduleId) {
         if (System.currentTimeMillis() - this.selectModuleTime > 1000L) {
             if (moduleStatus != -1) {
                 click(MODULES_X_MAX - 5, MODULE_Y);
                 this.moduleStatus = -1;
             } else {
-                click(MODULES_X_MAX - 30, MODULE_Y + 40 + (20 * module));
-                this.moduleStatus = module;
+                click(MODULES_X_MAX - 30, MODULE_Y + 40 + (20 * moduleIdToIndex(moduleId)));
+                this.moduleStatus = moduleId;
             }
             this.selectModuleTime = System.currentTimeMillis();
         }
     }
 
-    private ObjArray gearsArr = ObjArray.ofArrObj();
-    private void petModules() {
-        gearsArr.update(API.readMemoryLong(API.readMemoryLong(getGearsSprite() + 176) + 224));
-        gearsArr.update();
+    @Override
+    public void update() {
+        super.update();
+        if (address == 0) return;
 
+        guiSprites.update(address);
+        long gearsSprite = API.readMemoryLong(guiSprites.getLast() + 216);
+        gearsArr.update(API.readMemoryLong(API.readMemoryLong(gearsSprite + 176) + 224));
         gearsArr.sync(gearList, Gear::new, null);
-    }
 
-    private ObjArray currSprite = ObjArray.ofSprite();
-    private ObjArray currentArr = ObjArray.ofArrObj();
-    private long currentModule() {
-        long temp = API.readMemoryLong(address + 400);
-        currentArr.update(temp);
-        currentArr.update();
+        locatorWrapper.update(API.readMemoryLong(gearsSprite + 168));
+        locatorNpcList.update(API.readMemoryLong(locatorWrapper.get(0) + 224));
 
-        for (int i = 0; i < currentArr.size; i++) {
-            if (API.readMemoryInt(currentArr.get(i) + 172) == 54) {
-                temp = currentArr.get(i);
-                break;
-            }
+        locatorNpcList.sync(locatorList, Gear::new, null);
+
+        modulesArr.update(API.readMemoryLong(address + 400));
+
+        for (int i = 0; i < modulesArr.size; i++) {
+            if (API.readMemoryInt(modulesArr.get(i) + 172) != 54) continue;
+            currentArr.update(API.readMemoryLong(modulesArr.get(i) + 184));
+            break;
         }
-
-        currentArr.update(API.readMemoryLong(temp + 184));
-        currentArr.update();
-
         for (int i = 0; i < currentArr.size; i++) {
-            if (API.readMemoryInt(currentArr.get(i) + 168) == 72) {
-                temp = currentArr.get(i);
-                break;
-            }
+            if (API.readMemoryInt(currentArr.get(i) + 168) != 72) continue;
+            currSpriteWrapper.update(currentArr.get(i));
+            break;
         }
+        currSprite.update(API.readMemoryLong(API.readMemoryLong(currSpriteWrapper.get(0) + 216) + 176));
+        long currentModule = API.readMemoryLong(API.readMemoryLong(currSprite.get(1) + 216) + 152);
 
-        currSprite.update(temp);
-        currSprite.update();
-
-        temp = API.readMemoryLong(API.readMemoryLong(currSprite.get(0) + 216) + 176);
-
-        currSprite.update(temp);
-        currSprite.update();
-
-        return API.readMemoryLong(API.readMemoryLong(currSprite.get(1) + 216) + 152);
+        for (Gear gear : gearList) if (gear.check == currentModule) current = gear;
+        for (Gear gear : locatorList) if (gear.check == currentModule) current = gear;
     }
 
-    private ObjArray locatorArr = ObjArray.ofArrObj();
-    private void findLocatorNpc() {
-        locatorArr.update(API.readMemoryLong(getGearsSprite() + 168));
-        locatorArr.update();
-        locatorArr.update(API.readMemoryLong(locatorArr.get(0) + 224));
-        locatorArr.update();
-
-        locatorArr.sync(locatorList, Gear::new, null);
-    }
-
-    private ObjArray sprite = ObjArray.ofSprite();
-    private long getGearsSprite() {
-        sprite.update(address);
-        sprite.update();
-        return API.readMemoryLong(sprite.getLast() + 216);
-    }
-
-    static class Gear extends UpdatableAuto {
+    public static class Gear extends UpdatableAuto {
         public int id, parentId;
         public long check;
         public String name;
@@ -169,4 +163,5 @@ public class PetManager extends Gui {
             this.check = API.readMemoryLong(API.readMemoryLong(address + 208) + 152);
         }
     }
+
 }

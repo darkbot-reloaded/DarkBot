@@ -16,7 +16,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class HeroManager extends Ship implements Manager {
 
     public static HeroManager instance;
-    private final Main main;
+    public final Main main;
 
     private long staticAddress;
     private long settingsAddress;

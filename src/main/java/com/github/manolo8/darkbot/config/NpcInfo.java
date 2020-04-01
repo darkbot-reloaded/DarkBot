@@ -23,6 +23,8 @@ public class NpcInfo {
     @Option(key = "config.loot.npc_table.attack_formation")
     public Character attackFormation;
 
+    public int npcId;
+
     public static transient Map<String, NpcExtraFlag> NPC_FLAGS = new LinkedHashMap<>();
 
     @Option(key = "config.loot.npc_table.extra")
