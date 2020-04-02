@@ -104,7 +104,8 @@ public class CollectorModule implements Module {
     }
 
     public boolean isNotWaiting() {
-        return System.currentTimeMillis() > waiting || current == null || current.removed;
+        return System.currentTimeMillis() > waiting || current == null || current.removed
+                || main.statsManager.currentBox != current.address;
     }
 
     public boolean tryCollectNearestBox() {
@@ -121,15 +122,19 @@ public class CollectorModule implements Module {
         double distance = hero.locationInfo.distance(current);
 
         if (distance < 200) {
-            drive.stop(false);
-            current.clickable.setRadius(800);
-            drive.clickCenter(true, current.locationInfo.now);
-            current.clickable.setRadius(0);
+            if (!current.isCollected() && main.statsManager.currentBox == current.address) {
+                current.setCollected();
+                waiting = System.currentTimeMillis() + current.boxInfo.waitTime + hero.timeTo(distance) + 30;
+            } else if (System.currentTimeMillis() > waiting) {
+                drive.stop(false);
+                current.clickable.setRadius(800);
+                drive.clickCenter(true, current.locationInfo.now);
+                current.clickable.setRadius(0);
 
-            current.setCollected();
-
-            waiting = System.currentTimeMillis() + current.boxInfo.waitTime + hero.timeTo(distance) + 30;
-
+                waiting = System.currentTimeMillis() + current.boxInfo.waitTime
+                        + Math.min(1_000, current.getRetries() * 100) // Add 100ms per retry, max 1 second
+                        + hero.timeTo(distance) + 30;
+            }
         } else {
             drive.move(current);
         }
@@ -147,8 +152,7 @@ public class CollectorModule implements Module {
     public void checkInvisibility() {
         if (config.COLLECT.AUTO_CLOACK
                 && !hero.invisible
-                && System.currentTimeMillis() - invisibleTime > 60000
-        ) {
+                && System.currentTimeMillis() - invisibleTime > 60000) {
             invisibleTime = System.currentTimeMillis();
             API.keyboardClick(config.COLLECT.AUTO_CLOACK_KEY);
         }

@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,7 @@ public class EffectManager implements Manager {
     }
 
     public List<Integer> getEffects(Entity entity) {
-        return effects.get(entity.address);
+        return effects.getOrDefault(entity.address, Collections.emptyList());
     }
 
     public boolean hasEffect(Entity entity, Effect effect) {

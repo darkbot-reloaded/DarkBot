@@ -15,6 +15,8 @@ public class StatsManager implements Manager {
     private long address;
     private long settingsAddress;
 
+    public long currentBox; // Pretty out of place, but will work
+
     public double credits;
     public double uridium;
     public double experience;
@@ -62,6 +64,8 @@ public class StatsManager implements Manager {
 
         deposit = API.readMemoryInt(API.readMemoryLong(address + 240) + 40);
         depositTotal = API.readMemoryInt(API.readMemoryLong(address + 248) + 40);
+
+        currentBox = API.readMemoryLong(address + 0xE8);
 
         if (settingsAddress == 0) return;
         if (instance == null || instance.isEmpty() || !instance.startsWith("http")) {

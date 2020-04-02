@@ -7,7 +7,7 @@ import com.github.manolo8.darkbot.utils.I18n;
 import java.util.Locale;
 
 public enum NpcExtra implements NpcExtraFlag {
-    NO_CIRCLE, IGNORE_OWNERSHIP, IGNORE_ATTACKED, PASSIVE, ATTACK_SECOND, USE_RSB;
+    NO_CIRCLE, IGNORE_OWNERSHIP, IGNORE_ATTACKED, PASSIVE, ATTACK_SECOND, USE_RSB, PET_LOCATOR;
 
     @Override
     public String getShortName() {

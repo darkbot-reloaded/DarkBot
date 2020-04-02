@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
+import static java.lang.Thread.getAllStackTraces;
 
 public class PetManager extends Gui {
 
@@ -40,7 +41,8 @@ public class PetManager extends Gui {
     private ObjArray locatorWrapper = ObjArray.ofArrObj(), locatorNpcList = ObjArray.ofArrObj();
     private List<Gear> locatorList = new ArrayList<>();
 
-    private Gear current;
+    private Gear currentModule; // The Module used, like Passive mode, kamikaze, or enemy locator
+    private Gear currentGear;   // The Gear used, like passive mode, or an npc inside enemy locator.
 
     PetManager(Main main) {
         this.main = main;
@@ -104,16 +106,15 @@ public class PetManager extends Gui {
     }
 
     private void selectModule(int moduleId) {
-        if (System.currentTimeMillis() - this.selectModuleTime > 1000L) {
-            if (moduleStatus != -1) {
-                click(MODULES_X_MAX - 5, MODULE_Y);
-                this.moduleStatus = -1;
-            } else {
-                click(MODULES_X_MAX - 30, MODULE_Y + 40 + (20 * moduleIdToIndex(moduleId)));
-                this.moduleStatus = moduleId;
-            }
-            this.selectModuleTime = System.currentTimeMillis();
+        if (System.currentTimeMillis() - this.selectModuleTime < 300) return;
+        if (moduleStatus != -1) {
+            click(MODULES_X_MAX - 5, MODULE_Y);
+            this.moduleStatus = -1;
+        } else {
+            click(MODULES_X_MAX - 30, MODULE_Y + 40 + (20 * moduleIdToIndex(moduleId)));
+            this.moduleStatus = moduleId;
         }
+        this.selectModuleTime = System.currentTimeMillis();
     }
 
     @Override
@@ -144,10 +145,24 @@ public class PetManager extends Gui {
             break;
         }
         currSprite.update(API.readMemoryLong(API.readMemoryLong(currSpriteWrapper.get(0) + 216) + 176));
-        long currentModule = API.readMemoryLong(API.readMemoryLong(currSprite.get(1) + 216) + 152);
+        long currGearId = API.readMemoryLong(API.readMemoryLong(currSprite.get(1) + 216) + 152);
 
-        for (Gear gear : gearList) if (gear.check == currentModule) current = gear;
-        for (Gear gear : locatorList) if (gear.check == currentModule) current = gear;
+        currentGear = currentModule = findGear(gearList, currGearId);
+
+        if (currentGear == null) {
+            currentGear = findGear(locatorList, currGearId);
+            if (currentGear != null) currentModule = byId(currentGear.parentId);
+        }
+    }
+
+    public Gear findGear(List<Gear> gears, long check) {
+        for (Gear gear : gears) if (gear.check == check) return gear;
+        return null;
+    }
+
+    public Gear byId(int id) {
+        for (Gear gear : gearList) if (gear.id == id) return gear;
+        return null;
     }
 
     public static class Gear extends UpdatableAuto {

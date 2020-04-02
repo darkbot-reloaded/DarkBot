@@ -7,7 +7,9 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class Box extends Entity {
 
-    private long collectedUntil, reset = 0;
+    private long collectedUntil;
+    private int retries = 0;
+
     public String type;
 
     public BoxInfo boxInfo;
@@ -21,8 +23,15 @@ public class Box extends Entity {
     }
 
     public void setCollected() {
-        collectedUntil = System.currentTimeMillis() + reset;
-        reset += reset < 10_000 ? 2_000 : 120_000;
+        collectedUntil = System.currentTimeMillis() + getNextWait();
+    }
+
+    public int getRetries() {
+        return retries;
+    }
+
+    public int getNextWait() {
+        return retries < 5 ? retries * 2_000 : (retries * 60_000);
     }
 
     @Override

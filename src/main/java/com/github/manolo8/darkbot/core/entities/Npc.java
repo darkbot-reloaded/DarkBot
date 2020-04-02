@@ -25,7 +25,9 @@ public class Npc extends Ship {
         npcId = API.readMemoryInt(API.readMemoryLong(address + 192) + 80);
         ish = hasEffect(EffectManager.Effect.ISH);
 
-        if (!oldName.equals(playerInfo.username))
+        if (!oldName.equals(playerInfo.username)) {
             npcInfo = ConfigEntity.INSTANCE.getOrCreateNpcInfo(playerInfo.username);
+            npcInfo.npcId = npcId;
+        }
     }
 }
