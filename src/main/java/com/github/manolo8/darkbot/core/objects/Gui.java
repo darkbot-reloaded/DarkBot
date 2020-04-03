@@ -87,6 +87,10 @@ public class Gui extends Updatable {
         API.mouseClick(x + plusX, y + plusY);
     }
 
+    public void hover(int plusX, int plusY) {
+        API.mouseMove(x + plusX, y + plusY);
+    }
+
     public boolean show(boolean value) {
         if (trySetShowing(value)) {
             if (minimized.address != 0) API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);

@@ -27,6 +27,8 @@ public class DarkBotAPI extends AbstractDarkBotApi {
 
     public native boolean isValid();
 
+    public native void mouseMove(int x, int y);
+
     public native void mouseClick(int x, int y);
 
     public native void keyboardClick(char btn);

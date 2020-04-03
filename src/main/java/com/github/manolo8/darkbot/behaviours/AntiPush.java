@@ -20,6 +20,7 @@ public class AntiPush implements Behaviour {
 
     @Override
     public void install(Main main) {
+        this.main = main;
         this.mapManager = main.mapManager;
         this.ships = main.mapManager.entities.ships;
     }

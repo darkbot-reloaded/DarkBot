@@ -35,6 +35,11 @@ public class DarkFlash extends AbstractDarkBotApi {
     }
 
     @Override
+    public void mouseMove(int x, int y) {
+        mousePress(x, y); // Darkflash doesn't have mouse move, can't do much about it
+    }
+
+    @Override
     public void mouseClick(int x, int y) {
         this.mousePress(x, y);
     }
