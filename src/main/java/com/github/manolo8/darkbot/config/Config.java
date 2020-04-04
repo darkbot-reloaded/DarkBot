@@ -141,7 +141,7 @@ public class Config {
     public static class PetSettings {
         public @Option boolean ENABLED = false;
         public @Deprecated int MODULE = 0; // Kept so plugins using it don't just break. They'll just be unable to use pet.
-        public @Option @Editor(JListField.class) @Options(PetGearSupplier.class) int MODULE_ID = 0;
+        public @Option @Editor(JListField.class) @Options(PetGearSupplier.class) int MODULE_ID = 1;
     }
 
     public @Option GroupSettings GROUP = new GroupSettings();
