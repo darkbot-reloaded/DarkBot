@@ -166,18 +166,18 @@ public class PetManager extends Gui {
                 break;
             case DROPDOWN:
                 if (submoduleIdx != -1) {
-                    hover(MODULES_X_MAX - 10, MODULE_Y + 40 + (20 * moduleIdToIndex(moduleId)));
+                    hover(MODULES_X_MAX - 10, MODULE_Y + 40 + (25 * moduleIdToIndex(moduleId)));
                     selection = ModuleStatus.SUB_DROPDOWN;
                     this.selectModuleTime = System.currentTimeMillis() + 30;
                 } else {
-                    click(MODULES_X_MAX - 30, MODULE_Y + 40 + (20 * moduleIdToIndex(moduleId)));
+                    click(MODULES_X_MAX - 30, MODULE_Y + 40 + (25 * moduleIdToIndex(moduleId)));
                     selection = ModuleStatus.SELECTED;
                 }
                 break;
             case SUB_DROPDOWN:
                 selection = ModuleStatus.SELECTED;
                 if (submoduleIdx == -1) return;
-                click(MODULES_X_MAX + 100, MODULE_Y + 40 + (20 * moduleIdToIndex(moduleId)) + (20 * submoduleIdx));
+                click(MODULES_X_MAX + 100, MODULE_Y + 40 + (25 * moduleIdToIndex(moduleId)) + (25 * submoduleIdx));
         }
     }
 
