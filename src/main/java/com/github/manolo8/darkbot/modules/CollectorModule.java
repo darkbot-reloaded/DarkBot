@@ -104,8 +104,12 @@ public class CollectorModule implements Module {
     }
 
     public boolean isNotWaiting() {
-        return System.currentTimeMillis() > waiting || current == null || current.removed
-                || main.statsManager.currentBox != current.address;
+        /*if (!current.isCollected() && main.statsManager.currentBox == current.address) {
+            current.setCollected();
+            waiting = System.currentTimeMillis() + current.boxInfo.waitTime +
+                    hero.timeTo(hero.locationInfo.distance(current)) + 30;
+        }*/
+        return System.currentTimeMillis() > waiting || current == null || current.removed;
     }
 
     public boolean tryCollectNearestBox() {
@@ -122,19 +126,16 @@ public class CollectorModule implements Module {
         double distance = hero.locationInfo.distance(current);
 
         if (distance < 200) {
-            if (!current.isCollected() && main.statsManager.currentBox == current.address) {
-                current.setCollected();
-                waiting = System.currentTimeMillis() + current.boxInfo.waitTime + hero.timeTo(distance) + 30;
-            } else if (System.currentTimeMillis() > waiting) {
-                drive.stop(false);
-                current.clickable.setRadius(800);
-                drive.clickCenter(true, current.locationInfo.now);
-                current.clickable.setRadius(0);
+            drive.stop(false);
+            current.clickable.setRadius(800);
+            drive.clickCenter(true, current.locationInfo.now);
+            current.clickable.setRadius(0);
 
-                waiting = System.currentTimeMillis() + current.boxInfo.waitTime
-                        + Math.min(1_000, current.getRetries() * 100) // Add 100ms per retry, max 1 second
-                        + hero.timeTo(distance) + 30;
-            }
+            current.setCollected();
+
+            waiting = System.currentTimeMillis() + current.boxInfo.waitTime
+                    + Math.min(1_000, current.getRetries() * 100) // Add 100ms per retry, max 1 second
+                    + hero.timeTo(distance) + 30;
         } else {
             drive.move(current);
         }
