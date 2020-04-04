@@ -33,10 +33,6 @@ public class Entity extends Updatable {
         this.id = id;
     }
 
-    public void setMain(Main main) {
-        this.main = main;
-    }
-
     public int getId() {
         return id;
     }

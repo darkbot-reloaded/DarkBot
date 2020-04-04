@@ -1,11 +1,13 @@
 package com.github.manolo8.darkbot.core.utils;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.entities.Barrier;
 import com.github.manolo8.darkbot.core.entities.BasePoint;
 import com.github.manolo8.darkbot.core.entities.BattleStation;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.MapNpc;
 import com.github.manolo8.darkbot.core.entities.NoCloack;
 import com.github.manolo8.darkbot.core.entities.Npc;
@@ -17,6 +19,7 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,6 +45,7 @@ public class EntityList extends Updatable {
     public final List<BattleStation> battleStations;
     public final List<BasePoint> basePoints;
     public final List<Entity> unknown;
+    public final FakeNpc fakeNpc;
 
     public EntityList(Main main) {
         this.main = main;
@@ -72,6 +76,7 @@ public class EntityList extends Updatable {
         this.allEntities.add(battleStations);
         this.allEntities.add(basePoints);
         this.allEntities.add(unknown);
+        this.fakeNpc = new FakeNpc(main);
 
         this.main.status.add(this::refreshRadius);
     }
@@ -83,6 +88,8 @@ public class EntityList extends Updatable {
             removeAllInvalidEntities();
 
             refreshEntities();
+
+            updatePing(main.mapManager.pingLocation, main.guiManager.pet.getTrackedNpc());
         }
 
     }
@@ -226,6 +233,14 @@ public class EntityList extends Updatable {
         }
     }
 
+    public void updatePing(Location location, NpcInfo info) {
+        fakeNpc.set(location, info);
+        boolean shouldBeNpc = fakeNpc.isPingAlive() && main.hero.locationInfo.distance(fakeNpc) > 1500;
+
+        if (!shouldBeNpc) npcs.remove(fakeNpc);
+        else if (!npcs.contains(fakeNpc)) npcs.add(fakeNpc);
+    }
+
     private void doInEachEntity(Consumer<Entity> consumer) {
         for (List<? extends Entity> entities : allEntities) {
             entities.forEach(consumer);
@@ -237,6 +252,7 @@ public class EntityList extends Updatable {
             ids.clear();
 
             obstacles.clear();
+            fakeNpc.removed();
 
             for (List<? extends Entity> entities : allEntities) {
                 for (Entity entity : entities) entity.removed();

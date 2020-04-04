@@ -112,7 +112,7 @@ public class Gui extends Updatable {
     }
 
     public boolean isAnimationDone() {
-        return !isTweening && System.currentTimeMillis() - 1500 > time;
+        return !isTweening && System.currentTimeMillis() - 1000 > time;
     }
 
 }

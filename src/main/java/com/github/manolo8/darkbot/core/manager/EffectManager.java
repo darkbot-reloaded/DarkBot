@@ -43,6 +43,7 @@ public class EffectManager implements Manager {
     }
 
     public List<Integer> getEffects(Entity entity) {
+        if (entity.address == 0) return Collections.emptyList();
         return effects.getOrDefault(entity.address, Collections.emptyList());
     }
 

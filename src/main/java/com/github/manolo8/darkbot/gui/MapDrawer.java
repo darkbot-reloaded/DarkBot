@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.core.entities.BasePoint;
 import com.github.manolo8.darkbot.core.entities.BattleStation;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.NoCloack;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Portal;
@@ -67,6 +68,8 @@ public class MapDrawer extends JPanel {
     private Color NANO_HULL = Color.decode("#D0D024");
     private Color SHIELD = Color.decode("#0288d1");
     private Color METEROID = Color.decode("#AAAAAA");
+    private Color PING = new Color(0, 255, 0, 32);
+    private Color PING_BORDER = new Color(0, 255, 0, 128);
     private Color BARRIER = new Color(255, 255, 255, 32);
     private Color BARRIER_BORDER = new Color(255, 255, 255, 128);
     private Color NO_CLOACK = new Color(24, 160, 255, 32);
@@ -99,6 +102,7 @@ public class MapDrawer extends JPanel {
 
     private List<Portal> portals;
     private List<Npc> npcs;
+    private FakeNpc fakeNpc;
     private List<Box> boxes;
     private List<Ship> ships;
     private List<BattleStation> battleStations;
@@ -160,6 +164,7 @@ public class MapDrawer extends JPanel {
 
         this.portals = main.mapManager.entities.portals;
         this.npcs = main.mapManager.entities.npcs;
+        this.fakeNpc = main.mapManager.entities.fakeNpc;
         this.boxes = main.mapManager.entities.boxes;
         this.ships = main.mapManager.entities.ships;
         this.battleStations = main.mapManager.entities.battleStations;
@@ -402,6 +407,13 @@ public class MapDrawer extends JPanel {
 
         g2.setColor(NPCS);
         for (Npc npc : npcs) drawEntity(g2, npc.locationInfo.now, npc.npcInfo.kill);
+        if (fakeNpc.isPingAlive()) {
+            Location loc = fakeNpc.locationInfo.now;
+            g2.setColor(PING);
+            g2.fillOval(translateX(loc.x) - 7, translateY(loc.y) - 7, 15, 15);
+            g2.setColor(PING_BORDER);
+            g2.drawOval(translateX(loc.x) - 7, translateY(loc.y) - 7, 15, 15);
+        }
 
         for (Ship ship : ships) {
             Location loc = ship.locationInfo.now;

@@ -52,6 +52,7 @@ public class MapManager implements Manager {
     public double height;
 
     private ObjArray minimapLayers = ObjArray.ofVector(true);
+    public Location pingLocation = null;
 
     public MapManager(Main main) {
         this.main = main;
@@ -77,11 +78,11 @@ public class MapManager implements Manager {
         if (mapAddress != temp) {
             update(temp);
         } else {
+            pingLocation = updateMinimap();
             entities.update();
         }
 
         updateBounds();
-        updateMinimap();
         checkMirror();
     }
 
