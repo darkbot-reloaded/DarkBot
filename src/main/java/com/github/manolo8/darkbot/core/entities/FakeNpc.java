@@ -44,7 +44,7 @@ public class FakeNpc extends Npc {
     }
 
     public void set(Location loc, NpcInfo type) {
-        if (loc == null || (loc.x == 0 && loc.y == 0) || type == null) {
+        if (loc == null || (loc.x == 0 && loc.y == 0)) {
             if (!isPingAlive()) removed();
             return;
         }
