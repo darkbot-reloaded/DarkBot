@@ -3,96 +3,59 @@ package com.github.manolo8.darkbot.core;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.github.manolo8.darkbot.Main.API;
 
 public class BotInstaller {
+    private static final byte[] bytesToMainApplication =
+            new byte[]{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
 
-    public static final byte[] bytesToMainApplication = new byte[]{
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0
-    };
+    private static final byte[] bytesToSettings =
+            new byte[]{0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5};
 
-    private static final byte[] bytesToSettings = new byte[]{
-            0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5
-    };
-
-    private final List<Manager> managers;
+    public final Lazy<Boolean> invalid             = new Lazy<>(true);
+    public final Lazy<Long> mainApplicationAddress = new Lazy<>();
+    public final Lazy<Long> mainAddress            = new Lazy<>();
+    public final Lazy<Long> screenManagerAddress   = new Lazy<>();
+    public final Lazy<Long> guiManagerAddress      = new Lazy<>();
+    public final Lazy<Long> heroInfoAddress        = new Lazy<>();
+    public final Lazy<Long> settingsAddress        = new Lazy<>();
 
     public static int SEP;
 
-    public final Lazy<Boolean> invalid;
-
-    public final Lazy<Long> mainApplicationAddress;
-
-    public final Lazy<Long> mainAddress;
-
-    public final Lazy<Long> screenManagerAddress;
-    public final Lazy<Long> guiManagerAddress;
-
-    public final Lazy<Long> heroInfoAddress;
-    public final Lazy<Long> settingsAddress;
-
     private long timer;
 
-    public BotInstaller() {
-        this.managers = new ArrayList<>();
-
-        this.mainApplicationAddress = new Lazy<>();
-        this.mainAddress = new Lazy<>();
-        this.screenManagerAddress = new Lazy<>();
-        this.guiManagerAddress = new Lazy<>();
-        this.heroInfoAddress = new Lazy<>();
-        this.settingsAddress = new Lazy<>();
-
-        this.invalid = new Lazy<>(true);
+    public BotInstaller(Manager... managers) {
         this.invalid.add(value -> {
             if (value) timer = System.currentTimeMillis();
         });
-    }
 
-    public void add(Manager manager) {
-        this.managers.add(manager);
-    }
-
-    public void init() {
-        for (Manager manager : managers) {
-            manager.install(this);
-        }
+        for (Manager manager : managers) manager.install(this);
     }
 
     public boolean isInvalid() {
-        if (invalid.value) return true;
-
-        if (API.readMemoryLong(mainApplicationAddress.value + 1344) == mainAddress.value) {
-
-            checkUserData();
-
-            return false;
-        } else {
-            invalid.send(true);
+        if (invalid.value) {
+            checkInvalid();
+            invalid.send(tryInstall());
             return true;
         }
-    }
 
-    public void verify() {
-        invalid.send(!install0());
+        if (API.readMemoryLong(mainApplicationAddress.value + 1344) == mainAddress.value) {
+            if (heroInfoAddress.value == 0) checkUserData();
+            return false;
+        }
+
+        invalid.send(true);
+        return true;
     }
 
     private void checkUserData() {
-        if (heroInfoAddress.value != 0) return;
-
         int id = API.readMemoryInt(API.readMemoryLong(screenManagerAddress.value + 240) + 56);
-
         if (id == 0) return;
 
         long[] address = API.queryMemoryInt(id, 10);
-
         for (long value : address) {
-
             int level    = API.readMemoryInt(value + 4);
             int speed    = API.readMemoryInt(value + 8);
             int bool     = API.readMemoryInt(value + 12);
@@ -109,61 +72,44 @@ public class BotInstaller {
                 heroInfoAddress.send(value - 48);
                 break;
             }
-
         }
-
     }
 
-    private boolean install0() {
+    /**
+     * Attempts to install, returns if the bot is still invalid
+     * @return True if invalid and should retry, false otherwise.
+     */
+    private boolean tryInstall() {
+        if (!API.isValid()) return true;
+        long[] query;
+        long temp;
 
-        if (!API.isValid()) return false;
+        if ((query = API.queryMemory(bytesToMainApplication, 1)).length != 1) return true;
+        this.mainApplicationAddress.send(query[0] - 228);
+        BotInstaller.SEP = API.readMemoryInt(mainApplicationAddress.value + 4);
 
-        long[] address = API.queryMemory(bytesToMainApplication, 1);
+        if ((query = API.queryMemory(bytesToSettings, 1)).length != 1) return true;
+        this.settingsAddress.send(query[0] - 237);
 
-        checkInvalid();
+        if ((temp = API.readMemoryLong(mainApplicationAddress.value + 1344)) == 0) return true;
+        this.mainAddress.send(temp);
 
-        if (address.length != 1) return false;
+        if ((temp = API.readMemoryLong(mainAddress.value + 504)) == 0) return true;
+        this.screenManagerAddress.send(temp);
 
-        mainApplicationAddress.send(address[0] - 228);
-
-        address = API.queryMemory(bytesToSettings, 1);
-
-        if (address.length != 1) return false;
-
-        settingsAddress.send(address[0] - 237);
-
-        SEP = API.readMemoryInt(mainApplicationAddress.value + 4);
-
-        long temp = API.readMemoryLong(mainApplicationAddress.value + 1344);
-
-        if (temp == 0) return false;
-
-        mainAddress.send(temp);
-
-        temp = API.readMemoryLong(mainAddress.value + 504);
-
-        if (temp == 0) return false;
-
-        screenManagerAddress.send(temp);
-
-        temp = API.readMemoryLong(mainAddress.value + 512);
-
-        if (temp == 0) return false;
-
-        guiManagerAddress.send(temp);
+        if ((temp = API.readMemoryLong(mainAddress.value + 512)) == 0) return true;
+        this.guiManagerAddress.send(temp);
 
         //reset address
-        heroInfoAddress.send(0L);
-
-        return true;
+        this.heroInfoAddress.send(0L);
+        return false;
     }
 
     private void checkInvalid() {
-        if (timer == 0 || System.currentTimeMillis() - timer <= 180000) return;
+        if (timer == 0 || System.currentTimeMillis() - timer < 180000) return;
 
-        System.out.println("Triggering refresh: bot installer was invalid for too long");
         API.handleRefresh();
         timer = System.currentTimeMillis();
+        System.out.println("Triggering refresh: bot installer was invalid for too long");
     }
-
 }

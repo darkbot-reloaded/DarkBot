@@ -7,11 +7,7 @@ import java.net.URI;
 public class SystemUtils {
 
     public static void openUrl(String url) {
-        try {
-            Desktop.getDesktop().browse(URI.create(url));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        openUrl(URI.create(url));
     }
 
     public static void openUrl(URI url) {
