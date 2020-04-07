@@ -33,7 +33,7 @@ public class BotInstaller {
     public final Lazy<Long> screenManagerAddress;
     public final Lazy<Long> guiManagerAddress;
 
-    public final Lazy<Long> userDataAddress;
+    public final Lazy<Long> heroInfoAddress;
     public final Lazy<Long> settingsAddress;
 
     private long timer;
@@ -45,7 +45,7 @@ public class BotInstaller {
         this.mainAddress = new Lazy<>();
         this.screenManagerAddress = new Lazy<>();
         this.guiManagerAddress = new Lazy<>();
-        this.userDataAddress = new Lazy<>();
+        this.heroInfoAddress = new Lazy<>();
         this.settingsAddress = new Lazy<>();
 
         this.invalid = new Lazy<>(true);
@@ -83,7 +83,7 @@ public class BotInstaller {
     }
 
     private void checkUserData() {
-        if (userDataAddress.value != 0) return;
+        if (heroInfoAddress.value != 0) return;
 
         int id = API.readMemoryInt(API.readMemoryLong(screenManagerAddress.value + 240) + 56);
 
@@ -93,11 +93,11 @@ public class BotInstaller {
 
         for (long value : address) {
 
-            int level = API.readMemoryInt(value + 4);
-            int speed = API.readMemoryInt(value + 8);
-            int bool = API.readMemoryInt(value + 12);
-            int val = API.readMemoryInt(value + 16);
-            int cargo = API.readMemoryInt(API.readMemoryLong(value - 48 + 240) + 40);
+            int level    = API.readMemoryInt(value + 4);
+            int speed    = API.readMemoryInt(value + 8);
+            int bool     = API.readMemoryInt(value + 12);
+            int val      = API.readMemoryInt(value + 16);
+            int cargo    = API.readMemoryInt(API.readMemoryLong(value - 48 + 240) + 40);
             int maxCargo = API.readMemoryInt(API.readMemoryLong(value - 48 + 248) + 40);
 
             if (level >= 0 && level <= 32
@@ -106,7 +106,7 @@ public class BotInstaller {
                     && val == 0
                     && cargo >= 0
                     && maxCargo >= 100 && maxCargo < 100_000) {
-                userDataAddress.send(value - 48);
+                heroInfoAddress.send(value - 48);
                 break;
             }
 
@@ -153,17 +153,17 @@ public class BotInstaller {
         guiManagerAddress.send(temp);
 
         //reset address
-        userDataAddress.send(0L);
+        heroInfoAddress.send(0L);
 
         return true;
     }
 
     private void checkInvalid() {
-        if (timer != 0 && System.currentTimeMillis() - timer > 180000) {
-            System.out.println("Triggering refresh: bot installer was invalid for too long");
-            API.handleRefresh();
-            timer = System.currentTimeMillis();
-        }
+        if (timer == 0 || System.currentTimeMillis() - timer <= 180000) return;
+
+        System.out.println("Triggering refresh: bot installer was invalid for too long");
+        API.handleRefresh();
+        timer = System.currentTimeMillis();
     }
 
 }

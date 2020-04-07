@@ -18,6 +18,11 @@ public interface IDarkBotAPI {
 
     double readMemoryDouble(long address);
 
+    default double readMemoryDouble(long address, int... offsets) {
+        for (int offset = 0; offset < offsets.length - 1; offset++) address = readMemoryLong(address + offset);
+        return readMemoryDouble(address + offsets[offsets.length - 1]);
+    }
+
     long readMemoryLong(long address);
 
     default long readMemoryLong(long address, int... offsets) {
@@ -27,9 +32,24 @@ public interface IDarkBotAPI {
 
     int readMemoryInt(long address);
 
+    default int readMemoryInt(long address, int... offsets) {
+        for (int offset = 0; offset < offsets.length - 1; offset++) address = readMemoryLong(address + offset);
+        return readMemoryInt(address + offsets[offsets.length - 1]);
+    }
+
     boolean readMemoryBoolean(long address);
 
+    default boolean readMemoryBoolean(long address, int... offsets) {
+        for (int offset = 0; offset < offsets.length - 1; offset++) address = readMemoryLong(address + offset);
+        return readMemoryBoolean(address + offsets[offsets.length - 1]);
+    }
+
     String readMemoryString(long address);
+
+    default String readMemoryString(long address, int... offsets) {
+        for (int offset : offsets) address = readMemoryLong(address + offset);
+        return readMemoryString(address);
+    }
 
     byte[] readMemory(long address, int length);
 

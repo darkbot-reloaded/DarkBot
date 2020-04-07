@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
+import com.github.manolo8.darkbot.core.objects.facades.EternalGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 
@@ -23,6 +24,7 @@ public class FacadeManager implements Manager {
 
     public final LogMediator log = registerMediator("LogWindowMediator", new LogMediator());
     public final EscortProxy escort = registerProxy("payload_escort", new EscortProxy());
+    public final EternalGateProxy eternalGate = registerProxy("eternal_gate", new EternalGateProxy());
 
     public FacadeManager(Main main) {
         this.main = main;

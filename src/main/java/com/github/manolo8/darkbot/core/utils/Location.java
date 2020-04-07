@@ -1,5 +1,8 @@
 package com.github.manolo8.darkbot.core.utils;
 
+import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.objects.LocationInfo;
+
 import java.util.Objects;
 
 import static java.lang.Math.pow;
@@ -30,7 +33,15 @@ public class Location {
     }
 
     public double distance(Location o) {
-        return sqrt(pow(x - o.x, 2) + pow(y - o.y, 2));
+        return distance(o.x, o.y);
+    }
+
+    public double distance(LocationInfo o) {
+        return distance(o.now);
+    }
+
+    public double distance(Entity e) {
+        return distance(e.locationInfo);
     }
 
     public double angle(Location o) {
@@ -49,13 +60,17 @@ public class Location {
         return this;
     }
 
+    public Location set(Location o) {
+        return set(o.x, o.y);
+    }
+
     public Location copy() {
         return new Location(x, y);
     }
 
     @Override
     public String toString() {
-        return x + "," + y;
+        return (int) x + "," + (int) y;
     }
 
     @Override

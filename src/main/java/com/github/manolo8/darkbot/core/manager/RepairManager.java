@@ -21,7 +21,7 @@ public class RepairManager implements Manager {
             repairAddress = 0;
         });
         botInstaller.mainAddress.add(value -> mainAddress = value);
-        botInstaller.userDataAddress.add(value -> userDataAddress = value);
+        botInstaller.heroInfoAddress.add(value -> userDataAddress = value);
     }
 
     public void tick() {

@@ -171,10 +171,9 @@ public class Main extends Thread implements PluginListener {
                 Time.sleep(1000);
             }
 
-            double tickTime = System.currentTimeMillis() - time;
-            avgTick = ((avgTick * 9) + tickTime) / 10;
+            avgTick = ((avgTick * 9) + (System.currentTimeMillis() - time)) / 10;
 
-            sleepMax(time, botInstaller.invalid.value ? 1000 :
+            Time.sleepMax(time, botInstaller.invalid.value ? 1000 :
                     Math.max(config.BOT_SETTINGS.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
         }
     }
@@ -366,14 +365,4 @@ public class Main extends Thread implements PluginListener {
         }
     }
 
-    private void sleepMax(long time, int total) {
-        time = System.currentTimeMillis() - time;
-
-        if (time < total) {
-            try {
-                Thread.sleep(total - time);
-            } catch (InterruptedException ignored) {
-            }
-        }
-    }
 }
