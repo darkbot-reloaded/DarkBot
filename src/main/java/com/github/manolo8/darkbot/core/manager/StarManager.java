@@ -149,13 +149,13 @@ public class StarManager {
                 .addGG(436, "Escort EIC 1", "ESC-E1").exitBy(1)
                 .addGG(437, "Escort EIC 2", "ESC-E2").exitBy(1)
                 .addGG(438, "Escort EIC 3", "ESC-E3").exitBy(1)
-                .addMap(439, "Volantis")
-                .addMap(440, "Alcyone")
-                .addMap(441, "Auriga")
-                .addMap(442, "Bootes")
-                .addMap(443, "Aquila")
-                .addMap(444, "Orion")
-                .addMap(445, "Maia");
+                .addGG(439, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
+                .addGG(440, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
+                .addGG(441, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
+                .addGG(442, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
+                .addGG(443, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
+                .addGG(444, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
+                .addGG(445, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1);
 
         starSystem = mapBuild.build();
     }
@@ -164,7 +164,8 @@ public class StarManager {
         return starSystem.outgoingEdgesOf(HeroManager.instance.map).stream()
                 .filter(p -> p.matches(x, y, type))
                 .peek(p -> p.id = id)
-                .findAny().orElse(new Portal(id, type, x, y));
+                .findFirst()
+                .orElse(new Portal(id, type, x, y));
     }
 
     public Portal next(HeroManager hero, Map target) {
