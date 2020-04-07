@@ -251,6 +251,9 @@ public class Main extends Thread implements PluginListener {
         this.config     = new Config();
         this.configFile = new File("config.json");
 
+        if (!configFile.exists())
+            configFile = new File("config_old.json");
+
         if (configFile.exists()) loadConfig();
         else saveConfig();
 
