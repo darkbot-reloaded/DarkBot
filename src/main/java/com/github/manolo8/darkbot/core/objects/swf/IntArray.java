@@ -11,16 +11,16 @@ import static com.github.manolo8.darkbot.Main.API;
  */
 public class IntArray extends Updatable {
     private final int sizeOffset, tableOffset, bytesOffset;
-    private final boolean isIntArr, autoUpdatable;
+    private final boolean isArray, autoUpdatable;
 
     public int[] elements = new int[0];
     public int size;
 
-    public IntArray(int sizeOffset, int tableOffset, int bytesOffset, boolean isIntArr, boolean autoUpdatable) {
+    public IntArray(int sizeOffset, int tableOffset, int bytesOffset, boolean isArray, boolean autoUpdatable) {
         this.sizeOffset = sizeOffset;
         this.tableOffset = tableOffset;
         this.bytesOffset = bytesOffset;
-        this.isIntArr = isIntArr;
+        this.isArray = isArray;
         this.autoUpdatable = autoUpdatable;
     }
 
@@ -75,7 +75,7 @@ public class IntArray extends Updatable {
         byte[] data = API.readMemory(table, size * getOffset());
 
         for (int i = 0, offset = 0; i < size; i++, offset += getOffset()) {
-            elements[i] = ByteUtils.getInt(data, offset) >> (isIntArr ? 3 : 0);
+            elements[i] = ByteUtils.getInt(data, offset) >> (isArray ? 3 : 0);
         }
     }
 
@@ -86,6 +86,6 @@ public class IntArray extends Updatable {
     }
 
     private int getOffset() {
-        return isIntArr ? 8 : 4;
+        return isArray ? 8 : 4;
     }
 }

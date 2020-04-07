@@ -4,11 +4,10 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import com.github.manolo8.darkbot.utils.LogUtils;
 
 import javax.swing.*;
-import java.io.FileNotFoundException;
 
 public class Bot {
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) {
         if (System.console() == null
                 && Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")) {
             LogUtils.setOutputToFile();

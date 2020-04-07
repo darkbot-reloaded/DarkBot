@@ -36,10 +36,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.ToIntFunction;
@@ -48,7 +51,13 @@ import java.util.stream.IntStream;
 
 public class MapDrawer extends JPanel {
 
-    private final DecimalFormat formatter = new DecimalFormat("###,###,###");
+    private final DecimalFormat STAT_FORMAT = new DecimalFormat("###,###,###");
+    private final NumberFormat HEALTH_FORMAT;
+    {
+        DecimalFormatSymbols sym = new DecimalFormatSymbols();
+        sym.setGroupingSeparator(' ');
+        HEALTH_FORMAT = new DecimalFormat("###,###,###", sym);
+    }
 
     private Color BACKGROUND = Color.decode("#263238");
     private Color TEXT = Color.decode("#F2F2F2");
@@ -239,10 +248,10 @@ public class MapDrawer extends JPanel {
         }
 
         drawBackgroundedText(g2, Align.LEFT,
-                "cre/h " + formatter.format(statsManager.earnedCredits()),
-                "uri/h " + formatter.format(statsManager.earnedUridium()),
-                "exp/h " + formatter.format(statsManager.earnedExperience()),
-                "hon/h " + formatter.format(statsManager.earnedHonor()),
+                "cre/h " + STAT_FORMAT.format(statsManager.earnedCredits()),
+                "uri/h " + STAT_FORMAT.format(statsManager.earnedUridium()),
+                "exp/h " + STAT_FORMAT.format(statsManager.earnedExperience()),
+                "hon/h " + STAT_FORMAT.format(statsManager.earnedHonor()),
                 "cargo " + statsManager.deposit + "/" + statsManager.depositTotal,
                 "death " + guiManager.deaths + '/' + config.GENERAL.SAFETY.MAX_DEATHS);
 
@@ -573,7 +582,8 @@ public class MapDrawer extends JPanel {
 
         g2.setColor(TEXT);
         if (!compact)
-            drawString(g2, (health.getHull() + health.getHp()) + "/" + totalMaxHealth, x + width / 2, y + height - 2, Align.MID);
+            drawString(g2, HEALTH_FORMAT.format(health.getHull() + health.getHp()) + "/" +
+                    HEALTH_FORMAT.format(totalMaxHealth), x + width / 2, y + height - 2, Align.MID);
 
         if (health.getMaxShield() != 0) {
             g2.setColor(SHIELD.darker());
@@ -582,7 +592,8 @@ public class MapDrawer extends JPanel {
             g2.fillRect(x, y + height + margin, (int) (health.shieldPercent() * width), height);
             g2.setColor(TEXT);
             if (!compact)
-                drawString(g2, health.getShield() + "/" + health.getMaxShield(), x + width / 2, y + height + height - 2, Align.MID);
+                drawString(g2, HEALTH_FORMAT.format(health.getShield()) + "/" +
+                        HEALTH_FORMAT.format(health.getMaxShield()), x + width / 2, y + height + height - 2, Align.MID);
         }
     }
 

@@ -9,14 +9,8 @@ import java.util.Set;
 
 public class ConfigEntity {
 
-    public static ConfigEntity INSTANCE;
-
-    private final Config config;
-
-    public ConfigEntity(Config config) {
-        this.config = config;
-        INSTANCE = this;
-    }
+    public static ConfigEntity INSTANCE = new ConfigEntity();
+    private Config config;
 
     public NpcInfo getOrCreateNpcInfo(String name) {
         int mapId = MapManager.id;
@@ -97,6 +91,10 @@ public class ConfigEntity {
 
     public Config getConfig() {
         return config;
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
     }
 
 }

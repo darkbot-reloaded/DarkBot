@@ -2,12 +2,10 @@ package com.github.manolo8.darkbot;
 
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
-import com.github.manolo8.darkbot.core.DarkBotAPI;
-import com.github.manolo8.darkbot.core.DarkFlash;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
@@ -35,19 +33,11 @@ import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.TemporalModule;
 import com.github.manolo8.darkbot.utils.I18n;
-import com.github.manolo8.darkbot.utils.LoginUtils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -64,9 +54,9 @@ public class Main extends Thread implements PluginListener {
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .create();
 
+    public ConfigManager configManager = new ConfigManager();
+    public Config config = configManager.loadConfig(null);
     public static IDarkBotAPI API;
-
-    public Config config = setConfig();
 
     public final Lazy.Sync<Boolean> status       = new Lazy.Sync<>();
     public final StarManager starManager         = new StarManager();
@@ -90,15 +80,15 @@ public class Main extends Thread implements PluginListener {
     public double avgTick;
     public boolean tickingModule;
 
-    private File configFile;
     private String moduleId;
     private List<Behaviour> behaviours = new ArrayList<>();
 
-    private boolean failedConfig;
     private volatile boolean running;
 
     public Main() {
         super("Main");
+        VerifierChecker.getAuthApi().setupAuth();
+        API = configManager.getAPI();
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();
@@ -111,8 +101,8 @@ public class Main extends Thread implements PluginListener {
 
         this.form = new MainGui(this);
 
-        if (failedConfig) Popups.showMessageAsync("Error",
-                I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
+        if (configManager.getConfigFailed())
+            Popups.showMessageAsync("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
 
         API.createWindow();
         start();
@@ -147,7 +137,7 @@ public class Main extends Thread implements PluginListener {
         else validTick();
 
         this.form.tick();
-        checkConfig();
+        this.configManager.checkConfig();
     }
 
     private boolean isInvalid() {
@@ -245,57 +235,6 @@ public class Main extends Thread implements PluginListener {
     @Override
     public void afterLoadComplete() {
         moduleId = "(none)";
-    }
-
-    private Config setConfig() {
-        this.config     = new Config();
-        this.configFile = new File("config.json");
-
-        if (!configFile.exists())
-            configFile = new File("config_old.json");
-
-        if (configFile.exists()) loadConfig();
-        else saveConfig();
-
-        new ConfigEntity(config);
-
-        setAPI();
-        return this.config;
-    }
-
-    private void checkConfig() {
-        if (config.changed) {
-            config.changed = false;
-            saveConfig();
-        }
-    }
-
-    private void setAPI() {
-        VerifierChecker.getAuthApi().setupAuth();
-
-        if (config.BOT_SETTINGS.API == 0) API = new DarkBotAPI();
-        else if (config.BOT_SETTINGS.API == 1) API = new DarkFlash(new LoginUtils().performSidLogin().getLoginData());
-            //else if (config.API == 2) API = new
-        else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API);
-    }
-
-    private void loadConfig() {
-        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8)) {
-            this.config = GSON.fromJson(reader, Config.class);
-            if (this.config == null) this.config = new Config();
-        } catch (Exception e) {
-            failedConfig = true;
-            e.printStackTrace();
-        }
-    }
-
-    public void saveConfig() {
-        if (failedConfig) return; // Don't save defaults if config failed to load!
-        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(configFile), StandardCharsets.UTF_8)) {
-            GSON.toJson(this.config, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public boolean isRunning() {
