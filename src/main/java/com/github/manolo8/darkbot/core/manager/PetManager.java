@@ -77,6 +77,9 @@ public class PetManager extends Gui {
         }
         updatePetTarget();
         int moduleId = main.config.PET.MODULE_ID;
+        if (main.config.PET.COMPATIBILITY_MODE && main.config.PET.MODULE < gearList.size()) {
+            moduleId = gearList.get(main.config.PET.MODULE).id;
+        }
 
         if (target != null && !(target instanceof Npc) && target.playerInfo.isEnemy()) {
             moduleId = PetGearSupplier.Gears.PASSIVE.getId();

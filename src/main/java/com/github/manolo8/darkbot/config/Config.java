@@ -141,6 +141,7 @@ public class Config {
     public static class PetSettings {
         public @Option boolean ENABLED = false;
         public @Deprecated int MODULE = 0; // Kept so plugins using it don't just break. They'll just be unable to use pet.
+        public @Option(value = "Legacy mode (old plugin compatibility)", description = "Enable if an older plugin is managing pet. The new pet selector becomes useless.") boolean COMPATIBILITY_MODE = false;
         public @Option @Editor(JListField.class) @Options(PetGearSupplier.class) int MODULE_ID = 1;
     }
 
