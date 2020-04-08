@@ -39,6 +39,7 @@ public class GuiManager implements Manager {
     public final Gui targetedOffers = register("targetedOffers", new TargetedOfferGui());
     public final Gui logout = register("logout");
     public final Gui eventProgress =  register("eventProgress");
+    public final Gui eternalGate = register("eternal_gate");
     public final PetManager pet;
     public final OreTradeGui oreTrade;
     public final GroupManager group;

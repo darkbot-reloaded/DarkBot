@@ -7,6 +7,8 @@ import com.github.manolo8.darkbot.utils.I18n;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -27,7 +29,8 @@ public class StarManager {
         StarBuilder mapBuild = new StarBuilder();
         mapBuild.addMap(-1, I18n.get("gui.map.loading"), "?")
                 .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1")
-                .addGG(-3, "Escort GG").accessOnlyBy(54, 10500, 6500, "1-1", "2-1", "3-1", "1-8", "2-8", "3-8");
+                .addGG(-3, "GG Escort").accessOnlyBy(54, 10500, 6500, "1-1", "2-1", "3-1", "1-8", "2-8", "3-8")
+                .addGG(-4, "GG Eternal").accessBy(54, 10500, 6500, HOME_MAPS);
                 // MMO
         mapBuild.addMap(1, "1-1").addPortal(18500, 11500, "1-2").addPortal(10500, 6750, "Experiment Zone 1")
                 .addMap(2, "1-2").addPortal(2000, 2000, "1-1").addPortal(18500, 2000, "1-3").addPortal(18500, 11500, "1-4")
@@ -149,15 +152,20 @@ public class StarManager {
                 .addGG(436, "Escort EIC 1", "ESC-E1").exitBy(1)
                 .addGG(437, "Escort EIC 2", "ESC-E2").exitBy(1)
                 .addGG(438, "Escort EIC 3", "ESC-E3").exitBy(1)
-                .addGG(439, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
-                .addGG(440, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
-                .addGG(441, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
-                .addGG(442, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
-                .addGG(443, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
-                .addGG(444, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1)
-                .addGG(445, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS).exitBy(1);
+                .addGG(439, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS)
+                .addGG(440, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS)
+                .addGG(441, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS)
+                .addGG(442, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS)
+                .addGG(443, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS)
+                .addGG(444, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS)
+                .addGG(445, "Eternal Gate", "GG Eternal").accessBy(54, HOME_MAPS);
 
         starSystem = mapBuild.build();
+
+        //org.jgrapht.io.DOTExporter<Map, Portal> exporter = new org.jgrapht.io.DOTExporter<>(m -> (m.id < 0 ? "00" : "") + Math.abs(m.id), Map::toString, Portal::toString);
+        //Writer writer = new StringWriter();
+        //exporter.exportGraph(starSystem, writer);
+        //System.out.println(writer.toString());
     }
 
     public Portal getOrCreate(int id, int type, int x, int y) {

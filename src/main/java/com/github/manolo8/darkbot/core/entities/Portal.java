@@ -48,7 +48,8 @@ public class Portal extends Entity {
 
     @Override
     public String toString() {
-        return id + "(" + locationInfo.now + ")" + type;
+        if (!removed) return id + "(" + locationInfo.now + ")" + type;
+        else return "(" + matcher.searchX + "," + matcher.searchY + ")" + matcher.searchType;
     }
 
     // Holds the search criteria portals in the star manager

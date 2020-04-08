@@ -50,6 +50,9 @@ public class PetManager extends Gui {
     private Gear currentSubModule;// The submodule used, like an npc inside enemy locator.
     private NpcInfo selectedNpc;
 
+    private Integer gearOverride = null;
+    private long gearOverrideTime = 0;
+
     private enum ModuleStatus {
         NOTHING,
         DROPDOWN,
@@ -79,6 +82,10 @@ public class PetManager extends Gui {
         int moduleId = main.config.PET.MODULE_ID;
         if (main.config.PET.COMPATIBILITY_MODE && main.config.PET.MODULE < gearList.size()) {
             moduleId = gearList.get(main.config.PET.MODULE).id;
+        }
+
+        if (gearOverrideTime > System.currentTimeMillis() && gearOverride != null) {
+            moduleId = gearOverride;
         }
 
         if (target != null && !(target instanceof Npc) && target.playerInfo.isEnemy()) {
@@ -135,6 +142,11 @@ public class PetManager extends Gui {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public void setOverride(Integer gearId) {
+        this.gearOverride = gearId;
+        this.gearOverrideTime = System.currentTimeMillis() + 5000;
     }
 
     private boolean active() {

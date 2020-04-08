@@ -113,6 +113,14 @@ public class StarBuilder {
     }
 
     /**
+     * Adds a type portal to jump to the gate, from one of the maps, and also includes itself (Like most ggs).
+     */
+    protected StarBuilder accessBy(int type, int x, int y, String... maps) {
+        this.ggPorts.add(new GGPort(type, x, y, true, maps));
+        return this;
+    }
+
+    /**
      * Adds a type portal to jump to the gate, from one of the maps, but won't be able to jump from itself (Special cases).
      */
     protected StarBuilder accessOnlyBy(int type, String... maps) {

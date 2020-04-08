@@ -116,9 +116,11 @@ public class ConfigManager {
     private static void saveConfig(Config config, Path configFile, Path backupFile) {
         if (Files.exists(configFile)) {
             try {
-                Files.move(configFile, backupFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-            } catch (IOException ignore) {
+                Files.move(configFile, backupFile,
+                        StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (IOException e) {
                 System.err.println("Couldn't move config before updating save file");
+                e.printStackTrace();
             }
         }
 
