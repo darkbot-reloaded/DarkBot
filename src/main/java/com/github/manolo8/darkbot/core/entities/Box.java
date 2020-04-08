@@ -24,6 +24,7 @@ public class Box extends Entity {
 
     public void setCollected() {
         collectedUntil = System.currentTimeMillis() + getNextWait();
+        retries++;
     }
 
     public int getRetries() {
