@@ -21,7 +21,9 @@ public class LogMediator extends Updatable {
 
         for (int i = arrayObj.indexOf(lastLogPtr) + 1; i < arrayObj.size; i++) {
             lastLogPtr = arrayObj.get(i);
-            logs.send(API.readMemoryString(API.readMemoryLong(lastLogPtr + 0x28)));
+            String val = API.readMemoryString(API.readMemoryLong(lastLogPtr + 0x28));
+            if (val == null || val.trim().isEmpty()) continue;
+            logs.send(val);
         }
     }
 }

@@ -38,7 +38,7 @@ public class HeroManager extends Ship implements Manager {
         super(0);
         instance = this;
 
-        this.main = main;
+        this.main = super.main = main;
         this.drive = new Drive(this, main.mapManager);
         main.status.add(drive::toggleRunning);
         this.pet = new Pet(0);

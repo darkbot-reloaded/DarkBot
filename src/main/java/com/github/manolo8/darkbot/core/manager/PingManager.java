@@ -52,7 +52,7 @@ public class PingManager implements Manager {
         if (lastPings.size < 0 || lastPings.size > 100) return false;
 
         if (lastPings.size != 0 && currSize != lastPings.size) lastCheck = System.currentTimeMillis();
-        else if (System.currentTimeMillis() - lastCheck > 5000) return false;
+        else if (System.currentTimeMillis() - lastCheck > 10_000) return false;
 
         this.currSize = lastPings.size;
 

@@ -203,7 +203,7 @@ public class GuiManager implements Manager {
                 && (hero.locationInfo.isMoving() || System.currentTimeMillis() - hero.drive.lastMoved > 20 * 1000)
                 && (hero.health.hpIncreasedIn(30_000) || hero.health.hpDecreasedIn(30_000) || hero.health.hpPercent() == 1 || (hero.hasTarget() && hero.isAttacking(hero.target)))
                 && (hero.health.shIncreasedIn(30_000) || hero.health.shDecreasedIn(30_000) || hero.health.shieldPercent() == 1 || hero.health.shieldPercent() == 0)) {
-            validTime = main.pingManager.lastPingUpdate() + 60_000;
+            validTime = System.currentTimeMillis();// Math.max(validTime, main.pingManager.lastPingUpdate() + 120_000);
         }
 
         checkInvalid();

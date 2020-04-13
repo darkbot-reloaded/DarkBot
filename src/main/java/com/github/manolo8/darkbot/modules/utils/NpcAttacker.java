@@ -65,7 +65,7 @@ public class NpcAttacker {
     }
 
     void lockAndSetTarget() {
-        if (hero.locationInfo.distance(target) > 700 || System.currentTimeMillis() - clickDelay < 400) return;
+        if (hero.locationInfo.distance(target) > 800 || System.currentTimeMillis() - clickDelay < 400) return;
         hero.setTarget(target);
         setRadiusAndClick(true);
         clickDelay = System.currentTimeMillis();
@@ -76,7 +76,7 @@ public class NpcAttacker {
 
     protected void tryAttackOrFix() {
         boolean bugged = hero.isAttacking(target)
-                && (!hero.isAiming(target) || (!target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 650))
+                && (!hero.isAiming(target) || (!target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 700))
                 && System.currentTimeMillis() > (laserTime + fixTimes * 3000);
         boolean ammoChanged = shouldSab() != sab || shouldRsb() != rsb;
         if ((ammoChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
