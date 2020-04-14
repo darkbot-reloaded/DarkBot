@@ -213,12 +213,12 @@ public class PetManager extends Gui {
 
         modulesArr.update(API.readMemoryLong(address + 400));
 
-        for (int i = 0; i < modulesArr.size; i++) {
+        for (int i = 0; i < modulesArr.getSize(); i++) {
             if (API.readMemoryInt(modulesArr.get(i) + 172) != 54) continue;
             currentArr.update(API.readMemoryLong(modulesArr.get(i) + 184));
             break;
         }
-        for (int i = 0; i < currentArr.size; i++) {
+        for (int i = 0; i < currentArr.getSize(); i++) {
             if (API.readMemoryInt(currentArr.get(i) + 168) != 72) continue;
             currSpriteWrapper.update(currentArr.get(i));
             break;

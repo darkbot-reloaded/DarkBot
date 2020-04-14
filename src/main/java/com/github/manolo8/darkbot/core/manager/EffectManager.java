@@ -34,7 +34,7 @@ public class EffectManager implements Manager {
         effectsPtr.update(addr);
         effects.clear();
 
-        for (int i = 0; i < effectsPtr.size; i++) {
+        for (int i = 0; i < effectsPtr.getSize(); i++) {
             int id      = API.readMemoryInt( effectsPtr.get(i) + 0x24);
             long entity = API.readMemoryLong(effectsPtr.get(i) + 0x48);
 

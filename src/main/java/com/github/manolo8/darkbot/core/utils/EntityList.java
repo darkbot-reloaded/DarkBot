@@ -106,7 +106,7 @@ public class EntityList extends Updatable {
     private void refreshEntities() {
 
         entitiesAddress.update();
-        for (int i = 0; i < entitiesAddress.size; i++) {
+        for (int i = 0; i < entitiesAddress.getSize(); i++) {
             long found = entitiesAddress.get(i);
 
             int id = API.readMemoryInt(found + 56);

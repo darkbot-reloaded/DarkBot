@@ -1,13 +1,7 @@
 package com.github.manolo8.darkbot.core.objects.swf;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.group.GroupMember;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -17,16 +11,15 @@ import static com.github.manolo8.darkbot.Main.API;
  */
 public class ObjArray extends Updatable implements SwfPtrCollection {
     private final int sizeOffset, tableOffset, bytesOffset;
-    private final boolean isSprite, autoUpdatable;
+    private final boolean autoUpdatable;
 
     public int size;
-    public long[] elements = new long[0];
+    private long[] elements = new long[0];
 
-    protected ObjArray(int sizeOffset, int tableOffset, int bytesOffset, boolean isSprite, boolean autoUpdatable) {
+    protected ObjArray(int sizeOffset, int tableOffset, int bytesOffset, boolean autoUpdatable) {
         this.sizeOffset    = sizeOffset;
         this.tableOffset   = tableOffset;
         this.bytesOffset   = bytesOffset;
-        this.isSprite      = isSprite;
         this.autoUpdatable = autoUpdatable;
     }
 
@@ -38,7 +31,7 @@ public class ObjArray extends Updatable implements SwfPtrCollection {
     }
 
     public static ObjArray ofArrStr(boolean autoUpdatable) {
-        return new ObjArray(0x28, 0x20, 0x10, false, autoUpdatable);
+        return new ObjArray(0x28, 0x20, 0x10, autoUpdatable);
     }
 
     /**
@@ -49,7 +42,7 @@ public class ObjArray extends Updatable implements SwfPtrCollection {
     }
 
     public static ObjArray ofArrObj(boolean autoUpdatable) {
-        return new ObjArray(0x38, 0x20, 0x10, false, autoUpdatable);
+        return new ObjArray(0x38, 0x20, 0x10, autoUpdatable);
     }
 
     /**
@@ -60,7 +53,7 @@ public class ObjArray extends Updatable implements SwfPtrCollection {
     }
 
     public static ObjArray ofSprite(boolean autoUpdatable) {
-        return new ObjArray(0x18, 0x8, 0x8, true, autoUpdatable);
+        return new ObjArray(0x18, 0x8, 0x8, autoUpdatable);
     }
 
     /**
@@ -71,7 +64,7 @@ public class ObjArray extends Updatable implements SwfPtrCollection {
     }
 
     public static ObjArray ofVector(boolean autoUpdatable) {
-        return new ObjArray(0x38, 0x30, 0x10, false, autoUpdatable);
+        return new ObjArray(0x38, 0x30, 0x10, autoUpdatable);
     }
 
     public int getSize() {
@@ -107,13 +100,17 @@ public class ObjArray extends Updatable implements SwfPtrCollection {
 
         for (int i = 0, offset = 0; offset < bytes.length && i < size; offset += 8) {
             long value = ByteUtils.getLong(bytes, offset);
-            if (value != 0) elements[i++] = value & ByteUtils.FIX;
+            if (value != 0) elements[i++] = value & ByteUtils.FIX; //not sure if we should skip 0 values
         }
     }
 
     @Override
     public void update(long address) {
-        super.update(isSprite ? API.readMemoryLong(address, 0x48, 0x40) : address);
+        super.update(isSprite() ? API.readMemoryLong(address, 0x48, 0x40) : address);
         if (autoUpdatable) update();
+    }
+
+    private boolean isSprite() {
+        return this.sizeOffset == 0x18;
     }
 }

@@ -153,7 +153,7 @@ public class Main extends Thread implements PluginListener {
         statsManager.tick();
 
         tickingModule = running && guiManager.canTickModule();
-        if (running && guiManager.canTickModule()) tickRunning();
+        if (tickingModule) tickRunning();
         else tickLogic(false);
 
         if (!running && (!hero.hasTarget() || !mapManager.isTarget(hero.target))) {

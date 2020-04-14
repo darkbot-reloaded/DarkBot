@@ -4,14 +4,11 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -21,17 +18,16 @@ import static com.github.manolo8.darkbot.Main.API;
  */
 public class PairArray extends Updatable implements SwfPtrCollection {
     private final int sizeOffset, tableOffset;
-    private final boolean isDictionary, autoUpdatable;
+    private final boolean autoUpdatable;
 
     public int size;
 
     private Pair[] pairs = new Pair[0];
     private Map<String, Lazy<Long>> lazy = new HashMap<>();
 
-    protected PairArray(int sizeOffset, int tableOffset, boolean isDictionary, boolean autoUpdatable) {
+    protected PairArray(int sizeOffset, int tableOffset, boolean autoUpdatable) {
         this.sizeOffset    = sizeOffset;
         this.tableOffset   = tableOffset;
-        this.isDictionary  = isDictionary;
         this.autoUpdatable = autoUpdatable;
     }
 
@@ -43,7 +39,7 @@ public class PairArray extends Updatable implements SwfPtrCollection {
     }
 
     public static PairArray ofArray(boolean autoUpdatable) {
-        return new PairArray(0x50, 0x48, false, autoUpdatable);
+        return new PairArray(0x50, 0x48, autoUpdatable);
     }
 
     /**
@@ -54,7 +50,7 @@ public class PairArray extends Updatable implements SwfPtrCollection {
     }
 
     public static PairArray ofDictionary(boolean autoUpdatable) {
-        return new PairArray(0x10, 0x8, true, autoUpdatable);
+        return new PairArray(0x10, 0x8, autoUpdatable);
     }
 
     public void addLazy(String key, Consumer<Long> consumer) {
@@ -69,8 +65,18 @@ public class PairArray extends Updatable implements SwfPtrCollection {
         return get(idx).value;
     }
 
+    public long getPtr(String key) {
+        return Optional.ofNullable(get(key))
+                .map(pair -> pair.value).orElse(0L);
+    }
+
     public Pair get(int idx) {
         return idx >= 0 && idx < size && idx < pairs.length ? pairs[idx] : null;
+    }
+
+    public Pair get(String key) {
+        for (Pair pair : pairs) if (pair.key.equals(key)) return pair;
+        return null;
     }
 
     public boolean hasKey(String key) {
@@ -101,12 +107,12 @@ public class PairArray extends Updatable implements SwfPtrCollection {
             index = 0;
         }
 
-        if (isDictionary) resetMissingObj();
+        if (isDictionary()) resetMissingObj();
     }
 
     @Override
     public void update(long address) {
-        super.update(isDictionary ? API.readMemoryLong(address + 0x20) : address);
+        super.update(isDictionary() ? API.readMemoryLong(address + 0x20) : address);
         if (autoUpdatable) update();
     }
 
@@ -119,7 +125,11 @@ public class PairArray extends Updatable implements SwfPtrCollection {
     }
 
     private boolean isInvalid(long address) {
-        return isDictionary ? address < 10 : address == 0;
+        return isDictionary() ? address < 10 : address == 0;
+    }
+
+    private boolean isDictionary() {
+        return sizeOffset == 0x10;
     }
 
     public class Pair {

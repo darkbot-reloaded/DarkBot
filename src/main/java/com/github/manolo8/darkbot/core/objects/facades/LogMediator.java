@@ -7,7 +7,7 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class LogMediator extends Updatable {
-    private ObjArray arrayObj = ObjArray.ofArrStr();
+    private ObjArray messageBuffer = ObjArray.ofArrStr();
 
     public long lastLogPtr = 0;
     public final Lazy<String> logs = new Lazy.NoCache<>(); // Can't cache the value, same log could appear twice
@@ -17,10 +17,11 @@ public class LogMediator extends Updatable {
     }
 
     public void update() {
-        arrayObj.update(API.readMemoryLong(address + 0x60));
+        messageBuffer.update(API.readMemoryLong(address + 0x60));
+        if (messageBuffer.size <= 0 || 50 < messageBuffer.size) return;
 
-        for (int i = arrayObj.indexOf(lastLogPtr) + 1; i < arrayObj.size; i++) {
-            lastLogPtr = arrayObj.get(i);
+        for (int i = messageBuffer.indexOf(lastLogPtr) + 1; i < messageBuffer.getSize(); i++) {
+            lastLogPtr = messageBuffer.get(i);
             String val = API.readMemoryString(API.readMemoryLong(lastLogPtr + 0x28));
             if (val == null || val.trim().isEmpty()) continue;
             logs.send(val);

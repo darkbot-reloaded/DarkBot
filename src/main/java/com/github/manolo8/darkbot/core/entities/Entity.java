@@ -72,7 +72,7 @@ public class Entity extends Updatable {
 
         traits.update();
 
-        for (int c = 0; c < traits.size; c++) {
+        for (int c = 0; c < traits.getSize(); c++) {
             long adr = traits.get(c);
 
             int radius = API.readMemoryInt(adr + 40);
