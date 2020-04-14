@@ -36,7 +36,7 @@ public class FeatureDefinition<T> {
         if (plugin != null
                 && !plugin.getInfo().ENABLED_FEATURES.contains(id)
                 && !plugin.getInfo().DISABLED_FEATURES.contains(id)) {
-            setStatusInternal(Module.class.isAssignableFrom(clazz));
+            setStatusInternal(Module.class.isAssignableFrom(clazz) || feature.enabledByDefault());
         }
     }
 

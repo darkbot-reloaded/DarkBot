@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 public class BehaviourHandler extends FeatureHandler<Behaviour> {
 
-    private static final Class[] NATIVE = new Class[]{AntiPush.class};
+    private static final Class[] NATIVE = new Class[]{};
 
     private final Main main;
     private final FeatureRegistry featureRegistry;

@@ -10,4 +10,5 @@ import java.lang.annotation.Target;
 public @interface Feature {
     String name();
     String description();
+    boolean enabledByDefault() default false;
 }
