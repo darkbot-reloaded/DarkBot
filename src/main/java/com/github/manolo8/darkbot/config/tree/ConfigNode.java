@@ -111,7 +111,7 @@ public abstract class ConfigNode {
         }
 
         boolean isVisible(StringQuery filter) {
-            return super.isVisible(filter) || Arrays.stream(children).anyMatch(n -> n.match(filter));
+            return super.isVisible(filter) || Arrays.stream(children).anyMatch(n -> n.isVisible(filter));
         }
 
     }
