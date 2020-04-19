@@ -9,8 +9,15 @@ public class Time {
     }
 
     public static String toString(long time) {
+        return millisToString(time);
+    }
+
+    public static String millisToString(long millis) {
+        return secondsToString((int) (millis / 1000L));
+    }
+
+    public static String secondsToString(int seconds) {
         StringBuilder builder = new StringBuilder();
-        int seconds = (int) (time / 1000L);
         if (seconds >= 3600) {
             int hours = seconds / 3600;
             if (hours < 10) {
