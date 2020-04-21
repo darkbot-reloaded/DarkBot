@@ -1,7 +1,9 @@
 package com.github.manolo8.darkbot.core;
 
 import com.github.manolo8.darkbot.utils.Time;
+import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.ptr.IntByReference;
 
 public class DarkFlash extends AbstractDarkBotApi {
     private LoginData loginData;
@@ -12,13 +14,22 @@ public class DarkFlash extends AbstractDarkBotApi {
 
     @Override
     public void createWindow() {
+        IntByReference parentProcessId = new IntByReference();
+
         setCookie(loginData.url, loginData.sid);
         new Thread(() -> this.loadSWF(loginData.preloaderUrl, loginData.params, loginData.url)).start();
         new Thread(() -> {
-            while ((window = USER_32.FindWindow(null, "DarkPlayer")) == null || !USER_32.IsWindow(window)) Time.sleep(100);
+            while ((window = USER_32.FindWindow(null, "DarkPlayer")) == null ||
+                    !USER_32.IsWindow(window) ||
+                    USER_32.GetWindowThreadProcessId(window, parentProcessId) == 0 ||
+                    parentProcessId.getValue() != Kernel32.INSTANCE.GetCurrentProcessId()) Time.sleep(100);
+
+            setVisible(true);
             WinDef.RECT rect = new WinDef.RECT();
             USER_32.GetWindowRect(window, rect);
-            USER_32.MoveWindow(window, rect.left, rect.top, 1280, 800, true);
+            USER_32.MoveWindow(window, rect.left, rect.top, 1270, 800, true);
+
+            flash = USER_32.FindWindowEx(USER_32.FindWindowEx(window, null, null, null), null, null, null);
             setVisible(true);
             setRender(true);
         }).start();
@@ -36,7 +47,7 @@ public class DarkFlash extends AbstractDarkBotApi {
 
     @Override
     public void mouseMove(int x, int y) {
-        mousePress(x, y); // Darkflash doesn't have mouse move, can't do much about it
+        USER_32.SendMessage(flash, 0x0200, null, new WinDef.LPARAM(x & 0xFFFF | ((y & 0xFFFF) << 16)));
     }
 
     @Override

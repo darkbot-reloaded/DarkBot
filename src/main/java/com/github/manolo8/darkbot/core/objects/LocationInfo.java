@@ -52,7 +52,10 @@ public class LocationInfo extends Updatable {
 
         if (isMoving() && !(last.x == 0 && last.y == 0)) {
             angle = now.angle(past);
-            speed = now.distance(last) / (System.currentTimeMillis() - lastUpdate);
+            double newSpeed = now.distance(last) / (System.currentTimeMillis() - lastUpdate);
+            speed = Math.min(1, speed * 0.75 + newSpeed * 0.25); // In-game speed of 560 is a 0.56 speed here, limit to 1000.
+        } else {
+            speed = 0;
         }
 
         lastUpdate = System.currentTimeMillis();
@@ -92,6 +95,6 @@ public class LocationInfo extends Updatable {
     }
 
     public boolean isMoving() {
-        return !now.equals(last);
+        return !now.equals(last) || !now.equals(past);
     }
 }

@@ -65,22 +65,20 @@ public class FeatureRegistry implements PluginListener {
     }
 
     private <T> Optional<T> getFeature(String id) {
-        synchronized (pluginHandler.getBackgroundLock()) {
-            synchronized (pluginHandler) {
-                FeatureDefinition<T> feature = getFeatureDefinition(id);
-                try {
-                    if (feature == null || !feature.canLoad()) return Optional.empty();
+        synchronized (pluginHandler) {
+            FeatureDefinition<T> feature = getFeatureDefinition(id);
+            try {
+                if (feature == null || !feature.canLoad()) return Optional.empty();
 
-                    T instance = feature.getInstance();
-                    if (instance != null) return Optional.of(instance);
+                T instance = feature.getInstance();
+                if (instance != null) return Optional.of(instance);
 
-                    feature.setInstance(instance = featureLoader.loadFeature(feature));
-                    return Optional.of(instance);
-                } catch (Throwable e) {
-                    feature.getIssues().addFailure(I18n.get("bot.issue.feature.failed_to_load"), IssueHandler.createDescription(e));
-                    e.printStackTrace();
-                    return Optional.empty();
-                }
+                feature.setInstance(instance = featureLoader.loadFeature(feature));
+                return Optional.of(instance);
+            } catch (Throwable e) {
+                feature.getIssues().addFailure(I18n.get("bot.issue.feature.failed_to_load"), IssueHandler.createDescription(e));
+                e.printStackTrace();
+                return Optional.empty();
             }
         }
     }
@@ -119,11 +117,9 @@ public class FeatureRegistry implements PluginListener {
     }
 
     public <T> FeatureDefinition<T> getFeatureDefinition(String id) {
-        synchronized (pluginHandler.getBackgroundLock()) {
-            synchronized (pluginHandler) {
-                //noinspection unchecked
-                return (FeatureDefinition<T>) FEATURES_BY_ID.get(id);
-            }
+        synchronized (pluginHandler) {
+            //noinspection unchecked
+            return (FeatureDefinition<T>) FEATURES_BY_ID.get(id);
         }
     }
 

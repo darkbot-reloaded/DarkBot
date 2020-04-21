@@ -160,7 +160,7 @@ public class GuiManager implements Manager {
 
         if (lostConnection.visible) {
             //Wait 15 seconds to reconnect
-            if (lostConnection.lastUpdatedIn(25000)) {
+            if (lostConnection.lastUpdatedIn(2500)) {
                 tryReconnect(lostConnection);
                 checkInvalid();
             }

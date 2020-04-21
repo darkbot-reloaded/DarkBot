@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -50,44 +51,57 @@ public class PluginHandler {
         return jars != null ? jars : new File[0];
     }
 
+    /** Updates plugins asynchronously */
     public void updatePlugins() {
-        SwingUtilities.invokeLater(this::updatePluginsSync);
+        new Thread(() -> {
+            synchronized (getBackgroundLock()) {
+                try {
+                    SwingUtilities.invokeAndWait(this::updatePluginsInternal);
+                } catch (InterruptedException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     public void updatePluginsSync() {
         synchronized (getBackgroundLock()) {
-            synchronized (this) {
-                LOADED_PLUGINS.clear();
-                FAILED_PLUGINS.clear();
-                LOADING_EXCEPTIONS.clear();
-                LISTENERS.forEach(PluginListener::beforeLoad);
-                System.gc();
+            updatePluginsInternal();
+        }
+    }
 
-                if (PLUGIN_CLASS_LOADER != null) {
-                    try {
-                        PLUGIN_CLASS_LOADER.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+    private void updatePluginsInternal() {
+        synchronized (this) {
+            LOADED_PLUGINS.clear();
+            FAILED_PLUGINS.clear();
+            LOADING_EXCEPTIONS.clear();
+            LISTENERS.forEach(PluginListener::beforeLoad);
+            System.gc();
 
-                for (File plugin : getJars("plugins/updates")) {
-                    Path plPath = plugin.toPath();
-                    try {
-                        Files.move(plPath, PLUGIN_PATH.resolve(plPath.getFileName()), StandardCopyOption.REPLACE_EXISTING);
-                    } catch (Exception e) {
-                        LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to update plugin: " + plPath.getFileName(), e));
-                        e.printStackTrace();
-                    }
-                }
+            if (PLUGIN_CLASS_LOADER != null) {
                 try {
-                    loadPlugins(getJars("plugins"));
-                } catch (Exception e) {
-                    LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugins", e));
+                    PLUGIN_CLASS_LOADER.close();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-                LISTENERS.forEach(PluginListener::afterLoad);
             }
+
+            for (File plugin : getJars("plugins/updates")) {
+                Path plPath = plugin.toPath();
+                try {
+                    Files.move(plPath, PLUGIN_PATH.resolve(plPath.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+                } catch (Exception e) {
+                    LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to update plugin: " + plPath.getFileName(), e));
+                    e.printStackTrace();
+                }
+            }
+            try {
+                loadPlugins(getJars("plugins"));
+            } catch (Exception e) {
+                LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugins", e));
+                e.printStackTrace();
+            }
+            LISTENERS.forEach(PluginListener::afterLoad);
         }
         LISTENERS.forEach(PluginListener::afterLoadComplete);
     }

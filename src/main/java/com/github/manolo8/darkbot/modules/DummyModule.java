@@ -10,7 +10,7 @@ public class DummyModule implements Module {
 
     @Override
     public boolean canRefresh() {
-        return true;
+        return false;
     }
 
     @Override

@@ -5,7 +5,7 @@ public class Time {
 
     public static String toString(Integer time) {
         if (time == null) return "-";
-        return toString(time.intValue());
+        return millisToString(time.longValue());
     }
 
     public static String toString(long time) {

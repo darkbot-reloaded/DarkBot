@@ -80,8 +80,8 @@ public class BackpageManager extends Thread {
                 }
             }
 
-            synchronized (main.pluginHandler.getBackgroundLock()) {
-                for (Task task : tasks) {
+            for (Task task : tasks) {
+                synchronized (main.pluginHandler.getBackgroundLock()) {
                     try {
                         task.tickTask();
                     } catch (Throwable e) {
