@@ -19,6 +19,7 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
+import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.utils.Drive;
@@ -53,6 +54,7 @@ public class MapDrawer extends JPanel {
 
     private final DecimalFormat STAT_FORMAT = new DecimalFormat("###,###,###");
     private final NumberFormat HEALTH_FORMAT;
+
     {
         DecimalFormatSymbols sym = new DecimalFormatSymbols();
         sym.setGroupingSeparator(' ');
@@ -130,6 +132,7 @@ public class MapDrawer extends JPanel {
                 hovering = true;
                 repaint();
             }
+
             public void mouseExited(MouseEvent evt) {
                 hovering = false;
                 repaint();
@@ -245,6 +248,15 @@ public class MapDrawer extends JPanel {
                     },
                     member -> Math.min(g2.getFontMetrics().stringWidth(member.getDisplayText(hideNames)), 200),
                     group.members);
+        } else {
+            drawBackgrounded(g2, 15, Align.RIGHT,
+                    (x, y, w, booster) -> {
+                        g2.setColor(booster.getColor());
+                        g2.drawString(booster.toSimpleString(), x, y + 14);
+                    },
+                    b -> g2.getFontMetrics().stringWidth(b.toSimpleString()),
+                    main.facadeManager.booster.boosters
+                            .stream().filter(b -> b.amount > 0).collect(Collectors.toList()));
         }
 
         drawBackgroundedText(g2, Align.LEFT,
@@ -378,7 +390,7 @@ public class MapDrawer extends JPanel {
             Location last = null;
             for (Location point : points) {
                 g2.setColor(TRAIL[(int) (curr++ / max)]);
-                if (last != null) drawLine(g2, last.x, last.y,point.x, point.y);
+                if (last != null) drawLine(g2, last.x, last.y, point.x, point.y);
                 last = point;
             }
         }
@@ -515,6 +527,7 @@ public class MapDrawer extends JPanel {
                                       Renderer<T> renderer,
                                       ToIntFunction<T> widthGetter,
                                       Collection<T> toRender) {
+        if (toRender.size() == 0) return;
         g2.setFont(FONT_SMALL);
 
         int width = toRender.stream().mapToInt(widthGetter).max().orElse(0) + 8;
@@ -552,7 +565,7 @@ public class MapDrawer extends JPanel {
         List<ZoneInfo.Zone> zones = zoneInfo.getSortedZones();
         for (int i = 0; i < zones.size(); i++) {
             Location loc1 = zones.get(i).innerPoint(0.5, 0.5, MapManager.internalWidth, MapManager.internalHeight);
-            Location loc2 = zones.get((i + 1) % zones.size()).innerPoint(0.5, 0.5,MapManager.internalWidth, MapManager.internalHeight);
+            Location loc2 = zones.get((i + 1) % zones.size()).innerPoint(0.5, 0.5, MapManager.internalWidth, MapManager.internalHeight);
             drawLine(g2, loc1.x, loc1.y, loc2.x, loc2.y);
         }
     }
@@ -600,6 +613,7 @@ public class MapDrawer extends JPanel {
     protected enum Align {
         LEFT, MID, RIGHT
     }
+
     protected void drawString(Graphics2D g2, String str, int x, int y, Align align) {
         if (str == null || str.isEmpty()) return;
         if (align != Align.LEFT) {
