@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core;
 
+import com.github.manolo8.darkbot.utils.LoginData;
 import com.github.manolo8.darkbot.utils.Time;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;
@@ -16,9 +17,15 @@ public class DarkFlash extends AbstractDarkBotApi {
     public void createWindow() {
         IntByReference parentProcessId = new IntByReference();
 
-        setCookie(loginData.url, loginData.sid);
-        new Thread(() -> this.loadSWF(loginData.preloaderUrl, loginData.params, loginData.url)).start();
-        new Thread(() -> {
+        String url = "https://" + loginData.getUrl() + "/",
+                sid = "dosid=" + loginData.getSid();
+
+        setCookie(url, sid);
+        Thread apiThread = new Thread(() -> this.loadSWF(loginData.getPreloaderUrl(), loginData.getParams(), url));
+        apiThread.setDaemon(true);
+        apiThread.start();
+
+        Thread windowFinder = new Thread(() -> {
             while ((window = USER_32.FindWindow(null, "DarkPlayer")) == null ||
                     !USER_32.IsWindow(window) ||
                     USER_32.GetWindowThreadProcessId(window, parentProcessId) == 0 ||
@@ -32,7 +39,9 @@ public class DarkFlash extends AbstractDarkBotApi {
             flash = USER_32.FindWindowEx(USER_32.FindWindowEx(window, null, null, null), null, null, null);
             setVisible(true);
             setRender(true);
-        }).start();
+        });
+        windowFinder.setDaemon(true);
+        windowFinder.start();
     }
 
     @Override
@@ -102,24 +111,4 @@ public class DarkFlash extends AbstractDarkBotApi {
         System.loadLibrary("lib/DarkFlash");
     }
 
-    public static class LoginData {
-        private final String sid, url, preloaderUrl, params;
-
-        public LoginData(String sid, String url, String preloaderUrl, String params) {
-            this.sid = sid;
-            this.url = url;
-            this.preloaderUrl = preloaderUrl;
-            this.params = params;
-        }
-
-        @Override
-        public String toString() {
-            return "LoginData{" +
-                    "sid='" + sid + '\'' +
-                    ", url='" + url + '\'' +
-                    ", preloaderUrl='" + preloaderUrl + '\'' +
-                    ", params='" + params + '\'' +
-                    '}';
-        }
-    }
 }

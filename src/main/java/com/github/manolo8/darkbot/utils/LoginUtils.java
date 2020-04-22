@@ -1,8 +1,7 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.core.DarkFlash;
+import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -19,41 +18,33 @@ public class LoginUtils {
     private static final Pattern LOGIN_PATTERN = Pattern.compile("\"bgcdw_login_form\" action=\"(.*)\"");
     private static final Pattern DATA_PATTERN = Pattern.compile("\"src\": \"([^\"]*)\".*}, \\{(.*)}");
 
-    private DarkFlash.LoginData loginData;
+    public static LoginData performUserLogin() {
+        LoginData[] ld = new LoginData[]{null}; // Use an array to trick lambda into thinking it's final
+        LoginForm panel = new LoginForm(data -> ld[0] = data);
 
-    public LoginUtils performSidLogin() {
-        JPanel panel = new JPanel(new MigLayout("ins 0", "[]3px[]10px[]3px[]"));
-        JTextField sv = new JTextField(5), sid = new JTextField(20);
-        panel.add(new JLabel("Server"));
-        panel.add(sv);
-        panel.add(new JLabel("SID"));
-        panel.add(sid);
+        JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
+        pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
 
-        JButton login = new JButton("Log in");
-        login.addActionListener(event -> {
-            setLoginData(sid.getText(), sv.getText() + ".darkorbit.com");
-            SwingUtilities.getWindowAncestor(panel).setVisible(false);
-        });
+        Popups.showMessageSync("Login", pane, panel::setDialog);
 
-        JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{login}, login);
-        Popups.showMessageSync("Sid Login", pane);
+        LoginData loginData = ld[0];
 
         if (loginData == null) System.exit(0);
-        return this;
-    }
 
-    public DarkFlash.LoginData getLoginData() {
+        if (loginData.getUsername() != null) usernameLogin(loginData);
+        findPreloader(loginData);
+
         return loginData;
     }
 
-    private void login(String username, String password) {
+    public static void usernameLogin(LoginData loginData) {
         String loginUrl = getLoginUrl(HttpUtils.create("https://www.darkorbit.com/").getInputStream());
         CookieManager cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
 
         HttpUtils.create(loginUrl)
-                .setParam("username", username)
-                .setParam("password", password)
+                .setParam("username", loginData.getUsername())
+                .setParam("password", loginData.getPassword())
                 .getAndCloseInputStream();
 
         CookieHandler.setDefault(null);
@@ -63,16 +54,13 @@ public class LoginUtils {
                 .filter(c -> c.getDomain().matches(".*\\d+.*"))
                 .findFirst().orElseThrow(WrongCredentialsException::new);
 
-        setLoginData(cookie.getValue(), cookie.getDomain());
+        loginData.setSid(cookie.getValue(), cookie.getDomain());
     }
 
-    private void setLoginData(String sid, String url) {
-        url = "https://" + url + "/";
-        sid = "dosid=" + sid;
-
-        InputStream in = HttpUtils.create(url + "indexInternal.es?action=internalMapRevolution")
+    public static void findPreloader(LoginData loginData) {
+        InputStream in = HttpUtils.create("https://" + loginData.getUrl() + "/indexInternal.es?action=internalMapRevolution")
                 .setFollowRedirects(false)
-                .setHeader("Cookie", sid)
+                .setHeader("Cookie", "dosid=" + loginData.getSid())
                 .getInputStream();
 
         String flashEmbed = new BufferedReader(new InputStreamReader(in))
@@ -82,14 +70,14 @@ public class LoginUtils {
                 .orElseThrow(WrongCredentialsException::new);
 
         Matcher m = DATA_PATTERN.matcher(flashEmbed);
-        if (m.find()) loginData = new DarkFlash.LoginData(sid, url, m.group(1), m.group(2)
+        if (m.find()) loginData.setPreloader(m.group(1), m.group(2)
                 .replaceAll("\"", "")
                 .replaceAll(",", "&")
                 .replaceAll(": ", "="));
         else throw new WrongCredentialsException("Can't parse flashembed vars");
     }
 
-    private String getLoginUrl(InputStream in) {
+    private static String getLoginUrl(InputStream in) {
         return new BufferedReader(new InputStreamReader(in)).lines()
                 .map(LOGIN_PATTERN::matcher)
                 .filter(Matcher::find)
@@ -97,7 +85,7 @@ public class LoginUtils {
                 .findFirst().orElseThrow(WrongCredentialsException::new);
     }
 
-    private static class WrongCredentialsException extends IllegalArgumentException {
+    public static class WrongCredentialsException extends IllegalArgumentException {
 
         public WrongCredentialsException() {
             this("Wrong login data");
@@ -105,7 +93,6 @@ public class LoginUtils {
 
         public WrongCredentialsException(String s) {
             super(s);
-            Popups.showMessageAsync("Error", s, JOptionPane.ERROR_MESSAGE);
         }
     }
 }

@@ -116,6 +116,7 @@
                                     <artifact>net.java.dev.jna:*</artifact>
                                     <includes>
                                         <include>com/sun/jna/*</include>
+                                        <include>com/sun/jna/ptr/*</include>
                                         <include>com/sun/jna/platform/win32/**</include>
                                         <include>com/sun/jna/win32/**</include>
                                         <include>com/sun/jna/win32-x86-64/**</include>

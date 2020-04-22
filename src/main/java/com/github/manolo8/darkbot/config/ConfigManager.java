@@ -89,7 +89,7 @@ public class ConfigManager {
 
     public IDarkBotAPI getAPI() {
         if (config.BOT_SETTINGS.API == 0) return new DarkBotAPI();
-        else if (config.BOT_SETTINGS.API == 1) return new DarkFlash(new LoginUtils().performSidLogin().getLoginData());
+        else if (config.BOT_SETTINGS.API == 1) return new DarkFlash(LoginUtils.performUserLogin());
         else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API);
     }
 

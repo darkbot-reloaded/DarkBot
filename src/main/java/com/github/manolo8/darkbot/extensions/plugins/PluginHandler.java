@@ -53,7 +53,7 @@ public class PluginHandler {
 
     /** Updates plugins asynchronously */
     public void updatePlugins() {
-        new Thread(() -> {
+        Thread pluginReloader = new Thread(() -> {
             synchronized (getBackgroundLock()) {
                 try {
                     SwingUtilities.invokeAndWait(this::updatePluginsInternal);
@@ -61,7 +61,9 @@ public class PluginHandler {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        });
+        pluginReloader.setDaemon(true);
+        pluginReloader.start();
     }
 
     public void updatePluginsSync() {

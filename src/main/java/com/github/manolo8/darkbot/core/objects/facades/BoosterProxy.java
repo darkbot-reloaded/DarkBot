@@ -52,7 +52,7 @@ public class BoosterProxy extends Updatable {
         public String toSimpleString() {
             long hours = Math.round(cd / 3600);
             String time = hours < 100 ? String.format("%2d", hours) : " ∞";
-            return time + "h " + amount + "% " + cat.getSmall(category);
+            return time + "h " + (int) amount + "% " + cat.getSmall(category);
         }
 
         public Color getColor() {

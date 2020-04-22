@@ -19,6 +19,7 @@ public class MouseManager extends Thread {
     public MouseManager(MapManager map) {
         super("MouseClicker");
         this.map = map;
+        setDaemon(true);
         start();
     }
 

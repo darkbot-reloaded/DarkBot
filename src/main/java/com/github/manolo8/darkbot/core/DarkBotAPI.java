@@ -13,14 +13,19 @@ public class DarkBotAPI extends AbstractDarkBotApi {
     }
 
     public void createWindow() {
-        new Thread(() -> {
+        Thread apiThread = new Thread(() -> {
             createWindow0();
             System.out.println("Browser window exited, exiting");
             System.exit(0);
-        }, "BotBrowser").start();
-        new Thread(() -> {
+        }, "BotBrowser");
+        apiThread.setDaemon(true);
+        apiThread.start();
+
+        Thread windowFinder = new Thread(() -> {
             while ((window = USER_32.FindWindow("DarkBrowser", "DarkBrowser")) == null || !USER_32.IsWindow(window)) Time.sleep(100);
-        }).start();
+        });
+        windowFinder.setDaemon(true);
+        windowFinder.start();
     }
 
     private native void createWindow0();
