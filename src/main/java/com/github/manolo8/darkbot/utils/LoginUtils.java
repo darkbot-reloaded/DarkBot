@@ -19,21 +19,15 @@ public class LoginUtils {
     private static final Pattern DATA_PATTERN = Pattern.compile("\"src\": \"([^\"]*)\".*}, \\{(.*)}");
 
     public static LoginData performUserLogin() {
-        LoginData[] ld = new LoginData[]{null}; // Use an array to trick lambda into thinking it's final
-        LoginForm panel = new LoginForm(data -> ld[0] = data);
+        LoginForm panel = new LoginForm();
 
         JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
         pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
 
         Popups.showMessageSync("Login", pane, panel::setDialog);
 
-        LoginData loginData = ld[0];
-
-        if (loginData == null) System.exit(0);
-
-        if (loginData.getUsername() != null) usernameLogin(loginData);
-        findPreloader(loginData);
-
+        LoginData loginData = panel.getResult();
+        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) System.exit(0);
         return loginData;
     }
 

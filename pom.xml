@@ -152,6 +152,7 @@
                                 <option>-dontwarn</option>
                                 <option>-keepattributes Signature</option>
                                 <option>-keep class com.github.manolo8.** { *; }</option>
+                                <option>-keep class a{}</option>
                                 <option>-keep class com.formdev.** { *; }</option>
                                 <option>-keep class com.sun.jna.* { *; }</option>
                             </options>

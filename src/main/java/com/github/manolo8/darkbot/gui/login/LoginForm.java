@@ -8,7 +8,6 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class LoginForm extends JPanel {
 
@@ -18,12 +17,14 @@ public class LoginForm extends JPanel {
     private JLabel info = new JLabel("");
     private JButton login = new JButton("Log in");
 
-    public LoginForm(Consumer<LoginData> callback) {
+    private LoginData loginData = new LoginData();
+
+    public LoginForm() {
         super(new MigLayout("wrap 2, ins 0", "[]10px:push[]"));
         tabbedPane.addTab("User & Pass", user);
         tabbedPane.addTab("SID login", sid);
 
-        login.addActionListener(ac -> new LoginTask(new LoginData(), callback).execute());
+        login.addActionListener(ac -> new LoginTask().execute());
 
         add(tabbedPane, "span 2");
         add(info, "gapleft 8px, grow 0");
@@ -32,6 +33,10 @@ public class LoginForm extends JPanel {
 
     public void setDialog(JDialog dialog) {
         dialog.getRootPane().setDefaultButton(login);
+    }
+
+    public LoginData getResult() {
+        return loginData;
     }
 
     private static class UserLogin extends JPanel {
@@ -58,15 +63,7 @@ public class LoginForm extends JPanel {
     }
 
     private class LoginTask extends SwingWorker<LoginData, String> {
-
-        private LoginData loginData;
         private boolean failed = false;
-        private Consumer<LoginData> callback;
-
-        public LoginTask(LoginData loginData, Consumer<LoginData> callback) {
-            this.loginData = loginData;
-            this.callback = callback;
-        }
 
         @Override
         protected void process(List<String> chunks) {
@@ -85,31 +82,27 @@ public class LoginForm extends JPanel {
         @Override
         protected void done() {
             super.done();
-            if (!failed) {
-                callback.accept(loginData);
-                SwingUtilities.getWindowAncestor(LoginForm.this).setVisible(false);
-            }
+            if (!failed) SwingUtilities.getWindowAncestor(LoginForm.this).setVisible(false);
         }
 
         @Override
         protected LoginData doInBackground() {
             try {
-                LoginData ld = new LoginData();
                 if (tabbedPane.getSelectedComponent() instanceof UserLogin) {
                     publish("Logging in (1/2)");
-                    ld.setCredentials(user.user.getText(), user.pass.getText());
-                    LoginUtils.usernameLogin(ld);
+                    loginData.setCredentials(user.user.getText(), user.pass.getText());
+                    LoginUtils.usernameLogin(loginData);
                 } else {
-                    ld.setSid(sid.sid.getText(), sid.sv.getText() + ".darkorbit.com");
+                    loginData.setSid(sid.sid.getText(), sid.sv.getText() + ".darkorbit.com");
                 }
                 publish("Loading spacemap (2/2)");
-                LoginUtils.findPreloader(ld);
-
+                LoginUtils.findPreloader(loginData);
+                return loginData;
             } catch (Exception e) {
                 publish("Failed to login!");
                 failed = true;
             }
-            return loginData;
+            return null;
         }
     }
 

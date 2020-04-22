@@ -170,7 +170,7 @@ public class Config {
         public @Option boolean CONFIRM_EXIT = true;
         public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
         public @Option boolean DEV_STUFF = false;
-        public /*@Option @Num(min = 0, max = 1, step = 1) */ int API = 0;
+        public @Option("Browser/API, Old=0,New=1, restart bot to apply") @Num(min = 0, max = 1, step = 1) int API = 0;
 
         public @Option Display DISPLAY = new Display();
         public static class Display {
