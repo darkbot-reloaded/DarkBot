@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.utils.Time;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -41,18 +42,14 @@ public class BoosterProxy extends Updatable {
             this.amount   = API.readMemoryDouble(address + 0x50);
             this.subBoostersArr.update(API.readMemoryLong(address + 0x30));
 
-            double current, min = 0;
-            for (int i = 0; i < subBoostersArr.getSize(); i++) {
-                current = API.readMemoryDouble(subBoostersArr.get(i), 0x30, 0x38);
-                if (min == 0 || (current != 0 && current < min)) min = current;
-            }
+            double min = Double.POSITIVE_INFINITY, curr;
+            for (int i = 0; i < subBoostersArr.getSize(); i++)
+                if ((curr = API.readMemoryDouble(subBoostersArr.get(i), 0x30, 0x38)) > 0 && curr < min) min = curr;
             this.cd = min;
         }
 
         public String toSimpleString() {
-            long hours = Math.round(cd / 3600);
-            String time = hours < 100 ? String.format("%2d", hours) : " ∞";
-            return time + "h " + (int) amount + "% " + cat.getSmall(category);
+            return String.format("%3s %2.0f%% %s", Time.secondsToShort(cd), amount, cat.getSmall(category));
         }
 
         public Color getColor() {

@@ -41,6 +41,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -255,8 +256,10 @@ public class MapDrawer extends JPanel {
                         g2.drawString(booster.toSimpleString(), x, y + 14);
                     },
                     b -> g2.getFontMetrics().stringWidth(b.toSimpleString()),
-                    main.facadeManager.booster.boosters
-                            .stream().filter(b -> b.amount > 0).collect(Collectors.toList()));
+                    main.facadeManager.booster.boosters.stream()
+                            .filter(b -> b.amount > 0)
+                            //.sorted(Comparator.comparingDouble(b -> -b.cd)) // Maybe setting?
+                            .collect(Collectors.toList()));
         }
 
         drawBackgroundedText(g2, Align.LEFT,

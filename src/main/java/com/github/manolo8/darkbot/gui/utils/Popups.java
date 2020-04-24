@@ -8,6 +8,10 @@ import java.util.function.Consumer;
 
 public class Popups {
 
+    public static void showMessageAsync(String title, String content, int type) {
+        showMessageAsync(title, (Object) content, type);
+    }
+
     public static void showMessageAsync(String title, Object content, int type) {
         showMessageAsync(title, new JOptionPane(content, type));
     }

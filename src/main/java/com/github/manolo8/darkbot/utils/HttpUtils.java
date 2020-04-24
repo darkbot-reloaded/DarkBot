@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -102,6 +103,14 @@ public class HttpUtils {
      * Put any param to make POST request
      */
     public HttpUtils setParam(String key, String value) {
+        this.params.put(key, URLEncoder.encode(value));
+        return this;
+    }
+
+    /**
+     * Put any param to make POST request, without encoding
+     */
+    public HttpUtils setRawParam(String key, String value) {
         this.params.put(key, value);
         return this;
     }

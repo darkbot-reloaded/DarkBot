@@ -39,6 +39,19 @@ public class Time {
         return builder.toString();
     }
 
+    /**
+     * Seconds to short-string value
+     */
+    public static String secondsToShort(double time) {
+        if (time < 60) return Math.round(time) + "s";
+        if ((time /= 60) < 60) return Math.round(time) + "m";
+        if ((time /= 60) < 60) return Math.round(time) + "h";
+        if ((time /= 24) < 100) return Math.round(time) + "d";
+        if ((time /= 7) < 100) return Math.round(time) + "w";
+        if ((time = time * 7 / 365) < 100) return Math.round(time) + "y";
+        return "∞ "; // Over 99 years
+    }
+
     public static void sleepMax(long time, int total) {
         time = System.currentTimeMillis() - time;
         sleep(total - time);

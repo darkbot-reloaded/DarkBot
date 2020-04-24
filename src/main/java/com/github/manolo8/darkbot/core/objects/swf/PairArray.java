@@ -87,27 +87,34 @@ public class PairArray extends Updatable implements SwfPtrCollection {
 
     @Override
     public void update() {
+        if (lazy.isEmpty()) return;
+
         size = API.readMemoryInt(address + sizeOffset);
 
         if (size < 0 || size > 1024) return;
         if (pairs.length != size) pairs = Arrays.copyOf(pairs, size);
 
-        long index = 0;
         long table = API.readMemoryLong(address + tableOffset) & ByteUtils.FIX;
 
+        String key = null;
         for (int offset = 8, i = 0; offset < 8192 && i < size; offset += 8) {
-            if (isInvalid(index)) index = API.readMemoryLong(table + offset) & ByteUtils.FIX;
-            if (isInvalid(index)) continue;
+            if (key == null && (key = getKey(API.readMemoryLong(table + offset) & ByteUtils.FIX)) == null) continue;
 
             long value = API.readMemoryLong(table + (offset += 8));
             if (isInvalid(value)) continue;
 
             if (pairs[i] == null) pairs[i] = new Pair();
-            pairs[i++].set(API.readMemoryString(index), value & ByteUtils.FIX);
-            index = 0;
+            pairs[i++].set(key, value & ByteUtils.FIX);
+            key = null;
         }
 
         if (isDictionary()) resetMissingObj();
+    }
+
+    public String getKey(long addr) {
+        if (isInvalid(addr)) return null;
+        String key = API.readMemoryString(addr);
+        return key == null || key.trim().isEmpty() || key.equals("ERROR") ? null : key;
     }
 
     @Override

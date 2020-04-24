@@ -137,10 +137,16 @@ public class PluginHandler {
                 PluginDefinition plDef = GSON.fromJson(isr, (Type) PluginDefinition.class);
                 plugin.setDefinition(plDef);
             }
-
+            testUnique(plugin);
             testCompatibility(plugin);
             testSignature(plugin, jar);
         }
+    }
+
+    private void testUnique(Plugin plugin) {
+        if (LOADED_PLUGINS.stream().anyMatch(other -> other.getName().equals(plugin.getName())))
+            plugin.getIssues().addFailure(I18n.get("plugins.issues.loaded_twice"),
+                    I18n.get("plugins.issues.loaded_twice.desc"));
     }
 
     private void testCompatibility(Plugin plugin) {
@@ -148,7 +154,7 @@ public class PluginHandler {
 
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
             plugin.getIssues().addFailure(I18n.get("plugins.issues.invalid_json"),
-                    I18n.get("plugins.issues.invalid_json.desc,", pd.minVersion, pd.supportedVersion));
+                    I18n.get("plugins.issues.invalid_json.desc", pd.minVersion, pd.supportedVersion));
 
         String supportedRange = "DarkBot v" + (pd.minVersion.compareTo(pd.supportedVersion) == 0 ?
                 pd.minVersion : pd.minVersion + "-v" + pd.supportedVersion);
