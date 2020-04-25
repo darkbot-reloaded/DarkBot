@@ -20,10 +20,11 @@ import java.util.Locale;
 public class PlayerEditor extends JPanel {
     private JList<PlayerInfo> playerInfoList;
     private DefaultListModel<PlayerInfo> playersModel;
+    private SearchField sf;
     protected Main main;
 
     public PlayerEditor() {
-        super(new MigLayout("ins 0, gap 0, wrap 4, fill", "[][][grow][]", "[][grow,fill]"));
+        super(new MigLayout("ins 0, gap 0, wrap 5, fill", "[][][][grow][]", "[][grow,fill]"));
     }
 
     public void setup(Main main) {
@@ -31,7 +32,8 @@ public class PlayerEditor extends JPanel {
 
         add(new AddPlayer(), "grow");
         add(new AddId(), "grow");
-        add(new SearchField(this::refreshList), "grow");
+        add(new RemovePlayers(), "grow");
+        add(sf = new SearchField(this::refreshList), "grow");
         add(new PlayerTagEditor(this), "grow");
 
         playerInfoList = new JList<>(playersModel = new DefaultListModel<>());
@@ -41,7 +43,11 @@ public class PlayerEditor extends JPanel {
         add(scroll, "span, grow");
 
         main.config.PLAYER_INFOS.values().forEach(playersModel::addElement);
-        main.config.PLAYER_UPDATED.add(i -> refreshList(null));
+        main.config.PLAYER_UPDATED.add(i -> SwingUtilities.invokeLater(this::refreshList));
+    }
+
+    public void refreshList() {
+        refreshList(sf.getText());
     }
 
     public void refreshList(String filter) {
@@ -102,6 +108,26 @@ public class PlayerEditor extends JPanel {
         playerInfoList.updateUI();
     }
 
+    public void removePlayers() {
+        List<PlayerInfo> players = playerInfoList.getSelectedValuesList();
+        if (players.isEmpty()) {
+            Popups.showMessageAsync(I18n.get("players.select_players.warn.title"), I18n.get("players.select_players.warn.remove_player"), JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        int result = JOptionPane.showConfirmDialog(this,
+                I18n.get("players.remove_player.msg", players.size()),
+                I18n.get("players.remove_player.title"),
+                JOptionPane.YES_NO_OPTION);
+        if (result != JOptionPane.YES_OPTION) return;
+
+        for (PlayerInfo player : players) {
+            main.config.PLAYER_INFOS.remove(player.userId);
+            playersModel.removeElement(player);
+        }
+        main.config.changed = true;
+    }
+
     public class AddPlayer extends MainButton {
         public AddPlayer() {
             super(UIUtils.getIcon("add"), I18n.get("players.add_player.by_name"));
@@ -132,6 +158,17 @@ public class PlayerEditor extends JPanel {
                 Popups.showMessageAsync(I18n.get("players.add_player.invalid_id"),
                         I18n.get("players.add_player.invalid_id.no_number", id), JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    public class RemovePlayers extends MainButton {
+        public RemovePlayers() {
+            super(UIUtils.getIcon("remove"));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            removePlayers();
         }
     }
 

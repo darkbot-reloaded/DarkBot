@@ -8,12 +8,14 @@ import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.Base62;
+import com.github.manolo8.darkbot.utils.HttpUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.IOUtils;
 
 import javax.swing.*;
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,7 +53,7 @@ public class UsernameUpdater implements Task {
 
             IOUtils.write(conn.getOutputStream(),
                     byId ? "command=loadUserInfo&userId=" + Base62.encode(user.userId) :
-                            "command=searchProfileFromExternalPPP&profileUsername=" + user.username);
+                            "command=searchProfileFromExternalPPP&profileUsername=" + URLEncoder.encode(user.username, "UTF-8"));
 
             UserResponse response = Main.GSON.fromJson(IOUtils.read(conn.getInputStream()), UserResponse.class);
 
