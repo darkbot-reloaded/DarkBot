@@ -1,4 +1,4 @@
-package com.github.manolo8.darkbot.utils;
+package com.github.manolo8.darkbot.utils.login;
 
 public class LoginData {
     private String username, password, sid, url, preloaderUrl, params;

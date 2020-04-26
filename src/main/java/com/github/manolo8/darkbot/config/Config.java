@@ -30,24 +30,25 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
+import java.util.UUID;
 
 public class Config {
 
-    // DEFINED AREAS
+    // Defined map areas
     public Map<Integer, ZoneInfo> AVOIDED = new HashMap<>();
     public Map<Integer, ZoneInfo> PREFERRED = new HashMap<>();
     public Map<Integer, Set<SafetyInfo>> SAFETY = new HashMap<>();
     public transient Lazy<SafetyInfo> ADDED_SAFETY = new Lazy.NoCache<>();
-    // DEFINED AREAS
 
+    // Player list & resolver
     public Map<Integer, PlayerInfo> PLAYER_INFOS = new HashMap<>();
     public Set<PlayerTag> PLAYER_TAGS = new HashSet<>();
     public transient Lazy<Integer> PLAYER_UPDATED = new Lazy.NoCache<>();
-
     public Queue<UnresolvedPlayer> UNRESOLVED = new LinkedList<>();
 
-    public Map<String, Object> CUSTOM_CONFIGS = new HashMap<>();
 
+    // Plugin custom configuration objects
+    public Map<String, Object> CUSTOM_CONFIGS = new HashMap<>();
     public Map<String, PluginInfo> PLUGIN_INFOS = new HashMap<>();
 
     public transient boolean changed;

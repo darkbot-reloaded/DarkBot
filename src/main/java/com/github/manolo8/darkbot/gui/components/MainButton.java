@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 public class MainButton extends JButton implements ActionListener {
 
     protected Color actionColor; // Currently useless.
+    protected boolean defaultInsets;
 
     public MainButton(String text) {
         this(null, text);
@@ -17,6 +18,11 @@ public class MainButton extends JButton implements ActionListener {
 
     public MainButton(Icon icon) {
         this(icon, null);
+    }
+
+    public MainButton(Icon icon, boolean defaultInsets) {
+        this(icon);
+        this.defaultInsets = defaultInsets;
     }
 
     protected MainButton(Icon icon, String text) {
@@ -36,6 +42,7 @@ public class MainButton extends JButton implements ActionListener {
 
     @Override
     public Insets getInsets() {
+        if (defaultInsets) return super.getInsets();
         return UIUtils.getInsetConfig(getText() != null && !getText().isEmpty());
     }
 

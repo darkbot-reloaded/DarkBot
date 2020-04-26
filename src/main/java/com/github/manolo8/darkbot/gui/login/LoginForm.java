@@ -1,8 +1,9 @@
 package com.github.manolo8.darkbot.gui.login;
 
+import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
-import com.github.manolo8.darkbot.utils.LoginData;
-import com.github.manolo8.darkbot.utils.LoginUtils;
+import com.github.manolo8.darkbot.utils.login.LoginData;
+import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -12,71 +13,66 @@ import java.util.List;
 public class LoginForm extends JPanel {
 
     private JTabbedPane tabbedPane = new JTabbedPane();
-    private UserLogin user = new UserLogin();
-    private SidLogin sid = new SidLogin();
-    private JLabel info = new JLabel("");
-    private JButton login = new JButton("Log in");
+
+    private JLabel infoLb = new JLabel("");
+    private JButton loginBtn = new JButton("Log in");
 
     private LoginData loginData = new LoginData();
 
     public LoginForm() {
-        super(new MigLayout("wrap 2, ins 0", "[]10px:push[]"));
-        tabbedPane.addTab("User & Pass", user);
-        tabbedPane.addTab("SID login", sid);
+        super(new MigLayout("wrap 2, ins 0", "[]10px:push[]", "[]8px[]"));
+        tabbedPane.addTab("User & Pass", new UserLogin());
+        tabbedPane.addTab("SID login", new SidLogin());
+        SavedLogins saved =  new SavedLogins(this);
+        tabbedPane.addTab("Saved", saved);
+        tabbedPane.setEnabledAt(2, saved.isLoaded());
 
-        login.addActionListener(ac -> new LoginTask().execute());
+        loginBtn.addActionListener(ac -> new LoginTask().execute());
 
         add(tabbedPane, "span 2");
-        add(info, "gapleft 8px, grow 0");
-        add(login, "gapright 8px");
+        add(infoLb, "gapleft 8px, grow 0");
+        add(loginBtn, "gapright 8px");
     }
 
     public void setDialog(JDialog dialog) {
-        dialog.getRootPane().setDefaultButton(login);
+        dialog.getRootPane().setDefaultButton(loginBtn);
     }
 
     public LoginData getResult() {
         return loginData;
     }
 
-    private static class UserLogin extends JPanel {
-        private JTextField user = new JTextField(16),
-                pass = new JPasswordField(16);
-        UserLogin() {
-            super(new MigLayout("wrap 2, height 30px!", "[]8px:push[]"));
-            add(new JLabel("Username"));
-            add(user);
-            add(new JLabel("Password"));
-            add(pass);
-        }
-    }
-    private static class SidLogin extends JPanel {
-        public JTextField sv = new JTextField(4),
-                sid = new JTextField(16);
-        SidLogin() {
-            super(new MigLayout("wrap 2, height 30px!", "[]8px:push[]"));
-            add(new JLabel("Server"));
-            add(sv);
-            add(new JLabel("SID"));
-            add(sid);
+    public void setInfoText(Message val) {
+        infoLb.setText(val.text);
+        infoLb.setToolTipText(val.description);
+        Font baseFont = infoLb.getFont();
+        if (val.error) {
+            infoLb.setForeground(UIUtils.RED.brighter().brighter());
+            infoLb.setFont(baseFont.deriveFont(baseFont.getStyle() | Font.BOLD));
+        } else {
+            infoLb.setForeground(null);
+            infoLb.setFont(baseFont.deriveFont(baseFont.getStyle() & ~Font.BOLD));
         }
     }
 
-    private class LoginTask extends SwingWorker<LoginData, String> {
+    public static class Message {
+        private boolean error;
+        private String text;
+        private String description;
+
+        public Message(boolean error, String text, String description) {
+            this.error = error;
+            this.text = text;
+            this.description = description;
+        }
+    }
+
+    private class LoginTask extends SwingWorker<LoginData, Message> {
         private boolean failed = false;
 
         @Override
-        protected void process(List<String> chunks) {
-            String val = chunks.get(chunks.size() - 1);
-            info.setText(val);
-            Font baseFont = info.getFont();
-            if (val.startsWith("Failed")) {
-                info.setForeground(UIUtils.RED.brighter().brighter());
-                info.setFont(baseFont.deriveFont(baseFont.getStyle() | Font.BOLD));
-            } else {
-                info.setForeground(null);
-                info.setFont(baseFont.deriveFont(baseFont.getStyle() & ~Font.BOLD));
-            }
+        protected void process(List<Message> chunks) {
+            setInfoText(chunks.get(chunks.size() - 1));
         }
 
         @Override
@@ -88,18 +84,18 @@ public class LoginForm extends JPanel {
         @Override
         protected LoginData doInBackground() {
             try {
-                if (tabbedPane.getSelectedComponent() instanceof UserLogin) {
-                    publish("Logging in (1/2)");
-                    loginData.setCredentials(user.user.getText(), user.pass.getText());
-                    LoginUtils.usernameLogin(loginData);
-                } else {
-                    loginData.setSid(sid.sid.getText(), sid.sv.getText() + ".darkorbit.com");
+                publish(new Message(false, "Logging in (1/2)", null));
+                Message msg = ((LoginScreen) tabbedPane.getSelectedComponent()).tryLogin(loginData);
+                if (msg != null) {
+                    publish(msg);
+                    failed = true;
+                    return null;
                 }
-                publish("Loading spacemap (2/2)");
+                publish(new Message(false, "Loading spacemap (2/2)", null));
                 LoginUtils.findPreloader(loginData);
                 return loginData;
             } catch (Exception e) {
-                publish("Failed to login!");
+                publish(new Message(true, "Failed to login!", IssueHandler.createDescription(e)));
                 failed = true;
             }
             return null;

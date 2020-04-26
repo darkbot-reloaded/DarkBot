@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core;
 
-import com.github.manolo8.darkbot.utils.LoginData;
+import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.Time;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;

@@ -1,16 +1,28 @@
-package com.github.manolo8.darkbot.utils;
+package com.github.manolo8.darkbot.utils.login;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.utils.Encryption;
+import com.github.manolo8.darkbot.utils.HttpUtils;
 
 import javax.swing.*;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpCookie;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -89,4 +101,29 @@ public class LoginUtils {
             super(s);
         }
     }
+
+    public static Credentials loadCredentials() {
+        Path file = Paths.get("credentials.json");
+        if (!Files.exists(file)) return Credentials.create();
+
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get("credentials.json"))) {
+            return Credentials.GSON.fromJson(reader, Credentials.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Credentials.create();
+    }
+
+    public static void saveCredentials(Credentials c, char[] passwd) throws GeneralSecurityException {
+        Path file = Paths.get("credentials.json");
+
+        c.encrypt(passwd);
+
+        try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+            Credentials.GSON.toJson(c, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

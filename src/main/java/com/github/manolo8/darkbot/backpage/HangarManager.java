@@ -85,7 +85,7 @@ public class HangarManager {
 
     private boolean repairDrone(Drone drone) {
         try {
-            String encodeParams = Base64Utils.base64Encode( "{\"action\":\"repairDrone\",\"lootId\":\""
+            String encodeParams = Base64Utils.encode( "{\"action\":\"repairDrone\",\"lootId\":\""
                     + drone.getLoot() + "\",\"repairPrice\":" + drone.getRepairPrice() +
                     ",\"params\":{\"hi\":" + getActiveHangar() + "}," +
                     "\"itemId\":\"" + drone.getItemId() + "\",\"repairCurrency\":\"" + drone.getRepairCurrency() +
@@ -123,7 +123,7 @@ public class HangarManager {
         String hangarId = getActiveHangar();
         if (hangarId == null) return;
 
-        String encodeParams = Base64Utils.base64Encode("{\"params\":{\"hi\":" + hangarId + "}}");
+        String encodeParams = Base64Utils.encode("{\"params\":{\"hi\":" + hangarId + "}}");
         String json = this.backpageManager.getDataInventory("flashAPI/inventory.php?action=getHangar&params=" + encodeParams);
 
         if (json != null) {

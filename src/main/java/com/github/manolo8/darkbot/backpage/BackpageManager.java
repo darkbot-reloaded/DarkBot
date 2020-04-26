@@ -140,7 +140,7 @@ public class BackpageManager extends Thread {
         try {
             HttpURLConnection conn = getConnection(params, 2500);
             conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            data = Base64Utils.base64Decode(conn.getInputStream());
+            data = Base64Utils.decode(conn.getInputStream());
         } catch (Exception e) {
             e.printStackTrace();
         }
