@@ -9,6 +9,11 @@ import com.sun.jna.ptr.IntByReference;
 public class DarkFlash extends AbstractDarkBotApi {
     private LoginData loginData;
 
+    static {
+        // Forces proguard to include the no-param constructor, needed for mouseMove
+        new WinDef.LRESULT();
+    }
+
     public DarkFlash(LoginData loginData) {
         this.loginData = loginData;
     }

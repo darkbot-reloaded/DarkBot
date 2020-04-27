@@ -121,6 +121,10 @@
                                         <include>com/sun/jna/win32/**</include>
                                         <include>com/sun/jna/win32-x86-64/**</include>
                                     </includes>
+                                    <excludes>
+                                        <exclude>**/*.html</exclude>
+                                        <exclude>**/*.template</exclude>
+                                    </excludes>
                                 </filter>
                             </filters>
                             <transformers>

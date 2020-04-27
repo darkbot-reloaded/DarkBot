@@ -1,9 +1,7 @@
 package com.github.manolo8.darkbot.utils.login;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.utils.Encryption;
 import com.github.manolo8.darkbot.utils.HttpUtils;
 
 import javax.swing.*;
@@ -20,9 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
