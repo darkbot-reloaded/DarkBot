@@ -10,6 +10,8 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class SavedLogins extends JPanel implements LoginScreen {
     public LoginForm loginForm;
@@ -54,6 +56,15 @@ public class SavedLogins extends JPanel implements LoginScreen {
         add(new RemoveLogin(), "grow");
 
         updateList();
+        users.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() < 2) return;
+                int idx = users.locationToIndex(e.getPoint());
+                if (idx == -1) return;
+                if (users.getCellBounds(idx, idx).contains(e.getPoint())) loginForm.startLogin();
+            }
+        });
     }
 
     public boolean isLoaded() {
@@ -90,8 +101,8 @@ public class SavedLogins extends JPanel implements LoginScreen {
         JPasswordField pass = new JPasswordField(10);
 
         JOptionPane.showMessageDialog(this, new Object[]{
-                "Master password for darkbot to encrypt your credentials.\n" +
-                        "You can use a blank (empty) password:", pass},
+                        "Master password for darkbot to encrypt your credentials.\n" +
+                                "You can use a blank (empty) password:", pass},
                 "Darkbot Master password", JOptionPane.PLAIN_MESSAGE);
 
         return pass.getPassword();

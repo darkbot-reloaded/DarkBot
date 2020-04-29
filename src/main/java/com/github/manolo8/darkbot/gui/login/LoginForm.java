@@ -27,7 +27,7 @@ public class LoginForm extends JPanel {
         tabbedPane.addTab("Saved", saved);
         tabbedPane.setEnabledAt(2, saved.isLoaded());
 
-        loginBtn.addActionListener(ac -> new LoginTask().execute());
+        loginBtn.addActionListener(ac -> startLogin());
 
         add(tabbedPane, "span 2");
         add(infoLb, "gapleft 8px, grow 0");
@@ -65,6 +65,11 @@ public class LoginForm extends JPanel {
             this.text = text;
             this.description = description;
         }
+    }
+
+    protected void startLogin() {
+        setInfoText(new Message(false, "Logging in (1/2)", null));
+        new LoginTask().execute();
     }
 
     private class LoginTask extends SwingWorker<LoginData, Message> {
