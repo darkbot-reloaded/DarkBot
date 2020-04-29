@@ -1,4 +1,4 @@
-package com.github.manolo8.darkbot.core;
+package com.github.manolo8.darkbot.core.api;
 
 public interface IDarkBotAPI {
 
@@ -12,9 +12,11 @@ public interface IDarkBotAPI {
 
     void keyboardClick(char btn);
 
-    void keyboardClick(Character ch);
+    default void keyboardClick(Character ch) {
+        if (ch != null) keyboardClick((char) ch);
+    }
 
-    void sendText(String string);
+    void sendText(String string); // There's currently no working implementation of this.
 
     double readMemoryDouble(long address);
 
@@ -71,9 +73,4 @@ public interface IDarkBotAPI {
 
     void handleRefresh();
 
-    void refresh();
-
-    static LoggingAPIHandler getLoggingHandler(DarkBotAPI API) {
-        return new LoggingAPIHandler(API);
-    }
 }

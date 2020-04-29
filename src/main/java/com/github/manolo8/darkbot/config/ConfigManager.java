@@ -4,7 +4,7 @@ import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
 import com.github.manolo8.darkbot.core.DarkFlash;
-import com.github.manolo8.darkbot.core.IDarkBotAPI;
+import com.github.manolo8.darkbot.core.api.IDarkBotAPI;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
