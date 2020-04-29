@@ -50,5 +50,8 @@ public abstract class ApiAdapter implements IDarkBotAPI {
         if (visible) USER_32.SetForegroundWindow(window);
     }
 
+    public void sendText(String str) {}
+    public void setRender(boolean render) {}
+
 }
 

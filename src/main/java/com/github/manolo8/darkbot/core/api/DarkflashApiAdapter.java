@@ -129,11 +129,6 @@ class DarkflashApiAdapter extends ApiAdapter {
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        API.setVisible(visible);
-    }
-
-    @Override
     public void setRender(boolean render) {
         API.setRender(render);
     }

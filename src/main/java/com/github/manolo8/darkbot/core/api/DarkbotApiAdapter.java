@@ -103,9 +103,6 @@ class DarkbotApiAdapter extends ApiAdapter {
     }
 
     @Override
-    public void setRender(boolean visible) {}
-
-    @Override
     public void handleRefresh() {
         USER_32.SetForegroundWindow(window);
         API.refresh();
