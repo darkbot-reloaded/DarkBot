@@ -3,7 +3,7 @@ package com.github.manolo8.darkbot.core.api;
 import com.github.manolo8.darkbot.core.DarkBotAPI;
 import com.github.manolo8.darkbot.utils.Time;
 
-class DarkbotApiAdapter extends ApiAdapter {
+public class DarkbotApiAdapter extends ApiAdapter {
 
     private DarkBotAPI API = new DarkBotAPI();
 

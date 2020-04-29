@@ -7,7 +7,7 @@ import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.ptr.IntByReference;
 
-class DarkflashApiAdapter extends ApiAdapter {
+public class DarkflashApiAdapter extends ApiAdapter {
 
     private final LoginData loginData;
     private final DarkFlash API = new DarkFlash();
@@ -35,14 +35,14 @@ class DarkflashApiAdapter extends ApiAdapter {
                     USER_32.GetWindowThreadProcessId(window, parentProcessId) == 0 ||
                     parentProcessId.getValue() != Kernel32.INSTANCE.GetCurrentProcessId()) Time.sleep(100);
 
-            setVisible(true);
+            API.setVisible(true);
             WinDef.RECT rect = new WinDef.RECT();
             USER_32.GetWindowRect(window, rect);
             USER_32.MoveWindow(window, rect.left, rect.top, 1270, 800, true);
 
             flash = USER_32.FindWindowEx(USER_32.FindWindowEx(window, null, null, null), null, null, null);
-            setVisible(true);
-            setRender(true);
+            API.setVisible(true);
+            API.setRender(true);
         });
         windowFinder.setDaemon(true);
         windowFinder.start();
