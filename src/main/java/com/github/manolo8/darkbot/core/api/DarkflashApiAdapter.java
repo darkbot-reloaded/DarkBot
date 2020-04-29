@@ -7,6 +7,8 @@ import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.ptr.IntByReference;
 
+import javax.swing.*;
+
 public class DarkflashApiAdapter extends ApiAdapter {
 
     private final LoginData loginData;
@@ -25,6 +27,7 @@ public class DarkflashApiAdapter extends ApiAdapter {
                 sid = "dosid=" + loginData.getSid();
 
         API.setCookie(url, sid);
+        showForm();
         Thread apiThread = new Thread(() -> API.loadSWF(loginData.getPreloaderUrl(), loginData.getParams(), url));
         apiThread.setDaemon(true);
         apiThread.start();
@@ -46,6 +49,13 @@ public class DarkflashApiAdapter extends ApiAdapter {
         });
         windowFinder.setDaemon(true);
         windowFinder.start();
+    }
+
+    private void showForm() {
+        // Credits for the dll:
+        JFrame frame = new JFrame("Darkbot - By Manolo8");
+        frame.setVisible(true);
+        frame.setVisible(false);
     }
 
     @Override

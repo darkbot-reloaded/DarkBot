@@ -18,39 +18,40 @@ import static com.github.manolo8.darkbot.Main.API;
  */
 public class PairArray extends Updatable implements SwfPtrCollection {
     private final int sizeOffset, tableOffset;
-    private final boolean autoUpdatable;
+    private boolean autoUpdatable, ignoreEmpty = true;
 
     public int size;
 
     private Pair[] pairs = new Pair[0];
     private Map<String, Lazy<Long>> lazy = new HashMap<>();
 
-    protected PairArray(int sizeOffset, int tableOffset, boolean autoUpdatable) {
+    private PairArray(int sizeOffset, int tableOffset) {
         this.sizeOffset    = sizeOffset;
         this.tableOffset   = tableOffset;
-        this.autoUpdatable = autoUpdatable;
     }
 
     /**
-     * Reads pairs of {@code Array}
+     * Reads pairs of {@code Array} type
      */
     public static PairArray ofArray() {
-        return ofArray(false);
-    }
-
-    public static PairArray ofArray(boolean autoUpdatable) {
-        return new PairArray(0x50, 0x48, autoUpdatable);
+        return new PairArray(0x50, 0x48);
     }
 
     /**
-     * Reads pairs of {@code Dictionary}
+     * Reads pairs of {@code Dictionary} type
      */
     public static PairArray ofDictionary() {
-        return ofDictionary(false);
+        return new PairArray(0x10, 0x8);
     }
 
-    public static PairArray ofDictionary(boolean autoUpdatable) {
-        return new PairArray(0x10, 0x8, autoUpdatable);
+    public PairArray setAutoUpdatable(boolean updatable) {
+        this.autoUpdatable = updatable;
+        return this;
+    }
+
+    public PairArray setIgnoreEmpty(boolean ignoreEmpty) {
+        this.ignoreEmpty = ignoreEmpty;
+        return this;
     }
 
     public void addLazy(String key, Consumer<Long> consumer) {
@@ -87,7 +88,7 @@ public class PairArray extends Updatable implements SwfPtrCollection {
 
     @Override
     public void update() {
-        if (lazy.isEmpty()) return;
+        if (lazy.isEmpty() && ignoreEmpty) return;
 
         size = API.readMemoryInt(address + sizeOffset);
 

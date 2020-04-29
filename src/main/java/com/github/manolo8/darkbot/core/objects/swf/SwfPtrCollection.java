@@ -41,6 +41,7 @@ public interface SwfPtrCollection {
             T item = newItem ? constructor.get() : list.get(listIdx);
             item.update(getPtr(arrIdx));
             if (filter != null && !filter.test(item)) {
+                if (!newItem) list.remove(listIdx);
                 ignored.add(item);
                 listIdx--;
                 continue;

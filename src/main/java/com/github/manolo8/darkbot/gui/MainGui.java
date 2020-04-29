@@ -23,7 +23,7 @@ public class MainGui extends JFrame {
     public static final Image ICON = UIUtils.getImage("icon");
 
     public MainGui(Main main) throws HeadlessException {
-        super("DarkBot" + (main.config.BOT_SETTINGS.API == 1 ? " - By Manolo8" : ""));
+        super("DarkBot");
 
         this.configGui = new ConfigGui(main);
         configGui.setIconImage(ICON);

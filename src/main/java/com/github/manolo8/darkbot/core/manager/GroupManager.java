@@ -31,7 +31,7 @@ public class GroupManager extends Gui {
     public boolean pinging; // If the pinging button is enabled & you're ready to ping
     public List<Invite> invites = new ArrayList<>();
 
-    private PairArray inviteDict = PairArray.ofDictionary(true);
+    private PairArray inviteDict = PairArray.ofDictionary().setAutoUpdatable(true).setIgnoreEmpty(false);
 
     private long nextAction;
 
@@ -59,7 +59,7 @@ public class GroupManager extends Gui {
         pinging = API.readMemoryBoolean(groupAddress + 0x40);
         inviteDict.update(API.readMemoryLong(groupAddress + 0x48));
 
-        inviteDict.sync(invites, () -> new Invite(main.hero), null);
+        inviteDict.sync(invites, () -> new Invite(main.hero), invite -> invite.valid);
     }
 
     public void tick() {
@@ -84,7 +84,7 @@ public class GroupManager extends Gui {
         if (pending != null || !config.ACCEPT_INVITES || invites.isEmpty() || group.isValid()) return;
 
         invites.stream()
-                .filter(in -> in.incomming && (config.WHITELIST_TAG == null ||
+                .filter(in -> in.valid && in.incomming && (config.WHITELIST_TAG == null ||
                         config.WHITELIST_TAG.has(main.config.PLAYER_INFOS.get(in.inviter.id))))
                 .findFirst()
                 .ifPresent(inv -> pending = () -> acceptInvite(inv));

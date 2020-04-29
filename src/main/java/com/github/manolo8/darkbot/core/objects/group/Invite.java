@@ -11,6 +11,7 @@ public class Invite extends UpdatableAuto {
     public PartialGroupMember inviter = new PartialGroupMember();
     public PartialGroupMember invited = new PartialGroupMember();
     public boolean incomming;
+    public boolean valid;
 
     public Invite(HeroManager hero) {
         this.hero = hero;
@@ -21,6 +22,7 @@ public class Invite extends UpdatableAuto {
         if (address == 0) return;
         inviter.update(API.readMemoryLong(address + 0x20));
         invited.update(API.readMemoryLong(address + 0x28));
+        valid = inviter.username != null && invited.username != null;
         incomming = inviter.id != hero.id && invited.id == hero.id;
     }
 }
