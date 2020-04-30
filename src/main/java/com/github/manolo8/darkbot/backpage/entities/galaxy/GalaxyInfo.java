@@ -2,10 +2,8 @@ package com.github.manolo8.darkbot.backpage.entities.galaxy;
 
 import com.github.manolo8.darkbot.utils.XmlHelper;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class GalaxyInfo {
     private Integer money;
@@ -95,9 +93,7 @@ public class GalaxyInfo {
     }
 
     private void updateItems(Element e) {
-        NodeList list = e.getElementsByTagName("item");
-
-        IntStream.range(0, list.getLength()).mapToObj(i -> (Element) list.item(i))
+        XmlHelper.stream(e.getElementsByTagName("item"))
                 .forEach(item -> {
                     Optional.ofNullable(getGate(XmlHelper.attrToInt(item, "gate_id"))).ifPresent(gate -> gate.update(item));
                     this.items.add(new Item().update(item));
@@ -105,9 +101,7 @@ public class GalaxyInfo {
     }
 
     private void updateGates(Element e) {
-        NodeList list = e.getElementsByTagName("gate");
-
-        IntStream.range(0, list.getLength()).mapToObj(i -> (Element) list.item(i))
+        XmlHelper.stream(e.getElementsByTagName("gate"))
                 .forEach(gate -> Arrays.stream(GalaxyGate.values())
                         .filter(g -> g.match(XmlHelper.attrToInt(gate, "id")))
                         .findFirst()
@@ -115,9 +109,7 @@ public class GalaxyInfo {
     }
 
     private void updateMultipliers(Element e) {
-        NodeList list = e.getElementsByTagName("multiplier");
-
-        IntStream.range(0, list.getLength()).mapToObj(i -> (Element) list.item(i))
+        XmlHelper.stream(e.getElementsByTagName("multiplier"))
                 .forEach(multiplier -> Arrays.stream(GalaxyGate.values())
                         .filter(g -> g.match(multiplier.getAttribute("mode")))
                         .findFirst()

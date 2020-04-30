@@ -1,6 +1,10 @@
 package com.github.manolo8.darkbot.utils;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class XmlHelper {
 
@@ -25,4 +29,9 @@ public class XmlHelper {
         String value = e.getTextContent();
         return value == null || value.isEmpty() ? null : Integer.parseInt(value);
     }
+
+    public static Stream<Element> stream(NodeList list) {
+        return IntStream.range(0, list.getLength()).mapToObj(i -> (Element) list.item(i));
+    }
+
 }

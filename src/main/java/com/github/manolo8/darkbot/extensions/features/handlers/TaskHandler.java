@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.extensions.features.handlers;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.backpage.FlashResManager;
 import com.github.manolo8.darkbot.backpage.UsernameUpdater;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
@@ -12,7 +13,7 @@ import java.util.stream.Stream;
 
 public class TaskHandler extends FeatureHandler<Task> {
 
-    private static final Class[] NATIVE = new Class[]{UsernameUpdater.class};
+    private static final Class[] NATIVE = new Class[]{UsernameUpdater.class, FlashResManager.class};
 
     private final Main main;
     private final FeatureRegistry featureRegistry;

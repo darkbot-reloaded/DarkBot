@@ -16,6 +16,7 @@ import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.PingManager;
+import com.github.manolo8.darkbot.core.manager.SettingsManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
@@ -45,7 +46,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 7");
+    public static final Version VERSION      = new Version("1.13.17 beta 8 alpha 1");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -61,6 +62,7 @@ public class Main extends Thread implements PluginListener {
     public final Lazy.Sync<Boolean> status       = new Lazy.Sync<>();
     public final StarManager starManager         = new StarManager();
     public final MapManager mapManager           = new MapManager(this);
+    public final SettingsManager settingsManager = new SettingsManager(this);
     public final HeroManager hero                = new HeroManager(this);
     public final FacadeManager facadeManager     = new FacadeManager(this);
     public final EffectManager effectManager     = new EffectManager(this);
@@ -72,8 +74,8 @@ public class Main extends Thread implements PluginListener {
     public final FeatureRegistry featureRegistry = new FeatureRegistry(this, pluginHandler);
 
     private final MainGui form;
-    private final BotInstaller botInstaller =
-            new BotInstaller(facadeManager, effectManager, guiManager, mapManager, hero, statsManager, pingManager);
+    private final BotInstaller botInstaller = new BotInstaller(
+            settingsManager, facadeManager, effectManager, guiManager, mapManager, hero, statsManager, pingManager);
 
     public Module module;
     public long lastRefresh;
@@ -145,6 +147,7 @@ public class Main extends Thread implements PluginListener {
     }
 
     private void validTick() {
+        settingsManager.tick();
         hero.tick();
         mapManager.tick();
         facadeManager.tick();

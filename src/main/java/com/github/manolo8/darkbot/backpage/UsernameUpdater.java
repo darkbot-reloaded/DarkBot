@@ -13,6 +13,7 @@ import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.IOUtils;
 
 import javax.swing.*;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -107,8 +108,8 @@ public class UsernameUpdater implements Task {
         String userName;
         String url;
 
-        private String getUsername() {
-            return URLDecoder.decode(userName);
+        private String getUsername() throws UnsupportedEncodingException {
+            return URLDecoder.decode(userName, "UTF-8");
         }
 
         private int getId() {

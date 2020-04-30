@@ -82,7 +82,7 @@ public class PairArray extends Updatable implements SwfPtrCollection {
 
     public boolean hasKey(String key) {
         for (int i = 0; i < size && i < pairs.length; i++)
-            if (pairs[i].key != null && pairs[i].key.equals(key)) return true;
+            if (pairs[i] != null && pairs[i].key != null && pairs[i].key.equals(key)) return true;
         return false;
     }
 

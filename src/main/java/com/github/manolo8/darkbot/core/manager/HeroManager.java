@@ -17,9 +17,9 @@ public class HeroManager extends Ship implements Manager {
 
     public static HeroManager instance;
     public final Main main;
+    private final SettingsManager settings;
 
     private long staticAddress;
-    private long settingsAddress;
 
     public final Pet pet;
     public final Drive drive;
@@ -39,6 +39,7 @@ public class HeroManager extends Ship implements Manager {
         instance = this;
 
         this.main = super.main = main;
+        this.settings = main.settingsManager;
         this.drive = new Drive(this, main.mapManager);
         main.status.add(drive::toggleRunning);
         this.pet = new Pet(0);
@@ -48,7 +49,6 @@ public class HeroManager extends Ship implements Manager {
     @Override
     public void install(BotInstaller botInstaller) {
         botInstaller.screenManagerAddress.add(value -> staticAddress = value + 240);
-        botInstaller.settingsAddress.add(value -> this.settingsAddress = value);
     }
 
     public void tick() {
@@ -69,7 +69,7 @@ public class HeroManager extends Ship implements Manager {
         super.update();
         pet.update();
 
-        config = API.readMemoryInt(settingsAddress + 52);
+        config = settings.config;
 
         long petAddress = API.readMemoryLong(address + 176);
         if (petAddress != pet.address) pet.update(petAddress);
@@ -96,18 +96,11 @@ public class HeroManager extends Ship implements Manager {
         return (long) (distance * 1000 / shipInfo.speed);
     }
 
-    // 208 -> next map, 212 -> curr map, 216 -> prev map
-    private int nextMap() {
-        return API.readMemoryInt(settingsAddress + 204);
-    }
-    private int currMap() {
-        return API.readMemoryInt(settingsAddress + 208);
-    }
-
     public void jumpPortal(Portal portal) {
         if (portal.removed) return;
         if (System.currentTimeMillis() - portalTime > 10000 || (System.currentTimeMillis() - portalTime > 1000 &&
-                map.id == currMap() && (nextMap() == -1 || portal.target == null || nextMap() != portal.target.id))) {
+                map.id == settings.currMap &&
+                (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id))) {
             API.keyboardClick('j');
             portalTime = System.currentTimeMillis();
         }
