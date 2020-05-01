@@ -1,7 +1,9 @@
 package com.github.manolo8.darkbot.gui.login;
 
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.components.MainButton;
+import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.login.Credentials;
 import com.github.manolo8.darkbot.utils.login.LoginData;
@@ -88,16 +90,21 @@ public class SavedLogins extends JPanel implements LoginScreen {
     }
 
     private char[] requestMasterPassword() {
+        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISABLE_MASTER_PASSWORD) return new char[]{};
+
         JPasswordField pass = new JPasswordField(10);
 
-        int result = JOptionPane.showConfirmDialog(this, new Object[]{"Input your master password:", pass},
-                "Darkbot Master password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (result != JOptionPane.YES_OPTION) return null;
+        JOptionPane pane = new JOptionPane(new Object[]{"Input your master password:", pass},
+                JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+        Popups.showMessageSync("Darkbot Master password", pane);
+        Object result = pane.getValue();
 
-        return pass.getPassword();
+        if (result instanceof Integer && (Integer) result == JOptionPane.YES_OPTION) return pass.getPassword();
+        return null;
     }
 
     private char[] createMasterPassword() {
+        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISABLE_MASTER_PASSWORD) return new char[]{};
         JPasswordField pass = new JPasswordField(10);
 
         JOptionPane.showMessageDialog(this, new Object[]{

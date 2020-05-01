@@ -173,6 +173,7 @@ public class Config {
         public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
         public @Option boolean DEV_STUFF = false;
         public @Option("Browser/API, restart to apply") @Editor(JListField.class) @Options(ApiSupplier.class) int API = 0;
+        public @Option("Disable master password") boolean DISABLE_MASTER_PASSWORD = false;
 
         public @Option Display DISPLAY = new Display();
         public static class Display {
