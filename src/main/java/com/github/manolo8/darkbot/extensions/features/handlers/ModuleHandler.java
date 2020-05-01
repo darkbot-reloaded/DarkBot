@@ -23,7 +23,8 @@ public class ModuleHandler extends FeatureHandler<Module> {
 
     @Override
     public void update(Stream<FeatureDefinition<Module>> modules) {
-        ModuleSupplier.updateModules(modules.collect(Collectors.toMap(FeatureDefinition::getId, Function.identity(), (a, b) -> a, LinkedHashMap::new)));
+        ModuleSupplier.updateModules(modules.collect(
+                Collectors.toMap(FeatureDefinition::getId, Function.identity(), (a, b) -> a, LinkedHashMap::new)));
     }
 
 }

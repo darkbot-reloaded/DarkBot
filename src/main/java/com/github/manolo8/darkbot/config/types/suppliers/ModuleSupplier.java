@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 
 public class ModuleSupplier extends OptionList<String> {
     private static Set<ModuleSupplier> INSTANCES = Collections.newSetFromMap(new WeakHashMap<>());
-    private static Map<String, FeatureDefinition> MODULES_BY_ID;
+    private static Map<String, FeatureDefinition<?>> MODULES_BY_ID;
     private static List<String> MODULE_NAMES;
 
-    public static void updateModules(Map<String, FeatureDefinition> modules) {
+    public static void updateModules(Map<String, FeatureDefinition<?>> modules) {
         ModuleSupplier.MODULES_BY_ID = modules;
         MODULE_NAMES = MODULES_BY_ID.values().stream()
                 .filter(m -> !TemporalModule.class.isAssignableFrom(m.getClazz()))
@@ -47,13 +47,13 @@ public class ModuleSupplier extends OptionList<String> {
 
     @Override
     public String getTooltipFromVal(String id) {
-        FeatureDefinition feature = MODULES_BY_ID.get(id);
+        FeatureDefinition<?> feature = MODULES_BY_ID.get(id);
         return feature == null ? null : feature.getDescription();
     }
 
     @Override
     public String getText(String id) {
-        FeatureDefinition feature = MODULES_BY_ID.get(id);
+        FeatureDefinition<?> feature = MODULES_BY_ID.get(id);
         return feature == null ? null : feature.getName();
     }
 

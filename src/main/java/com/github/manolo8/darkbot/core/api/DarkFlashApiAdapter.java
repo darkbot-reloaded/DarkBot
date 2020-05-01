@@ -9,13 +9,13 @@ import com.sun.jna.ptr.IntByReference;
 
 import javax.swing.*;
 
-public class DarkflashApiAdapter extends ApiAdapter {
+public class DarkFlashApiAdapter extends ApiAdapter {
 
     private final LoginData loginData;
     private final DarkFlash API = new DarkFlash();
     private long willBeValid = System.currentTimeMillis() + 5_000;
 
-    public DarkflashApiAdapter(LoginData loginData) {
+    public DarkFlashApiAdapter(LoginData loginData) {
         this.loginData = loginData;
     }
 

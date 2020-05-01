@@ -16,8 +16,7 @@ import static com.github.manolo8.darkbot.Main.API;
  * Reads arrays with pair of values
  * Instead of EntryArray & Dictionary
  */
-public class PairArray extends Updatable implements SwfPtrCollection {
-    private final int sizeOffset, tableOffset;
+public abstract class PairArray extends Updatable implements SwfPtrCollection {
     private boolean autoUpdatable, ignoreEmpty = true;
 
     public int size;
@@ -25,23 +24,18 @@ public class PairArray extends Updatable implements SwfPtrCollection {
     private Pair[] pairs = new Pair[0];
     private Map<String, Lazy<Long>> lazy = new HashMap<>();
 
-    private PairArray(int sizeOffset, int tableOffset) {
-        this.sizeOffset    = sizeOffset;
-        this.tableOffset   = tableOffset;
-    }
-
     /**
      * Reads pairs of {@code Array} type
      */
     public static PairArray ofArray() {
-        return new PairArray(0x50, 0x48);
+        return new PairArray.Pairs();
     }
 
     /**
      * Reads pairs of {@code Dictionary} type
      */
     public static PairArray ofDictionary() {
-        return new PairArray(0x10, 0x8);
+        return new PairArray.Dictionary();
     }
 
     public PairArray setAutoUpdatable(boolean updatable) {
@@ -86,58 +80,91 @@ public class PairArray extends Updatable implements SwfPtrCollection {
         return false;
     }
 
-    @Override
-    public void update() {
-        if (lazy.isEmpty() && ignoreEmpty) return;
-
-        size = API.readMemoryInt(address + sizeOffset);
-
-        if (size < 0 || size > 1024) return;
-        if (pairs.length != size) pairs = Arrays.copyOf(pairs, size);
-
-        long table = API.readMemoryLong(address + tableOffset) & ByteUtils.FIX;
-
-        String key = null;
-        for (int offset = 8, i = 0; offset < 8192 && i < size; offset += 8) {
-            if (key == null && (key = getKey(API.readMemoryLong(table + offset) & ByteUtils.FIX)) == null) continue;
-
-            long value = API.readMemoryLong(table + (offset += 8));
-            if (isInvalid(value)) continue;
-
-            if (pairs[i] == null) pairs[i] = new Pair();
-            pairs[i++].set(key, value & ByteUtils.FIX);
-            key = null;
-        }
-
-        if (isDictionary()) resetMissingObj();
-    }
-
-    public String getKey(long addr) {
-        if (isInvalid(addr)) return null;
-        String key = API.readMemoryString(addr);
-        return key == null || key.trim().isEmpty() || key.equals("ERROR") ? null : key;
-    }
+    public abstract void update();
 
     @Override
     public void update(long address) {
-        super.update(isDictionary() ? API.readMemoryLong(address + 0x20) : address);
+        super.update(address);
         if (autoUpdatable) update();
     }
 
-    private void resetMissingObj() {
-        this.lazy.entrySet().parallelStream()
-                .filter(l -> l.getValue() != null && l.getValue().value != null)
-                .filter(l -> l.getValue().value != 0)
-                .filter(l -> !hasKey(l.getKey()))
-                .forEach(l -> l.getValue().send(0L));
+    private static class Pairs extends PairArray {
+        public boolean isInvalid(long addr) {
+            return addr == 0;
+        }
+
+        public String getKey(long addr) {
+            if (isInvalid(addr)) return null;
+            String key = API.readMemoryString(addr);
+            return key == null || key.trim().isEmpty() || key.equals("ERROR") ? null : key;
+        }
+
+        public void update() {
+            if (super.lazy.isEmpty() && super.ignoreEmpty) return;
+
+            size = API.readMemoryInt(address + 0x50);
+
+            if (size < 0 || size > 1024) return;
+            if (super.pairs.length != size) super.pairs = Arrays.copyOf(super.pairs, size);
+
+            long table = API.readMemoryLong(address + 0x48) & ByteUtils.FIX;
+
+            String key = null;
+            for (int offset = 8, i = 0; offset < 8192 && i < size; offset += 8) {
+                if (key == null && (key = getKey(API.readMemoryLong(table + offset) & ByteUtils.FIX)) == null) continue;
+
+                long value = API.readMemoryLong(table + (offset += 8));
+                if (isInvalid(value)) continue;
+
+                if (super.pairs[i] == null) super.pairs[i] = new Pair();
+                super.pairs[i++].set(key, value & ByteUtils.FIX);
+                key = null;
+            }
+        }
+
     }
 
-    private boolean isInvalid(long address) {
-        return isDictionary() ? address < 10 : address == 0;
-    }
+    private static class Dictionary extends PairArray {
+        @Override
+        public void update() {
+            if (address == 0) return;
 
-    private boolean isDictionary() {
-        return sizeOffset == 0x10;
+            long tableInfo = API.readMemoryLong(address + 32);
+
+            if (tableInfo == 0) return;
+
+            int  size   = API.readMemoryInt(tableInfo + 16);
+            long table  = align8(API.readMemoryLong(tableInfo + 8));
+            int  exp    = API.readMemoryInt(tableInfo + 20);
+            int  length = (int) (Math.pow(2, exp) * 4);
+
+            if (length > 4096 || length < 0 || size < 0 || size > 1024) return;
+
+            if (super.pairs.length < size) super.pairs = Arrays.copyOf(super.pairs, size);
+
+            byte[] bytes = API.readMemory(table, length);
+
+            int i = 0;
+            for (int offset = 0; offset < length && i < size; offset += 16) {
+                long keyAddr = ByteUtils.getLong(bytes, offset) - 2, valAddr = ByteUtils.getLong(bytes, offset + 8) - 1;
+
+                if (keyAddr == -2 || (valAddr >= -2 && valAddr <= 9)) continue;
+
+                if (super.pairs[i] == null) super.pairs[i] = new Pair();
+                super.pairs[i++].set(API.readMemoryString(keyAddr), valAddr);
+            }
+            this.size = i;
+
+            super.lazy.entrySet().stream()
+                    .filter(l -> l.getValue() != null && l.getValue().value != null
+                            && l.getValue().value != 0 && !hasKey(l.getKey()))
+                    .forEach(l -> l.getValue().send(0L));
+        }
+
+        private long align8(long value) {
+            long aligned = value + 8 - (value & 0b1111);
+            return aligned <= value ? aligned + 8 : aligned;
+        }
     }
 
     public class Pair {

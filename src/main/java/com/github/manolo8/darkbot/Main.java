@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
-import com.github.manolo8.darkbot.core.api.IDarkBotAPI;
+import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.itf.Module;
@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 8 alpha 1");
+    public static final Version VERSION      = new Version("1.13.17 beta 8");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -78,7 +78,7 @@ public class Main extends Thread implements PluginListener {
             settingsManager, facadeManager, effectManager, guiManager, mapManager, hero, statsManager, pingManager);
 
     public Module module;
-    public long lastRefresh;
+    public long lastRefresh = System.currentTimeMillis();
     public double avgTick;
     public boolean tickingModule;
 

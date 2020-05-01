@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 
@@ -46,7 +47,7 @@ public abstract class ApiAdapter implements IDarkBotAPI {
         int minX = Arrays.stream(GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices())
                 .mapToInt(g -> g.getDefaultConfiguration().getBounds().x).min().orElse(0);
 
-        USER_32.MoveWindow(window, visible ? x : minX - w, y, w, h, true);
+        USER_32.MoveWindow(window, visible ? x : minX - w - 100, y, w, h, true);
         if (visible) USER_32.SetForegroundWindow(window);
     }
 

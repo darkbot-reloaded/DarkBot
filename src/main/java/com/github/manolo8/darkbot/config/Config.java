@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
 import com.github.manolo8.darkbot.config.types.Tag;
 import com.github.manolo8.darkbot.config.types.TagDefault;
+import com.github.manolo8.darkbot.config.types.suppliers.ApiSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
@@ -171,7 +172,7 @@ public class Config {
         public @Option boolean CONFIRM_EXIT = true;
         public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
         public @Option boolean DEV_STUFF = false;
-        public @Option("Browser/API, Old=0,New=1, restart bot to apply") @Num(min = 0, max = 1, step = 1) int API = 0;
+        public @Option("Browser/API, restart to apply") @Editor(JListField.class) @Options(ApiSupplier.class) int API = 0;
 
         public @Option Display DISPLAY = new Display();
         public static class Display {

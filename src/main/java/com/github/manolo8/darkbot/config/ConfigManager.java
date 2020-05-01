@@ -2,16 +2,18 @@ package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
-import com.github.manolo8.darkbot.core.DarkBotAPI;
-import com.github.manolo8.darkbot.core.DarkFlash;
-import com.github.manolo8.darkbot.core.api.DarkbotApiAdapter;
-import com.github.manolo8.darkbot.core.api.DarkflashApiAdapter;
-import com.github.manolo8.darkbot.core.api.IDarkBotAPI;
+import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
+import com.github.manolo8.darkbot.core.api.DarkBotApiAdapter;
+import com.github.manolo8.darkbot.core.api.DarkFlashApiAdapter;
+import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.api.NativeApiAdapter;
+import com.github.manolo8.darkbot.core.api.NoopApiAdapter;
+import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -91,10 +93,25 @@ public class ConfigManager {
     }
 
     public IDarkBotAPI getAPI() {
-        if (config.BOT_SETTINGS.API == 0) return new DarkbotApiAdapter();
-        else if (config.BOT_SETTINGS.API == 1) return new DarkflashApiAdapter(LoginUtils.performUserLogin());
-        else if (config.BOT_SETTINGS.API == 2) return new NativeApiAdapter(LoginUtils.performUserLogin());
-        else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API);
+        try {
+            if (config.BOT_SETTINGS.API == 0) return new DarkBotApiAdapter();
+            else if (config.BOT_SETTINGS.API == 1) return new DarkFlashApiAdapter(LoginUtils.performUserLogin());
+            else if (config.BOT_SETTINGS.API == 2) return new DarkBoatAdapter(LoginUtils.performUserLogin());
+            else if (config.BOT_SETTINGS.API == 3) return new NativeApiAdapter(LoginUtils.performUserLogin());
+            else if (config.BOT_SETTINGS.API == 4) return new NoopApiAdapter();
+            else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API);
+        } catch (Error e) {
+            System.out.println("Error enabling API #" + config.BOT_SETTINGS.API + ", using no-op api");
+            e.printStackTrace();
+            config.BOT_SETTINGS.API = 4;
+            Popups.showMessageAsync(
+                    "API failed to load",
+                    "The API you had selected is not able to load.\n" +
+                    "You probably do not have the required DLL in your lib folder.\n" +
+                    "The bot will start on no-operation API, change it in the settings and restart.",
+                    JOptionPane.ERROR_MESSAGE);
+            return new NoopApiAdapter();
+        }
     }
 
     public void checkConfig() {
