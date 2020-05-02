@@ -31,7 +31,8 @@ public class ConfigManager {
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .create();
 
-    private static final String DEFAULT = "config",
+    public static final String DEFAULT = "config",
+            CONFIG_FOLDER = "configs",
             BACKUP = "_old",
             EXTENSION = ".json";
 
@@ -48,11 +49,17 @@ public class ConfigManager {
     }
 
     public Path getConfigFile() {
-        return Paths.get(getConfigName() + EXTENSION);
+        return isDefault() ? Paths.get(getConfigName() + EXTENSION) :
+                Paths.get(CONFIG_FOLDER, getConfigName() + EXTENSION);
     }
 
     public Path getConfigBackupFile() {
-        return Paths.get(getConfigName() + BACKUP + EXTENSION);
+        return isDefault() ? Paths.get(getConfigName() + BACKUP + EXTENSION) :
+                Paths.get(CONFIG_FOLDER, getConfigName() + BACKUP + EXTENSION);
+    }
+
+    public boolean isDefault() {
+        return configName == null;
     }
 
     public boolean getConfigFailed() {
@@ -60,6 +67,7 @@ public class ConfigManager {
     }
 
     public Config loadConfig(String configName) {
+        if (DEFAULT.equals(configName)) configName = null;
         this.configName = configName;
         this.config = loadConfig(getConfigFile(), getConfigBackupFile());
         return this.config;

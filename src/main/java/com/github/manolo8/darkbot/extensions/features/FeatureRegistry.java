@@ -48,6 +48,10 @@ public class FeatureRegistry implements PluginListener {
         registryHandler.update();
     }
 
+    public void updateConfig() {
+        FEATURES_BY_ID.values().forEach(featureLoader::updateConfig);
+    }
+
     private void registerNativeFeature(Class<?> clazz) {
         FEATURES_BY_ID.put(clazz.getCanonicalName(), new FeatureDefinition<>(null, clazz));
     }

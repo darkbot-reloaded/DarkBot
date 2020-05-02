@@ -72,6 +72,11 @@ public class MainGui extends JFrame {
         configGui.setCustomConfig(name, config);
     }
 
+    public void updateConfiguration() {
+        mapDrawer.setup(main);
+        configGui.setComponentData();
+    }
+
     public void tryClose() {
         if (main.config.BOT_SETTINGS.CONFIRM_EXIT) exitConfirmation.setVisible(true);
         else {

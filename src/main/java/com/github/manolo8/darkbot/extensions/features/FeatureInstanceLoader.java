@@ -20,11 +20,12 @@ import java.util.List;
 class FeatureInstanceLoader {
 
     private final List<FeatureDecorator<?>> FEATURE_DECORATORS;
+    private final ConfigurableDecorator CONFIGURATION_DECORATOR;
 
     FeatureInstanceLoader(Main main) {
         FEATURE_DECORATORS = Arrays.asList(
                 new InstallableDecorator(main),
-                new ConfigurableDecorator(main.config.CUSTOM_CONFIGS),
+                CONFIGURATION_DECORATOR = new ConfigurableDecorator(main),
                 new InstructionProviderDecorator(),
                 new NpcExtraDecorator());
     }
@@ -41,6 +42,10 @@ class FeatureInstanceLoader {
         for (FeatureDecorator<?> decorator : FEATURE_DECORATORS) {
             decorator.tryUnload(feature);
         }
+    }
+
+    <T> void updateConfig(FeatureDefinition<T> fd) {
+        if (fd.getInstance() != null) CONFIGURATION_DECORATOR.tryLoad(fd, fd.getInstance());
     }
 
 }

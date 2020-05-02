@@ -38,7 +38,7 @@ public class PluginHandler {
     private static List<PluginListener> LISTENERS = new ArrayList<>();
 
     public void addListener(PluginListener listener) {
-        LISTENERS.add(listener);
+        if (!LISTENERS.contains(listener)) LISTENERS.add(listener);
     }
 
     private final Object BACKGROUND_LOCK = new Object();

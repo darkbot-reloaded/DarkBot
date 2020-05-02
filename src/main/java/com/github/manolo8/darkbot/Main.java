@@ -218,16 +218,18 @@ public class Main extends Thread implements PluginListener {
 
     private <A extends Module> A setModule(A module, boolean setConfig) {
         module.install(this);
-        if (setConfig) {
-            if (module instanceof Configurable) {
-                String name = module.getClass().getAnnotation(Feature.class).name();
-                form.setCustomConfig(name, config.CUSTOM_CONFIGS.get(module.getClass().getCanonicalName()));
-            } else {
-                form.setCustomConfig(null, null);
-            }
-        }
+        if (setConfig) updateCustomConfig(module);
         this.module = module;
         return module;
+    }
+
+    private <A extends Module> void updateCustomConfig(A module) {
+        if (module instanceof Configurable) {
+            String name = module.getClass().getAnnotation(Feature.class).name();
+            form.setCustomConfig(name, config.CUSTOM_CONFIGS.get(module.getClass().getCanonicalName()));
+        } else {
+            form.setCustomConfig(null, null);
+        }
     }
 
     @Override
@@ -274,6 +276,14 @@ public class Main extends Thread implements PluginListener {
                 });
             setModule(module, true);
         }
+    }
+
+    public void setConfig(String config) {
+        if (configManager.getConfigName().equals(config)) return;
+        this.config = configManager.loadConfig(config);
+        featureRegistry.updateConfig();
+        form.updateConfiguration();
+        updateCustomConfig(module);
     }
 
 }

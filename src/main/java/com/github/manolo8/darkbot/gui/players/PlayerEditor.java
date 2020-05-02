@@ -21,28 +21,31 @@ public class PlayerEditor extends JPanel {
     private JList<PlayerInfo> playerInfoList;
     private DefaultListModel<PlayerInfo> playersModel;
     private SearchField sf;
+    private PlayerTagEditor tagEditor;
     protected Main main;
 
     public PlayerEditor() {
         super(new MigLayout("ins 0, gap 0, wrap 5, fill", "[][][][grow][]", "[][grow,fill]"));
-    }
-
-    public void setup(Main main) {
-        this.main = main;
 
         add(new AddPlayer(), "grow");
         add(new AddId(), "grow");
         add(new RemovePlayers(), "grow");
         add(sf = new SearchField(this::refreshList), "grow");
-        add(new PlayerTagEditor(this), "grow");
+        add(tagEditor = new PlayerTagEditor(this), "grow");
 
         playerInfoList = new JList<>(playersModel = new DefaultListModel<>());
         playerInfoList.setCellRenderer(new PlayerRenderer());
 
-        JScrollPane scroll = new JScrollPane(playerInfoList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        add(scroll, "span, grow");
+        add(new JScrollPane(playerInfoList,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), "span, grow");
+    }
 
-        main.config.PLAYER_INFOS.values().forEach(playersModel::addElement);
+    public void setup(Main main) {
+        this.main = main;
+
+        tagEditor.setup(main);
+
+        refreshList();
         main.config.PLAYER_UPDATED.add(i -> SwingUtilities.invokeLater(this::refreshList));
     }
 

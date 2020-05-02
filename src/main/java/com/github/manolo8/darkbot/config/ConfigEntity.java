@@ -70,14 +70,17 @@ public class ConfigEntity {
     }
 
     public ZoneInfo getOrCreatePreferred() {
+        if (MapManager.id < 0) return new ZoneInfo();
         return config.PREFERRED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.BOT_SETTINGS.ZONE_RESOLUTION));
     }
 
     public ZoneInfo getOrCreateAvoided() {
+        if (MapManager.id < 0) return new ZoneInfo();
         return config.AVOIDED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.BOT_SETTINGS.ZONE_RESOLUTION));
     }
 
     public Set<SafetyInfo> getOrCreateSafeties() {
+        if (MapManager.id < 0) return new HashSet<>();
         return config.SAFETY.computeIfAbsent(MapManager.id, id -> new HashSet<>());
     }
 

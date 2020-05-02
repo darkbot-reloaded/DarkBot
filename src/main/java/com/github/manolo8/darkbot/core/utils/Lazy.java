@@ -21,7 +21,7 @@ public class Lazy<C> {
     }
 
     public void add(Consumer<C> consumer) {
-        this.consumers.add(consumer);
+        if (!consumers.contains(consumer)) this.consumers.add(consumer);
     }
 
     public void remove(Consumer<C> consumer) {

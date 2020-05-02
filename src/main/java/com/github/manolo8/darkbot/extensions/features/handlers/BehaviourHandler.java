@@ -27,8 +27,8 @@ public class BehaviourHandler extends FeatureHandler<Behaviour> {
     }
 
     @Override
-    public void update(Stream<FeatureDefinition<Behaviour>> tasks) {
-        main.setBehaviours(tasks
+    public void update(Stream<FeatureDefinition<Behaviour>> behaviours) {
+        main.setBehaviours(behaviours
                 .map(featureRegistry::getFeature)
                 .map(o -> o.orElse(null))
                 .filter(Objects::nonNull)

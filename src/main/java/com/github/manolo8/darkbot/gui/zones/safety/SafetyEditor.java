@@ -1,4 +1,4 @@
-package com.github.manolo8.darkbot.gui.safety;
+package com.github.manolo8.darkbot.gui.zones.safety;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.SafetyInfo;

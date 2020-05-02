@@ -11,10 +11,10 @@ import java.util.Map;
 
 public class ConfigurableDecorator extends FeatureDecorator<Configurable> {
 
-    private final Map<String, Object> CUSTOM_CONFIGS;
+    private final Main main;
 
-    public ConfigurableDecorator(Map<String, Object> CUSTOM_CONFIGS) {
-        this.CUSTOM_CONFIGS = CUSTOM_CONFIGS;
+    public ConfigurableDecorator(Main main) {
+        this.main = main;
     }
 
     @Override
@@ -28,8 +28,8 @@ public class ConfigurableDecorator extends FeatureDecorator<Configurable> {
         Class<?> configClass = (Class) configParams[0];
         if (configClass == null) return;
 
-        Object config = toConfig(CUSTOM_CONFIGS.get(id), configClass);
-        CUSTOM_CONFIGS.put(id, config);
+        Object config = toConfig(main.config.CUSTOM_CONFIGS.get(id), configClass);
+        main.config.CUSTOM_CONFIGS.put(id, config);
 
         //noinspection unchecked
         obj.setConfig(config);
@@ -38,7 +38,7 @@ public class ConfigurableDecorator extends FeatureDecorator<Configurable> {
     @Override
     protected void unload(Configurable obj) {
         String id = obj.getClass().getCanonicalName();
-        CUSTOM_CONFIGS.put(id, toJsonElement(CUSTOM_CONFIGS.get(id)));
+        main.config.CUSTOM_CONFIGS.put(id, toJsonElement(main.config.CUSTOM_CONFIGS.get(id)));
     }
 
     private JsonElement toJsonElement(Object config) {

@@ -7,10 +7,13 @@ import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.components.TabbedPane;
 import com.github.manolo8.darkbot.gui.players.PlayerEditor;
 import com.github.manolo8.darkbot.gui.plugins.PluginDisplay;
-import com.github.manolo8.darkbot.gui.safety.SafetiesEditor;
+import com.github.manolo8.darkbot.gui.titlebar.ConfigPicker;
+import com.github.manolo8.darkbot.gui.zones.ZonesEditor;
+import com.github.manolo8.darkbot.gui.zones.safety.SafetiesEditor;
 import com.github.manolo8.darkbot.gui.titlebar.ConfigTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
+import com.github.manolo8.darkbot.gui.zones.ZoneEditor;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -22,27 +25,24 @@ import java.util.function.Consumer;
 public class ConfigGui extends JFrame {
 
     private final Main main;
-    private final Config config;
 
     private final JPanel mainPanel = new JPanel();
 
     private TabbedPane tabbedPane;
 
     private AdvancedConfig advancedPane;
-    private ZoneEditor preferredZones;
-    private ZoneEditor avoidedZones;
-    private SafetiesEditor safeEditor;
+    private ZonesEditor zones;
     private PlayerEditor playerEditor;
+    private ConfigPicker configPicker;
     private MainButton pluginTab;
     private PluginDisplay pluginDisplay;
 
     private Lazy<Boolean> stateChange = new Lazy.NoCache<>();
 
     public ConfigGui(Main main) throws HeadlessException {
-        super("DarkBot - Config");
+        super("DarkBot Configuration");
 
         this.main = main;
-        this.config = main.config;
 
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize(640, 480);
@@ -67,33 +67,29 @@ public class ConfigGui extends JFrame {
         tabbedPane = new TabbedPane();
 
         advancedPane = new AdvancedConfig();
-        preferredZones = new ZoneEditor();
-        avoidedZones = new ZoneEditor();
-        safeEditor = new SafetiesEditor();
+        zones = new ZonesEditor();
         playerEditor = new PlayerEditor();
+        configPicker = new ConfigPicker();
         pluginDisplay = new PluginDisplay();
     }
 
     private void setComponentPosition() {
         tabbedPane.addTab(null, "tabs.general", advancedPane);
-        tabbedPane.addTab(null, "tabs.preferred_zones", preferredZones);
-        tabbedPane.addTab(null, "tabs.avoided_zones", avoidedZones);
-        tabbedPane.addTab(null, "tabs.safety_places", safeEditor);
+        tabbedPane.addTab(null, "tabs.zones", zones);
         tabbedPane.addTab(null, "tabs.players", playerEditor);
         pluginTab = tabbedPane.addHiddenTab(UIUtils.getIcon("plugins"), "tabs.plugins", pluginDisplay);
 
         mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][grow]"));
-        mainPanel.add(new ConfigTitleBar(this, tabbedPane.getHeader(), pluginTab, main), "grow, span");
+        mainPanel.add(new ConfigTitleBar(this, tabbedPane.getHeader(), configPicker, pluginTab, main), "grow, span");
 
         mainPanel.add(tabbedPane, "grow, span");
     }
 
-    private void setComponentData() {
-        advancedPane.setEditingConfig(config);
+    public void setComponentData() {
+        advancedPane.setEditingConfig(main.config);
         main.pluginHandler.addListener(advancedPane);
-        preferredZones.setup(main, config.PREFERRED);
-        avoidedZones.setup(main, config.AVOIDED);
-        safeEditor.setup(main);
+        zones.setup(main);
+        configPicker.setup(main);
         playerEditor.setup(main);
         pluginDisplay.setup(main, pluginTab);
     }

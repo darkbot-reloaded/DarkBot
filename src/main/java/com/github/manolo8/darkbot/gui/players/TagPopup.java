@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -24,6 +25,18 @@ public class TagPopup extends JPopupMenu {
         super("Player tags");
         this.playerTags = playerTags;
         this.callback = callback;
+    }
+
+    public TagPopup(Consumer<PlayerTag> callback) {
+        super("Player tags");
+        this.playerTags = Collections.emptyList();
+        this.callback = callback;
+    }
+
+    public void setTags(Collection<PlayerTag> tags) {
+        this.playerTags = tags;
+        this.tagCache.clear();
+        this.nullTagsCache.clear();
     }
 
     public void show(Component invoker, int x, int y, String nullTag) {

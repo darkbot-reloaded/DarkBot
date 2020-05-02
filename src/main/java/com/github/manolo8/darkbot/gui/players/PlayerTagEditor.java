@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.players;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
@@ -26,13 +27,17 @@ public class PlayerTagEditor extends JPanel {
         add(new TagButton(UIUtils.getIcon("add"), null, editor::addTagToPlayers, "Add new tag", true, false));
         add(new TagButton(UIUtils.getIcon("remove"), null, editor::removeTagFromPlayers, null, false, false));
         add(new TagButton(UIUtils.getIcon("close"), "Manage tags", editor::deleteTag, null, false, true));
-        tags = new TagPopup(editor.main.config.PLAYER_TAGS, tag -> latestClicked.action.accept(tag));
+        tags = new TagPopup(tag -> latestClicked.action.accept(tag));
         tags.addPopupMenuListener(new PopupMenuListenerAdapter() {
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 latestClicked.keepClosed = System.currentTimeMillis() + 100;
             }
         });
+    }
+
+    void setup(Main main) {
+        tags.setTags(main.config.PLAYER_TAGS);
     }
 
     public void showPopup(TagButton clicked) {
@@ -42,7 +47,7 @@ public class PlayerTagEditor extends JPanel {
             return;
         }
 
-        if (editor.main.config.PLAYER_TAGS.isEmpty()) {
+        if (editor.main != null && editor.main.config.PLAYER_TAGS.isEmpty()) {
             editor.addTagToPlayers(null);
             return;
         }

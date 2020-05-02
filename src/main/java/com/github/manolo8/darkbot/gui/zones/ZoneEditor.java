@@ -1,13 +1,15 @@
-package com.github.manolo8.darkbot.gui;
+package com.github.manolo8.darkbot.gui.zones;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ZoneInfo;
+import com.github.manolo8.darkbot.core.objects.Map;
+import com.github.manolo8.darkbot.gui.MapDrawer;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Map;
+import java.util.function.Consumer;
 
 public class ZoneEditor extends MapDrawer {
 
@@ -22,14 +24,16 @@ public class ZoneEditor extends MapDrawer {
 
     private int startX, startY;
 
+    private Consumer<Map> mapChange = null;
+
     private class Rect {
         int x1, x2, y1, y2;
 
         public void set(int x1, int y1, int x2, int y2) {
-            this.x1 = x1 < x2 ? x1 : x2;
-            this.y1 = y1 < y2 ? y1 : y2;
-            this.x2 = x1 < x2 ? x2 : x1;
-            this.y2 = y1 < y2 ? y2 : y1;
+            this.x1 = Math.min(x1, x2);
+            this.y1 = Math.min(y1, y2);
+            this.x2 = Math.max(x1, x2);
+            this.y2 = Math.max(y1, y2);
         }
 
         public void update(double divisions) {
@@ -83,13 +87,14 @@ public class ZoneEditor extends MapDrawer {
         });
     }
 
-    void setup(Main main, Map<Integer, ZoneInfo> zonesByMap) {
+    void setup(Main main, java.util.Map<Integer, ZoneInfo> zonesByMap) {
         super.setup(main);
-        main.mapManager.mapChange.add(map -> {
+        if (mapChange != null) main.mapManager.mapChange.remove(mapChange);
+        main.mapManager.mapChange.add(mapChange = map -> {
             zoneInfo = zonesByMap.computeIfAbsent(map.id, id -> new ZoneInfo(config.BOT_SETTINGS.ZONE_RESOLUTION));
             ZoneEditor.this.repaint();
         });
-        zoneInfo = zonesByMap.get(-1);
+        zoneInfo = zonesByMap.get(main.hero.map.id);
     }
 
     @Override
