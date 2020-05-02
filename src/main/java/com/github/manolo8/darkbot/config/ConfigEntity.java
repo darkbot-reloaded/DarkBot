@@ -80,7 +80,6 @@ public class ConfigEntity {
     }
 
     public Set<SafetyInfo> getOrCreateSafeties() {
-        if (MapManager.id < 0) return new HashSet<>();
         return config.SAFETY.computeIfAbsent(MapManager.id, id -> new HashSet<>());
     }
 

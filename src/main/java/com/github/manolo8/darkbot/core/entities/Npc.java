@@ -23,7 +23,10 @@ public class Npc extends Ship {
         super.update();
 
         npcId = API.readMemoryInt(API.readMemoryLong(address + 192) + 80);
-        ish = hasEffect(EffectManager.Effect.ISH);
+        //  The address is wrong, and likely belongs to a "has any effect" boolean, but the other ISH effect is wrong
+        ish = API.readMemoryBoolean(API.readMemoryLong(address + 208) + 56);
+        // This ISH effect, is not the one used in NPCs.
+        // ish = hasEffect(EffectManager.Effect.ISH);
 
         if (!oldName.equals(playerInfo.username)) {
             npcInfo = ConfigEntity.INSTANCE.getOrCreateNpcInfo(playerInfo.username);

@@ -12,7 +12,7 @@ public class DarkBoat {
     public native void    reload(); // currently not working
     public native boolean isValid();
 
-    public native void keyClick  (int btnCode);
+    public native void keyClick  (int keyCode);
     public native void sendText  (String text);
 
     public native void mouseMove (int x, int y);
@@ -24,7 +24,7 @@ public class DarkBoat {
     public native long    readLong   (long address);
     public native double  readDouble (long address);
     public native boolean readBoolean(long address);
-    public native String  readString (long address); // currently bugged
+    public native String  readString (long address); // bugged encoding
     public native byte[]  readBytes  (long address, int length);
 
     public native void replaceInt    (long address, int     oldValue, int     newValue);
@@ -32,12 +32,13 @@ public class DarkBoat {
     public native void replaceDouble (long address, double  oldValue, double  newValue);
     public native void replaceBoolean(long address, boolean oldValue, boolean newValue);
 
-    public native void writeInt      (long address, int value);
-    public native void writeLong     (long address, long value);
-    public native void writeDouble   (long address, double value);
+    public native void writeInt      (long address, int     value);
+    public native void writeLong     (long address, long    value);
+    public native void writeDouble   (long address, double  value);
     public native void writeBoolean  (long address, boolean value);
+    public native void writeBytes    (long address, byte... bytes);
 
-    public native long[] queryBytes  (byte[] pattern, int maxSize);
     public native long[] queryInt    (int    value  , int maxSize);
     public native long[] queryLong   (long   value  , int maxSize);
+    public native long[] queryBytes  (byte[] pattern, int maxSize);
 }

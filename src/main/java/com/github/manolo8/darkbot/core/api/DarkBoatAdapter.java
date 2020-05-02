@@ -44,7 +44,7 @@ public class DarkBoatAdapter extends ApiAdapter {
 
     @Override
     public void keyboardClick(char btn) {
-        API.keyClick(btn);
+        API.keyClick(Character.toUpperCase(btn));
     }
 
     @Override

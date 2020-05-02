@@ -31,9 +31,9 @@ public class StarManager {
 
         StarBuilder mapBuild = new StarBuilder();
         mapBuild.addMap(-1, I18n.get("gui.map.loading"), "?")
-                .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1")
-                .addGG(-3, "GG Escort").accessOnlyBy(54, 10500, 6500, /*"1-1", "2-1", "3-1",*/ OUTPOST_HOME_MAPS) // Gotta "reserve" x-1 maps for GG eternal.
-                .addGG(-4, "GG Eternal").accessBy(54, 10500, 6500, HOME_MAPS);
+                .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1");
+                //.addGG(-3, "GG Escort").accessOnlyBy(54, 10500, 6500, /*"1-1", "2-1", "3-1",*/ OUTPOST_HOME_MAPS) // Gotta "reserve" x-1 maps for GG eternal.
+                //.addGG(-4, "GG Eternal").accessBy(54, 10500, 6500, HOME_MAPS);
                 // MMO
         mapBuild.addMap(1, "1-1").addPortal(18500, 11500, "1-2").addPortal(10500, 6750, "Experiment Zone 1")
                 .addMap(2, "1-2").addPortal(2000, 2000, "1-1").addPortal(18500, 2000, "1-3").addPortal(18500, 11500, "1-4")
