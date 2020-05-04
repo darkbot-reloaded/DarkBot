@@ -52,7 +52,9 @@ public abstract class ApiAdapter implements IDarkBotAPI {
     }
 
     public void sendText(String str) {}
-    public void setRender(boolean render) {}
+    public long getMemoryUsage() {
+        return 0L;
+    }
 
 }
 

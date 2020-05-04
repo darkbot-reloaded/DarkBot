@@ -60,6 +60,7 @@ public class Main extends Thread implements PluginListener {
     public static IDarkBotAPI API;
 
     public final Lazy.Sync<Boolean> status       = new Lazy.Sync<>();
+    public final Lazy.Sync<String> configChange  = new Lazy.Sync<>();
     public final StarManager starManager         = new StarManager();
     public final MapManager mapManager           = new MapManager(this);
     public final SettingsManager settingsManager = new SettingsManager(this);
@@ -97,6 +98,7 @@ public class Main extends Thread implements PluginListener {
         });
 
         this.status.add(this::onRunningToggle);
+        this.configChange.add(this::setConfig);
 
         this.pluginHandler.updatePluginsSync();
         this.pluginHandler.addListener(this);
@@ -139,7 +141,8 @@ public class Main extends Thread implements PluginListener {
         else validTick();
 
         this.form.tick();
-        this.configManager.checkConfig();
+        this.configManager.saveChangedConfig();
+        this.configChange.tick();
     }
 
     private boolean isInvalid() {
@@ -281,6 +284,7 @@ public class Main extends Thread implements PluginListener {
     public void setConfig(String config) {
         if (configManager.getConfigName().equals(config)) return;
         this.config = configManager.loadConfig(config);
+        mapManager.updateAreas();
         featureRegistry.updateConfig();
         form.updateConfiguration();
         updateCustomConfig(module);

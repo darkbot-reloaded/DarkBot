@@ -11,6 +11,7 @@ public class DarkBoat {
     public native void    setVisible(boolean visible);
     public native void    reload(); // currently not working
     public native boolean isValid();
+    public native long    getMemoryUsage();
 
     public native void keyClick  (int keyCode);
     public native void sendText  (String text);

@@ -122,7 +122,7 @@ public class ConfigManager {
         }
     }
 
-    public void checkConfig() {
+    public void saveChangedConfig() {
         if (!config.changed) return;
         config.changed = false;
         saveConfig();

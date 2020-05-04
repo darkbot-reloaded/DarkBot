@@ -97,12 +97,16 @@ public class MapManager implements Manager {
         if (switched) {
             id = currMap;
             main.hero.map = main.starManager.byId(id);
-            preferred = ConfigEntity.INSTANCE.getOrCreatePreferred();
-            avoided = ConfigEntity.INSTANCE.getOrCreateAvoided();
-            safeties = ConfigEntity.INSTANCE.getOrCreateSafeties();
+            updateAreas();
         }
         entities.update(address);
         if (switched) mapChange.send(main.hero.map);
+    }
+
+    public void updateAreas() {
+        preferred = ConfigEntity.INSTANCE.getOrCreatePreferred();
+        avoided = ConfigEntity.INSTANCE.getOrCreateAvoided();
+        safeties = ConfigEntity.INSTANCE.getOrCreateSafeties();
     }
 
     private void checkMirror() {

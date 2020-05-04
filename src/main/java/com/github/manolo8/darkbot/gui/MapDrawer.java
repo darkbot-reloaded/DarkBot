@@ -51,6 +51,8 @@ import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.github.manolo8.darkbot.Main.API;
+
 public class MapDrawer extends JPanel {
 
     private final DecimalFormat STAT_FORMAT = new DecimalFormat("###,###,###");
@@ -341,9 +343,8 @@ public class MapDrawer extends JPanel {
             drawString(g2, main.tickingModule ? main.module.status() : main.module.stoppedStatus(), 5, 12 + 15, Align.LEFT);
         }
 
-        drawString(g2, pingManager.ping + " ms ping", width - 5, 12, Align.RIGHT);
-        drawString(g2, String.format("%.1f ms tick", main.avgTick), width - 5, 24, Align.RIGHT);
-        drawString(g2, "SID: " + main.backpage.sidStatus(), width - 5, 36, Align.RIGHT);
+        drawString(g2, String.format("%.1f tick  %dMB  ping %d ms",  main.avgTick, API.getMemoryUsage(), pingManager.ping), width - 5, 12, Align.RIGHT);
+        drawString(g2, "SID: " + main.backpage.sidStatus(), width - 5, 24, Align.RIGHT);
 
         drawMap(g2);
     }

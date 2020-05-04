@@ -139,11 +139,6 @@ public class DarkFlashApiAdapter extends ApiAdapter {
     }
 
     @Override
-    public void setRender(boolean render) {
-        API.setRender(render);
-    }
-
-    @Override
     public void handleRefresh() {
         willBeValid = System.currentTimeMillis() + 5_000;
         API.reloadSWF();

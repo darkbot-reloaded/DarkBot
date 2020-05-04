@@ -5,6 +5,7 @@ public interface IDarkBotAPI {
     void createWindow();
 
     boolean isValid();
+    long getMemoryUsage();
 
     void mouseMove(int x, int y);
 
@@ -68,8 +69,6 @@ public interface IDarkBotAPI {
     long[] queryMemory(byte[] query, int maxQuantity);
 
     void setVisible(boolean visible);
-
-    void setRender(boolean visible);
 
     void handleRefresh();
 

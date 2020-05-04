@@ -15,7 +15,7 @@ public class ConfigPicker extends JComboBox<String> {
 
     public ConfigPicker() {
         addActionListener(a -> {
-            if (main != null) main.setConfig((String) getSelectedItem());
+            if (main != null) main.configChange.send((String) getSelectedItem());
         });
     }
 
