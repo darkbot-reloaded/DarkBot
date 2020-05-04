@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.utils.login.LoginData;
+import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.NativeApi;
 
 public class NativeApiAdapter extends ApiAdapter {
@@ -11,8 +12,8 @@ public class NativeApiAdapter extends ApiAdapter {
     private static int nextBotId = 0;
     private int botId = -1;
 
-    public NativeApiAdapter(LoginData loginData) {
-        this.loginData = loginData;
+    public NativeApiAdapter() {
+        this.loginData = LoginUtils.performUserLogin();
     }
 
     public void createWindow() {

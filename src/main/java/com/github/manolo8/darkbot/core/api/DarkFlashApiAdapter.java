@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.api;
 import com.github.manolo8.darkbot.core.DarkFlash;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.login.LoginData;
+import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.ptr.IntByReference;
@@ -15,8 +16,8 @@ public class DarkFlashApiAdapter extends ApiAdapter {
     private final DarkFlash API = new DarkFlash();
     private long willBeValid = System.currentTimeMillis() + 5_000;
 
-    public DarkFlashApiAdapter(LoginData loginData) {
-        this.loginData = loginData;
+    public DarkFlashApiAdapter() {
+        this.loginData = LoginUtils.performUserLogin();
     }
 
     @Override

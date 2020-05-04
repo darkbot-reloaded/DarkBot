@@ -1,14 +1,15 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.utils.login.LoginData;
+import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.DarkBoat;
 
 public class DarkBoatAdapter extends ApiAdapter {
     private final LoginData loginData;
     private final DarkBoat API = new DarkBoat();
 
-    public DarkBoatAdapter(LoginData loginData) {
-        this.loginData = loginData;
+    public DarkBoatAdapter() {
+        this.loginData = LoginUtils.performUserLogin();
     }
 
     @Override
@@ -25,11 +26,18 @@ public class DarkBoatAdapter extends ApiAdapter {
     @Override
     public void setVisible(boolean visible) {
         API.setVisible(visible);
+        //window = USER_32.FindWindow(null, "DarkBoat 2137");
+        //super.setVisible(visible);
     }
 
     @Override
     public boolean isValid() {
         return API.isValid();
+    }
+
+    @Override
+    public long getMemoryUsage() {
+        return API.getMemoryUsage();
     }
 
     @Override

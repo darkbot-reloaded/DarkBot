@@ -340,11 +340,11 @@ public class MapDrawer extends JPanel {
                 Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000));
         drawString(g2, info, 5, 12, Align.LEFT);
         if (main.module != null) {
-            drawString(g2, main.tickingModule ? main.module.status() : main.module.stoppedStatus(), 5, 12 + 15, Align.LEFT);
+            drawString(g2, main.tickingModule ? main.module.status() : main.module.stoppedStatus(), 5, 26, Align.LEFT);
         }
 
         drawString(g2, String.format("%.1f tick  %dMB  ping %d ms",  main.avgTick, API.getMemoryUsage(), pingManager.ping), width - 5, 12, Align.RIGHT);
-        drawString(g2, "SID: " + main.backpage.sidStatus(), width - 5, 24, Align.RIGHT);
+        drawString(g2, "SID: " + main.backpage.sidStatus(), width - 5, 26, Align.RIGHT);
 
         drawMap(g2);
     }

@@ -103,9 +103,9 @@ public class ConfigManager {
     public IDarkBotAPI getAPI() {
         try {
             if (config.BOT_SETTINGS.API == 0) return new DarkBotApiAdapter();
-            else if (config.BOT_SETTINGS.API == 1) return new DarkFlashApiAdapter(LoginUtils.performUserLogin());
-            else if (config.BOT_SETTINGS.API == 2) return new DarkBoatAdapter(LoginUtils.performUserLogin());
-            else if (config.BOT_SETTINGS.API == 3) return new NativeApiAdapter(LoginUtils.performUserLogin());
+            else if (config.BOT_SETTINGS.API == 1) return new DarkFlashApiAdapter();
+            else if (config.BOT_SETTINGS.API == 2) return new DarkBoatAdapter();
+            else if (config.BOT_SETTINGS.API == 3) return new NativeApiAdapter();
             else if (config.BOT_SETTINGS.API == 4) return new NoopApiAdapter();
             else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API);
         } catch (Error e) {

@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.utils.MathUtils;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -172,7 +173,8 @@ public class Drive {
         ZoneInfo area = map.preferred;
         boolean sequential = ConfigEntity.INSTANCE.getConfig().GENERAL.ROAMING.SEQUENTIAL;
 
-        List<ZoneInfo.Zone> zones = sequential ? area.getSortedZones() : area.getZones();
+        List<ZoneInfo.Zone> zones = area == null ? Collections.emptyList() :
+                sequential ? area.getSortedZones() : area.getZones();
         boolean changed = !zones.equals(lastZones);
         lastZones = zones;
 
