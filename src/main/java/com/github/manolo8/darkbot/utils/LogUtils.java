@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.utils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,13 +25,13 @@ public class LogUtils {
             PrintStream output = getLogger();
             System.setOut(output);
             System.setErr(output);
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
             System.out.println("Failed to redirect logs, file not found:");
             e.printStackTrace();
         }
     }
 
-    private static PrintStream getLogger() throws FileNotFoundException {
+    private static PrintStream getLogger() throws FileNotFoundException, UnsupportedEncodingException {
         return new PrintStreamWithDate("logs/" + LocalDateTime.now().format(FILENAME_DATE) + ".log");
     }
 
@@ -75,8 +76,8 @@ public class LogUtils {
     }
 
     private static class PrintStreamWithDate extends PrintStream {
-        public PrintStreamWithDate(String logfile) throws FileNotFoundException {
-            super(logfile);
+        public PrintStreamWithDate(String logfile) throws FileNotFoundException, UnsupportedEncodingException {
+            super(logfile, "UTF-8");
         }
 
         @Override

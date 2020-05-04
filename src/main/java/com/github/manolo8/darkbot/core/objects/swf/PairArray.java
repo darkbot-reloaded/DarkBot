@@ -116,8 +116,8 @@ public abstract class PairArray extends Updatable implements SwfPtrCollection {
                 long value = API.readMemoryLong(table + (offset += 8));
                 if (isInvalid(value)) continue;
 
-                if (super.pairs[i] == null) super.pairs[i] = new Pair();
-                super.pairs[i++].set(key, value & ByteUtils.FIX);
+                if (super.pairs[i] == null) super.pairs[i] = new Pair(key, value & ByteUtils.FIX);
+                else super.pairs[i++].set(key, value & ByteUtils.FIX);
                 key = null;
             }
         }
@@ -125,6 +125,8 @@ public abstract class PairArray extends Updatable implements SwfPtrCollection {
     }
 
     private static class Dictionary extends PairArray {
+        private String[] removed;
+
         @Override
         public void update() {
             if (address == 0) return;
@@ -140,25 +142,38 @@ public abstract class PairArray extends Updatable implements SwfPtrCollection {
 
             if (length > 4096 || length < 0 || size < 0 || size > 1024) return;
 
-            if (super.pairs.length < size) super.pairs = Arrays.copyOf(super.pairs, size);
+            if (super.pairs.length < size) {
+                removed = new String[size];
+                super.pairs = Arrays.copyOf(super.pairs, size);
+            }
 
             byte[] bytes = API.readMemory(table, length);
 
-            int i = 0;
-            for (int offset = 0; offset < length && i < size; offset += 16) {
+            int current = 0, remove = 0;
+            for (int offset = 0; offset < length && current < size; offset += 16) {
                 long keyAddr = ByteUtils.getLong(bytes, offset) - 2, valAddr = ByteUtils.getLong(bytes, offset + 8) - 1;
 
                 if (keyAddr == -2 || (valAddr >= -2 && valAddr <= 9)) continue;
 
-                if (super.pairs[i] == null) super.pairs[i] = new Pair();
-                super.pairs[i++].set(API.readMemoryString(keyAddr), valAddr);
+                Pair pair = super.pairs[current];
+                if (pair == null) super.pairs[current++] = new Pair(API.readMemoryString(keyAddr), valAddr);
+                else if (pair.value != valAddr) {
+                    removed[remove++] = pair.key;
+                    super.pairs[current++].set(API.readMemoryString(keyAddr), valAddr);
+                }
             }
-            this.size = i;
 
-            super.lazy.entrySet().stream()
-                    .filter(l -> l.getValue() != null && l.getValue().value != null
-                            && l.getValue().value != 0 && !hasKey(l.getKey()))
-                    .forEach(l -> l.getValue().send(0L));
+            while (this.size > current) {
+                removed[remove++] = super.pairs[--this.size].key;
+                super.pairs[this.size] = null;
+            }
+            this.size = current;
+
+            for (String str; remove > 0;) {
+                if (hasKey(str = removed[--remove])) continue;
+                Lazy<Long> l = super.lazy.get(str);
+                if (l != null) l.send(0L);
+            }
         }
 
         private long align8(long value) {
@@ -170,6 +185,12 @@ public abstract class PairArray extends Updatable implements SwfPtrCollection {
     public class Pair {
         public String key;
         public long value;
+
+        private Pair() {}
+        private Pair(String key, long value) {
+            set(key, value);
+        }
+
 
         private void set(String index, long value) {
             this.key   = index;
