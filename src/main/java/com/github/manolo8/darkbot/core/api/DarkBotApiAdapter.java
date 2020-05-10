@@ -19,6 +19,7 @@ public class DarkBotApiAdapter extends ApiAdapter {
 
         Thread windowFinder = new Thread(() -> {
             while ((window = USER_32.FindWindow("DarkBrowser", "DarkBrowser")) == null || !USER_32.IsWindow(window)) Time.sleep(100);
+            setSize(-1, -1);
         });
         windowFinder.setDaemon(true);
         windowFinder.start();

@@ -8,6 +8,10 @@ public class SpinnerNumberMinMaxFix extends SpinnerNumberModel {
         super(value, minimum, maximum, stepSize);
     }
 
+    public SpinnerNumberMinMaxFix(int value, int minimum, int maximum, int stepSize) {
+        super(value, minimum, maximum, stepSize);
+    }
+
     public SpinnerNumberMinMaxFix(double value, double minimum, double maximum, double stepSize) {
         super(value, minimum, maximum, stepSize);
     }

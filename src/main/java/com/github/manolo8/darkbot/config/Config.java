@@ -184,6 +184,8 @@ public class Config {
             public @Option boolean SHOW_ZONES = true;
             public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
 
+            public int width = 1280;
+            public int height = 800;
             public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
         }
     }

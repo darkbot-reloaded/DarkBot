@@ -45,14 +45,7 @@ public class LoginForm extends JPanel {
     public void setInfoText(Message val) {
         infoLb.setText(val.text);
         infoLb.setToolTipText(val.description);
-        Font baseFont = infoLb.getFont();
-        if (val.error) {
-            infoLb.setForeground(UIUtils.RED.brighter().brighter());
-            infoLb.setFont(baseFont.deriveFont(baseFont.getStyle() | Font.BOLD));
-        } else {
-            infoLb.setForeground(null);
-            infoLb.setFont(baseFont.deriveFont(baseFont.getStyle() & ~Font.BOLD));
-        }
+        UIUtils.setRed(infoLb, val.error);
     }
 
     public static class Message {

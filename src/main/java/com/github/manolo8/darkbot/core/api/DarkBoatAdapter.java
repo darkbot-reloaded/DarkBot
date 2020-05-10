@@ -24,10 +24,13 @@ public class DarkBoatAdapter extends ApiAdapter {
     }
 
     @Override
+    public void setSize(int width, int height) {
+        API.setSize(width, height);
+    }
+
+    @Override
     public void setVisible(boolean visible) {
         API.setVisible(visible);
-        //window = USER_32.FindWindow(null, "DarkBoat 2137");
-        //super.setVisible(visible);
     }
 
     @Override

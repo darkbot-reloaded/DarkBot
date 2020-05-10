@@ -8,6 +8,7 @@ public class DarkBoat {
 
     public native void    setData(String url, String sid, String preloader, String vars);
     public native void    createWindow();
+    public native void    setSize(int width, int height);
     public native void    setVisible(boolean visible);
     public native void    reload(); // currently not working
     public native boolean isValid();

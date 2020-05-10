@@ -40,10 +40,7 @@ public class DarkFlashApiAdapter extends ApiAdapter {
                     parentProcessId.getValue() != Kernel32.INSTANCE.GetCurrentProcessId()) Time.sleep(100);
 
             API.setVisible(true);
-            WinDef.RECT rect = new WinDef.RECT();
-            USER_32.GetWindowRect(window, rect);
-            USER_32.MoveWindow(window, rect.left, rect.top, 1270, 800, true);
-
+            setSize(-1, -1);
             flash = USER_32.FindWindowEx(USER_32.FindWindowEx(window, null, null, null), null, null, null);
             API.setVisible(true);
             API.setRender(true);

@@ -56,4 +56,16 @@ public class UIUtils {
         return new MatteBorder(top, left, bottom, right, BORDER);
     }
 
+    public static JLabel setRed(JLabel label, boolean set) {
+        Font baseFont = label.getFont();
+        if (set) {
+            label.setForeground(UIUtils.RED.brighter().brighter());
+            label.setFont(baseFont.deriveFont(baseFont.getStyle() | Font.BOLD));
+        } else {
+            label.setForeground(null);
+            label.setFont(baseFont.deriveFont(baseFont.getStyle() & ~Font.BOLD));
+        }
+        return label;
+    }
+
 }

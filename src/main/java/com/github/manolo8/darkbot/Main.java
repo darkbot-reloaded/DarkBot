@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 11");
+    public static final Version VERSION      = new Version("1.13.17 beta 13");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -92,6 +92,7 @@ public class Main extends Thread implements PluginListener {
         super("Main");
         VerifierChecker.getAuthApi().setupAuth();
         API = configManager.getAPI();
+        API.setSize(config.BOT_SETTINGS.DISPLAY.width, config.BOT_SETTINGS.DISPLAY.height);
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();

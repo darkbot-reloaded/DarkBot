@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core;
 public interface IDarkBotAPI {
 
     void createWindow();
+    void setSize(int width, int height);
 
     boolean isValid();
     long getMemoryUsage();

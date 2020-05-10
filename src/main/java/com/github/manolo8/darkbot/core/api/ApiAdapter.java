@@ -15,6 +15,8 @@ public abstract class ApiAdapter implements IDarkBotAPI {
     protected volatile WinDef.HWND window;
     protected volatile WinDef.HWND flash;
 
+    private int initialWidth, initialHeight; // Prefered sizes set by setSize
+
     @Override
     public String readMemoryString(long address) {
         int flags = readMemoryInt(address + 36);
@@ -54,6 +56,30 @@ public abstract class ApiAdapter implements IDarkBotAPI {
     public void sendText(String str) {}
     public long getMemoryUsage() {
         return 0L;
+    }
+
+    public void setSize(int width, int height) {
+        if (width == -1 && height == -1) {
+            width = this.initialWidth;
+            height = this.initialHeight;
+        }
+        if (window == null) {
+            this.initialWidth = width;
+            this.initialHeight = height;
+            return;
+        }
+
+        WinDef.RECT rect = new WinDef.RECT();
+        USER_32.GetWindowRect(window, rect);
+        x = rect.left;
+        y = rect.top;
+        w = width;
+        h = height;
+        int minX = Arrays.stream(GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices())
+                .mapToInt(g -> g.getDefaultConfiguration().getBounds().x).min().orElse(0);
+
+
+        USER_32.MoveWindow(window, x > minX ? x : minX - w - 100, y, w, h, true);
     }
 
 }

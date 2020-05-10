@@ -27,12 +27,7 @@ class IssueList extends JPanel {
     }
 
     private JLabel getError(PluginIssue pluginIssue) {
-        JLabel label = new JLabel(pluginIssue.getMessage());
-        if (pluginIssue.preventsLoading()) {
-            label.setForeground(UIUtils.RED.brighter().brighter());
-            Font baseFont = label.getFont();
-            label.setFont(baseFont.deriveFont(baseFont.getStyle() | Font.BOLD));
-        }
+        JLabel label = UIUtils.setRed(new JLabel(pluginIssue.getMessage()), pluginIssue.preventsLoading());
         label.setToolTipText(pluginIssue.getDescription());
         label.addMouseListener(new SimpleMouseListener() {
             @Override
