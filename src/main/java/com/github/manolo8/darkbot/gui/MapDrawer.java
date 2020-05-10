@@ -103,7 +103,7 @@ public class MapDrawer extends JPanel {
     private Font FONT_SMALL = new Font("Consolas", Font.PLAIN, 12);
     private Font FONT_TINY = new Font(Font.SANS_SERIF, Font.PLAIN, 9);
 
-    private TreeMap<Long, Line> positions = new TreeMap<>();
+    private final TreeMap<Long, Line> positions = new TreeMap<>();
 
     private Main main;
     protected HeroManager hero;
@@ -122,7 +122,7 @@ public class MapDrawer extends JPanel {
     private List<BattleStation> battleStations;
     private List<BasePoint> basePoints;
 
-    private RenderingHints hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    private final RenderingHints hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
     private Location last = new Location(0, 0);
 
@@ -227,41 +227,8 @@ public class MapDrawer extends JPanel {
             }
         }
 
-        Group group = main.guiManager.group.group;
-        boolean hideNames = config.BOT_SETTINGS.DISPLAY.HIDE_GROUP_NAMES;
-        if (group != null && group.isValid()) {
-            drawBackgrounded(g2, 28, Align.RIGHT,
-                    (x, y, w, member) -> {
-                        Font font = FONT_SMALL;
-                        Color color = TEXT;
-
-                        Map<TextAttribute, Object> attrs = new HashMap<>();
-                        attrs.put(TextAttribute.WEIGHT, member.isLeader ? TextAttribute.WEIGHT_BOLD : TextAttribute.WEIGHT_REGULAR);
-                        attrs.put(TextAttribute.STRIKETHROUGH, member.isDead ? TextAttribute.STRIKETHROUGH_ON : false);
-                        attrs.put(TextAttribute.UNDERLINE, member.isLocked ? TextAttribute.UNDERLINE_ON : -1);
-                        if (member.isCloacked) color = color.darker();
-
-                        g2.setFont(font.deriveFont(attrs));
-                        g2.setColor(color);
-                        g2.drawString(member.getDisplayText(hideNames), x, y + 14);
-
-                        drawHealth(g2, member.memberInfo, x, y + 18, w / 2 - 3, 4);
-                        if (member.targetInfo.shipType != 0)
-                            drawHealth(g2, member.targetInfo, x + (w / 2) + 3, y + 18, w / 2 - 3, 4);
-                    },
-                    member -> Math.min(g2.getFontMetrics().stringWidth(member.getDisplayText(hideNames)), 200),
-                    group.members);
-        } else {
-            drawBackgrounded(g2, 15, Align.RIGHT,
-                    (x, y, w, booster) -> {
-                        g2.setColor(booster.getColor());
-                        g2.drawString(booster.toSimpleString(), x, y + 14);
-                    },
-                    b -> g2.getFontMetrics().stringWidth(b.toSimpleString()),
-                    main.facadeManager.booster.boosters.stream()
-                            .filter(b -> b.amount > 0)
-                            //.sorted(Comparator.comparingDouble(b -> -b.cd)) // Maybe setting?
-                            .collect(Collectors.toList()));
+        synchronized (Main.UPDATE_LOCKER) {
+            if (!drawGroup(g2)) drawBoosters(g2);
         }
 
         drawBackgroundedText(g2, Align.LEFT,
@@ -503,6 +470,47 @@ public class MapDrawer extends JPanel {
 
         g2.setColor(PET_IN);
         g2.fillRect(x - 2, y - 2, 4, 4);
+    }
+
+    private boolean drawGroup(Graphics2D g2) {
+        Group group = main.guiManager.group.group;
+        if (group == null || !group.isValid()) return false;
+        boolean hideNames = config.BOT_SETTINGS.DISPLAY.HIDE_GROUP_NAMES;
+        drawBackgrounded(g2, 28, Align.RIGHT,
+                (x, y, w, member) -> {
+                    Font font = FONT_SMALL;
+                    Color color = TEXT;
+
+                    Map<TextAttribute, Object> attrs = new HashMap<>();
+                    attrs.put(TextAttribute.WEIGHT, member.isLeader ? TextAttribute.WEIGHT_BOLD : TextAttribute.WEIGHT_REGULAR);
+                    attrs.put(TextAttribute.STRIKETHROUGH, member.isDead ? TextAttribute.STRIKETHROUGH_ON : false);
+                    attrs.put(TextAttribute.UNDERLINE, member.isLocked ? TextAttribute.UNDERLINE_ON : -1);
+                    if (member.isCloacked) color = color.darker();
+
+                    g2.setFont(font.deriveFont(attrs));
+                    g2.setColor(color);
+                    g2.drawString(member.getDisplayText(hideNames), x, y + 14);
+
+                    drawHealth(g2, member.memberInfo, x, y + 18, w / 2 - 3, 4);
+                    if (member.targetInfo.shipType != 0)
+                        drawHealth(g2, member.targetInfo, x + (w / 2) + 3, y + 18, w / 2 - 3, 4);
+                },
+                member -> Math.min(g2.getFontMetrics().stringWidth(member.getDisplayText(hideNames)), 200),
+                group.members);
+        return true;
+    }
+
+    private void drawBoosters(Graphics2D g2) {
+        drawBackgrounded(g2, 15, Align.RIGHT,
+                (x, y, w, booster) -> {
+                    g2.setColor(booster.getColor());
+                    g2.drawString(booster.toSimpleString(), x, y + 14);
+                },
+                b -> g2.getFontMetrics().stringWidth(b.toSimpleString()),
+                main.facadeManager.booster.boosters.stream()
+                        .filter(b -> b.amount > 0)
+                        //.sorted(Comparator.comparingDouble(b -> -b.cd)) // Maybe setting?
+                        .collect(Collectors.toList()));
     }
 
     private void drawActionButton(Graphics2D g2) {

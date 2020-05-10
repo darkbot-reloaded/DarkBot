@@ -79,9 +79,6 @@ public class DarkFlashApiAdapter extends ApiAdapter {
     }
 
     @Override
-    public void sendText(String string) {}
-
-    @Override
     public double readMemoryDouble(long address) {
         return API.readMemoryDouble(address);
     }

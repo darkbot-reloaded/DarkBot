@@ -59,6 +59,11 @@ public class DarkBoatAdapter extends ApiAdapter {
     }
 
     @Override
+    public void sendText(String str) {
+        API.sendText(str);
+    }
+
+    @Override
     public double readMemoryDouble(long address) {
         return API.readDouble(address);
     }

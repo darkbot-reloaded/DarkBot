@@ -12,8 +12,8 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class NpcAttacker {
 
+    protected Main main;
     protected MapManager mapManager;
-    protected Config config;
     protected HeroManager hero;
     protected Drive drive;
 
@@ -30,7 +30,6 @@ public class NpcAttacker {
     public NpcAttacker(Main main) {
         this.mapManager = main.mapManager;
         this.hero = main.hero;
-        this.config = main.config;
         this.drive = hero.drive;
     }
 
@@ -54,9 +53,9 @@ public class NpcAttacker {
         }
 
         if (ability != null && ability < System.currentTimeMillis()) {
-            if (target.health.maxHp < config.LOOT.SHIP_ABILITY_MIN) ability = null;
+            if (target.health.maxHp < main.config.LOOT.SHIP_ABILITY_MIN) ability = null;
             else if (hero.locationInfo.distance(target) < 575) {
-                API.keyboardClick(config.LOOT.SHIP_ABILITY);
+                API.keyboardClick(main.config.LOOT.SHIP_ABILITY);
                 ability = null;
             }
         }
@@ -71,7 +70,7 @@ public class NpcAttacker {
         clickDelay = System.currentTimeMillis();
         fixTimes = 0;
         laserTime = clickDelay + 50;
-        if (config.LOOT.SHIP_ABILITY != null) ability = clickDelay + 4000;
+        if (main.config.LOOT.SHIP_ABILITY != null) ability = clickDelay + 4000;
     }
 
     protected void tryAttackOrFix() {
@@ -96,22 +95,22 @@ public class NpcAttacker {
     }
 
     private boolean shouldSab() {
-        return config.LOOT.SAB.ENABLED && hero.health.shieldPercent() < config.LOOT.SAB.PERCENT
-                && target.health.shield > config.LOOT.SAB.NPC_AMOUNT;
+        return main.config.LOOT.SAB.ENABLED && hero.health.shieldPercent() < main.config.LOOT.SAB.PERCENT
+                && target.health.shield > main.config.LOOT.SAB.NPC_AMOUNT;
     }
 
     private boolean shouldRsb() {
-        if (!config.LOOT.RSB.ENABLED || !target.npcInfo.extra.has(NpcExtra.USE_RSB)) return false;
-        if (useRsbUntil < System.currentTimeMillis() - config.LOOT.RSB.AMMO_REFRESH) useRsbUntil = System.currentTimeMillis();
+        if (!main.config.LOOT.RSB.ENABLED || !target.npcInfo.extra.has(NpcExtra.USE_RSB)) return false;
+        if (useRsbUntil < System.currentTimeMillis() - main.config.LOOT.RSB.AMMO_REFRESH) useRsbUntil = System.currentTimeMillis();
 
         return useRsbUntil > System.currentTimeMillis() - 50;
     }
 
     private char getAttackKey() {
-        if (rsb = shouldRsb()) return this.config.LOOT.RSB.KEY;
-        if (sab = shouldSab()) return this.config.LOOT.SAB.KEY;
+        if (rsb = shouldRsb()) return main.config.LOOT.RSB.KEY;
+        if (sab = shouldSab()) return main.config.LOOT.SAB.KEY;
         return this.target == null || this.target.npcInfo.attackKey == null ?
-                this.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;
+                main.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;
     }
 
     private void setRadiusAndClick(boolean single) {

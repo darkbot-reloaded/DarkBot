@@ -19,16 +19,16 @@ import java.util.stream.Collectors;
 
 public class SafetyFinder {
 
-    private final MapManager mapManager;
-    private final Config.General.Safety SAFETY;
-    private final Config.General.Running RUNNING;
+    private final Main main;
+    private Config.General.Safety SAFETY;
+    private Config.General.Running RUNNING;
 
-    private List<Ship> ships;
-    private HeroManager hero;
-    private Drive drive;
-    private MapTraveler mapTraveler;
-    private PortalJumper jumper;
-    private Consumer<Map> listener = this::onMapChange;
+    private final List<Ship> ships;
+    private final HeroManager hero;
+    private final Drive drive;
+    private final MapTraveler mapTraveler;
+    private final PortalJumper jumper;
+    private final Consumer<Map> listener = this::onMapChange;
 
     private SafetyInfo safety;
     private Escaping escape = Escaping.NONE;
@@ -57,21 +57,19 @@ public class SafetyFinder {
     private Map prevMap;
 
     public SafetyFinder(Main main) {
-        this.mapManager = main.mapManager;
-        this.SAFETY = main.config.GENERAL.SAFETY;
-        this.RUNNING = main.config.GENERAL.RUNNING;
+        this.main = main;
 
         this.ships = main.mapManager.entities.ships;
         this.hero = main.hero;
         this.drive = main.hero.drive;
         this.mapTraveler = new MapTraveler(main);
         this.jumper = new PortalJumper(hero);
-        mapManager.mapChange.add(listener);
+        this.main.mapManager.mapChange.add(listener);
     }
 
     public void uninstall() {
         mapTraveler.uninstall();
-        mapManager.mapChange.remove(listener);
+        this.main.mapManager.mapChange.remove(listener);
     }
 
     private void onMapChange(Map map) {
@@ -103,6 +101,9 @@ public class SafetyFinder {
      * @return True if it's safe to keep working, false if the safety is working.
      */
     public boolean tick() {
+        this.SAFETY = main.config.GENERAL.SAFETY;
+        this.RUNNING = main.config.GENERAL.RUNNING;
+
         if (escape == Escaping.WAITING) {
             if (escapingSince == -1) escapingSince = System.currentTimeMillis();
 
@@ -195,7 +196,7 @@ public class SafetyFinder {
     }
 
     private SafetyInfo getSafety() {
-        List<SafetyInfo> safeties = mapManager.safeties.stream()
+        List<SafetyInfo> safeties = main.mapManager.safeties.stream()
                 .filter(s -> s.entity != null && !s.entity.removed)
                 .filter(escape::canUse)
                 .peek(s -> s.distance = Math.max(0, drive.distanceBetween(hero.locationInfo.now, s.x, s.y) - s.radius()))

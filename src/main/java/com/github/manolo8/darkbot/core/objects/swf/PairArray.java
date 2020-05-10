@@ -156,11 +156,12 @@ public abstract class PairArray extends Updatable implements SwfPtrCollection {
                 if (keyAddr == -2 || (valAddr >= -2 && valAddr <= 9)) continue;
 
                 Pair pair = super.pairs[current];
-                if (pair == null) super.pairs[current++] = new Pair(API.readMemoryString(keyAddr), valAddr);
+                if (pair == null) super.pairs[current] = new Pair(API.readMemoryString(keyAddr), valAddr);
                 else if (pair.value != valAddr) {
                     removed[remove++] = pair.key;
-                    super.pairs[current++].set(API.readMemoryString(keyAddr), valAddr);
+                    super.pairs[current].set(API.readMemoryString(keyAddr), valAddr);
                 }
+                current++;
             }
 
             while (this.size > current) {

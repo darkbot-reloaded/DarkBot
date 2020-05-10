@@ -13,18 +13,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.github.manolo8.darkbot.Main.API;
+import static com.github.manolo8.darkbot.Main.UPDATE_LOCKER;
 
 public class BoosterProxy extends Updatable {
     public List<Booster> boosters = new ArrayList<>();
 
-    private ObjArray boostersArr = ObjArray.ofVector(true);
+    private final ObjArray boostersArr = ObjArray.ofVector(true);
 
     @Override
     public void update() {
         long data = API.readMemoryLong(address + 48) & ByteUtils.FIX;
 
         boostersArr.update(API.readMemoryLong(data + 0x48));
-        boostersArr.sync(boosters, Booster::new, null);
+        synchronized (UPDATE_LOCKER) {
+            boostersArr.sync(boosters, Booster::new, null);
+        }
     }
 
     public static class Booster extends UpdatableAuto {
@@ -32,7 +35,7 @@ public class BoosterProxy extends Updatable {
         public String category, name;
         public BoosterCategory cat;
 
-        private ObjArray subBoostersArr = ObjArray.ofVector(true);
+        private final ObjArray subBoostersArr = ObjArray.ofVector(true);
 
         @Override
         public void update() {
@@ -82,8 +85,8 @@ public class BoosterProxy extends Updatable {
             }
         };
 
-        private String small;
-        private Color color;
+        private final String small;
+        private final Color color;
 
         BoosterCategory(String small, Color color) {
             this.small = small;
