@@ -8,7 +8,6 @@ import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.Base62;
-import com.github.manolo8.darkbot.utils.HttpUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.IOUtils;
 
@@ -26,18 +25,22 @@ public class UsernameUpdater implements Task {
 
     private static final Pattern PROFILE_ID = Pattern.compile("/p/([A-Za-z0-9]+)-");
 
+    private Main main;
     private Config config;
     private BackpageManager backpageManager;
 
 
     @Override
     public void install(Main main) {
+        this.main = main;
         this.config = main.config;
         this.backpageManager = main.backpage;
     }
 
     @Override
     public void tick() {
+        this.config = main.config;
+
         UnresolvedPlayer user = config.UNRESOLVED.poll();
         if (user == null || (user.userId == -1 && user.username == null)) return;
         if (user.shouldWait()) {

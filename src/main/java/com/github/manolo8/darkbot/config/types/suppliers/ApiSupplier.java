@@ -8,7 +8,7 @@ public class ApiSupplier extends OptionList<Integer> {
     private static final List<String> APIS = Arrays.asList(
             "Darkbot browser (Legacy)",
             "Darkflash API (new)",
-            "Darkboat API (WIP, unreleased)",
+            "Darkboat API (newer & better)",
             "NativeAPI (Linux, unreleased)",
             "No-operation API");
     private static final List<String> TOOLTIPS = Arrays.asList(

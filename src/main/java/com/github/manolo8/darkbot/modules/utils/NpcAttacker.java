@@ -28,6 +28,7 @@ public class NpcAttacker {
     protected boolean rsb;
 
     public NpcAttacker(Main main) {
+        this.main = main;
         this.mapManager = main.mapManager;
         this.hero = main.hero;
         this.drive = hero.drive;

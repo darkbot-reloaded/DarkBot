@@ -58,6 +58,8 @@ public class SafetyFinder {
 
     public SafetyFinder(Main main) {
         this.main = main;
+        this.SAFETY = main.config.GENERAL.SAFETY;
+        this.RUNNING = main.config.GENERAL.RUNNING;
 
         this.ships = main.mapManager.entities.ships;
         this.hero = main.hero;
@@ -101,9 +103,6 @@ public class SafetyFinder {
      * @return True if it's safe to keep working, false if the safety is working.
      */
     public boolean tick() {
-        this.SAFETY = main.config.GENERAL.SAFETY;
-        this.RUNNING = main.config.GENERAL.RUNNING;
-
         if (escape == Escaping.WAITING) {
             if (escapingSince == -1) escapingSince = System.currentTimeMillis();
 

@@ -171,10 +171,11 @@ public class PetManager extends Gui {
 
     private void selectModule(int moduleId, int submoduleIdx) {
         if (System.currentTimeMillis() < this.selectModuleTime) return;
-        this.selectModuleTime = System.currentTimeMillis() + 150;
+        this.selectModuleTime = System.currentTimeMillis() + 500;
 
         switch (selection) {
             case SELECTED:
+                this.selectModuleTime = System.currentTimeMillis() + 3000;
             case NOTHING:
                 click(MODULES_X_MAX - 5, MODULE_Y);
                 selection = ModuleStatus.DROPDOWN;
@@ -193,7 +194,6 @@ public class PetManager extends Gui {
                 if (submoduleIdx == -1) return;
                 click(MODULES_X_MAX + 100, MODULE_Y + 35 + (22 * moduleIdToIndex(moduleId)) + (22 * submoduleIdx));
         }
-        this.selectModuleTime = System.currentTimeMillis() + (selection == ModuleStatus.SELECTED ? 5000 : 150);
     }
 
     @Override
