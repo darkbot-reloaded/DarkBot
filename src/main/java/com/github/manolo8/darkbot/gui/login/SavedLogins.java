@@ -73,6 +73,10 @@ public class SavedLogins extends JPanel implements LoginScreen {
         return loaded;
     }
 
+    public int getLogins() {
+        return loaded ? model.getSize() : 0;
+    }
+
     private void updateList() {
         if (!loaded) return; // Prevent list even trying
 

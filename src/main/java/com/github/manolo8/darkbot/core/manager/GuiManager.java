@@ -31,7 +31,7 @@ public class GuiManager implements Manager {
     private long guiAddress;
     private long mainAddress;
 
-    private List<Gui> registeredGuis = new ArrayList<>();
+    private final List<Gui> registeredGuis = new ArrayList<>();
 
     public final Gui lostConnection = register("lost_connection");
     public final Gui connecting = register("connection");
@@ -43,6 +43,8 @@ public class GuiManager implements Manager {
     public final PetManager pet;
     public final OreTradeGui oreTrade;
     public final GroupManager group;
+
+    public long lastCloseAttempt = 0;
 
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
@@ -107,6 +109,9 @@ public class GuiManager implements Manager {
         guis.update();
 
         registeredGuis.forEach(Gui::update);
+
+        if (lastCloseAttempt > System.currentTimeMillis()) return;
+        lastCloseAttempt = System.currentTimeMillis() + 5000;
 
         if (checks != LoadStatus.DONE && checks.canAdvance.test(quests)) {
             if (checks == LoadStatus.CLICKING_AMMO) API.keyboardClick(main.config.LOOT.AMMO_KEY);

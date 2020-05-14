@@ -21,7 +21,7 @@ public class ConfigTitleBar extends JPanel implements SimpleMouseListener {
         for (JComponent tab : tabs) {
             add(tab, "grow");
         }
-        add(configs, "grow");
+        add(configs, "grow, hidemode 2");
         add(new DragArea(frame), "grow");
         add(plugins, "grow");
         add(new PluginReloadButton(frame, main.pluginHandler), "grow");

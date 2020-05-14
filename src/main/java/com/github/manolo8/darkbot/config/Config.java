@@ -167,6 +167,7 @@ public class Config {
     public static class BotSettings {
         public @Option @Editor(LangEditor.class) @Options(LanguageSupplier.class)
                 Locale LOCALE = new Locale(Locale.getDefault().getLanguage());
+        public @Option boolean FORCE_GAME_LANGUAGE = false;
         public @Option @Num(min = 10, max = 300) int ZONE_RESOLUTION = 30;
         public @Option boolean MAP_START_STOP = false;
         public @Option boolean CONFIRM_EXIT = true;

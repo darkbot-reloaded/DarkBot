@@ -36,6 +36,7 @@ public class ConfigPicker extends JComboBox<String> {
         }
         setSelectedItem(main.configManager.getConfigName());
         this.main = main;
+        setVisible(getModel().getSize() > 1);
     }
 
 }

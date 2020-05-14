@@ -7,17 +7,18 @@ import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.List;
 
 public class LoginForm extends JPanel {
 
-    private JTabbedPane tabbedPane = new JTabbedPane();
+    private final JTabbedPane tabbedPane = new JTabbedPane();
 
-    private JLabel infoLb = new JLabel("");
-    private JButton loginBtn = new JButton("Log in");
+    private final JLabel infoLb = new JLabel("");
+    private final JButton loginBtn = new JButton("Log in");
 
-    private LoginData loginData = new LoginData();
+    private final LoginData loginData = new LoginData();
+
+    private LoginTask loginTask;
 
     public LoginForm() {
         super(new MigLayout("wrap 2, ins 0", "[]10px:push[]", "[]8px[]"));
@@ -26,6 +27,7 @@ public class LoginForm extends JPanel {
         SavedLogins saved =  new SavedLogins(this);
         tabbedPane.addTab("Saved", saved);
         tabbedPane.setEnabledAt(2, saved.isLoaded());
+        if (saved.getLogins() > 0) tabbedPane.setSelectedComponent(saved);
 
         loginBtn.addActionListener(ac -> startLogin());
 
@@ -49,9 +51,9 @@ public class LoginForm extends JPanel {
     }
 
     public static class Message {
-        private boolean error;
-        private String text;
-        private String description;
+        private final boolean error;
+        private final String text;
+        private final String description;
 
         public Message(boolean error, String text, String description) {
             this.error = error;
@@ -60,9 +62,16 @@ public class LoginForm extends JPanel {
         }
     }
 
-    protected void startLogin() {
+    private boolean canLogIn = true;
+    protected synchronized void startLogin() {
+        if (!canLogIn) return;
+        loginBtn.setEnabled(canLogIn = false);
         setInfoText(new Message(false, "Logging in (1/2)", null));
         new LoginTask().execute();
+    }
+
+    protected synchronized void endLogin() {
+        loginBtn.setEnabled(canLogIn = true);
     }
 
     private class LoginTask extends SwingWorker<LoginData, Message> {
@@ -75,8 +84,8 @@ public class LoginForm extends JPanel {
 
         @Override
         protected void done() {
-            super.done();
             if (!failed) SwingUtilities.getWindowAncestor(LoginForm.this).setVisible(false);
+            endLogin();
         }
 
         @Override
