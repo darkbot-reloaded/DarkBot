@@ -12,11 +12,12 @@ public class MapModule extends TemporalModule {
     @Override
     public void install(Main main) {
         super.install(main);
-        this.traveler = new MapTraveler(main);
+        if (traveler == null) this.traveler = new MapTraveler(main);
     }
 
     public void uninstall() {
         this.traveler.uninstall();
+        this.traveler = null;
     }
 
     @Override

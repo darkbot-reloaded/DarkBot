@@ -171,14 +171,14 @@ public class Drive {
     private int lastZoneIdx;
     public void moveRandom() {
         ZoneInfo area = map.preferred;
-        boolean sequential = ConfigEntity.INSTANCE.getConfig().GENERAL.ROAMING.SEQUENTIAL;
+        boolean sequential = hero.main.config.GENERAL.ROAMING.SEQUENTIAL;
 
         List<ZoneInfo.Zone> zones = area == null ? Collections.emptyList() :
                 sequential ? area.getSortedZones() : area.getZones();
         boolean changed = !zones.equals(lastZones);
         lastZones = zones;
 
-        if (ConfigEntity.INSTANCE.getConfig().GENERAL.ROAMING.KEEP && !changed && lastRandomMove != null) {
+        if ( hero.main.config.GENERAL.ROAMING.KEEP && !changed && lastRandomMove != null) {
             move(lastRandomMove);
             return;
         }

@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Gui;
@@ -8,9 +10,11 @@ import com.github.manolo8.darkbot.core.objects.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.core.utils.Location;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -36,6 +40,7 @@ public class GuiManager implements Manager {
     public final Gui lostConnection = register("lost_connection");
     public final Gui connecting = register("connection");
     public final Gui quests = register("quests");
+    public final Gui minimap = register("minimap");
     public final Gui targetedOffers = register("targetedOffers", new TargetedOfferGui());
     public final Gui logout = register("logout");
     public final Gui eventProgress =  register("eventProgress");
@@ -44,15 +49,36 @@ public class GuiManager implements Manager {
     public final OreTradeGui oreTrade;
     public final GroupManager group;
 
-    public long lastCloseAttempt = 0;
-
+    private static boolean minimapWasOpen;
+    private static Location previous;
+    private static long minimapClick;
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
-        WAITING(q -> q.lastUpdatedIn(5000) && q.visible),
-        MISSION_CLOSING(q -> q.show(false)),
-        CLICKING_AMMO(q -> true), DONE(q -> false);
-        Predicate<Gui> canAdvance;
-        LoadStatus(Predicate<Gui> next) {
+        WAITING(gm -> {
+            minimapWasOpen = gm.minimap.visible;
+            return gm.quests.lastUpdatedIn(5000) && gm.quests.visible;
+        }),
+        MISSION_CLOSING(gm -> gm.quests.show(false)),
+        CLICKING_AMMO(gm -> {
+            API.keyboardClick(gm.main.config.LOOT.AMMO_KEY);
+            return true;
+        }),
+        OPEN_MINIMAP(gm -> gm.minimap.show(true)), // Ensure minimap shows
+        CLICK_MINIMAP(gm -> {
+            previous = gm.main.hero.locationInfo.now.copy();
+            minimapClick = System.currentTimeMillis();
+            gm.minimap.click(100, 100);
+            return true;
+        }),
+        STOP_MOVE(gm -> { // If drive already moving, ignored, otherwise, move towards previous after 1s
+            if (minimapClick + 1000 < System.currentTimeMillis()) gm.main.hero.drive.move(previous);
+            return !gm.main.hero.drive.paths.isEmpty();
+        }),
+        RESET_MINIMAP(gm -> gm.minimap.show(minimapWasOpen)), // Hide if originally hidden
+        DONE(q -> false);
+
+        Predicate<GuiManager> canAdvance;
+        LoadStatus(Predicate<GuiManager> next) {
             this.canAdvance = next;
         }
     }
@@ -110,13 +136,8 @@ public class GuiManager implements Manager {
 
         registeredGuis.forEach(Gui::update);
 
-        if (lastCloseAttempt > System.currentTimeMillis()) return;
-        lastCloseAttempt = System.currentTimeMillis() + 5000;
-
-        if (checks != LoadStatus.DONE && checks.canAdvance.test(quests)) {
-            if (checks == LoadStatus.CLICKING_AMMO) API.keyboardClick(main.config.LOOT.AMMO_KEY);
+        if (checks != LoadStatus.DONE && checks.canAdvance.test(this))
             checks = LoadStatus.values()[checks.ordinal() + 1];
-        }
         targetedOffers.show(false);
     }
 
