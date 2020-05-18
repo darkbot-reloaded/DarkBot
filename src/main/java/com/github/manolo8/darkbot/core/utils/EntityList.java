@@ -235,7 +235,8 @@ public class EntityList extends Updatable {
 
     public void updatePing(Location location, NpcInfo info) {
         fakeNpc.set(location, info);
-        boolean shouldBeNpc = info != null && fakeNpc.isPingAlive() && main.hero.locationInfo.distance(fakeNpc) > 1000;
+        boolean shouldBeNpc = location != null && info != null && fakeNpc.isPingAlive() &&
+                npcs.stream().noneMatch(n -> fakeNpc != n && n.npcInfo == info && n.locationInfo.distance(location) < 500);
 
         if (!shouldBeNpc) npcs.remove(fakeNpc);
         else if (!npcs.contains(fakeNpc)) npcs.add(fakeNpc);

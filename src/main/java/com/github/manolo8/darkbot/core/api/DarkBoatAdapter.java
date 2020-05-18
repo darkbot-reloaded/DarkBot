@@ -59,6 +59,11 @@ public class DarkBoatAdapter extends ApiAdapter {
     }
 
     @Override
+    public void rawKeyboardClick(char btn) {
+        API.keyClick(btn);
+    }
+
+    @Override
     public void sendText(String str) {
         API.sendText(str);
     }

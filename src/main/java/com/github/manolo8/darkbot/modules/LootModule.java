@@ -109,6 +109,7 @@ public class LootModule implements Module {
                 hero.setTarget(attack.target = null);
             }
         } else if (!(attack.target.npcInfo.extra.has(NpcExtra.IGNORE_OWNERSHIP) || main.mapManager.isCurrentTargetOwned())
+                || attack.isBugged()
                 || (hero.locationInfo.distance(attack.target) > config.LOOT.NPC_DISTANCE_IGNORE) // Too far away from ship
                 || (closestDist > 650 && attack.target.health.hpPercent() > 0.90)   // Too far into obstacle and full hp
                 || (closestDist > 500 && !attack.target.locationInfo.isMoving() // Inside obstacle, waiting & and regen shields

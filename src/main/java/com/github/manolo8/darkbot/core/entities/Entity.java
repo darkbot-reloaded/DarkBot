@@ -18,23 +18,19 @@ public class Entity extends Updatable {
 
     public int id;
 
-    public LocationInfo locationInfo;
-    public Clickable clickable;
+    public LocationInfo locationInfo = new LocationInfo(0);
+    public Clickable clickable = new Clickable();
 
     public boolean removed;
 
-    public ObjArray traits;
+    public ObjArray traits = ObjArray.ofVector();
 
     public Map<String, Object> metadata;
 
     public Entity() {
-        this.locationInfo = new LocationInfo(0);
-        this.clickable = new Clickable();
-        this.traits = ObjArray.ofVector();
     }
 
     public Entity(int id) {
-        this();
         this.id = id;
     }
 

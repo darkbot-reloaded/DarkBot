@@ -120,11 +120,12 @@ public class GroupManager extends Gui {
     }
 
     public void sendInvite(String username) {
-        click(MARGIN_WIDTH + (INVITE_WIDTH / 2), HEADER_HEIGHT + getInvitingHeight() - (BUTTON_HEIGHT / 2));
+        System.out.println("Sending invite to " + username);
+        click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
         Time.sleep(75); // This should not be here, but will stay for now
         API.sendText(username);
         Time.sleep(75); // This should not be here, but will stay for now
-        click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), HEADER_HEIGHT + getInvitingHeight() - (BUTTON_HEIGHT / 2));
+        click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
         pastInvites.put(username, System.currentTimeMillis() + 60_000); // Wait at least 60s to re-invite
     }
 
@@ -163,7 +164,7 @@ public class GroupManager extends Gui {
     }
 
     private int getInvitingHeight() {
-        return group.isValid() ? getGroupHeight() : (canInvite() ? BUTTON_HEIGHT : 0);
+        return HEADER_HEIGHT + (group.isValid() ? getGroupHeight() : BUTTON_HEIGHT) - (BUTTON_HEIGHT / 2);
     }
 
     private int offset(int margin, int offset, int index) {

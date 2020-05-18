@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -48,6 +47,7 @@ public class PetManager extends Gui {
     private ModuleStatus selection = ModuleStatus.NOTHING;
     private Gear currentModule;   // The Module used, like Passive mode, kamikaze, or enemy locator
     private Gear currentSubModule;// The submodule used, like an npc inside enemy locator.
+    private long validUntil;
     private NpcInfo selectedNpc;
 
     private Integer gearOverride = null;
@@ -110,12 +110,12 @@ public class PetManager extends Gui {
         }
         if (submoduleId == -1) selectedNpc = null;
 
-        if ((selection != ModuleStatus.SELECTED
+        if (selection != ModuleStatus.SELECTED
                 || (currentModule != null && currentModule.id != moduleId)
                 || (currentSubModule == null && submoduleIdx != -1)
-                || (currentSubModule != null && currentSubModule.id != submoduleId)) && show(true))
-            this.selectModule(moduleId, submoduleIdx);
-        else if (System.currentTimeMillis() > this.selectModuleTime) show(false);
+                || (currentSubModule != null && currentSubModule.id != submoduleId)) {
+            if (show(true)) this.selectModule(moduleId, submoduleIdx);
+        } else if (System.currentTimeMillis() > this.selectModuleTime) show(false);
     }
 
     private class NpcPick {
@@ -175,7 +175,6 @@ public class PetManager extends Gui {
 
         switch (selection) {
             case SELECTED:
-                this.selectModuleTime = System.currentTimeMillis() + 3000;
             case NOTHING:
                 click(MODULES_X_MAX - 5, MODULE_Y);
                 selection = ModuleStatus.DROPDOWN;
@@ -191,9 +190,12 @@ public class PetManager extends Gui {
                 break;
             case SUB_DROPDOWN:
                 selection = ModuleStatus.SELECTED;
-                if (submoduleIdx == -1) return;
-                click(MODULES_X_MAX + 100, MODULE_Y + 35 + (22 * moduleIdToIndex(moduleId)) + (22 * submoduleIdx));
+                if (submoduleIdx != -1)
+                    click(MODULES_X_MAX + 100, MODULE_Y + 35 + (22 * moduleIdToIndex(moduleId)) + (22 * submoduleIdx));
         }
+
+        if (selection == ModuleStatus.SELECTED)
+            this.selectModuleTime = System.currentTimeMillis() + 3000;
     }
 
     @Override
@@ -207,8 +209,15 @@ public class PetManager extends Gui {
         gearsArr.sync(gearList, Gear::new, null);
 
         locatorWrapper.update(API.readMemoryLong(gearsSprite + 168));
+
+        int oldSize = locatorNpcList.getSize();
         locatorNpcList.update(API.readMemoryLong(locatorWrapper.get(0) + 224));
 
+        // Sometimes the NPC list will be half-updated and there may be way less npcs than before.
+        // If we have a recent update and list is smaller, we'll ignore updating for a bit
+        if (locatorNpcList.getSize() < oldSize && validUntil > System.currentTimeMillis()) return;
+
+        validUntil = System.currentTimeMillis() + 100;
         locatorNpcList.sync(locatorList, Gear::new, null);
 
         modulesArr.update(API.readMemoryLong(address + 400));
@@ -232,6 +241,11 @@ public class PetManager extends Gui {
             currentSubModule = findGear(locatorList, currGearCheck);
             if (currentSubModule != null) currentModule = byId(currentSubModule.parentId);
         }
+    }
+
+    private void updateGear(Gear module, Gear subModule) {
+        currentModule = module;
+        currentSubModule = module == null ? null : subModule;
     }
 
     public Gear findGear(List<Gear> gears, long check) {

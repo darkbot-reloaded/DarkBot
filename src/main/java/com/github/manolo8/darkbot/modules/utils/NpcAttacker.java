@@ -3,6 +3,8 @@ package com.github.manolo8.darkbot.modules.utils;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.NpcExtra;
+import com.github.manolo8.darkbot.core.DarkBotAPI;
+import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
@@ -46,8 +48,12 @@ public class NpcAttacker {
         return target != null && !target.removed;
     }
 
+    public boolean isBugged() {
+        return fixTimes > 5;
+    }
+
     public void doKillTargetTick() {
-        if (target == null) return;
+        if (target == null || target instanceof FakeNpc) return;
         if (!mapManager.isTarget(target)) {
             lockAndSetTarget();
             return;
@@ -83,7 +89,8 @@ public class NpcAttacker {
             laserTime = System.currentTimeMillis() + 750;
             if (!bugged || ammoChanged) API.keyboardClick(getAttackKey());
             else {
-                setRadiusAndClick(false);
+                if (API instanceof DarkBotAPI) API.rawKeyboardClick((char) 0x11);
+                else setRadiusAndClick(false);
                 fixTimes++;
             }
         }

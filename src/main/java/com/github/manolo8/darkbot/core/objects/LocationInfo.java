@@ -8,9 +8,9 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class LocationInfo extends Updatable {
 
-    public final Location now;
-    public final Location last;
-    public final Location past;
+    public Location now = new Location();
+    public Location last = new Location();
+    public Location past = new Location();
 
     private long lastUpdate;
     public double angle;
@@ -18,10 +18,6 @@ public class LocationInfo extends Updatable {
 
     public LocationInfo(long address) {
         this.address = address;
-
-        this.now = new Location();
-        this.last = new Location();
-        this.past = new Location();
     }
 
     public LocationInfo(double x, double y) {
@@ -33,6 +29,7 @@ public class LocationInfo extends Updatable {
 
     @Override
     public void update() {
+        if (address == 0) return;
         double newX = API.readMemoryDouble(address + 32);
         double newY = API.readMemoryDouble(address + 40);
         updatePosition(newX, newY);
@@ -84,6 +81,10 @@ public class LocationInfo extends Updatable {
 
     public double distance(LocationInfo locationInfo) {
         return now.distance(locationInfo.now);
+    }
+
+    public double distance(Location location) {
+        return now.distance(location);
     }
 
     public double distance(Entity entity) {

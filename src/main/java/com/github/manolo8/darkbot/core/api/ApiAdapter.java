@@ -53,6 +53,9 @@ public abstract class ApiAdapter implements IDarkBotAPI {
         if (visible) USER_32.SetForegroundWindow(window);
     }
 
+    public void rawKeyboardClick(char ch) {
+        keyboardClick(ch);
+    }
     public void sendText(String str) {}
     public long getMemoryUsage() {
         return 0L;

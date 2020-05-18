@@ -13,6 +13,7 @@ public interface IDarkBotAPI {
     void mouseClick(int x, int y);
 
     void keyboardClick(char btn);
+    void rawKeyboardClick(char btn);
 
     default void keyboardClick(Character ch) {
         if (ch != null) keyboardClick((char) ch);

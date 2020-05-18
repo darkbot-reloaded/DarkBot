@@ -16,13 +16,15 @@ public class PingManager implements Manager {
     private int currSize;
 
     private long lastCheck = System.currentTimeMillis() + 60_000;
-    private volatile long searchTime;
+    private long searchTime;
+    private int retries;
 
     @Override
     public void install(BotInstaller botInstaller) {
         botInstaller.invalid.add(value -> {
             reset();
             lastCheck = System.currentTimeMillis() + 60_000;
+            retries = 0;
         });
     }
 
@@ -34,9 +36,10 @@ public class PingManager implements Manager {
         if (searchTime == -1) return;
         if (!updatePing()) {
             reset();
-            if (System.currentTimeMillis() - searchTime < 5000) return;
-            searchTime = -1;
-            searchPingManager();
+            if (System.currentTimeMillis() > searchTime) {
+                searchTime = -1;
+                searchPingManager();
+            }
         }
     }
 
@@ -85,6 +88,6 @@ public class PingManager implements Manager {
                 .findAny()
                 .ifPresent(pings -> this.lastPings = pings);
 
-        searchTime = System.currentTimeMillis();
+        searchTime = System.currentTimeMillis() + Math.min(300_000, ++retries * 10_000);
     }
 }

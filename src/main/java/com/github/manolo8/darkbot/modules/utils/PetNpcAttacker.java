@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.modules.utils;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.entities.FakeNpc;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -23,7 +24,7 @@ public class PetNpcAttacker extends NpcAttacker {
     }
 
     public void doKillTargetTick() {
-        if (target == null) return;
+        if (target == null || target instanceof FakeNpc) return;
         if (!mapManager.isTarget(target)) {
             lockAndSetTarget();
             return;
