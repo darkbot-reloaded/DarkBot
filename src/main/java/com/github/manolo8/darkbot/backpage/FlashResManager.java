@@ -3,8 +3,8 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.features.Feature;
-import com.github.manolo8.darkbot.utils.HttpUtils;
 import com.github.manolo8.darkbot.utils.XmlHelper;
+import com.github.manolo8.darkbot.utils.http.Http;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -39,15 +39,16 @@ public class FlashResManager implements Task {
     @Override
     public void tick() {
         if (main == null) return;
-        String currLang =  main.settingsManager.lang;
+        String currLang = main.settingsManager.lang;
         if (currLang == null || currLang.isEmpty() || currLang.equals("ERROR") || currLang.equals(lang)) return;
 
         try {
-            Element root = DocumentBuilderFactory
-                    .newInstance()
-                    .newDocumentBuilder()
-                    .parse(HttpUtils.create(URL.replace("{lang}", currLang)).getInputStream())
-                    .getDocumentElement();
+            Element root = Http.create(URL.replace("{lang}", currLang))
+                    .consumeInputStream(inputStream -> DocumentBuilderFactory
+                            .newInstance()
+                            .newDocumentBuilder()
+                            .parse(inputStream)
+                            .getDocumentElement());
 
             ALL_TRANSLATIONS = XmlHelper.stream(root.getElementsByTagName("item")).collect(Collectors.toMap(
                     i -> i.getAttributes().getNamedItem("name").getNodeValue(), Node::getTextContent, (a,b) -> a));
@@ -59,7 +60,4 @@ public class FlashResManager implements Task {
             lang = null;
         }
     }
-
-
-
 }

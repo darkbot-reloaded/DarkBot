@@ -3,8 +3,9 @@ package com.github.manolo8.darkbot.utils.login;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.utils.HttpUtils;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.http.Http;
+import com.github.manolo8.darkbot.utils.http.Method;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -52,14 +53,20 @@ public class LoginUtils {
     }
 
     public static void usernameLogin(LoginData loginData) {
-        String loginUrl = getLoginUrl(HttpUtils.create("https://www.darkorbit.com/").getInputStream());
+        String loginUrl = Http.create("https://www.darkorbit.com/")
+                .consumeInputStream(LoginUtils::getLoginUrl);
+
         CookieManager cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
 
-        HttpUtils.create(loginUrl)
-                .setParam("username", loginData.getUsername())
-                .setParam("password", loginData.getPassword())
-                .getAndCloseInputStream();
+        try {
+            Http.create(loginUrl, Method.POST)
+                    .setParam("username", loginData.getUsername())
+                    .setParam("password", loginData.getPassword())
+                    .closeInputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         CookieHandler.setDefault(null);
 
@@ -72,22 +79,17 @@ public class LoginUtils {
     }
 
     public static void findPreloader(LoginData loginData) {
-        InputStream in = HttpUtils.create("https://" + loginData.getUrl() + "/indexInternal.es?action=internalMapRevolution")
-                .setFollowRedirects(false)
-                .setHeader("Cookie", "dosid=" + loginData.getSid())
-                .getInputStream();
-
-        String flashEmbed = new BufferedReader(new InputStreamReader(in))
-                .lines()
-                .filter(l -> l.contains("flashembed("))
-                .findFirst()
-                .orElseThrow(WrongCredentialsException::new);
+        String flashEmbed = Http.create("https://" + loginData.getUrl() + "/indexInternal.es?action=internalMapRevolution", false)
+                .setRawHeader("Cookie", "dosid=" + loginData.getSid())
+                .consumeInputStream(inputStream ->
+                        new BufferedReader(new InputStreamReader(inputStream))
+                                .lines()
+                                .filter(l -> l.contains("flashembed("))
+                                .findFirst()
+                                .orElseThrow(WrongCredentialsException::new));
 
         Matcher m = DATA_PATTERN.matcher(flashEmbed);
-        if (m.find()) loginData.setPreloader(m.group(1), replaceParameters(m.group(2)
-                .replaceAll("\"", "")
-                .replaceAll(",", "&")
-                .replaceAll(": ", "=")));
+        if (m.find()) loginData.setPreloader(m.group(1), replaceParameters(m.group(2)));
         else throw new WrongCredentialsException("Can't parse flashembed vars");
     }
 
@@ -105,17 +107,6 @@ public class LoginUtils {
                 .filter(Matcher::find)
                 .map(matcher -> matcher.group(1).replace("&amp;", "&"))
                 .findFirst().orElseThrow(WrongCredentialsException::new);
-    }
-
-    public static class WrongCredentialsException extends IllegalArgumentException {
-
-        public WrongCredentialsException() {
-            this("Wrong login data");
-        }
-
-        public WrongCredentialsException(String s) {
-            super(s);
-        }
     }
 
     public static Credentials loadCredentials() {
@@ -139,6 +130,17 @@ public class LoginUtils {
             Credentials.GSON.toJson(c, writer);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static class WrongCredentialsException extends IllegalArgumentException {
+
+        public WrongCredentialsException() {
+            this("Wrong login data");
+        }
+
+        public WrongCredentialsException(String s) {
+            super(s);
         }
     }
 

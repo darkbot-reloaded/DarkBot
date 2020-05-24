@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.entities.galaxy.GalaxyGate;
 import com.github.manolo8.darkbot.backpage.entities.galaxy.GalaxyInfo;
+import com.github.manolo8.darkbot.utils.http.Method;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -57,13 +58,14 @@ public class GalaxyManager {
     private void handleRequest(String params, int expiryTime, int minWait) {
         if (System.currentTimeMillis() > lastGatesUpdate + expiryTime) {
             try {
-                galaxyInfo.update(DocumentBuilderFactory
-                        .newInstance()
-                        .newDocumentBuilder()
-                        .parse(main.backpage.getConnection(params, minWait).getInputStream())
-                        .getDocumentElement());
+                galaxyInfo.update(main.backpage.getConnection(params, Method.GET, minWait)
+                        .addSupplier(() -> lastGatesUpdate = System.currentTimeMillis())
+                        .consumeInputStream(inputStream -> DocumentBuilderFactory
+                                .newInstance()
+                                .newDocumentBuilder()
+                                .parse(inputStream)
+                                .getDocumentElement()));
 
-                lastGatesUpdate = System.currentTimeMillis();
             } catch (Exception e) {
                 e.printStackTrace();
             }

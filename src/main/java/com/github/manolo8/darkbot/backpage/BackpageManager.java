@@ -6,6 +6,8 @@ import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
+import com.github.manolo8.darkbot.utils.http.Http;
+import com.github.manolo8.darkbot.utils.http.Method;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -51,6 +53,7 @@ public class BackpageManager extends Thread {
     }
 
     @Override
+    @SuppressWarnings("InfiniteLoopStatement")
     public void run() {
         while (true) {
             Time.sleep(100);
@@ -133,6 +136,18 @@ public class BackpageManager extends Thread {
         conn.setRequestProperty("Cookie", "dosid=" + this.sid);
         lastRequest = System.currentTimeMillis();
         return conn;
+    }
+
+    public Http getConnection(String params, Method method, int minWait) {
+        Time.sleep(lastRequest + minWait - System.currentTimeMillis());
+        return getConnection(params, method);
+    }
+
+    public Http getConnection(String params, Method method) {
+        if (isInvalid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        return Http.create(this.instance + params, method)
+                .setRawHeader("Cookie", "dosid" + this.sid)
+                .addSupplier(() -> lastRequest = System.currentTimeMillis());
     }
 
     public String getDataInventory(String params) {
