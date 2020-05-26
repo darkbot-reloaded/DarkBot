@@ -13,13 +13,18 @@ public class IOUtils {
     }
 
     public static String read(InputStream input) throws IOException {
+        return read(input, false);
+    }
+
+    public static String read(InputStream input, boolean closeStream) throws IOException {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int length;
         while ((length = input.read(buffer)) != -1) {
             result.write(buffer, 0, length);
         }
+        if (closeStream) input.close();
+
         return result.toString(StandardCharsets.UTF_8.name());
     }
-
 }

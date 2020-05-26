@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.net.HttpCookie;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,7 +55,7 @@ public class LoginUtils {
         String loginUrl = Http.create("https://www.darkorbit.com/")
                 .consumeInputStream(LoginUtils::getLoginUrl);
 
-        CookieManager cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
+        CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
 
         try {

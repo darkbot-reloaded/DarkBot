@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Utility for HTTP connections.
@@ -167,14 +168,14 @@ public class Http {
     }
 
     /**
-     * Connects, gets and converts InputStream to String.
+     * Connects, gets and converts InputStream to String then closes stream.
      * <b>Creates new connection on each call</b>
      *
      * @return body of request as String
      * @throws IOException of {@link IOUtils#read(InputStream)}
      */
     public String getContent() throws IOException {
-        return IOUtils.read(getInputStream());
+        return IOUtils.read(getInputStream(), true);
     }
 
     /**
@@ -233,10 +234,26 @@ public class Http {
      * @throws IOException of connection
      */
     public HttpURLConnection getConnection() throws IOException {
+        return getConnection(null);
+    }
+
+    /**
+     * Gets {@link HttpURLConnection} with provided params,
+     * request method, and body.
+     * <b>Creates new connection on each call</b>
+     *
+     * @param customSettings custom settings of connection which they
+     *                       will be consumed after initializing http.
+     * @return HttpURLConnection
+     * @throws IOException of connection
+     */
+    public HttpURLConnection getConnection(Consumer<HttpURLConnection> customSettings) throws IOException {
         if (method == Method.GET && params != null && !url.contains("?"))
             url += "?" + params.toString();
 
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        if (customSettings != null) customSettings.accept(conn);
+
         conn.setInstanceFollowRedirects(followRedirects);
         conn.setRequestProperty("User-Agent", userAgent);
         if (!headers.isEmpty()) headers.forEach(conn::setRequestProperty);

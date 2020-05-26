@@ -10,7 +10,7 @@ public class DarkBoat {
     public native void    createWindow();
     public native void    setSize(int width, int height);
     public native void    setVisible(boolean visible);
-    public native void    reload(); // currently not working
+    public native void    reload();
     public native boolean isValid();
     public native long    getMemoryUsage();
 

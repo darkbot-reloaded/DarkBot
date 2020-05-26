@@ -10,12 +10,11 @@ import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.Base62;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.IOUtils;
+import com.github.manolo8.darkbot.utils.http.Method;
 
 import javax.swing.*;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,15 +50,12 @@ public class UsernameUpdater implements Task {
         try {
             boolean byId = user.userId != -1;
 
-            HttpURLConnection conn = backpageManager.getConnection("ajax/" + (byId ? "user" : "pilotprofil" ) + ".php");
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-
-            IOUtils.write(conn.getOutputStream(),
-                    byId ? "command=loadUserInfo&userId=" + Base62.encode(user.userId) :
-                            "command=searchProfileFromExternalPPP&profileUsername=" + URLEncoder.encode(user.username, "UTF-8"));
-
-            UserResponse response = Main.GSON.fromJson(IOUtils.read(conn.getInputStream()), UserResponse.class);
+            UserResponse response = backpageManager.getConnection("ajax/" + (byId ? "user" : "pilotprofil") + ".php", Method.POST)
+                    .setRawParam("command", "loadUserInfo")
+                    .setRawParam("userId", Base62.encode(user.userId))
+                    .setRawParam("command", "searchProfileFromExternalPPP")
+                    .setParam("profileUsername", user.username)
+                    .consumeInputStream(inputStream -> Main.GSON.fromJson(IOUtils.read(inputStream), UserResponse.class));
 
             if (response == null || !Objects.equals(response.result, "OK")) {
                 reQueue(user);

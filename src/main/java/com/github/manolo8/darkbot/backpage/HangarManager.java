@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.backpage.entities.Item;
 import com.github.manolo8.darkbot.backpage.entities.ItemInfo;
 import com.github.manolo8.darkbot.backpage.entities.ShipInfo;
 import com.github.manolo8.darkbot.utils.Base64Utils;
+import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -14,6 +15,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,24 +54,28 @@ public class HangarManager {
     }
 
     public boolean changeHangar(String hangarId) {
-        if (this.lastHangarChange <= System.currentTimeMillis() - 12_000 && backpageManager.sidStatus().contains("OK")) {
-            String token = "";
-            try {
-                token = backpageManager.getReloadToken(backpageManager.getConnection("indexInternal.es?action=internalDock").getInputStream());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (lastHangarChange > System.currentTimeMillis() || !backpageManager.sidStatus().contains("OK")) return false;
+
+        try {
+            String token = backpageManager.getConnection("indexInternal.es", Method.GET)
+                    .setRawParam("action", "internalDock")
+                    .consumeInputStream(backpageManager::getReloadToken);
+
             if (token == null || token.isEmpty()) return false;
-            String url = "indexInternal.es?action=internalDock&subAction=changeHangar&hangarId=" + hangarId + "&reloadToken="+token;
-            try {
-                backpageManager.getConnection(url, 2000).getResponseCode();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            this.lastHangarChange = System.currentTimeMillis();
-            return true;
+
+            return !backpageManager.getConnection("indexInternal.es", Method.GET, 2000)
+                    .addSupplier(() -> this.lastHangarChange = System.currentTimeMillis() + 12_000)
+                    .setRawParam("action", "internalDock")
+                    .setRawParam("subAction", "changeHangar")
+                    .setRawParam("hangarId", hangarId)
+                    .setRawParam("reloadToken", token)
+                    .getContent().contains("\"type\":\"error\"");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.lastHangarChange = System.currentTimeMillis() + 5_000;
+            return false;
         }
-        return false;
     }
 
     public Boolean checkDrones() {

@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -19,29 +20,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BackpageManager extends Thread {
-    private final Main main;
+    public  static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
+    private static final String[] ACTIONS = new String[]{
+            "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
+
     public final HangarManager hangarManager;
     public final GalaxyManager galaxyManager;
-    private static final int SECOND = 1000, MINUTE = 60 * SECOND;
 
-    private static final String[] ACTIONS = new String[] {
-            "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"
-    };
+    private final Main main;
+    private String sid, instance;
+    private List<Task> tasks;
 
-    private static String getRandomAction() {
-        return ACTIONS[(int) (Math.random() * ACTIONS.length)];
-    }
-
-    private String sid;
-    private String instance;
     private long lastRequest;
-
     private long sidLastUpdate = System.currentTimeMillis();
     private long sidNextUpdate = sidLastUpdate;
-    private int sidStatus = -1;
     private long checkDrones = Long.MAX_VALUE;
-
-    private List<Task> tasks;
+    private int sidStatus = -1;
 
     public BackpageManager(Main main) {
         super("BackpageManager");
@@ -50,6 +44,10 @@ public class BackpageManager extends Thread {
         this.galaxyManager = new GalaxyManager(main);
         setDaemon(true);
         start();
+    }
+
+    private static String getRandomAction() {
+        return ACTIONS[(int) (Math.random() * ACTIONS.length)];
     }
 
     @Override
@@ -114,9 +112,9 @@ public class BackpageManager extends Thread {
         } catch (Exception e) {
             sidStatus = -2;
             e.printStackTrace();
-            return 5 * MINUTE;
+            return 5 * Time.MINUTE;
         }
-        return 10 * MINUTE;
+        return 10 * Time.MINUTE;
     }
 
     private int sidKeepAlive() throws Exception {
@@ -146,36 +144,33 @@ public class BackpageManager extends Thread {
     public Http getConnection(String params, Method method) {
         if (isInvalid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         return Http.create(this.instance + params, method)
-                .setRawHeader("Cookie", "dosid" + this.sid)
+                .setRawHeader("Cookie", "dosid=" + this.sid)
                 .addSupplier(() -> lastRequest = System.currentTimeMillis());
     }
 
     public String getDataInventory(String params) {
-        String data = null;
         try {
-            HttpURLConnection conn = getConnection(params, 2500);
-            conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            data = Base64Utils.decode(conn.getInputStream());
-        } catch (Exception e) {
+            return getConnection(params, Method.GET, 2500)
+                    .setRawHeader("Content-Type", "application/x-www-form-urlencoded")
+                    .consumeInputStream(Base64Utils::decode);
+        } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-        return data;
     }
 
     public String getReloadToken(InputStream input) {
-        Pattern p = Pattern.compile("reloadToken=([^\"]+)");
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(input))) {
-            String currentLine;
-            while ((currentLine = in.readLine()) != null) {
-                Matcher m = p.matcher(currentLine);
-                if (m.find()) {
-                    return m.group(1);
-                }
-            }
-        } catch (Exception e){
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
+            return br.lines()
+                    .map(RELOAD_TOKEN_PATTERN::matcher)
+                    .filter(Matcher::find)
+                    .map(m -> m.group(1))
+                    .findFirst().orElse(null);
+
+        } catch (IOException e){
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     public void setTasks(List<Task> tasks) {

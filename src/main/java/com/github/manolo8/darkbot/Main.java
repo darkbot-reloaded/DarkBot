@@ -114,6 +114,7 @@ public class Main extends Thread implements PluginListener {
     }
 
     @Override
+    @SuppressWarnings("InfiniteLoopStatement")
     public void run() {
         long time;
 
