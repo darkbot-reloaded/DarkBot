@@ -3,7 +3,12 @@ package com.github.manolo8.darkbot.backpage.entities.galaxy;
 import com.github.manolo8.darkbot.utils.XmlHelper;
 import org.w3c.dom.Element;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class GalaxyInfo {
     private Integer money;
@@ -15,8 +20,8 @@ public class GalaxyInfo {
     private Integer bonusRewardsDay;
     private Integer energyCost;
 
-    private List<Item> items = new ArrayList<>();
-    private Map<GalaxyGate, Gate> gates = new HashMap<>();
+    private final List<Item> items = new ArrayList<>();
+    private final Map<GalaxyGate, Gate> gates = new HashMap<>();
 
     public void update(Element e) {
         this.items.clear();
@@ -78,10 +83,10 @@ public class GalaxyInfo {
 
     public Gate getGate(Integer id) {
         if (id == null) return null;
-        return Arrays.stream(GalaxyGate.values())
-                .filter(gate -> gate.getId() == id)
-                .findFirst()
-                .map(this::getGate).orElse(null);
+        for (GalaxyGate gate : GalaxyGate.values())
+            if (gate.getId() == id) return getGate(gate);
+
+        return null;
     }
 
     public Gate getGate(GalaxyGate gate) {

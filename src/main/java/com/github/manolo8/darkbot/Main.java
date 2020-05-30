@@ -130,7 +130,7 @@ public class Main extends Thread implements PluginListener {
 
             avgTick = ((avgTick * 9) + (System.currentTimeMillis() - time)) / 10;
 
-            Time.sleepMax(time, botInstaller.invalid.value ? 1000 :
+            Time.sleepMax(time, botInstaller.invalid.get() ? 1000 :
                     Math.max(config.BOT_SETTINGS.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
         }
     }

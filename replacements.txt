@@ -1,0 +1,5 @@
+//for v10.0.19071543, * means is a replacement or just add this in formater
+_-UV=*Main*
+_-P1v=*Screen Manager*
+_-15e=*Gui Manager*
+//didnt check for other names on that version

@@ -35,14 +35,14 @@ public class BotInstaller {
     }
 
     public boolean isInvalid() {
-        if (invalid.value) {
+        if (invalid.get()) {
             checkInvalid();
             invalid.send(tryInstall());
             return true;
         }
 
-        if (API.readMemoryLong(mainApplicationAddress.value + 1344) == mainAddress.value) {
-            if (heroInfoAddress.value == 0) checkUserData();
+        if (API.readMemoryLong(mainApplicationAddress.get() + 1344) == mainAddress.get()) {
+            if (heroInfoAddress.get() == 0) checkUserData();
             return false;
         }
 
@@ -51,7 +51,7 @@ public class BotInstaller {
     }
 
     private void checkUserData() {
-        int id = API.readMemoryInt(API.readMemoryLong(screenManagerAddress.value + 240) + 56);
+        int id = API.readMemoryInt(API.readMemoryLong(screenManagerAddress.get() + 240) + 56);
         if (id == 0) return;
 
         long[] address = API.queryMemoryInt(id, 10);
@@ -86,18 +86,18 @@ public class BotInstaller {
 
         if ((query = API.queryMemory(bytesToMainApplication, 1)).length != 1) return true;
         this.mainApplicationAddress.send(query[0] - 228);
-        BotInstaller.SEP = API.readMemoryInt(mainApplicationAddress.value + 4);
+        BotInstaller.SEP = API.readMemoryInt(mainApplicationAddress.get() + 4);
 
         if ((query = API.queryMemory(bytesToSettings, 1)).length != 1) return true;
         this.settingsAddress.send(query[0] - 237);
 
-        if ((temp = API.readMemoryLong(mainApplicationAddress.value + 1344)) == 0) return true;
+        if ((temp = API.readMemoryLong(mainApplicationAddress.get() + 1344)) == 0) return true;
         this.mainAddress.send(temp);
 
-        if ((temp = API.readMemoryLong(mainAddress.value + 504)) == 0) return true;
+        if ((temp = API.readMemoryLong(mainAddress.get() + 504)) == 0) return true;
         this.screenManagerAddress.send(temp);
 
-        if ((temp = API.readMemoryLong(mainAddress.value + 512)) == 0) return true;
+        if ((temp = API.readMemoryLong(mainAddress.get() + 512)) == 0) return true;
         this.guiManagerAddress.send(temp);
 
         //reset address
