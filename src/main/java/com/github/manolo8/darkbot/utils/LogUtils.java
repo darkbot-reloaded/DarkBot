@@ -1,7 +1,9 @@
 package com.github.manolo8.darkbot.utils;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
@@ -13,9 +15,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 public class LogUtils {
-    private static final DateTimeFormatter LOG_DATE = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
-    private static final DateTimeFormatter FILENAME_DATE = DateTimeFormatter.ofPattern("uuuu-MM-dd_HH-mm-ss_SSS");
-    private static final Path LOG_FOLDER = Paths.get("logs");
+    public static final DateTimeFormatter LOG_DATE = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
+    public static final DateTimeFormatter FILENAME_DATE = DateTimeFormatter.ofPattern("uuuu-MM-dd_HH-mm-ss_SSS");
+    public static final Path LOG_FOLDER = Paths.get("logs");
 
     public static void setOutputToFile() {
         if (!Files.exists(LOG_FOLDER)) createFolder();
@@ -28,6 +30,17 @@ public class LogUtils {
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             System.out.println("Failed to redirect logs, file not found:");
             e.printStackTrace();
+        }
+    }
+
+    public static OutputStream createLogFile(String filename) {
+        String fileName = "logs/" + filename + ".log";
+
+        try {
+            return new FileOutputStream(fileName, true);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 

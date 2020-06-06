@@ -1,13 +1,11 @@
 package com.github.manolo8.darkbot.core.objects.swf;
 
-import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -16,13 +14,15 @@ import static com.github.manolo8.darkbot.Main.API;
  * Reads arrays with pair of values
  * Instead of EntryArray & Dictionary
  */
-public abstract class PairArray extends Updatable implements SwfPtrCollection {
+public abstract class PairArray extends SwfPtrCollection {
     private boolean autoUpdatable, ignoreEmpty = true;
 
     public int size;
 
     private Pair[] pairs = new Pair[0];
     private Map<String, Lazy<Long>> lazy = new HashMap<>();
+
+    protected PairArray() {}
 
     /**
      * Reads pairs of {@code Array} type
@@ -49,7 +49,11 @@ public abstract class PairArray extends Updatable implements SwfPtrCollection {
     }
 
     public void addLazy(String key, Consumer<Long> consumer) {
-        this.lazy.computeIfAbsent(key, k -> new Lazy<>()).add(consumer);
+        addLazy(key, consumer, true);
+    }
+
+    public void addLazy(String key, Consumer<Long> consumer, boolean cacheValue) {
+        this.lazy.computeIfAbsent(key, k -> (cacheValue ? new Lazy<>() : new Lazy.NoCache<>())).add(consumer);
     }
 
     public int getSize() {
@@ -61,8 +65,8 @@ public abstract class PairArray extends Updatable implements SwfPtrCollection {
     }
 
     public long getPtr(String key) {
-        return Optional.ofNullable(get(key))
-                .map(pair -> pair.value).orElse(0L);
+        Pair pair = get(key);
+        return pair != null ? pair.value : 0L;
     }
 
     public Pair get(int idx) {
@@ -79,8 +83,6 @@ public abstract class PairArray extends Updatable implements SwfPtrCollection {
             if (pairs[i] != null && pairs[i].key != null && pairs[i].key.equals(key)) return true;
         return false;
     }
-
-    public abstract void update();
 
     @Override
     public void update(long address) {

@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.core.objects.swf;
 
-import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -9,7 +8,7 @@ import static com.github.manolo8.darkbot.Main.API;
  * Reads arrays in flash.
  * Instead of ArrayObj, VectorPtr & SpriteArray
  */
-public class ObjArray extends Updatable implements SwfPtrCollection {
+public class ObjArray extends SwfPtrCollection {
     private final int sizeOffset, tableOffset, bytesOffset;
     private final boolean autoUpdatable;
 
@@ -81,11 +80,6 @@ public class ObjArray extends Updatable implements SwfPtrCollection {
 
     public long getLast() {
         return get(getSize() - 1);
-    }
-
-    public int indexOf(long value) {
-        for (int i = getSize() - 1; i >= 0; i--) if (value == get(i)) return i;
-        return -1;
     }
 
     @Override
