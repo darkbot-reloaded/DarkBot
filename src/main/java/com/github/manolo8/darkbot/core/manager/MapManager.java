@@ -69,7 +69,9 @@ public class MapManager implements Manager {
             minimapAddressStatic = value + 224;
             mapAddressStatic = value + 256;
         });
-
+        botInstaller.invalid.add(invalid -> {
+            if (invalid) entities.entityListener.clearCache();
+        });
     }
 
     public void tick() {

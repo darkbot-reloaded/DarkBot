@@ -16,6 +16,10 @@ public class EntityListener {
     private final Map<EntityFactory, Lazy<Entity>> listeners = new EnumMap<>(EntityFactory.class);
     private Main main;
 
+    public void setMain(Main main) {
+        this.main = main;
+    }
+
     public void add(EntityFactory type, Consumer<Entity> consumer) {
         getListener(type).add(consumer);
     }
@@ -38,15 +42,13 @@ public class EntityListener {
         cachedTypes.entrySet().removeIf(entry -> entry.getValue() == EntityFactory.UNKNOWN);
     }
 
-    public void setMain(Main main) {
-        if (this.main == null) this.main = main;
-    }
 
     public void sendEntity(int id, long address) {
-        EntityFactory type = getEntityType(id, address);
-        if (type == EntityFactory.NONE || address == main.hero.address || address == main.hero.pet.address) return;
+        EntityFactory type = getEntityType(address);
+        if (address == main.hero.address || address == main.hero.pet.address) return;
 
         Entity entity = type.createEntity(id, address);
+        if (entity == null) return;
         entity.added(main);
         entity.update();
 
@@ -55,9 +57,9 @@ public class EntityListener {
         getListener(type).send(entity);
     }
 
-    private EntityFactory getEntityType(int id, long address) {
+    private EntityFactory getEntityType(long address) {
         return cachedTypes.computeIfAbsent(API.readMemoryLong(address + 0x10),
-                                           l -> EntityFactory.find(id, address)).get(address);
+                                           l -> EntityFactory.find(address)).get(address);
     }
 
     private Lazy<Entity> getListener(EntityFactory type) {

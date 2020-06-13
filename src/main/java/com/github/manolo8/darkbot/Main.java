@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 21");
+    public static final Version VERSION      = new Version("1.13.17 beta 22");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -54,8 +54,6 @@ public class Main extends Thread implements PluginListener {
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .create();
-
-    private List<Runnable> invalidTickListeners = new ArrayList<>();
 
     public ConfigManager configManager = new ConfigManager();
     public Config config = configManager.loadConfig(null);
@@ -137,18 +135,12 @@ public class Main extends Thread implements PluginListener {
         }
     }
 
-    public void addInvalidTickListener(Runnable action) {
-        this.invalidTickListeners.add(action);
-    }
-
     private void tick() {
         this.status.tick();
         checkModule();
 
-        if (isInvalid()) {
-            tickingModule = false;
-            invalidTickListeners.forEach(Runnable::run);
-        } else validTick();
+        if (isInvalid()) tickingModule = false;
+        else validTick();
 
         this.form.tick();
         this.configManager.saveChangedConfig();

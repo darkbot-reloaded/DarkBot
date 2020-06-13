@@ -17,6 +17,7 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import org.intellij.lang.annotations.Language;
 
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -55,48 +56,97 @@ public enum EntityFactory {
 
     PORTAL   (EntityFactory::getOrCreatePortal, "[0-9]+$"),
 
-    BARRIER  (Barrier::new, EntityFactory::defineZoneType, "NOA|DMG"),
+    ZONE     (EntityFactory::isZone, EntityFactory::defineZoneType), // Generic zone, redirects to BARRIER or MIST_ZONE
+    BARRIER  (Barrier::new),
     MIST_ZONE(NoCloack::new),
 
-    SHIP     (Ship::new, EntityFactory::defineShipType),
+    PET      (Pet::new, EntityFactory::isPet),
+    SHIP     (EntityFactory::isShip, EntityFactory::defineShipType), // Generic ship, redirects to PLAYER or NPC
+    PLAYER   (Ship::new),
     NPC      (Npc::new),
 
-    PET      (Pet::new),
-    UNKNOWN  (Entity::new),
-    NONE();
+    UNKNOWN  (Entity::new, (asset, addr) -> true);
 
-    private final Pattern pattern;
-    private final Function<Long, EntityFactory> customType;
+    // Constructor to create the entity of this type
     private final BiFunction<Integer, Long, ? extends Entity> constructor;
+    // Test if the type matches for the asset & address provided
+    private final BiPredicate<String, Long> typeMatcher;
+    // Will mutate the type to a different (specialized) type in the bot
+    private final Function<Long, EntityFactory> typeModifier;
 
-    EntityFactory() { this(null, null, null); }
-    EntityFactory(BiFunction<Integer, Long, Entity> constructor) { this(constructor, null, null); }
-    EntityFactory(BiFunction<Integer, Long, Entity> constructor, @Language("RegExp") String regex) { this(constructor, null, regex); }
-    EntityFactory(BiFunction<Integer, Long, Entity> constructor, Function<Long, EntityFactory> customType) { this(constructor, customType, null); }
-    EntityFactory(BiFunction<Integer, Long, Entity> constructor, Function<Long, EntityFactory> customType, @Language("RegExp") String regex) {
-        this.constructor = constructor;
-        this.customType  = customType;
-        this.pattern     = regex == null ? null : Pattern.compile(regex);
+
+    EntityFactory(BiFunction<Integer, Long, Entity> constructor) {
+        this(constructor, (asset, addr) -> false, null);
+    }
+
+    EntityFactory(BiFunction<Integer, Long, Entity> constructor, @Language("RegExp") String regex) {
+        this(constructor, regexMatcher(regex));
+    }
+
+    EntityFactory(BiFunction<Integer, Long, Entity> constructor, BiPredicate<String, Long> typeMatcher) {
+        this(constructor, typeMatcher, null);
+    }
+
+    EntityFactory(BiPredicate<String, Long> typeMatcher, Function<Long, EntityFactory> typeModifier) {
+        this(null, typeMatcher, typeModifier);
+    }
+
+    EntityFactory(BiFunction<Integer, Long, Entity> constructor, BiPredicate<String, Long> typeMatcher, Function<Long, EntityFactory> typeModifier) {
+        this.constructor  = constructor;
+        this.typeModifier = typeModifier;
+        this.typeMatcher  = typeMatcher;
+    }
+
+    private static BiPredicate<String, Long> regexMatcher(String regex) {
+        Pattern p = Pattern.compile(regex);
+        return (asset, addr) -> p.matcher(asset).matches();
     }
 
     public EntityFactory get(long address) {
-        return this.customType == null ? this : this.customType.apply(address);
+        return this.typeModifier == null ? this : this.typeModifier.apply(address);
     }
 
     public Entity createEntity(int id, long address) {
-        return this.constructor == null ? new Entity(id, address) : this.constructor.apply(id, address);
+        return this.constructor == null ? null : this.constructor.apply(id, address);
     }
 
-    public static EntityFactory find(int id, long address) {
+    public static EntityFactory find(long address) {
         String assetId = getAssetId(address);
 
         for (EntityFactory type : EntityFactory.values()) {
-            if (type.pattern == null) continue;
-            if (type.pattern.matcher(type == BARRIER ? getZoneKey(address) :
-                                             assetId).matches()) return type;
+            if (type.typeMatcher.test(assetId, address)) return type;
         }
 
-        return isPet(address) ? PET : isShip(address, id) ? SHIP : UNKNOWN;
+        return UNKNOWN;
+    }
+
+    private static String getAssetId(long address) {
+        long temp = API.readMemoryLong(address, 48, 48, 16) & ByteUtils.FIX;
+        return API.readMemoryString(temp, 64, 32, 24, 8, 16, 24).trim();
+    }
+
+    private static String getZoneKey(long address) {
+        return API.readMemoryString(address, 136).trim();
+    }
+
+    private static boolean isZone(String asset, long address) {
+        String key = getZoneKey(address);
+        return key.equals("NOA") || key.equals("DMG");
+    }
+
+    private static boolean isPet(String asset, long address) {
+        return API.readMemoryString(address, 192, 136).trim().equals("pet");
+    }
+
+    private static boolean isShip(String asset, long address) {
+        int id      = API.readMemoryInt(address + 56);
+        int isNpc   = API.readMemoryInt(address + 112);
+        int visible = API.readMemoryInt(address + 116);
+        int c       = API.readMemoryInt(address + 120);
+        int d       = API.readMemoryInt(address + 124);
+
+        return id > 0 && (isNpc == 1 || isNpc == 0) &&
+                (visible == 1 || visible == 0) && (c == 1 || c == 0) && d == 0;
     }
 
     private static EntityFactory defineZoneType(long address) {
@@ -107,29 +157,6 @@ public enum EntityFactory {
     private static EntityFactory defineShipType(long address) {
         int isNpc = API.readMemoryInt(address + 112);
         return isNpc == 1 ? NPC : isNpc == 0 ? SHIP : UNKNOWN;
-    }
-
-    private static String getZoneKey(long address) {
-        return API.readMemoryString(address, 136).trim();
-    }
-
-    private static String getAssetId(long address) {
-        long temp = API.readMemoryLong(address, 48, 48, 16) & ByteUtils.FIX;
-        return API.readMemoryString(temp, 64, 32, 24, 8, 16, 24).trim();
-    }
-
-    private static boolean isPet(long address) {
-        return API.readMemoryString(address, 192, 136).trim().equals("pet");
-    }
-
-    private static boolean isShip(long address, int id) {
-        int isNpc   = API.readMemoryInt(address + 112);
-        int visible = API.readMemoryInt(address + 116);
-        int c       = API.readMemoryInt(address + 120);
-        int d       = API.readMemoryInt(address + 124);
-
-        return id > 0 && (isNpc == 1 || isNpc == 0) &&
-                (visible == 1 || visible == 0) && (c == 1 || c == 0) && d == 0;
     }
 
     private static Portal getOrCreatePortal(int id, long address) {

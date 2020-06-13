@@ -30,7 +30,7 @@ import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.*;
 
 public class EntityList extends Updatable {
-    private final EntityListener entityListener           = new EntityListener();
+    public final EntityListener entityListener            = new EntityListener();
 
     public final List<Obstacle> obstacles                 = new ArrayList<>();
     public final List<List<? extends Entity>> allEntities = new ArrayList<>();
@@ -63,7 +63,6 @@ public class EntityList extends Updatable {
         });
 
         this.main.status.add(this::refreshRadius);
-        this.main.addInvalidTickListener(entityListener::clearCache);
     }
 
     @Override
