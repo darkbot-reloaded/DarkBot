@@ -35,14 +35,13 @@ public class HeroManager extends Ship implements Manager {
     private long portalTime;
 
     public HeroManager(Main main) {
-        super(0);
         instance = this;
 
         this.main = super.main = main;
         this.settings = main.settingsManager;
         this.drive = new Drive(this, main.mapManager);
         main.status.add(drive::toggleRunning);
-        this.pet = new Pet(0);
+        this.pet = new Pet();
         this.map = main.starManager.byId(-1);
     }
 
@@ -52,12 +51,8 @@ public class HeroManager extends Ship implements Manager {
     }
 
     public void tick() {
-
         long address = API.readMemoryLong(staticAddress);
-
-        if (this.address != address) {
-            update(address);
-        }
+        if (this.address != address) update(address);
 
         update();
 
@@ -67,12 +62,11 @@ public class HeroManager extends Ship implements Manager {
     @Override
     public void update() {
         super.update();
-        pet.update();
-
         config = settings.config;
 
         long petAddress = API.readMemoryLong(address + 176);
         if (petAddress != pet.address) pet.update(petAddress);
+        pet.update();
     }
 
     @Override

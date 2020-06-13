@@ -11,16 +11,13 @@ public class BattleStation
         extends Entity
         implements Obstacle {
 
-    public PlayerInfo info;
-    public Area area;
+    public PlayerInfo info = new PlayerInfo();
+    public Area area = new Area(0, 0, 0, 0);
     public int hullId;
 
-    public BattleStation(int id, int hullId) {
+    public BattleStation(int id, long address) {
         super(id);
-        this.hullId = hullId;
-
-        this.info = new PlayerInfo();
-        this.area = new Area(0, 0, 0, 0);
+        this.update(address);
     }
 
     @Override
@@ -44,6 +41,7 @@ public class BattleStation
     public void update(long address) {
         super.update(address);
 
+        hullId = API.readMemoryInt(address + 116);
         info.update(API.readMemoryLong(address + 120));
     }
 

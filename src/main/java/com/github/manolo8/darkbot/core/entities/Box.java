@@ -14,8 +14,9 @@ public class Box extends Entity {
 
     public BoxInfo boxInfo;
 
-    public Box(int id) {
+    public Box(int id, long address) {
         super(id);
+        this.update(address);
     }
 
     public boolean isCollected() {

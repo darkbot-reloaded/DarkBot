@@ -4,8 +4,8 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 
 public class BasePoint extends Entity {
 
-    public BasePoint(int id) {
-        super(id);
+    public BasePoint(int id, long address) {
+        super(id, address);
     }
 
     @Override

@@ -11,8 +11,8 @@ public class Barrier
     private static final int BARRIER_RADIUS = 60;
     private Area area = new Area(0, 0, 0, 0);
 
-    public Barrier(int id) {
-        super(id);
+    public Barrier(int id, long address) {
+        super(id, address);
     }
 
     @Override

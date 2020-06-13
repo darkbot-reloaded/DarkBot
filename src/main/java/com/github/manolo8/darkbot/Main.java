@@ -55,6 +55,8 @@ public class Main extends Thread implements PluginListener {
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .create();
 
+    private List<Runnable> invalidTickListeners = new ArrayList<>();
+
     public ConfigManager configManager = new ConfigManager();
     public Config config = configManager.loadConfig(null);
     public static IDarkBotAPI API;
@@ -135,12 +137,18 @@ public class Main extends Thread implements PluginListener {
         }
     }
 
+    public void addInvalidTickListener(Runnable action) {
+        this.invalidTickListeners.add(action);
+    }
+
     private void tick() {
         this.status.tick();
         checkModule();
 
-        if (isInvalid()) tickingModule = false;
-        else validTick();
+        if (isInvalid()) {
+            tickingModule = false;
+            invalidTickListeners.forEach(Runnable::run);
+        } else validTick();
 
         this.form.tick();
         this.configManager.saveChangedConfig();

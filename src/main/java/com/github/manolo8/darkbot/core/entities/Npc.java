@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
-import com.github.manolo8.darkbot.core.manager.EffectManager;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -15,6 +14,11 @@ public class Npc extends Ship {
 
     public Npc(int id) {
         super(id);
+    }
+
+    public Npc(int id, long address) {
+        super(id);
+        this.update(address);
     }
 
     @Override

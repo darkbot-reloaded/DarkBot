@@ -13,22 +13,27 @@ public class Ship extends Entity {
 
     private static HashMap<Integer, Long> cacheTimer = new HashMap<>();
 
-    public Health health;
-    public PlayerInfo playerInfo;
-    public ShipInfo shipInfo;
-    public boolean invisible;
+    public Health health         = new Health();
+    public PlayerInfo playerInfo = new PlayerInfo();
+    public ShipInfo shipInfo     = new ShipInfo();
 
+    public boolean invisible;
     public long timer;
+
+    public Ship() {}
 
     public Ship(int id) {
         super(id);
 
-        this.health = new Health();
-        this.playerInfo = new PlayerInfo();
-        this.shipInfo = new ShipInfo();
+        Long temp = cacheTimer.remove(id);
+        if (temp != null) timer = temp;
+    }
+
+    public Ship(int id, long address) {
+        super(id);
+        this.update(address);
 
         Long temp = cacheTimer.remove(id);
-
         if (temp != null) timer = temp;
     }
 
@@ -37,7 +42,7 @@ public class Ship extends Entity {
     }
 
     public boolean isAiming(Ship other) {
-        return MathUtils.angleDiff(shipInfo.angle,locationInfo.now.angle(other.locationInfo.now)) < 0.2;
+        return MathUtils.angleDiff(shipInfo.angle, locationInfo.now.angle(other.locationInfo.now)) < 0.2;
     }
 
     @Override

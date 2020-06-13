@@ -13,25 +13,20 @@ import java.util.Map;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Entity extends Updatable {
-
     public Main main;
-
-    public int id;
-
+    public Map<String, Object> metadata;
     public LocationInfo locationInfo = new LocationInfo(0);
     public Clickable clickable = new Clickable();
+    public ObjArray traits = ObjArray.ofVector(true);
 
+    public int id;
     public boolean removed;
 
-    public ObjArray traits = ObjArray.ofVector();
-
-    public Map<String, Object> metadata;
-
-    public Entity() {
-    }
-
-    public Entity(int id) {
+    public Entity() {}
+    public Entity(int id) { this.id = id; }
+    public Entity(int id, long address) {
         this.id = id;
+        this.update(address);
     }
 
     public int getId() {
@@ -47,8 +42,7 @@ public class Entity extends Updatable {
     }
 
     public boolean isInvalid(long mapAddress) {
-
-        int id = API.readMemoryInt(address + 56);
+        int  id        = API.readMemoryInt(address + 56);
         long container = API.readMemoryLong(address + 96);
 
         return container != mapAddress || this.id != id;
@@ -66,14 +60,12 @@ public class Entity extends Updatable {
         this.locationInfo.update(API.readMemoryLong(address + 64));
         this.traits.update(API.readMemoryLong(address + 48));
 
-        traits.update();
-
         for (int c = 0; c < traits.getSize(); c++) {
             long adr = traits.get(c);
 
-            int radius = API.readMemoryInt(adr + 40);
+            int radius   = API.readMemoryInt(adr + 40);
             int priority = API.readMemoryInt(adr + 44);
-            int enabled = API.readMemoryInt(adr + 48);
+            int enabled  = API.readMemoryInt(adr + 48);
 
             if (radius >= 0 && radius < 4000 && priority > -4 && priority < 1000 && (enabled == 1 || enabled == 0)) {
                 clickable.update(adr);
@@ -91,8 +83,8 @@ public class Entity extends Updatable {
     }
 
     public void added(Main main) {
-        this.main = main;
-        removed = false;
+        this.main    = main;
+        this.removed = false;
     }
 
     public void removed() {
