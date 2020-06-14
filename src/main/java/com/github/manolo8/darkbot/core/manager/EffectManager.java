@@ -60,13 +60,15 @@ public class EffectManager implements Manager {
         LOCATOR(1),
         PET_SPAWN(2),
         ENERGY_LEECH(11),
+        NPC_ISH(16),
         DRAW_FIRE(36),
         ISH(84),
         STICKY_BOMB(56),
         POLARITY_POSITIVE(65),
-        POLARITY_NEGATIVE(66);
+        POLARITY_NEGATIVE(66),
+        INFECTION(98);
 
-        private int id;
+        private final int id;
 
         Effect(int id) {
             this.id = id;

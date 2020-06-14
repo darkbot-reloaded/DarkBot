@@ -11,9 +11,10 @@ import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class EntityListener {
+public class EntityRegistry {
     private final Map<Long, EntityFactory> cachedTypes       = new HashMap<>();
     private final Map<EntityFactory, Lazy<Entity>> listeners = new EnumMap<>(EntityFactory.class);
+    private final Lazy<Entity> fallback                      = new Lazy.NoCache<>();
     private Main main;
 
     public void setMain(Main main) {
@@ -21,30 +22,28 @@ public class EntityListener {
     }
 
     public void add(EntityFactory type, Consumer<Entity> consumer) {
-        getListener(type).add(consumer);
+        listeners.computeIfAbsent(type, k -> new Lazy.NoCache<>()).add(consumer);
     }
 
-    public void addForEach(Consumer<Entity> consumer) {
+    public void addDefault(Consumer<Entity> consumer) {
+        fallback.add(consumer);
+    }
+
+    public void addToAll(Consumer<Entity> consumer) {
         listeners.forEach((f, e) -> add(f, consumer));
     }
 
     public boolean remove(EntityFactory type, Consumer<Entity> consumer) {
-        return getListener(type).remove(consumer);
+        return listeners.computeIfAbsent(type, k -> new Lazy.NoCache<>()).remove(consumer);
     }
 
     public void clearCache() {
-        if (!cachedTypes.isEmpty()) cachedTypes.clear();
+        cachedTypes.clear();
     }
-
-    //workaround for 5-2 station Class was recognized as unknown on x-1, x-8 map
-    public void clearUnknownCache() {
-        if (cachedTypes.isEmpty()) return;
-        cachedTypes.entrySet().removeIf(entry -> entry.getValue() == EntityFactory.UNKNOWN);
-    }
-
 
     public void sendEntity(int id, long address) {
-        EntityFactory type = getEntityType(address);
+        EntityFactory type = cachedTypes.computeIfAbsent(API.readMemoryLong(address + 0x10),
+                l -> EntityFactory.find(address)).get(address);
         if (address == main.hero.address || address == main.hero.pet.address) return;
 
         Entity entity = type.createEntity(id, address);
@@ -54,15 +53,7 @@ public class EntityListener {
 
         if (main.isRunning()) entity.clickable.setRadius(0);
 
-        getListener(type).send(entity);
+        listeners.getOrDefault(type, fallback).send(entity);
     }
 
-    private EntityFactory getEntityType(long address) {
-        return cachedTypes.computeIfAbsent(API.readMemoryLong(address + 0x10),
-                                           l -> EntityFactory.find(address)).get(address);
-    }
-
-    private Lazy<Entity> getListener(EntityFactory type) {
-        return this.listeners.computeIfAbsent(type, k -> new Lazy.NoCache<>());
-    }
 }

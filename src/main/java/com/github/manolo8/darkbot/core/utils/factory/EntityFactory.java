@@ -12,6 +12,13 @@ import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
+import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
+import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
+import com.github.manolo8.darkbot.core.entities.bases.BaseHangar;
+import com.github.manolo8.darkbot.core.entities.bases.BaseHeadquarters;
+import com.github.manolo8.darkbot.core.entities.bases.QuestGiver;
+import com.github.manolo8.darkbot.core.entities.bases.BaseRefinery;
+import com.github.manolo8.darkbot.core.entities.bases.BaseRepairStation;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import org.intellij.lang.annotations.Language;
@@ -26,9 +33,9 @@ import static com.github.manolo8.darkbot.Main.API;
 public enum EntityFactory {
     BOX             (Box::new,           "box_.*"),
     ORE             (Box::new,           "ore_.*"),
+    X2_BEACON       (Box::new,           "beacon_.*"),
     MINE            (Mine::new,          "mine_.*"),
     FIREWORK        (Entity::new,        "firework_box"),
-    X2_BEACON       (BasePoint::new,     "beacon_.*"),
 
     LOW_RELAY       (MapNpc::new,        "relay"),
     NPC_BEACON      (MapNpc::new,        "npc-beacon.*"),
@@ -40,19 +47,19 @@ public enum EntityFactory {
     CBS_MODULE_CON  (BattleStation::new, "module-construction"),
     CBS_STATION     (BattleStation::new, "battleStation"),
 
-    POD_HEAL        (BasePoint::new,     "pod_heal"),
-    BUFF_CAPSULE    (BasePoint::new,     "buffCapsule_.*"),
-    BURNING_TRAIL   (BasePoint::new,     "burning_trail_entity_.*"),
-    PLUTUS_GENERATOR(BasePoint::new,     "plutus-generator"),
+    POD_HEAL        (Entity::new, "pod_heal"),               // Aegis/hammerclaw healing pods
+    BUFF_CAPSULE    (Entity::new, "buffCapsule_.*"),
+    BURNING_TRAIL   (Entity::new, "burning_trail_entity_.*"),
+    PLUTUS_GENERATOR(Entity::new, "plutus-generator"),
 
-    REFINERY        (BasePoint::new,     "refinery_.*"),
-    HOME_ZONE       (BasePoint::new,     "ctbHomeZone_.*"),
-    BASE_TURRET     (BasePoint::new,     "turret_.*"),
-    BASE_HANGAR     (BasePoint::new,     "hangar_.*"),
-    BASE_STATION    (BasePoint::new,     "station_.*"),
-    HEADQUARTER     (BasePoint::new,     "headquarters_.*"),
-    QUEST_GIVER     (BasePoint::new,     "questgiver_.*"),
-    REPAIR_STATION  (BasePoint::new,     "repairstation_.*"),
+    BASE_TURRET     (BaseTurret::new,       "turret_.*"),       // Turrets around x-1 and x-8 bases
+    REFINERY        (BaseRefinery::new,     "refinery_.*"),     // Refinery to sell ores at
+    BASE_HANGAR     (BaseHangar::new,       "hangar_.*"),       // Hangar inside bases
+    HEADQUARTER     (BaseHeadquarters::new, "headquarters_.*"), // Headquarters in middle of x-1 and x-8
+    REPAIR_STATION  (BaseRepairStation::new,"repairstation_.*"),// Repair station inside bases
+    QUEST_GIVER     (QuestGiver::new,       "questgiver_.*"),   // Quest givers on x-1, x-4, x-5 and x-8
+    BASE_STATION    (BaseStation::new,      "station_.*"),      // Standalone station on 5-2
+    CTB_HOME_ZONE   (BasePoint::new,        "ctbHomeZone_.*"),
 
     PORTAL   (EntityFactory::getOrCreatePortal, "[0-9]+$"),
 
@@ -156,7 +163,7 @@ public enum EntityFactory {
 
     private static EntityFactory defineShipType(long address) {
         int isNpc = API.readMemoryInt(address + 112);
-        return isNpc == 1 ? NPC : isNpc == 0 ? SHIP : UNKNOWN;
+        return isNpc == 1 ? NPC : isNpc == 0 ? PLAYER : UNKNOWN;
     }
 
     private static Portal getOrCreatePortal(int id, long address) {

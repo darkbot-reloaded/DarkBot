@@ -18,7 +18,7 @@ import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.factory.EntityFactory;
-import com.github.manolo8.darkbot.core.utils.factory.EntityListener;
+import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,7 +30,7 @@ import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.*;
 
 public class EntityList extends Updatable {
-    public final EntityListener entityListener            = new EntityListener();
+    public final EntityRegistry entityRegistry = new EntityRegistry();
 
     public final List<Obstacle> obstacles                 = new ArrayList<>();
     public final List<List<? extends Entity>> allEntities = new ArrayList<>();
@@ -41,11 +41,11 @@ public class EntityList extends Updatable {
     public final List<Mine> mines                   = register(MINE);
     public final List<Npc> npcs                     = register(NPC, LOW_RELAY);
     public final List<Portal> portals               = register(PORTAL);
-    public final List<Ship> ships                   = register(SHIP, PET);
+    public final List<Ship> ships                   = register(PLAYER, PET);
     public final List<Pet> pets                     = register(PET);
     public final List<BattleStation> battleStations = register(CBS_ASTEROID, CBS_MODULE, CBS_STATION, CBS_MODULE_CON, CBS_CONSTRUCTION);
     public final List<BasePoint> basePoints         = register(BASE_HANGAR, BASE_STATION, HEADQUARTER, QUEST_GIVER, BASE_TURRET, REPAIR_STATION, REFINERY);
-    public final List<Entity> unknown               = register(UNKNOWN);
+    public final List<Entity> unknown               = new ArrayList<>();
     public final FakeNpc fakeNpc;
 
     private final Main main;
@@ -55,12 +55,12 @@ public class EntityList extends Updatable {
     public EntityList(Main main) {
         this.main    = main;
         this.fakeNpc = new FakeNpc(main);
-        this.entityListener.setMain(main);
+        this.entityRegistry.setMain(main);
 
-        this.entityListener.addForEach(entity -> {
-            if (entity instanceof Obstacle)
-                obstacles.add((Obstacle) entity);
+        this.entityRegistry.addToAll(entity -> {
+            if (entity instanceof Obstacle) obstacles.add((Obstacle) entity);
         });
+        this.entityRegistry.addDefault(unknown::add);
 
         this.main.status.add(this::refreshRadius);
     }
@@ -87,7 +87,7 @@ public class EntityList extends Updatable {
         this.allEntities.add(list);
 
         for (EntityFactory type : types)
-            this.entityListener.add(type, e -> list.add((T) e));
+            this.entityRegistry.add(type, e -> list.add((T) e));
 
         return list;
     }
@@ -98,7 +98,7 @@ public class EntityList extends Updatable {
             long entityPtr = entitiesArr.get(i);
 
             int id = API.readMemoryInt(entityPtr + 56);
-            if (ids.add(id)) entityListener.sendEntity(id, entityPtr);
+            if (ids.add(id)) entityRegistry.sendEntity(id, entityPtr);
         }
     }
 
@@ -118,7 +118,6 @@ public class EntityList extends Updatable {
             });
         }
 
-
         this.obstacles.removeIf(Obstacle::isRemoved);
     }
 
@@ -135,10 +134,10 @@ public class EntityList extends Updatable {
         allEntities.forEach(entities -> entities.forEach(consumer));
     }
 
-    private void clear() {
+    public void clear() {
         synchronized (Main.UPDATE_LOCKER) {
             ids.clear();
-            entityListener.clearUnknownCache();
+            entityRegistry.clearCache();
 
             obstacles.clear();
             fakeNpc.removed();

@@ -22,6 +22,8 @@ public class EternalGateProxy extends Updatable {
 
     @Override
     public void update() {
+        if (address == 0) return;
+
         long data = API.readMemoryLong(address + 48) & ByteUtils.FIX;
 
         this.currentWave   = API.readMemoryInt(data + 0x40);

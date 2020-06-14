@@ -70,7 +70,7 @@ public class MapManager implements Manager {
             mapAddressStatic = value + 256;
         });
         botInstaller.invalid.add(invalid -> {
-            if (invalid) entities.entityListener.clearCache();
+            if (invalid) entities.clear();
         });
     }
 

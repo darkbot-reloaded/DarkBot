@@ -38,26 +38,20 @@ public class FacadeManager implements Manager {
     }
 
     public <T extends Updatable> T registerCommand(String key, T command) {
-        @SuppressWarnings("UnnecessaryLocalVariable")
-        Updatable fix = command; // Workaround for a java compiler assertion bug having issues with types
-        this.commands.addLazy(key, fix::update);
-        updatables.add(fix);
+        this.commands.addLazy(key, ((Updatable) command)::update);
+        updatables.add(command);
         return command;
     }
 
     public <T extends Updatable> T registerProxy(String key, T proxy) {
-        @SuppressWarnings("UnnecessaryLocalVariable")
-        Updatable fix = proxy; // Workaround for a java compiler assertion bug having issues with types
-        this.proxies.addLazy(key, fix::update);
-        updatables.add(fix);
+        this.proxies.addLazy(key, ((Updatable) proxy)::update);
+        updatables.add(proxy);
         return proxy;
     }
 
     public <T extends Updatable> T registerMediator(String key, T mediator) {
-        @SuppressWarnings("UnnecessaryLocalVariable")
-        Updatable fix = mediator; // Workaround for a java compiler assertion bug having issues with types
-        this.mediators.addLazy(key, fix::update);
-        updatables.add(fix);
+        this.mediators.addLazy(key, ((Updatable) mediator)::update);
+        updatables.add(mediator);
         return mediator;
     }
 
@@ -77,6 +71,8 @@ public class FacadeManager implements Manager {
         proxies.update();
         mediators.update();
 
-        updatables.forEach(Updatable::update);
+        for (Updatable updatable : updatables) {
+            if (updatable.address != 0) updatable.update();
+        }
     }
 }

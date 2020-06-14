@@ -14,12 +14,12 @@ import com.github.manolo8.darkbot.core.entities.NoCloack;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
+import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
-import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.utils.Drive;
@@ -41,10 +41,8 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.ToIntFunction;
@@ -92,6 +90,7 @@ public class MapDrawer extends JPanel {
     private Color SAFETY = new Color(16, 96, 255, 48);
 
     private Color BASES = Color.decode("#00D14E");
+    private Color BASE_SPOTS = new Color(0, 209, 78, 128);
     private Color UNKNOWN = Color.decode("#7C05D1");
     private Color TEXTS_BACKGROUND = new Color(38, 50, 56, 128);
 
@@ -389,7 +388,15 @@ public class MapDrawer extends JPanel {
         g2.setColor(this.BASES);
         for (BasePoint base : this.basePoints) {
             Location loc = base.locationInfo.now;
-            g2.fillOval(this.translateX(loc.x) - 2, this.translateY(loc.y) - 2, 4, 4);
+            if (base instanceof BaseTurret) {
+                g2.setColor(this.BASES);
+                g2.fillOval(this.translateX(loc.x) - 2, this.translateY(loc.y) - 2, 4, 4);
+            } else {
+                g2.setColor(this.BASE_SPOTS);
+                g2.fillOval(this.translateX(loc.x) - 7, this.translateY(loc.y) - 7, 15, 15);
+                g2.setColor(this.TEXT_DARK);
+                drawString(g2, base.getClass().getSimpleName(), translateX(loc.x), translateY(loc.y), Align.LEFT);
+            }
         }
     }
 

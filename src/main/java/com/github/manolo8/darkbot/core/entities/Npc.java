@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
+import com.github.manolo8.darkbot.core.manager.EffectManager;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -27,10 +28,7 @@ public class Npc extends Ship {
         super.update();
 
         npcId = API.readMemoryInt(API.readMemoryLong(address + 192) + 80);
-        //  The address is wrong, and likely belongs to a "has any effect" boolean, but the other ISH effect is wrong
-        ish = API.readMemoryBoolean(API.readMemoryLong(address + 208) + 56);
-        // This ISH effect, is not the one used in NPCs.
-        // ish = hasEffect(EffectManager.Effect.ISH);
+        ish = hasEffect(EffectManager.Effect.NPC_ISH);
 
         if (!oldName.equals(playerInfo.username)) {
             npcInfo = ConfigEntity.INSTANCE.getOrCreateNpcInfo(playerInfo.username);
