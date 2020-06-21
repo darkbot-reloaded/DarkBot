@@ -12,9 +12,9 @@ public class Gui extends Updatable {
     public boolean visible;
     protected boolean isTweening; // If it's in the middle of an animation
 
-    protected Point pos;
-    protected Point size;
-    protected Point minimized;
+    protected final Point pos = new Point();
+    protected final Point size = new Point();
+    protected final Point minimized = new Point();
 
     public int x;
     public int y;
@@ -24,14 +24,6 @@ public class Gui extends Updatable {
     protected long time;
     protected long update;
 
-    public Gui() {
-        this.size = new Point();
-        this.pos = new Point();
-        this.minimized = new Point();
-
-        update();
-    }
-
     public void update() {
         if (address == 0) return;
         pos.update(API.readMemoryLong(addressInfo + 9 * 8));
@@ -40,10 +32,6 @@ public class Gui extends Updatable {
         // 12 * 8 = help text
         // 13 * 8 = tool tip
         minimized.update(API.readMemoryLong(addressInfo + 14 * 8));
-
-        size.update();
-        pos.update();
-        minimized.update();
 
         width = (int) Math.round(size.x);
         height = (int) Math.round(size.y);

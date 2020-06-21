@@ -14,6 +14,5 @@ public abstract class MenuBar extends UpdatableAuto {
         this.barId = API.readMemoryString(address, 32);
         this.layoutId = API.readMemoryString(address, 40);
         this.barLocation.update(API.readMemoryLong(address + 48));
-        this.barLocation.update();
     }
 }

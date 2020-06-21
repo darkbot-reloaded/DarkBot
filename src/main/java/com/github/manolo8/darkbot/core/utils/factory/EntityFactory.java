@@ -138,7 +138,7 @@ public enum EntityFactory {
 
     private static boolean isZone(String asset, long address) {
         String key = getZoneKey(address);
-        return key.equals("NOA") || key.equals("DMG");
+        return key.equals("NOA") || key.equals("DMG") || key.equals("TRG");
     }
 
     private static boolean isPet(String asset, long address) {

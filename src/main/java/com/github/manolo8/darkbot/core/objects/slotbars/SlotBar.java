@@ -14,7 +14,7 @@ public class SlotBar extends MenuBar {
     public Point stickOffset = new Point();
     public List<Slot> slots = new ArrayList<>();
 
-    private ObjArray slotsArr = ObjArray.ofVector(true);
+    private final ObjArray slotsArr = ObjArray.ofVector(true);
 
     @Override
     public void update() {
@@ -22,7 +22,6 @@ public class SlotBar extends MenuBar {
 
         this.isVisible = API.readMemoryBoolean(address + 56);
         this.stickOffset.update(API.readMemoryLong(address + 72));
-        this.stickOffset.update();
 
         this.slotsArr.update(API.readMemoryLong(address + 64));
         this.slotsArr.sync(slots, Slot::new, null);
