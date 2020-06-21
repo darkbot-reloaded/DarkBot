@@ -76,8 +76,8 @@ public class SafetyFinder {
 
     private void onMapChange(Map map) {
         if (safety != null && safety.type == SafetyInfo.Type.PORTAL) {
-            if (jumpState == JumpState.JUMPING) jumpState = JumpState.JUMPED;
-            else if (jumpState == JumpState.RETURNING && map == prevMap) jumpState = JumpState.RETURNED;
+            if (map == prevMap) jumpState = JumpState.RETURNED;
+            else if (jumpState == JumpState.JUMPING) jumpState = JumpState.JUMPED;
         }
     }
 

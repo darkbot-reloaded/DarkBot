@@ -97,6 +97,7 @@ public class NpcAttacker {
     }
 
     public double modifyRadius(double radius) {
+        if (target.health.hpPercent() < 0.25 && target.npcInfo.extra.has(NpcExtra.AGGRESSIVE_FOLLOW)) radius *= 0.75;
         if (target != hero.target || !hero.isAttacking(target) || castingAbility()) return Math.min(550, radius);
         if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) return Math.min(600, radius);
         return radius;
