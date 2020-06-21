@@ -10,7 +10,7 @@ public class UserLogin extends JPanel implements LoginScreen {
     private JTextField username = new JTextField(16), password = new JPasswordField(16);
 
     public UserLogin() {
-        super(new MigLayout("wrap 2, height 48px!", "[]8px:push[]", "push[][]push"));
+        super(new MigLayout("wrap 2", "[]8px:push[]", "push[][]push"));
         add(new JLabel("Username"));
         add(username);
         add(new JLabel("Password"));

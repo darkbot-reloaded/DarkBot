@@ -14,6 +14,8 @@ import com.github.manolo8.darkbot.core.entities.NoCloack;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
+import com.github.manolo8.darkbot.core.entities.bases.BaseHeadquarters;
+import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
 import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
@@ -87,10 +89,10 @@ public class MapDrawer extends JPanel {
     private Color NO_CLOACK = new Color(24, 160, 255, 32);
     private Color PREFER = new Color(0, 255, 128, 32);
     private Color AVOID = new Color(255, 0, 0, 32);
-    private Color SAFETY = new Color(16, 96, 255, 48);
+    private Color SAFETY = new Color(16, 128, 255, 96);
 
-    private Color BASES = Color.decode("#00D14E");
-    private Color BASE_SPOTS = new Color(0, 209, 78, 128);
+    private Color BASES = new Color(0, 255, 128);
+    private Color BASE_SPOTS = new Color(0, 255, 128, 32);
     private Color UNKNOWN = Color.decode("#7C05D1");
     private Color TEXTS_BACKGROUND = new Color(38, 50, 56, 128);
 
@@ -309,7 +311,8 @@ public class MapDrawer extends JPanel {
             drawString(g2, main.tickingModule ? main.module.status() : main.module.stoppedStatus(), 5, 26, Align.LEFT);
         }
 
-        drawString(g2, String.format("%.1f tick  %dMB  ping %d ms",  main.avgTick, API.getMemoryUsage(), pingManager.ping), width - 5, 12, Align.RIGHT);
+        drawString(g2, String.format("%.1ftick  %dFPS  %dMB  %dms ping", main.avgTick,
+                main.facadeManager.stats.getFps(), API.getMemoryUsage(), pingManager.ping), width - 5, 12, Align.RIGHT);
         drawString(g2, "SID: " + main.backpage.sidStatus(), width - 5, 26, Align.RIGHT);
 
         drawMap(g2);
@@ -385,17 +388,16 @@ public class MapDrawer extends JPanel {
             else drawEntity(g2, loc, false);
         }
 
-        g2.setColor(this.BASES);
         for (BasePoint base : this.basePoints) {
             Location loc = base.locationInfo.now;
             if (base instanceof BaseTurret) {
                 g2.setColor(this.BASES);
-                g2.fillOval(this.translateX(loc.x) - 2, this.translateY(loc.y) - 2, 4, 4);
+                g2.fillOval(this.translateX(loc.x) - 1, this.translateY(loc.y) - 1, 2, 2);
             } else {
                 g2.setColor(this.BASE_SPOTS);
-                g2.fillOval(this.translateX(loc.x) - 7, this.translateY(loc.y) - 7, 15, 15);
-                g2.setColor(this.TEXT_DARK);
-                drawString(g2, base.getClass().getSimpleName(), translateX(loc.x), translateY(loc.y), Align.LEFT);
+                int radius = base instanceof BaseHeadquarters ? 3500 :
+                        base instanceof BaseStation ? 3000 : 1000, half = radius / 2;
+                g2.fillOval(translateX(loc.x - half), translateY(loc.y - half), translateX(radius), translateY(radius));
             }
         }
     }
@@ -591,9 +593,9 @@ public class MapDrawer extends JPanel {
 
     protected void drawSafeZone(Graphics2D g2, SafetyInfo safetyInfo) {
         if (safetyInfo == null) return;
-        int radius = safetyInfo.diameter / 2;
+        int radius = safetyInfo.radius();
         g2.fillOval(translateX(safetyInfo.x - radius), translateY(safetyInfo.y - radius),
-                translateX(safetyInfo.diameter), translateY(safetyInfo.diameter));
+                translateX(safetyInfo.diameter()), translateY(safetyInfo.diameter()));
     }
 
     private void drawHealth(Graphics2D g2, HealthHolder health, int x, int y, int width, int height) {

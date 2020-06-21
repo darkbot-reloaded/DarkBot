@@ -11,9 +11,9 @@ import java.util.Comparator;
 
 class SafetiesDisplay extends MapDrawer {
 
-    private Color ZONE = new Color(0, 255, 128, 32);
     private Color ZONE_HIGHLIGHT = new Color(0, 255, 128, 96);
-    private Color ZONE_SELECTED = new Color(0, 255, 128, 192);
+    private Color ZONE_SELECTED = new Color(0, 255, 128, 128);
+    private Color ZONE_SOLID = new Color(0, 255, 128);
 
     private SafetiesEditor editor;
     private SafetyInfo closest;
@@ -66,16 +66,13 @@ class SafetiesDisplay extends MapDrawer {
 
     @Override
     protected void drawCustomZones(Graphics2D g2) {
-        g2.setColor(ZONE);
-        for (SafetyInfo safetyInfo : editor.safetyInfos) {
-            if (safetyInfo == editor.editing || (hovering && safetyInfo == closest)
-                    || safetyInfo.runMode == SafetyInfo.RunMode.NEVER
-                    || safetyInfo.entity == null || safetyInfo.entity.removed) continue;
-            drawSafeZone(g2, safetyInfo);
-        }
         if (hovering && closest != null && closest != editor.editing) {
             g2.setColor(ZONE_HIGHLIGHT);
             drawSafeZone(g2, closest);
+            g2.setColor(ZONE_SOLID);
+            int radius = closest.radius();
+            g2.drawOval(translateX(closest.x - radius), translateY(closest.y - radius),
+                        translateX(closest.diameter()), translateY(closest.diameter()));
         }
         if (editor.editing != null) {
             g2.setColor(ZONE_SELECTED);

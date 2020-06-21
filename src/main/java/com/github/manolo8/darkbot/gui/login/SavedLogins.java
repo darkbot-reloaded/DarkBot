@@ -19,14 +19,14 @@ public class SavedLogins extends JPanel implements LoginScreen {
     public LoginForm loginForm;
 
     private char[] password;
-    private Credentials credentials = LoginUtils.loadCredentials();
     private boolean loaded = false;
+    private final Credentials credentials = LoginUtils.loadCredentials();
 
-    private DefaultListModel<Credentials.User> model = new DefaultListModel<>();
-    private JList<Credentials.User> users = new JList<>(model);
+    private final DefaultListModel<Credentials.User> model = new DefaultListModel<>();
+    private final JList<Credentials.User> users = new JList<>(model);
 
     public SavedLogins(LoginForm loginForm) {
-        super(new MigLayout("ins 0, gap 0, wrap 2, height 46px!", "[26px!][grow]", "[26px!][26px!][26px!]"));
+        super(new MigLayout("ins 0, gap 0, wrap 2", "[26px!][grow]", "[26px!][26px!][26px!]"));
         this.loginForm = loginForm;
 
         users.setLayoutOrientation(JList.HORIZONTAL_WRAP);

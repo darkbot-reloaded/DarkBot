@@ -15,7 +15,6 @@
     <repositories>
         <repository>
             <id>jfrog</id>
-            <name>Jfrog Artifacts</name>
             <url>https://oss.jfrog.org/artifactory/oss-snapshot-local/com/formdev/</url>
         </repository>
     </repositories>
@@ -31,7 +30,7 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
-            <version>0.27</version>
+            <version>0.36</version>
         </dependency>
 
 <!--        <dependency>-->

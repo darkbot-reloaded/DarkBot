@@ -12,7 +12,6 @@ class SafetyEditor extends JPanel {
     private JComboBox<SafetyInfo.RunMode> runEditor;
     private JComboBox<SafetyInfo.JumpMode> jumpEditor;
     private JComboBox<SafetyInfo.CbsMode> cbsEditor;
-    private JSlider diameterEditor;
 
     SafetyEditor(SafetiesEditor editor) {
         super(new MigLayout("wrap 3, fill", "[][][]"));
@@ -20,7 +19,6 @@ class SafetyEditor extends JPanel {
         runEditor = new JComboBox<>(SafetyInfo.RunMode.values());
         jumpEditor = new JComboBox<>(SafetyInfo.JumpMode.values());
         cbsEditor = new JComboBox<>(SafetyInfo.CbsMode.values());
-        diameterEditor = new JSlider(50, 8000);
         edit(null);
 
         add(new JLabel(I18n.get("safety_places.run_mode")));
@@ -29,7 +27,6 @@ class SafetyEditor extends JPanel {
         add(runEditor, "grow");
         add(jumpEditor, "grow");
         add(cbsEditor, "grow");
-        add(diameterEditor, "span, grow");
 
         runEditor.addActionListener(a -> {
             if (editor.editing != null) {
@@ -49,25 +46,16 @@ class SafetyEditor extends JPanel {
                 ConfigEntity.changed();
             }
         });
-        diameterEditor.addChangeListener(a -> {
-            if (editor.editing != null) {
-                editor.editing.diameter = diameterEditor.getValue();
-                editor.edit(editor.editing);
-                ConfigEntity.changed();
-            }
-        });
     }
 
     void edit(SafetyInfo editing) {
         runEditor.setEnabled(editing != null);
         jumpEditor.setEnabled(editing != null && editing.type == SafetyInfo.Type.PORTAL);
         cbsEditor.setEnabled(editing != null && editing.type == SafetyInfo.Type.CBS);
-        diameterEditor.setEnabled(editing != null);
 
         setEdit(runEditor, editing == null ? null : editing.runMode);
         setEdit(jumpEditor, editing == null ? null : editing.jumpMode);
         setEdit(cbsEditor, editing == null ? null : editing.cbsMode);
-        diameterEditor.setValue(editing == null ? 50 : editing.diameter);
     }
 
     private <T> void setEdit(JComboBox<T> combo, T obj) {

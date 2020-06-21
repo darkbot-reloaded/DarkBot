@@ -34,7 +34,8 @@ public class EntityRegistry {
     }
 
     public boolean remove(EntityFactory type, Consumer<Entity> consumer) {
-        return listeners.computeIfAbsent(type, k -> new Lazy.NoCache<>()).remove(consumer);
+        Lazy<Entity> l = listeners.get(type);
+        return l != null && l.remove2(consumer);
     }
 
     public void clearCache() {

@@ -32,9 +32,19 @@ public class Lazy<C> {
      * Removes consumer from the consumer list.
      *
      * @param consumer to remove
+     */
+    @Deprecated
+    public void remove(Consumer<C> consumer) {
+        this.consumers.remove(consumer);
+    }
+
+    /**
+     * Removes consumer from the consumer list.
+     *
+     * @param consumer to remove
      * @return result of {@link List#remove(Object)}
      */
-    public boolean remove(Consumer<C> consumer) {
+    public boolean remove2(Consumer<C> consumer) {
         return this.consumers.remove(consumer);
     }
 

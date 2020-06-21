@@ -1,10 +1,12 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.utils.Ignorable;
-import com.github.manolo8.darkbot.core.entities.BasePoint;
 import com.github.manolo8.darkbot.core.entities.BattleStation;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.Portal;
+import com.github.manolo8.darkbot.core.entities.bases.BaseHeadquarters;
+import com.github.manolo8.darkbot.core.entities.bases.BaseSpot;
+import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
 import com.github.manolo8.darkbot.utils.I18n;
 
 import java.io.Serializable;
@@ -16,8 +18,9 @@ public class SafetyInfo implements Serializable, Ignorable {
         PORTAL, CBS, BASE;
         public static Type of(Entity entity) {
             if (entity instanceof Portal) return PORTAL;
-            if (entity instanceof BattleStation) return CBS;
-            if (entity instanceof BasePoint) return BASE;
+            if (entity instanceof BattleStation && // FIXME: split BattleStation classes
+                    ((BattleStation) entity).hullId >= 0 && ((BattleStation) entity).hullId < 255) return CBS;
+            if (entity instanceof BaseSpot) return BASE;
             return null;
         }
         public String toString() {
@@ -26,31 +29,39 @@ public class SafetyInfo implements Serializable, Ignorable {
     }
 
     public Type type;
-    public int x, y, diameter;
+    public int x, y;
     public transient Entity entity;
     public transient double distance;
 
-    public SafetyInfo() {}
+    private transient final RunMode defaultRunMode; // Used to determine if it should be stored
+    public RunMode runMode = RunMode.ALWAYS;
+    public JumpMode jumpMode;
+    public CbsMode cbsMode;
+
+    public SafetyInfo() {
+        this.defaultRunMode = null;
+    }
 
     public SafetyInfo(Type type, int x, int y, Entity entity) {
         this.type = type;
         this.x = x;
         this.y = y;
-        this.diameter = type == Type.BASE ? 1500 : 500;
-        this.runMode = type == Type.PORTAL && ((Portal) entity).target != null && !((Portal) entity).target.gg
-                ? RunMode.ALWAYS : RunMode.NEVER;
+        this.entity = entity;
+        this.runMode = this.defaultRunMode = getDefaultRunMode();
         if (type == Type.PORTAL) jumpMode = JumpMode.ESCAPING;
         if (type == Type.CBS) cbsMode = CbsMode.ALLY;
-        this.entity = entity;
+    }
+
+    private RunMode getDefaultRunMode() {
+        return (type == Type.PORTAL && ((Portal) entity).target != null && !((Portal) entity).target.gg) ||
+                type == Type.BASE && (entity instanceof BaseHeadquarters || entity instanceof BaseStation) ?
+                RunMode.ALWAYS : RunMode.NEVER;
     }
 
     @Override
     public boolean ignore() {
         return (x == 0 && y == 0) ||
-                diameter == (type == Type.BASE ? 1500 : 500) &&
-                (type != Type.PORTAL ? runMode == RunMode.NEVER :
-                        (entity != null && ((Portal) entity).target != null
-                                && runMode == (((Portal) entity).target.gg ? RunMode.NEVER : RunMode.ALWAYS))) &&
+                runMode == defaultRunMode &&
                 jumpMode == (type == Type.PORTAL ? JumpMode.ESCAPING : null) &&
                 cbsMode == (type == Type.CBS ? CbsMode.ALLY : null);
     }
@@ -67,7 +78,6 @@ public class SafetyInfo implements Serializable, Ignorable {
             return I18n.getOrDefault("safety_places.run_mode." + name().toLowerCase(Locale.ROOT), name());
         }
     }
-    public RunMode runMode = RunMode.ALWAYS;
 
     // PORTAL
     // Condition to jump
@@ -77,7 +87,6 @@ public class SafetyInfo implements Serializable, Ignorable {
             return I18n.getOrDefault("safety_places.jump_mode." + name().toLowerCase(Locale.ROOT), name());
         }
     }
-    public JumpMode jumpMode;
 
     // CBS
     // Condition to run to CBS
@@ -87,10 +96,15 @@ public class SafetyInfo implements Serializable, Ignorable {
             return I18n.getOrDefault("safety_places.cbs_mode." + name().toLowerCase(Locale.ROOT), name());
         }
     }
-    public CbsMode cbsMode;
+
+    public int diameter() {
+        return type != Type.BASE ? 500 :
+                entity instanceof BaseHeadquarters ? 2500 :
+                        entity instanceof BaseStation ? 3000 : 500;
+    }
 
     public int radius() {
-        return diameter / 2;
+        return diameter() / 2;
     }
 
     @Override
@@ -108,13 +122,12 @@ public class SafetyInfo implements Serializable, Ignorable {
         SafetyInfo that = (SafetyInfo) o;
         return x == that.x &&
                 y == that.y &&
-                diameter == that.diameter &&
                 type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, x, y, diameter);
+        return Objects.hash(type, x, y);
     }
 
 }

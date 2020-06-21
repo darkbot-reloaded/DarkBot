@@ -176,7 +176,7 @@ public class GuiManager implements Manager {
 
     private void checkInvalid() {
         if (System.currentTimeMillis() - validTime > 90_000 + (main.hero.map.id == -1 ? 180_000 : 0)) {
-            System.out.println("Triggering refresh: gui manger was invalid for too long");
+            System.out.println("Triggering refresh: gui manger was invalid for too long. (Make sure your hp fills up)");
             API.handleRefresh();
             validTime = System.currentTimeMillis();
         }
@@ -229,7 +229,7 @@ public class GuiManager implements Manager {
                 && (hero.locationInfo.isMoving() || System.currentTimeMillis() - hero.drive.lastMoved > 20 * 1000)
                 && (hero.health.hpIncreasedIn(30_000) || hero.health.hpDecreasedIn(30_000) || hero.health.hpPercent() == 1 || (hero.hasTarget() && hero.isAttacking(hero.target)))
                 && (hero.health.shIncreasedIn(30_000) || hero.health.shDecreasedIn(30_000) || hero.health.shieldPercent() == 1 || hero.health.shieldPercent() == 0)) {
-            validTime = System.currentTimeMillis();// Math.max(validTime, main.pingManager.lastPingUpdate() + 120_000);
+            validTime = System.currentTimeMillis();
         }
 
         checkInvalid();

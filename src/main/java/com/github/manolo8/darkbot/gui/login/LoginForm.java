@@ -18,8 +18,6 @@ public class LoginForm extends JPanel {
 
     private final LoginData loginData = new LoginData();
 
-    private LoginTask loginTask;
-
     public LoginForm() {
         super(new MigLayout("wrap 2, ins 0", "[]10px:push[]", "[]8px[]"));
         tabbedPane.addTab("User & Pass", new UserLogin());
@@ -31,7 +29,7 @@ public class LoginForm extends JPanel {
 
         loginBtn.addActionListener(ac -> startLogin());
 
-        add(tabbedPane, "span 2");
+        add(tabbedPane, "span 2, growx, height 112px!");
         add(infoLb, "gapleft 8px, grow 0");
         add(loginBtn, "gapright 8px");
     }
