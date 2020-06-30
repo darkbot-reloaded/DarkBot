@@ -11,7 +11,6 @@ import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
-import com.github.manolo8.darkbot.core.manager.PetManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
@@ -19,7 +18,6 @@ import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
-import com.github.manolo8.darkbot.gui.tree.components.JPlayerTagField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 
@@ -31,7 +29,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
-import java.util.UUID;
 
 public class Config {
 
@@ -118,7 +115,7 @@ public class Config {
             public @Option boolean ENABLED = false;
             public @Option Character KEY = '2';
             public @Option @Editor(JPercentField.class) double PERCENT = 0.8;
-            public @Option @Num(min = 500, max = 100000, step = 500) int NPC_AMOUNT = 12000;
+            public @Option @Num(min = 500, max = 1_000_000, step = 1000) int NPC_AMOUNT = 12000;
         }
         public static class Rsb {
             public @Option boolean ENABLED = false;
@@ -174,11 +171,12 @@ public class Config {
         public @Option boolean CONFIRM_EXIT = true;
         public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
         public @Option boolean DEV_STUFF = false;
-        public @Option("Browser/API, restart to apply") @Editor(JListField.class) @Options(ApiSupplier.class) int API = 0;
+        public @Option("Browser/API, restart to apply") @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
         public @Option("Disable master password") boolean DISABLE_MASTER_PASSWORD = false;
 
         public @Option Display DISPLAY = new Display();
         public static class Display {
+            //public @Option @Editor(JCheckedComboBox.class) @OptionList(DisplayFlags.class) Set<DisplayFlags> ENABLED;
             public @Option boolean SHOW_NAMES;
             public @Option boolean HIDE_NAME;
             public @Option boolean HIDE_GROUP_NAMES;

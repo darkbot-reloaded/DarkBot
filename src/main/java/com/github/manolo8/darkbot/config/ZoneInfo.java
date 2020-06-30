@@ -132,7 +132,7 @@ public class ZoneInfo implements Serializable, Ignorable {
         getZones(); // Update zones
         if (!ordered) {
             ordered = true;
-            if (zones.size() <= 1) return zones;
+            if (zones.size() <= 1 || zones.size() > 1000) return zones;
 
             SimpleWeightedGraph<Zone, DefaultWeightedEdge> zoneGraph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
             for (ZoneInfo.Zone zone : zones) zoneGraph.addVertex(zone); // Add vertex

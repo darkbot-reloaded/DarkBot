@@ -10,9 +10,12 @@ public class DarkBoat {
     public native void    createWindow();
     public native void    setSize(int width, int height);
     public native void    setVisible(boolean visible);
+    // When enabled browser is further hidden, lowering CPU usage, but doesn't work on all systems
+    public native void    setMinimized(boolean visible);
     public native void    reload();
     public native boolean isValid();
     public native long    getMemoryUsage();
+    public native int     getVersion();
 
     public native void keyClick  (int keyCode);
     public native void sendText  (String text);

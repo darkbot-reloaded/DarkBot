@@ -23,6 +23,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 public class ConfigManager {
+    // Used for debug mode
+    public static boolean FORCE_NO_OP = false;
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -101,6 +103,7 @@ public class ConfigManager {
     }
 
     public IDarkBotAPI getAPI() {
+        if (FORCE_NO_OP) return new NoopApiAdapter();
         try {
             if (config.BOT_SETTINGS.API == 0) return new DarkBotApiAdapter();
             else if (config.BOT_SETTINGS.API == 1) return new DarkFlashApiAdapter();

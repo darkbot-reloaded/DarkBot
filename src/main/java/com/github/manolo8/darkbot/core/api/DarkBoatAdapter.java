@@ -44,6 +44,11 @@ public class DarkBoatAdapter extends ApiAdapter {
     }
 
     @Override
+    public int getVersion() {
+        return API.getVersion();
+    }
+
+    @Override
     public void mouseMove(int x, int y) {
         API.mouseMove(x, y);
     }

@@ -171,7 +171,7 @@ public class PetManager extends Gui {
 
     private void selectModule(int moduleId, int submoduleIdx) {
         if (System.currentTimeMillis() < this.selectModuleTime) return;
-        this.selectModuleTime = System.currentTimeMillis() + 500;
+        this.selectModuleTime = System.currentTimeMillis() + 750;
 
         switch (selection) {
             case SELECTED:

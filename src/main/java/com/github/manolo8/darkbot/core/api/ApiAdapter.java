@@ -60,6 +60,9 @@ public abstract class ApiAdapter implements IDarkBotAPI {
     public long getMemoryUsage() {
         return 0L;
     }
+    public int getVersion() {
+        return 0;
+    }
 
     public void setSize(int width, int height) {
         if (width == -1 && height == -1) {

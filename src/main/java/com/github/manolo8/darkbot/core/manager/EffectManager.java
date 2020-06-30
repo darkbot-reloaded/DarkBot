@@ -66,7 +66,7 @@ public class EffectManager implements Manager {
         STICKY_BOMB(56),
         POLARITY_POSITIVE(65),
         POLARITY_NEGATIVE(66),
-        INFECTION(98);
+        INFECTION(85);
 
         private final int id;
 

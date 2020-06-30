@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.utils.LogUtils;
 
 import javax.swing.*;
@@ -21,5 +22,12 @@ public class Bot {
             e.printStackTrace();
         }
         SwingUtilities.invokeLater(Main::new);
+    }
+
+    public static class NoOpBot {
+        public static void main(String[] args) {
+            ConfigManager.FORCE_NO_OP = true;
+            Bot.main(args);
+        }
     }
 }

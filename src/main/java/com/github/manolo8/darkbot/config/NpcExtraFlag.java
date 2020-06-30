@@ -9,6 +9,6 @@ public interface NpcExtraFlag {
     }
 
     default String getId() {
-        return getClass().getCanonicalName() + (getClass().isEnum() ? ((Enum) this).name() : getName());
+        return getClass().getCanonicalName() + (getClass().isEnum() ? ((Enum<?>) this).name() : getName());
     }
 }
