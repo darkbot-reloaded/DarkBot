@@ -15,7 +15,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class Entity extends Updatable {
     public Main main;
     public Map<String, Object> metadata;
-    public LocationInfo locationInfo = new LocationInfo(0);
+    public LocationInfo locationInfo = new LocationInfo();
     public Clickable clickable = new Clickable();
     public ObjArray traits = ObjArray.ofVector(true);
 

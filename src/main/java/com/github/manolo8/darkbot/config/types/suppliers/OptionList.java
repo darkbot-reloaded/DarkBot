@@ -16,6 +16,9 @@ public abstract class OptionList<T> implements ComboBoxModel<String> {
     public String getTooltipFromVal(T value) {
         return null;
     }
+    public String getShortText(T value) {
+        return getText(value);
+    }
     public abstract List<String> getOptions();
 
     private Object selectedItem;

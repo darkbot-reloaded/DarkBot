@@ -21,7 +21,7 @@ public class UnresolvedPlayer {
     }
 
     public boolean shouldWait() {
-        return System.currentTimeMillis() > lastUpdate + (retries * retries * 1000);
+        return System.currentTimeMillis() < lastUpdate + (retries * retries * 1000);
     }
 
 }

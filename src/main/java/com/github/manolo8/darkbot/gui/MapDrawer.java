@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
+import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.core.entities.Barrier;
 import com.github.manolo8.darkbot.core.entities.BasePoint;
 import com.github.manolo8.darkbot.core.entities.BattleStation;
@@ -22,6 +23,8 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
+import com.github.manolo8.darkbot.core.objects.LocationInfo;
+import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.utils.Drive;
@@ -43,6 +46,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +54,7 @@ import java.util.TreeMap;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -195,7 +200,7 @@ public class MapDrawer extends JPanel {
 
         synchronized (Main.UPDATE_LOCKER) {
             drawZones(g2);
-            if (config.BOT_SETTINGS.DISPLAY.SHOW_ZONES) drawCustomZones(g2);
+            if (hasFlag(DisplayFlag.ZONES)) drawCustomZones(g2);
             drawInfos(g2);
             drawHealth(g2);
             drawTrail(g2);
@@ -232,13 +237,14 @@ public class MapDrawer extends JPanel {
             if (!drawGroup(g2)) drawBoosters(g2);
         }
 
-        drawBackgroundedText(g2, Align.LEFT,
-                "cre/h " + STAT_FORMAT.format(statsManager.earnedCredits()),
-                "uri/h " + STAT_FORMAT.format(statsManager.earnedUridium()),
-                "exp/h " + STAT_FORMAT.format(statsManager.earnedExperience()),
-                "hon/h " + STAT_FORMAT.format(statsManager.earnedHonor()),
-                "cargo " + statsManager.deposit + "/" + statsManager.depositTotal,
-                "death " + guiManager.deaths + '/' + config.GENERAL.SAFETY.MAX_DEATHS);
+        if (hasFlag(DisplayFlag.STATS_AREA))
+            drawBackgroundedText(g2, Align.LEFT,
+                    "cre/h " + STAT_FORMAT.format(statsManager.earnedCredits()),
+                    "uri/h " + STAT_FORMAT.format(statsManager.earnedUridium()),
+                    "exp/h " + STAT_FORMAT.format(statsManager.earnedExperience()),
+                    "hon/h " + STAT_FORMAT.format(statsManager.earnedHonor()),
+                    "cargo " + statsManager.deposit + "/" + statsManager.depositTotal,
+                    "death " + guiManager.deaths + '/' + config.GENERAL.SAFETY.MAX_DEATHS);
 
         if (hovering && main.config.BOT_SETTINGS.MAP_START_STOP) drawActionButton(g2);
     }
@@ -327,7 +333,7 @@ public class MapDrawer extends JPanel {
     private void drawHealth(Graphics2D g2) {
         g2.setColor(TEXT);
         g2.setFont(FONT_MID);
-        if (!config.BOT_SETTINGS.DISPLAY.HIDE_NAME)
+        if (!hasFlag(DisplayFlag.HERO_NAME))
             drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40, Align.MID);
         drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20, 12);
 
@@ -363,7 +369,7 @@ public class MapDrawer extends JPanel {
             Location last = null;
             for (Location point : points) {
                 g2.setColor(TRAIL[(int) (curr++ / max)]);
-                if (last != null) drawLine(g2, last.x, last.y, point.x, point.y);
+                if (last != null) drawLine(g2, last, point);
                 last = point;
             }
         }
@@ -406,6 +412,12 @@ public class MapDrawer extends JPanel {
         g2.setColor(BOXES);
         for (Box box : boxes) drawEntity(g2, box.locationInfo.now, box.boxInfo.collect);
 
+        if (config.BOT_SETTINGS.DEV_STUFF) {
+            g2.setColor(GOING);
+            for (Npc npc : npcs) drawLine(g2, npc.locationInfo, npc.shipInfo.destination);
+            for (Ship ship : ships) drawLine(g2, ship.locationInfo, ship.shipInfo.destination);
+        }
+
         g2.setColor(NPCS);
         for (Npc npc : npcs) drawEntity(g2, npc.locationInfo.now, npc.npcInfo.kill);
         if (fakeNpc.isPingAlive()) {
@@ -420,14 +432,13 @@ public class MapDrawer extends JPanel {
             Location loc = ship.locationInfo.now;
             g2.setColor(ship.playerInfo.isEnemy() ? ENEMIES : ALLIES);
             drawEntity(g2, ship.locationInfo.now, false);
-            if (config.BOT_SETTINGS.DISPLAY.SHOW_NAMES)
+            if (hasFlag(DisplayFlag.USERNAMES))
                 drawString(g2, ship.playerInfo.username, translateX(loc.x), translateY(loc.y) - 5, Align.MID);
         }
 
         if (hero.target != null && !hero.target.removed) {
             g2.setColor(GOING);
-            Location now = hero.target.locationInfo.now, later = hero.target.locationInfo.destinationInTime(200);
-            drawLine(g2, now.x, now.y, later.x, later.y);
+            drawLine(g2, hero.target.locationInfo, hero.target.shipInfo.destination);
             g2.setColor(TARGET);
             drawEntity(g2, hero.target.locationInfo.now, true);
         }
@@ -482,9 +493,11 @@ public class MapDrawer extends JPanel {
     }
 
     private boolean drawGroup(Graphics2D g2) {
+        if (!hasFlag(DisplayFlag.GROUP_AREA)) return false;
+
         Group group = main.guiManager.group.group;
         if (group == null || !group.isValid()) return false;
-        boolean hideNames = config.BOT_SETTINGS.DISPLAY.HIDE_GROUP_NAMES;
+        boolean hideNames = !hasFlag(DisplayFlag.GROUP_NAMES);
         drawBackgrounded(g2, 28, Align.RIGHT,
                 (x, y, w, member) -> {
                     Font font = FONT_SMALL;
@@ -510,16 +523,19 @@ public class MapDrawer extends JPanel {
     }
 
     private void drawBoosters(Graphics2D g2) {
+        if (!hasFlag(DisplayFlag.BOOSTER_AREA)) return;
+
+        Stream<BoosterProxy.Booster> boosters = main.facadeManager.booster.boosters.stream().filter(b -> b.amount > 0);
+        if (hasFlag(DisplayFlag.SORT_BOOSTERS))
+            boosters = boosters.sorted(Comparator.comparingDouble(b -> -b.cd));
+
         drawBackgrounded(g2, 15, Align.RIGHT,
                 (x, y, w, booster) -> {
                     g2.setColor(booster.getColor());
                     g2.drawString(booster.toSimpleString(), x, y + 14);
                 },
                 b -> g2.getFontMetrics().stringWidth(b.toSimpleString()),
-                main.facadeManager.booster.boosters.stream()
-                        .filter(b -> b.amount > 0)
-                        //.sorted(Comparator.comparingDouble(b -> -b.cd)) // Maybe setting?
-                        .collect(Collectors.toList()));
+                boosters.collect(Collectors.toList()));
     }
 
     private void drawActionButton(Graphics2D g2) {
@@ -587,7 +603,7 @@ public class MapDrawer extends JPanel {
         for (int i = 0; i < zones.size(); i++) {
             Location loc1 = zones.get(i).innerPoint(0.5, 0.5, MapManager.internalWidth, MapManager.internalHeight);
             Location loc2 = zones.get((i + 1) % zones.size()).innerPoint(0.5, 0.5, MapManager.internalWidth, MapManager.internalHeight);
-            drawLine(g2, loc1.x, loc1.y, loc2.x, loc2.y);
+            drawLine(g2, loc1, loc2);
         }
     }
 
@@ -601,8 +617,8 @@ public class MapDrawer extends JPanel {
     private void drawHealth(Graphics2D g2, HealthHolder health, int x, int y, int width, int height) {
         g2.setFont(FONT_SMALL);
 
-        boolean compact = height < 8;
-        int margin = compact ? 2 : 0;
+        boolean displayAmount = height >= 8 && hasFlag(DisplayFlag.HP_SHIELD_NUM);
+        int margin = height < 8 ? 2 : 0;
 
         int totalMaxHealth = health.getMaxHp() + health.getHull();
         int hullWidth = totalMaxHealth == 0 ? 0 : (health.getHull() * width / totalMaxHealth);
@@ -615,7 +631,7 @@ public class MapDrawer extends JPanel {
         g2.fillRect(x, y, hullWidth, height);
 
         g2.setColor(TEXT);
-        if (!compact)
+        if (displayAmount)
             drawString(g2, HEALTH_FORMAT.format(health.getHull() + health.getHp()) + "/" +
                     HEALTH_FORMAT.format(totalMaxHealth), x + width / 2, y + height - 2, Align.MID);
 
@@ -625,7 +641,7 @@ public class MapDrawer extends JPanel {
             g2.setColor(SHIELD);
             g2.fillRect(x, y + height + margin, (int) (health.shieldPercent() * width), height);
             g2.setColor(TEXT);
-            if (!compact)
+            if (displayAmount)
                 drawString(g2, HEALTH_FORMAT.format(health.getShield()) + "/" +
                         HEALTH_FORMAT.format(health.getMaxShield()), x + width / 2, y + height + height - 2, Align.MID);
         }
@@ -644,8 +660,13 @@ public class MapDrawer extends JPanel {
         g2.drawString(str, x, y);
     }
 
-    private void drawLine(Graphics2D g2, double x1, double y1, double x2, double y2) {
-        g2.drawLine(translateX(x1), translateY(y1), translateX(x2), translateY(y2));
+    private void drawLine(Graphics2D g2, LocationInfo a, LocationInfo b) {
+        if (!a.isLoaded() || !b.isLoaded()) return;
+        drawLine(g2, a.now, b.now);
+    }
+
+    private void drawLine(Graphics2D g2, Location a, Location b) {
+        g2.drawLine(translateX(a.x), translateY(a.y), translateX(b.x), translateY(b.y));
     }
 
     private void drawEntity(Graphics2D g2, Location loc, boolean fill) {
@@ -653,6 +674,10 @@ public class MapDrawer extends JPanel {
         int y = this.translateY(loc.y) - 1;
         if (fill) g2.fillRect(x, y, 4, 4);
         else g2.drawRect(x, y, 3, 3);
+    }
+    
+    private boolean hasFlag(DisplayFlag df) {
+        return config.BOT_SETTINGS.DISPLAY.TOGGLE.contains(df);
     }
 
     protected int translateX(double x) {

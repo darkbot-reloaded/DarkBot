@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.config.types.Options;
 import com.github.manolo8.darkbot.config.types.Tag;
 import com.github.manolo8.darkbot.config.types.TagDefault;
 import com.github.manolo8.darkbot.config.types.suppliers.ApiSupplier;
+import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
@@ -15,12 +16,14 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
+import com.github.manolo8.darkbot.gui.tree.components.JCheckboxListField;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,6 +32,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
+
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.*;
 
 public class Config {
 
@@ -171,17 +176,15 @@ public class Config {
         public @Option boolean CONFIRM_EXIT = true;
         public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
         public @Option boolean DEV_STUFF = false;
-        public @Option("Browser/API, restart to apply") @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
-        public @Option("Disable master password") boolean DISABLE_MASTER_PASSWORD = false;
+        public @Option @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
+        public @Option boolean DISABLE_MASTER_PASSWORD = false;
 
         public @Option Display DISPLAY = new Display();
         public static class Display {
-            //public @Option @Editor(JCheckedComboBox.class) @OptionList(DisplayFlags.class) Set<DisplayFlags> ENABLED;
-            public @Option boolean SHOW_NAMES;
-            public @Option boolean HIDE_NAME;
-            public @Option boolean HIDE_GROUP_NAMES;
+            public @Option @Editor(JCheckboxListField.class) @Options(DisplayFlag.Supplier.class)
+                    Set<DisplayFlag> TOGGLE = EnumSet.of(
+                            HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA);
             public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
-            public @Option boolean SHOW_ZONES = true;
             public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
 
             public int width = 1280;

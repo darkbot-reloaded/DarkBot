@@ -155,8 +155,9 @@ public class MapManager implements Manager {
 
             if (layerIdx != Integer.MAX_VALUE) continue;
 
-            int x = API.readMemoryInt(API.readMemoryLong(layer, 0x48, 0x20, 0x18) + 0x58);
-            int y = API.readMemoryInt(API.readMemoryLong(layer, 0x48, 0x20, 0x18) + 0x5C);
+            long addr = API.readMemoryLong(layer, 0x48, 0x20, 0x18);
+            int x = API.readMemoryInt(addr + 0x58);
+            int y = API.readMemoryInt(addr + 0x5C);
 
             double scale = (internalWidth / minimapX) / 20;
 

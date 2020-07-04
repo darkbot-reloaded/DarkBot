@@ -16,13 +16,13 @@ public class LocationInfo extends Updatable {
     public double angle;
     public double speed;
 
+    public LocationInfo() {}
+
     public LocationInfo(long address) {
         this.address = address;
     }
 
     public LocationInfo(double x, double y) {
-        this(0);
-
         this.now.x = x;
         this.now.y = y;
     }

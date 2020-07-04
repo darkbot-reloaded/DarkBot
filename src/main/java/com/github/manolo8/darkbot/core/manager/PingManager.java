@@ -55,7 +55,7 @@ public class PingManager implements Manager {
         if (lastPings.size < 0 || lastPings.size > 100) return false;
 
         if (lastPings.size != 0 && currSize != lastPings.size) lastCheck = System.currentTimeMillis();
-        else if (System.currentTimeMillis() - lastCheck > 10_000) return false;
+        else if (System.currentTimeMillis() - lastCheck > 20_000) return false;
 
         this.currSize = lastPings.size;
 
@@ -67,9 +67,7 @@ public class PingManager implements Manager {
     }
 
     private void searchPingManager() {
-        Arrays.stream(API.queryMemoryLong(1000, 10_000))
-                .unordered()
-                .parallel()
+        Arrays.stream(API.queryMemoryInt(15000, 100))
                 .filter(val -> API.readMemoryInt(val + 16) == 0)
                 .map(val -> API.readMemoryLong(val + 8)) // Get ping manager address
                 .distinct()
@@ -88,6 +86,6 @@ public class PingManager implements Manager {
                 .findAny()
                 .ifPresent(pings -> this.lastPings = pings);
 
-        searchTime = System.currentTimeMillis() + Math.min(300_000, ++retries * 10_000);
+        searchTime = System.currentTimeMillis() + Math.min(300_000, ++retries * 5_000);
     }
 }

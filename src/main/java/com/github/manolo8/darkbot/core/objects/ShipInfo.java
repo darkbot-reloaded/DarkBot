@@ -10,6 +10,7 @@ public class ShipInfo extends Updatable {
     public double angle;
     public long target;
     private long keepTargetTime;
+    public LocationInfo destination = new LocationInfo();
 
     @Override
     public void update() {
@@ -20,6 +21,9 @@ public class ShipInfo extends Updatable {
         }
         angle = Math.toRadians(API.readMemoryInt(API.readMemoryLong(address + 48) + 32));
         speed = API.readMemoryInt(API.readMemoryLong(address + 72) + 40);
+
+        destination.update(API.readMemoryLong(address + 96));
+        destination.update();
     }
 
 }
