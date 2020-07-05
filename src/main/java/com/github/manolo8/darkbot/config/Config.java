@@ -163,6 +163,7 @@ public class Config {
         public @Option @Num(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
         public @Option @Num(max = 60 * 12, step = 10) int PAUSE_FOR = 5;
         public @Option @Editor(JPercentField.class) double DRONE_REPAIR_PERCENTAGE = 0.9;
+        public @Option boolean HONOR_LOST_EXACT = true;
         public @Option boolean LOG_CHAT = false;
     }
 

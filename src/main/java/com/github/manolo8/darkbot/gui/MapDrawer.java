@@ -333,7 +333,7 @@ public class MapDrawer extends JPanel {
     private void drawHealth(Graphics2D g2) {
         g2.setColor(TEXT);
         g2.setFont(FONT_MID);
-        if (!hasFlag(DisplayFlag.HERO_NAME))
+        if (hasFlag(DisplayFlag.HERO_NAME))
             drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40, Align.MID);
         drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20, 12);
 

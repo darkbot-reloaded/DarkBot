@@ -116,12 +116,18 @@ public class StatsManager implements Manager {
     private void updateHonor(double honor) {
         if (honor == 0) return;
         double honorDiff = honor - this.honor;
-        if (honorDiff < -10_000) {
-            System.out.println("Paused bot, lost " + honorDiff + " honor.");
-            main.setModule(new DisconnectModule(null, I18n.get("module.disconnect.reason.honor")));
-        }
         if (this.honor != 0) earnedHonor += honorDiff;
         this.honor = honor;
+
+        if (honorDiff > -10_000) return;
+
+        System.out.println("Paused bot, lost " + honorDiff + " honor.");
+        double friendlies = Math.log(Math.abs(honorDiff) / 100) / Math.log(2);
+        boolean isExact = Math.abs(friendlies - Math.round(friendlies)) < 0.01;
+        System.out.println("Look like " + friendlies + " friendly kills, credible & pausing: " + isExact);
+
+        if (!main.config.MISCELLANEOUS.HONOR_LOST_EXACT || isExact)
+            main.setModule(new DisconnectModule(null, I18n.get("module.disconnect.reason.honor")));
     }
 
     public long runningTime() {
