@@ -71,6 +71,7 @@ public interface IDarkBotAPI {
     long[] queryMemory(byte[] query, int maxQuantity);
 
     void setVisible(boolean visible);
+    void setMinimized(boolean visible);
 
     void handleRefresh();
 

@@ -178,6 +178,7 @@ public class Config {
         public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
         public @Option boolean DEV_STUFF = false;
         public @Option @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
+        public @Option boolean FULLY_HIDE_API = true;
         public @Option boolean DISABLE_MASTER_PASSWORD = false;
 
         public @Option Display DISPLAY = new Display();

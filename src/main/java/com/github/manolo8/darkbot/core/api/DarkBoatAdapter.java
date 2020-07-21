@@ -34,6 +34,11 @@ public class DarkBoatAdapter extends ApiAdapter {
     }
 
     @Override
+    public void setMinimized(boolean visible) {
+        API.setMinimized(visible);
+    }
+
+    @Override
     public boolean isValid() {
         return API.isValid();
     }

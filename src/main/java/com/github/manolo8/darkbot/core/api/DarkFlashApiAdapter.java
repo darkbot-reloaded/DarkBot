@@ -56,6 +56,10 @@ public class DarkFlashApiAdapter extends ApiAdapter {
         frame.setVisible(false);
     }
 
+    public void setMinimized(boolean visible) {
+        API.setVisible(visible);
+    }
+
     @Override
     public boolean isValid() {
         return willBeValid < System.currentTimeMillis();

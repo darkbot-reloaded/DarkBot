@@ -53,6 +53,10 @@ public abstract class ApiAdapter implements IDarkBotAPI {
         if (visible) USER_32.SetForegroundWindow(window);
     }
 
+    public void setMinimized(boolean visible) {
+        this.setVisible(visible);
+    }
+
     public void rawKeyboardClick(char ch) {
         keyboardClick(ch);
     }
