@@ -10,15 +10,7 @@ import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.itf.Module;
-import com.github.manolo8.darkbot.core.manager.EffectManager;
-import com.github.manolo8.darkbot.core.manager.FacadeManager;
-import com.github.manolo8.darkbot.core.manager.GuiManager;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
-import com.github.manolo8.darkbot.core.manager.MapManager;
-import com.github.manolo8.darkbot.core.manager.PingManager;
-import com.github.manolo8.darkbot.core.manager.SettingsManager;
-import com.github.manolo8.darkbot.core.manager.StarManager;
-import com.github.manolo8.darkbot.core.manager.StatsManager;
+import com.github.manolo8.darkbot.core.manager.*;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
@@ -73,10 +65,11 @@ public class Main extends Thread implements PluginListener {
     public final BackpageManager backpage        = new BackpageManager(this);
     public final PluginHandler pluginHandler     = new PluginHandler();
     public final FeatureRegistry featureRegistry = new FeatureRegistry(this, pluginHandler);
+    public final RepairManager repairManager     = new RepairManager();
 
     private final MainGui form;
     private final BotInstaller botInstaller = new BotInstaller(
-            settingsManager, facadeManager, effectManager, guiManager, mapManager, hero, statsManager, pingManager);
+            settingsManager, facadeManager, effectManager, guiManager, mapManager, hero, statsManager, pingManager, repairManager);
 
     public Module module;
     public long lastRefresh = System.currentTimeMillis();
@@ -159,6 +152,7 @@ public class Main extends Thread implements PluginListener {
         effectManager.tick();
         guiManager.tick();
         statsManager.tick();
+        repairManager.tick();
 
         tickingModule = running && guiManager.canTickModule();
         if (tickingModule) tickRunning();

@@ -18,6 +18,7 @@ public class LogUtils {
     public static final DateTimeFormatter LOG_DATE = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
     public static final DateTimeFormatter FILENAME_DATE = DateTimeFormatter.ofPattern("uuuu-MM-dd_HH-mm-ss_SSS");
     public static final Path LOG_FOLDER = Paths.get("logs");
+    public static final String START_TIME = LocalDateTime.now().format(FILENAME_DATE);
 
     public static void setOutputToFile() {
         if (!Files.exists(LOG_FOLDER)) createFolder();
@@ -45,7 +46,7 @@ public class LogUtils {
     }
 
     private static PrintStream getLogger() throws FileNotFoundException, UnsupportedEncodingException {
-        return new PrintStreamWithDate("logs/" + LocalDateTime.now().format(FILENAME_DATE) + ".log");
+        return new PrintStreamWithDate("logs/" + START_TIME + ".log");
     }
 
     private static void createFolder() {

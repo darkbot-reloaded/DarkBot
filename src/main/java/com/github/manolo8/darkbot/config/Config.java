@@ -165,6 +165,7 @@ public class Config {
         public @Option @Editor(JPercentField.class) double DRONE_REPAIR_PERCENTAGE = 0.9;
         public @Option boolean HONOR_LOST_EXACT = true;
         public @Option boolean LOG_CHAT = false;
+        public @Option boolean LOG_DEATHS = false;
     }
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
