@@ -310,7 +310,8 @@ public class MapDrawer extends JPanel {
         g2.setFont(FONT_SMALL);
         String info = I18n.get("gui.map.info",
                 Main.VERSION.toString(),
-                (main.isRunning() ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"),
+                (main.isRunning() || !config.MISCELLANEOUS.RESET_REFRESH ?
+                        Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"),
                 Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000));
         drawString(g2, info, 5, 12, Align.LEFT);
         if (main.module != null) {

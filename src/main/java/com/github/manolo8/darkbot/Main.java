@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 32");
+    public static final Version VERSION      = new Version("1.13.17 beta 33");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -252,7 +252,8 @@ public class Main extends Thread implements PluginListener {
     }
 
     private void onRunningToggle(boolean running) {
-        lastRefresh = System.currentTimeMillis();
+        if (config.MISCELLANEOUS.RESET_REFRESH)
+            lastRefresh = System.currentTimeMillis();
         if (running && module instanceof TemporalModule) {
             moduleId = "(none)";
         }
