@@ -67,7 +67,7 @@ public class PingManager implements Manager {
     }
 
     private void searchPingManager() {
-        Arrays.stream(API.queryMemoryInt(15000, 100))
+        Arrays.stream(API.queryMemoryInt(15000, 10_000))
                 .filter(val -> API.readMemoryInt(val + 16) == 0)
                 .map(val -> API.readMemoryLong(val + 8)) // Get ping manager address
                 .distinct()

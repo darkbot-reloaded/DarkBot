@@ -35,7 +35,7 @@ public class SettingsManager implements Manager, Tickable {
 
         this.force2d = API.readMemoryInt(address, 0x2D0, 0x20);
 
-        this.lang = API.readMemoryString(address, 0x248);
+        this.lang = API.readMemoryString(address, 0x258);
     }
 
 

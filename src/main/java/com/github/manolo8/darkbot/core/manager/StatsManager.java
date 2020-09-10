@@ -69,7 +69,7 @@ public class StatsManager implements Manager {
 
         if (settingsAddress == 0) return;
         if (instance == null || instance.isEmpty() || !instance.startsWith("http")) {
-            instance = API.readMemoryString(API.readMemoryLong(settingsAddress + 600));
+            instance = API.readMemoryString(API.readMemoryLong(settingsAddress + 616));
         }
     }
 
