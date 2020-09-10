@@ -78,14 +78,18 @@ public class LoginUtils {
     }
 
     public static void findPreloader(LoginData loginData) {
-        String flashEmbed = Http.create("https://" + loginData.getUrl() + "/indexInternal.es?action=internalMapRevolution", false)
-                .setRawHeader("Cookie", "dosid=" + loginData.getSid())
-                .consumeInputStream(inputStream ->
-                        new BufferedReader(new InputStreamReader(inputStream))
-                                .lines()
-                                .filter(l -> l.contains("flashembed("))
-                                .findFirst()
-                                .orElseThrow(WrongCredentialsException::new));
+        Http req = Http.create("https://" + loginData.getUrl() + "/indexInternal.es?action=internalMapRevolution", false)
+                .setRawHeader("Cookie", "dosid=" + loginData.getSid());
+
+        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.SPOOF_CLIENT)
+            req.setUserAgent("BigpointClient/1.1.0");
+
+        String flashEmbed = req.consumeInputStream(inputStream ->
+                new BufferedReader(new InputStreamReader(inputStream))
+                        .lines()
+                        .filter(l -> l.contains("flashembed("))
+                        .findFirst()
+                        .orElseThrow(WrongCredentialsException::new));
 
         Matcher m = DATA_PATTERN.matcher(flashEmbed);
         if (m.find()) loginData.setPreloader(m.group(1), replaceParameters(m.group(2)));
