@@ -2,184 +2,201 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.entities.Drone;
-import com.github.manolo8.darkbot.backpage.entities.Hangar;
 import com.github.manolo8.darkbot.backpage.entities.Item;
 import com.github.manolo8.darkbot.backpage.entities.ItemInfo;
 import com.github.manolo8.darkbot.backpage.entities.ShipInfo;
+import com.github.manolo8.darkbot.backpage.hangar.Hangar;
+import com.github.manolo8.darkbot.backpage.hangar.HangarResponse;
+import com.github.manolo8.darkbot.core.itf.Tickable;
 import com.github.manolo8.darkbot.utils.Base64Utils;
+import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.List;
-import java.util.function.Consumer;
 
-public class HangarManager {
+public class HangarManager implements Tickable {
+    private final Gson gson = new Gson();
 
-    private static final Gson GSON = new Gson();
-    private static final JsonParser JSON_PARSER = new JsonParser();
-    private static final Type DRONE_LIST = new TypeToken<List<Drone>>(){}.getType();
-    private static final Type ITEMINFO_LIST = new TypeToken<List<ItemInfo>>(){}.getType();
-    private static final Type ITEM_LIST = new TypeToken<List<Item>>(){}.getType();
-    private static final Type SHIPINFO_LIST = new TypeToken<List<ShipInfo>>(){}.getType();
-    private static final Type STRING_LIST = new TypeToken<List<String>>(){}.getType();
+    @Deprecated
+    private final LegacyHangarManager legacyHangarManager;
 
     private final Main main;
-    private final BackpageManager backpageManager;
-    private long lastHangarChange = 0;
-    private List<Hangar> hangars;
-    private List<Drone> drones;
-    private List<Item> items;
-    private List<ItemInfo> itemInfos;
-    private List<ShipInfo> shipInfos;
-    private List<String> types;
-    private List<String> lootIds;
-    private long lastHangarDataUpdate = 0;
+    private final BackpageManager backpage;
 
-    HangarManager(Main main, BackpageManager backpageManager) {
+    private HangarResponse hangarList;
+    private HangarResponse currentHangar;
+
+    private volatile long updateHangarListEvery = -1, updateCurrentHangarEvery = -1;
+    private long lastHangarListUpdate, lastCurrentHangarUpdate;
+
+
+    public HangarManager(Main main, BackpageManager backpage) {
         this.main = main;
-        this.backpageManager = backpageManager;
-        this.hangars = new ArrayList<>();
-        this.drones = new ArrayList<>();
-        this.items = new ArrayList<>();
-        this.itemInfos = new ArrayList<>();
-        this.shipInfos = new ArrayList<>();
+        this.backpage = backpage;
+
+        this.legacyHangarManager = new LegacyHangarManager(main, backpage);
     }
 
-    public boolean changeHangar(String hangarId) {
-        if (lastHangarChange > System.currentTimeMillis() || !backpageManager.sidStatus().contains("OK")) return false;
-
+    @Override
+    public void tick() {
         try {
-            String token = backpageManager.getConnection("indexInternal.es", Method.GET)
-                    .setRawParam("action", "internalDock")
-                    .consumeInputStream(backpageManager::getReloadToken);
+            if (updateHangarListEvery != -1 &&
+                    (lastHangarListUpdate + updateCurrentHangarEvery) < System.currentTimeMillis()) {
+                long timer = System.currentTimeMillis();
+                updateHangarList();
+                lastHangarListUpdate = System.currentTimeMillis();
+                updateHangarListEvery = -1;
 
-            if (token == null || token.isEmpty()) return false;
-
-            return !backpageManager.getConnection("indexInternal.es", Method.GET, 2000)
-                    .addSupplier(() -> this.lastHangarChange = System.currentTimeMillis() + 12_000)
-                    .setRawParam("action", "internalDock")
-                    .setRawParam("subAction", "changeHangar")
-                    .setRawParam("hangarId", hangarId)
-                    .setRawParam("reloadToken", token)
-                    .getContent().contains("\"type\":\"error\"");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.lastHangarChange = System.currentTimeMillis() + 5_000;
-            return false;
-        }
-    }
-
-    public Boolean checkDrones() {
-        updateHangarData(500);
-        boolean repaired = !drones.isEmpty();
-        for (Drone drone : drones) {
-            if (drone.getDamage() / 100d >= main.config.MISCELLANEOUS.DRONE_REPAIR_PERCENTAGE) {
-                repaired &= repairDrone(drone);
+                System.out.println("HangarList updated in: " + (System.currentTimeMillis() - timer) + "ms");
+                Time.sleep(500);
             }
-        }
-        return repaired;
-    }
 
-    private boolean repairDrone(Drone drone) {
-        try {
-            String encodeParams = Base64Utils.encode( "{\"action\":\"repairDrone\",\"lootId\":\""
-                    + drone.getLoot() + "\",\"repairPrice\":" + drone.getRepairPrice() +
-                    ",\"params\":{\"hi\":" + getActiveHangar() + "}," +
-                    "\"itemId\":\"" + drone.getItemId() + "\",\"repairCurrency\":\"" + drone.getRepairCurrency() +
-                    "\",\"quantity\":1,\"droneLevel\":" + drone.getDroneLevel() + "}");
-            String url = "flashAPI/inventory.php?action=repairDrone&params="+encodeParams;
-            String json = this.backpageManager.getDataInventory(url);
-            return json.contains("'isError':0");
+            if (updateCurrentHangarEvery != -1 &&
+                    (lastCurrentHangarUpdate + updateCurrentHangarEvery) < System.currentTimeMillis()) {
+                long timer = System.currentTimeMillis();
+                updateCurrentHangar();
+                lastCurrentHangarUpdate = System.currentTimeMillis();
+                updateCurrentHangarEvery = -1;
+
+                System.out.println("CurrentHangar updated in: " + (System.currentTimeMillis() - timer) + "ms");
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
     }
 
+    public HangarResponse getHangarList() {
+        return hangarList;
+    }
+
+    public HangarResponse getCurrentHangar() {
+        return currentHangar;
+    }
+
+    /**
+     * Request hangar list to be updated within a certain timeframe.
+     * This method should be repeatedly called to request updates
+     * @param millis The maximum time to wait
+     */
+    public void requestUpdateCurrentHangar(long millis) {
+        if (millis < 0) return;
+        this.updateCurrentHangarEvery = millis;
+    }
+
+    /**
+     * Request current hangar to be updated within a certain timeframe.
+     * This method should be repeatedly called to request updates
+     * @param millis The maximum time to wait
+     */
+    public void requestUpdateHangarList(long millis) {
+        if (millis < 0) return;
+        this.updateHangarListEvery = millis;
+    }
+
+    public void updateCurrentHangar() throws Exception {
+        if (hangarList == null) updateHangarList();
+
+        for (Hangar hangar : hangarList.getData().getRet().getHangars())
+            if (hangar.isActive()) {
+                this.currentHangar = getHangarResponseById(hangar.getHangarId());
+                break;
+            }
+    }
+
+    public void updateHangarList() throws Exception {
+        this.hangarList = deserializeHangar(getInputStream("getHangarList", new JsonObject()));
+    }
+
+    public HangarResponse getHangarResponseById(int hangarId) throws Exception {
+        JsonObject paramObj = new JsonObject();
+        JsonObject hangarObj = new JsonObject();
+
+        hangarObj.addProperty("hi", hangarId);
+        paramObj.add("params", hangarObj);
+
+        return deserializeHangar(getInputStream("getHangar", paramObj));
+    }
+
+    public InputStream getInputStream(String action, JsonObject json) throws IOException {
+        return backpage.getConnection("flashAPI/inventory.php", Method.POST)
+                .setRawParam("action", action)
+                .setParam("params", Base64Utils.encode(json.toString()))
+                .getInputStream();
+    }
+
+    private HangarResponse deserializeHangar(InputStream in) throws Exception {
+        HangarResponse hangar = gson.fromJson(Base64Utils.decode(in), HangarResponse.class);
+        in.close();
+
+        if (hangar.getData().map != null) {
+            String[] lootIds = hangar.getData().map.get("lootIds");
+
+            hangar.getData().getRet().getItemInfos()
+                    .forEach(itemInfo -> itemInfo.setLocalizationId(lootIds[itemInfo.getLootId()]));
+
+            hangar.getData().map = null;
+        }
+
+        return hangar;
+    }
+
+    /* For backwards compatibility, keep methods from legacy hangar manager */
+    @Deprecated
+    public boolean changeHangar(String hangarId) {
+        return legacyHangarManager.changeHangar(hangarId);
+    }
+
+    @Deprecated
+    public Boolean checkDrones() {
+        return legacyHangarManager.checkDrones();
+    }
+
+    @Deprecated
     public void updateHangars() {
-        String params = "flashAPI/inventory.php?action=getHangarList";
-        String json = backpageManager.getDataInventory(params);
-
-        if (json == null || !(json.contains("'isError':0") || json.contains("\"isError\":0"))) return;
-
-        JsonObject ret = JSON_PARSER.parse(json).getAsJsonObject().get("data").getAsJsonObject().get("ret").getAsJsonObject();
-        hangars.clear();
-        forEachHangar(ret, h -> hangars.add(GSON.fromJson(h, Hangar.class)));
+        legacyHangarManager.updateHangars();
     }
 
+    @Deprecated
     public String getActiveHangar() {
-        return hangars.stream().filter(Hangar::hangarIsActive).findFirst().map(Hangar::getHangarId).orElse(null);
+        return legacyHangarManager.getActiveHangar();
     }
 
+    @Deprecated
     public void updateHangarData(int expiryTime) {
-        if (System.currentTimeMillis() > lastHangarDataUpdate + expiryTime) updateHangarData();
+        legacyHangarManager.updateHangarData(expiryTime);
     }
 
-    private void updateHangarData() {
-        updateHangars();
-        String hangarId = getActiveHangar();
-        if (hangarId == null) return;
-
-        String encodeParams = Base64Utils.encode("{\"params\":{\"hi\":" + hangarId + "}}");
-        String json = this.backpageManager.getDataInventory("flashAPI/inventory.php?action=getHangar&params=" + encodeParams);
-
-        if (json != null) {
-            JsonObject data = JSON_PARSER.parse(json).getAsJsonObject().getAsJsonObject("data");
-            JsonObject ret = data.getAsJsonObject("ret");
-            forEachHangar(ret, h -> {
-                if (!h.get("hangar_is_active").getAsBoolean()) return;
-                this.drones = GSON.fromJson(h.getAsJsonObject("general").get("drones"), DRONE_LIST);
-            });
-            this.items = GSON.fromJson(ret.get("items"), ITEM_LIST);
-            this.itemInfos = GSON.fromJson(ret.get("itemInfo"), ITEMINFO_LIST);
-            this.shipInfos = GSON.fromJson(ret.get("shipInfo"), SHIPINFO_LIST);
-            this.types = GSON.fromJson(data.getAsJsonObject("map").get("types"), STRING_LIST);
-            this.lootIds = GSON.fromJson(data.getAsJsonObject("map").get("lootIds"), STRING_LIST);
-            lastHangarDataUpdate = System.currentTimeMillis();
-        }
-    }
-
-    private void forEachHangar(JsonObject ret, Consumer<JsonObject> consumer) {
-        try {
-            JsonElement val = ret.get("hangars");
-            if (val instanceof JsonArray) val.getAsJsonArray().forEach(i -> consumer.accept(i.getAsJsonObject()));
-            else val.getAsJsonObject().entrySet().forEach(i -> consumer.accept(i.getValue().getAsJsonObject()));
-        } catch (Exception e) {
-            System.err.println("Failed to iterate hangars: " + ret);
-            throw e;
-        }
-    }
-
+    @Deprecated
     public List<Drone> getDrones() {
-        return drones;
+        return legacyHangarManager.getDrones();
     }
 
+    @Deprecated
     public List<Item> getItems() {
-        return items;
+        return legacyHangarManager.getItems();
     }
 
+    @Deprecated
     public List<ItemInfo> getItemInfos() {
-        return itemInfos;
+        return legacyHangarManager.getItemInfos();
     }
 
+    @Deprecated
     public List<ShipInfo> getShipInfos() {
-        return shipInfos;
+        return legacyHangarManager.getShipInfos();
     }
 
+    @Deprecated
     public List<String> getTypes() {
-        return types;
+        return legacyHangarManager.getTypes();
     }
 
+    @Deprecated
     public List<String> getLootIds() {
-        return lootIds;
+        return legacyHangarManager.getLootIds();
     }
 }

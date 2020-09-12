@@ -17,6 +17,10 @@ public class IOUtils {
     }
 
     public static String read(InputStream input, boolean closeStream) throws IOException {
+        return new String(readByteArray(input, closeStream), StandardCharsets.UTF_8);
+    }
+
+    public static byte[] readByteArray(InputStream input, boolean closeStream) throws IOException {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int length;
@@ -25,6 +29,6 @@ public class IOUtils {
         }
         if (closeStream) input.close();
 
-        return result.toString(StandardCharsets.UTF_8.name());
+        return result.toByteArray();
     }
 }
