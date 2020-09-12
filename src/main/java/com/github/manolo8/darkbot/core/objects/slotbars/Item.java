@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Item extends UpdatableAuto {
-    // Use it only if isReady() == false
+    // Only has relevant info if !isReady()
     public final ItemTimer itemTimer = new ItemTimer();
 
     public double quantity;
@@ -35,8 +35,6 @@ public class Item extends UpdatableAuto {
             this.counterType = API.readMemoryString(address, 72);
             this.actionStyle = API.readMemoryString(address, 80);
             this.iconLootId  = API.readMemoryString(address, 96);
-
-            //this.itemTimer.update(API.readMemoryLong(address, 88, 40)); sometimes keeps old address
         }
         super.update(address);
     }
@@ -45,7 +43,6 @@ public class Item extends UpdatableAuto {
         return this.itemTimer.address == 0;
     }
 
-    //Object doesnt exist on "ready" state
     public static class ItemTimer extends UpdatableAuto {
         public double elapsed, startTime, itemDelay, availableIn;
 
