@@ -5,13 +5,14 @@ import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class CategoryBar extends MenuBar {
     public List<Category> categories = new ArrayList<>();
 
-    private ObjArray categoriesArr = ObjArray.ofVector(true);
+    private final ObjArray categoriesArr = ObjArray.ofVector(true);
 
     @Override
     public void update() {
@@ -20,17 +21,42 @@ public class CategoryBar extends MenuBar {
         this.categoriesArr.sync(this.categories, Category::new, null);
     }
 
+    public Category get(CategoryType type) {
+        String id = type.getId();
+        for (Category category : categories) {
+            if (id.equals(category.categoryId)) return category;
+        }
+        return null;
+    }
+
     public static class Category extends UpdatableAuto {
         public String categoryId;
         public List<Item> items = new ArrayList<>();
 
-        private ObjArray itemsArr = ObjArray.ofVector(true);
+        private final ObjArray itemsArr = ObjArray.ofVector(true);
 
         @Override
         public void update() {
             this.categoryId = API.readMemoryString(address, 32);
             this.itemsArr.update(API.readMemoryLong(address + 40));
             this.itemsArr.sync(this.items, Item::new, null);
+        }
+    }
+
+    private enum CategoryType {
+        LASERS,
+        ROCKETS,
+        ROCKET_LAUNCHERS,
+        SPECIAL_ITEMS,
+        MINES,
+        CPUS,
+        BUY_NOW,
+        TECH_ITEMS,
+        SHIP_ABILITIES,
+        DRONE_FORMATIONS;
+
+        public String getId() {
+            return name().toLowerCase(Locale.ROOT);
         }
     }
 }

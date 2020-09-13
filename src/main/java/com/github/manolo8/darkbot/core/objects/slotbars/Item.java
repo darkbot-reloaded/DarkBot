@@ -29,7 +29,6 @@ public class Item extends UpdatableAuto {
 
     @Override
     public void update(long address) {
-        if (address == 0) return;
         if (this.address != address) {
             this.id          = API.readMemoryString(address, 64);
             this.counterType = API.readMemoryString(address, 72);

@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.objects.slotbars;
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,14 +32,19 @@ public class SlotBar extends MenuBar {
         public int slotNumber;
         public boolean premium; //not sure
         public String slotBarId;
-        public Item item = new Item();
+        public @Nullable Item item;
 
         @Override
         public void update() {
             this.slotNumber = API.readMemoryInt(address + 32);
             this.premium    = API.readMemoryBoolean(address + 36);
             this.slotBarId  = API.readMemoryString(address, 48);
-            this.item.update(API.readMemoryLong(address + 40));
+            long itemPtr = API.readMemoryLong(address + 40);
+            if (itemPtr == 0) item = null;
+            else {
+                if (item == null) item = new Item();
+                item.update(itemPtr);
+            }
         }
     }
 }
