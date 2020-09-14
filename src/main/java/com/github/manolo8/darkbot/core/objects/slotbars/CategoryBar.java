@@ -43,7 +43,7 @@ public class CategoryBar extends MenuBar {
         }
     }
 
-    private enum CategoryType {
+    public enum CategoryType {
         LASERS,
         ROCKETS,
         ROCKET_LAUNCHERS,
