@@ -20,7 +20,7 @@ public class SWFUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            break;
+            return;
         }
         System.out.println("SWF not found, are you running?");
     }
