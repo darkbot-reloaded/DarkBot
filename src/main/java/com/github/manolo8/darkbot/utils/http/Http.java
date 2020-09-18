@@ -19,12 +19,22 @@ import java.util.function.Consumer;
  * Use it like builder, just one time for instance
  */
 public class Http {
+    private static String DEFAULT_USER_AGENT = "Mozilla/5.0";
+
+    public static String getDefaultUserAgent() {
+        return DEFAULT_USER_AGENT;
+    }
+
+    public static void setDefaultUserAgent(String defaultUserAgent) {
+        DEFAULT_USER_AGENT = defaultUserAgent;
+    }
+
     protected String url;
     protected final Method method;
     protected final boolean followRedirects;
 
     //Discord doesn't handle java's user agent...
-    protected String userAgent = "Mozilla/5.0";
+    protected String userAgent = DEFAULT_USER_AGENT;
     protected ParamBuilder params;
     protected List<Runnable> suppliers;
     protected Map<String, String> headers = new LinkedHashMap<>();

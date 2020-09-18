@@ -5,25 +5,21 @@ import com.github.manolo8.darkbot.core.itf.ExtraMenuProvider;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
-import com.github.manolo8.darkbot.gui.utils.TitledSeparator;
+import com.github.manolo8.darkbot.gui.utils.JTitledPopupMenuSeparator;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.SystemUtils;
 import com.github.manolo8.darkbot.utils.debug.SWFUtils;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.PopupMenuEvent;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class ExtraButton extends TitleBarToggleButton<JFrame> {
@@ -106,7 +102,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
 
 
             if (main.config.BOT_SETTINGS.DEV_STUFF) {
-                list.add(new TitledSeparator("Dev stuff"));
+                list.add(new JTitledPopupMenuSeparator("Dev stuff"));
                 list.add(create("Save SWF", SWFUtils::dumpMainSWF));
             }
 

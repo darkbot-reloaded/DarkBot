@@ -8,11 +8,11 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
-public class TitledSeparator extends JPopupMenu.Separator {
+public class JTitledPopupMenuSeparator extends JPopupMenu.Separator {
 
     private final JPopupMenu menu = new JPopupMenu();
 
-    public TitledSeparator(String title) {
+    public JTitledPopupMenuSeparator(String title) {
         setBorder(new Border(title));
         setPreferredSize(new Dimension(0, menu.getFontMetrics(menu.getFont()).getHeight()));
     }
