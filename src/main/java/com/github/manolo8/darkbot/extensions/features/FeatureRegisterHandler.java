@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.extensions.features;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.extensions.features.handlers.BehaviourHandler;
+import com.github.manolo8.darkbot.extensions.features.handlers.ExtraMenuHandler;
 import com.github.manolo8.darkbot.extensions.features.handlers.FeatureHandler;
 import com.github.manolo8.darkbot.extensions.features.handlers.ModuleHandler;
 import com.github.manolo8.darkbot.extensions.features.handlers.NpcExtraHandler;
@@ -29,11 +30,12 @@ public class FeatureRegisterHandler {
                 new ModuleHandler(),
                 new BehaviourHandler(main, featureRegistry),
                 new TaskHandler(main, featureRegistry),
-                new NpcExtraHandler(featureRegistry)
+                new NpcExtraHandler(featureRegistry),
+                new ExtraMenuHandler(featureRegistry)
         );
     }
 
-    Stream<Class> getNativeFeatures() {
+    Stream<Class<?>> getNativeFeatures() {
         return FEATURE_HANDLERS.stream().flatMap(fr -> Arrays.stream(fr.getNativeFeatures()));
     }
 

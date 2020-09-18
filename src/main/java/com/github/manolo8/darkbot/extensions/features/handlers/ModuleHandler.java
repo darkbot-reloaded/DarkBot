@@ -14,10 +14,10 @@ import java.util.stream.Stream;
 
 public class ModuleHandler extends FeatureHandler<Module> {
 
-    private static final Class[] NATIVE = new Class[]{CollectorModule.class, LootModule.class, LootNCollectorModule.class};
+    private static final Class<?>[] NATIVE = new Class[]{CollectorModule.class, LootModule.class, LootNCollectorModule.class};
 
     @Override
-    public Class[] getNativeFeatures() {
+    public Class<?>[] getNativeFeatures() {
         return NATIVE;
     }
 

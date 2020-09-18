@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 public abstract class FeatureHandler<T> {
 
-    private Class<T> handledType;
+    private final Class<T> handledType;
 
     public FeatureHandler() {
         Type[] types = ReflectionUtils.findGenericParameters(getClass(), FeatureHandler.class);
@@ -23,7 +23,7 @@ public abstract class FeatureHandler<T> {
         return handledType;
     }
 
-    public abstract Class[] getNativeFeatures();
+    public abstract Class<?>[] getNativeFeatures();
     public abstract void update(Stream<FeatureDefinition<T>> features);
 
 }

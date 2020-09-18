@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 public class BehaviourHandler extends FeatureHandler<Behaviour> {
 
-    private static final Class[] NATIVE = new Class[]{};
+    private static final Class<?>[] NATIVE = new Class[]{};
 
     private final Main main;
     private final FeatureRegistry featureRegistry;
@@ -22,7 +22,7 @@ public class BehaviourHandler extends FeatureHandler<Behaviour> {
     }
 
     @Override
-    public Class[] getNativeFeatures() {
+    public Class<?>[] getNativeFeatures() {
         return NATIVE;
     }
 

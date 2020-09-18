@@ -22,26 +22,27 @@ public class PetManager extends Gui {
 
     private static final int MAIN_BUTTON_X = 30, MODULES_X_MAX = 260, MODULE_Y = 120;
 
+    private final Main main;
+    private final List<Ship> ships;
+    private final Pet pet;
+
     private long togglePetTime, selectModuleTime;
     private long activeUntil;
-    private Main main;
-    private List<Ship> ships;
     private Ship target;
-    private Pet pet;
     private boolean enabled = false;
 
-    private ObjArray guiSprites = ObjArray.ofSprite();
+    private final ObjArray guiSprites = ObjArray.ofSprite();
 
-    private ObjArray modulesArr = ObjArray.ofArrObj();
-    private ObjArray currentArr = ObjArray.ofArrObj();
-    private ObjArray currSpriteWrapper = ObjArray.ofSprite();
-    private ObjArray currSprite = ObjArray.ofSprite();
+    private final ObjArray modulesArr = ObjArray.ofArrObj();
+    private final ObjArray currentArr = ObjArray.ofArrObj();
+    private final ObjArray currSpriteWrapper = ObjArray.ofSprite();
+    private final ObjArray currSprite = ObjArray.ofSprite();
 
-    private ObjArray gearsArr = ObjArray.ofArrObj();
-    private List<Gear> gearList = new ArrayList<>();
+    private final ObjArray gearsArr = ObjArray.ofArrObj();
+    private final List<Gear> gearList = new ArrayList<>();
 
-    private ObjArray locatorWrapper = ObjArray.ofArrObj(), locatorNpcList = ObjArray.ofArrObj();
-    private List<Gear> locatorList = new ArrayList<>();
+    private final ObjArray locatorWrapper = ObjArray.ofArrObj(), locatorNpcList = ObjArray.ofArrObj();
+    private final List<Gear> locatorList = new ArrayList<>();
 
 
     private ModuleStatus selection = ModuleStatus.NOTHING;
@@ -119,8 +120,8 @@ public class PetManager extends Gui {
     }
 
     private class NpcPick {
-        private NpcInfo npc;
-        private Gear gear;
+        private final NpcInfo npc;
+        private final Gear gear;
         public NpcPick(String npcName, NpcInfo npc) {
             this.npc = npc;
             String fuzzyName = npcName.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
@@ -133,7 +134,7 @@ public class PetManager extends Gui {
 
     private void updatePetTarget() {
         if (target == null || target.removed || !pet.isAttacking(target))
-            target = ships.stream().filter(s -> pet.isAttacking(s)).findFirst().orElse(null);
+            target = ships.stream().filter(pet::isAttacking).findFirst().orElse(null);
     }
 
     public boolean isEnabled() {

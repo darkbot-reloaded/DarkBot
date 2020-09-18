@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.itf.Installable;
 import com.github.manolo8.darkbot.extensions.features.decorators.ConfigurableDecorator;
+import com.github.manolo8.darkbot.extensions.features.decorators.ExtraMenuDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.FeatureDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstallableDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstructionProviderDecorator;
@@ -27,7 +28,8 @@ class FeatureInstanceLoader {
                 new InstallableDecorator(main),
                 CONFIGURATION_DECORATOR = new ConfigurableDecorator(main),
                 new InstructionProviderDecorator(),
-                new NpcExtraDecorator());
+                new NpcExtraDecorator(),
+                new ExtraMenuDecorator());
     }
 
     <T> T loadFeature(FeatureDefinition<T> featureDefinition) {

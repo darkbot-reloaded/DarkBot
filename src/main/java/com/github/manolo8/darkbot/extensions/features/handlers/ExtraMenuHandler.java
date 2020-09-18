@@ -1,19 +1,19 @@
 package com.github.manolo8.darkbot.extensions.features.handlers;
 
-import com.github.manolo8.darkbot.config.NpcExtra;
-import com.github.manolo8.darkbot.core.itf.NpcExtraProvider;
+import com.github.manolo8.darkbot.core.itf.ExtraMenuProvider;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
+import com.github.manolo8.darkbot.gui.titlebar.ExtraButton;
 
 import java.util.stream.Stream;
 
-public class NpcExtraHandler extends FeatureHandler<NpcExtraProvider> {
+public class ExtraMenuHandler extends FeatureHandler<ExtraMenuProvider> {
 
-    private static final Class<?>[] NATIVE = new Class[]{NpcExtra.DefaultNpcExtraProvider.class};
+    private static final Class<?>[] NATIVE = new Class[]{ExtraButton.DefaultExtraMenuProvider.class};
 
     private final FeatureRegistry featureRegistry;
 
-    public NpcExtraHandler(FeatureRegistry featureRegistry) {
+    public ExtraMenuHandler(FeatureRegistry featureRegistry) {
         this.featureRegistry = featureRegistry;
     }
 
@@ -23,7 +23,7 @@ public class NpcExtraHandler extends FeatureHandler<NpcExtraProvider> {
     }
 
     @Override
-    public void update(Stream<FeatureDefinition<NpcExtraProvider>> extras) {
+    public void update(Stream<FeatureDefinition<ExtraMenuProvider>> extras) {
         // Attempt to create an instance of the feature. Will do nothing if it's not enabled
         extras.forEach(featureRegistry::getFeature);
     }
