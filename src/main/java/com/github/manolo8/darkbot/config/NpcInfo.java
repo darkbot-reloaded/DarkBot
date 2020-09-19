@@ -1,13 +1,16 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.types.Option;
+import com.github.manolo8.darkbot.core.itf.NpcExtraProvider;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Option(key = "config.loot.npc_table.name")
 public class NpcInfo {
@@ -25,7 +28,14 @@ public class NpcInfo {
 
     public int npcId;
 
-    public static transient Map<String, NpcExtraFlag> NPC_FLAGS = new LinkedHashMap<>();
+    public static transient final Map<String, NpcExtraFlag> NPC_FLAGS = new LinkedHashMap<>();
+
+    public static void setNpcFlags(Stream<NpcExtraProvider> flags) {
+        NPC_FLAGS.clear();
+        flags.map(NpcExtraProvider::values)
+                .flatMap(Arrays::stream)
+                .forEach(flag -> NPC_FLAGS.put(flag.getId(), flag));
+    }
 
     @Option(key = "config.loot.npc_table.extra")
     public ExtraNpcInfo extra = new ExtraNpcInfo();

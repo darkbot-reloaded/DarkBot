@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,8 +31,8 @@ public class BehaviourHandler extends FeatureHandler<Behaviour> {
     public void update(Stream<FeatureDefinition<Behaviour>> behaviours) {
         main.setBehaviours(behaviours
                 .map(featureRegistry::getFeature)
-                .map(o -> o.orElse(null))
-                .filter(Objects::nonNull)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList()));
     }
 

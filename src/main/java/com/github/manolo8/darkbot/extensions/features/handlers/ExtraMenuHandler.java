@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.gui.titlebar.ExtraButton;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ExtraMenuHandler extends FeatureHandler<ExtraMenuProvider> {
@@ -24,7 +25,9 @@ public class ExtraMenuHandler extends FeatureHandler<ExtraMenuProvider> {
 
     @Override
     public void update(Stream<FeatureDefinition<ExtraMenuProvider>> extras) {
-        // Attempt to create an instance of the feature. Will do nothing if it's not enabled
-        extras.forEach(featureRegistry::getFeature);
+        ExtraButton.setExtraDecorations(extras
+                .map(featureRegistry::getFeature)
+                .filter(Optional::isPresent)
+                .map(Optional::get));
     }
 }

@@ -22,7 +22,7 @@ public class SWFUtils {
             }
             return;
         }
-        System.out.println("SWF not found, are you running?");
+        System.out.println("SWF not found, are you running the flash client?");
     }
 
 }

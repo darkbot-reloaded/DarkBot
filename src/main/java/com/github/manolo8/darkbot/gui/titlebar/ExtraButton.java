@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class ExtraButton extends TitleBarToggleButton<JFrame> {
 
@@ -30,14 +31,9 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
     private static final Set<ExtraMenuProvider> EXTRA_DECORATIONS = new LinkedHashSet<>();
     private static final Lazy<Void> clean = new Lazy.NoCache<>();
 
-
-    public static void register(ExtraMenuProvider provider) {
-        EXTRA_DECORATIONS.add(provider);
-        clean.send(null);
-    }
-
-    public static void unregister(ExtraMenuProvider provider) {
-        EXTRA_DECORATIONS.remove(provider);
+    public static void setExtraDecorations(Stream<ExtraMenuProvider> provider) {
+        EXTRA_DECORATIONS.clear();
+        provider.forEach(EXTRA_DECORATIONS::add);
         clean.send(null);
     }
 
@@ -97,27 +93,16 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 System.out.println("Triggering refresh: user requested");
                 Main.API.handleRefresh();
             }));
-            list.add(create("discord", () -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
-            list.add(create("copy_sid", () -> SystemUtils.toClipboard(main.statsManager.sid)));
+            list.add(create("discord", e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
+            list.add(create("copy_sid", e -> SystemUtils.toClipboard(main.statsManager.sid)));
 
 
             if (main.config.BOT_SETTINGS.DEV_STUFF) {
-                list.add(new JTitledPopupMenuSeparator("Dev stuff"));
-                list.add(create("Save SWF", SWFUtils::dumpMainSWF));
+                list.add(createSeparator("Dev stuff"));
+                list.add(create("Save SWF", e -> SWFUtils.dumpMainSWF()));
             }
 
             return list;
-        }
-
-
-        private JMenuItem create(String key, Runnable listener) {
-            return create(key, e -> listener.run());
-        }
-
-        private JMenuItem create(String key, ActionListener listener) {
-            JMenuItem item = new JMenuItem(I18n.getOrDefault("gui.hamburger_button." + key, key));
-            if (listener != null) item.addActionListener(listener);
-            return item;
         }
 
     }
