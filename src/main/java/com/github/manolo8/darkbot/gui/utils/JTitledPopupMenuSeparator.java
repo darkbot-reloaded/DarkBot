@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.gui.utils;
 
 import com.formdev.flatlaf.util.UIScale;
-import sun.swing.SwingUtilities2;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -54,7 +53,7 @@ public class JTitledPopupMenuSeparator extends JPopupMenu.Separator {
                 int xt = x + ((width - titleWidth) / 2);
                 int yt = y + fm.getAscent();
 
-                SwingUtilities2.drawStringUnderlineCharAt(menu, g2, title, -1, xt, yt);
+                g2.drawString(title, xt, yt);
             } finally {
                 g2.dispose();
             }
