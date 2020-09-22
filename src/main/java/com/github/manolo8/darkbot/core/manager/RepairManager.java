@@ -16,14 +16,13 @@ import java.util.*;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class RepairManager implements Manager {
-    boolean wasInDeadState;
+    private boolean writtenToLog;
     private long guiAddress, mainAddress, userDataAddress, repairAddress;
 
     private String killerName;
-    private IntArray repairOptions = IntArray.ofArray(true);
+    private final IntArray repairOptions = IntArray.ofArray(true);
 
-    private Map<String, OutputStream> streams = new HashMap<>();
-    private String killerMessage;
+    private final Map<String, OutputStream> streams = new HashMap<>();
 
     @Override
     public void install(BotInstaller botInstaller) {
@@ -36,16 +35,13 @@ public class RepairManager implements Manager {
     }
 
     public void tick() {
-        if (!isDead()) {
-            if (wasInDeadState) {
-                writeKiller();
-                if (!ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.LOG_DEATHS) return;
-
-                writeToFile(LogUtils.START_TIME + "death");
-            }
-            return;
+        if (isDead()) {
+            writtenToLog = false;
+        } else if (!writtenToLog) {
+            writeKiller();
+            writtenToLog = true;
         }
-        wasInDeadState = true;
+
         if (repairAddress == 0) updateRepairAddr();
 
         killerName = API.readMemoryString(API.readMemoryLong(repairAddress + 0x68));
@@ -57,27 +53,37 @@ public class RepairManager implements Manager {
         if (values.length == 1) repairAddress = values[0] - 0x38;
     }
 
-    private void writeKiller() {
-        killerMessage = killerName == null || killerName.isEmpty()
-                ? "You were destroyed by a radiation/mine/unknown"
-                : "You have been destroyed by: " + killerName;
-        System.out.println(killerMessage);
-        wasInDeadState = false;
+    public String getKillerName() {
+        return killerName;
     }
 
     public boolean isDead() {
         return API.readMemoryBoolean(userDataAddress + 0x4C);
     }
 
-    private void writeToFile(String name) {
-        try {
-            OutputStream os = getOrCreateStream(name);
-            if (os == null) return;
-
-            os.write(formatLogMessage(killerMessage).getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            e.printStackTrace();
+    public boolean canRespawn(int option) {
+        for (int i = 0; i < repairOptions.getSize(); i++) {
+            if (repairOptions.get(i) == option) return true;
         }
+        return false;
+    }
+
+    public int[] getRespawnOptionsIds() {
+        int[] options = new int[repairOptions.getSize()];
+        for (int i = 0; i < repairOptions.getSize(); i++) {
+            options[i] = repairOptions.get(i);
+        }
+        return options;
+    }
+
+    private void writeKiller() {
+        String killerMessage = killerName == null || killerName.isEmpty()
+                ? "You were destroyed by a radiation/mine/unknown"
+                : "You have been destroyed by: " + killerName;
+        System.out.println(killerMessage);
+
+        if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.LOG_DEATHS)
+            writeToFile(LogUtils.START_TIME + "death", formatLogMessage(killerMessage));
     }
 
     private String formatLogMessage(String message) {
@@ -85,10 +91,19 @@ public class RepairManager implements Manager {
                 LocalDateTime.now().format(LogUtils.LOG_DATE),
                 message);
     }
+    private void writeToFile(String name, String message) {
+        try {
+            OutputStream os = getOrCreateStream(name);
+            if (os == null) return;
+
+            os.write(message.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private OutputStream getOrCreateStream(String name) {
         return this.streams.computeIfAbsent(name, LogUtils::createLogFile);
     }
 
-    public String getKillerName() { return killerName; }
 }
