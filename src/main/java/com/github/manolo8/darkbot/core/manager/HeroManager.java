@@ -29,6 +29,7 @@ public class HeroManager extends Ship implements Manager {
     public Ship target;
 
     public int config;
+    public int formationId;
     private long configTime;
     private Character formation = null;
     private long formationTime;
@@ -63,6 +64,7 @@ public class HeroManager extends Ship implements Manager {
     public void update() {
         super.update();
         config = settings.config;
+        formationId = API.readMemoryInt(address, 280, 40, 40);
 
         long petAddress = API.readMemoryLong(address + 176);
         if (petAddress != pet.address) pet.update(petAddress);
