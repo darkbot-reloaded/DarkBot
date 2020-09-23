@@ -19,38 +19,33 @@ public interface IDarkBotAPI {
         if (ch != null) keyboardClick((char) ch);
     }
 
-    void sendText(String string); // There's currently no working implementation of this.
+    void sendText(String string);
 
     double readMemoryDouble(long address);
-
     default double readMemoryDouble(long address, int... offsets) {
         for (int i = 0; i < offsets.length - 1; i++) address = readMemoryLong(address + offsets[i]);
         return readMemoryDouble(address + offsets[offsets.length - 1]);
     }
 
     long readMemoryLong(long address);
-
     default long readMemoryLong(long address, int... offsets) {
         for (int offset : offsets) address = readMemoryLong(address + offset);
         return address;
     }
 
     int readMemoryInt(long address);
-
     default int readMemoryInt(long address, int... offsets) {
         for (int i = 0; i < offsets.length - 1; i++) address = readMemoryLong(address + offsets[i]);
         return readMemoryInt(address + offsets[offsets.length - 1]);
     }
 
     boolean readMemoryBoolean(long address);
-
     default boolean readMemoryBoolean(long address, int... offsets) {
         for (int i = 0; i < offsets.length - 1; i++) address = readMemoryLong(address + offsets[i]);
         return readMemoryBoolean(address + offsets[offsets.length - 1]);
     }
 
     String readMemoryString(long address);
-
     default String readMemoryString(long address, int... offsets) {
         for (int offset : offsets) address = readMemoryLong(address + offset);
         return readMemoryString(address);
@@ -58,16 +53,14 @@ public interface IDarkBotAPI {
 
     byte[] readMemory(long address, int length);
 
+    void writeMemoryInt(long address, int value);
+    void writeMemoryLong(long address, long value);
     void writeMemoryDouble(long address, double value);
 
-    void writeMemoryLong(long address, long value);
-
-    void writeMemoryInt(long address, int value);
+    void replaceInt(long address, int oldValue, int newValue);
 
     long[] queryMemoryInt(int value, int maxQuantity);
-
     long[] queryMemoryLong(long value, int maxQuantity);
-
     long[] queryMemory(byte[] query, int maxQuantity);
 
     void setVisible(boolean visible);

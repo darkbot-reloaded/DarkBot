@@ -61,6 +61,9 @@ public abstract class ApiAdapter implements IDarkBotAPI {
         keyboardClick(ch);
     }
     public void sendText(String str) {}
+    public void replaceInt(long addr, int oldValue, int newValue) {
+        writeMemoryInt(addr, newValue);
+    }
     public long getMemoryUsage() {
         return 0L;
     }

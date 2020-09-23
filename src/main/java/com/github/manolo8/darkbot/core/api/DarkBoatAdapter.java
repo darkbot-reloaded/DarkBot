@@ -119,6 +119,11 @@ public class DarkBoatAdapter extends ApiAdapter {
     }
 
     @Override
+    public void replaceInt(long addr, int oldValue, int newValue) {
+        API.replaceInt(addr, oldValue, newValue);
+    }
+
+    @Override
     public long[] queryMemoryInt(int value, int maxQuantity) {
         return API.queryInt(value, maxQuantity);
     }

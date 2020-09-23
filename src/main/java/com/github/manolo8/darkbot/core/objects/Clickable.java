@@ -17,20 +17,22 @@ public class Clickable extends Updatable {
     public void setPriority(int priority) {
         if (this.priority == priority || isInvalid()) return;
         if (defPriority == -1) this.defPriority = this.priority;
-        API.writeMemoryInt(address + 44, this.priority = priority);
+        API.replaceInt(address + 44, this.priority, this.priority = priority);
     }
 
     public void setRadius(int radius) {
         if (this.radius == radius || isInvalid()) return;
         if (defRadius == -1) this.defRadius = this.radius;
         if (defRadius <= 0) return;
-        API.writeMemoryInt(address + 40, this.radius = radius);
+        API.replaceInt(address + 40, this.radius, this.radius = radius);
     }
 
     public void reset() {
         if (isInvalid()) return;
-        if (defRadius != -1 && defRadius != radius) API.writeMemoryInt(address + 40, radius = defRadius);
-        if (defRadius != -1 && defPriority != priority) API.writeMemoryInt(address + 44, priority = defPriority);
+        if (defRadius != -1 && defRadius != radius)
+            API.replaceInt(address + 40, radius, radius = defRadius);
+        if (defRadius != -1 && defPriority != priority)
+            API.replaceInt(address + 44, priority, priority = defPriority);
     }
 
     /**
