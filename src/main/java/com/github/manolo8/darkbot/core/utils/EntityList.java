@@ -45,7 +45,7 @@ public class EntityList extends Updatable {
     public final List<Pet> pets                     = register(PET);
     public final List<BattleStation> battleStations = register(CBS_ASTEROID, CBS_MODULE, CBS_STATION, CBS_MODULE_CON, CBS_CONSTRUCTION);
     public final List<BasePoint> basePoints         = register(BASE_HANGAR, BASE_STATION, HEADQUARTER, QUEST_GIVER, BASE_TURRET, REPAIR_STATION, REFINERY);
-    public final List<Entity> unknown               = new ArrayList<>();
+    public final List<Entity> unknown               = register();
     public final FakeNpc fakeNpc;
 
     private final Main main;
