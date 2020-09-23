@@ -49,32 +49,14 @@ public class GuiManager implements Manager {
     public final OreTradeGui oreTrade;
     public final GroupManager group;
 
-    private static boolean minimapWasOpen;
-    private static Location previous;
-    private static long minimapClick;
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
-        WAITING(gm -> {
-            minimapWasOpen = gm.minimap.visible;
-            return gm.quests.lastUpdatedIn(5000) && gm.quests.visible;
-        }),
+        WAITING(gm -> gm.quests.lastUpdatedIn(5000) && gm.quests.visible),
         MISSION_CLOSING(gm -> gm.quests.show(false)),
         CLICKING_AMMO(gm -> {
             API.keyboardClick(gm.main.config.LOOT.AMMO_KEY);
             return true;
         }),
-        OPEN_MINIMAP(gm -> gm.minimap.show(true)), // Ensure minimap shows
-        CLICK_MINIMAP(gm -> {
-            previous = gm.main.hero.locationInfo.now.copy();
-            minimapClick = System.currentTimeMillis();
-            gm.minimap.click(100, 100);
-            return true;
-        }),
-        STOP_MOVE(gm -> { // If drive already moving, ignored, otherwise, move towards previous after 1s
-            if (minimapClick + 1000 < System.currentTimeMillis()) gm.main.hero.drive.move(previous);
-            return !gm.main.hero.drive.paths.isEmpty();
-        }),
-        RESET_MINIMAP(gm -> gm.minimap.show(minimapWasOpen)), // Hide if originally hidden
         DONE(q -> false);
 
         Predicate<GuiManager> canAdvance;
