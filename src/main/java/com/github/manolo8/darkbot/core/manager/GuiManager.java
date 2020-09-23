@@ -134,10 +134,9 @@ public class GuiManager implements Manager {
         if (System.currentTimeMillis() - lastRepair > 10000) {
             deaths++;
             long respawnId = main.config.GENERAL.SAFETY.REVIVE_LOCATION;
-            if (!main.repairManager.canRespawn((int)respawnId)) {
-                respawnId = main.repairManager.getRespawnOptionsIds()[0];
+            if (main.repairManager.canRespawn((int) respawnId)) {
+                API.writeMemoryLong(repairAddress + 32, respawnId);
             }
-            API.writeMemoryLong(repairAddress + 32, respawnId);
             API.mouseClick(MapManager.clientWidth / 2, (MapManager.clientHeight / 2) + 190);
             lastRepair = System.currentTimeMillis();
             if (main.config.MISCELLANEOUS.DRONE_REPAIR_PERCENTAGE != 0) this.main.backpage.checkDronesAfterKill();
