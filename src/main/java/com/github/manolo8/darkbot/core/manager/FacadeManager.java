@@ -62,7 +62,9 @@ public class FacadeManager implements Manager {
     }
 
     public void tick() {
-        commands.update();
+        // Currently commands are not used by the bot and they represent
+        // a decently big cpu chunk in ticking. Leaving them out reduces tick time significantly.
+        //commands.update();
         proxies.update();
         mediators.update();
 
