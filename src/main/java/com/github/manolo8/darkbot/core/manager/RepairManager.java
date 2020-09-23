@@ -35,11 +35,11 @@ public class RepairManager implements Manager {
     }
 
     public void tick() {
-        if (isDead()) {
-            writtenToLog = false;
-        } else if (!writtenToLog) {
-            writeKiller();
+        if (isDead()) writtenToLog = false;
+        else {
+            if (!writtenToLog) writeKiller();
             writtenToLog = true;
+            return;
         }
 
         if (repairAddress == 0) updateRepairAddr();
