@@ -80,7 +80,7 @@ public class MapManager implements Manager {
         if (mapAddress != temp) {
             update(temp);
         } else {
-            pingLocation = updateMinimap();
+            pingLocation = getEnemyLocatorTarget();
             entities.update();
         }
 
@@ -141,7 +141,7 @@ public class MapManager implements Manager {
         height = boundMaxY - boundY;
     }
 
-    private Location updateMinimap() {
+    private Location getEnemyLocatorTarget() {
         long temp = API.readMemoryLong(minimapAddressStatic); // Minimap
         double minimapX = API.readMemoryInt(temp + 0xA8);
 
@@ -149,18 +149,21 @@ public class MapManager implements Manager {
         temp = API.readMemoryLong(temp + 0xA8); // Vector<Layer>
         minimapLayers.update(temp);
 
-        for (int i = 0; i < minimapLayers.getSize(); i++) {
+        for (int i = minimapLayers.getSize() - 1; i >= 0; i--) {
             long layer = minimapLayers.get(i); // Seems to be offset by 1 for some reason.
             long layerIdx = API.readMemoryInt(layer + 0xA8);
 
             if (layerIdx != Integer.MAX_VALUE) continue;
 
-            long addr = API.readMemoryLong(layer, 0x48, 0x20, 0x18);
-            int x = API.readMemoryInt(addr + 0x58);
-            int y = API.readMemoryInt(addr + 0x5C);
+            temp = API.readMemoryLong(layer, 0x48);
+            temp = API.readMemoryInt(temp, 0x40, 0x18) > 0 //check size of sprite rray
+                    ? API.readMemoryLong(temp, 0x20, 0x18)
+                    : API.readMemoryLong(temp, 0x20);
+
+            int x = API.readMemoryInt(temp + 0x58);
+            int y = API.readMemoryInt(temp + 0x5C);
 
             double scale = (internalWidth / minimapX) / 20;
-
             return new Location(scale * x, scale * y);
         }
 
