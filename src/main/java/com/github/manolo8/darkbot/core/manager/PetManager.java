@@ -20,7 +20,12 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class PetManager extends Gui {
 
-    private static final int MAIN_BUTTON_X = 30, MODULES_X_MAX = 260, MODULE_Y = 120;
+    private static final int MAIN_BUTTON_X = 30,
+            MODULES_X_MAX = 260,
+            MODULE_Y = 135,
+            MODULE_Y_OFFSET = 17,
+            MODULE_HEIGHT = 23,
+            SUBMODULE_HEIGHT = 22;
 
     private final Main main;
     private final List<Ship> ships;
@@ -163,13 +168,6 @@ public class PetManager extends Gui {
         }
     }
 
-    private int moduleIdToIndex(int moduleId) {
-        for (int i = 0; i < gearList.size(); i++) {
-            if (gearList.get(i).id == moduleId) return i;
-        }
-        return 0;
-    }
-
     private void selectModule(int moduleId, int submoduleIdx) {
         if (System.currentTimeMillis() < this.selectModuleTime) return;
         this.selectModuleTime = System.currentTimeMillis() + 750;
@@ -182,21 +180,33 @@ public class PetManager extends Gui {
                 break;
             case DROPDOWN:
                 if (submoduleIdx != -1) {
-                    hover(MODULES_X_MAX - 10, MODULE_Y + 35 + (22 * moduleIdToIndex(moduleId)));
+                    hover(MODULES_X_MAX - 30, getModuleY(moduleId, true));
                     selection = ModuleStatus.SUB_DROPDOWN;
                 } else {
-                    click(MODULES_X_MAX - 30, MODULE_Y + 35 + (22 * moduleIdToIndex(moduleId)));
+                    click(MODULES_X_MAX - 30, getModuleY(moduleId, true));
                     selection = ModuleStatus.SELECTED;
                 }
                 break;
             case SUB_DROPDOWN:
                 selection = ModuleStatus.SELECTED;
                 if (submoduleIdx != -1)
-                    click(MODULES_X_MAX + 100, MODULE_Y + 35 + (22 * moduleIdToIndex(moduleId)) + (22 * submoduleIdx));
+                    click(MODULES_X_MAX + 50, getModuleY(moduleId, false) + (SUBMODULE_HEIGHT * submoduleIdx));
         }
 
         if (selection == ModuleStatus.SELECTED)
             this.selectModuleTime = System.currentTimeMillis() + 3000;
+    }
+
+    private int getModuleY(int moduleId, boolean centered) {
+        return MODULE_Y + MODULE_Y_OFFSET + (MODULE_HEIGHT * moduleIdToIndex(moduleId)) +
+                (centered ? (MODULE_HEIGHT / 2) : 0);
+    }
+
+    private int moduleIdToIndex(int moduleId) {
+        for (int i = 0; i < gearList.size(); i++) {
+            if (gearList.get(i).id == moduleId) return i;
+        }
+        return 0;
     }
 
     @Override
