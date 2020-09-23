@@ -13,13 +13,13 @@ import java.util.function.Consumer;
 
 public class MapTraveler {
 
-    private Main main;
-    private HeroManager hero;
-    private List<Portal> portals;
-    private Drive drive;
-    private StarManager star;
-    private Consumer<Map> listener = this::onMapChange;
-    private PortalJumper jumper;
+    private final Main main;
+    private final HeroManager hero;
+    private final List<Portal> portals;
+    private final Drive drive;
+    private final StarManager star;
+    private final Consumer<Map> listener = this::onMapChange;
+    private final PortalJumper jumper;
 
     public Portal current;
     public Map target;

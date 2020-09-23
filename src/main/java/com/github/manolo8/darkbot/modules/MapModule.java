@@ -29,7 +29,7 @@ public class MapModule extends TemporalModule {
 
     @Override
     public boolean canRefresh() {
-        return false;
+        return true;
     }
 
     public void setTarget(Map target) {
