@@ -16,7 +16,7 @@ import java.util.*;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class RepairManager implements Manager {
-    private boolean writtenToLog;
+    private boolean writtenToLog = true;
     private long guiAddress, mainAddress, userDataAddress, repairAddress;
 
     private String killerName;
