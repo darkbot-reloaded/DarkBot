@@ -262,6 +262,8 @@ public class Http {
             url += "?" + params.toString();
 
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        conn.setConnectTimeout(30_000);
+        conn.setReadTimeout(30_000);
         if (customSettings != null) customSettings.accept(conn);
 
         conn.setInstanceFollowRedirects(followRedirects);

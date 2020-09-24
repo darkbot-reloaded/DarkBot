@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 
+import javax.xml.ws.http.HTTPBinding;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -134,6 +135,8 @@ public class BackpageManager extends Thread {
         if (isInvalid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         HttpURLConnection conn = (HttpURLConnection) new URL(this.instance + params)
                 .openConnection();
+        conn.setConnectTimeout(30_000);
+        conn.setReadTimeout(30_000);
         conn.setInstanceFollowRedirects(false);
         conn.setRequestProperty("Cookie", "dosid=" + this.sid);
         lastRequest = System.currentTimeMillis();
