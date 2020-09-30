@@ -22,7 +22,7 @@ public class BoosterProxy extends Updatable {
 
     @Override
     public void update() {
-        long data = API.readMemoryLong(address + 48) & ByteUtils.FIX;
+        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
 
         boostersArr.update(API.readMemoryLong(data + 0x48));
         synchronized (UPDATE_LOCKER) {

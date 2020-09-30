@@ -128,7 +128,7 @@ public enum EntityFactory {
     }
 
     private static String getAssetId(long address) {
-        long temp = API.readMemoryLong(address, 48, 48, 16) & ByteUtils.FIX;
+        long temp = API.readMemoryLong(address, 48, 48, 16) & ByteUtils.ATOM_MASK;
         return API.readMemoryString(temp, 64, 32, 24, 8, 16, 24).trim();
     }
 

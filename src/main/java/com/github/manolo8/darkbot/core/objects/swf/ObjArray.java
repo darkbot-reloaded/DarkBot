@@ -94,7 +94,7 @@ public class ObjArray extends SwfPtrCollection {
 
         for (int i = 0, offset = 0; offset < bytes.length && i < size; offset += 8) {
             long value = ByteUtils.getLong(bytes, offset);
-            elements[i++] = value & ByteUtils.FIX; //not sure if we should skip 0 values
+            elements[i++] = value & ByteUtils.ATOM_MASK; //not sure if we should skip 0 values
         }
     }
 

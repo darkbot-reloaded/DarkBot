@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -24,7 +23,7 @@ public class EternalGateProxy extends Updatable {
     public void update() {
         if (address == 0) return;
 
-        long data = API.readMemoryLong(address + 48) & ByteUtils.FIX;
+        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
 
         this.currentWave   = API.readMemoryInt(data + 0x40);
         this.furthestWave  = API.readMemoryInt(data + 0x44);

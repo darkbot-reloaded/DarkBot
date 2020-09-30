@@ -29,7 +29,7 @@ public class ChatProxy extends Updatable {
     @Override
     public void update() {
         if (!ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.LOG_CHAT) return;
-        long data = API.readMemoryLong(address + 48) & ByteUtils.FIX;
+        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
 
         this.chatsArr.update(API.readMemoryLong(data + 64));
         if (chatsArr.getSize() > 10) return;

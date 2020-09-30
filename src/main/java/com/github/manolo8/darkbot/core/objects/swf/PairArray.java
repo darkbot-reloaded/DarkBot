@@ -109,17 +109,17 @@ public abstract class PairArray extends SwfPtrCollection {
             if (size < 0 || size > 1024) return;
             if (super.pairs.length != size) super.pairs = Arrays.copyOf(super.pairs, size);
 
-            long table = API.readMemoryLong(address + 0x48) & ByteUtils.FIX;
+            long table = API.readMemoryLong(address + 0x48) & ByteUtils.ATOM_MASK;
 
             String key = null;
             for (int offset = 8, i = 0; offset < 8192 && i < size; offset += 8) {
-                if (key == null && (key = getKey(API.readMemoryLong(table + offset) & ByteUtils.FIX)) == null) continue;
+                if (key == null && (key = getKey(API.readMemoryLong(table + offset) & ByteUtils.ATOM_MASK)) == null) continue;
 
                 long value = API.readMemoryLong(table + (offset += 8));
                 if (isInvalid(value)) continue;
 
-                if (super.pairs[i] == null) super.pairs[i] = new Pair(key, value & ByteUtils.FIX);
-                else super.pairs[i++].set(key, value & ByteUtils.FIX);
+                if (super.pairs[i] == null) super.pairs[i] = new Pair(key, value & ByteUtils.ATOM_MASK);
+                else super.pairs[i++].set(key, value & ByteUtils.ATOM_MASK);
                 key = null;
             }
         }

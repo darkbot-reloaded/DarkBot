@@ -13,7 +13,7 @@ public class ChrominProxy extends Updatable {
     public void update() {
         if (address == 0) return;
 
-        long data = API.readMemoryLong(address + 48) & ByteUtils.FIX;
+        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
 
         this.maxAmt = API.readMemoryDouble(data + 48);
         this.currAmt = API.readMemoryDouble(data + 40);

@@ -1,7 +1,49 @@
 package com.github.manolo8.darkbot.core.utils;
 
 public class ByteUtils {
-    public static final long FIX = 0xfffffffffff8L;
+
+    /**
+     * The AtomConstants namespace defines constants for
+     * manipulating atoms.
+     *
+     * The atom is a primitive value in ActionScript.  Since
+     * ActionScript is a dynamically typed language, an atom can
+     * belong to one of several types: null, undefined, number,
+     * integer, string, boolean, object reference.
+     *
+     * Atoms are encoded with care to take up the minimum
+     * possible space.  An atom is represented by a 32-bit
+     * integer, with the bottom 3 bits indicating the type.
+     *
+     *      32 bit atom
+     *
+     *  31             16 15     8 7   3 210
+     *  dddddddd dddddddd dddddddd ddddd TTT
+     *
+     *  TTT
+     *  000  - untagged
+     *  001  object
+     *  010  string
+     *  011  namespace
+     *  100  undefined
+     *  101  boolean
+     *  110  integer
+     *  111  double
+     *
+     *  - using last 3 bits means allocations must be 8-byte aligned.
+     *  - related types are 1 bit apart, e.g. int/double
+     *
+     *  kIntptrType atoms are used to represent integer values from -2^28..2^28-1,
+     *  regardless of whether the context implies int, uint, or Number.
+     *  If a number doesn't fit into that range it is stored as a kDoubleType
+     *
+     */
+    /**
+     * A mask that will remove atom constant bits
+     */
+    public static final long ATOM_MASK = ~0b111L;
+    @Deprecated // Use ATOM_MASK instead.
+    public static final long FIX = ~0b111L;
 
     public static int getInt(byte[] data, int offset) {
         return data.length < offset + 4 ? 0 :

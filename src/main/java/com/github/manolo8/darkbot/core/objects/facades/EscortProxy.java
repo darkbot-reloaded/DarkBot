@@ -10,7 +10,7 @@ public class EscortProxy extends Updatable {
     public int keys;
 
     public void update() {
-        long data = API.readMemoryLong(address + 48) & ByteUtils.FIX;
+        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
 
         this.keys = API.readMemoryInt(API.readMemoryLong(data + 88) + 40);
         this.time = API.readMemoryDouble(API.readMemoryLong(data + 72) + 56);
