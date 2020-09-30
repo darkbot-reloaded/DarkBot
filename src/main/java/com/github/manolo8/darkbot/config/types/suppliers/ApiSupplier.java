@@ -7,14 +7,14 @@ public class ApiSupplier extends OptionList<Integer> {
 
     private static final List<String> APIS = Arrays.asList(
             "Darkbot browser (Legacy)",
-            "Darkflash API (new)",
-            "Darkboat API (newer & better)",
+            "Darkflash API (Legacy)",
+            "Darkboat API (Recommended)",
             "NativeAPI (Linux, unreleased)",
-            "No-operation API");
+            "No-operation API (Testing only)");
     private static final List<String> TOOLTIPS = Arrays.asList(
             "Legacy browser, manual login, by Manolo8",
-            "New API, no browser, auto login, by Manolo8",
-            "Newer API, no browser, auto login, by Punisher",
+            "No browser API, auto login, lacks support for new features, by Manolo8",
+            "Currently API, no browser, auto login, by Punisher",
             "WIP API, many different implementations by zBlock, wakatoa & Tanoshizo. None publicly released",
             "API that will do nothing. Useful for testing, default if error occurs loading another API. By Popcorn");
 

@@ -10,6 +10,8 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class SettingsManager implements Manager, Tickable {
 
+    private final Main main;
+
     private long address;
 
     public int config;
@@ -19,7 +21,9 @@ public class SettingsManager implements Manager, Tickable {
 
     public String lang;
 
-    public SettingsManager(Main main) {}
+    public SettingsManager(Main main) {
+        this.main = main;
+    }
 
     @Override
     public void install(BotInstaller botInstaller) {
@@ -38,8 +42,10 @@ public class SettingsManager implements Manager, Tickable {
         this.lang = API.readMemoryString(address, 0x258);
 
         // Enforce GPU capabilities support
-        API.replaceInt(address + 292, 0, 1);
-        API.replaceInt(address + 300, 0, 1);
+        if (main.config.BOT_SETTINGS.ENFORCE_HW_ACCEL) {
+            API.replaceInt(address + 292, 0, 1);
+            API.replaceInt(address + 300, 0, 1);
+        }
     }
 
 
