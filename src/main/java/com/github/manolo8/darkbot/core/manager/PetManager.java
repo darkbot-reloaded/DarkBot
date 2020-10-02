@@ -36,19 +36,13 @@ public class PetManager extends Gui {
     private Ship target;
     private boolean enabled = false;
 
-    private final ObjArray guiSprites = ObjArray.ofSprite();
-
-    private final ObjArray modulesArr = ObjArray.ofArrObj();
-    private final ObjArray currentArr = ObjArray.ofArrObj();
-    private final ObjArray currSpriteWrapper = ObjArray.ofSprite();
-    private final ObjArray currSprite = ObjArray.ofSprite();
-
     private final ObjArray gearsArr = ObjArray.ofArrObj();
     private final List<Gear> gearList = new ArrayList<>();
 
     private final ObjArray locatorWrapper = ObjArray.ofArrObj(), locatorNpcList = ObjArray.ofArrObj();
     private final List<Gear> locatorList = new ArrayList<>();
 
+    private final List<Integer> petBuffsIds = new ArrayList<>();
 
     private ModuleStatus selection = ModuleStatus.NOTHING;
     private Gear currentModule;   // The Module used, like Passive mode, kamikaze, or enemy locator
@@ -58,6 +52,7 @@ public class PetManager extends Gui {
 
     private Integer gearOverride = null;
     private long gearOverrideTime = 0;
+    private boolean petRepaired;
 
     private enum ModuleStatus {
         NOTHING,
@@ -214,11 +209,62 @@ public class PetManager extends Gui {
         super.update();
         if (address == 0) return;
 
-        guiSprites.update(address);
-        long gearsSprite = API.readMemoryLong(guiSprites.getLast() + 216);
-        gearsArr.update(API.readMemoryLong(API.readMemoryLong(gearsSprite + 176) + 224));
+        //update gearsList
+        long gearsSprite = getSpriteChild(address, -1); //read gui sprite
+        gearsArr.update(API.readMemoryLong(gearsSprite, 176, 224));
         gearsArr.sync(gearList, Gear::new, null);
 
+        //update locator npcs list
+        updateLocator(gearsSprite);
+
+        long elementsListAddress = getElementsList(54);
+        //update current module
+        updateCurrentModule(elementsListAddress);
+
+        //update pet buffs
+        updatePetBuffs(elementsListAddress);
+
+        //update petRepaired
+        long element = getSpriteElement(elementsListAddress, 67);
+        petRepaired = API.readMemoryLong(getSpriteChildWrapper(element, 0), 0x148) == 0;
+    }
+
+    // TODO: 01.10.2020 needs more testing.
+    public boolean isPetRepaired() {
+        return petRepaired;
+    }
+
+    public boolean hasBuff(PetBuff buff) {
+        return hasBuff(buff.getId());
+    }
+
+    public boolean hasBuff(int buffId) {
+        return petBuffsIds.contains(buffId);
+    }
+
+    private void updatePetBuffs(long elementsListAddress) {
+        long temp = getSpriteElement(elementsListAddress, 70);
+        temp = getSpriteChild(temp, 0);
+
+        petBuffsIds.clear();
+        forEachSpriteChild(temp, l -> petBuffsIds.add(API.readMemoryInt(l + 168)));
+    }
+
+    private void updateCurrentModule(long elementsListAddress) {
+        long temp = getSpriteElement(elementsListAddress, 72);
+        temp = API.readMemoryLong(getSpriteChild(temp, 0), 176); //get first sprite child then read 176 offset
+
+        long currGearCheck = API.readMemoryLong(getSpriteChild(temp, 1), 152, 16);
+
+        currentModule = findGear(gearList, currGearCheck);
+        if (currentModule != null) currentSubModule = null;
+        else {
+            currentSubModule = findGear(locatorList, currGearCheck);
+            if (currentSubModule != null) currentModule = byId(currentSubModule.parentId);
+        }
+    }
+
+    private void updateLocator(long gearsSprite) {
         locatorWrapper.update(API.readMemoryLong(gearsSprite + 168));
 
         int oldSize = locatorNpcList.getSize();
@@ -230,28 +276,6 @@ public class PetManager extends Gui {
 
         validUntil = System.currentTimeMillis() + 100;
         locatorNpcList.sync(locatorList, Gear::new, null);
-
-        modulesArr.update(API.readMemoryLong(address + 400));
-
-        for (int i = 0; i < modulesArr.getSize(); i++) {
-            if (API.readMemoryInt(modulesArr.get(i) + 172) != 54) continue;
-            currentArr.update(API.readMemoryLong(modulesArr.get(i) + 184));
-            break;
-        }
-        for (int i = 0; i < currentArr.getSize(); i++) {
-            if (API.readMemoryInt(currentArr.get(i) + 168) != 72) continue;
-            currSpriteWrapper.update(currentArr.get(i));
-            break;
-        }
-        currSprite.update(API.readMemoryLong(API.readMemoryLong(currSpriteWrapper.get(0) + 216) + 176));
-        long currGearCheck = API.readMemoryLong(currSprite.get(1), 216, 152, 0x10);
-
-        currentModule = findGear(gearList, currGearCheck);
-        if (currentModule != null) currentSubModule = null;
-        else {
-            currentSubModule = findGear(locatorList, currGearCheck);
-            if (currentSubModule != null) currentModule = byId(currentSubModule.parentId);
-        }
     }
 
     private void updateGear(Gear module, Gear subModule) {
@@ -284,4 +308,20 @@ public class PetManager extends Gui {
         }
     }
 
+    public enum PetBuff {
+        SINGULARITY,
+        SPEED_LEECH,
+        TRADE,
+        WEAKEN_SHIELD,
+        KAMIKAZE_CD,
+        COMBO_REPAIR_CD,
+        FRIENDLY_SACRIFICE,
+        RETARGETING_CD,
+        HP_LINK_CD,
+        MEGA_MINE_CD;
+
+        public int getId() {
+            return ordinal() + 1;
+        }
+    }
 }

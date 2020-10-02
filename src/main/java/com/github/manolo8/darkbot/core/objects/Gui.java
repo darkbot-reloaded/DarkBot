@@ -2,27 +2,32 @@ package com.github.manolo8.darkbot.core.objects;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+
+import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Gui extends Updatable {
 
-    public long addressInfo;
-
-    public boolean visible;
-    protected boolean isTweening; // If it's in the middle of an animation
-
     protected final Point pos = new Point();
     protected final Point size = new Point();
     protected final Point minimized = new Point();
+
+    public long addressInfo;
+    public boolean visible;
 
     public int x;
     public int y;
     public int width;
     public int height;
 
+    protected boolean isTweening; // If it's in the middle of an animation
     protected long time;
     protected long update;
+
+    private ObjArray tempArray;
+    private ObjArray tempChildArray;
 
     public void update() {
         if (address == 0) return;
@@ -103,4 +108,72 @@ public class Gui extends Updatable {
         return !isTweening && System.currentTimeMillis() - 1000 > time;
     }
 
+    /**
+     * Doing action for each child of sprite after reading a wrapper.
+     *
+     * @param spriteAddress address of Sprite or object which extends Sprite
+     * @param consumer to be executed every child.
+     */
+    public void forEachSpriteChild(long spriteAddress, Consumer<Long> consumer) {
+        if (tempChildArray == null) tempChildArray = ObjArray.ofSprite();
+
+        tempChildArray.update(spriteAddress);
+        tempChildArray.forEach(l -> consumer.accept(API.readMemoryLong(l, 216)));
+    }
+
+    /**
+     * Get child of sprite
+     * index of sprite must be known.
+     *
+     * @param childIndex set -1 to get last.
+     */
+    public long getSpriteChild(long spriteAddress, int childIndex) {
+        return API.readMemoryLong(getSpriteChildWrapper(spriteAddress, childIndex), 216);
+    }
+
+    /**
+     * Get child of sprite wrapped in a object
+     * index of sprite must be known.
+     *
+     * @param childIndex set -1 to get last.
+     */
+    public long getSpriteChildWrapper(long spriteAddress, int childIndex) {
+        if (tempChildArray == null) tempChildArray = ObjArray.ofSprite();
+
+        tempChildArray.update(spriteAddress);
+        return childIndex != -1 ? tempChildArray.getPtr(childIndex) : tempChildArray.getLast();
+    }
+
+    /**
+     * Sprite Object with id at 168 offset.
+     */
+    public long getSpriteElement(int elementsListId, int elementId) {
+        long listAddr = getElementsList(elementsListId);
+        return getSpriteElement(listAddr, elementId);
+    }
+
+    public long getSpriteElement(long elementsListAddress, int elementId) {
+        if (elementsListAddress == 0) return 0;
+
+        tempArray.update(API.readMemoryLong(elementsListAddress, 184));
+        for (int i = 0; i < tempArray.getSize(); i++)
+            if (API.readMemoryInt(tempArray.getPtr(i), 168) == elementId)
+                return tempArray.get(i);
+
+        return 0;
+    }
+
+    /**
+     * An Array of Sprites Array with ids.
+     */
+    public long getElementsList(int elementsListId) {
+        if (tempArray == null) tempArray = ObjArray.ofArrObj();
+
+        tempArray.update(API.readMemoryLong(address, 400));
+        for (int i = 0; i < tempArray.getSize(); i++)
+            if (API.readMemoryInt(tempArray.getPtr(i), 172) == elementsListId)
+                return tempArray.get(i);
+
+        return 0;
+    }
 }
