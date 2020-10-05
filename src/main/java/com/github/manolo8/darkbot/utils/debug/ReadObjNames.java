@@ -56,7 +56,7 @@ public class ReadObjNames {
     }
 
     private static String formatString(String s, int offset, boolean isObject) {
-        return  (isObject ? "\u001B[34mOBJ" : "\u001B[32mSTR") +  "[" + offset + "]\u001B[0m " + s;
+        return (isObject ? "\u001B[34mOBJ" : "\u001B[32mSTR") + "[" + offset + " | 0x" + Integer.toHexString(offset) + "]\u001B[0m " + s;
     }
 
     private static void updateReplacements() {

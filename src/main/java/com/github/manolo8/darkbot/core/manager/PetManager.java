@@ -13,8 +13,10 @@ import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -53,6 +55,8 @@ public class PetManager extends Gui {
     private Integer gearOverride = null;
     private long gearOverrideTime = 0;
     private boolean petRepaired;
+
+    private Map<PetStatsType, PetStats> petStats = new EnumMap<>(PetStatsType.class);
 
     private enum ModuleStatus {
         NOTHING,
@@ -227,6 +231,9 @@ public class PetManager extends Gui {
         //update petRepaired
         long element = getSpriteElement(elementsListAddress, 67);
         petRepaired = API.readMemoryLong(getSpriteChildWrapper(element, 0), 0x148) == 0;
+
+        //update petStats
+        updatePetStats(elementsListAddress);
     }
 
     // TODO: 01.10.2020 needs more testing.
@@ -281,6 +288,58 @@ public class PetManager extends Gui {
     private void updateGear(Gear module, Gear subModule) {
         currentModule = module;
         currentSubModule = module == null ? null : subModule;
+    }
+
+    private void updatePetStats(long elementsListAddress) {
+        if (pet.removed) return;
+        for (PetStatsType type : PetStatsType.values())
+            petStats.computeIfAbsent(type, PetStats::new).update(elementsListAddress, type.id);
+    }
+
+    public class PetStats {
+        private double curr, total;
+
+        public double getCurr() {
+            return curr;
+        }
+
+        public double getTotal() {
+            return total;
+        }
+
+        PetStats(PetManager.PetStatsType petStatsType) {
+            this.curr = 0;
+            this.total = 0;
+        }
+
+        private void update(long elementsListAddress, int id) {
+            long address = getAddress(elementsListAddress, id);
+            curr = API.readMemoryDouble(address, 0x120);
+            total = API.readMemoryDouble(address, 0x128);
+        }
+
+        private long getAddress(long elementsListAddress, int id) {
+            long element = getSpriteElement(elementsListAddress, id);
+            long child = getSpriteChild(element, 0);
+            return child;
+        }
+    }
+
+    public enum PetStatsType {
+        HP(60),
+        SHIELD(62),
+        FUEL(63),
+        XP(61),
+        HEAT(109);
+
+        private final int id;
+        PetStatsType(int id) {
+            this.id = id;
+        }
+    }
+
+    public PetStats getPetStats(PetStatsType type) {
+        return petStats.get(type);
     }
 
     public Gear findGear(List<Gear> gears, long check) {
