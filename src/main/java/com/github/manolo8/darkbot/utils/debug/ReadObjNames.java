@@ -25,8 +25,9 @@ public class ReadObjNames {
     }
 
     public static void of(long address, int maxOffset) {
-        System.out.println("\n==========[" + API.readMemoryString(address, 0x10, 0x28, 0x90) + "]==========");
         updateReplacements();
+        String result = API.readMemoryString(address, 0x10, 0x28, 0x90);
+        System.out.println("\n==========[" + replacements.getOrDefault(result, result) + "]==========");
 
         for (int offset = 0; offset < maxOffset; offset++) {
             long addr = API.readMemoryLong(address + offset);

@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
+import com.github.manolo8.darkbot.core.objects.RefinementGui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
@@ -45,6 +46,7 @@ public class GuiManager implements Manager {
     public final Gui logout = register("logout");
     public final Gui eventProgress =  register("eventProgress");
     public final Gui eternalGate = register("eternal_gate");
+    public final RefinementGui refinement = register("refinement", new RefinementGui());
     public final PetManager pet;
     public final OreTradeGui oreTrade;
     public final GroupManager group;

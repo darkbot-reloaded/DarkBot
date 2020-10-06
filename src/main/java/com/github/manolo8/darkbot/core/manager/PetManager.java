@@ -56,7 +56,7 @@ public class PetManager extends Gui {
     private long gearOverrideTime = 0;
     private boolean petRepaired;
 
-    private Map<PetStatsType, PetStats> petStats = new EnumMap<>(PetStatsType.class);
+    private final Map<PetStatsType, PetStats> petStats = new EnumMap<>(PetStatsType.class);
 
     private enum ModuleStatus {
         NOTHING,
