@@ -6,8 +6,8 @@ How to run:
 - Unzip the release in a known folder outside of the project
 - Run `mvn clean install`
 - Add Run/Debug configuration:
-  -> Main class: com.github.manolo8.darkbot.Bot
-  -> Working directory: wherever you unzipped the release
+  - Main class: com.github.manolo8.darkbot.Bot
+  - Working directory: wherever you unzipped the release
 
 Distribution & support for the bot can be found over at discord: https://discord.gg/bEFgxCy
 
