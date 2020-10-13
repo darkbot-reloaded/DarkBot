@@ -99,7 +99,7 @@ public abstract class PairArray extends SwfPtrCollection {
         public String getKey(long addr) {
             if (isInvalid(addr)) return null;
             String key = API.readMemoryStringFallback(addr, null);
-            return key == null || key.trim().isEmpty() ? null : key;
+            return key == null || key.isEmpty() ? null : key;
         }
 
         public void update() {

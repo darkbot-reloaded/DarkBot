@@ -61,9 +61,9 @@ public class StatsManager implements Manager {
 
         currentBox = API.readMemoryLong(address + 0xE8);
 
-        sid = API.readMemoryString(API.readMemoryLong(address + 168));
+        sid = API.readMemoryStringFallback(API.readMemoryLong(address + 168), null);
         if (settingsAddress == 0) return;
-        instance = API.readMemoryString(API.readMemoryLong(settingsAddress + 616));
+        instance = API.readMemoryStringFallback(API.readMemoryLong(settingsAddress + 616), null);
     }
 
     public int getLevel() {

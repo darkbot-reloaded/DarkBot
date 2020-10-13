@@ -15,6 +15,6 @@ public class PartialGroupMember extends UpdatableAuto {
     @Override
     public void update() {
         id         = API.readMemoryInt(address + 0x20);
-        username   = API.readMemoryStringFallback(API.readMemoryLong(address + 0x68), "...");
+        username   = API.readMemoryStringFallback(API.readMemoryLong(address + 0x68), null);
     }
 }

@@ -52,7 +52,7 @@ public class ReadObjNames {
     private static void print(long address, int offset, boolean isObject) {
         String result = API.readMemoryStringFallback(address, null);
 
-        if (result != null && !result.trim().isEmpty())
+        if (result != null && !result.isEmpty())
             System.out.println(formatString(replacements.getOrDefault(result, result), offset, isObject));
     }
 

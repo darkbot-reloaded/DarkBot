@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.api.ApiAdapter;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.utils.XmlHelper;
