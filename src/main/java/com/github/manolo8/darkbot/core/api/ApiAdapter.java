@@ -33,19 +33,21 @@ public abstract class ApiAdapter implements IDarkBotAPI {
     }
 
     public String readMemoryStringInternal(long address) {
-        int size = readMemoryInt(address + 32);
-        if (size == 0) return "";
-
         //get string from cache and return if exists
         String temp = stringCache.get(address);
         if (temp != null) return temp;
+
+        int size = readMemoryInt(address + 32);
+        if (size == 0) return "";
 
         int flags = readMemoryInt(address + 36);
         int width = (flags & 0b001);
         int type = (flags & 0b110) >> 1;
 
+        size <<= width;
+
         //we assume that string size over 1024 or below 0 is invalid
-        if ((size <<= width) > 1024 || size < 0) return null;
+        if (size > 1024 || size < 0) return null;
 
         //read string buffer
         byte[] bytes;
