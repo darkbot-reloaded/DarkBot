@@ -33,7 +33,6 @@ public abstract class ApiAdapter implements IDarkBotAPI {
     }
 
     public String readMemoryStringInternal(long address) {
-        //get string from cache and return if exists
         String temp = stringCache.get(address);
         if (temp != null) return temp;
 
@@ -122,4 +121,3 @@ public abstract class ApiAdapter implements IDarkBotAPI {
     }
 
 }
-
