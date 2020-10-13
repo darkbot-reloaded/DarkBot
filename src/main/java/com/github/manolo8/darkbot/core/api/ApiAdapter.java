@@ -48,7 +48,6 @@ public abstract class ApiAdapter implements IDarkBotAPI {
         //we assume that string size over 1024 or below 0 is invalid
         if (size > 1024 || size < 0) return null;
 
-        //read string buffer
         byte[] bytes;
         if (type == 2)
             bytes = readMemory(readMemoryLong(address, 24, 16) + readMemoryInt(address + 16), size);
