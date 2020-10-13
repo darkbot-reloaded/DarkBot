@@ -15,6 +15,7 @@ public class Pet extends Ship {
 
     @Override
     public void update() {
+        if (address == 0) return;
         super.update();
         id = API.readMemoryInt(address + 56);
         level = API.readMemoryInt(address, 0x130, 0x28, 0x28);
