@@ -1,15 +1,12 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.manolo8.darkbot.core.utils.WeakValueHashMap;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 
 import java.awt.*;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Arrays;
 
 public abstract class ApiAdapter implements IDarkBotAPI {
@@ -22,10 +19,7 @@ public abstract class ApiAdapter implements IDarkBotAPI {
     private int initialWidth, initialHeight; // Prefered sizes set by setSize
 
     private static final String FALLBACK_STRING = "ERROR";
-    private final LoadingCache<Long, String> stringCache = CacheBuilder.newBuilder()
-            .weakValues()
-            .expireAfterAccess(Duration.ofMinutes(1))
-            .build(CacheLoader.from(this::readMemoryStringInternal));
+    private final WeakValueHashMap<Long, String> stringCache = new WeakValueHashMap<>();
 
     @Override
     public String readMemoryString(long address) {
@@ -34,32 +28,36 @@ public abstract class ApiAdapter implements IDarkBotAPI {
 
     @Override
     public String readMemoryStringFallback(long address, String fallback) {
-        String str = stringCache.getUnchecked(address);
-        if (str == null) {
-            stringCache.invalidate(address);
-            return fallback;
-        }
-
-        if (str.isEmpty()) stringCache.invalidate(address);
-        return str;
+        String str = readMemoryStringInternal(address);
+        return str == null ? fallback : str;
     }
 
     public String readMemoryStringInternal(long address) {
+        int size = readMemoryInt(address + 32);
+        if (size == 0) return "";
+
+        //get string from cache and return if exists
+        String temp = stringCache.get(address);
+        if (temp != null) return temp;
+
         int flags = readMemoryInt(address + 36);
         int width = (flags & 0b001);
-        int size = readMemoryInt(address + 32) << width;
         int type = (flags & 0b110) >> 1;
 
-        if (size > 1024 || size < 0) return null;
+        //we assume that string size over 1024 or below 0 is invalid
+        if ((size <<= width) > 1024 || size < 0) return null;
 
+        //read string buffer
         byte[] bytes;
-
         if (type == 2)
-            bytes = readMemory(readMemoryLong(readMemoryLong(address + 24) + 16) + readMemoryInt(address + 16), size);
+            bytes = readMemory(readMemoryLong(address, 24, 16) + readMemoryInt(address + 16), size);
         else
             bytes = readMemory(readMemoryLong(address + 16), size);
 
-        return width == 0 ? new String(bytes, StandardCharsets.ISO_8859_1) : new String(bytes, StandardCharsets.UTF_16LE);
+        temp = new String(bytes, width == 0 ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_16LE);
+        stringCache.put(address, temp);
+
+        return temp;
     }
 
     private int x, y, w, h;
