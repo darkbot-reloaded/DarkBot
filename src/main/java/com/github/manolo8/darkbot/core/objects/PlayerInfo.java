@@ -21,19 +21,13 @@ public class PlayerInfo extends Updatable {
 
     @Override
     public void update() {
-
         clanId = readIntFromIntHolder(40);
         clanDiplomacy = readIntFromIntHolder(48);
         factionId = readIntFromIntHolder(72);
         rank = readIntFromIntHolder(80);
         gg = readIntFromIntHolder(88);
-
-        //noinspection StringEquality
-        if (username.isEmpty() || username == "ERROR") {
-            clanTag = readStringFromStringHolder(56);
-            username = readStringFromStringHolder(64);
-        }
-
+        clanTag = readStringFromStringHolder(56);
+        username = readStringFromStringHolder(64);
     }
 
     private int readIntFromIntHolder(int holderOffset) {
@@ -41,6 +35,6 @@ public class PlayerInfo extends Updatable {
     }
 
     private String readStringFromStringHolder(int holderOffset) {
-        return API.readMemoryString(API.readMemoryLong(API.readMemoryLong(address + holderOffset) + 40));
+        return API.readMemoryStringFallback(API.readMemoryLong(API.readMemoryLong(address + holderOffset) + 40), "");
     }
 }

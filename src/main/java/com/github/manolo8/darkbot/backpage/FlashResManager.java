@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.api.ApiAdapter;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.utils.XmlHelper;
@@ -40,7 +41,9 @@ public class FlashResManager implements Task {
     public void tick() {
         if (main == null) return;
         String currLang = main.settingsManager.lang;
-        if (currLang == null || currLang.isEmpty() || currLang.equals("ERROR") || currLang.equals(lang)) return;
+        if (currLang == null
+                || currLang.isEmpty()
+                || currLang.equals(lang)) return;
 
         try {
             Element root = Http.create(URL.replace("{lang}", currLang))

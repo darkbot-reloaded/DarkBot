@@ -1,11 +1,15 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 
 import java.awt.*;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
 
 public abstract class ApiAdapter implements IDarkBotAPI {
@@ -17,14 +21,36 @@ public abstract class ApiAdapter implements IDarkBotAPI {
 
     private int initialWidth, initialHeight; // Prefered sizes set by setSize
 
+    private static final String FALLBACK_STRING = "ERROR";
+    private final LoadingCache<Long, String> stringCache = CacheBuilder.newBuilder()
+            .weakValues()
+            .expireAfterAccess(Duration.ofMinutes(1))
+            .build(CacheLoader.from(this::readMemoryStringInternal));
+
     @Override
     public String readMemoryString(long address) {
-        int flags = readMemoryInt(address + 36);
-        int width = (flags & 0x00000001);
-        int size = readMemoryInt(address + 32) << width;
-        int type = (flags & 0x00000006) >> 1;
+        return readMemoryStringFallback(address, FALLBACK_STRING);
+    }
 
-        if (size > 1024 || size < 0) return "ERROR";
+    @Override
+    public String readMemoryStringFallback(long address, String fallback) {
+        String str = stringCache.getUnchecked(address);
+        if (str == null) {
+            stringCache.invalidate(address);
+            return fallback;
+        }
+
+        if (str.isEmpty()) stringCache.invalidate(address);
+        return str;
+    }
+
+    public String readMemoryStringInternal(long address) {
+        int flags = readMemoryInt(address + 36);
+        int width = (flags & 0b001);
+        int size = readMemoryInt(address + 32) << width;
+        int type = (flags & 0b110) >> 1;
+
+        if (size > 1024 || size < 0) return null;
 
         byte[] bytes;
 
