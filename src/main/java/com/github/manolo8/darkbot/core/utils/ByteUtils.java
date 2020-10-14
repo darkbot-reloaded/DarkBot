@@ -171,6 +171,7 @@ public class ByteUtils {
         }
 
         public String readString(long address) {
+            if (address == 0) return "";
             StrLocation loc = new StrLocation(address);
 
             // Attempt read in cache
