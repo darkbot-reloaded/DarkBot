@@ -1,5 +1,9 @@
 package com.github.manolo8.darkbot.core.utils;
 
+import com.github.manolo8.darkbot.core.IDarkBotAPI;
+
+import java.nio.charset.StandardCharsets;
+
 public class ByteUtils {
 
     /**
@@ -37,9 +41,7 @@ public class ByteUtils {
      *  regardless of whether the context implies int, uint, or Number.
      *  If a number doesn't fit into that range it is stored as a kDoubleType
      *
-     */
-    /**
-     * A mask that will remove atom constant bits
+     * A mask that will remove atom constant bits:
      */
     public static final long ATOM_MASK = ~0b111L;
     @Deprecated // Use ATOM_MASK instead.
@@ -100,4 +102,90 @@ public class ByteUtils {
 
         return b;
     }
+
+    public static class StringReader {
+        private static final int TYPE_DYNAMIC = 0, TYPE_STATIC = 1, TYPE_DEPENDENT = 2;
+        private static final int WIDTH_AUTO = -1, WIDTH_8 = 0, WIDTH_16 = 1;
+
+        private final IDarkBotAPI API;
+        private final WeakValueHashMap<StrLocation, String> stringCache = new WeakValueHashMap<>();
+
+        public StringReader(IDarkBotAPI API) {
+            this.API = API;
+        }
+
+        private class StrLocation {
+            private final long address, base;
+            private final int size, width;
+
+            private StrLocation(long address) {
+                this.address = address;
+
+                int size = API.readMemoryInt(address + 32);
+                if (size == 0) {
+                    this.size = 0;
+                    this.base = 0;
+                    this.width = 0;
+                    return;
+                }
+
+                int flags  = API.readMemoryInt(address + 36);
+                int type   = (flags & 0b110) >> 1;
+
+                this.width = (flags & 0b001);
+                this.size  = (size << width);
+                this.base = type == TYPE_DEPENDENT ? API.readMemoryLong(address, 24, 16) : 0;
+            }
+
+            private String read() {
+                if (size == 0) return "";
+                // assume that string sizes over 1024 or below 0 are invalid
+                if (size > 1024 || size < 0) return null;
+
+                long addr = base == 0 ? API.readMemoryLong(address + 16) : base + API.readMemoryInt(address + 16);
+                return new String(API.readMemory(addr, size),
+                        width == WIDTH_8 ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_16LE);
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+
+                StrLocation that = (StrLocation) o;
+
+                if (address != that.address) return false;
+                if (base != that.base) return false;
+                if (size != that.size) return false;
+                return width == that.width;
+            }
+
+            @Override
+            public int hashCode() {
+                int result = (int) (address ^ (address >>> 32));
+                result = 31 * result + (int) (base ^ (base >>> 32));
+                result = 31 * result + size;
+                result = 31 * result + width;
+                return result;
+            }
+        }
+
+        public String readString(long address) {
+            if (address == 0) return "";
+            StrLocation loc = new StrLocation(address);
+
+            // Attempt read in cache
+            String result = stringCache.get(loc);
+            if (result != null) return result;
+
+            result = loc.read();
+            if (result != null && !result.isEmpty())
+                stringCache.put(loc, result);
+
+            return result;
+        }
+
+    }
+
+
 }
