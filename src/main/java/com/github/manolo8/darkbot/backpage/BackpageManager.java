@@ -9,7 +9,6 @@ import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 
-import javax.xml.ws.http.HTTPBinding;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +23,10 @@ public class BackpageManager extends Thread {
     public  static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
     private static final String[] ACTIONS = new String[]{
             "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
+
+    private static class SidStatus {
+        private static final int NO_SID = -1, ERROR = -2, UNKNOWN = -3;
+    }
 
     public final HangarManager hangarManager;
     public final LegacyHangarManager legacyHangarManager;
@@ -60,8 +63,10 @@ public class BackpageManager extends Thread {
             Time.sleep(100);
 
             if (isInvalid()) {
-                sidStatus = -1;
+                sidStatus = SidStatus.NO_SID;
                 continue;
+            } else if (sidStatus == SidStatus.NO_SID) {
+                sidStatus = SidStatus.UNKNOWN;
             }
 
             this.hangarManager.tick();
@@ -115,7 +120,7 @@ public class BackpageManager extends Thread {
         try {
             sidStatus = sidKeepAlive();
         } catch (Exception e) {
-            sidStatus = -2;
+            sidStatus = SidStatus.ERROR;
             e.printStackTrace();
             return 5 * Time.MINUTE;
         }
@@ -185,15 +190,16 @@ public class BackpageManager extends Thread {
     }
 
     public synchronized String sidStatus() {
-        return sidStat() + (sidStatus != -1 && sidStatus != 302 ?
+        return sidStat() + (sidStatus != SidStatus.NO_SID && sidStatus != 302 ?
                 " " + Time.toString(System.currentTimeMillis() - sidLastUpdate) + "/" +
                         Time.toString(sidNextUpdate - sidLastUpdate) : "");
     }
 
     private String sidStat() {
         switch (sidStatus) {
-            case -1: return "--";
-            case -2: return "ERR";
+            case SidStatus.NO_SID:
+            case SidStatus.UNKNOWN: return "--";
+            case SidStatus.ERROR: return "ERR";
             case 200: return "OK";
             case 302: return "KO";
             default: return sidStatus + "";
