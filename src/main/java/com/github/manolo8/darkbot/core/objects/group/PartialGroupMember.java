@@ -9,14 +9,12 @@ public class PartialGroupMember extends UpdatableAuto {
     public String username;
 
     public String getUsername() {
-        return username != null ? username : "...";
+        return username != null && !username.isEmpty() ? username : "...";
     }
 
     @Override
     public void update() {
         id         = API.readMemoryInt(address + 0x20);
-        username   = API.readMemoryString(API.readMemoryLong(address + 0x68));
-        if (username != null && (username.isEmpty() || username.equals("ERROR")))
-            username = null;
+        username   = API.readMemoryStringFallback(API.readMemoryLong(address + 0x68), null);
     }
 }

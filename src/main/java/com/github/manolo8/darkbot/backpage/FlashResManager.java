@@ -40,7 +40,9 @@ public class FlashResManager implements Task {
     public void tick() {
         if (main == null) return;
         String currLang = main.settingsManager.lang;
-        if (currLang == null || currLang.isEmpty() || currLang.equals("ERROR") || currLang.equals(lang)) return;
+        if (currLang == null
+                || currLang.isEmpty()
+                || currLang.equals(lang)) return;
 
         try {
             Element root = Http.create(URL.replace("{lang}", currLang))

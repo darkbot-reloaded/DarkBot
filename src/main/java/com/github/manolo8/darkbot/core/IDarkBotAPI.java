@@ -46,9 +46,14 @@ public interface IDarkBotAPI {
     }
 
     String readMemoryString(long address);
+    String readMemoryStringFallback(long address, String fallback);
     default String readMemoryString(long address, int... offsets) {
         for (int offset : offsets) address = readMemoryLong(address + offset);
         return readMemoryString(address);
+    }
+    default String readMemoryStringFallback(long address, String fallback, int... offsets) {
+        for (int offset : offsets) address = readMemoryLong(address + offset);
+        return readMemoryStringFallback(address, fallback);
     }
 
     byte[] readMemory(long address, int length);

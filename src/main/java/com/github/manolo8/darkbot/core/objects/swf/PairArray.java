@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.swf;
 
+import com.github.manolo8.darkbot.core.api.ApiAdapter;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 
@@ -97,8 +98,8 @@ public abstract class PairArray extends SwfPtrCollection {
 
         public String getKey(long addr) {
             if (isInvalid(addr)) return null;
-            String key = API.readMemoryString(addr);
-            return key == null || key.trim().isEmpty() || key.equals("ERROR") ? null : key;
+            String key = API.readMemoryStringFallback(addr, null);
+            return key == null || key.isEmpty() ? null : key;
         }
 
         public void update() {

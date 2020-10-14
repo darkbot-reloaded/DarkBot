@@ -21,7 +21,7 @@ public class ConfigEntity {
             info.radius = 500;
             info.mapList.add(mapId);
 
-            if (!name.equals("ERROR") && !name.isEmpty()) {
+            if (!name.isEmpty()) {
                 config.LOOT.NPC_INFOS.put(name, info);
                 config.LOOT.MODIFIED_NPC.send(name);
 
@@ -38,7 +38,7 @@ public class ConfigEntity {
         BoxInfo info = config.COLLECT.BOX_INFOS.get(name);
         if (info == null) {
             info = new BoxInfo();
-            if (!name.equals("ERROR") && !name.isEmpty()) {
+            if (!name.isEmpty()) {
                 config.COLLECT.BOX_INFOS.put(name, info);
                 config.COLLECT.ADDED_BOX.send(name);
 

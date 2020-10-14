@@ -43,14 +43,8 @@ public class StatsManager implements Manager {
 
     @Override
     public void install(BotInstaller botInstaller) {
-        botInstaller.heroInfoAddress.add(value -> {
-            address = value;
-            sid = API.readMemoryString(API.readMemoryLong(address + 168));
-        });
-        botInstaller.settingsAddress.add(value -> {
-            settingsAddress = value;
-            instance = null;
-        });
+        botInstaller.heroInfoAddress.add(value -> address = value);
+        botInstaller.settingsAddress.add(value -> settingsAddress = value);
     }
 
 
@@ -67,10 +61,9 @@ public class StatsManager implements Manager {
 
         currentBox = API.readMemoryLong(address + 0xE8);
 
+        sid = API.readMemoryStringFallback(API.readMemoryLong(address + 168), null);
         if (settingsAddress == 0) return;
-        if (instance == null || instance.isEmpty() || !instance.startsWith("http")) {
-            instance = API.readMemoryString(API.readMemoryLong(settingsAddress + 616));
-        }
+        instance = API.readMemoryStringFallback(API.readMemoryLong(settingsAddress + 616), null);
     }
 
     public int getLevel() {
