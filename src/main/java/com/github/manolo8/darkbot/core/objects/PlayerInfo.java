@@ -26,8 +26,10 @@ public class PlayerInfo extends Updatable {
         factionId = readIntFromIntHolder(72);
         rank = readIntFromIntHolder(80);
         gg = readIntFromIntHolder(88);
-        clanTag = readStringFromStringHolder(56);
-        username = readStringFromStringHolder(64);
+        if (username.isEmpty()) {
+            clanTag = readStringFromStringHolder(56);
+            username = readStringFromStringHolder(64);
+        }
     }
 
     private int readIntFromIntHolder(int holderOffset) {

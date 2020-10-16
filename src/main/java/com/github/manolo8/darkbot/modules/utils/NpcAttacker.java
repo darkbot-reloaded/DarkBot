@@ -82,9 +82,8 @@ public class NpcAttacker {
     }
 
     protected void tryAttackOrFix() {
-        boolean bugged = hero.isAttacking(target)
-                && (!hero.isAiming(target) || (!target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 700))
-                && System.currentTimeMillis() > (laserTime + fixTimes * 3000);
+        boolean bugged = System.currentTimeMillis() > (laserTime + fixTimes * 3000) &&
+                (!hero.isAiming(target) || (!target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 700));
         boolean ammoChanged = shouldSab() != sab || shouldRsb() != rsb;
         if ((ammoChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
             laserTime = System.currentTimeMillis() + 750;
