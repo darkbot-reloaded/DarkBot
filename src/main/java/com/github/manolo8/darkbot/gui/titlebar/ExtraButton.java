@@ -4,22 +4,24 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.ExtraMenuProvider;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
+import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
+import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
-import com.github.manolo8.darkbot.gui.utils.JTitledPopupMenuSeparator;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
-import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.SystemUtils;
 import com.github.manolo8.darkbot.utils.debug.SWFUtils;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -31,10 +33,39 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
     private static final Set<ExtraMenuProvider> EXTRA_DECORATIONS = new LinkedHashSet<>();
     private static final Lazy<Void> clean = new Lazy.NoCache<>();
 
-    public static void setExtraDecorations(Stream<ExtraMenuProvider> provider) {
+    private static final PluginExtraMenuProvider PLUGIN_DECORATIONS = new PluginExtraMenuProvider();
+    private static final Map<Plugin, Set<ExtraMenuProvider>> plugins = new HashMap<>();
+
+    public static void setExtraDecorations(Stream<ExtraMenuProvider> provider, FeatureRegistry featureRegistry) {
         EXTRA_DECORATIONS.clear();
-        provider.forEach(EXTRA_DECORATIONS::add);
+        plugins.clear();
+
+        provider.forEach(extra -> {
+            if (!(extra instanceof DefaultExtraMenuProvider)) {
+                Plugin plugin = featureRegistry.getFeatureDefinition(extra).getPlugin();
+                plugins.computeIfAbsent(
+                        plugin,
+                        features -> new HashSet<>()).add(extra);
+            } else {
+                EXTRA_DECORATIONS.add(extra);
+            }
+        });
         clean.send(null);
+    }
+
+    private static class PluginExtraMenuProvider implements ExtraMenuProvider {
+        @Override
+        public Collection<JComponent> getExtraMenuItems(Main main) {
+            List<JComponent> list = new ArrayList<>();
+
+            plugins.forEach((plugin, features) -> {
+                List<JComponent> components = new ArrayList<>();
+                features.forEach(feature -> feature.getExtraMenuItems(main).forEach(component -> components.add(component)));
+                list.add(createMenu(plugin.getName(), components));
+            });
+
+            return list;
+        }
     }
 
     protected boolean empty = true;
@@ -65,6 +96,10 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             for (JComponent component : extraDecoration.getExtraMenuItems(main)) {
                 extraOptions.add(component);
             }
+        }
+
+        if (!plugins.isEmpty()) {
+            PLUGIN_DECORATIONS.getExtraMenuItems(main).forEach(component -> extraOptions.add(component));
         }
         empty = false;
     }
@@ -102,9 +137,11 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 list.add(create("Save SWF", e -> SWFUtils.dumpMainSWF()));
             }
 
+            if (!plugins.isEmpty()) {
+                list.add(createSeparator("Plugin stuff"));
+            }
+
             return list;
         }
-
     }
-
 }

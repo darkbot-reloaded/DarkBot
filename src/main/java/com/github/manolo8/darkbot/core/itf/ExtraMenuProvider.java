@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.utils.I18n;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.util.Collection;
+import java.util.List;
 
 public interface ExtraMenuProvider {
     Collection<JComponent> getExtraMenuItems(Main main);
@@ -21,6 +22,12 @@ public interface ExtraMenuProvider {
         JMenuItem item = new JMenuItem(I18n.getOrDefault("gui.hamburger_button." + key, key));
         if (listener != null) item.addActionListener(listener);
         return item;
+    }
+
+    default JMenu createMenu(String key, List<JComponent> components) {
+        JMenu menu = new JMenu(key);
+        for (JComponent component : components) menu.add(component);
+        return menu;
     }
 
     default JComponent createSeparator(String key) {

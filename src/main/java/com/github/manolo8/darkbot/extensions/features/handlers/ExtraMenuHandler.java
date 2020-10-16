@@ -28,6 +28,6 @@ public class ExtraMenuHandler extends FeatureHandler<ExtraMenuProvider> {
         ExtraButton.setExtraDecorations(extras
                 .map(featureRegistry::getFeature)
                 .filter(Optional::isPresent)
-                .map(Optional::get));
+                .map(Optional::get), featureRegistry);
     }
 }
