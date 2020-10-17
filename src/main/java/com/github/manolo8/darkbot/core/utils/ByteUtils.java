@@ -116,7 +116,8 @@ public class ByteUtils {
 
         private class StrLocation {
             private final long address, base;
-            private final int size, width;
+            private final int size;
+            private final boolean width8;
 
             private StrLocation(long address) {
                 this.address = address;
@@ -125,16 +126,20 @@ public class ByteUtils {
                 if (size == 0) {
                     this.size = 0;
                     this.base = 0;
-                    this.width = 0;
+                    this.width8 = true;
                     return;
                 }
 
                 int flags  = API.readMemoryInt(address + 36);
                 int type   = (flags & 0b110) >> 1;
+                int width = (flags & 0b001);
 
-                this.width = (flags & 0b001);
                 this.size  = (size << width);
-                this.base = type == TYPE_DEPENDENT ? API.readMemoryLong(address, 24, 16) : 0;
+                this.width8 = width == WIDTH_8;
+                if (type == TYPE_DEPENDENT)
+                    this.base = API.readMemoryLong(address, 24, 16) + API.readMemoryInt(address + 16);
+                else
+                    this.base = API.readMemoryLong(address + 16);
             }
 
             private String read() {
@@ -142,9 +147,8 @@ public class ByteUtils {
                 // assume that string sizes over 1024 or below 0 are invalid
                 if (size > 1024 || size < 0) return null;
 
-                long addr = base == 0 ? API.readMemoryLong(address + 16) : base + API.readMemoryInt(address + 16);
-                return new String(API.readMemory(addr, size),
-                        width == WIDTH_8 ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_16LE);
+                return new String(API.readMemory(base, size),
+                        width8 ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_16LE);
             }
 
             @Override
@@ -157,7 +161,7 @@ public class ByteUtils {
                 if (address != that.address) return false;
                 if (base != that.base) return false;
                 if (size != that.size) return false;
-                return width == that.width;
+                return width8 == that.width8;
             }
 
             @Override
@@ -165,7 +169,7 @@ public class ByteUtils {
                 int result = (int) (address ^ (address >>> 32));
                 result = 31 * result + (int) (base ^ (base >>> 32));
                 result = 31 * result + size;
-                result = 31 * result + width;
+                result = 31 * result + (width8 ? 1 : 0);
                 return result;
             }
         }
