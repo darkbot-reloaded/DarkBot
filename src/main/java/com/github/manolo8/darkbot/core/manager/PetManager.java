@@ -54,7 +54,7 @@ public class PetManager extends Gui {
 
     private Integer gearOverride = null;
     private long gearOverrideTime = 0;
-    private boolean petRepaired;
+    private boolean repaired;
 
     private final Map<PetStatsType, PetStats> petStats = new EnumMap<>(PetStatsType.class);
 
@@ -149,9 +149,37 @@ public class PetManager extends Gui {
         this.enabled = enabled;
     }
 
+    public void setOverride(PetGearSupplier.Gears gear) {
+        setOverride(gear.getId());
+    }
+
     public void setOverride(Integer gearId) {
         this.gearOverride = gearId;
-        this.gearOverrideTime = System.currentTimeMillis() + 5000;
+        this.gearOverrideTime = gearId == null ? 0 : System.currentTimeMillis() + 5000;
+    }
+
+    public boolean hasGear(PetGearSupplier.Gears gear) {
+        return hasGear(gear.getId());
+    }
+
+    public boolean hasGear(int id) {
+        return findGearById(id) != null;
+    }
+
+    public PetStats getPetStats(PetStatsType type) {
+        return petStats.get(type);
+    }
+
+    public boolean hasCooldown(PetBuff buff) {
+        return hasCooldown(buff.getId());
+    }
+
+    public boolean hasCooldown(int buffId) {
+        return petBuffsIds.contains(buffId);
+    }
+
+    public boolean isRepaired() {
+        return repaired;
     }
 
     private boolean active() {
@@ -213,40 +241,41 @@ public class PetManager extends Gui {
         super.update();
         if (address == 0) return;
 
-        //update gearsList
-        long gearsSprite = getSpriteChild(address, -1); //read gui sprite
+        long gearsSprite = getSpriteChild(address, -1);
         gearsArr.update(API.readMemoryLong(gearsSprite, 176, 224));
         gearsArr.sync(gearList, Gear::new, null);
 
-        //update locator npcs list
-        updateLocator(gearsSprite);
+        updateNpcLocatorList(gearsSprite);
 
         long elementsListAddress = getElementsList(54);
-        //update current module
         updateCurrentModule(elementsListAddress);
 
-        //update pet buffs
         updatePetBuffs(elementsListAddress);
 
-        //update petRepaired
         long element = getSpriteElement(elementsListAddress, 67);
-        petRepaired = API.readMemoryLong(getSpriteChildWrapper(element, 0), 0x148) == 0;
+        repaired = API.readMemoryLong(getSpriteChildWrapper(element, 0), 0x148) == 0;
 
-        //update petStats
         updatePetStats(elementsListAddress);
     }
 
-    // TODO: 01.10.2020 needs more testing.
-    public boolean isPetRepaired() {
-        return petRepaired;
-    }
-
+    @Deprecated
     public boolean hasBuff(PetBuff buff) {
         return hasBuff(buff.getId());
     }
 
+    @Deprecated
     public boolean hasBuff(int buffId) {
         return petBuffsIds.contains(buffId);
+    }
+
+    @Deprecated
+    public boolean isPetRepaired() {
+        return repaired;
+    }
+
+    @Deprecated // Use hasGear instead
+    public Gear byId(int id) {
+        return findGearById(id);
     }
 
     private void updatePetBuffs(long elementsListAddress) {
@@ -267,11 +296,11 @@ public class PetManager extends Gui {
         if (currentModule != null) currentSubModule = null;
         else {
             currentSubModule = findGear(locatorList, currGearCheck);
-            if (currentSubModule != null) currentModule = byId(currentSubModule.parentId);
+            if (currentSubModule != null) currentModule = findGearById(currentSubModule.parentId);
         }
     }
 
-    private void updateLocator(long gearsSprite) {
+    private void updateNpcLocatorList(long gearsSprite) {
         locatorWrapper.update(API.readMemoryLong(gearsSprite + 168));
 
         int oldSize = locatorNpcList.getSize();
@@ -285,15 +314,35 @@ public class PetManager extends Gui {
         locatorNpcList.sync(locatorList, Gear::new, null);
     }
 
-    private void updateGear(Gear module, Gear subModule) {
-        currentModule = module;
-        currentSubModule = module == null ? null : subModule;
-    }
-
     private void updatePetStats(long elementsListAddress) {
         if (pet.removed) return;
         for (PetStatsType type : PetStatsType.values())
             petStats.computeIfAbsent(type, PetStats::new).update(elementsListAddress, type.id);
+    }
+
+    private Gear findGear(List<Gear> gears, long check) {
+        for (Gear gear : gears) if (gear.check == check) return gear;
+        return null;
+    }
+
+    private Gear findGearById(int id) {
+        for (Gear gear : gearList) if (gear.id == id) return gear;
+        return null;
+    }
+
+    public static class Gear extends UpdatableAuto {
+        public int id, parentId;
+        public long check;
+        public String name, fuzzyName;
+
+        @Override
+        public void update() {
+            this.id = API.readMemoryInt(address + 172);
+            this.parentId = API.readMemoryInt(address + 176); //assume, -1 if none
+            this.name = API.readMemoryString(API.readMemoryLong(address + 200));
+            this.fuzzyName = name.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
+            this.check = API.readMemoryLong(address, 208, 152, 0x10);
+        }
     }
 
     public class PetStats {
@@ -320,53 +369,21 @@ public class PetManager extends Gui {
 
         private long getAddress(long elementsListAddress, int id) {
             long element = getSpriteElement(elementsListAddress, id);
-            long child = getSpriteChild(element, 0);
-            return child;
+            return getSpriteChild(element, 0);
         }
     }
 
     public enum PetStatsType {
-        HP(60),
-        SHIELD(62),
-        FUEL(63),
-        XP(61),
-        HEAT(109);
+        HP(60), SHIELD(62), FUEL(63), XP(61), HEAT(109);
 
         private final int id;
+
         PetStatsType(int id) {
             this.id = id;
         }
     }
 
-    public PetStats getPetStats(PetStatsType type) {
-        return petStats.get(type);
-    }
-
-    public Gear findGear(List<Gear> gears, long check) {
-        for (Gear gear : gears) if (gear.check == check) return gear;
-        return null;
-    }
-
-    public Gear byId(int id) {
-        for (Gear gear : gearList) if (gear.id == id) return gear;
-        return null;
-    }
-
-    public static class Gear extends UpdatableAuto {
-        public int id, parentId;
-        public long check;
-        public String name, fuzzyName;
-
-        @Override
-        public void update() {
-            this.id = API.readMemoryInt(address + 172);
-            this.parentId = API.readMemoryInt(address + 176); //assume, -1 if none
-            this.name = API.readMemoryString(API.readMemoryLong(address + 200));
-            this.fuzzyName = name.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
-            this.check = API.readMemoryLong(address, 208, 152, 0x10);
-        }
-    }
-
+    // Represents a pet cool down
     public enum PetBuff {
         SINGULARITY,
         SPEED_LEECH,

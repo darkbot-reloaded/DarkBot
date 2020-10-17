@@ -84,15 +84,13 @@ public class NpcAttacker {
     protected void tryAttackOrFix() {
         boolean bugged = System.currentTimeMillis() > (laserTime + fixTimes * 3000) &&
                 (!hero.isAiming(target) || (!target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 700));
-        boolean ammoChanged = shouldSab() != sab || shouldRsb() != rsb;
+        boolean ammoChanged = fixTimes == 0 || shouldSab() != sab || shouldRsb() != rsb;
         if ((ammoChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
             laserTime = System.currentTimeMillis() + 750;
+            fixTimes++;
             if (!bugged || ammoChanged) API.keyboardClick(getAttackKey());
-            else {
-                if (API instanceof DarkBoatAdapter) API.rawKeyboardClick((char) 0x11);
-                else setRadiusAndClick(false);
-                fixTimes++;
-            }
+            else if (API instanceof DarkBoatAdapter) API.rawKeyboardClick((char) 0x11);
+            else setRadiusAndClick(false);
         }
     }
 

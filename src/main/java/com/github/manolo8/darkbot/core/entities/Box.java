@@ -33,7 +33,8 @@ public class Box extends Entity {
     }
 
     public int getNextWait() {
-        return retries < 5 ? retries * 2_000 : (retries * 60_000);
+        return retries % 3 == 0 ? 50 : // one every 3 is an "instant retry"
+                retries < 5 ? retries * 1_000 : retries * 60_000; // After 5 retries consider box bugged
     }
 
     @Override
