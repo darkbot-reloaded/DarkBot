@@ -17,7 +17,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +35,13 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
 
     public static void setExtraDecorations(Stream<ExtraMenuProvider> provider, FeatureRegistry featureRegistry) {
         EXTRA_DECORATIONS.clear();
-        PluginExtraMenuProvider.plugins.clear();
+        PluginExtraMenuProvider.PLUGINS.clear();
 
         provider.forEach(extra -> {
-            if (!(extra instanceof PluginExtraMenuProvider) && !(extra instanceof DefaultExtraMenuProvider)) {
-                Plugin plugin = featureRegistry.getFeatureDefinition(extra).getPlugin();
-                PluginExtraMenuProvider.plugins.computeIfAbsent(
-                        plugin,
+            Plugin pl = featureRegistry.getFeatureDefinition(extra).getPlugin();
+            if (pl != null) {
+                PluginExtraMenuProvider.PLUGINS.computeIfAbsent(
+                        pl,
                         features -> new LinkedHashSet<>()).add(extra);
             } else {
                 EXTRA_DECORATIONS.add(extra);
@@ -52,18 +53,17 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
 
     @Feature(name = "Plugin menu provider", description = "Provides plugin extra menus")
     public static class PluginExtraMenuProvider implements ExtraMenuProvider {
-        private static final Map<Plugin, Set<ExtraMenuProvider>> plugins = new HashMap<>();
+        private static final Map<Plugin, Set<ExtraMenuProvider>> PLUGINS = new LinkedHashMap<>();
 
         @Override
         public Collection<JComponent> getExtraMenuItems(Main main) {
+            if (PLUGINS.isEmpty()) return Collections.emptyList();
             List<JComponent> list = new ArrayList<>();
-            if (plugins.isEmpty()) return list;
             list.add(createSeparator("plugins"));
 
-            plugins.forEach((plugin, features) -> {
-                List<JComponent> components = new ArrayList<>();
-                features.forEach(feature -> feature.getExtraMenuItems(main).forEach(component -> components.add(component)));
-                list.add(createMenu(plugin.getName(), components));
+            PLUGINS.forEach((plugin, features) -> {
+                list.add(createMenu(plugin.getName(), 
+                    features.stream().flatMap(f -> f.getExtraMenuItems(main).stream())));
             });
 
             return list;
@@ -99,7 +99,6 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 extraOptions.add(component);
             }
         }
-
         empty = false;
     }
 
@@ -138,5 +137,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
 
             return list;
         }
+
     }
+
 }

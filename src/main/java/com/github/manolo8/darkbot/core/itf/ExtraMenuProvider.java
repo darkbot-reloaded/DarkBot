@@ -7,7 +7,7 @@ import com.github.manolo8.darkbot.utils.I18n;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.util.Collection;
-import java.util.List;
+import java.util.stream.Stream;
 
 public interface ExtraMenuProvider {
     Collection<JComponent> getExtraMenuItems(Main main);
@@ -24,14 +24,14 @@ public interface ExtraMenuProvider {
         return item;
     }
 
-    default JMenu createMenu(String key, List<JComponent> components) {
+    default JMenu createMenu(String key, Stream<JComponent> components) {
         JMenu menu = new JMenu(key);
-        for (JComponent component : components) menu.add(component);
+        components.forEach(menu::add);
         return menu;
     }
 
     default JComponent createSeparator(String key) {
-        return new JTitledPopupMenuSeparator(I18n.getOrDefault("gui.hamburger_separator." + key, key));
+        return new JTitledPopupMenuSeparator(I18n.getOrDefault("gui.hamburger_button." + key, key));
     }
 
 }
