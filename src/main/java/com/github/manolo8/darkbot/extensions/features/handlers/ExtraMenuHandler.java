@@ -10,7 +10,10 @@ import java.util.stream.Stream;
 
 public class ExtraMenuHandler extends FeatureHandler<ExtraMenuProvider> {
 
-    private static final Class<?>[] NATIVE = new Class[]{ExtraButton.DefaultExtraMenuProvider.class};
+    private static final Class<?>[] NATIVE = new Class[] {
+            ExtraButton.DefaultExtraMenuProvider.class,
+            ExtraButton.PluginExtraMenuProvider.class
+    };
 
     private final FeatureRegistry featureRegistry;
 

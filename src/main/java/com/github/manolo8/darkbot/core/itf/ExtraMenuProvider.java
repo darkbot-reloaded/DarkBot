@@ -31,7 +31,7 @@ public interface ExtraMenuProvider {
     }
 
     default JComponent createSeparator(String key) {
-        return new JTitledPopupMenuSeparator(I18n.getOrDefault("gui.hamburger_button." + key, key));
+        return new JTitledPopupMenuSeparator(I18n.getOrDefault("gui.hamburger_separator." + key, key));
     }
 
 }

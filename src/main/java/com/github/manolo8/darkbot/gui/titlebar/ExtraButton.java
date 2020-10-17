@@ -18,7 +18,6 @@ import java.awt.event.InputEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,30 +32,33 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
     private static final Set<ExtraMenuProvider> EXTRA_DECORATIONS = new LinkedHashSet<>();
     private static final Lazy<Void> clean = new Lazy.NoCache<>();
 
-    private static final PluginExtraMenuProvider PLUGIN_DECORATIONS = new PluginExtraMenuProvider();
-    private static final Map<Plugin, Set<ExtraMenuProvider>> plugins = new HashMap<>();
-
     public static void setExtraDecorations(Stream<ExtraMenuProvider> provider, FeatureRegistry featureRegistry) {
         EXTRA_DECORATIONS.clear();
-        plugins.clear();
+        PluginExtraMenuProvider.plugins.clear();
 
         provider.forEach(extra -> {
-            if (!(extra instanceof DefaultExtraMenuProvider)) {
+            if (!(extra instanceof PluginExtraMenuProvider) && !(extra instanceof DefaultExtraMenuProvider)) {
                 Plugin plugin = featureRegistry.getFeatureDefinition(extra).getPlugin();
-                plugins.computeIfAbsent(
+                PluginExtraMenuProvider.plugins.computeIfAbsent(
                         plugin,
-                        features -> new HashSet<>()).add(extra);
+                        features -> new LinkedHashSet<>()).add(extra);
             } else {
                 EXTRA_DECORATIONS.add(extra);
             }
         });
+
         clean.send(null);
     }
 
-    private static class PluginExtraMenuProvider implements ExtraMenuProvider {
+    @Feature(name = "Plugin menu provider", description = "Provides plugin extra menus")
+    public static class PluginExtraMenuProvider implements ExtraMenuProvider {
+        private static final Map<Plugin, Set<ExtraMenuProvider>> plugins = new HashMap<>();
+
         @Override
         public Collection<JComponent> getExtraMenuItems(Main main) {
             List<JComponent> list = new ArrayList<>();
+            if (plugins.isEmpty()) return list;
+            list.add(createSeparator("plugins"));
 
             plugins.forEach((plugin, features) -> {
                 List<JComponent> components = new ArrayList<>();
@@ -98,9 +100,6 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             }
         }
 
-        if (!plugins.isEmpty()) {
-            PLUGIN_DECORATIONS.getExtraMenuItems(main).forEach(component -> extraOptions.add(component));
-        }
         empty = false;
     }
 
@@ -135,10 +134,6 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             if (main.config.BOT_SETTINGS.DEV_STUFF) {
                 list.add(createSeparator("Dev stuff"));
                 list.add(create("Save SWF", e -> SWFUtils.dumpMainSWF()));
-            }
-
-            if (!plugins.isEmpty()) {
-                list.add(createSeparator("Plugin stuff"));
             }
 
             return list;
