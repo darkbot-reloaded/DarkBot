@@ -13,6 +13,15 @@ public interface ExtraMenuProvider {
     Collection<JComponent> getExtraMenuItems(Main main);
 
     /**
+     * Used for plugins to group or not group Extras up inside a JMenu
+     * @return boolean value indicating whether or not the Extra should
+     * be inside or outside a JMenu
+     */
+    default boolean shouldBeInsideMenu() {
+        return true;
+    }
+
+    /**
      * Utility method to create a menu item
      * @param key The translation key, or name of the item
      * @param listener The action to take when pressed

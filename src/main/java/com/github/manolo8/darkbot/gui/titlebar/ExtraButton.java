@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ExtraButton extends TitleBarToggleButton<JFrame> {
@@ -62,8 +63,15 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             list.add(createSeparator("plugins"));
 
             PLUGINS.forEach((plugin, features) -> {
-                list.add(createMenu(plugin.getName(), 
-                    features.stream().flatMap(f -> f.getExtraMenuItems(main).stream())));
+                features.stream()
+                        .filter(f -> !f.shouldBeInsideMenu())
+                        .flatMap(f -> f.getExtraMenuItems(main).stream())
+                        .collect(Collectors.toCollection(() -> list));
+
+                list.add(createMenu(plugin.getName(),
+                    features.stream()
+                            .filter(ExtraMenuProvider::shouldBeInsideMenu)
+                            .flatMap(f -> f.getExtraMenuItems(main).stream())));
             });
 
             return list;
