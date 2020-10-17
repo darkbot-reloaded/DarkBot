@@ -1,9 +1,7 @@
 package com.github.manolo8.darkbot.modules.utils;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.NpcExtra;
-import com.github.manolo8.darkbot.core.DarkBotAPI;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.Npc;
@@ -27,6 +25,7 @@ public class NpcAttacker {
     protected long fixTimes;
     protected long clickDelay;
     protected long useRsbUntil;
+    protected boolean attacking;
     protected boolean sab;
     protected boolean rsb;
 
@@ -78,19 +77,24 @@ public class NpcAttacker {
         clickDelay = System.currentTimeMillis();
         fixTimes = 0;
         laserTime = clickDelay + 50;
+        attacking = false;
         if (main.config.LOOT.SHIP_ABILITY != null) ability = clickDelay + 4000;
     }
 
     protected void tryAttackOrFix() {
         boolean bugged = System.currentTimeMillis() > (laserTime + fixTimes * 3000) &&
                 (!hero.isAiming(target) || (!target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 700));
-        boolean ammoChanged = fixTimes == 0 || shouldSab() != sab || shouldRsb() != rsb;
+        boolean ammoChanged = shouldSab() != sab || shouldRsb() != rsb;
         if ((ammoChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
             laserTime = System.currentTimeMillis() + 750;
-            fixTimes++;
-            if (!bugged || ammoChanged) API.keyboardClick(getAttackKey());
-            else if (API instanceof DarkBoatAdapter) API.rawKeyboardClick((char) 0x11);
-            else setRadiusAndClick(false);
+            if (!attacking || !bugged || ammoChanged) {
+                API.keyboardClick(getAttackKey());
+                attacking = true;
+            } else {
+                if (API instanceof DarkBoatAdapter) API.rawKeyboardClick((char) 0x11);
+                else setRadiusAndClick(false);
+                fixTimes++;
+            }
         }
     }
 
