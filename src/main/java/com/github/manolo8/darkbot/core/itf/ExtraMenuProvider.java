@@ -13,12 +13,11 @@ public interface ExtraMenuProvider {
     Collection<JComponent> getExtraMenuItems(Main main);
 
     /**
-     * Used for plugins to group or not group Extras up inside a JMenu
-     * @return boolean value indicating whether or not the Extra should
-     * be inside or outside a JMenu
+     * If the extra menu items should automatically be put in a submenu for the plugin
+     * @return true if they should be hidden in a submenu, false otherwise
      */
-    default boolean shouldBeInsideMenu() {
-        return true;
+    default boolean autoSubmenu() {
+        return false;
     }
 
     /**

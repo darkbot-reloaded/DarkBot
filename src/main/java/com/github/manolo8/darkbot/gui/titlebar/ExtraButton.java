@@ -40,7 +40,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
 
         provider.forEach(extra -> {
             Plugin pl = featureRegistry.getFeatureDefinition(extra).getPlugin();
-            if (pl != null) {
+            if (pl != null && extra.autoSubmenu()) {
                 PluginExtraMenuProvider.PLUGINS.computeIfAbsent(
                         pl,
                         features -> new LinkedHashSet<>()).add(extra);
@@ -63,14 +63,8 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             list.add(createSeparator("plugins"));
 
             PLUGINS.forEach((plugin, features) -> {
-                features.stream()
-                        .filter(f -> !f.shouldBeInsideMenu())
-                        .flatMap(f -> f.getExtraMenuItems(main).stream())
-                        .collect(Collectors.toCollection(() -> list));
-
                 list.add(createMenu(plugin.getName(),
                     features.stream()
-                            .filter(ExtraMenuProvider::shouldBeInsideMenu)
                             .flatMap(f -> f.getExtraMenuItems(main).stream())));
             });
 
