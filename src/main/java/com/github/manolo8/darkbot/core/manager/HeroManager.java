@@ -94,7 +94,7 @@ public class HeroManager extends Ship implements Manager {
 
     public void jumpPortal(Portal portal) {
         if (portal.removed) return;
-        if (System.currentTimeMillis() - portalTime > 10000 || (System.currentTimeMillis() - portalTime > 1000 &&
+        if (System.currentTimeMillis() - portalTime > 15000 || (System.currentTimeMillis() - portalTime > 1000 &&
                 map.id == settings.currMap &&
                 (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id))) {
             API.keyboardClick('j');

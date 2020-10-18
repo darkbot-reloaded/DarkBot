@@ -411,7 +411,13 @@ public class MapDrawer extends JPanel {
 
     private void drawDynamicEntities(Graphics2D g2) {
         g2.setColor(BOXES);
-        for (Box box : boxes) drawEntity(g2, box.locationInfo.now, box.boxInfo.collect);
+        for (Box box : boxes) {
+            Location loc = box.locationInfo.now;
+            drawEntity(g2, loc, box.boxInfo.collect);
+
+            if (hasFlag(DisplayFlag.RESOURCE_NAMES))
+                drawString(g2, box.type, translateX(loc.x), translateY(loc.y) - 5, Align.MID);
+        }
 
         if (config.BOT_SETTINGS.DEV_STUFF) {
             g2.setColor(GOING);

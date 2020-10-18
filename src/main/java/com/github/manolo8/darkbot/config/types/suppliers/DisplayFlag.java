@@ -8,7 +8,14 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 public enum DisplayFlag {
-    USERNAMES, HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, GROUP_AREA, GROUP_NAMES, BOOSTER_AREA, SORT_BOOSTERS;
+    USERNAMES,
+    HERO_NAME,
+    HP_SHIELD_NUM,
+    ZONES,
+    STATS_AREA,
+    GROUP_AREA, GROUP_NAMES,
+    BOOSTER_AREA, SORT_BOOSTERS,
+    RESOURCE_NAMES;
 
     public String getName() {
         return I18n.getOrDefault("config.bot_settings.display.toggle." + name().toLowerCase(Locale.ROOT), name());

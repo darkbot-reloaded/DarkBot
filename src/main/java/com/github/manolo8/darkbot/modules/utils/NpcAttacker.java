@@ -82,7 +82,9 @@ public class NpcAttacker {
     }
 
     protected void tryAttackOrFix() {
-        boolean bugged = System.currentTimeMillis() > (laserTime + fixTimes * 3000) &&
+        // Consider bugged if attacking every 15 seconds, if not attacking every 2 seconds
+        long buggedTime = laserTime + fixTimes * (hero.isAttacking(target) ? 2000 : 15000);
+        boolean bugged = System.currentTimeMillis() > buggedTime &&
                 (!hero.isAiming(target) || (!target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 700));
         boolean ammoChanged = shouldSab() != sab || shouldRsb() != rsb;
         if ((ammoChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
