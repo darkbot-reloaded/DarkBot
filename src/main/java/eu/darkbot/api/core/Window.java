@@ -22,8 +22,6 @@ public interface Window {
 
     /**
      * Makes browser window visible.
-     * <br>
-     * Moves window off-screen in {@link eu.darkbot.api.DarkBoat} case
      */
     void setVisible(boolean visible);
 
@@ -51,9 +49,7 @@ public interface Window {
      * @param keyCode to send
      */
     void keyClick(int keyCode);
-
     void keyClick(char keyCode);
-
     void keyClick(Character keyCode);
 
     /**
