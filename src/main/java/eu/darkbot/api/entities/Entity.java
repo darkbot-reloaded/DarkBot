@@ -2,6 +2,7 @@ package eu.darkbot.api.entities;
 
 import eu.darkbot.api.entities.utils.EntityEffect;
 import eu.darkbot.api.objects.LocationInfo;
+import org.jetbrains.annotations.Nullable;
 
 public interface Entity {
     /**
@@ -30,8 +31,11 @@ public interface Entity {
      * @param effect to check
      * @return true if current entity have indicated effect
      */
-    boolean hasEffect(EntityEffect effect);
-    boolean hasEffect(int effectId);
+    boolean hasEffect(int effect);
+
+    default boolean hasEffect(EntityEffect effect) {
+        return hasEffect(effect.getId());
+    }
 
     /**
      * Sets metadata key with given value and stores it only for current entity.
@@ -41,11 +45,13 @@ public interface Entity {
      * @param value to be put with your key
      * @return result of {@link java.util.Map#put(Object, Object)}
      */
+    @Nullable
     Object setMetadata(String key, Object value);
 
     /**
      * Returns value associated with key or null if key doesnt exists.
      */
+    @Nullable
     Object getMetadata(String key);
 
     /**
