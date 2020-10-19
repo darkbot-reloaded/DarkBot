@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,7 +39,10 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
         EXTRA_DECORATIONS.clear();
         PluginExtraMenuProvider.PLUGINS.clear();
 
+        AtomicReference<ExtraMenuProvider> pluginProvider = new AtomicReference<>();
         provider.forEach(extra -> {
+            if (extra instanceof PluginExtraMenuProvider) pluginProvider.set(extra);
+
             Plugin pl = featureRegistry.getFeatureDefinition(extra).getPlugin();
             if (pl != null && extra.autoSubmenu()) {
                 PluginExtraMenuProvider.PLUGINS.computeIfAbsent(
@@ -48,6 +52,11 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 EXTRA_DECORATIONS.add(extra);
             }
         });
+
+        if (pluginProvider.get() != null) {
+            EXTRA_DECORATIONS.remove(pluginProvider.get());
+            EXTRA_DECORATIONS.add(pluginProvider.get());
+        }
 
         clean.send(null);
     }
@@ -60,13 +69,19 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
         public Collection<JComponent> getExtraMenuItems(Main main) {
             if (PLUGINS.isEmpty()) return Collections.emptyList();
             List<JComponent> list = new ArrayList<>();
-            list.add(createSeparator("plugins"));
 
             PLUGINS.forEach((plugin, features) -> {
-                list.add(createMenu(plugin.getName(),
-                    features.stream()
-                            .flatMap(f -> f.getExtraMenuItems(main).stream())));
+                features = features.stream()
+                        .filter(f -> !f.getExtraMenuItems(main).isEmpty())
+                        .collect(Collectors.toSet());
+                if (!features.isEmpty()) {
+                    list.add(createMenu(plugin.getName(),
+                            features.stream()
+                                    .flatMap(f -> f.getExtraMenuItems(main).stream())));
+                }
             });
+
+            if (!list.isEmpty()) list.add(0, createSeparator("plugins"));
 
             return list;
         }
