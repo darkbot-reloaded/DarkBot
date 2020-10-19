@@ -1,5 +1,7 @@
 package eu.darkbot.api.core;
 
+import eu.darkbot.utils.Point;
+
 /**
  * Utility to manage game window
  */
@@ -49,26 +51,44 @@ public interface Window {
      * @param keyCode to send
      */
     void keyClick(int keyCode);
-    void keyClick(char keyCode);
-    void keyClick(Character keyCode);
+
+    default void keyClick(Character keyCode) {
+        if (keyCode != null) keyClick(keyCode.charValue());
+    }
 
     /**
      * Moves mouse to x & y coordinates of game window
      */
     void mouseMove(int x, int y);
 
+    default void mouseMove(Point point) {
+        mouseMove(point.x, point.y);
+    }
+
     /**
      * Simulates hold of left mouse button
      */
     void mouseDown(int x, int y);
+
+    default void mouseDown(Point point) {
+        mouseDown(point.x, point.y);
+    }
 
     /**
      * Simulates release of left mouse button
      */
     void mouseUp(int x, int y);
 
+    default void mouseUp(Point point) {
+        mouseUp(point.x, point.y);
+    }
+
     /**
      * Simulates mouse click at x & y coordinates
      */
     void mouseClick(int x, int y);
+
+    default void mouseClick(Point point) {
+        mouseClick(point.x, point.y);
+    }
 }

@@ -1,4 +1,15 @@
 package eu.darkbot.api.entities;
 
-public interface Zone {
+import eu.darkbot.api.entities.utils.Area;
+
+public interface Zone extends Entity {
+    /**
+     * @return {@link Area} of that Zone
+     */
+    Area getArea();
+
+    /**
+     * Returns true if zone isn't outside map
+     */
+    boolean isZoneValid();
 }

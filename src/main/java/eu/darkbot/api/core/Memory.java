@@ -15,7 +15,14 @@ public interface Memory {
      * @return signed integer value
      */
     int readInt(long address);
-    int readInt(long address, int... offsets);
+
+    default int readInt(long address, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        return readInt(address + offsets[++i]);
+    }
 
     /**
      * Reads signed long value from memory.
@@ -24,7 +31,13 @@ public interface Memory {
      * @return signed long value
      */
     long readLong(long address);
-    long readLong(long address, int... offsets);
+
+    default long readLong(long address, int... offsets) {
+        for (int offset : offsets)
+            address = readLong(address + offset);
+
+        return address;
+    }
 
     /**
      * Reads double value from memory.
@@ -33,7 +46,14 @@ public interface Memory {
      * @return double value
      */
     double readDouble(long address);
-    double readDouble(long address, int... offsets);
+
+    default double readDouble(long address, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        return readDouble(address + offsets[++i]);
+    }
 
     /**
      * Reads boolean value from memory.
@@ -42,7 +62,14 @@ public interface Memory {
      * @return boolean value
      */
     boolean readBoolean(long address);
-    boolean readBoolean(long address, int... offsets);
+
+    default boolean readBoolean(long address, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        return readBoolean(address + offsets[++i]);
+    }
 
     /**
      * Reads String from memory.
@@ -50,7 +77,10 @@ public interface Memory {
      * @param address to read
      */
     String readString(long address);
-    String readString(long address, int offsets);
+
+    default String readString(long address, int offsets) {
+        return readString(readLong(address, offsets));
+    }
 
     /**
      * Reads byte array from memory with given length.
@@ -60,7 +90,14 @@ public interface Memory {
      * @return byte array from memory
      */
     byte[] readBytes(long address, int length);
-    byte[] readBytes(long address, int length, int... offsets);
+
+    default byte[] readBytes(long address, int length, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        return readBytes(address + offsets[++i], length);
+    }
 
     /**
      * Replaces integer value in memory with newValue only if
@@ -71,7 +108,14 @@ public interface Memory {
      * @param newValue which will be written
      */
     void replaceInt(long address, int oldValue, int newValue);
-    void replaceInt(long address, int oldValue, int newValue, int... offsets);
+
+    default void replaceInt(long address, int oldValue, int newValue, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        replaceInt(address + offsets[++i], oldValue, newValue);
+    }
 
     /**
      * Replaces long value in memory with newValue only if
@@ -82,7 +126,14 @@ public interface Memory {
      * @param newValue which will be written
      */
     void replaceLong(long address, long oldValue, long newValue);
-    void replaceLong(long address, long oldValue, long newValue, int... offsets);
+
+    default void replaceLong(long address, long oldValue, long newValue, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        replaceLong(address + offsets[++i], oldValue, newValue);
+    }
 
     /**
      * Replaces double value in memory with newValue only if
@@ -93,7 +144,14 @@ public interface Memory {
      * @param newValue which will be written
      */
     void replaceDouble(long address, double oldValue, double newValue);
-    void replaceDouble(long address, double oldValue, double newValue, int... offsets);
+
+    default void replaceDouble(long address, double oldValue, double newValue, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        replaceDouble(address + offsets[++i], oldValue, newValue);
+    }
 
     /**
      * Replaces boolean value in memory with newValue only if
@@ -104,7 +162,14 @@ public interface Memory {
      * @param newValue which will be written
      */
     void replaceBoolean(long address, boolean oldValue, boolean newValue);
-    void replaceBoolean(long address, boolean oldValue, boolean newValue, int... offsets);
+
+    default void replaceBoolean(long address, boolean oldValue, boolean newValue, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        replaceBoolean(address + offsets[++i], oldValue, newValue);
+    }
 
     /**
      * Overrides memory at address with given integer value
@@ -113,7 +178,14 @@ public interface Memory {
      * @param value   which will be written
      */
     void writeInt(long address, int value);
-    void writeInt(long address, int value, int... offsets);
+
+    default void writeInt(long address, int value, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        writeInt(address + offsets[++i], value);
+    }
 
     /**
      * Overrides memory at address with given long value
@@ -122,7 +194,14 @@ public interface Memory {
      * @param value   which will be written
      */
     void writeLong(long address, long value);
-    void writeLong(long address, long value, int... offsets);
+
+    default void writeLong(long address, long value, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        writeLong(address + offsets[++i], value);
+    }
 
     /**
      * Overrides memory at address with given double value
@@ -131,7 +210,14 @@ public interface Memory {
      * @param value   which will be written
      */
     void writeDouble(long address, double value);
-    void writeDouble(long address, double value, int... offsets);
+
+    default void writeDouble(long address, double value, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        writeDouble(address + offsets[++i], value);
+    }
 
     /**
      * Overrides memory at address with given boolean value
@@ -140,7 +226,14 @@ public interface Memory {
      * @param value   which will be written
      */
     void writeBoolean(long address, boolean value);
-    void writeBoolean(long address, boolean value, int... offsets);
+
+    default void writeBoolean(long address, boolean value, int... offsets) {
+        int i = 0;
+        for (; i < offsets.length - 1; i++)
+            address = readLong(address + offsets[i]);
+
+        writeBoolean(address + offsets[++i], value);
+    }
 
     /**
      * Overrides memory region at given address with bytes array.
@@ -160,7 +253,6 @@ public interface Memory {
      * @return array of direct pointers to searched value
      */
     long[] queryInt(int value, int maxSize);
-    long[] queryInt(int value, int maxSize, int... offsets);
 
     /**
      * Search current process memory for given value
@@ -171,7 +263,6 @@ public interface Memory {
      * @return array of direct pointers to searched value
      */
     long[] queryLong(long value, int maxSize);
-    long[] queryLong(long value, int maxSize, int... offsets);
 
     /**
      * Search current process memory for given pattern
@@ -182,5 +273,4 @@ public interface Memory {
      * @return array of direct pointers to searched pattern
      */
     long[] queryBytes(byte[] pattern, int maxSize);
-    long[] queryBytes(byte[] pattern, int maxSize, int... offsets);
 }

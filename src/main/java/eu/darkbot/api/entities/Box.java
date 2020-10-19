@@ -2,7 +2,7 @@ package eu.darkbot.api.entities;
 
 public interface Box extends Entity {
 
-    String getBoxType();
+    String getTypeName();
     boolean isCollected();
     void setCollected();
 }

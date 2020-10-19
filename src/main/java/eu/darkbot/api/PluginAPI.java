@@ -9,8 +9,9 @@ import eu.darkbot.api.managers.PetManager;
 public interface PluginAPI {
     /**
      * @return {@link BackpageManager}
+     * @throws IllegalCallerException on access backpage with thread other than backpage one.
      */
-    BackpageManager getBackpageManager();
+    BackpageManager getBackpageManager() throws IllegalCallerException;
 
     /**
      * @return {@link HeroManager}

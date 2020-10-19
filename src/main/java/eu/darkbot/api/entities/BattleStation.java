@@ -1,4 +1,4 @@
 package eu.darkbot.api.entities;
 
-public interface BattleStation {
+public interface BattleStation extends Zone {
 }
