@@ -41,20 +41,17 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
 
         AtomicReference<ExtraMenuProvider> pluginProvider = new AtomicReference<>();
         provider.forEach(extra -> {
-            if (extra instanceof PluginExtraMenuProvider) pluginProvider.set(extra);
-
             Plugin pl = featureRegistry.getFeatureDefinition(extra).getPlugin();
-            if (pl != null && extra.autoSubmenu()) {
+            if (pl != null && extra.autoSubmenu())
                 PluginExtraMenuProvider.PLUGINS.computeIfAbsent(
                         pl,
                         features -> new LinkedHashSet<>()).add(extra);
-            } else {
-                EXTRA_DECORATIONS.add(extra);
-            }
+            else if (extra instanceof PluginExtraMenuProvider) pluginProvider.set(extra);
+            else EXTRA_DECORATIONS.add(extra);
         });
 
+        // Add PluginExtraMenuProvider outside of forEach so it is always placed at end
         if (pluginProvider.get() != null) {
-            EXTRA_DECORATIONS.remove(pluginProvider.get());
             EXTRA_DECORATIONS.add(pluginProvider.get());
         }
 
@@ -71,14 +68,10 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             List<JComponent> list = new ArrayList<>();
 
             PLUGINS.forEach((plugin, features) -> {
-                features = features.stream()
-                        .filter(f -> !f.getExtraMenuItems(main).isEmpty())
-                        .collect(Collectors.toSet());
-                if (!features.isEmpty()) {
-                    list.add(createMenu(plugin.getName(),
-                            features.stream()
-                                    .flatMap(f -> f.getExtraMenuItems(main).stream())));
-                }
+                List<JComponent> menus = features.stream()
+                        .flatMap(f -> f.getExtraMenuItems(main).stream()).collect(Collectors.toList());
+                if (!menus.isEmpty())
+                    list.add(createMenu(plugin.getName(), menus.stream()));
             });
 
             if (!list.isEmpty()) list.add(0, createSeparator("plugins"));
