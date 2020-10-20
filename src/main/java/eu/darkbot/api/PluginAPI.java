@@ -9,9 +9,9 @@ import eu.darkbot.api.managers.PetManager;
 public interface PluginAPI {
     /**
      * @return {@link BackpageManager}
-     * @throws IllegalCallerException on access backpage with thread other than backpage one.
+     * @throws WrongThreadException on access backpage with thread other than backpage one.
      */
-    BackpageManager getBackpageManager() throws IllegalCallerException;
+    BackpageManager getBackpageManager() throws WrongThreadException;
 
     /**
      * @return {@link HeroManager}
@@ -40,4 +40,10 @@ public interface PluginAPI {
      * @return current ping in milliseconds.
      */
     int getPing();
+
+    class WrongThreadException extends RuntimeException {
+        public WrongThreadException(String message) {
+            super(message);
+        }
+    }
 }

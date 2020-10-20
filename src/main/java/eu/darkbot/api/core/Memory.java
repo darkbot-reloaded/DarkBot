@@ -21,7 +21,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        return readInt(address + offsets[++i]);
+        return readInt(address + offsets[i]);
     }
 
     /**
@@ -52,7 +52,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        return readDouble(address + offsets[++i]);
+        return readDouble(address + offsets[i]);
     }
 
     /**
@@ -68,7 +68,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        return readBoolean(address + offsets[++i]);
+        return readBoolean(address + offsets[i]);
     }
 
     /**
@@ -96,7 +96,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        return readBytes(address + offsets[++i], length);
+        return readBytes(address + offsets[i], length);
     }
 
     /**
@@ -114,7 +114,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        replaceInt(address + offsets[++i], oldValue, newValue);
+        replaceInt(address + offsets[i], oldValue, newValue);
     }
 
     /**
@@ -132,7 +132,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        replaceLong(address + offsets[++i], oldValue, newValue);
+        replaceLong(address + offsets[i], oldValue, newValue);
     }
 
     /**
@@ -150,7 +150,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        replaceDouble(address + offsets[++i], oldValue, newValue);
+        replaceDouble(address + offsets[i], oldValue, newValue);
     }
 
     /**
@@ -168,7 +168,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        replaceBoolean(address + offsets[++i], oldValue, newValue);
+        replaceBoolean(address + offsets[i], oldValue, newValue);
     }
 
     /**
@@ -184,7 +184,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        writeInt(address + offsets[++i], value);
+        writeInt(address + offsets[i], value);
     }
 
     /**
@@ -200,7 +200,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        writeLong(address + offsets[++i], value);
+        writeLong(address + offsets[i], value);
     }
 
     /**
@@ -216,7 +216,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        writeDouble(address + offsets[++i], value);
+        writeDouble(address + offsets[i], value);
     }
 
     /**
@@ -232,7 +232,7 @@ public interface Memory {
         for (; i < offsets.length - 1; i++)
             address = readLong(address + offsets[i]);
 
-        writeBoolean(address + offsets[++i], value);
+        writeBoolean(address + offsets[i], value);
     }
 
     /**

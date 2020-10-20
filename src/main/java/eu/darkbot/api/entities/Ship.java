@@ -13,6 +13,9 @@ public interface Ship extends Entity, Health {
 
     String getUsername();
 
+    boolean hasPet();
+    Pet getPet();
+
     int getClanId();
     int getClanDiplomacy();
     String getClanTag();
