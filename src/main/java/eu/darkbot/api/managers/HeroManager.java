@@ -15,20 +15,24 @@ import eu.darkbot.utils.Location;
  */
 public interface HeroManager extends Ship {
 
-    Drive getDrive();
-
     boolean hasTarget();
     Ship getTarget();
     void setTarget(Ship target);
-
-    boolean jumpPortal(Portal portal);
 
     default long timeTo(double distance) {
         return (long) (distance * 1000 / getSpeed());
     }
 
-    default long timeTo(LocationInfo location) {
-        return timeTo(getLocationInfo().distance(location));
+    default long timeTo(Location destination) {
+        return timeTo(getLocationInfo().distance(destination));
+    }
+
+    default long timeTo(LocationInfo destination) {
+        return timeTo(getLocationInfo().distance(destination));
+    }
+
+    default long timeTo(Entity destination) {
+        return timeTo(getLocationInfo().distance(destination));
     }
 
     boolean isInMode(int configuration, Character formation);
@@ -47,30 +51,4 @@ public interface HeroManager extends Ship {
     boolean setAttackMode();
     boolean setRoamMode();
     boolean setRunMode();
-
-    //should be added into heroManager directly?
-    interface Drive {
-        void stop(boolean currentLocation);
-
-        void moveTo(double x, double y);
-
-        default void moveTo(Location target) {
-            moveTo(target.x, target.y);
-        }
-
-        default void moveTo(LocationInfo target) {
-            moveTo(target.getLocation());
-        }
-
-        default void moveto(Entity target) {
-            moveTo(target.getLocationInfo());
-        }
-
-        void moveRandom();
-        boolean canMove();
-        // hero thing should be overridden
-        boolean isMoving();
-        boolean isOutOfMap();
-        Location movingTo();
-    }
 }
