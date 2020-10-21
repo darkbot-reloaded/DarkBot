@@ -228,11 +228,9 @@ public class Http {
      * @return <R> of your expression or null on exception.
      */
     @SuppressWarnings("unchecked")
-    public <R, X extends Throwable> R consumeInputStream(ThrowFunction<InputStream, R, X> function) throws IOException, X {
+    public <R, X extends Throwable> R consumeInputStream(ThrowFunction<InputStream, R, X> function) throws X {
         try (InputStream is = getInputStream()) {
             return function.apply(is);
-        } catch (IOException e) {
-            throw e;
         } catch (Throwable t) {
             throw (X) t;
         }
