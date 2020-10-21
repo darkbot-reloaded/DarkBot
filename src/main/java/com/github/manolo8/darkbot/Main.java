@@ -34,7 +34,6 @@ import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.TemporalModule;
-import com.github.manolo8.darkbot.utils.CommandLineUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
@@ -118,7 +117,7 @@ public class Main extends Thread implements PluginListener {
     }
 
     private void initializeStartupSettings() {
-        if (CommandLineUtils.AUTO_START) setRunning(true);
+        if (Bot.getStartupParams().AUTO_START) setRunning(true);
     }
 
     @Override

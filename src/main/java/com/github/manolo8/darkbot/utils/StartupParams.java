@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class CommandLineUtils {
+public class StartupParams {
     private static final String COMMAND_PREFIX = "-";
 
     /**
@@ -24,8 +24,8 @@ public class CommandLineUtils {
      * </pre></blockquote>
      */
     private static final String LOGIN_COMMAND = COMMAND_PREFIX + "login";
-    public static boolean AUTO_LOGIN = false;
-    public static String USERNAME;
+    public boolean AUTO_LOGIN = false;
+    public String USERNAME;
     /**
      * Sample content of master password file:
      * <blockquote><pre>
@@ -36,7 +36,7 @@ public class CommandLineUtils {
      *     password=""
      * </pre></blockquote>
      */
-    public static File MASTER_PASSWORD_FILE;
+    public File MASTER_PASSWORD_FILE;
 
     /**
      * <b>Usage:</b> <tt>-start<br>
@@ -48,9 +48,9 @@ public class CommandLineUtils {
      * </pre></blockquote>
      */
     private static final String START_COMMAND = COMMAND_PREFIX + "start";
-    public static boolean AUTO_START = false;
+    public boolean AUTO_START = false;
 
-    public static void parse(String[] args) {
+    public void parse(String[] args) {
         try {
             for (int i = 0; i < args.length; i++) {
                 switch (args[i]) {
@@ -72,7 +72,7 @@ public class CommandLineUtils {
         }
     }
 
-    public static char[] getMasterPassword() throws IOException {
+    public char[] getMasterPassword() throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(MASTER_PASSWORD_FILE));
 
         StringBuilder sb = new StringBuilder();

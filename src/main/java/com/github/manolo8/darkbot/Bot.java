@@ -2,12 +2,14 @@ package com.github.manolo8.darkbot;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.github.manolo8.darkbot.config.ConfigManager;
-import com.github.manolo8.darkbot.utils.CommandLineUtils;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.LogUtils;
 
 import javax.swing.*;
 
 public class Bot {
+
+    private static final StartupParams STARTUP_PARAMS = new StartupParams();
 
     public static void main(String[] args) {
         if (System.console() == null
@@ -19,11 +21,10 @@ public class Bot {
             UIManager.setLookAndFeel(new FlatDarkLaf());
             UIManager.put("Button.arc", 0);
             UIManager.put("Component.arc", 0);
-
-            CommandLineUtils.parse(args);
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
+        STARTUP_PARAMS.parse(args);
         SwingUtilities.invokeLater(Main::new);
     }
 
@@ -32,5 +33,9 @@ public class Bot {
             ConfigManager.FORCE_NO_OP = true;
             Bot.main(args);
         }
+    }
+
+    public static StartupParams getStartupParams() {
+        return STARTUP_PARAMS;
     }
 }
