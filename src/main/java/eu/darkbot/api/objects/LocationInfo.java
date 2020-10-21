@@ -1,9 +1,8 @@
 package eu.darkbot.api.objects;
 
-import eu.darkbot.api.entities.Entity;
 import eu.darkbot.utils.Location;
 
-public interface LocationInfo {
+public interface LocationInfo extends Locatable {
     /**
      * @return true if current entity is loaded and valid.
      */
@@ -29,16 +28,8 @@ public interface LocationInfo {
      */
     double getAngle(double x, double y);
 
-    default double getAngle(Entity other) {
-        return getAngle(other.getLocationInfo());
-    }
-
-    default double getAngle(LocationInfo other) {
-        return getAngle(other.getLocation());
-    }
-
-    default double getAngle(Location other) {
-        return getAngle(other.x, other.y);
+    default double getAngle(Locatable other) {
+        return getAngle(other.getX(), other.getY());
     }
 
     /**
@@ -46,22 +37,9 @@ public interface LocationInfo {
      */
     double distance(double x, double y);
 
-    default double distance(Entity other) {
-        return distance(other.getLocationInfo());
+    default double distance(Locatable other) {
+        return distance(other.getX(), other.getY());
     }
-
-    default double distance(LocationInfo other) {
-        return distance(other.getLocation());
-    }
-
-    default double distance(Location other) {
-        return distance(other.x, other.y);
-    }
-
-    /**
-     * @return current {@link Location}
-     */
-    Location getLocation();
 
     /**
      * Calculates future destination of entity in time(ms)

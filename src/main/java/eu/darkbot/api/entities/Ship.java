@@ -1,6 +1,7 @@
 package eu.darkbot.api.entities;
 
 import eu.darkbot.api.objects.Health;
+import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.LocationInfo;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,6 +42,18 @@ public interface Ship extends Entity, Health {
      * @return speed of ship from memory.
      */
     int getSpeed();
+
+    /**
+     * Calculates needed time to travel given distance.
+     * @return time in milliseconds needed to travel given distance
+     */
+    default long timeTo(double distance) {
+        return (long) (distance * 1000 / getSpeed());
+    }
+
+    default long timeTo(Locatable destination) {
+        return timeTo(getLocationInfo().distance(destination));
+    }
 
     /**
      * @return angle of ship from memory.

@@ -1,10 +1,11 @@
 package eu.darkbot.api.entities;
 
 import eu.darkbot.api.entities.utils.EntityEffect;
+import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.LocationInfo;
 import org.jetbrains.annotations.Nullable;
 
-public interface Entity {
+public interface Entity extends Locatable {
     /**
      * @return id of entity
      */
