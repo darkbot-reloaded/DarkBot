@@ -10,7 +10,16 @@ import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.itf.Module;
-import com.github.manolo8.darkbot.core.manager.*;
+import com.github.manolo8.darkbot.core.manager.EffectManager;
+import com.github.manolo8.darkbot.core.manager.FacadeManager;
+import com.github.manolo8.darkbot.core.manager.GuiManager;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.manager.PingManager;
+import com.github.manolo8.darkbot.core.manager.RepairManager;
+import com.github.manolo8.darkbot.core.manager.SettingsManager;
+import com.github.manolo8.darkbot.core.manager.StarManager;
+import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
@@ -25,6 +34,7 @@ import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.TemporalModule;
+import com.github.manolo8.darkbot.utils.CommandLineUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
@@ -103,7 +113,12 @@ public class Main extends Thread implements PluginListener {
             Popups.showMessageAsync("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
 
         API.createWindow();
+        initializeStartupSettings();
         start();
+    }
+
+    private void initializeStartupSettings() {
+        if (CommandLineUtils.AUTO_START) setRunning(true);
     }
 
     @Override

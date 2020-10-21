@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.CommandLineUtils;
 import com.github.manolo8.darkbot.utils.login.Credentials;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
@@ -35,7 +36,7 @@ public class SavedLogins extends JPanel implements LoginScreen {
 
         try {
             if (!credentials.isEmpty()) {
-                password = requestMasterPassword();
+                password = CommandLineUtils.AUTO_LOGIN ? CommandLineUtils.getMasterPassword() : requestMasterPassword();
                 if (password == null) {
                     loginForm.setInfoText(new LoginForm.Message(true, "Didn't load credentials",
                             "Master password was cancelled. Saved credentials aren't available"));
@@ -121,7 +122,9 @@ public class SavedLogins extends JPanel implements LoginScreen {
 
     @Override
     public LoginForm.Message tryLogin(LoginData login) {
-        Credentials.User user = users.getSelectedValue();
+        Credentials.User user = CommandLineUtils.AUTO_LOGIN
+                ? credentials.getUsers().stream().filter(usr -> usr.u.equals(CommandLineUtils.USERNAME)).findFirst().orElse(null)
+                : users.getSelectedValue();
         if (user == null) return new LoginForm.Message(true, "No user selected", "Select the user to login with");
 
         login.setCredentials(user.u, user.p);

@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.github.manolo8.darkbot.config.ConfigManager;
+import com.github.manolo8.darkbot.utils.CommandLineUtils;
 import com.github.manolo8.darkbot.utils.LogUtils;
 
 import javax.swing.*;
@@ -18,6 +19,8 @@ public class Bot {
             UIManager.setLookAndFeel(new FlatDarkLaf());
             UIManager.put("Button.arc", 0);
             UIManager.put("Component.arc", 0);
+
+            CommandLineUtils.parse(args);
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }

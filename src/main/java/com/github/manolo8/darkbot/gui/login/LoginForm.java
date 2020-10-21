@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.login;
 
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.CommandLineUtils;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import net.miginfocom.swing.MigLayout;
@@ -32,6 +33,8 @@ public class LoginForm extends JPanel {
         add(tabbedPane, "span 2, growx, height 112px!");
         add(infoLb, "gapleft 8px, grow 0");
         add(loginBtn, "gapright 8px");
+
+        if (CommandLineUtils.AUTO_LOGIN) startLogin();
     }
 
     public void setDialog(JDialog dialog) {
