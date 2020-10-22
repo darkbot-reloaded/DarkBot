@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.utils.login;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.gui.login.AutoLoginForm;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.I18n;
@@ -54,14 +53,32 @@ public class LoginUtils {
     }
 
     public static LoginData performAutoLogin(StartupParams params) {
-        AutoLoginForm panel = new AutoLoginForm(params);
+        Credentials credentials = loadCredentials();
+        try {
+            credentials.decrypt(params.getMasterPassword());
+        } catch (Exception e) {
+            System.err.println("Couldn't login, check your master password txt file");
+            e.printStackTrace();
+        }
 
-        JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
-        pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+        Credentials.User user = credentials.getUsers()
+                .stream()
+                .filter(usr -> usr.u.equals(params.getUsername()))
+                .findFirst()
+                .orElse(null);
+        if (user == null) {
+            System.err.println("Invalid program arguments, make sure you entered the correct username and filepath");
+            System.exit(0);
+        }
 
-        Popups.showMessageSync("Auto Login", pane);
+        LoginData loginData = new LoginData();
+        loginData.setCredentials(user.u, user.p);
 
-        LoginData loginData = panel.getResult();
+        System.out.println("Auto logging in (1/2)");
+        usernameLogin(loginData);
+        System.out.println("Loading spacemap (2/2)");
+        findPreloader(loginData);
+
         if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) System.exit(0);
         return loginData;
     }
