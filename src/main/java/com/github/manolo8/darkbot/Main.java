@@ -35,6 +35,7 @@ import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.TemporalModule;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -90,10 +91,10 @@ public class Main extends Thread implements PluginListener {
 
     private volatile boolean running;
 
-    public Main() {
+    public Main(StartupParams params) {
         super("Main");
         VerifierChecker.getAuthApi().setupAuth();
-        API = configManager.getAPI();
+        API = configManager.getAPI(params);
         API.setSize(config.BOT_SETTINGS.DISPLAY.width, config.BOT_SETTINGS.DISPLAY.height);
 
         this.botInstaller.invalid.add(value -> {
@@ -112,12 +113,12 @@ public class Main extends Thread implements PluginListener {
             Popups.showMessageAsync("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
 
         API.createWindow();
-        initializeStartupSettings();
+        initializeStartupSettings(params);
         start();
     }
 
-    private void initializeStartupSettings() {
-        if (Bot.getStartupParams().AUTO_START) setRunning(true);
+    private void initializeStartupSettings(StartupParams params) {
+        if (params.shouldAutoStart()) setRunning(true);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.login;
 
-import com.github.manolo8.darkbot.Bot;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.login.LoginData;
@@ -33,8 +32,6 @@ public class LoginForm extends JPanel {
         add(tabbedPane, "span 2, growx, height 112px!");
         add(infoLb, "gapleft 8px, grow 0");
         add(loginBtn, "gapright 8px");
-
-        if (Bot.getStartupParams().AUTO_LOGIN) startLogin();
     }
 
     public void setDialog(JDialog dialog) {
@@ -52,9 +49,9 @@ public class LoginForm extends JPanel {
     }
 
     public static class Message {
-        private final boolean error;
-        private final String text;
-        private final String description;
+        final boolean error;
+        final String text;
+        final String description;
 
         public Message(boolean error, String text, String description) {
             this.error = error;

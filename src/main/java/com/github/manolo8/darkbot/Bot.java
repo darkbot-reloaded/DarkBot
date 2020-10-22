@@ -9,8 +9,6 @@ import javax.swing.*;
 
 public class Bot {
 
-    private static final StartupParams STARTUP_PARAMS = new StartupParams();
-
     public static void main(String[] args) {
         if (System.console() == null
                 && Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")) {
@@ -24,8 +22,8 @@ public class Bot {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-        STARTUP_PARAMS.parse(args);
-        SwingUtilities.invokeLater(Main::new);
+        StartupParams params = new StartupParams(args);
+        SwingUtilities.invokeLater(() -> new Main(params));
     }
 
     public static class NoOpBot {
@@ -33,9 +31,5 @@ public class Bot {
             ConfigManager.FORCE_NO_OP = true;
             Bot.main(args);
         }
-    }
-
-    public static StartupParams getStartupParams() {
-        return STARTUP_PARAMS;
     }
 }

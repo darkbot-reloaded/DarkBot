@@ -12,68 +12,92 @@ public class StartupParams {
     private static final String COMMAND_PREFIX = "-";
 
     /**
-     * <b>Usage:</b> <tt>-login <i>username</i> <i>filepath</i></tt><br>
-     * &#x09 This command will auto login to the account with this <i>username</i><br>
-     * &#x09<i>username</i> and <i>filepath</i> are required arguments<br>
-     * &#x09<i>username</i> refers to the account you want to login to<br>
-     * &#x09<i>filepath</i> refers to the filepath to your txt file containing your master password
-     * <p>
-     * <b>Example usage:</b>
-     * <blockquote><pre>
+     * <b>NAME</b>
+     * <pre>
+     *     login - auto logins to the account with this <i>username</i>
+     * </pre>
+     * <b>SYNTAX</b>
+     * <pre>
+     *     -login <i>username</i> <i>filepath</i>
+     * </pre>
+     * <b>OPTIONS</b>
+     * <pre>
+     *     <i>username</i> and <i>filepath</i> are required arguments
+     *     <i>username</i> refers to the account you want to login to
+     *     <i>filepath</i> refers to the filepath to your txt file containing your master password
+     * </pre>
+     * <b>SAMPLE USAGE</b>
+     * <pre>
      *     -login NotABot C:\Users\Owner\masterpw.txt
-     * </pre></blockquote>
+     * </pre>
+     * @see #masterPasswordFile
      */
     private static final String LOGIN_COMMAND = COMMAND_PREFIX + "login";
-    public boolean AUTO_LOGIN = false;
-    public String USERNAME;
+    private boolean autoLogin = false;
+    private String username;
     /**
+     * This is a txt file containing your master file<br>
      * Sample content of master password file:
-     * <blockquote><pre>
+     * <pre>
      *     password="mypassword12345"
-     * </pre></blockquote>
+     * </pre>
      * Leave it empty if you didnt set a master password like this:
-     * <blockquote><pre>
+     * <pre>
      *     password=""
-     * </pre></blockquote>
+     * </pre>
      */
-    public File MASTER_PASSWORD_FILE;
+    private File masterPasswordFile;
 
     /**
-     * <b>Usage:</b> <tt>-start<br>
-     * &#x09This command takes no arguments and will auto start the bot
-     * <p>
-     * <b>Example usage:</b>
-     * <blockquote><pre>
+     * <b>NAME</b>
+     * <pre>
+     *     start - auto starts bot
+     * </pre>
+     * <b>SYNTAX</b>
+     * <pre>
      *     -start
-     * </pre></blockquote>
+     * </pre>
+     * <b>OPTIONS</b>
+     * <pre>
+     *     This command takes no options
+     * </pre>
+     * <b>SAMPLE USAGE</b>
+     * <pre>
+     *     -start
+     * </pre>
      */
     private static final String START_COMMAND = COMMAND_PREFIX + "start";
-    public boolean AUTO_START = false;
+    private boolean autoStart = false;
 
-    public void parse(String[] args) {
+    public StartupParams(String[] args) {
+        parse(args);
+    }
+
+    private void parse(String[] args) {
         try {
             for (int i = 0; i < args.length; i++) {
                 switch (args[i]) {
                     case LOGIN_COMMAND:
-                        USERNAME = args[++i];
-                        MASTER_PASSWORD_FILE = new File(args[++i]);
-                        AUTO_LOGIN = true;
+                        username = args[++i];
+                        masterPasswordFile = new File(args[++i]);
+                        autoLogin = true;
                         break;
                     case START_COMMAND:
-                        AUTO_START = true;
+                        autoStart = true;
                         break;
                 }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
-            System.err.println("Invalid program arguments");
+            System.err.println("[ERROR] Invalid program arguments");
             Popups.showMessageSync("Command Line Error",
                     new JOptionPane(new Object[]{"Invalid program arguments"}, JOptionPane.ERROR_MESSAGE));
+            System.exit(0);
         }
     }
 
     public char[] getMasterPassword() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(MASTER_PASSWORD_FILE));
+        BufferedReader br = new BufferedReader(new FileReader(masterPasswordFile));
 
         StringBuilder sb = new StringBuilder();
         String s;
@@ -83,4 +107,17 @@ public class StartupParams {
 
         return sb.substring(sb.indexOf("\"") + 1, sb.lastIndexOf("\"")).toCharArray();
     }
+
+    public boolean shouldAutoLogin() {
+        return autoLogin;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public boolean shouldAutoStart() {
+        return autoStart;
+    }
+
 }

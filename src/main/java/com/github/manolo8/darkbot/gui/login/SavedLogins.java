@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.login;
 
-import com.github.manolo8.darkbot.Bot;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.components.MainButton;
@@ -36,7 +35,7 @@ public class SavedLogins extends JPanel implements LoginScreen {
 
         try {
             if (!credentials.isEmpty()) {
-                password = Bot.getStartupParams().AUTO_LOGIN ? Bot.getStartupParams().getMasterPassword() : requestMasterPassword();
+                password = requestMasterPassword();
                 if (password == null) {
                     loginForm.setInfoText(new LoginForm.Message(true, "Didn't load credentials",
                             "Master password was cancelled. Saved credentials aren't available"));
@@ -122,9 +121,7 @@ public class SavedLogins extends JPanel implements LoginScreen {
 
     @Override
     public LoginForm.Message tryLogin(LoginData login) {
-        Credentials.User user = Bot.getStartupParams().AUTO_LOGIN
-                ? credentials.getUsers().stream().filter(usr -> usr.u.equals(Bot.getStartupParams().USERNAME)).findFirst().orElse(null)
-                : users.getSelectedValue();
+        Credentials.User user = users.getSelectedValue();
         if (user == null) return new LoginForm.Message(true, "No user selected", "Select the user to login with");
 
         login.setCredentials(user.u, user.p);

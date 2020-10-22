@@ -1,9 +1,11 @@
 package com.github.manolo8.darkbot.utils.login;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.gui.login.AutoLoginForm;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 
@@ -45,6 +47,19 @@ public class LoginUtils {
         pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
 
         Popups.showMessageSync("Login", pane, panel::setDialog);
+
+        LoginData loginData = panel.getResult();
+        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) System.exit(0);
+        return loginData;
+    }
+
+    public static LoginData performAutoLogin(StartupParams params) {
+        AutoLoginForm panel = new AutoLoginForm(params);
+
+        JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
+        pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+
+        Popups.showMessageSync("Auto Login", pane);
 
         LoginData loginData = panel.getResult();
         if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) System.exit(0);

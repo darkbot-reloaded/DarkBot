@@ -2,14 +2,14 @@ package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
+import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
 import com.github.manolo8.darkbot.core.api.DarkBotApiAdapter;
 import com.github.manolo8.darkbot.core.api.DarkFlashApiAdapter;
-import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.api.NativeApiAdapter;
 import com.github.manolo8.darkbot.core.api.NoopApiAdapter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.utils.login.LoginUtils;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -102,13 +102,13 @@ public class ConfigManager {
         return config;
     }
 
-    public IDarkBotAPI getAPI() {
+    public IDarkBotAPI getAPI(StartupParams params) {
         if (FORCE_NO_OP) return new NoopApiAdapter();
         try {
             if (config.BOT_SETTINGS.API == 0) return new DarkBotApiAdapter();
-            else if (config.BOT_SETTINGS.API == 1) return new DarkFlashApiAdapter();
-            else if (config.BOT_SETTINGS.API == 2) return new DarkBoatAdapter();
-            else if (config.BOT_SETTINGS.API == 3) return new NativeApiAdapter();
+            else if (config.BOT_SETTINGS.API == 1) return new DarkFlashApiAdapter(params);
+            else if (config.BOT_SETTINGS.API == 2) return new DarkBoatAdapter(params);
+            else if (config.BOT_SETTINGS.API == 3) return new NativeApiAdapter(params);
             else if (config.BOT_SETTINGS.API == 4) return new NoopApiAdapter();
             else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API);
         } catch (Error e) {
