@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
@@ -53,7 +54,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -69,45 +69,7 @@ public class MapDrawer extends JPanel {
         HEALTH_FORMAT = new DecimalFormat("###,###,###", sym);
     }
 
-    private Color BACKGROUND = Color.decode("#263238");
-    private Color TEXT = Color.decode("#F2F2F2");
-    protected Color TEXT_DARK = Color.decode("#BBBBBB");
-    private Color GOING = Color.decode("#8F9BFF");
-    private Color PORTALS = Color.decode("#AEAEAE");
-    private Color OWNER = Color.decode("#22CC22");
-    private Color[] TRAIL = IntStream.rangeClosed(1, 255).mapToObj(i -> new Color(224, 224, 224, i)).toArray(Color[]::new);
-    private Color BOXES = Color.decode("#BBB830");
-    private Color ALLIES = Color.decode("#29B6F6");
-    private Color ENEMIES = Color.decode("#d50000");
-    private Color NPCS = Color.decode("#AA4040");
-    private Color TARGET = NPCS.darker();
-    private Color PET = Color.decode("#004c8c");
-    private Color PET_IN = Color.decode("#c56000");
-    private Color HEALTH = Color.decode("#388e3c");
-    private Color NANO_HULL = Color.decode("#D0D024");
-    private Color SHIELD = Color.decode("#0288d1");
-    private Color METEROID = Color.decode("#AAAAAA");
-    private Color PING = new Color(0, 255, 0, 32);
-    private Color PING_BORDER = new Color(0, 255, 0, 128);
-    private Color BARRIER = new Color(255, 255, 255, 32);
-    private Color BARRIER_BORDER = new Color(255, 255, 255, 128);
-    private Color NO_CLOACK = new Color(24, 160, 255, 32);
-    private Color PREFER = new Color(0, 255, 128, 32);
-    private Color AVOID = new Color(255, 0, 0, 32);
-    private Color SAFETY = new Color(16, 128, 255, 96);
-
-    private Color BASES = new Color(0, 255, 128);
-    private Color BASE_SPOTS = new Color(0, 255, 128, 32);
-    private Color UNKNOWN = Color.decode("#7C05D1");
-    private Color TEXTS_BACKGROUND = new Color(38, 50, 56, 128);
-
-    private Color ACTION_BUTTON = new Color(255, 255, 255, 160);
-    private Color DARKEN_BACK = new Color(0, 0, 0, 96);
-
-    protected Font FONT_BIG = new Font("Consolas", Font.PLAIN, 32);
-    private Font FONT_MID = new Font(Font.SANS_SERIF, Font.PLAIN, 18);
-    private Font FONT_SMALL = new Font("Consolas", Font.PLAIN, 12);
-    private Font FONT_TINY = new Font(Font.SANS_SERIF, Font.PLAIN, 9);
+    protected ColorScheme cs = new ColorScheme();
 
     private final TreeMap<Long, Line> positions = new TreeMap<>();
 
@@ -210,22 +172,22 @@ public class MapDrawer extends JPanel {
         }
 
         if (config.BOT_SETTINGS.DEV_STUFF) {
-            g2.setFont(FONT_TINY);
-            g2.setColor(TEXT_DARK);
+            g2.setFont(cs.FONTS.TINY);
+            g2.setColor(cs.TEXT_DARK);
             synchronized (Main.UPDATE_LOCKER) {
                 List<Entity> entities = mapManager.entities.allEntities.stream().flatMap(Collection::stream)
                         .filter(e -> e.id > 150_000_000 && e.id < 160_000_000)
                         .filter(e -> e.locationInfo.isLoaded())
                         .collect(Collectors.toList());
 
-                g2.setColor(TEXTS_BACKGROUND);
+                g2.setColor(cs.TEXTS_BACKGROUND);
                 for (Entity e : entities) {
                     Location loc = e.locationInfo.now;
                     int strWidth = g2.getFontMetrics().stringWidth(e.toString());
                     g2.fillRect(translateX(loc.x) - (strWidth >> 1), translateY(loc.y) - 7, strWidth, 8);
                 }
-                g2.setColor(TEXT);
-                g2.setFont(FONT_TINY);
+                g2.setColor(cs.TEXT);
+                g2.setFont(cs.FONTS.TINY);
                 for (Entity e : entities) {
                     Location loc = e.locationInfo.now;
                     drawString(g2, e.toString(), translateX(loc.x), translateY(loc.y), Align.MID);
@@ -250,11 +212,13 @@ public class MapDrawer extends JPanel {
     }
 
     protected Graphics2D setupDraw(Graphics g) {
+        cs = main.config.BOT_SETTINGS.DISPLAY.cs;
+
         height = getHeight();
         width = getWidth();
         mid = width / 2;
 
-        g.setColor(BACKGROUND);
+        g.setColor(cs.BACKGROUND);
         g.fillRect(0, 0, width, height);
 
         Graphics2D g2 = (Graphics2D) g.create();
@@ -267,17 +231,17 @@ public class MapDrawer extends JPanel {
         for (Barrier barrier : mapManager.entities.barriers) {
             if (!barrier.use()) continue;
             Area area = barrier.getZone();
-            g2.setColor(this.BARRIER);
+            g2.setColor(cs.BARRIER);
             g2.fillRect(
                     translateX(area.minX), translateY(area.minY),
                     translateX(area.maxX - area.minX), translateY(area.maxY - area.minY));
-            g2.setColor(BARRIER_BORDER);
+            g2.setColor(cs.BARRIER_BORDER);
             g2.drawRect(
                     translateX(area.minX), translateY(area.minY),
                     translateX(area.maxX - area.minX), translateY(area.maxY - area.minY));
         }
 
-        g2.setColor(this.NO_CLOACK);
+        g2.setColor(cs.NO_CLOACK);
         for (NoCloack noCloack : mapManager.entities.noCloack) {
             Area area = noCloack.getZone();
             g2.fillRect(
@@ -287,12 +251,12 @@ public class MapDrawer extends JPanel {
     }
 
     protected void drawCustomZones(Graphics2D g2) {
-        g2.setColor(PREFER);
+        g2.setColor(cs.PREFER);
         drawCustomZone(g2, config.PREFERRED.get(hero.map.id));
         if (config.GENERAL.ROAMING.SEQUENTIAL) drawCustomZonePath(g2, config.PREFERRED.get(hero.map.id));
-        g2.setColor(AVOID);
+        g2.setColor(cs.AVOID);
         drawCustomZone(g2, config.AVOIDED.get(hero.map.id));
-        g2.setColor(SAFETY);
+        g2.setColor(cs.SAFETY);
         for (SafetyInfo safety : config.SAFETY.get(hero.map.id)) {
             if (safety.runMode == SafetyInfo.RunMode.NEVER
                     || safety.entity == null || safety.entity.removed) continue;
@@ -301,13 +265,13 @@ public class MapDrawer extends JPanel {
     }
 
     private void drawInfos(Graphics2D g2) {
-        g2.setColor(TEXT_DARK);
+        g2.setColor(cs.TEXT_DARK);
         String status = I18n.get(
                 (main.isRunning() ? "gui.map.running" : "gui.map.waiting"),
                 Time.toString(statsManager.runningTime()));
         drawString(g2, status, mid, height / 2 + 35, Align.MID);
 
-        g2.setFont(FONT_SMALL);
+        g2.setFont(cs.FONTS.SMALL);
         String info = I18n.get("gui.map.info",
                 Main.VERSION.toString(),
                 (main.isRunning() || !config.MISCELLANEOUS.RESET_REFRESH ?
@@ -326,22 +290,22 @@ public class MapDrawer extends JPanel {
     }
 
     protected void drawMap(Graphics2D g2) {
-        g2.setColor(TEXT_DARK);
-        g2.setFont(FONT_BIG);
+        g2.setColor(cs.TEXT_DARK);
+        g2.setFont(cs.FONTS.BIG);
         drawString(g2, hero.map.name, mid, (height / 2) - 5, Align.MID);
     }
 
     private void drawHealth(Graphics2D g2) {
-        g2.setColor(TEXT);
-        g2.setFont(FONT_MID);
+        g2.setColor(cs.TEXT);
+        g2.setFont(cs.FONTS.MID);
         if (hasFlag(DisplayFlag.HERO_NAME))
             drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40, Align.MID);
         drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20, 12);
 
         if (hero.target != null && !hero.target.removed) {
-            if (hero.target instanceof Npc || hero.target.playerInfo.isEnemy()) g2.setColor(this.ENEMIES);
-            else g2.setColor(this.ALLIES);
-            g2.setFont(FONT_MID);
+            if (hero.target instanceof Npc || hero.target.playerInfo.isEnemy()) g2.setColor(cs.ENEMIES);
+            else g2.setColor(cs.ALLIES);
+            g2.setFont(cs.FONTS.MID);
             String name = hero.target.playerInfo.username;
             drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40, Align.MID);
 
@@ -369,7 +333,7 @@ public class MapDrawer extends JPanel {
         for (List<Location> points : paths) {
             Location last = null;
             for (Location point : points) {
-                g2.setColor(TRAIL[(int) (curr++ / max)]);
+                g2.setColor(cs.getTrail()[(int) (curr++ / max)]);
                 if (last != null) drawLine(g2, last, point);
                 last = point;
             }
@@ -378,16 +342,16 @@ public class MapDrawer extends JPanel {
     }
 
     protected void drawStaticEntities(Graphics2D g2) {
-        g2.setColor(PORTALS);
+        g2.setColor(cs.PORTALS);
         for (Portal portal : portals) {
             Location loc = portal.locationInfo.now;
             g2.drawOval(translateX(loc.x) - 6, translateY(loc.y) - 6, 11, 11);
         }
 
         for (BattleStation station : this.battleStations) {
-            if (station.hullId == 0) g2.setColor(this.METEROID);
-            else if (station.info.isEnemy()) g2.setColor(this.ENEMIES);
-            else g2.setColor(this.ALLIES);
+            if (station.hullId == 0) g2.setColor(cs.METEROID);
+            else if (station.info.isEnemy()) g2.setColor(cs.ENEMIES);
+            else g2.setColor(cs.ALLIES);
 
             Location loc = station.locationInfo.now;
             if (station.hullId >= 0 && station.hullId < 255)
@@ -398,10 +362,10 @@ public class MapDrawer extends JPanel {
         for (BasePoint base : this.basePoints) {
             Location loc = base.locationInfo.now;
             if (base instanceof BaseTurret) {
-                g2.setColor(this.BASES);
+                g2.setColor(cs.BASES);
                 g2.fillOval(this.translateX(loc.x) - 1, this.translateY(loc.y) - 1, 2, 2);
             } else {
-                g2.setColor(this.BASE_SPOTS);
+                g2.setColor(cs.BASE_SPOTS);
                 int radius = base instanceof BaseHeadquarters ? 3500 :
                         base instanceof BaseStation ? 3000 : 1000, half = radius / 2;
                 g2.fillOval(translateX(loc.x - half), translateY(loc.y - half), translateX(radius), translateY(radius));
@@ -410,7 +374,7 @@ public class MapDrawer extends JPanel {
     }
 
     private void drawDynamicEntities(Graphics2D g2) {
-        g2.setColor(BOXES);
+        g2.setColor(cs.BOXES);
         for (Box box : boxes) {
             Location loc = box.locationInfo.now;
             drawEntity(g2, loc, box.boxInfo.collect);
@@ -420,39 +384,39 @@ public class MapDrawer extends JPanel {
         }
 
         if (config.BOT_SETTINGS.DEV_STUFF) {
-            g2.setColor(GOING);
+            g2.setColor(cs.GOING);
             for (Npc npc : npcs) drawLine(g2, npc.locationInfo, npc.shipInfo.destination);
             for (Ship ship : ships) drawLine(g2, ship.locationInfo, ship.shipInfo.destination);
         }
 
-        g2.setColor(NPCS);
+        g2.setColor(cs.NPCS);
         for (Npc npc : npcs) drawEntity(g2, npc.locationInfo.now, npc.npcInfo.kill);
         if (fakeNpc.isPingAlive()) {
             Location loc = fakeNpc.locationInfo.now;
-            g2.setColor(PING);
+            g2.setColor(cs.PING);
             g2.fillOval(translateX(loc.x) - 7, translateY(loc.y) - 7, 15, 15);
-            g2.setColor(PING_BORDER);
+            g2.setColor(cs.PING_BORDER);
             g2.drawOval(translateX(loc.x) - 7, translateY(loc.y) - 7, 15, 15);
         }
 
         for (Ship ship : ships) {
             Location loc = ship.locationInfo.now;
-            g2.setColor(ship.playerInfo.isEnemy() ? ENEMIES : ALLIES);
+            g2.setColor(ship.playerInfo.isEnemy() ? cs.ENEMIES : cs.ALLIES);
             drawEntity(g2, ship.locationInfo.now, false);
             if (hasFlag(DisplayFlag.USERNAMES))
                 drawString(g2, ship.playerInfo.username, translateX(loc.x), translateY(loc.y) - 5, Align.MID);
         }
 
         if (hero.target != null && !hero.target.removed) {
-            g2.setColor(GOING);
+            g2.setColor(cs.GOING);
             drawLine(g2, hero.target.locationInfo, hero.target.shipInfo.destination);
-            g2.setColor(TARGET);
+            g2.setColor(cs.TARGET);
             drawEntity(g2, hero.target.locationInfo.now, true);
         }
 
         if (!config.BOT_SETTINGS.DEV_STUFF) return;
 
-        g2.setColor(UNKNOWN);
+        g2.setColor(cs.UNKNOWN);
         for (Entity entity : mapManager.entities.unknown) {
             drawEntity(g2, entity.locationInfo.now, false);
         }
@@ -463,25 +427,25 @@ public class MapDrawer extends JPanel {
     }
 
     private void drawHero(Graphics2D g2) {
-        g2.setColor(TEXT);
-        g2.setFont(FONT_SMALL);
+        g2.setColor(cs.TEXT);
+        g2.setFont(cs.FONTS.SMALL);
         drawString(g2, hero.config + "C", 12, height - 12, Align.LEFT);
 
         if (!hero.locationInfo.isLoaded()) return;
 
-        g2.setColor(GOING);
+        g2.setColor(cs.GOING);
         PathPoint begin = new PathPoint((int) hero.locationInfo.now.x, (int) hero.locationInfo.now.y);
         for (PathPoint path : drive.paths) {
             g2.drawLine(translateX(begin.x), translateY(begin.y),
                     translateX(path.x), translateY((begin = path).y));
         }
 
-        g2.setColor(OWNER);
+        g2.setColor(cs.HERO);
 
         Location loc = hero.locationInfo.now;
         g2.fillOval(translateX(loc.x) - 3, translateY(loc.y) - 3, 7, 7);
 
-        g2.setColor(BARRIER_BORDER);
+        g2.setColor(cs.BARRIER_BORDER);
         g2.drawRect(translateX(mapManager.boundX), translateY(mapManager.boundY),
                 translateX(mapManager.boundMaxX - mapManager.boundX),
                 translateY(mapManager.boundMaxY - mapManager.boundY));
@@ -492,10 +456,10 @@ public class MapDrawer extends JPanel {
         int x = translateX(loc.x),
                 y = translateY(loc.y);
 
-        g2.setColor(PET);
+        g2.setColor(cs.PET);
         g2.fillRect(x - 3, y - 3, 6, 6);
 
-        g2.setColor(PET_IN);
+        g2.setColor(cs.PET_IN);
         g2.fillRect(x - 2, y - 2, 4, 4);
     }
 
@@ -507,8 +471,8 @@ public class MapDrawer extends JPanel {
         boolean hideNames = !hasFlag(DisplayFlag.GROUP_NAMES);
         drawBackgrounded(g2, 28, Align.RIGHT,
                 (x, y, w, member) -> {
-                    Font font = FONT_SMALL;
-                    Color color = TEXT;
+                    Font font = cs.FONTS.SMALL;
+                    Color color = cs.TEXT;
 
                     Map<TextAttribute, Object> attrs = new HashMap<>();
                     attrs.put(TextAttribute.WEIGHT, member.isLeader ? TextAttribute.WEIGHT_BOLD : TextAttribute.WEIGHT_REGULAR);
@@ -546,9 +510,9 @@ public class MapDrawer extends JPanel {
     }
 
     private void drawActionButton(Graphics2D g2) {
-        g2.setColor(this.DARKEN_BACK);
+        g2.setColor(cs.DARKEN_BACK);
         g2.fillRect(0, 0, this.getWidth(), this.getHeight());
-        g2.setColor(this.ACTION_BUTTON);
+        g2.setColor(cs.ACTION_BUTTON);
         int height2 = this.getHeight() / 2, height3 = this.getHeight() / 3,
                 width3 = this.getWidth() / 3, width9 = this.getWidth() / 9;
         if (this.main.isRunning()) {
@@ -572,16 +536,16 @@ public class MapDrawer extends JPanel {
                                       ToIntFunction<T> widthGetter,
                                       Collection<T> toRender) {
         if (toRender.size() == 0) return;
-        g2.setFont(FONT_SMALL);
+        g2.setFont(cs.FONTS.SMALL);
 
         int width = toRender.stream().mapToInt(widthGetter).max().orElse(0) + 8;
         int height = toRender.size() * lineHeight + 4;
         int top = getHeight() / 2 - height / 2;
         int left = align == Align.RIGHT ? getWidth() - width : 0;
 
-        g2.setColor(TEXTS_BACKGROUND);
+        g2.setColor(cs.TEXTS_BACKGROUND);
         g2.fillRect(left, top, width, height);
-        g2.setColor(TEXT);
+        g2.setColor(cs.TEXT);
         for (T render : toRender) {
             renderer.render(left + 4, top, width - 8, render);
             top += lineHeight;
@@ -622,7 +586,7 @@ public class MapDrawer extends JPanel {
     }
 
     private void drawHealth(Graphics2D g2, HealthHolder health, int x, int y, int width, int height) {
-        g2.setFont(FONT_SMALL);
+        g2.setFont(cs.FONTS.SMALL);
 
         boolean displayAmount = height >= 8 && hasFlag(DisplayFlag.HP_SHIELD_NUM);
         int margin = height < 8 ? 2 : 0;
@@ -630,24 +594,24 @@ public class MapDrawer extends JPanel {
         int totalMaxHealth = health.getMaxHp() + health.getHull();
         int hullWidth = totalMaxHealth == 0 ? 0 : (health.getHull() * width / totalMaxHealth);
 
-        g2.setColor(HEALTH.darker());
+        g2.setColor(cs.HEALTH.darker());
         g2.fillRect(x, y, width, height);
-        g2.setColor(HEALTH);
+        g2.setColor(cs.HEALTH);
         g2.fillRect(x, y, hullWidth + (int) (health.hpPercent() * (width - hullWidth)), height);
-        g2.setColor(NANO_HULL);
+        g2.setColor(cs.NANO_HULL);
         g2.fillRect(x, y, hullWidth, height);
 
-        g2.setColor(TEXT);
+        g2.setColor(cs.TEXT);
         if (displayAmount)
             drawString(g2, HEALTH_FORMAT.format(health.getHull() + health.getHp()) + "/" +
                     HEALTH_FORMAT.format(totalMaxHealth), x + width / 2, y + height - 2, Align.MID);
 
         if (health.getMaxShield() != 0) {
-            g2.setColor(SHIELD.darker());
+            g2.setColor(cs.SHIELD.darker());
             g2.fillRect(x, y + height + margin, width, height);
-            g2.setColor(SHIELD);
+            g2.setColor(cs.SHIELD);
             g2.fillRect(x, y + height + margin, (int) (health.shieldPercent() * width), height);
-            g2.setColor(TEXT);
+            g2.setColor(cs.TEXT);
             if (displayAmount)
                 drawString(g2, HEALTH_FORMAT.format(health.getShield()) + "/" +
                         HEALTH_FORMAT.format(health.getMaxShield()), x + width / 2, y + height + height - 2, Align.MID);

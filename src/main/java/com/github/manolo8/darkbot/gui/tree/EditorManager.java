@@ -7,6 +7,8 @@ import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.tree.ConfigNode;
 import com.github.manolo8.darkbot.gui.tree.components.JBoolField;
 import com.github.manolo8.darkbot.gui.tree.components.JCharField;
+import com.github.manolo8.darkbot.gui.tree.components.JColorField;
+import com.github.manolo8.darkbot.gui.tree.components.JFontField;
 import com.github.manolo8.darkbot.gui.tree.components.JLabelField;
 import com.github.manolo8.darkbot.gui.tree.components.JNumberField;
 import com.github.manolo8.darkbot.gui.tree.components.JPlayerTagField;
@@ -45,6 +47,8 @@ public class EditorManager {
         addEditor(new JShipConfigField(), Config.ShipConfig.class);
         addEditor(new JRangeField(), Config.PercentRange.class);
         addEditor(new JPlayerTagField(), PlayerTag.class);
+        addEditor(new JColorField(), Color.class);
+        addEditor(new JFontField(), Font.class);
     }
 
     private void addEditor(OptionEditor editor, Class... types) {
