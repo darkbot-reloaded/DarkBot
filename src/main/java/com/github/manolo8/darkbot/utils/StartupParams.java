@@ -1,40 +1,31 @@
 package com.github.manolo8.darkbot.utils;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Properties;
 
 public class StartupParams {
     private static final String COMMAND_PREFIX = "-";
 
     /**
-     * Command-line argument for auto-login, requires username and a path to a plaintext file with the master password.
-     * Example usage: {@code -login NotABot C:\Users\Owner\masterpw.txt}
+     * Command-line argument for auto-login
+     * requires a path to a properties file containing a username and either a password or a master-password.
+     * Example usage: {@code -login C:\Users\Owner\startup.properties}
      *
-     * @see #username
-     * @see #masterPasswordPath
+     * @see #startupPropertiesPath
      */
     private static final String LOGIN_COMMAND = COMMAND_PREFIX + "login";
     private boolean autoLogin = false;
     /**
-     * If you have a username containing special characters and are having issues passing in your username from RunBot.bat
-     * <ol>
-     *     <li>Change your Windows locale to UTF-8
-     *     <li>add this flag -Dsun.jnu.encoding=UTF-8
-     * </ol>
-     * Example RunBot.bat file: {@code START javaw -jar -Dsun.jnu.encoding=UTF-8 DarkBot.jar -login ᑎOTᗩᗷOT C:\Users\Owner\masterpw.txt}
-     * @see <a href="https://stackoverflow.com/a/53995490">https://stackoverflow.com/questions/7660651/passing-command-line-unicode-argument-to-java-code/9043883</a>
+     * Path to properties file containing 3 keys: username, password, master-password
+     * username is required to be defined and you can choose to define either password or master-password
+     * If you have an empty master-password you can define that field to be empty
+     * leave undefined fields empty
      */
-    private String username;
-    /**
-     * Plaintext file containing the master password, make sure it has only 1 line
-     * Leave the file empty if you have an empty master password
-     */
-    private Path masterPasswordPath;
+    private String startupPropertiesPath;
 
     /**
      * Command-line argument for auto-start, has no parameters.
@@ -43,6 +34,7 @@ public class StartupParams {
     private boolean autoStart = false;
 
     private String[] args;
+    private Properties properties;
 
     public StartupParams(String[] args) {
         this.args = args;
@@ -54,12 +46,11 @@ public class StartupParams {
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case LOGIN_COMMAND:
-                    if (i + 2 >= args.length) {
-                        System.err.println("Missing arguments for auto-login, usage: -login username path/to/masterpass.txt");
+                    if (i + 1 >= args.length) {
+                        System.err.println("Missing arguments for auto-login, usage: -login path/to/startup.properties");
                         System.exit(0);
                     }
-                    username = args[++i];
-                    masterPasswordPath = Paths.get(args[++i]);
+                    startupPropertiesPath = args[++i];
                     autoLogin = true;
                     break;
                 case START_COMMAND:
@@ -69,21 +60,52 @@ public class StartupParams {
         }
     }
 
-    public char[] getMasterPassword() throws IOException {
-        List<String> lines = Files.readAllLines(masterPasswordPath, StandardCharsets.UTF_8);
-        if (lines.size() != 1) {
-            System.err.println("Master password file contains multiple lines, make sure it only contains 1 line");
+    public char[] getMasterPassword() {
+        String masterPassword = get(PropertyKey.MASTER_PASSWORD);
+        return masterPassword == null ? null : masterPassword.toCharArray();
+    }
+
+    private String get(String key) throws IOException {
+        if (properties == null) {
+            properties = new Properties();
+            properties.load(new InputStreamReader(new FileInputStream(startupPropertiesPath), StandardCharsets.UTF_8));
+            System.out.println("Loaded startup properties file");
+            properties.list(System.out);
+        }
+        return properties.getProperty(key);
+    }
+
+    public String get(PropertyKey key) {
+        try {
+            String value = get(key.name);
+            if (value == null) {
+                System.err.println("Unable to retrieve " + key.name + ", make sure you have defined this key inside your properties file");
+                if (key.required) System.exit(0);
+            }
+            return value;
+        } catch (IOException e) {
+            System.err.println("Unable to retrieve " + key.name + ", make sure you have specified the correct path to your properties file");
+            e.printStackTrace();
             System.exit(0);
         }
-        return lines.get(0).toCharArray();
+        return null;
+    }
+
+    public enum PropertyKey {
+        USERNAME("username", true),
+        PASSWORD("password", false),
+        MASTER_PASSWORD("master-password", false);
+
+        private final String name;
+        private final boolean required;
+        PropertyKey(String name, boolean required) {
+            this.name = name;
+            this.required = required;
+        }
     }
 
     public boolean getAutoLogin() {
         return autoLogin;
-    }
-
-    public String getUsername() {
-        return username;
     }
 
     public boolean getAutoStart() {

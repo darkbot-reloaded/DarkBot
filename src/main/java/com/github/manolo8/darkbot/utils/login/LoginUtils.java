@@ -59,30 +59,44 @@ public class LoginUtils {
 
     public static LoginData performAutoLogin(StartupParams params) {
         Credentials credentials = loadCredentials();
-        try {
-            credentials.decrypt(params.getMasterPassword());
-        } catch (Exception e) {
-            System.err.println("Couldn't retreive logins, check your master password file");
-            e.printStackTrace();
-        }
-
-        Credentials.User user = credentials.getUsers()
-                .stream()
-                .filter(usr -> usr.u.equals(params.getUsername()))
-                .findFirst()
-                .orElse(null);
-        if (user == null) {
-            System.err.println("Couldn't find the provided user in the saved logins. Make sure the username and master password are correct.");
-            System.exit(0);
+        String password = params.get(StartupParams.PropertyKey.PASSWORD);
+        Credentials.User user = null;
+        
+        if (password == null || password.isEmpty()) {
+            try {
+                char[] masterPassword = params.getMasterPassword();
+                if (masterPassword == null) {
+                    System.err.println("Both master-password and password are undefined, make sure to at least define one of these fields");
+                    System.exit(0);
+                }
+                credentials.decrypt(masterPassword);
+            } catch (Exception e) {
+                System.err.println("Couldn't retreive logins, check your startup properties file");
+                e.printStackTrace();
+            }
+            
+            user = credentials.getUsers()
+                    .stream()
+                    .filter(usr -> usr.u.equals(params.get(StartupParams.PropertyKey.USERNAME)))
+                    .findFirst()
+                    .orElse(null);
+            if (user == null) {
+                System.err.println("Couldn't find the provided user in the saved logins. Make sure the username and master password are correct.");
+                System.exit(0);
+            }
         }
 
         LoginData loginData = new LoginData();
-        loginData.setCredentials(user.u, user.p);
+        loginData.setCredentials(params.get(StartupParams.PropertyKey.USERNAME), password == null || password.isEmpty() ? user.p : password);
 
-        System.out.println("Auto logging in (1/2)");
-        usernameLogin(loginData);
-        System.out.println("Loading spacemap (2/2)");
-        findPreloader(loginData);
+        try {
+            System.out.println("Auto logging in (1/2)");
+            usernameLogin(loginData);
+            System.out.println("Loading spacemap (2/2)");
+            findPreloader(loginData);
+        } catch (WrongCredentialsException e) {
+            System.err.println("Wrong credentials, check your username and password");
+        }
 
         if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
             System.err.println("Could not find preloader url or parameters");
