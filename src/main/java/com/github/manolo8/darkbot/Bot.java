@@ -22,7 +22,7 @@ public class Bot {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-        StartupParams params = new StartupParams(args);
+        StartupParams params = args.length == 0 ? null : new StartupParams(args);
         SwingUtilities.invokeLater(() -> new Main(params));
     }
 

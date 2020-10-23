@@ -1,114 +1,84 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.gui.utils.Popups;
-
-import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 public class StartupParams {
     private static final String COMMAND_PREFIX = "-";
 
     /**
-     * <b>NAME</b>
-     * <pre>
-     *     login - auto logins to the account with this <i>username</i>
-     * </pre>
-     * <b>SYNTAX</b>
-     * <pre>
-     *     -login <i>username</i> <i>filepath</i>
-     * </pre>
-     * <b>OPTIONS</b>
-     * <pre>
-     *     <i>username</i> and <i>filepath</i> are required arguments
-     *     <i>username</i> refers to the account you want to login to
-     *     <i>filepath</i> refers to the filepath to your txt file containing your master password
-     * </pre>
-     * <b>SAMPLE USAGE</b>
-     * <pre>
-     *     -login NotABot C:\Users\Owner\masterpw.txt
-     * </pre>
-     * @see #masterPasswordFile
+     * Command-line argument for auto-login, requires username and a path to a plaintext file with the master password.
+     * Example usage: {@code -login NotABot C:\Users\Owner\masterpw.txt}
+     *
+     * @see #username
+     * @see #masterPasswordPath
      */
     private static final String LOGIN_COMMAND = COMMAND_PREFIX + "login";
     private boolean autoLogin = false;
+    /**
+     * If you have a username containing special characters and are having issues passing in your username from RunBot.bat
+     * <ol>
+     *     <li>Change your Windows locale to UTF-8
+     *     <li>add this flag -Dsun.jnu.encoding=UTF-8
+     * </ol>
+     * Example RunBot.bat file: {@code START javaw -jar -Dsun.jnu.encoding=UTF-8 DarkBot.jar -login ᑎOTᗩᗷOT C:\Users\Owner\masterpw.txt}
+     * @see <a href="https://stackoverflow.com/a/53995490">https://stackoverflow.com/questions/7660651/passing-command-line-unicode-argument-to-java-code/9043883</a>
+     */
     private String username;
     /**
-     * This is a txt file containing your master file<br>
-     * Sample content of master password file:
-     * <pre>
-     *     password="mypassword12345"
-     * </pre>
-     * Leave it empty if you didnt set a master password like this:
-     * <pre>
-     *     password=""
-     * </pre>
+     * Plaintext file containing the master password, make sure it has only 1 line
+     * Leave the file empty if you have an empty master password
      */
-    private File masterPasswordFile;
+    private Path masterPasswordPath;
 
     /**
-     * <b>NAME</b>
-     * <pre>
-     *     start - auto starts bot
-     * </pre>
-     * <b>SYNTAX</b>
-     * <pre>
-     *     -start
-     * </pre>
-     * <b>OPTIONS</b>
-     * <pre>
-     *     This command takes no options
-     * </pre>
-     * <b>SAMPLE USAGE</b>
-     * <pre>
-     *     -start
-     * </pre>
+     * Command-line argument for auto-start, has no parameters.
      */
     private static final String START_COMMAND = COMMAND_PREFIX + "start";
     private boolean autoStart = false;
 
+    private String[] args;
+
     public StartupParams(String[] args) {
+        this.args = args;
         parse(args);
+        System.out.println(this);
     }
 
     private void parse(String[] args) {
-        try {
-            for (int i = 0; i < args.length; i++) {
-                switch (args[i]) {
-                    case LOGIN_COMMAND:
-                        username = args[++i];
-                        masterPasswordFile = new File(args[++i]);
-                        autoLogin = true;
-                        break;
-                    case START_COMMAND:
-                        autoStart = true;
-                        break;
-                }
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case LOGIN_COMMAND:
+                    if (i + 2 >= args.length) {
+                        System.err.println("Missing arguments for auto-login, usage: -login username path/to/masterpass.txt");
+                        System.exit(0);
+                    }
+                    username = args[++i];
+                    masterPasswordPath = Paths.get(args[++i]);
+                    autoLogin = true;
+                    break;
+                case START_COMMAND:
+                    autoStart = true;
+                    break;
             }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace();
-            System.err.println("[ERROR] Invalid program arguments");
-            Popups.showMessageSync("Command Line Error",
-                    new JOptionPane(new Object[]{"Invalid program arguments"}, JOptionPane.ERROR_MESSAGE));
-            System.exit(0);
         }
     }
 
     public char[] getMasterPassword() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(masterPasswordFile));
-
-        StringBuilder sb = new StringBuilder();
-        String s;
-        while ((s = br.readLine()) != null) {
-            sb.append(s);
+        List<String> lines = Files.readAllLines(masterPasswordPath, StandardCharsets.UTF_8);
+        if (lines.size() != 1) {
+            System.err.println("Master password file contains multiple lines, make sure it only contains 1 line");
+            System.exit(0);
         }
-
-        return sb.substring(sb.indexOf("\"") + 1, sb.lastIndexOf("\"")).toCharArray();
+        return lines.get(0).toCharArray();
     }
 
-    public boolean shouldAutoLogin() {
+    public boolean getAutoLogin() {
         return autoLogin;
     }
 
@@ -116,8 +86,12 @@ public class StartupParams {
         return username;
     }
 
-    public boolean shouldAutoStart() {
+    public boolean getAutoStart() {
         return autoStart;
     }
 
+    @Override
+    public String toString() {
+        return "StartupParams: " + Arrays.toString(args);
+    }
 }

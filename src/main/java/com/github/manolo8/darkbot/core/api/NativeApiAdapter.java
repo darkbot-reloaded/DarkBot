@@ -14,7 +14,7 @@ public class NativeApiAdapter extends ApiAdapter {
     private int botId = -1;
 
     public NativeApiAdapter(StartupParams params) {
-        this.loginData = params.shouldAutoLogin() ? LoginUtils.performAutoLogin(params) : LoginUtils.performUserLogin();
+        this.loginData = LoginUtils.performUserLogin(params);
     }
 
     public void createWindow() {

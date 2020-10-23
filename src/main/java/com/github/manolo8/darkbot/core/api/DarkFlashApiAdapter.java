@@ -18,7 +18,7 @@ public class DarkFlashApiAdapter extends ApiAdapter {
     private long willBeValid = System.currentTimeMillis() + 5_000;
 
     public DarkFlashApiAdapter(StartupParams params) {
-        this.loginData = params.shouldAutoLogin() ? LoginUtils.performAutoLogin(params) : LoginUtils.performUserLogin();
+        this.loginData = LoginUtils.performUserLogin(params);
     }
 
     @Override

@@ -49,9 +49,9 @@ public class LoginForm extends JPanel {
     }
 
     public static class Message {
-        final boolean error;
-        final String text;
-        final String description;
+        private final boolean error;
+        private final String text;
+        private final String description;
 
         public Message(boolean error, String text, String description) {
             this.error = error;

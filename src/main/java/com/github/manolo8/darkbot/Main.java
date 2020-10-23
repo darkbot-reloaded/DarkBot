@@ -113,12 +113,8 @@ public class Main extends Thread implements PluginListener {
             Popups.showMessageAsync("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
 
         API.createWindow();
-        initializeStartupSettings(params);
+        if (params != null && params.getAutoStart()) setRunning(true);
         start();
-    }
-
-    private void initializeStartupSettings(StartupParams params) {
-        if (params.shouldAutoStart()) setRunning(true);
     }
 
     @Override

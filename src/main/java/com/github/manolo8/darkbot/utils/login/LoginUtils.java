@@ -39,7 +39,9 @@ public class LoginUtils {
         FORCED_PARAMS.put("autoStartEnabled", "1");
     }
 
-    public static LoginData performUserLogin() {
+    public static LoginData performUserLogin(StartupParams params) {
+        if (params != null && params.getAutoLogin()) return LoginUtils.performAutoLogin(params);
+
         LoginForm panel = new LoginForm();
 
         JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
@@ -48,7 +50,10 @@ public class LoginUtils {
         Popups.showMessageSync("Login", pane, panel::setDialog);
 
         LoginData loginData = panel.getResult();
-        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) System.exit(0);
+        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
+            System.err.println("Could not find preloader url or parameters");
+            System.exit(0);
+        }
         return loginData;
     }
 
@@ -57,7 +62,7 @@ public class LoginUtils {
         try {
             credentials.decrypt(params.getMasterPassword());
         } catch (Exception e) {
-            System.err.println("Couldn't login, check your master password txt file");
+            System.err.println("Couldn't retreive logins, check your master password file");
             e.printStackTrace();
         }
 
@@ -67,7 +72,7 @@ public class LoginUtils {
                 .findFirst()
                 .orElse(null);
         if (user == null) {
-            System.err.println("Invalid program arguments, make sure you entered the correct username and filepath");
+            System.err.println("Couldn't find the provided user in the saved logins. Make sure the username and master password are correct.");
             System.exit(0);
         }
 
@@ -79,7 +84,10 @@ public class LoginUtils {
         System.out.println("Loading spacemap (2/2)");
         findPreloader(loginData);
 
-        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) System.exit(0);
+        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
+            System.err.println("Could not find preloader url or parameters");
+            System.exit(0);
+        }
         return loginData;
     }
 

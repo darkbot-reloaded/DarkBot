@@ -10,7 +10,7 @@ public class DarkBoatAdapter extends ApiAdapter {
     private final DarkBoat API = new DarkBoat();
 
     public DarkBoatAdapter(StartupParams params) {
-        this.loginData = params.shouldAutoLogin() ? LoginUtils.performAutoLogin(params) : LoginUtils.performUserLogin();
+        this.loginData = LoginUtils.performUserLogin(params);
     }
 
     @Override
