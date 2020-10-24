@@ -1,6 +1,9 @@
 package eu.darkbot.api.entities.utils;
 
-public interface Area {
+import java.awt.Shape;
+
+public interface Area extends Shape {//?
+
     AreaType getAreaType();
 
     enum AreaType {
