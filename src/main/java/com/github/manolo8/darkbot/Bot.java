@@ -6,10 +6,11 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.LogUtils;
 
 import javax.swing.*;
+import java.io.IOException;
 
 public class Bot {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         if (System.console() == null
                 && Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")) {
             LogUtils.setOutputToFile();
@@ -27,7 +28,7 @@ public class Bot {
     }
 
     public static class NoOpBot {
-        public static void main(String[] args) {
+        public static void main(String[] args) throws IOException {
             ConfigManager.FORCE_NO_OP = true;
             Bot.main(args);
         }

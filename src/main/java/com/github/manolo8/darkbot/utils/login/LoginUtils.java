@@ -51,8 +51,8 @@ public class LoginUtils {
 
         LoginData loginData = panel.getResult();
         if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
-            System.err.println("Could not find preloader url or parameters");
-            System.exit(-1);
+            System.out.println("Closed login panel, exited without logging in");
+            System.exit(0);
         }
         return loginData;
     }
