@@ -192,6 +192,7 @@ public class Config {
                             HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA);
             public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
             public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
+            public @Option(key = "colors") ColorScheme cs = new ColorScheme();
 
             public int width = 1280;
             public int height = 800;

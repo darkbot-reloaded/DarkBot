@@ -13,11 +13,6 @@ import java.util.function.Consumer;
 
 public class ZoneEditor extends MapDrawer {
 
-    private Color LINES = new Color(128, 128, 128, 128);
-    private Color HOVERING = new Color(0, 150, 200);
-    private Color SELECTING = new Color(0, 128, 255);
-    private Color ZONE = new Color(0, 255, 128, 64);
-
     private ZoneInfo zoneInfo = null;
     private boolean selecting;
     private Rect area = new Rect();
@@ -116,26 +111,26 @@ public class ZoneEditor extends MapDrawer {
 
         if (!selecting && !hovering) return;
 
-        g2.setColor(selecting ? SELECTING : HOVERING);
+        g2.setColor(selecting ? cs.ZONE_EDITOR.SELECTING : cs.ZONE_EDITOR.HOVERING);
         area.update(res);
         area.draw(g2);
     }
 
     @Override
     protected void drawMap(Graphics2D g2) {
-        g2.setColor(TEXT_DARK);
-        g2.setFont(FONT_BIG);
+        g2.setColor(cs.TEXT_DARK);
+        g2.setFont(cs.FONTS.BIG);
         drawString(g2, hero.map.name, mid, (height / 2) + 12, Align.MID);
     }
 
     @Override
     protected void drawCustomZones(Graphics2D g2) {
-        g2.setColor(ZONE);
+        g2.setColor(cs.ZONE_EDITOR.ZONE);
         drawCustomZone(g2, zoneInfo);
     }
 
     private void drawGrid(Graphics2D g2, int resolution) {
-        g2.setColor(LINES);
+        g2.setColor(cs.ZONE_EDITOR.LINES);
         for (int i = 1; i < resolution; i++) {
             int x = i * width / resolution;
             g2.drawLine(x, 0, x, height);

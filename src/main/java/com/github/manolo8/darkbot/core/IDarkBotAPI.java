@@ -7,6 +7,7 @@ public interface IDarkBotAPI {
 
     boolean isValid();
     long getMemoryUsage();
+    int getVersion();
 
     void mouseMove(int x, int y);
 

@@ -58,7 +58,9 @@ public class LootNCollectorModule implements Module {
 
                 Box box = collectorModule.current;
 
-                if (box == null || box.locationInfo.distance(hero) > config.COLLECT.RADIUS
+                if ((lootModule.attack.target.npcInfo.extra.has(NpcExtra.IGNORE_BOXES)
+                        && hero.locationInfo.distance(lootModule.attack.target) > lootModule.attack.target.npcInfo.radius*1.2)
+                        || box == null || box.locationInfo.distance(hero) > config.COLLECT.RADIUS
                         || lootModule.attack.target.health.hpPercent() < 0.25) {
                     lootModule.moveToAnSafePosition();
                 } else {
