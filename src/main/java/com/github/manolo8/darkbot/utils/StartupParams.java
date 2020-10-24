@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Properties;
 
 public class StartupParams {
@@ -20,7 +21,7 @@ public class StartupParams {
     private static final String LOGIN_COMMAND = COMMAND_PREFIX + "login";
     private boolean autoLogin = false;
     /**
-     * Login properties file containing 3 keys: username, password, master-password
+     * Login properties file containing 3 keys: username, password, master_password
      * username is required to be defined and you can choose to define either password or master-password
      * If you have an empty master-password you can define that field to be empty
      * leave undefined fields empty
@@ -62,19 +63,18 @@ public class StartupParams {
                 case NO_OP_COMMAND:
                     forceNoOp = true;
                     break;
+                default:
+                    System.out.println("Unknown startup argument: " + args[i]);
             }
         }
     }
 
     private Properties loadLoginProperties(String path) throws IOException {
-        InputStreamReader reader = new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8);
         Properties p = new Properties();
-        p.load(reader);
-        reader.close();
-
+        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)) {
+            p.load(reader);
+        }
         System.out.println("Loaded startup properties file");
-        p.list(System.out);
-
         return p;
     }
 
@@ -88,25 +88,11 @@ public class StartupParams {
     }
 
     public String get(PropertyKey key) {
-        String value = get(key.name);
-        if (value == null) {
-            System.err.println("Unable to retrieve " + key.name + ", make sure you have defined this key inside your properties file");
-            if (key.required) System.exit(-1);
-        }
-        return value;
+        return get(key.name().toLowerCase(Locale.ROOT));
     }
 
     public enum PropertyKey {
-        USERNAME("username", true),
-        PASSWORD("password", false),
-        MASTER_PASSWORD("master-password", false);
-
-        private final String name;
-        private final boolean required;
-        PropertyKey(String name, boolean required) {
-            this.name = name;
-            this.required = required;
-        }
+        USERNAME, PASSWORD, MASTER_PASSWORD
     }
 
     public boolean getAutoLogin() {

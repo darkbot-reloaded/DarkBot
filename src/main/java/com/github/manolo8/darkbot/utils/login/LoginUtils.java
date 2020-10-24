@@ -58,35 +58,19 @@ public class LoginUtils {
     }
 
     public static LoginData performAutoLogin(StartupParams params) {
-        Credentials credentials = loadCredentials();
+        String username = params.get(StartupParams.PropertyKey.USERNAME);
         String password = params.get(StartupParams.PropertyKey.PASSWORD);
-        Credentials.User user = null;
-        
-        if (password == null || password.isEmpty()) {
-            try {
-                char[] masterPassword = params.getMasterPassword();
-                if (masterPassword == null) {
-                    System.err.println("Both master-password and password are undefined, make sure to at least define one of these fields");
-                }
-                credentials.decrypt(masterPassword);
-            } catch (Exception e) {
-                System.err.println("Couldn't retreive logins, check your startup properties file");
-                e.printStackTrace();
-            }
-            
-            user = credentials.getUsers()
-                    .stream()
-                    .filter(usr -> usr.u.equals(params.get(StartupParams.PropertyKey.USERNAME)))
-                    .findFirst()
-                    .orElse(null);
-            if (user == null) {
-                System.err.println("Couldn't find the provided user in the saved logins. Make sure the username and master password are correct.");
-            }
+        char[] masterPw = params.getMasterPassword();
+
+        if (username == null || (masterPw == null && (password == null || password.isEmpty()))) {
+            System.err.println("Credentials file requires username and either a password or a master password");
+            System.exit(-1);
         }
 
+        password = getPassword(username, password, masterPw);
+
         LoginData loginData = new LoginData();
-        loginData.setCredentials(params.get(StartupParams.PropertyKey.USERNAME),
-                (password == null || password.isEmpty()) && user != null ? user.p : password);
+        loginData.setCredentials(username, password);
 
         try {
             System.out.println("Auto logging in (1/2)");
@@ -102,6 +86,31 @@ public class LoginUtils {
             System.exit(-1);
         }
         return loginData;
+    }
+
+    private static String getPassword(String username, String password, char[] masterPassword) {
+        if (password == null || password.isEmpty()) {
+            Credentials credentials = loadCredentials();
+            try {
+                credentials.decrypt(masterPassword);
+            } catch (Exception e) {
+                System.err.println("Couldn't retreive logins, check your startup properties file");
+                e.printStackTrace();
+            }
+
+            Credentials.User user = credentials.getUsers()
+                    .stream()
+                    .filter(usr -> username.equals(usr.u))
+                    .findFirst()
+                    .orElse(null);
+            if (user == null) {
+                System.err.println("Couldn't find the provided user in the saved logins. Make sure the username and master password are correct.");
+                password = null;
+            } else {
+                password = user.p;
+            }
+        }
+        return password;
     }
 
     public static void usernameLogin(LoginData loginData) {
