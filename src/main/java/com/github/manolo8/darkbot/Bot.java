@@ -1,9 +1,8 @@
 package com.github.manolo8.darkbot;
 
 import com.formdev.flatlaf.FlatDarkLaf;
-import com.github.manolo8.darkbot.config.ConfigManager;
-import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.LogUtils;
+import com.github.manolo8.darkbot.utils.StartupParams;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -27,10 +26,4 @@ public class Bot {
         SwingUtilities.invokeLater(() -> new Main(params));
     }
 
-    public static class NoOpBot {
-        public static void main(String[] args) throws IOException {
-            ConfigManager.FORCE_NO_OP = true;
-            Bot.main(args);
-        }
-    }
 }

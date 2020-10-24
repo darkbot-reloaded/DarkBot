@@ -33,6 +33,13 @@ public class StartupParams {
     private static final String START_COMMAND = COMMAND_PREFIX + "start";
     private boolean autoStart = false;
 
+    /**
+     * Command-line argument for no-operation bot, has no parameters
+     * Used for debugging
+     */
+    private static final String NO_OP_COMMAND = COMMAND_PREFIX + "no-op";
+    private boolean forceNoOp = false;
+
     private String[] args;
 
     public StartupParams(String[] args) throws IOException {
@@ -51,6 +58,9 @@ public class StartupParams {
                     break;
                 case START_COMMAND:
                     autoStart = true;
+                    break;
+                case NO_OP_COMMAND:
+                    forceNoOp = true;
                     break;
             }
         }
@@ -105,6 +115,10 @@ public class StartupParams {
 
     public boolean getAutoStart() {
         return autoStart;
+    }
+
+    public boolean useNoOp() {
+        return forceNoOp;
     }
 
     @Override
