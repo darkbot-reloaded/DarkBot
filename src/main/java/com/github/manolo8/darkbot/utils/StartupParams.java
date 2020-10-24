@@ -48,7 +48,7 @@ public class StartupParams {
                 case LOGIN_COMMAND:
                     if (i + 1 >= args.length) {
                         System.err.println("Missing arguments for auto-login, usage: -login path/to/startup.properties");
-                        System.exit(0);
+                        System.exit(-1);
                     }
                     startupPropertiesPath = args[++i];
                     autoLogin = true;
@@ -80,13 +80,12 @@ public class StartupParams {
             String value = get(key.name);
             if (value == null) {
                 System.err.println("Unable to retrieve " + key.name + ", make sure you have defined this key inside your properties file");
-                if (key.required) System.exit(0);
+                if (key.required) System.exit(-1);
             }
             return value;
         } catch (IOException e) {
             System.err.println("Unable to retrieve " + key.name + ", make sure you have specified the correct path to your properties file");
             e.printStackTrace();
-            System.exit(0);
         }
         return null;
     }

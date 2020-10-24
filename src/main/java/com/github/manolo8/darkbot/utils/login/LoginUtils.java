@@ -52,7 +52,7 @@ public class LoginUtils {
         LoginData loginData = panel.getResult();
         if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
             System.err.println("Could not find preloader url or parameters");
-            System.exit(0);
+            System.exit(-1);
         }
         return loginData;
     }
@@ -67,7 +67,6 @@ public class LoginUtils {
                 char[] masterPassword = params.getMasterPassword();
                 if (masterPassword == null) {
                     System.err.println("Both master-password and password are undefined, make sure to at least define one of these fields");
-                    System.exit(0);
                 }
                 credentials.decrypt(masterPassword);
             } catch (Exception e) {
@@ -82,12 +81,12 @@ public class LoginUtils {
                     .orElse(null);
             if (user == null) {
                 System.err.println("Couldn't find the provided user in the saved logins. Make sure the username and master password are correct.");
-                System.exit(0);
             }
         }
 
         LoginData loginData = new LoginData();
-        loginData.setCredentials(params.get(StartupParams.PropertyKey.USERNAME), password == null || password.isEmpty() ? user.p : password);
+        loginData.setCredentials(params.get(StartupParams.PropertyKey.USERNAME),
+                (password == null || password.isEmpty()) && user != null ? user.p : password);
 
         try {
             System.out.println("Auto logging in (1/2)");
@@ -100,7 +99,7 @@ public class LoginUtils {
 
         if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
             System.err.println("Could not find preloader url or parameters");
-            System.exit(0);
+            System.exit(-1);
         }
         return loginData;
     }
