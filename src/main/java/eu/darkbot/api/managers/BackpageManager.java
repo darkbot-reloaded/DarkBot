@@ -22,17 +22,18 @@ public interface BackpageManager {
     long getLastRequestTime();
 
     /**
+     * Returns connection with current instance + params
+     * and with cookie dosid.
      *
-     * @param params
-     * @return
+     * @param params query to be added
      */
     HttpURLConnection getConnection(String params);
 
     /**
+     * Returns connection with current instance + params
+     * and with cookie dosid.
      *
-     * @param params
-     * @param minWait
-     * @return
+     * If minWait(ms) has not passed since last action, will sleep the difference.
      */
     default HttpURLConnection getConnection(String params, int minWait) {
         Time.sleep(getLastRequestTime() + minWait - System.currentTimeMillis());

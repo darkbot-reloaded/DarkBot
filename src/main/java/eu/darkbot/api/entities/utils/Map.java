@@ -36,7 +36,8 @@ public class Map extends com.github.manolo8.darkbot.core.objects.Map {
     }
 
     /**
-     * @return true if map is Galaxy gate
+     * @return true if map is galaxy gate type.
+     * For example: Alpha, Zeta, Hades etc.
      */
     public boolean isGg() {
         return gg;

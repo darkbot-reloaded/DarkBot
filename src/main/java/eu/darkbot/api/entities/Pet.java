@@ -1,30 +1,35 @@
 package eu.darkbot.api.entities;
 
-import eu.darkbot.utils.ThrowableItem;
+import eu.darkbot.utils.EquippableItem;
 
 public interface Pet extends Ship {
 
     int getLevel();
     int getOwnerId();
 
-    enum Buff {
+    /**
+     * Represents cooldowns of gears, pet debuffs etc.
+     */
+    enum Cooldown {
         SINGULARITY,
         SPEED_LEECH,
         TRADE,
         WEAKEN_SHIELD,
-        KAMIKAZE_CD,
-        COMBO_REPAIR_CD,
+        KAMIKAZE,
+        COMBO_REPAIR,
         FRIENDLY_SACRIFICE,
-        RETARGETING_CD,
-        HP_LINK_CD,
-        MEGA_MINE_CD;
+        RETARGETING,
+        HP_LINK,
+        MEGA_MINE,
+        BEACON_COMBAT,
+        BEACON_HP;
 
         public int getId() {
             return ordinal() + 1;
         }
     }
 
-    enum Gear implements ThrowableItem {
+    enum Gear implements EquippableItem {
         PASSIVE("Passive mode"),
         GUARD("Guard mode"),
         DESTROYER("Unknown id 3, Destroyer"),
@@ -67,7 +72,7 @@ public interface Pet extends Ship {
         }
 
         @Override
-        public String getMessage() {
+        public String getExceptionMessage() {
             return "Gear: " + this + " is not equipped!";
         }
     }

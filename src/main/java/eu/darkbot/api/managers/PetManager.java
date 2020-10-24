@@ -4,11 +4,13 @@ import eu.darkbot.api.entities.Pet;
 import eu.darkbot.api.objects.Gui;
 import eu.darkbot.utils.ItemNotEquippedException;
 
-import java.util.Set;
-
 public interface PetManager extends Gui, Pet {
 
-    Set<Gear> getAvailableGears();
+    boolean isGearAvailable(int gearId);
+
+    default boolean isGearAvailable(Pet.Gear gear) {
+        return isGearAvailable(gear.getId());
+    }
 
     void setGear(int gearId) throws ItemNotEquippedException;
 
@@ -16,10 +18,10 @@ public interface PetManager extends Gui, Pet {
         setGear(gear.getId());
     }
 
-    boolean hasCooldown(int petBuffId);
+    boolean hasCooldown(int cooldownId);
 
-    default boolean hasCooldown(Pet.Buff buff) {
-        return hasCooldown(buff.getId());
+    default boolean hasCooldown(Pet.Cooldown cooldown) {
+        return hasCooldown(cooldown.getId());
     }
 
     boolean isEnabled();
