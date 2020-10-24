@@ -1,13 +1,23 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.utils.Time;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.HttpURLConnection;
+import java.net.URI;
 
 public interface BackpageManager {
+
+    String getSid();
+
     /**
-     *
-     * @return
+     * Returns instance {@link URI}
+     * for example: https://int1.darkorbit.com/
+     */
+    URI getInstanceURI();
+
+    /**
+     * @return last request time in milliseconds
      */
     long getLastRequestTime();
 
@@ -36,5 +46,6 @@ public interface BackpageManager {
      * @param body which will be searched for reload token
      * @return reload token or null if wasn't found
      */
+    @Nullable
     String findReloadToken(String body);
 }

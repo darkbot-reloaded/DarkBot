@@ -1,10 +1,7 @@
 package eu.darkbot.api.objects;
 
-public interface Rectangle {
+public interface Rectangle extends Locatable {
 
-    int getX();
-    int getY();
-
-    int getHeight();
     int getWidth();
+    int getHeight();
 }
