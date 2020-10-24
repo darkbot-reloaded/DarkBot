@@ -282,8 +282,7 @@ public class MapDrawer extends JPanel {
             drawString(g2, main.tickingModule ? main.module.status() : main.module.stoppedStatus(), 5, 26, Align.LEFT);
         }
 
-        drawString(g2, String.format("%.1ftick  %dFPS  %dMB  %dms ping", main.avgTick,
-                main.facadeManager.stats.getFps(), API.getMemoryUsage(), pingManager.ping), width - 5, 12, Align.RIGHT);
+        drawString(g2, String.format("%.1ftick %dms ping", main.avgTick, pingManager.ping), width - 5, 12, Align.RIGHT);
         drawString(g2, "SID: " + main.backpage.sidStatus(), width - 5, 26, Align.RIGHT);
 
         drawMap(g2);

@@ -46,7 +46,7 @@ public class ReflectionUtils {
         return createInstance(clazz, null, null);
     }
 
-    public static <T, P> T createInstance(Class<T> clazz, Class<P> paramTyp, P param) {
+    public static <T> T createInstance(Class<T> clazz, Class<?> paramTyp, Object param) {
         try {
             if (paramTyp != null) {
                 try {

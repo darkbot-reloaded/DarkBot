@@ -25,20 +25,20 @@ import java.util.Map;
 public class EditorManager {
 
     // Standard editors for specific data types
-    private Map<Class, OptionEditor> editorsByType = new HashMap<>();
+    private final Map<Class<?>, OptionEditor> editorsByType = new HashMap<>();
     // Editors shared between diff TreeEditor instances
-    private Map<Class<? extends OptionEditor>, OptionEditor> sharedEditors = new HashMap<>();
+    private final Map<Class<? extends OptionEditor>, OptionEditor> sharedEditors;
     // Editors for specific @Editor annotations in fields
-    private Map<Class<? extends OptionEditor>, OptionEditor> editorsByClass = new HashMap<>();
-    private OptionEditor defaultEditor = new JLabelField();
+    private final Map<Class<? extends OptionEditor>, OptionEditor> editorsByClass = new HashMap<>();
+    private final OptionEditor defaultEditor = new JLabelField();
 
     public EditorManager() {
         this(null);
     }
 
     public EditorManager(EditorManager shared) {
-        if (shared != null) this.sharedEditors = shared.sharedEditors;
-        defaultEditor.getComponent().setOpaque(false);
+        this.sharedEditors = shared != null ? shared.sharedEditors : new HashMap<>();
+        this.defaultEditor.getComponent().setOpaque(false);
 
         addEditor(new JCharField(), Character.class);
         addEditor(new JBoolField(), boolean.class);
@@ -51,8 +51,8 @@ public class EditorManager {
         addEditor(new JFontField(), Font.class);
     }
 
-    private void addEditor(OptionEditor editor, Class... types) {
-        for (Class type : types) this.editorsByType.put(type, editor);
+    private void addEditor(OptionEditor editor, Class<?>... types) {
+        for (Class<?> type : types) this.editorsByType.put(type, editor);
         editor.getComponent().setOpaque(false);
     }
 
@@ -61,7 +61,7 @@ public class EditorManager {
         if (field.getEditor() == null) return editorsByType.getOrDefault(field.field.getType(), defaultEditor);
         Map<Class<? extends OptionEditor>, OptionEditor> editorMap = field.isSharedEditor() ? sharedEditors : editorsByClass;
         return editorMap.computeIfAbsent(editorClass,
-                c -> ReflectionUtils.createInstance(c, (Class<Object>) field.parent.getClass(), field.parent));
+                c -> ReflectionUtils.createInstance(c, field.parent.getClass(), field.parent));
     }
 
     public int getWidthFor(ConfigNode node, FontMetrics font) {

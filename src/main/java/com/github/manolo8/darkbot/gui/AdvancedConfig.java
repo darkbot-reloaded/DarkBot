@@ -11,6 +11,7 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.plaf.LayerUI;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.MouseWheelEvent;
@@ -101,7 +102,19 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     }
 
     private void unfoldTopLevelTree(JTree configTree) {
-        for (int i = configTree.getRowCount() - 1; i >= 0; i--) configTree.expandRow(i);
+        for (int i = 0; i < configTree.getRowCount(); i++) {
+            if (configTree.isExpanded(i)) continue;
+
+            TreePath path = configTree.getPathForRow(i);
+            if (treeModel.isLeaf(path.getLastPathComponent())) continue; // Ignore leaf nodes
+
+            path = path.getParentPath();
+
+            if (path == null || path.getPathCount() == 1 || // Unfold root or top-level nodes
+                    treeModel.getChildCount(path.getLastPathComponent()) == 1) { // Unfold children with no siblings
+                configTree.expandRow(i);
+            }
+        }
     }
 
     public static Dimension forcePreferredHeight(Dimension preferred) {

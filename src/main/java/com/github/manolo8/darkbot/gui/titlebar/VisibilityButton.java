@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.gui.components.ApiSettings;
+import com.github.manolo8.darkbot.gui.components.ApiSettingsPanel;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 
@@ -30,7 +30,7 @@ public class VisibilityButton extends TitleBarToggleButton<JFrame> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!SwingUtilities.isRightMouseButton(e)) return;
-                onRightClick();
+                new ApiSettingsPanel(main.config.BOT_SETTINGS.DISPLAY, VisibilityButton.this);
             }
         });
     }
@@ -43,12 +43,6 @@ public class VisibilityButton extends TitleBarToggleButton<JFrame> {
     private void toggleVisibility(boolean minimizing, boolean visible) {
         if (minimizing) API.setMinimized(!visible);
         else API.setVisible(visible);
-    }
-
-    private void onRightClick() {
-        Point p = getLocationOnScreen();
-        p.translate(0, getHeight());
-        new ApiSettings(main, p);
     }
 
 }

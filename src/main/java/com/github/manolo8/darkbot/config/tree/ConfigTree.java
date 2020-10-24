@@ -14,11 +14,11 @@ import java.util.List;
 
 public class ConfigTree implements TreeModel {
 
-    private ConfigNode.Parent root;
-    private ConfigNode[] originalChildren;
-    private List<TreeModelListener> listeners = new ArrayList<>();
+    private final ConfigNode.Parent root;
+    private final ConfigNode[] originalChildren;
+    private final List<TreeModelListener> listeners = new ArrayList<>();
 
-    private StringQuery filter = new StringQuery();
+    private final StringQuery filter = new StringQuery();
 
     public ConfigTree(Object config) {
         this.root = ConfigNode.rootingFrom(null, "Root", config, "config");
