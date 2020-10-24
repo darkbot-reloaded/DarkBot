@@ -78,7 +78,7 @@ public interface Memory {
      */
     String readString(long address);
 
-    default String readString(long address, int offsets) {
+    default String readString(long address, int... offsets) {
         return readString(readLong(address, offsets));
     }
 

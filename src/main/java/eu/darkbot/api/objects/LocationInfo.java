@@ -45,4 +45,6 @@ public interface LocationInfo extends Locatable {
      * Calculates future destination of entity in time(ms)
      */
     Location destinationInTime(long time);
+
+    Location getLocation();
 }

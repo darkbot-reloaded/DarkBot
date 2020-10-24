@@ -8,21 +8,21 @@ public interface Pet extends Ship {
     int getOwnerId();
 
     enum Buff {
-            SINGULARITY,
-            SPEED_LEECH,
-            TRADE,
-            WEAKEN_SHIELD,
-            KAMIKAZE_CD,
-            COMBO_REPAIR_CD,
-            FRIENDLY_SACRIFICE,
-            RETARGETING_CD,
-            HP_LINK_CD,
-            MEGA_MINE_CD;
+        SINGULARITY,
+        SPEED_LEECH,
+        TRADE,
+        WEAKEN_SHIELD,
+        KAMIKAZE_CD,
+        COMBO_REPAIR_CD,
+        FRIENDLY_SACRIFICE,
+        RETARGETING_CD,
+        HP_LINK_CD,
+        MEGA_MINE_CD;
 
-            public int getId() {
-                return ordinal() + 1;
-            }
+        public int getId() {
+            return ordinal() + 1;
         }
+    }
 
     enum Gear implements ThrowableItem {
         PASSIVE("Passive mode"),
