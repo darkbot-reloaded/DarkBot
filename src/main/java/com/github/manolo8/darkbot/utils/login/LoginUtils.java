@@ -60,14 +60,18 @@ public class LoginUtils {
     public static LoginData performAutoLogin(StartupParams params) {
         String username = params.get(StartupParams.PropertyKey.USERNAME);
         String password = params.get(StartupParams.PropertyKey.PASSWORD);
-        char[] masterPw = params.getMasterPassword();
 
-        if (username == null || (masterPw == null && (password == null || password.isEmpty()))) {
+        if (username != null && (password == null || password.isEmpty())) {
+            password = getPassword(username, params.getMasterPassword());
+
+            if (password == null)
+                System.err.println("Password for user couldn't be retrieved. Check that the user exists and master password is correct.");
+        }
+
+        if (username == null || password == null || password.isEmpty()) {
             System.err.println("Credentials file requires username and either a password or a master password");
             System.exit(-1);
         }
-
-        password = getPassword(username, password, masterPw);
 
         LoginData loginData = new LoginData();
         loginData.setCredentials(username, password);
@@ -88,29 +92,21 @@ public class LoginUtils {
         return loginData;
     }
 
-    private static String getPassword(String username, String password, char[] masterPassword) {
-        if (password == null || password.isEmpty()) {
-            Credentials credentials = loadCredentials();
-            try {
-                credentials.decrypt(masterPassword);
-            } catch (Exception e) {
-                System.err.println("Couldn't retreive logins, check your startup properties file");
-                e.printStackTrace();
-            }
-
-            Credentials.User user = credentials.getUsers()
-                    .stream()
-                    .filter(usr -> username.equals(usr.u))
-                    .findFirst()
-                    .orElse(null);
-            if (user == null) {
-                System.err.println("Couldn't find the provided user in the saved logins. Make sure the username and master password are correct.");
-                password = null;
-            } else {
-                password = user.p;
-            }
+    private static String getPassword(String username, char[] masterPassword) {
+        Credentials credentials = loadCredentials();
+        try {
+            credentials.decrypt(masterPassword);
+        } catch (Exception e) {
+            System.err.println("Couldn't retreive logins, check your startup properties file");
+            e.printStackTrace();
+            return null;
         }
-        return password;
+        return credentials.getUsers()
+                .stream()
+                .filter(usr -> username.equals(usr.u))
+                .findFirst()
+                .map(usr -> usr.p)
+                .orElse(null);
     }
 
     public static void usernameLogin(LoginData loginData) {
