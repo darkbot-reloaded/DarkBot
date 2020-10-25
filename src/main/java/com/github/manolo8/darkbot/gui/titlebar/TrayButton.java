@@ -47,7 +47,7 @@ public class TrayButton extends TitleBarButton<JFrame> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
-                    popupMenu.setLocation(e.getX(), e.getY());
+                    popupMenu.setLocation(e.getX(), e.getY() - popupMenu.getPreferredSize().height);
                     popupMenu.setInvoker(popupMenu);
                     dialog.setLocation(e.getX(), e.getY());
 
@@ -66,7 +66,7 @@ public class TrayButton extends TitleBarButton<JFrame> {
         JMenuItem title = new JMenuItem("DarkBot", UIUtils.getIcon("icon"));
         JMenuItem home = new JMenuItem("Home");
         JMenuItem discord = new JMenuItem("Discord");
-        JMenuItem copySid = new JMenuItem("Copy Sid");
+        JMenuItem copySid = new JMenuItem("Copy SID");
         JMenuItem quit = new JMenuItem("Quit DarkBot");
 
         title.setEnabled(false);
