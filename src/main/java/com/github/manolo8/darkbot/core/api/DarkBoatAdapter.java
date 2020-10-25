@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.DarkBoat;
@@ -8,8 +9,8 @@ public class DarkBoatAdapter extends ApiAdapter {
     private final LoginData loginData;
     private final DarkBoat API = new DarkBoat();
 
-    public DarkBoatAdapter() {
-        this.loginData = LoginUtils.performUserLogin();
+    public DarkBoatAdapter(StartupParams params) {
+        this.loginData = LoginUtils.performUserLogin(params);
     }
 
     @Override

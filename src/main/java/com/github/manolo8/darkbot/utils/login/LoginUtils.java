@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 
@@ -38,7 +39,9 @@ public class LoginUtils {
         FORCED_PARAMS.put("autoStartEnabled", "1");
     }
 
-    public static LoginData performUserLogin() {
+    public static LoginData performUserLogin(StartupParams params) {
+        if (params != null && params.getAutoLogin()) return LoginUtils.performAutoLogin(params);
+
         LoginForm panel = new LoginForm();
 
         JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
@@ -47,8 +50,63 @@ public class LoginUtils {
         Popups.showMessageSync("Login", pane, panel::setDialog);
 
         LoginData loginData = panel.getResult();
-        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) System.exit(0);
+        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
+            System.out.println("Closed login panel, exited without logging in");
+            System.exit(0);
+        }
         return loginData;
+    }
+
+    public static LoginData performAutoLogin(StartupParams params) {
+        String username = params.get(StartupParams.PropertyKey.USERNAME);
+        String password = params.get(StartupParams.PropertyKey.PASSWORD);
+
+        if (username != null && (password == null || password.isEmpty())) {
+            password = getPassword(username, params.getMasterPassword());
+
+            if (password == null)
+                System.err.println("Password for user couldn't be retrieved. Check that the user exists and master password is correct.");
+        }
+
+        if (username == null || password == null || password.isEmpty()) {
+            System.err.println("Credentials file requires username and either a password or a master password");
+            System.exit(-1);
+        }
+
+        LoginData loginData = new LoginData();
+        loginData.setCredentials(username, password);
+
+        try {
+            System.out.println("Auto logging in (1/2)");
+            usernameLogin(loginData);
+            System.out.println("Loading spacemap (2/2)");
+            findPreloader(loginData);
+        } catch (WrongCredentialsException e) {
+            System.err.println("Wrong credentials, check your username and password");
+        }
+
+        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
+            System.err.println("Could not find preloader url or parameters");
+            System.exit(-1);
+        }
+        return loginData;
+    }
+
+    private static String getPassword(String username, char[] masterPassword) {
+        Credentials credentials = loadCredentials();
+        try {
+            credentials.decrypt(masterPassword);
+        } catch (Exception e) {
+            System.err.println("Couldn't retreive logins, check your startup properties file");
+            e.printStackTrace();
+            return null;
+        }
+        return credentials.getUsers()
+                .stream()
+                .filter(usr -> username.equals(usr.u))
+                .findFirst()
+                .map(usr -> usr.p)
+                .orElse(null);
     }
 
     public static void usernameLogin(LoginData loginData) {

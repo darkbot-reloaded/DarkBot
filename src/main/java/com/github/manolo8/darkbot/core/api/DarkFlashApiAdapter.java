@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.DarkFlash;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
@@ -16,8 +17,8 @@ public class DarkFlashApiAdapter extends ApiAdapter {
     private final DarkFlash API = new DarkFlash();
     private long willBeValid = System.currentTimeMillis() + 5_000;
 
-    public DarkFlashApiAdapter() {
-        this.loginData = LoginUtils.performUserLogin();
+    public DarkFlashApiAdapter(StartupParams params) {
+        this.loginData = LoginUtils.performUserLogin(params);
     }
 
     @Override
