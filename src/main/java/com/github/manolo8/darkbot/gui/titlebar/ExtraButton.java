@@ -15,6 +15,7 @@ import com.github.manolo8.darkbot.utils.debug.SWFUtils;
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -126,19 +127,13 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
         public Collection<JComponent> getExtraMenuItems(Main main) {
             List<JComponent> list = new ArrayList<>();
 
-            list.add(create("home", e -> {
-                String sid = main.statsManager.sid, instance = main.statsManager.instance;
-                if (sid == null || sid.isEmpty() || instance == null || instance.isEmpty()) return;
-                String url = instance + "?dosid=" + sid;
-                if ((e.getModifiers() & InputEvent.BUTTON3_MASK) != 0) SystemUtils.toClipboard(url);
-                else SystemUtils.openUrl(url);
-            }));
+            list.add(create("home", homeAction(main)));
             list.add(create("reload", e -> {
                 System.out.println("Triggering refresh: user requested");
                 Main.API.handleRefresh();
             }));
-            list.add(create("discord", e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
-            list.add(create("copy_sid", e -> SystemUtils.toClipboard(main.statsManager.sid)));
+            list.add(create("discord", discordAction()));
+            list.add(create("copy_sid", copySidAction(main)));
             list.add(create("reset_colorscheme", e -> main.config.BOT_SETTINGS.DISPLAY.cs = new ColorScheme()));
 
 
@@ -148,6 +143,24 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             }
 
             return list;
+        }
+
+        public static ActionListener homeAction(Main main) {
+            return e -> {
+                String sid = main.statsManager.sid, instance = main.statsManager.instance;
+                if (sid == null || sid.isEmpty() || instance == null || instance.isEmpty()) return;
+                String url = instance + "?dosid=" + sid;
+                if ((e.getModifiers() & InputEvent.BUTTON3_MASK) != 0) SystemUtils.toClipboard(url);
+                else SystemUtils.openUrl(url);
+            };
+        }
+
+        public static ActionListener discordAction() {
+            return e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT");
+        }
+
+        public static ActionListener copySidAction(Main main) {
+            return e -> SystemUtils.toClipboard(main.statsManager.sid);
         }
 
     }
