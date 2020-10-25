@@ -17,9 +17,10 @@ import java.awt.event.MouseEvent;
 public class TrayButton extends TitleBarButton<JFrame> {
 
     private final TrayIcon icon;
+    private final JPopupMenu popupMenu;
+    private final JDialog dialog;
+
     private boolean shownMsg;
-    private JPopupMenu popupMenu;
-    private JDialog dialog;
     private Main main;
 
     TrayButton(Main main, JFrame frame) {
