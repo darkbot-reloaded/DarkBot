@@ -65,16 +65,10 @@ public class TrayButton extends TitleBarButton<JFrame> {
         JPopupMenu popup = new JPopupMenu("DarkBot");
 
         JMenuItem title = new JMenuItem("DarkBot", UIUtils.getIcon("icon"));
-        JMenuItem home = new JMenuItem("Home");
-        JMenuItem discord = new JMenuItem("Discord");
-        JMenuItem copySid = new JMenuItem("Copy SID");
         JMenuItem quit = new JMenuItem("Quit DarkBot");
 
         title.setEnabled(false);
         title.setDisabledIcon(UIUtils.getIcon("icon"));
-        home.addActionListener(ExtraButton.DefaultExtraMenuProvider.homeAction(main));
-        discord.addActionListener(ExtraButton.DefaultExtraMenuProvider.discordAction());
-        copySid.addActionListener(ExtraButton.DefaultExtraMenuProvider.copySidAction(main));
         quit.addActionListener(l -> {
             System.out.println("Exit button pressed, exiting");
             System.exit(0);
@@ -82,9 +76,7 @@ public class TrayButton extends TitleBarButton<JFrame> {
 
         popup.add(title);
         popup.add(new JPopupMenu.Separator());
-        popup.add(home);
-        popup.add(discord);
-        popup.add(copySid);
+        new ExtraButton.DefaultExtraMenuProvider().getExtraMenuItems(main).forEach(popup::add);
         popup.add(new JPopupMenu.Separator());
         popup.add(quit);
 
