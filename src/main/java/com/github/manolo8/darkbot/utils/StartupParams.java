@@ -41,11 +41,10 @@ public class StartupParams {
     private static final String NO_OP_COMMAND = COMMAND_PREFIX + "no-op";
     private boolean forceNoOp = false;
 
-    private String[] args;
+    private final String[] args;
 
     public StartupParams(String[] args) throws IOException {
         this.args = args;
-        System.out.println(this);
 
         // parsing program args
         for (int i = 0; i < args.length; i++) {
