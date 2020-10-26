@@ -13,8 +13,6 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Collections;
-import java.util.List;
 
 public class TrayButton extends TitleBarButton<JFrame> {
 
@@ -45,14 +43,13 @@ public class TrayButton extends TitleBarButton<JFrame> {
         icon.addActionListener(l -> {
             SystemTray.getSystemTray().remove(icon);
             frame.setVisible(true);
-            super.setVisible(true);
         });
 
         icon.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
-                    updatePopupMenu();
+                    rebuild(popupMenu);
                     popupMenu.setLocation(e.getX(), e.getY() - popupMenu.getPreferredSize().height);
                     popupMenu.setInvoker(popupMenu);
                     dialog.setLocation(e.getX(), e.getY());
@@ -67,6 +64,12 @@ public class TrayButton extends TitleBarButton<JFrame> {
 
     private JPopupMenu createPopup() {
         JPopupMenu popup = new JPopupMenu("DarkBot");
+        rebuild(popup);
+        return popup;
+    }
+
+    private void rebuild(JPopupMenu popup) {
+        popup.removeAll();
 
         JMenuItem title = new JMenuItem("DarkBot", UIUtils.getIcon("icon"));
         JMenuItem quit = new JMenuItem(I18n.get("gui.tray_menu.quit"));
@@ -84,20 +87,6 @@ public class TrayButton extends TitleBarButton<JFrame> {
                 .getExtraMenuItems(main).forEach(popup::add);
         popup.add(new JPopupMenu.Separator());
         popup.add(quit);
-
-        return popup;
-    }
-
-    private void updatePopupMenu() {
-        List<JComponent> defaultExtraMenu = (List<JComponent>) new ExtraButton.DefaultExtraMenuProvider()
-                .getExtraMenuItems(main);
-
-        while (popupMenu.getComponentCount() > 4)
-            popupMenu.remove(2);
-
-        Collections.reverse(defaultExtraMenu);
-        for (JComponent component : defaultExtraMenu)
-            popupMenu.add(component, 2);
     }
 
     private JDialog createDialog() {
@@ -109,7 +98,7 @@ public class TrayButton extends TitleBarButton<JFrame> {
         dialog.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                setVisible(false);
+                dialog.setVisible(false);
                 popupMenu.setVisible(false);
             }
         });
