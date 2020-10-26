@@ -13,11 +13,15 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Collections;
+import java.util.List;
 
 public class TrayButton extends TitleBarButton<JFrame> {
 
     private final TrayIcon icon;
+    // Default PopupMenu for TrayIcon has no look & feel, forcing us to use a JPopupMenu
     private final JPopupMenu popupMenu;
+    // We use a JDialog to make JPopupMenu disappear when it loses focus, see https://stackoverflow.com/a/20079304
     private final JDialog dialog;
 
     private boolean shownMsg;
@@ -48,6 +52,7 @@ public class TrayButton extends TitleBarButton<JFrame> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
+                    updatePopupMenu();
                     popupMenu.setLocation(e.getX(), e.getY() - popupMenu.getPreferredSize().height);
                     popupMenu.setInvoker(popupMenu);
                     dialog.setLocation(e.getX(), e.getY());
@@ -60,34 +65,41 @@ public class TrayButton extends TitleBarButton<JFrame> {
         return icon;
     }
 
-    // Using JPopupMenu because Look And Feel doesn't apply to PopupMenu
     private JPopupMenu createPopup() {
         JPopupMenu popup = new JPopupMenu("DarkBot");
 
         JMenuItem title = new JMenuItem("DarkBot", UIUtils.getIcon("icon"));
-        JMenuItem quit = new JMenuItem("Quit DarkBot");
+        JMenuItem quit = new JMenuItem(I18n.get("gui.tray_menu.quit"));
 
         title.setEnabled(false);
         title.setDisabledIcon(UIUtils.getIcon("icon"));
         quit.addActionListener(l -> {
-            System.out.println("Exit button pressed, exiting");
+            System.out.println("Tray icon exit button pressed, exiting");
             System.exit(0);
         });
 
         popup.add(title);
         popup.add(new JPopupMenu.Separator());
-        new ExtraButton.DefaultExtraMenuProvider().getExtraMenuItems(main).forEach(popup::add);
+        new ExtraButton.DefaultExtraMenuProvider()
+                .getExtraMenuItems(main).forEach(popup::add);
         popup.add(new JPopupMenu.Separator());
         popup.add(quit);
 
         return popup;
     }
 
-    /**
-     * Creates an invisible JDialog, used as a "hack" to make JPopupMenu invisible when it loses focus
-     * @return an invisible JDialog
-     * @see <a href="https://stackoverflow.com/a/20079304">https://stackoverflow.com/questions/19868209/cannot-hide-systemtray-jpopupmenu-when-it-loses-focus</a>
-     */
+    private void updatePopupMenu() {
+        List<JComponent> defaultExtraMenu = (List<JComponent>) new ExtraButton.DefaultExtraMenuProvider()
+                .getExtraMenuItems(main);
+
+        while (popupMenu.getComponentCount() > 4)
+            popupMenu.remove(2);
+
+        Collections.reverse(defaultExtraMenu);
+        for (JComponent component : defaultExtraMenu)
+            popupMenu.add(component, 2);
+    }
+
     private JDialog createDialog() {
         JDialog dialog = new JDialog();
         dialog.getRootPane().setOpaque(false);
