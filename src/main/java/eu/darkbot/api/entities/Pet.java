@@ -72,8 +72,8 @@ public interface Pet extends Ship {
         }
 
         @Override
-        public String getExceptionMessage() {
-            return "Gear: " + this + " is not equipped!";
+        public String getName() {
+            return name;
         }
     }
 }

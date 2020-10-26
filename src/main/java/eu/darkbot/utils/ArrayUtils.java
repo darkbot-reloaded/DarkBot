@@ -12,7 +12,10 @@ public class ArrayUtils {
         return Collections.unmodifiableList(Arrays.asList(a));
     }
 
-    public static boolean isEmpty(Collection<?> coll) {
-        return coll == null || coll.isEmpty();
+    /**
+     * Returns true whenever collection is not null and not empty.
+     */
+    public static boolean isNotBlank(Collection<?> coll) {
+        return coll != null && !coll.isEmpty();
     }
 }

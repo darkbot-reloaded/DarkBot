@@ -40,7 +40,8 @@ public interface Entity extends Locatable {
 
     /**
      * Sets metadata key with given value and stores it only for current entity.
-     * Can be used for custom timers, checks, predicates etc.
+     * Can be used for custom timers, checks, predicates etc. Make sure not to save
+     * any custom class that wouldn't be able to be unloaded. Use java types.
      *
      * @param key your unique key
      * @param value to be put with your key
