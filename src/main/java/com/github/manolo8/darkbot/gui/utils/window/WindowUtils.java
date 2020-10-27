@@ -1,8 +1,5 @@
 package com.github.manolo8.darkbot.gui.utils.window;
 
-import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.ConfigEntity;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;

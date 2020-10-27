@@ -12,9 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.util.Arrays;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 public class MainGui extends JFrame {
 
@@ -41,12 +39,9 @@ public class MainGui extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Config.BotSettings botSettings = main.config.BOT_SETTINGS;
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (botSettings.SAVE_GUI_POS)
-                main.configManager.saveConfig();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> main.configManager.saveConfig()));
 
-        Config.BotSettings.Window window = botSettings.MAIN_GUI_WINDOW;
+        Config.BotSettings.WindowPosition window = botSettings.MAIN_GUI_WINDOW;
         if (!botSettings.SAVE_GUI_POS || isOutsideScreen(window)) {
             setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
             setLocationRelativeTo(null);
@@ -123,17 +118,23 @@ public class MainGui extends JFrame {
         mapDrawer.repaint();
     }
 
-    private static boolean isOutsideScreen(Config.BotSettings.Window window) {
+    // https://stackoverflow.com/a/39776624
+    private static boolean isOutsideScreen(Config.BotSettings.WindowPosition window) {
+        Rectangle rec = new Rectangle(window.x, window.y, window.width, window.height);
+        int windowArea = rec.width * rec.height;
+
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        for (GraphicsDevice device : ge.getScreenDevices()) {
-            Rectangle deviceBounds = device.getDefaultConfiguration().getBounds();
-            if (window.height > deviceBounds.height || window.width > deviceBounds.width)
-                return true;
-            if (!device.getDefaultConfiguration().getBounds()
-                    .intersects(new Rectangle(window.x, window.y, window.width, window.height)))
-                return true;
+        Rectangle bounds;
+        int boundsArea = 0;
+
+        for (GraphicsDevice gd : ge.getScreenDevices()) {
+            bounds = gd.getDefaultConfiguration().getBounds();
+            if (bounds.intersects(rec)) {
+                bounds = bounds.intersection(rec);
+                boundsArea = boundsArea + (bounds.width * bounds.height);
+            }
         }
-        return false;
+        return boundsArea != windowArea;
     }
 
 }

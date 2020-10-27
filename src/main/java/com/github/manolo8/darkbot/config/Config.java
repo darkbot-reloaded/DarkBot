@@ -187,8 +187,8 @@ public class Config {
         public @Option boolean ENFORCE_HW_ACCEL = true;
         public @Option boolean DISABLE_MASTER_PASSWORD = false;
 
-        public Window MAIN_GUI_WINDOW = new Window();
-        public static class Window {
+        public WindowPosition MAIN_GUI_WINDOW = new WindowPosition();
+        public static class WindowPosition {
             // x and y refer to top left coordinates of window
             public int x = Integer.MIN_VALUE, y = Integer.MIN_VALUE;
             public int width = MainGui.DEFAULT_WIDTH, height = MainGui.DEFAULT_HEIGHT;
