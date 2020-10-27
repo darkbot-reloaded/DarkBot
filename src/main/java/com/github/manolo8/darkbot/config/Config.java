@@ -183,15 +183,16 @@ public class Config {
         public @Option boolean DEV_STUFF = false;
         public @Option @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
         public @Option boolean FULLY_HIDE_API = true;
-        public @Option boolean SAVE_MAIN_GUI_POS = true;
-        public @Option boolean SAVE_MAIN_GUI_SCREEN_SIZE = true;
+        public @Option boolean SAVE_MAIN_GUI_POS_AND_SIZE = false;
         public @Option boolean ENFORCE_HW_ACCEL = true;
         public @Option boolean DISABLE_MASTER_PASSWORD = false;
 
-        public int mainGuiX = Integer.MIN_VALUE;
-        public int mainGuiY = Integer.MIN_VALUE;
-        public int mainGuiWidth = MainGui.DEFAULT_WIDTH;
-        public int mainGuiHeight = MainGui.DEFAULT_HEIGHT;
+        public Window MAIN_GUI_WINDOW = new Window();
+        public static class Window {
+            // x and y refer to top left coordinates of window
+            public int x = Integer.MIN_VALUE, y = Integer.MIN_VALUE;
+            public int width = MainGui.DEFAULT_WIDTH, height = MainGui.DEFAULT_HEIGHT;
+        }
 
         public @Option Display DISPLAY = new Display();
         public static class Display {

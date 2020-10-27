@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.components.ExitConfirmation;
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -11,8 +10,6 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -41,23 +38,22 @@ public class MainGui extends JFrame {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        Config.BotSettings botSettings = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS;
-        Rectangle bounds = new Rectangle(botSettings.mainGuiX, botSettings.mainGuiY,
-                botSettings.mainGuiWidth, botSettings.mainGuiHeight);
+        Config.BotSettings botSettings = main.config.BOT_SETTINGS;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (botSettings.SAVE_MAIN_GUI_POS_AND_SIZE)
+                main.configManager.saveConfig();
+        }));
 
-        // setting size
-        if (!botSettings.SAVE_MAIN_GUI_SCREEN_SIZE || isBiggerThanScreenSize(bounds))
+        Config.BotSettings.Window thisWindow = botSettings.MAIN_GUI_WINDOW;
+        if (!botSettings.SAVE_MAIN_GUI_POS_AND_SIZE ||
+                (thisWindow.x == Integer.MIN_VALUE && thisWindow.y == Integer.MIN_VALUE) ||
+                isOutsideScreen(thisWindow)) {
             setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-        else
-            setSize(botSettings.mainGuiWidth, botSettings.mainGuiHeight);
-
-        // setting location
-        if (!botSettings.SAVE_MAIN_GUI_POS ||
-                (botSettings.mainGuiX == Integer.MIN_VALUE && botSettings.mainGuiY == Integer.MIN_VALUE) ||
-                !canBeSeen(bounds))
             setLocationRelativeTo(null);
-        else
-            setLocation(botSettings.mainGuiX, botSettings.mainGuiY);
+        } else {
+            setSize(thisWindow.width, thisWindow.height);
+            setLocation(thisWindow.x, thisWindow.y);
+        }
 
         setIconImage(ICON);
 
@@ -70,26 +66,6 @@ public class MainGui extends JFrame {
         toFront();
         requestFocus();
         setAlwaysOnTop(main.config.BOT_SETTINGS.DISPLAY.ALWAYS_ON_TOP);
-
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentMoved(ComponentEvent e) {
-                if (botSettings.SAVE_MAIN_GUI_POS) {
-                    botSettings.mainGuiX = getX();
-                    botSettings.mainGuiY = getY();
-                    ConfigEntity.changed();
-                }
-            }
-
-            @Override
-            public void componentResized(ComponentEvent e) {
-                if (botSettings.SAVE_MAIN_GUI_SCREEN_SIZE) {
-                    botSettings.mainGuiWidth = getWidth();
-                    botSettings.mainGuiHeight = getHeight();
-                    ConfigEntity.changed();
-                }
-            }
-        });
     }
 
     private void setComponentPosition() {
@@ -133,18 +109,16 @@ public class MainGui extends JFrame {
         mapDrawer.repaint();
     }
 
-    private boolean isBiggerThanScreenSize(Rectangle bounds) {
-        return forEachScreenDeviceIsFilterPresent(device -> {
+    private static boolean isOutsideScreen(Config.BotSettings.Window window) {
+        return anyScreenDeviceMatches(device -> {
             Rectangle deviceBounds = device.getDefaultConfiguration().getBounds();
-            return bounds.height > deviceBounds.height || bounds.width > deviceBounds.width;
+            return (window.height > deviceBounds.height || window.width > deviceBounds.width) ||
+                    !device.getDefaultConfiguration().getBounds()
+                            .intersects(new Rectangle(window.x, window.y, window.width, window.height));
         });
     }
 
-    private boolean canBeSeen(Rectangle bounds) {
-        return forEachScreenDeviceIsFilterPresent(device -> device.getDefaultConfiguration().getBounds().intersects(bounds));
-    }
-
-    private static boolean forEachScreenDeviceIsFilterPresent(Predicate<GraphicsDevice> filter) {
+    private static boolean anyScreenDeviceMatches(Predicate<GraphicsDevice> filter) {
         if (filter == null) return false;
 
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
