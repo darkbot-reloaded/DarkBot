@@ -10,6 +10,8 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -40,19 +42,17 @@ public class MainGui extends JFrame {
 
         Config.BotSettings botSettings = main.config.BOT_SETTINGS;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (botSettings.SAVE_MAIN_GUI_POS_AND_SIZE)
+            if (botSettings.SAVE_GUI_POS)
                 main.configManager.saveConfig();
         }));
 
-        Config.BotSettings.Window thisWindow = botSettings.MAIN_GUI_WINDOW;
-        if (!botSettings.SAVE_MAIN_GUI_POS_AND_SIZE ||
-                (thisWindow.x == Integer.MIN_VALUE && thisWindow.y == Integer.MIN_VALUE) ||
-                isOutsideScreen(thisWindow)) {
+        Config.BotSettings.Window window = botSettings.MAIN_GUI_WINDOW;
+        if (!botSettings.SAVE_GUI_POS || isOutsideScreen(window)) {
             setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
             setLocationRelativeTo(null);
         } else {
-            setSize(thisWindow.width, thisWindow.height);
-            setLocation(thisWindow.x, thisWindow.y);
+            setSize(window.width, window.height);
+            setLocation(window.x, window.y);
         }
 
         setIconImage(ICON);
@@ -66,6 +66,20 @@ public class MainGui extends JFrame {
         toFront();
         requestFocus();
         setAlwaysOnTop(main.config.BOT_SETTINGS.DISPLAY.ALWAYS_ON_TOP);
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                window.width = getWidth();
+                window.height = getHeight();
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                window.x = getX();
+                window.y = getY();
+            }
+        });
     }
 
     private void setComponentPosition() {
@@ -110,19 +124,16 @@ public class MainGui extends JFrame {
     }
 
     private static boolean isOutsideScreen(Config.BotSettings.Window window) {
-        return anyScreenDeviceMatches(device -> {
-            Rectangle deviceBounds = device.getDefaultConfiguration().getBounds();
-            return (window.height > deviceBounds.height || window.width > deviceBounds.width) ||
-                    !device.getDefaultConfiguration().getBounds()
-                            .intersects(new Rectangle(window.x, window.y, window.width, window.height));
-        });
-    }
-
-    private static boolean anyScreenDeviceMatches(Predicate<GraphicsDevice> filter) {
-        if (filter == null) return false;
-
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        return Arrays.stream(ge.getScreenDevices()).anyMatch(filter);
+        for (GraphicsDevice device : ge.getScreenDevices()) {
+            Rectangle deviceBounds = device.getDefaultConfiguration().getBounds();
+            if (window.height > deviceBounds.height || window.width > deviceBounds.width)
+                return true;
+            if (!device.getDefaultConfiguration().getBounds()
+                    .intersects(new Rectangle(window.x, window.y, window.width, window.height)))
+                return true;
+        }
+        return false;
     }
 
 }

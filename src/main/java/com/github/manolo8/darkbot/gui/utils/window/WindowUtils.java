@@ -19,21 +19,16 @@ public class WindowUtils {
         mainFrame.add(mainPanel);
 
         mainFrame.addComponentListener(new ComponentAdapter() {
-            Config.BotSettings.Window frame = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.MAIN_GUI_WINDOW;
             @Override
             public void componentResized(ComponentEvent e) {
                 Dimension sizeIn = mainFrame.getSize();
                 resizeFrame.setSize(sizeIn);
                 mainPanel.setSize(sizeIn);
-                frame.width = mainFrame.getWidth();
-                frame.height = mainFrame.getHeight();
             }
 
             @Override
             public void componentMoved(ComponentEvent e) {
                 setMaximizedInsets(mainFrame);
-                frame.x = mainFrame.getX();
-                frame.y = mainFrame.getY();
             }
         });
         Dimension sizeIn = mainFrame.getSize();

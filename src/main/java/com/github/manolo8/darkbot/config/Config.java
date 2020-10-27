@@ -183,7 +183,7 @@ public class Config {
         public @Option boolean DEV_STUFF = false;
         public @Option @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
         public @Option boolean FULLY_HIDE_API = true;
-        public @Option boolean SAVE_MAIN_GUI_POS_AND_SIZE = false;
+        public @Option boolean SAVE_GUI_POS = false;
         public @Option boolean ENFORCE_HW_ACCEL = true;
         public @Option boolean DISABLE_MASTER_PASSWORD = false;
 
