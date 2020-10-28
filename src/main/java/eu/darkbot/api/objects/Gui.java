@@ -26,8 +26,4 @@ public interface Gui extends Rectangle {
      * Moves mouse at gui position + plusX/Y
      */
     void hover(int plusX, int plusY);
-
-    //should be available in API?
-    long getElementsList(int elementsListId);
-    //and so on
 }

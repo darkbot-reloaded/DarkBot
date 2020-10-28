@@ -7,13 +7,33 @@ import org.jetbrains.annotations.Nullable;
 
 public interface Ship extends Entity, Health {
 
+    /**
+     * @return true if ship is invisible/cloaked.
+     */
     boolean isInvisible();
+
+    /**
+     * Returns true if ship is considered as enemy for {@link eu.darkbot.api.managers.HeroManager}.
+     * Is from other faction || is in enemy clan
+     */
     boolean isEnemy();
+
+    /**
+     * Returns true if ship aims other ship by checking theirs angle.
+     */
     boolean isAiming(Ship other);
+
+    // TODO: 28.10.2020 need proper doc
     boolean isAttacking(Ship other);
 
+    /**
+     * @return ship username.
+     */
     String getUsername();
 
+    /**
+     * @return true if ship has enabled {@link Pet}.
+     */
     boolean hasPet();
     Pet getPet();
 
@@ -23,8 +43,7 @@ public interface Ship extends Entity, Health {
 
     /**
      * Returns ship faction as int.
-     * 1 = MMO, 2 = EIC, 3 = VRU,
-     * 0 = probably npc
+     * 0 = NONE, 1 = MMO, 2 = EIC, 3 = VRU, 4 = KRONOS?
      */
     int getFactionId();
 
@@ -52,7 +71,7 @@ public interface Ship extends Entity, Health {
     }
 
     default long timeTo(Locatable destination) {
-        return timeTo(getLocationInfo().distance(destination));
+        return timeTo(getLocationInfo().distanceTo(destination));
     }
 
     /**
@@ -70,4 +89,40 @@ public interface Ship extends Entity, Health {
      */
     @Nullable
     LocationInfo getDestination();
+
+    /**
+     * Returns true if ship has enabled given formation.
+     */
+    boolean isInFormation(int formationId);
+
+    default boolean isInFormation(Ship.Formation formation) {
+        return isInFormation(formation.ordinal());
+    }
+
+    enum Formation {
+        // 2D formations
+        STANDARD,
+        TURTLE,
+        ARROW,
+        LANCE,
+        START,
+        PINCER,
+        DOUBLE_ARROW,
+        DIAMOND,
+        DOUBLE_CHEVRON,
+        MOTH,
+        CRAB,
+        HEART,
+        BARRAGE,
+        BAT,
+        // 3D formation
+        RING,
+        DRILL,
+        VETERAN,
+        DOME,
+        WHEEL,
+        X,
+        WAVY,
+        MOSQUITO
+    }
 }

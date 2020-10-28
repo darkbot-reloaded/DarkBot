@@ -3,7 +3,7 @@ package eu.darkbot.api.managers;
 public interface StatsManager {
 
     int getLevel();
-    long getRuntime();
+    long getRunningTime();
 
     int getCargo();
     int getMaxCargo();

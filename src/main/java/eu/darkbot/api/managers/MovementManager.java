@@ -2,7 +2,7 @@ package eu.darkbot.api.managers;
 
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.objects.Locatable;
-import eu.darkbot.utils.Location;
+import eu.darkbot.api.objects.Location;
 
 public interface MovementManager {
     /**

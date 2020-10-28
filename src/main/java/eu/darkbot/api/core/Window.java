@@ -1,6 +1,6 @@
 package eu.darkbot.api.core;
 
-import eu.darkbot.utils.Point;
+import eu.darkbot.api.objects.Point;
 
 /**
  * Utility to manage game window
@@ -59,36 +59,36 @@ public interface Window {
     /**
      * Moves mouse to x & y coordinates of game window
      */
-    void mouseMove(int x, int y);
+    void mouseMove(double x, double y);  //cast to int here or in implementation?
 
     default void mouseMove(Point point) {
-        mouseMove(point.x, point.y);
+        mouseMove(point.getX(), point.getY());
     }
 
     /**
      * Simulates hold of left mouse button
      */
-    void mouseDown(int x, int y);
+    void mouseDown(double x, double y);
 
     default void mouseDown(Point point) {
-        mouseDown(point.x, point.y);
+        mouseDown(point.getX(), point.getY());
     }
 
     /**
      * Simulates release of left mouse button
      */
-    void mouseUp(int x, int y);
+    void mouseUp(double x, double y);
 
     default void mouseUp(Point point) {
-        mouseUp(point.x, point.y);
+        mouseUp(point.getX(), point.getY());
     }
 
     /**
      * Simulates mouse click at x & y coordinates
      */
-    void mouseClick(int x, int y);
+    void mouseClick(double x, double y);
 
     default void mouseClick(Point point) {
-        mouseClick(point.x, point.y);
+        mouseClick(point.getX(), point.getY());
     }
 }

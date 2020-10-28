@@ -14,9 +14,19 @@ public interface Health {
     /**
      * @return percentage as double(0 to 1)
      */
-    double hpPercent();
-    double hullPercent();
-    double shieldPercent();
+    default double hpPercent() {
+        return getMaxHp() == 0 ? 1 :
+                ((double) getHp() / (double) getMaxHp());
+    }
+
+    default double hullPercent() {
+        return getMaxHull() == 0 ? 1 :
+                ((double) getHull() / (double) getMaxHull());
+    }
+    default double shieldPercent() {
+        return getMaxShield() == 0 ? 1 :
+                ((double) getShield() / (double) getMaxShield());
+    }
 
     /**
      * @param time in milliseconds

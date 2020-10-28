@@ -38,26 +38,21 @@ public interface PetManager extends Gui, Pet {
 
     @Override
     default int getHull() {
-        throw new UnsupportedOperationException("Pet dont have nano hull");
+        return 0;
     }
 
     @Override
     default int getMaxHull() {
-        throw new UnsupportedOperationException("Pet dont have nano hull");
-    }
-
-    @Override
-    default double hullPercent() {
-        throw new UnsupportedOperationException("Pet dont have nano hull");
+        return 0;
     }
 
     @Override
     default boolean hullDecreasedIn(int time) {
-        throw new UnsupportedOperationException("Pet dont have nano hull");
+       return false;
     }
 
     @Override
     default boolean hullIncreasedIn(int time) {
-        throw new UnsupportedOperationException("Pet dont have nano hull");
+        return false;
     }
 }
