@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.core.entities.BattleStation;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
+import com.github.manolo8.darkbot.core.entities.Mine;
 import com.github.manolo8.darkbot.core.entities.NoCloack;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Portal;
@@ -86,6 +87,7 @@ public class MapDrawer extends JPanel {
     private List<Npc> npcs;
     private FakeNpc fakeNpc;
     private List<Box> boxes;
+    private List<Mine> mines;
     private List<Ship> ships;
     private List<BattleStation> battleStations;
     private List<BasePoint> basePoints;
@@ -149,6 +151,7 @@ public class MapDrawer extends JPanel {
         this.npcs = main.mapManager.entities.npcs;
         this.fakeNpc = main.mapManager.entities.fakeNpc;
         this.boxes = main.mapManager.entities.boxes;
+        this.mines = main.mapManager.entities.mines;
         this.ships = main.mapManager.entities.ships;
         this.battleStations = main.mapManager.entities.battleStations;
         this.basePoints = main.mapManager.entities.basePoints;
@@ -381,6 +384,9 @@ public class MapDrawer extends JPanel {
             if (hasFlag(DisplayFlag.RESOURCE_NAMES))
                 drawString(g2, box.type, translateX(loc.x), translateY(loc.y) - 5, Align.MID);
         }
+
+        g2.setColor(cs.MINES);
+        for (Mine mine : mines) drawEntity(g2, mine.locationInfo.now, true);
 
         if (config.BOT_SETTINGS.DEV_STUFF) {
             g2.setColor(cs.GOING);

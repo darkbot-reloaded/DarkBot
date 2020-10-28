@@ -16,6 +16,7 @@ public class ColorScheme {
     public @Option Color HERO = new Color(0x22CC22);
     public @Option @Col(alpha = false) Color TRAIL_BASE = new Color(0xE0E0E0);
     public @Option Color BOXES = new Color(0xBBB830);
+    public @Option Color MINES = new Color(0xFF8000);
     public @Option Color ALLIES = new Color(0x29B6F6);
     public @Option Color ENEMIES = new Color(0xd50000);
     public @Option Color NPCS = new Color(0xAA4040);
