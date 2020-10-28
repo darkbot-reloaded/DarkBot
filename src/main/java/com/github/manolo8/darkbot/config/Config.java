@@ -14,6 +14,7 @@ import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JCheckboxListField;
@@ -182,8 +183,16 @@ public class Config {
         public @Option boolean DEV_STUFF = false;
         public @Option @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
         public @Option boolean FULLY_HIDE_API = true;
+        public @Option boolean SAVE_GUI_POS = false;
         public @Option boolean ENFORCE_HW_ACCEL = true;
         public @Option boolean DISABLE_MASTER_PASSWORD = false;
+
+        public WindowPosition MAIN_GUI_WINDOW = new WindowPosition();
+        public static class WindowPosition {
+            // x and y refer to top left coordinates of window
+            public int x = Integer.MIN_VALUE, y = Integer.MIN_VALUE;
+            public int width = MainGui.DEFAULT_WIDTH, height = MainGui.DEFAULT_HEIGHT;
+        }
 
         public @Option Display DISPLAY = new Display();
         public static class Display {

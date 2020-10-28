@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.gui.components.ExitConfirmation;
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -9,6 +10,8 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.function.Consumer;
 
 public class MainGui extends JFrame {
@@ -21,6 +24,7 @@ public class MainGui extends JFrame {
     private MapDrawer mapDrawer;
 
     public static final Image ICON = UIUtils.getImage("icon");
+    public static final int DEFAULT_WIDTH = 640, DEFAULT_HEIGHT = 480;
 
     public MainGui(Main main) throws HeadlessException {
         super("DarkBot");
@@ -33,8 +37,19 @@ public class MainGui extends JFrame {
         ToolTipManager.sharedInstance().setInitialDelay(350);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(640, 480);
-        setLocationRelativeTo(null);
+
+        Config.BotSettings botSettings = main.config.BOT_SETTINGS;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> main.configManager.saveConfig()));
+
+        Config.BotSettings.WindowPosition window = botSettings.MAIN_GUI_WINDOW;
+        if (!botSettings.SAVE_GUI_POS || isOutsideScreen(window)) {
+            setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+            setLocationRelativeTo(null);
+        } else {
+            setSize(window.width, window.height);
+            setLocation(window.x, window.y);
+        }
+
         setIconImage(ICON);
 
         setComponentPosition();
@@ -46,6 +61,20 @@ public class MainGui extends JFrame {
         toFront();
         requestFocus();
         setAlwaysOnTop(main.config.BOT_SETTINGS.DISPLAY.ALWAYS_ON_TOP);
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                window.width = getWidth();
+                window.height = getHeight();
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                window.x = getX();
+                window.y = getY();
+            }
+        });
     }
 
     private void setComponentPosition() {
@@ -87,6 +116,25 @@ public class MainGui extends JFrame {
 
     public void tick() {
         mapDrawer.repaint();
+    }
+
+    // https://stackoverflow.com/a/39776624
+    private static boolean isOutsideScreen(Config.BotSettings.WindowPosition window) {
+        Rectangle rec = new Rectangle(window.x, window.y, window.width, window.height);
+        int windowArea = rec.width * rec.height;
+
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        Rectangle bounds;
+        int boundsArea = 0;
+
+        for (GraphicsDevice gd : ge.getScreenDevices()) {
+            bounds = gd.getDefaultConfiguration().getBounds();
+            if (bounds.intersects(rec)) {
+                bounds = bounds.intersection(rec);
+                boundsArea = boundsArea + (bounds.width * bounds.height);
+            }
+        }
+        return boundsArea != windowArea;
     }
 
 }
