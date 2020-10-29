@@ -1,12 +1,14 @@
 package eu.darkbot.api.core;
 
+import eu.darkbot.api.API;
+
 /**
  * This interface provides API to read/write native memory
  * <p>
  * Those calls should be generally safe,
  * every access violation error is handled by native code
  */
-public interface Memory {
+public interface Memory extends API {
 
     /**
      * Reads signed integer value from memory.

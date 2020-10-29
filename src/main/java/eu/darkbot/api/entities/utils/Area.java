@@ -3,45 +3,46 @@ package eu.darkbot.api.entities.utils;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.Rectangle;
 
-public interface Area extends Rectangle {
+public interface Area {
+
+    /**
+     Returns an {@link Rectangle} that completely encloses the
+     * {@link Area}.  Note that there is no guarantee that the
+     * returned {@link Rectangle} is the smallest bounding box that
+     * encloses the {@link Area}, only that the {@link Area}
+     * lies entirely within the indicated {@link Rectangle}.
+     */
+    Rectangle getBounds();
 
     Locatable[] getPoints();
 
-    default boolean isEmpty() {
-        return getWidth() <= 0 && getHeight() <= 0;
-    }
+    /**
+     * @return true if Area is empty.
+     */
+    boolean isEmpty();
 
-    default boolean containsPoint(double x, double y) {
-        return (x >= getX() &&
-                y >= getY() &&
-                x < getX2() &&
-                y < getY2());
-    }
+    /**
+     * @return true if Area contains point of x&y.
+     */
+    boolean containsPoint(double x, double y);
 
     default boolean containsPoint(Locatable point) {
         return containsPoint(point.getX(), point.getY());
     }
 
-    default boolean intersects(double x, double y, double w, double h) {
-        if (isEmpty() || w <= 0 || h <= 0) return false;
-
-        return (x >= getX() &&
-                y >= getY() &&
-                (x + w) <= getX2() &&
-                (y + h) <= getY2());
-    }
+    /**
+     * Tests if given coordinates are in this {@link Area}.
+     */
+    boolean intersects(double x, double y, double w, double h) ;
 
     default boolean intersects(Rectangle rect) {
         return intersects(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
-    default boolean intersectsLine(double x, double y, double x2, double y2) {
-        return  (containsPoint(x, y) || containsPoint(x2, y2)) ||
-                (x < x2 && linesIntersect(x, y, x2, y2, getX(), getY(), getX(), getY2())) ||
-                (x > x2 && linesIntersect(x, y, x2, y2, getX2(), getY(), getX2(), getY2())) ||
-                (y < y2 && linesIntersect(x, y, x2, y2, getX(), getY(), getX2(), getY())) ||
-                (y > y2 && linesIntersect(x, y, x2, y2, getX(), getY2(), getX2(), getY2()));
-    }
+    /**
+     * Tests if given line coordinates intersects this {@link Area}.
+     */
+    boolean intersectsLine(double x, double y, double x2, double y2);
 
     default boolean intersectsLine(Locatable startPoint, Locatable endPoint) {
         return intersectsLine(startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY());

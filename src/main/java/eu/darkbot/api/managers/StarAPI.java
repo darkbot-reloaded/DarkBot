@@ -1,12 +1,13 @@
 package eu.darkbot.api.managers;
 
+import eu.darkbot.api.API;
 import eu.darkbot.api.entities.utils.Map;
 import eu.darkbot.utils.ArrayUtils;
 
 import java.util.List;
 import java.util.Set;
 
-public interface StarManager {
+public interface StarAPI extends API {
     List<String> HOME_MAPS = ArrayUtils.asImmutableList("1-1", "2-1", "3-1");
     List<String> OUTPOST_HOME_MAPS = ArrayUtils.asImmutableList("1-8", "2-8", "3-8");
 

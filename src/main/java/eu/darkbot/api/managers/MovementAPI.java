@@ -1,10 +1,11 @@
 package eu.darkbot.api.managers;
 
+import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.Location;
 
-public interface MovementManager {
+public interface MovementAPI extends API {
     /**
      * Tries to jump through portal.
      *

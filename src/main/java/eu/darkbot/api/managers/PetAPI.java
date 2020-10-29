@@ -1,10 +1,11 @@
 package eu.darkbot.api.managers;
 
+import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Pet;
 import eu.darkbot.api.objects.Gui;
 import eu.darkbot.utils.ItemNotEquippedException;
 
-public interface PetManager extends Gui, Pet {
+public interface PetAPI extends Gui, Pet, API {
 
     boolean isGearAvailable(int gearId);
 

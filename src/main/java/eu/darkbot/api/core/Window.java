@@ -1,11 +1,12 @@
 package eu.darkbot.api.core;
 
+import eu.darkbot.api.API;
 import eu.darkbot.api.objects.Point;
 
 /**
  * Utility to manage game window
  */
-public interface Window {
+public interface Window extends API {
 
     /**
      * @return version of native api

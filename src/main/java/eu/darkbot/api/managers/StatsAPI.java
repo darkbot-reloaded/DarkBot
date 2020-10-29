@@ -1,6 +1,8 @@
 package eu.darkbot.api.managers;
 
-public interface StatsManager {
+import eu.darkbot.api.API;
+
+public interface StatsAPI extends API {
 
     int getLevel();
     long getRunningTime();

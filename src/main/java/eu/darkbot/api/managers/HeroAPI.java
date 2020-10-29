@@ -1,5 +1,6 @@
 package eu.darkbot.api.managers;
 
+import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Npc;
 import eu.darkbot.api.entities.Ship;
 import eu.darkbot.config.ShipConfig;
@@ -9,7 +10,7 @@ import eu.darkbot.config.ShipConfig;
  * Where to move, whats your target etc.
  * TODO more docs
  */
-public interface HeroManager extends Ship {
+public interface HeroAPI extends Ship, API {
 
     boolean hasTarget();
     Ship getTarget();

@@ -2,26 +2,17 @@ package eu.darkbot.api;
 
 import eu.darkbot.api.core.Memory;
 import eu.darkbot.api.core.Window;
-import eu.darkbot.api.managers.BackpageManager;
-import eu.darkbot.api.managers.HeroManager;
-import eu.darkbot.api.managers.PetManager;
+import eu.darkbot.api.managers.BackpageAPI;
 
 public interface PluginAPI {
+
+    <T extends API> T getAPI(Class<T> api);
+
     /**
-     * @return {@link BackpageManager}
+     * @return {@link BackpageAPI}
      * @throws WrongThreadException on access backpage with thread other than backpage one.
      */
-    BackpageManager getBackpageManager() throws WrongThreadException;
-
-    /**
-     * @return {@link HeroManager}
-     */
-    HeroManager getHeroManager();
-
-    /**
-     * @return {@link PetManager}
-     */
-    PetManager getPetManager();
+    BackpageAPI getBackpageManager() throws WrongThreadException;
 
     /**
      * @return {@link Memory}

@@ -1,10 +1,11 @@
 package eu.darkbot.api.managers;
 
+import eu.darkbot.api.API;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 
-public interface RepairManager {
+public interface RepairAPI extends API {
 
     int getDeathsAmount();
 

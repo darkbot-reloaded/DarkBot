@@ -1,12 +1,13 @@
 package eu.darkbot.api.managers;
 
+import eu.darkbot.api.API;
 import eu.darkbot.utils.Time;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.HttpURLConnection;
 import java.net.URI;
 
-public interface BackpageManager {
+public interface BackpageAPI extends API {
 
     String getSid();
 

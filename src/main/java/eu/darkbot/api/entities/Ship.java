@@ -1,5 +1,6 @@
 package eu.darkbot.api.entities;
 
+import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.objects.Health;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.LocationInfo;
@@ -13,8 +14,9 @@ public interface Ship extends Entity, Health {
     boolean isInvisible();
 
     /**
-     * Returns true if ship is considered as enemy for {@link eu.darkbot.api.managers.HeroManager}.
-     * Is from other faction || is in enemy clan
+     * Returns true if ship is considered as enemy for {@link HeroAPI}.
+     * Is not in ally clan. Group?
+     * Is from other faction or enemy clan.
      */
     boolean isEnemy();
 
@@ -102,27 +104,62 @@ public interface Ship extends Entity, Health {
     enum Formation {
         // 2D formations
         STANDARD,
-        TURTLE,
+        TURTLE(0.1),
         ARROW,
         LANCE,
-        START,
+        STAR,
         PINCER,
-        DOUBLE_ARROW,
-        DIAMOND,
-        DOUBLE_CHEVRON,
-        MOTH,
+        DOUBLE_ARROW(-0.2),
+        DIAMOND(-0.3, 0, 0.01),
+        CHEVRON(-0.2, 0),
+        MOTH(0.2, 0, -0.05),
         CRAB,
-        HEART,
+        HEART(0.2, 0.2),
         BARRAGE,
         BAT,
-        // 3D formation
-        RING,
-        DRILL,
-        VETERAN,
-        DOME,
-        WHEEL,
-        X,
+        // 3D formations
+        RING(0.85),
+        DRILL(-0.25),
+        VETERAN(-0.2, -0.2),
+        DOME(0, 0.3, 0.005),
+        WHEEL(0, 0, -0.05),
+        X(0.08, 0),
         WAVY,
-        MOSQUITO
+        MOSQUITO;
+
+        private double hp, sh, sps;
+
+        Formation() {
+        }
+
+        Formation(double sh) {
+            this.sh = sh;
+        }
+
+        Formation(double hp, double sh) {
+            this.hp = hp;
+            this.sh = sh;
+        }
+
+        Formation(double hp, double sh, double sps) {
+            this.hp = hp;
+            this.sh = sh;
+            this.sps = sps;
+        }
+
+        public double getShieldMultiplier() {
+            return sh;
+        }
+
+        public double getHealthMultiplier() {
+            return hp;
+        }
+
+        /**
+         * @return shield regen % amount per second.
+         */
+        public double getShieldRegen() {
+            return sps;
+        }
     }
 }

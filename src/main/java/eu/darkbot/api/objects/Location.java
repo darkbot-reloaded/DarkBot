@@ -28,9 +28,18 @@ public interface Location extends Locatable, Point {
         return setTo(other.getX(), other.getY());
     }
 
-    void incrementBy(double x, double y);
+    default Location plus(double plusX, double plusY) {
+        return setTo(getX() + plusX, getY() + plusY);
+    }
 
-    default void incrementBy(Locatable other) {
-        incrementBy(other.getX(), other.getY());
+    default Location plus(Locatable other) {
+        return plus(other.getX(), other.getY());
+    }
+
+    Location copy();
+    Location copy(double plusX, double plusY);
+
+    default Location copy(Location other) {
+        return copy(other.getX(), other.getY());
     }
 }
