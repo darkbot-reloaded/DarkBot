@@ -31,7 +31,7 @@ import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
-import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
+import com.github.manolo8.darkbot.core.utils.pathfinder.Rectangle;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.gui.trail.Line;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -56,8 +56,6 @@ import java.util.TreeMap;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.github.manolo8.darkbot.Main.API;
 
 public class MapDrawer extends JPanel {
 
@@ -233,7 +231,7 @@ public class MapDrawer extends JPanel {
     protected void drawZones(Graphics2D g2) {
         for (Barrier barrier : mapManager.entities.barriers) {
             if (!barrier.use()) continue;
-            Area area = barrier.getZone();
+            Rectangle area = barrier.getZone();
             g2.setColor(cs.BARRIER);
             g2.fillRect(
                     translateX(area.minX), translateY(area.minY),
@@ -246,7 +244,7 @@ public class MapDrawer extends JPanel {
 
         g2.setColor(cs.NO_CLOACK);
         for (NoCloack noCloack : mapManager.entities.noCloack) {
-            Area area = noCloack.getZone();
+            Rectangle area = noCloack.getZone();
             g2.fillRect(
                     translateX(area.minX), translateY(area.minY),
                     translateX(area.maxX - area.minX), translateY(area.maxY - area.minY));

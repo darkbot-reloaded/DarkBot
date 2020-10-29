@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.utils.pathfinder;
 
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.utils.Location;
 
 import java.util.HashSet;
@@ -45,6 +46,10 @@ public class PathFinder {
 
         new PathFinderCalculator(current, destination)
                 .fillGeneratedPathTo(paths);
+
+        // If no possible path is found, try to fly straight
+        if (paths.isEmpty()) paths.add(destination);
+
         return paths;
     }
 
@@ -94,56 +99,33 @@ public class PathFinder {
         return current;
     }
 
-    public boolean changed() {
-        if (!obstacleHandler.changed()) return false;
-        points.clear();
-
-        rebuildPoints();
-        rebuildLineOfSight();
-        return true;
-    }
-
-    private void rebuildPoints() {
-        for (Area a : obstacleHandler) {
-            checkAndAddPoint((int) a.minX, (int) a.minY, Corner.TOP_LEFT);
-            checkAndAddPoint((int) a.maxX, (int) a.minY, Corner.TOP_RIGHT);
-            checkAndAddPoint((int) a.minX, (int) a.maxY, Corner.BOTTOM_LEFT);
-            checkAndAddPoint((int) a.maxX, (int) a.maxY, Corner.BOTTOM_RIGHT);
-        }
-    }
-
-    private void checkAndAddPoint(int x, int y, Corner corner) {
-        if (!map.isOutOfMap(x, y)
-                && canMove(x + corner.x, y - corner.y)
-                && canMove(x - corner.x, y + corner.y)
-                && canMove(x + corner.x, y + corner.y))
-            points.add(new PathPoint(x + corner.x, y + corner.y));
+    public boolean isOutOfMap(double x, double y) {
+        return map.isOutOfMap(x, y);
     }
 
     public boolean canMove(int x, int y) {
         return obstacleHandler.stream().noneMatch(a -> a.inside(x, y));
     }
 
+    public boolean changed() {
+        if (!obstacleHandler.changed()) return false;
+        points.clear();
+
+        for (Area a : obstacleHandler)
+            for (PathPoint p : a.getPoints(this))
+                if (!isOutOfMap(p.x, p.y) && canMove(p.x, p.y))
+                    this.points.add(p);
+
+        for (PathPoint point : points) point.fillLineOfSight(this);
+        return true;
+    }
+
     private Area areaTo(PathPoint point) {
         return obstacleHandler.stream().filter(a -> a.inside(point.x, point.y)).findAny().orElse(null);
     }
 
-    private void rebuildLineOfSight() {
-        for (PathPoint point : points) point.fillLineOfSight(this);
-    }
-
     boolean hasLineOfSight(PathPoint point1, PathPoint point2) {
         return obstacleHandler.stream().allMatch(a -> a.hasLineOfSight(point1, point2));
-    }
-
-    private enum Corner {
-        TOP_LEFT(-1, -1), TOP_RIGHT(1, -1), BOTTOM_LEFT(-1, 1),BOTTOM_RIGHT(1, 1);
-        int x,y;
-
-        Corner(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
     }
 
 }

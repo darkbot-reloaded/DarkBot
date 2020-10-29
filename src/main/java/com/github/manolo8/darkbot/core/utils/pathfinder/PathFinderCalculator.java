@@ -28,12 +28,9 @@ public class PathFinderCalculator {
     }
 
     public void fillGeneratedPathTo(LinkedList<PathPoint> target) {
-
         addDefs();
 
-        if (!build()) return;
-
-        unfragment(target);
+        if (build()) unfragment(target);
 
         remDefs();
     }
