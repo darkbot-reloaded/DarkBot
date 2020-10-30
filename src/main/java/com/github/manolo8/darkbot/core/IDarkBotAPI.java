@@ -17,7 +17,7 @@ public interface IDarkBotAPI {
     void rawKeyboardClick(char btn);
 
     default void keyboardClick(Character ch) {
-        if (ch != null) keyboardClick((char) ch);
+        if (ch != null) rawKeyboardClick(ch);
     }
 
     void sendText(String string);

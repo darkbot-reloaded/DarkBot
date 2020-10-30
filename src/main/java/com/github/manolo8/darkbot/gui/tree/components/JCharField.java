@@ -11,30 +11,32 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Objects;
 
-public class JCharField extends JTextField implements OptionEditor {
+public class JCharField extends JButton implements OptionEditor {
 
     private static final char EMPTY = (char) 0;
-    private static final DocumentFilter SINGLE_CHAR_DOCUMENT = new DocumentFilter(){
-        @Override
-        public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-            super.replace(fb, 0, fb.getDocument().getLength(), text == null || text.isEmpty() || text.equals("\b") ? "" : text.substring(text.length() - 1), attrs);
-        }
-    };
 
     private ConfigField field;
 
     public JCharField() {
-        super(1);
-        setMargin(new Insets(0, 3, 0, 3));
-        putClientProperty("JComboBox.isTableCellEditor", true); // Make L&F further reduce margin/border
-
-        ((AbstractDocument) getDocument()).setDocumentFilter(SINGLE_CHAR_DOCUMENT);
-        getDocument().addDocumentListener((GeneralDocumentListener) e -> setValue(getValue()));
+        setMargin(new Insets(0, 5, 0, 5));
         setHorizontalAlignment(CENTER);
-        setCaretColor(new Color(0, 0, 0, 0));
-        setHighlighter(null);
+        putClientProperty("JComponent.minimumWidth", 18);
+
+        addKeyListener(new KeyListener() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_BACK_SPACE || e.getKeyChar() == KeyEvent.VK_DELETE) setValue(EMPTY);
+                else setValue((char) e.getKeyCode());
+                e.consume();
+            }
+
+            @Override public void keyTyped(KeyEvent e) {}
+            @Override public void keyReleased(KeyEvent e) {}
+        });
     }
 
     @Override
@@ -45,22 +47,37 @@ public class JCharField extends JTextField implements OptionEditor {
     @Override
     public void edit(ConfigField field) {
         this.field = null;
-        setText(Objects.toString(field.get(), ""));
+        setText((Character) field.get());
         this.field = field;
     }
 
-    public Character getValue() {
-        if (field != null && field.isPrimitive() && getText().isEmpty()) return EMPTY;
-        return getText().isEmpty() ? null : getText().charAt(0);
+    public void setText(Character ch) {
+        setText(getDisplay(ch));
+    }
+
+    public static String getDisplay(Character ch) {
+        if (ch == null || ch == EMPTY) return "(unset)";
+        return KeyEvent.getKeyText(ch);
     }
 
     protected void setValue(Character value) {
+        setText(value);
         if (field != null) field.set(value);
+    }
+
+    @Override
+    public boolean isDefaultButton() {
+        return false;
     }
 
     @Override
     public Dimension getPreferredSize() {
         return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
+    }
+
+    @Override
+    public Dimension getReservedSize() {
+        return new Dimension(140, 0);
     }
 
 }

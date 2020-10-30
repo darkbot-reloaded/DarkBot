@@ -19,6 +19,7 @@ public class Bot {
             UIManager.setLookAndFeel(new FlatDarkLaf());
             UIManager.put("Button.arc", 0);
             UIManager.put("Component.arc", 0);
+            UIManager.put("Button.default.boldText", false);
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }

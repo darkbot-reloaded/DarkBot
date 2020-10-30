@@ -97,7 +97,7 @@ public class HeroManager extends Ship implements Manager {
         if (System.currentTimeMillis() - portalTime > 15000 || (System.currentTimeMillis() - portalTime > 1000 &&
                 map.id == settings.currMap &&
                 (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id))) {
-            API.keyboardClick('j');
+            API.rawKeyboardClick('J');
             portalTime = System.currentTimeMillis();
         }
     }
@@ -129,7 +129,7 @@ public class HeroManager extends Ship implements Manager {
         int formationCheck = main.config.GENERAL.FORMATION_CHECK;
 
         if (this.config != con && System.currentTimeMillis() - configTime > 5500L) {
-            Main.API.keyboardClick('c');
+            Main.API.rawKeyboardClick('C');
             this.configTime = System.currentTimeMillis();
         }
         boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000;

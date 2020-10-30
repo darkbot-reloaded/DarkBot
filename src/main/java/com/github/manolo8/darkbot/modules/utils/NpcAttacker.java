@@ -90,7 +90,7 @@ public class NpcAttacker {
         if ((ammoChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
             laserTime = System.currentTimeMillis() + 750;
             if (!attacking || !bugged || ammoChanged) {
-                API.keyboardClick(getAttackKey());
+                API.rawKeyboardClick(getAttackKey());
                 attacking = true;
             } else {
                 if (API instanceof DarkBoatAdapter) API.rawKeyboardClick((char) 0x11);

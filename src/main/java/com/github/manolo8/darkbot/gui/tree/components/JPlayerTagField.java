@@ -75,6 +75,13 @@ public class JPlayerTagField extends JButton implements OptionEditor {
     }
 
     @Override
+    public Dimension getReservedSize() {
+        Dimension popup = tagPopup.getPreferredSize();
+        popup.height = 0;
+        return popup;
+    }
+
+    @Override
     public boolean isDefaultButton() {
         return false;
     }

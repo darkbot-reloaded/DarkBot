@@ -12,8 +12,8 @@ import java.util.Objects;
 
 public class JShipConfigField extends JPanel implements OptionEditor {
 
-    private JButton config1 = new ConfigButton(1), config2 = new ConfigButton(2);
-    private FormationField formation = new FormationField();
+    private final ConfigButton config1 = new ConfigButton(1), config2 = new ConfigButton(2);
+    private final FormationField formation = new FormationField();
 
     private Config.ShipConfig editing;
 
@@ -28,12 +28,11 @@ public class JShipConfigField extends JPanel implements OptionEditor {
     }
 
     private void setConfig(int num) {
-        config1.setBackground(num == 1 ? UIManager.getColor("Tree.selectionBackground") : UIManager.getColor("Button.background"));
-        config2.setBackground(num == 2 ? UIManager.getColor("Tree.selectionBackground") : UIManager.getColor("Button.background"));
-        if (editing != null) {
-            this.editing.CONFIG = num;
-            ConfigEntity.changed();
-        }
+        config1.setSelected(num == 1);
+        config2.setSelected(num == 2);
+        if (editing == null) return;
+        this.editing.CONFIG = num;
+        ConfigEntity.changed();
     }
 
     @Override
@@ -46,8 +45,7 @@ public class JShipConfigField extends JPanel implements OptionEditor {
         this.editing = null;
         Config.ShipConfig conf = field.get();
         setConfig(conf.CONFIG);
-        formation.setText(Objects.toString(conf.FORMATION, ""));
-        formation.requestFocus();
+        formation.setText(conf.FORMATION);
 
         this.editing = conf;
     }
@@ -57,21 +55,38 @@ public class JShipConfigField extends JPanel implements OptionEditor {
         return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
+    @Override
+    public Dimension getReservedSize() {
+        return new Dimension(250, 0);
+    }
+
     private class ConfigButton extends JButton {
+        public boolean selected;
+
         ConfigButton(int config) {
-            super(config + "");
-            putClientProperty("JButton.buttonType", "square");
+            super(String.valueOf(config));
             //noinspection SuspiciousNameCombination
             setPreferredSize(new Dimension(AdvancedConfig.EDITOR_HEIGHT, AdvancedConfig.EDITOR_HEIGHT));
             setFocusable(false);
 
             addActionListener(a -> setConfig(config));
         }
+
+        public void setSelected(boolean selected) {
+            this.selected = selected;
+            repaint();
+        }
+
+        @Override
+        public boolean isDefaultButton() {
+            return selected;
+        }
     }
 
     private class FormationField extends JCharField {
         @Override
         protected void setValue(Character value) {
+            setText(value);
             if (editing == null) return;
             editing.FORMATION = value;
             ConfigEntity.changed();

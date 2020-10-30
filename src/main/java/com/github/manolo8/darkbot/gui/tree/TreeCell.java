@@ -73,6 +73,13 @@ public class TreeCell extends JPanel {
         @Override
         public Dimension preferredLayoutSize(Container parent) {
             Dimension dim = parent.getComponent(1).getPreferredSize();
+            if (parent.getComponent(1) instanceof OptionEditor) {
+                Dimension res = ((OptionEditor) parent.getComponent(1)).getReservedSize();
+                if (res != null)
+                    dim.setSize(Math.max(dim.width, res.width), Math.max(dim.height, res.height));
+            }
+
+
             dim.width += nameWidth;
             dim.height = Math.max(dim.height, minHeight);
             return dim;
