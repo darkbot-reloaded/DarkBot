@@ -6,9 +6,12 @@ import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.gui.utils.TableCharEditor;
+import com.github.manolo8.darkbot.gui.utils.table.TableCharEditor;
+import com.github.manolo8.darkbot.gui.utils.table.TableCharRenderer;
+import com.github.manolo8.darkbot.gui.utils.table.TableDoubleEditor;
 import com.github.manolo8.darkbot.gui.utils.ToolTipHeader;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.gui.utils.table.TableDoubleRenderer;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -23,8 +26,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public abstract class InfoTable<T extends TableModel, E> extends JTable implements OptionEditor {
-    private static final TableCharEditor CHAR_EDITOR = new TableCharEditor();
-
     private JComponent component;
     private Map<String, E> data;
     private Lazy<String> listener;
@@ -68,7 +69,12 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
     public InfoTable(T model, Map<String, E> data, Lazy<String> listener, Supplier<E> supplier) {
         super(model);
         getColumnModel().getColumn(0).setPreferredWidth(200);
-        setDefaultEditor(Character.class, CHAR_EDITOR);
+
+        setDefaultRenderer(Double.class, new TableDoubleRenderer());
+        setDefaultRenderer(Character.class, new TableCharRenderer());
+
+        setDefaultEditor(Double.class, new TableDoubleEditor());
+        setDefaultEditor(Character.class, new TableCharEditor());
 
         setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
         if (model instanceof GenericTableModel) {

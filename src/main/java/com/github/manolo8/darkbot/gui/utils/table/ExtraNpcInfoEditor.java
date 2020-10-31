@@ -1,7 +1,8 @@
-package com.github.manolo8.darkbot.gui.tree.components;
+package com.github.manolo8.darkbot.gui.utils.table;
 
 import com.github.manolo8.darkbot.config.NpcExtraFlag;
 import com.github.manolo8.darkbot.config.NpcInfo;
+import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.utils.JCheckBoxMenuItemNoClose;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
 
@@ -28,9 +29,9 @@ public class ExtraNpcInfoEditor extends AbstractCellEditor implements TableCellE
 
     private int tooltipDelay = -1;
 
-    ExtraNpcInfoEditor() {
+    public ExtraNpcInfoEditor() {
         button.setOpaque(false);
-        button.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        button.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
 
         button.addMouseListener(new MouseAdapter() {
             @Override

@@ -45,7 +45,7 @@ public class JShipConfigField extends JPanel implements OptionEditor {
         this.editing = null;
         Config.ShipConfig conf = field.get();
         setConfig(conf.CONFIG);
-        formation.setText(conf.FORMATION);
+        formation.setValue(conf.FORMATION);
 
         this.editing = conf;
     }
@@ -83,10 +83,10 @@ public class JShipConfigField extends JPanel implements OptionEditor {
         }
     }
 
-    private class FormationField extends JCharField {
+    private class FormationField extends JCharField.ExtraBorder {
         @Override
-        protected void setValue(Character value) {
-            setText(value);
+        public void setValue(Character value) {
+            setText(getDisplay(value));
             if (editing == null) return;
             editing.FORMATION = value;
             ConfigEntity.changed();

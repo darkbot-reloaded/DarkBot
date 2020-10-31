@@ -17,6 +17,7 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
+import com.github.manolo8.darkbot.gui.tree.components.JCharField;
 import com.github.manolo8.darkbot.gui.tree.components.JCheckboxListField;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
@@ -229,7 +230,7 @@ public class Config {
 
         @Override
         public String toString() {
-            return "Config: " + CONFIG + "   Formation: " + Objects.toString(FORMATION, "(unset)");
+            return "Config: " + CONFIG + "   Formation: " + JCharField.getDisplay(FORMATION);
         }
     }
 

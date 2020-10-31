@@ -7,7 +7,7 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
-import com.github.manolo8.darkbot.gui.utils.TableDoubleEditor;
+import com.github.manolo8.darkbot.gui.utils.table.ExtraNpcInfoEditor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,7 +34,6 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
 
         setDefaultEditor(ExtraNpcInfoList.class, new ExtraNpcInfoEditor());
-        setDefaultEditor(Double.class, new TableDoubleEditor());
 
         mapFilter = new JComboBox<>();
 
@@ -150,7 +149,7 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
     }
 
     public static class ExtraNpcInfoList {
-        Collection<NpcInfo> infos;
+        public Collection<NpcInfo> infos;
 
         ExtraNpcInfoList(Collection<NpcInfo> infos) {
             this.infos = infos;

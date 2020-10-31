@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.gui.tree;
 
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.tree.ConfigNode;
@@ -40,7 +39,7 @@ public class EditorManager {
         this.sharedEditors = shared != null ? shared.sharedEditors : new HashMap<>();
         this.defaultEditor.getComponent().setOpaque(false);
 
-        addEditor(new JCharField(), Character.class);
+        addEditor(new JCharField.ExtraBorder(), Character.class);
         addEditor(new JBoolField(), boolean.class);
         addEditor(new JNumberField(), double.class, int.class);
         addEditor(new JStringField(), String.class);
