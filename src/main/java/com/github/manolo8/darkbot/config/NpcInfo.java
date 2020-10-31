@@ -67,8 +67,11 @@ public class NpcInfo {
         }
 
         public String toString() {
-            return flags.stream().map(NPC_FLAGS::get)
-                    .filter(Objects::nonNull)
+            if (flags.isEmpty()) return "";
+
+            return NPC_FLAGS.entrySet().stream()
+                    .filter(e -> flags.contains(e.getKey()))
+                    .map(Map.Entry::getValue)
                     .map(NpcExtraFlag::getShortName)
                     .collect(Collectors.joining(","));
         }
