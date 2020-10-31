@@ -1,6 +1,9 @@
 package eu.darkbot.api.objects;
 
-public interface Gui extends Rectangle {
+public interface Gui extends Point {
+    double getWidth(); //or x2, y2?
+    double getHeight();
+
     /**
      * @return true if gui window is visible
      */

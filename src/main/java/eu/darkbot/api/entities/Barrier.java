@@ -1,4 +1,6 @@
 package eu.darkbot.api.entities;
 
-public interface Barrier extends Zone {
+import eu.darkbot.api.objects.Obstacle;
+
+public interface Barrier extends Zone, Obstacle {
 }

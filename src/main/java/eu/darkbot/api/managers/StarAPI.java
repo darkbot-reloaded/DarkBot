@@ -11,23 +11,16 @@ public interface StarAPI extends API {
     List<String> HOME_MAPS = ArrayUtils.asImmutableList("1-1", "2-1", "3-1");
     List<String> OUTPOST_HOME_MAPS = ArrayUtils.asImmutableList("1-8", "2-8", "3-8");
 
+    /**
+     * Adds given map into list of maps.
+     */
     Map addMap(Map map);
 
     Set<Map> getMaps();
 
-    default Map getById(int mapId) throws MapNotFoundException {
-        return getMaps().stream()
-                .filter(map -> map.getId() == mapId)
-                .findAny()
-                .orElseThrow(() -> new MapNotFoundException(mapId));
-    }
+    Map getById(int mapId) throws MapNotFoundException;
 
-    default Map getByName(String mapName) throws MapNotFoundException {
-        return getMaps().stream()
-                .filter(map -> map.getName().equals(mapName))
-                .findAny()
-                .orElseThrow(() -> new MapNotFoundException(mapName));
-    }
+    Map getByName(String mapName) throws MapNotFoundException;
 
     class MapNotFoundException extends Exception {
         public MapNotFoundException(int mapId) {

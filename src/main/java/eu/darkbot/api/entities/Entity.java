@@ -68,6 +68,10 @@ public interface Entity extends Locatable {
      */
     boolean isClickable();
 
+    /**
+     * Represents entity effects.
+     * todo add more effects.
+     */
     enum Effect {
         UNDEFINED(-1),
         LOCATOR(1),

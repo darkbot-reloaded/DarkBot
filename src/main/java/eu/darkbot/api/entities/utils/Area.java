@@ -2,6 +2,9 @@ package eu.darkbot.api.entities.utils;
 
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.Rectangle;
+import eu.darkbot.api.utils.PathFinder;
+
+import java.util.Collection;
 
 public interface Area {
 
@@ -14,7 +17,7 @@ public interface Area {
      */
     Rectangle getBounds();
 
-    Locatable[] getPoints();
+    Collection<Locatable> getPoints(PathFinder pf);
 
     /**
      * @return true if Area is empty.
