@@ -1,5 +1,7 @@
 package eu.darkbot.api.entities;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.time.LocalDateTime;
 
 public interface Box extends Entity {
@@ -27,6 +29,7 @@ public interface Box extends Entity {
     /**
      * @return time until box is marked as collected
      */
+    @Nullable
     LocalDateTime isCollectedUntil();
 
     /**

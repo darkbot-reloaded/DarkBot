@@ -3,6 +3,7 @@ package eu.darkbot.api.entities.utils;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.Rectangle;
 import eu.darkbot.api.utils.PathFinder;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
@@ -17,7 +18,7 @@ public interface Area {
      */
     Rectangle getBounds();
 
-    Collection<Locatable> getPoints(PathFinder pf);
+    Collection<Locatable> getPoints(@NotNull PathFinder pf);
 
     /**
      * @return true if Area is empty.
@@ -29,7 +30,7 @@ public interface Area {
      */
     boolean containsPoint(double x, double y);
 
-    default boolean containsPoint(Locatable point) {
+    default boolean containsPoint(@NotNull Locatable point) {
         return containsPoint(point.getX(), point.getY());
     }
 
@@ -38,7 +39,7 @@ public interface Area {
      */
     boolean intersects(double x, double y, double w, double h) ;
 
-    default boolean intersects(Rectangle rect) {
+    default boolean intersects(@NotNull Rectangle rect) {
         return intersects(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
@@ -47,7 +48,7 @@ public interface Area {
      */
     boolean intersectsLine(double x, double y, double x2, double y2);
 
-    default boolean intersectsLine(Locatable startPoint, Locatable endPoint) {
+    default boolean intersectsLine(@NotNull Locatable startPoint, @NotNull Locatable endPoint) {
         return intersectsLine(startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY());
     }
 

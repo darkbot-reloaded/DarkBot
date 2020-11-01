@@ -10,7 +10,7 @@ import eu.darkbot.api.entities.utils.Area;
  */
 public interface Zone extends Entity {
     /**
-     * @return {@link Area} of that Zone
+     * @return {@link Area} of the {@link Zone}
      */
     Area getArea();
 

@@ -4,9 +4,15 @@ import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.objects.Health;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.LocationInfo;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface Ship extends Entity, Health {
+
+    /**
+     * @return ship username.
+     */
+    String getUsername();
 
     /**
      * @return true if ship is invisible/cloaked.
@@ -23,20 +29,20 @@ public interface Ship extends Entity, Health {
     /**
      * Returns true if ship aims other ship by checking theirs angle.
      */
-    boolean isAiming(Ship other);
+    boolean isAiming(@NotNull Ship other);
 
     // TODO: 28.10.2020 need proper doc
-    boolean isAttacking(Ship other);
-
-    /**
-     * @return ship username.
-     */
-    String getUsername();
+    boolean isAttacking(@NotNull Ship other);
 
     /**
      * @return true if ship has enabled {@link Pet}.
      */
     boolean hasPet();
+
+    /**
+     * @return {@link Pet} associated with this ship or null if none.
+     */
+    @Nullable
     Pet getPet();
 
     int getClanId();
@@ -72,7 +78,7 @@ public interface Ship extends Entity, Health {
         return (long) (distance * 1000 / getSpeed());
     }
 
-    default long timeTo(Locatable destination) {
+    default long timeTo(@NotNull Locatable destination) {
         return timeTo(getLocationInfo().distanceTo(destination));
     }
 
@@ -97,10 +103,13 @@ public interface Ship extends Entity, Health {
      */
     boolean isInFormation(int formationId);
 
-    default boolean isInFormation(Ship.Formation formation) {
+    default boolean isInFormation(@NotNull Ship.Formation formation) {
         return isInFormation(formation.ordinal());
     }
 
+    /**
+     * Represents formations in-game.
+     */
     enum Formation {
         // 2D formations
         STANDARD,

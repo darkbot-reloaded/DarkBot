@@ -1,5 +1,7 @@
 package eu.darkbot.api.objects;
 
+import org.jetbrains.annotations.NotNull;
+
 public interface Location extends Locatable, Point {
     /**
      * @return the distance from the current point {@code (getX(), getY())}
@@ -11,7 +13,7 @@ public interface Location extends Locatable, Point {
         return Math.sqrt(ox * ox + oy * oy);
     }
 
-    default double distanceTo(Locatable other) {
+    default double distanceTo(@NotNull Locatable other) {
         return distanceTo(other.getX(), other.getY());
     }
 
@@ -22,7 +24,7 @@ public interface Location extends Locatable, Point {
         return Math.atan2(getY() - oy, getX() - ox);
     }
 
-    default double angleTo(Locatable other) {
+    default double angleTo(@NotNull Locatable other) {
         return angleTo(other.getX(), other.getY());
     }
 
@@ -36,7 +38,7 @@ public interface Location extends Locatable, Point {
      */
     Location setTo(double x, double y);
 
-    default Location setTo(Locatable other) {
+    default Location setTo(@NotNull Locatable other) {
         return setTo(other.getX(), other.getY());
     }
 
@@ -48,7 +50,7 @@ public interface Location extends Locatable, Point {
         return setTo(getX() + plusX, getY() + plusY);
     }
 
-    default Location plus(Locatable other) {
+    default Location plus(@NotNull Locatable other) {
         return plus(other.getX(), other.getY());
     }
 }

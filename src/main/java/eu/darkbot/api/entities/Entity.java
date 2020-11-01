@@ -2,6 +2,7 @@ package eu.darkbot.api.entities;
 
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.LocationInfo;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface Entity extends Locatable {
@@ -33,7 +34,7 @@ public interface Entity extends Locatable {
      */
     boolean hasEffect(int effect);
 
-    default boolean hasEffect(Entity.Effect effect) {
+    default boolean hasEffect(@NotNull Entity.Effect effect) {
         return hasEffect(effect.getId());
     }
 
@@ -69,9 +70,9 @@ public interface Entity extends Locatable {
     boolean isClickable();
 
     /**
-     * Represents entity effects.
-     * todo add more effects.
+     * Represents in-game entity effects.
      */
+    // TODO: 01.11.2020 add more effects
     enum Effect {
         UNDEFINED(-1),
         LOCATOR(1),

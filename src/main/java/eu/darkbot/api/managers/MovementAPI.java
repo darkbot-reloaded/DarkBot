@@ -4,6 +4,8 @@ import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.Location;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface MovementAPI extends API {
     /**
@@ -12,7 +14,7 @@ public interface MovementAPI extends API {
      * @param portal to jump through
      * @return true if jump button was clicked
      */
-    boolean jumpPortal(Portal portal);
+    boolean jumpPortal(@NotNull Portal portal);
 
     /**
      * @return true if hero is moving or destination path isn't empty.
@@ -27,6 +29,7 @@ public interface MovementAPI extends API {
     /**
      * @return current destination {@link Location}
      */
+    @Nullable
     Location getDestination();
 
     /**
@@ -54,7 +57,7 @@ public interface MovementAPI extends API {
      */
     boolean canMove(double x, double y);
 
-    default boolean canMove(Locatable destination) {
+    default boolean canMove(@NotNull Locatable destination) {
         return canMove(destination.getX(), destination.getY());
     }
 
@@ -63,7 +66,7 @@ public interface MovementAPI extends API {
      */
     void moveTo(double x, double y);
 
-    default void moveTo(Locatable destination) {
+    default void moveTo(@NotNull Locatable destination) {
         moveTo(destination.getX(), destination.getY());
     }
 
@@ -73,7 +76,7 @@ public interface MovementAPI extends API {
      */
     double getClosestDistance(double x, double y);
 
-    default double getClosestDistance(Locatable destination) {
+    default double getClosestDistance(@NotNull Locatable destination) {
         return getClosestDistance(destination.getX(), destination.getY());
     }
 
@@ -83,7 +86,7 @@ public interface MovementAPI extends API {
      */
     double getDistanceBetween(double x, double y, double ox, double oy);
 
-    default double getDistanceBetween(Locatable loc, Locatable otherLoc) {
+    default double getDistanceBetween(@NotNull Locatable loc, @NotNull Locatable otherLoc) {
         return getDistanceBetween(loc.getX(), loc.getY(), otherLoc.getX(), otherLoc.getY());
     }
 }

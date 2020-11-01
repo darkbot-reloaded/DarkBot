@@ -3,7 +3,15 @@ package eu.darkbot.api.objects;
 import java.time.LocalDateTime;
 
 public interface Gui extends Point {
+
+    /**
+     * @return width of the gui
+     */
     double getWidth();
+
+    /**
+     * @return height of the gui
+     */
     double getHeight();
 
     /**
@@ -28,7 +36,7 @@ public interface Gui extends Point {
     /**
      * Returns true only if state of gui equals visible param
      * and gui animation is done.
-     *
+     * <p>
      * Changing state of gui takes ~1 second.
      *
      * @param visible should gui be visible
@@ -47,7 +55,7 @@ public interface Gui extends Point {
     void hover(int plusX, int plusY);
 
     /**
-     * @return last time where gui was visible
+     * @return last {@link LocalDateTime} where gui was visible
      */
     LocalDateTime lastVisibleTime();
 }
