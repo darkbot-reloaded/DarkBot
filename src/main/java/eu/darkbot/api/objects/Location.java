@@ -1,10 +1,16 @@
 package eu.darkbot.api.objects;
 
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
+
 public interface Location extends Locatable, Point {
     /**
-     * Returns distance to location ox & oy
+     * @return the distance from the current point {@code (getX(), getY())}
+     *         to the point {@code (ox, oy)}
      */
-    double distanceTo(double ox, double oy);
+    default double distanceTo(double ox, double oy) {
+        return sqrt(pow(getX() - ox, 2) + pow(getY() - oy, 2));
+    }
 
     default double distanceTo(Locatable other) {
         return distanceTo(other.getX(), other.getY());
@@ -13,7 +19,9 @@ public interface Location extends Locatable, Point {
     /**
      * @return angle to other location as radians.
      */
-    double angleTo(double ox, double oy);
+    default double angleTo(double ox, double oy) {
+        return Math.atan2(getY() - oy, getX() - ox);
+    }
 
     default double angleTo(Locatable other) {
         return angleTo(other.getX(), other.getY());
@@ -23,11 +31,6 @@ public interface Location extends Locatable, Point {
      * Copies current location into a new {@link Location} object and returns it.
      */
     Location copy();
-    Location copy(double plusX, double plusY);
-
-    default Location copy(Location other) {
-        return copy(other.getX(), other.getY());
-    }
 
     /**
      * Sets current location into specified location.

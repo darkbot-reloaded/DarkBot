@@ -1,8 +1,22 @@
 package eu.darkbot.api.objects;
 
 public interface Gui extends Point {
-    double getWidth(); //or x2, y2?
+    double getWidth();
     double getHeight();
+
+    /**
+     * @return the right x coordinate of the window
+     */
+    default double getX2() {
+        return getX() + getWidth();
+    }
+
+    /**
+     * @return the bottom y coordinate of the window
+     */
+    default double getY2() {
+        return getY() + getHeight();
+    }
 
     /**
      * @return true if gui window is visible
