@@ -1,5 +1,7 @@
 package eu.darkbot.api.objects;
 
+import java.time.LocalDateTime;
+
 public interface Gui extends Point {
     double getWidth();
     double getHeight();
@@ -43,4 +45,9 @@ public interface Gui extends Point {
      * Moves mouse at gui position + plusX/Y
      */
     void hover(int plusX, int plusY);
+
+    /**
+     * @return last time where gui was visible
+     */
+    LocalDateTime lastVisibleTime();
 }

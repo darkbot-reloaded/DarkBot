@@ -2,19 +2,49 @@ package eu.darkbot.api.objects.slotbars;
 
 public interface Item {
 
+    /**
+     * @return id of the item
+     */
     String getId();
-    String getIconLootId();
 
+    /**
+     * @return current quantity of item
+     */
     double getQuantity();
 
-    boolean isSelected();
-    boolean isBuyable();
-    boolean isActivatable();
-    boolean isAvailable();
-    boolean isVisible();
-
+    /**
+     * @return true if plugin is ready, available and can be clicked
+     */
     boolean isReady();
 
+    /**
+     * @return true if item is selected
+     */
+    boolean isSelected();
+
+    /**
+     * @return true if item can be bought via click
+     */
+    boolean isBuyable();
+
+    /**
+     * @return true if item can be activated
+     */
+    boolean isActivatable();
+
+    /**
+     * @return true if item is available and is not greyed out
+     */
+    boolean isAvailable();
+    //boolean isVisible();
+
+    /**
+     * @return time in (ms, sec???) needed to be passed
+     */
     double readyIn();
+
+    /**
+     * @return total cooldown time in (ms, sec???) of item
+     */
     double totalCooldown();
 }

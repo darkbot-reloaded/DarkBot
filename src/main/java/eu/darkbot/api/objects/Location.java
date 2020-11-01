@@ -1,15 +1,14 @@
 package eu.darkbot.api.objects;
 
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
-
 public interface Location extends Locatable, Point {
     /**
      * @return the distance from the current point {@code (getX(), getY())}
      *         to the point {@code (ox, oy)}
      */
     default double distanceTo(double ox, double oy) {
-        return sqrt(pow(getX() - ox, 2) + pow(getY() - oy, 2));
+        ox -= getX();
+        oy -= getY();
+        return Math.sqrt(ox * ox + oy * oy);
     }
 
     default double distanceTo(Locatable other) {

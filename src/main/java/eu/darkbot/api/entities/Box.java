@@ -1,5 +1,7 @@
 package eu.darkbot.api.entities;
 
+import java.time.LocalDateTime;
+
 public interface Box extends Entity {
     /**
      * Hash is generated on server.
@@ -22,7 +24,13 @@ public interface Box extends Entity {
      */
     boolean isCollected();
 
-    long isCollectedUntil();
+    /**
+     * @return time until box is marked as collected
+     */
+    LocalDateTime isCollectedUntil();
 
+    /**
+     * Makes box being collected for x amount of time * amount of collect tries.
+     */
     void setCollected();
 }

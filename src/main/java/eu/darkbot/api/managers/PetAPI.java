@@ -4,7 +4,7 @@ import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Pet;
 import eu.darkbot.api.objects.Gui;
 import eu.darkbot.api.objects.LocationInfo;
-import eu.darkbot.utils.ItemNotEquippedException;
+import eu.darkbot.api.utils.ItemNotEquippedException;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -62,6 +62,14 @@ public interface PetAPI extends Gui, Pet, API {
     @Nullable
     LocationInfo getLocatorNpcLoc();
 
+    /**
+     * This method checks if pet have given cooldown.
+     * For example, kamikaze after use need to be cooldowned
+     *
+     * @param cooldownId to be checked
+     * @return true if pet has given {@code cooldownId}
+     * @see Pet.Cooldown
+     */
     boolean hasCooldown(int cooldownId);
 
     default boolean hasCooldown(Pet.Cooldown cooldown) {

@@ -1,6 +1,34 @@
 package eu.darkbot.config;
 
-import com.github.manolo8.darkbot.config.Config;
+import org.jetbrains.annotations.Nullable;
 
-public class ShipConfig extends Config.ShipConfig {
+public class ShipConfig {
+
+    protected int configuration;
+    protected Character formation;
+
+    public ShipConfig() {
+    }
+
+    public ShipConfig(int configuration, Character formation) {
+        this.configuration = configuration;
+        this.formation = formation;
+    }
+
+    public int getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(int configuration) {
+        this.configuration = configuration;
+    }
+
+    @Nullable
+    public Character getFormation() {
+        return formation;
+    }
+
+    public void setFormation(Character formation) {
+        this.formation = formation;
+    }
 }

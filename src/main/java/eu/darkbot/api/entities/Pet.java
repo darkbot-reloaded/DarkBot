@@ -1,6 +1,6 @@
 package eu.darkbot.api.entities;
 
-import eu.darkbot.utils.EquippableItem;
+import eu.darkbot.api.utils.EquippableItem;
 
 public interface Pet extends Ship {
 
