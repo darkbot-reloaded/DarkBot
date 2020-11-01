@@ -46,14 +46,21 @@ public interface Ship extends Entity, Health {
     Pet getPet();
 
     int getClanId();
-    int getClanDiplomacy();
+
+    /**
+     * @return {@link Diplomacy}
+     */
+    Diplomacy getClanDiplomacy();
+
+    /**
+     * @return ship's clan tag
+     */
     String getClanTag();
 
     /**
-     * Returns ship faction as int.
-     * 0 = NONE, 1 = MMO, 2 = EIC, 3 = VRU, 4 = KRONOS?
+     * @return {@link Faction}
      */
-    int getFactionId();
+    Faction getFactionId();
 
     /**
      * Probably id of rank icon.
@@ -72,6 +79,7 @@ public interface Ship extends Entity, Health {
 
     /**
      * Calculates needed time to travel given distance.
+     *
      * @return time in milliseconds needed to travel given distance
      */
     default long timeTo(double distance) {
@@ -99,12 +107,27 @@ public interface Ship extends Entity, Health {
     LocationInfo getDestination();
 
     /**
-     * Returns true if ship has enabled given formation.
+     * @return true if ship has enabled given formation.
      */
     boolean isInFormation(int formationId);
 
     default boolean isInFormation(@NotNull Ship.Formation formation) {
         return isInFormation(formation.ordinal());
+    }
+
+    enum Faction {
+        NONE,
+        MMO,
+        EIC,
+        VRU,
+        SATURN
+    }
+
+    enum Diplomacy {
+        NONE,
+        ALLIED,
+        NOT_ATTACK_PACT,
+        WAR
     }
 
     /**
