@@ -3,7 +3,7 @@ package eu.darkbot.api.entities;
 import eu.darkbot.api.entities.utils.Area;
 
 /**
- * Default zone entity in darkorbit.
+ * Default zone entity in-game.
  *
  * @see Barrier
  * @see Mist

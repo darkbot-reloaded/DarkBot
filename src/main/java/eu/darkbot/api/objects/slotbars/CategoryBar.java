@@ -5,22 +5,20 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public interface CategoryBar {
 
     /**
-     * @return {@link Map} of categories with {@link Item} {@link List}
+     * @param category {@link Category} to be checked
+     * @return true if {@link CategoryBar} contains given Category
      */
-    Map<Category, List<Item>> getCategories();
+    boolean hasCategory(@NotNull CategoryBar.Category category);
 
     /**
      * @param category to get item list from
      * @return list of items associated with given {@link Category}
      */
-    default List<Item> getItems(@NotNull CategoryBar.Category category) {
-        return getCategories().get(category);
-    }
+    List<Item> getItems(@NotNull CategoryBar.Category category);
 
     /**
      * Search every {@link Category} for given {@code itemId}.
