@@ -16,7 +16,7 @@ public interface CategoryBar {
 
     /**
      * @param category to get item list from
-     * @return list of item associated with given {@link Category}
+     * @return list of items associated with given {@link Category}
      */
     default List<Item> getItems(@NotNull CategoryBar.Category category) {
         return getCategories().get(category);
@@ -41,7 +41,7 @@ public interface CategoryBar {
      * Search {@link Category} for given {@code itemId}.
      *
      * @param category to be searched
-     * @param itemId to be looked for in given category
+     * @param itemId   to be looked for in given category
      * @return first encounter of given item id or null if none
      */
     @Nullable

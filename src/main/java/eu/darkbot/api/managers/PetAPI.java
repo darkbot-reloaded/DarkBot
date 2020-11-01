@@ -63,8 +63,8 @@ public interface PetAPI extends Gui, Pet, API {
     LocationInfo getLocatorNpcLoc();
 
     /**
-     * This method checks if pet have given cooldown.
-     * For example, kamikaze after use need to be cooldowned
+     * Checks if pet has the given cooldown,
+     * which can make gears unavailable temporally.
      *
      * @param cooldownId to be checked
      * @return true if pet has given {@code cooldownId}
