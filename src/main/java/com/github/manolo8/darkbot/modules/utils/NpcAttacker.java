@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.modules.utils;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
@@ -17,6 +18,7 @@ public class NpcAttacker {
     protected MapManager mapManager;
     protected HeroManager hero;
     protected Drive drive;
+    private final Config.KeyBinds KEY_BINDS;
 
     public Npc target;
     protected Long ability;
@@ -34,6 +36,7 @@ public class NpcAttacker {
         this.mapManager = main.mapManager;
         this.hero = main.hero;
         this.drive = hero.drive;
+        this.KEY_BINDS = main.config.KEY_BINDS;
     }
 
     public String status() {
@@ -93,7 +96,7 @@ public class NpcAttacker {
                 API.rawKeyboardClick(getAttackKey());
                 attacking = true;
             } else {
-                if (API instanceof DarkBoatAdapter) API.rawKeyboardClick((char) 0x11);
+                if (API instanceof DarkBoatAdapter) API.rawKeyboardClick(KEY_BINDS.LASER_KEY);
                 else setRadiusAndClick(false);
                 fixTimes++;
             }

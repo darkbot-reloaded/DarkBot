@@ -78,7 +78,6 @@ public class Config {
             public @Option @Editor(JListField.class) @Options(ReviveSpotSupplier.class) long REVIVE_LOCATION = 1L;
             public @Option @Num(min = 2, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 3;
             public @Option @Num(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
-
         }
 
         public @Option Running RUNNING = new Running();
@@ -100,10 +99,14 @@ public class Config {
             public @Option boolean ONLY_KILL_PREFERRED = false;
         }
     }
+
     public @Option KeyBinds KEY_BINDS = new KeyBinds();
     public static class KeyBinds {
         public @Option Character CONFIGURATION_KEY = 'C';
         public @Option Character JUMP_KEY = 'J';
+        public @Option Character PET_KEY = 'E';
+        public @Option Character LASER_KEY = (char) 0x11;
+        public @Option Character ROCKET_KEY = ' ';
     }
 
     public @Option Collect COLLECT = new Collect();
