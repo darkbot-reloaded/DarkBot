@@ -11,7 +11,6 @@ public class PetNpcAttacker extends NpcAttacker {
 
     public PetNpcAttacker(Main main) {
         super(main);
-        this.KEY_BINDS = main.config.KEY_BINDS;
     }
 
     public String status() {
