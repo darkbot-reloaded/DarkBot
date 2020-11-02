@@ -7,7 +7,6 @@ import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class PetNpcAttacker extends NpcAttacker {
-    private final Config.KeyBinds KEY_BINDS;
 
     public PetNpcAttacker(Main main) {
         super(main);
