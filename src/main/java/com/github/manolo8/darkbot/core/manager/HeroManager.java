@@ -18,6 +18,7 @@ public class HeroManager extends Ship implements Manager {
     public static HeroManager instance;
     public final Main main;
     private final SettingsManager settings;
+    private final Config.KeyBinds KEY_BINDS;
 
     private long staticAddress;
 
@@ -44,6 +45,7 @@ public class HeroManager extends Ship implements Manager {
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
         this.map = main.starManager.byId(-1);
+        this.KEY_BINDS = main.config.KEY_BINDS;
     }
 
     @Override
@@ -97,7 +99,7 @@ public class HeroManager extends Ship implements Manager {
         if (System.currentTimeMillis() - portalTime > 15000 || (System.currentTimeMillis() - portalTime > 1000 &&
                 map.id == settings.currMap &&
                 (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id))) {
-            API.rawKeyboardClick('J');
+            API.rawKeyboardClick(KEY_BINDS.JUMP_KEY);
             portalTime = System.currentTimeMillis();
         }
     }
@@ -129,7 +131,7 @@ public class HeroManager extends Ship implements Manager {
         int formationCheck = main.config.GENERAL.FORMATION_CHECK;
 
         if (this.config != con && System.currentTimeMillis() - configTime > 5500L) {
-            Main.API.rawKeyboardClick('C');
+            Main.API.rawKeyboardClick(KEY_BINDS.CONFIGURATION_KEY);
             this.configTime = System.currentTimeMillis();
         }
         boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000;
