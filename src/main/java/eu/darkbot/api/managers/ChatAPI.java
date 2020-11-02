@@ -24,7 +24,7 @@ public interface ChatAPI extends Gui, API {
     /**
      * Types or categories of chats
      */
-    enum Type { //TODO: PROBABLY MORE CHATS THAT I FORGOT
-        GLOBAL, COMPANY, CLAN, GROUP
+    enum Type {
+        GLOBAL, NEWBIE, FACTION, CLAN, GROUP, UBA, RZONE, PRIVATE
     }
 }

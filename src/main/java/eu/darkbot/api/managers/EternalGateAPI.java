@@ -1,7 +1,6 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.objects.EternalGateBooster;
 import eu.darkbot.api.objects.Gui;
 
 import java.util.List;
@@ -15,6 +14,14 @@ public interface EternalGateAPI extends Gui, API {
     int getCurrentWave();
     int getFurthestWave();
 
-    List<EternalGateBooster> getActiveBoosters();
-    List<EternalGateBooster> getBoosterOptions();
+    List<Booster> getActiveBoosters();
+    List<Booster> getBoosterOptions();
+
+    /**
+     * Booster for special event: eternal gate
+     */
+    interface Booster {
+        int getPercentage();
+        String getCategory();
+    }
 }

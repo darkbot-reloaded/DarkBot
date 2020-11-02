@@ -60,7 +60,7 @@ public interface Ship extends Entity, Health {
     /**
      * @return {@link Faction}
      */
-    Faction getFactionId();
+    Faction getFaction();
 
     /**
      * Probably id of rank icon.
