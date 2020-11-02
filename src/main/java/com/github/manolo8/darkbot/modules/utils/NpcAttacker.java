@@ -18,7 +18,7 @@ public class NpcAttacker {
     protected MapManager mapManager;
     protected HeroManager hero;
     protected Drive drive;
-    private final Config.KeyBinds KEY_BINDS;
+    protected final Config.KeyBinds KEY_BINDS;
 
     public Npc target;
     protected Long ability;
