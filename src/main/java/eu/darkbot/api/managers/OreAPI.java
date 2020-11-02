@@ -4,17 +4,19 @@ import eu.darkbot.api.API;
 import eu.darkbot.api.entities.BasePoint;
 import eu.darkbot.api.objects.Gui;
 
-/**
- * API for selling ores
- */
-public interface OreTradeAPI extends Gui, API {
+import java.util.Locale;
 
+/**
+ * API for ore related things such as selling ores or getting ore amount.
+ */
+public interface OreAPI extends Gui, API {
     /**
      * Sells the specified ore, trade window must be open for this method to work
      *
-     * @param ore  the {@code Ore} you want to sell
+     * @param ore  the {@code Ore} you want to sell it must be {@code sellable}
      * @see #showTrade
      * @see #canSellOres
+     * @see Ore#sellable
      */
     void sellOre(Ore ore);
 
@@ -36,10 +38,28 @@ public interface OreTradeAPI extends Gui, API {
      */
     boolean showTrade(boolean show, BasePoint base);
 
+    int getAmount(Ore ore);
+
     /**
-     * List of Ores that you can sell through the Ore Trade window
+     * Types of Ores visible in refinery window
      */
     enum Ore {
-        PROMETIUM, ENDRIUM, TERBIUM, PROMETID, DURANIUM, PROMERIUM, SEPROM, PALLADIUM, OSMIUM
+        PROMETIUM, ENDRIUM, TERBIUM, PROMETID, DURANIUM, PROMERIUM, SEPROM, PALLADIUM, OSMIUM, XENOMIT(false);
+        private final boolean sellable;
+
+        Ore() {
+            this(true);
+        }
+        Ore(boolean sellable) {
+            this.sellable = sellable;
+        }
+
+        public String getName() {
+            return name().toLowerCase(Locale.ROOT);
+        }
+
+        public boolean isSellable() {
+            return sellable;
+        }
     }
 }
