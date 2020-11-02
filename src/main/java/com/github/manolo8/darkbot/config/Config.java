@@ -67,7 +67,7 @@ public class Config {
         public @Option ShipConfig ROAM = new ShipConfig(1, '9');
         public @Option ShipConfig RUN = new ShipConfig(2, '9');
         public @Option @Num(max = 3600) int FORMATION_CHECK = 180;
-        public @Option Character CONFIGURATION_KEY = 'C';
+
 
         public @Option Safety SAFETY = new Safety();
         public static class Safety {
@@ -79,7 +79,7 @@ public class Config {
             public @Option @Editor(JListField.class) @Options(ReviveSpotSupplier.class) long REVIVE_LOCATION = 1L;
             public @Option @Num(min = 2, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 3;
             public @Option @Num(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
-            public @Option Character JUMP_KEY = 'j';
+
         }
 
         public @Option Running RUNNING = new Running();
@@ -100,6 +100,11 @@ public class Config {
             public @Option boolean SEQUENTIAL = false;
             public @Option boolean ONLY_KILL_PREFERRED = false;
         }
+    }
+    public @Option KeyBinds KEY_BINDS = new KeyBinds();
+    public static class KeyBinds{
+        public @Option Character CONFIGURATION_KEY = 'C';
+        public @Option Character JUMP_KEY = 'j';
     }
 
     public @Option Collect COLLECT = new Collect();
