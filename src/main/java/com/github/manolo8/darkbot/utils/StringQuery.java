@@ -14,7 +14,8 @@ public class StringQuery {
 
     public boolean matches(final String toStr) {
         if (query == null || query.isEmpty()) return true;
-        if (words && query.contains(" ")) return Arrays.stream(query.split(" ")).allMatch(q -> matches(toStr, q));
+        if (words && query.contains(" "))
+            return Arrays.stream(query.split(" ")).allMatch(q -> matches(toStr, q));
         else return matches(toStr, query);
     }
 
@@ -24,8 +25,8 @@ public class StringQuery {
             toStr = toStr.toLowerCase(Locale.ROOT);
             query = query.toLowerCase(Locale.ROOT);
         }
-        if (wordStart) return toStr.startsWith(query) || toStr.contains(" " + query);
-        else return toStr.contains(query);
+        if (!wordStart) return toStr.contains(query);
+        return toStr.startsWith(query) || toStr.replace("_", " ").contains(" " + query);
     }
 
 }
