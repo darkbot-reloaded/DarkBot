@@ -104,7 +104,7 @@ public class Config {
     public @Option KeyBinds KEY_BINDS = new KeyBinds();
     public static class KeyBinds{
         public @Option Character CONFIGURATION_KEY = 'C';
-        public @Option Character JUMP_KEY = 'j';
+        public @Option Character JUMP_KEY = 'J';
     }
 
     public @Option Collect COLLECT = new Collect();
