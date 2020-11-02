@@ -68,7 +68,6 @@ public class Config {
         public @Option ShipConfig RUN = new ShipConfig(2, '9');
         public @Option @Num(max = 3600) int FORMATION_CHECK = 180;
 
-
         public @Option Safety SAFETY = new Safety();
         public static class Safety {
             public @Option PercentRange REPAIR_HP_RANGE = new PercentRange(0.4, 0.95);
