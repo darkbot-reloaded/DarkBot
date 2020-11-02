@@ -16,6 +16,7 @@ import java.util.*;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class RepairManager implements Manager {
+    private  boolean wasDead = false;
     private boolean writtenToLog = true;
     private long guiAddress, mainAddress, userDataAddress, repairAddress;
 
@@ -41,7 +42,7 @@ public class RepairManager implements Manager {
             writtenToLog = true;
             return;
         }
-
+        wasDead = true;
         if (repairAddress == 0) updateRepairAddr();
 
         killerName = API.readMemoryString(API.readMemoryLong(repairAddress + 0x68));
@@ -64,6 +65,13 @@ public class RepairManager implements Manager {
             return API.readMemoryBoolean(repairAddress + 40);
         else updateRepairAddr();
         return false;
+    }
+    public boolean wasDead(){
+        return this.wasDead;
+    }
+    public void resetDead(){
+        System.out.println("death reset");
+        this.wasDead = false;
     }
 
     public boolean canRespawn(int option) {

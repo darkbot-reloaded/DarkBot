@@ -162,6 +162,7 @@ public class Config {
 
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();
     public static class Miscellaneous {
+        public @Option boolean REFRESH_AFTER_REVIVE = false;
         public @Option @Num(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
         public @Option @Num(max = 60 * 12, step = 10) int PAUSE_FOR = 5;
         public @Option boolean RESET_REFRESH = true;
@@ -174,7 +175,7 @@ public class Config {
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
     public static class BotSettings {
         public @Option @Editor(LangEditor.class) @Options(LanguageSupplier.class)
-                Locale LOCALE = new Locale(Locale.getDefault().getLanguage());
+        Locale LOCALE = new Locale(Locale.getDefault().getLanguage());
         public @Option boolean FORCE_GAME_LANGUAGE = false;
         public @Option boolean SPOOF_CLIENT = false;
         public @Option @Num(min = 10, max = 300) int ZONE_RESOLUTION = 30;
@@ -198,8 +199,8 @@ public class Config {
         public @Option Display DISPLAY = new Display();
         public static class Display {
             public @Option @Editor(JCheckboxListField.class) @Options(DisplayFlag.Supplier.class)
-                    Set<DisplayFlag> TOGGLE = EnumSet.of(
-                            HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA);
+            Set<DisplayFlag> TOGGLE = EnumSet.of(
+                    HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA);
             public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
             public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
             public @Option(key = "colors") ColorScheme cs = new ColorScheme();
