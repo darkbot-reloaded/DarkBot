@@ -157,7 +157,6 @@ public class GuiManager implements Manager {
 
     private boolean isDead() {
         if (repairAddress != 0) {
-            this.needRefresh = true;
             return API.readMemoryBoolean(repairAddress + 40);
         } else if (isInvalidShip()) {
             long[] values = API.queryMemory(ByteUtils.getBytes(guiAddress, mainAddress), 1);
@@ -195,6 +194,7 @@ public class GuiManager implements Manager {
         }
 
         if (isDead()) {
+            this.needRefresh = true;
             main.hero.drive.stop(false);
 
             if (lastDeath == -1) lastDeath = System.currentTimeMillis();
