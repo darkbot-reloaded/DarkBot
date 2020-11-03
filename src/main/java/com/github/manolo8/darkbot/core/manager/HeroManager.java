@@ -9,16 +9,19 @@ import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
+import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
 
 import static com.github.manolo8.darkbot.Main.API;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.JUMP_GATE;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.TOGGLE_CONFIG;
 
 public class HeroManager extends Ship implements Manager {
 
     public static HeroManager instance;
     public final Main main;
     private final SettingsManager settings;
-    private final Config.Miscellaneous.KeyBinds KEY_BINDS;
+    private final SettingsProxy keybinds;
 
     private long staticAddress;
 
@@ -41,11 +44,11 @@ public class HeroManager extends Ship implements Manager {
 
         this.main = super.main = main;
         this.settings = main.settingsManager;
+        this.keybinds = main.facadeManager.settings;
         this.drive = new Drive(this, main.mapManager);
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
         this.map = main.starManager.byId(-1);
-        this.KEY_BINDS = main.config.MISCELLANEOUS.KEY_BINDS;
     }
 
     @Override
@@ -99,7 +102,7 @@ public class HeroManager extends Ship implements Manager {
         if (System.currentTimeMillis() - portalTime > 15000 || (System.currentTimeMillis() - portalTime > 1000 &&
                 map.id == settings.currMap &&
                 (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id))) {
-            API.rawKeyboardClick(KEY_BINDS.JUMP_KEY);
+            API.keyboardClick(keybinds.getCharCode(JUMP_GATE));
             portalTime = System.currentTimeMillis();
         }
     }
@@ -131,7 +134,7 @@ public class HeroManager extends Ship implements Manager {
         int formationCheck = main.config.GENERAL.FORMATION_CHECK;
 
         if (this.config != con && System.currentTimeMillis() - configTime > 5500L) {
-            Main.API.rawKeyboardClick(KEY_BINDS.CONFIGURATION_KEY);
+            Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
             this.configTime = System.currentTimeMillis();
         }
         boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000;

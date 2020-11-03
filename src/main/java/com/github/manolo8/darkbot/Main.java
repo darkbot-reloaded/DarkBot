@@ -67,8 +67,8 @@ public class Main extends Thread implements PluginListener {
     public final StarManager starManager         = new StarManager();
     public final MapManager mapManager           = new MapManager(this);
     public final SettingsManager settingsManager = new SettingsManager(this);
-    public final HeroManager hero                = new HeroManager(this);
     public final FacadeManager facadeManager     = new FacadeManager(this);
+    public final HeroManager hero                = new HeroManager(this);
     public final EffectManager effectManager     = new EffectManager(this);
     public final GuiManager guiManager           = new GuiManager(this);
     public final StatsManager statsManager       = new StatsManager(this);

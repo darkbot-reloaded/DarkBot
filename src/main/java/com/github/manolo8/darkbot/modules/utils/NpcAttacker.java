@@ -8,9 +8,12 @@ import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
+import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
 
 import static com.github.manolo8.darkbot.Main.API;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.*;
 
 public class NpcAttacker {
 
@@ -18,7 +21,7 @@ public class NpcAttacker {
     protected MapManager mapManager;
     protected HeroManager hero;
     protected Drive drive;
-    protected final Config.Miscellaneous.KeyBinds KEY_BINDS;
+    protected final SettingsProxy keybinds;
 
     public Npc target;
     protected Long ability;
@@ -36,7 +39,7 @@ public class NpcAttacker {
         this.mapManager = main.mapManager;
         this.hero = main.hero;
         this.drive = hero.drive;
-        this.KEY_BINDS = main.config.MISCELLANEOUS.KEY_BINDS;
+        this.keybinds = main.facadeManager.settings;
     }
 
     public String status() {
@@ -93,10 +96,10 @@ public class NpcAttacker {
         if ((ammoChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
             laserTime = System.currentTimeMillis() + 750;
             if (!attacking || !bugged || ammoChanged) {
-                API.rawKeyboardClick(getAttackKey());
+                API.keyboardClick(getAttackKey());
                 attacking = true;
             } else {
-                if (API instanceof DarkBoatAdapter) API.rawKeyboardClick(KEY_BINDS.LASER_KEY);
+                if (API instanceof DarkBoatAdapter) API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
                 else setRadiusAndClick(false);
                 fixTimes++;
             }
@@ -122,7 +125,7 @@ public class NpcAttacker {
         return useRsbUntil > System.currentTimeMillis() - 50;
     }
 
-    private char getAttackKey() {
+    private Character getAttackKey() {
         if (rsb = shouldRsb()) return main.config.LOOT.RSB.KEY;
         if (sab = shouldSab()) return main.config.LOOT.SAB.KEY;
         return this.target == null || this.target.npcInfo.attackKey == null ?
