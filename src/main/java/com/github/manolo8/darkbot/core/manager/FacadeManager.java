@@ -27,6 +27,7 @@ public class FacadeManager implements Manager {
     public final SlotBarsProxy slotBars       = registerProxy("ItemsControlMenuProxy", new SlotBarsProxy());
     public final EternalGateProxy eternalGate = registerProxy("eternal_gate", new EternalGateProxy());
     public final ChrominProxy chrominEvent    = registerProxy("chrominEvent", new ChrominProxy());
+    public final SettingsProxy settings       = registerProxy("SettingsWindowFUIProxy", new SettingsProxy());
 
     public FacadeManager(Main main) {
         this.main = main;
