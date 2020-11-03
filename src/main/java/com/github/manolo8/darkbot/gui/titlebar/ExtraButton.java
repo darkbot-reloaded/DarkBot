@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ColorScheme;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.itf.ExtraMenuProvider;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
@@ -139,7 +140,11 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             }));
             list.add(create("discord", e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
             list.add(create("copy_sid", e -> SystemUtils.toClipboard(main.statsManager.sid)));
-            list.add(create("reset_colorscheme", e -> main.config.BOT_SETTINGS.DISPLAY.cs = new ColorScheme()));
+            list.add(create("reset_colorscheme", e -> {
+                main.config.BOT_SETTINGS.DISPLAY.cs = new ColorScheme();
+                ConfigEntity.changed();
+                main.getGui().updateConfiguration();
+            }));
 
 
             if (main.config.BOT_SETTINGS.DEV_STUFF) {

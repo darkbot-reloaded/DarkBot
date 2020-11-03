@@ -72,6 +72,12 @@ public class PluginHandler {
         }
     }
 
+    public void updateConfig() {
+        for (Plugin plugin : LOADED_PLUGINS) {
+            plugin.setDefinition(plugin.getDefinition());
+        }
+    }
+
     private void updatePluginsInternal() {
         synchronized (this) {
             LOADED_PLUGINS.clear();

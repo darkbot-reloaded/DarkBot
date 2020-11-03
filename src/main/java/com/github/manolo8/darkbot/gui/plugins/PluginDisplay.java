@@ -28,7 +28,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
         this.main = main;
         this.pluginTab = pluginTab;
         this.pluginHandler = main.pluginHandler;
-        add(setupUI());
+        if (pluginPanel == null) add(setupUI());
         refreshUI();
         pluginHandler.addListener(this);
     }
@@ -43,6 +43,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
     }
 
     private void refreshUI() {
+        pluginPanel.removeAll();
         Stream.concat(
                 pluginHandler.LOADING_EXCEPTIONS.stream().map(ExceptionCard::new),
                 Stream.concat(

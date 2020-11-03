@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.itf.InstructionProvider;
@@ -15,13 +16,13 @@ import java.awt.event.ActionEvent;
 
 public class FeatureConfigButton extends MainToggleButton {
 
-    private Config config;
-    private FeatureDefinition<Configurable> feature;
+    private final Main main;
+    private final FeatureDefinition<Configurable<?>> feature;
 
-    FeatureConfigButton(Config config, FeatureDefinition<Configurable> feature) {
+    FeatureConfigButton(Main main, FeatureDefinition<Configurable<?>> feature) {
         super(UIUtils.getIcon("config"));
         setDisabledIcon(UIUtils.getIcon("config_unloaded"));
-        this.config = config;
+        this.main = main;
         this.feature = feature;
         updateStatus(feature);
         feature.addStatusListener(this::updateStatus);
@@ -40,7 +41,7 @@ public class FeatureConfigButton extends MainToggleButton {
             Popups.showMessageAsync(I18n.get("plugins.config_button.popup"),
                     I18n.get("plugins.config_button.popup.desc"), JOptionPane.INFORMATION_MESSAGE);
         } else {
-            Object paneMessage = new AdvancedConfig(this.config.CUSTOM_CONFIGS.get(feature.getId()));
+            Object paneMessage = new AdvancedConfig(main.config.CUSTOM_CONFIGS.get(feature.getId()));
 
             JComponent instructions = getInstructions();
             if (instructions != null) paneMessage = new Object[]{instructions, paneMessage};

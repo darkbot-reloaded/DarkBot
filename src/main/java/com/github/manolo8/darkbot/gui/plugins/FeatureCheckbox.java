@@ -8,9 +8,8 @@ import javax.swing.*;
 class FeatureCheckbox extends JCheckBox {
 
     FeatureCheckbox(FeatureDefinition<?> feature) {
-        setSelected(feature.isEnabled());
+        super(feature.getName(), null, feature.canLoad());
 
-        setText(feature.getName());
         if (!feature.getDescription().isEmpty())
             setToolTipText(feature.getDescription());
         setOpaque(false);

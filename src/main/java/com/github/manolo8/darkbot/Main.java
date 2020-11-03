@@ -41,6 +41,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -102,7 +103,7 @@ public class Main extends Thread implements PluginListener {
         });
 
         this.status.add(this::onRunningToggle);
-        this.configChange.add(this::setConfig);
+        this.configChange.add(this::setConfigInternal);
 
         this.pluginHandler.updatePluginsSync();
         this.pluginHandler.addListener(this);
@@ -113,7 +114,7 @@ public class Main extends Thread implements PluginListener {
             Popups.showMessageAsync("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
 
         API.createWindow();
-        if (params != null && params.getAutoStart()) setRunning(true);
+        if (params.getAutoStart()) setRunning(true);
         start();
     }
 
@@ -290,12 +291,27 @@ public class Main extends Thread implements PluginListener {
     }
 
     public void setConfig(String config) {
+        this.configChange.send(config);
+    }
+
+    public MainGui getGui() {
+        return form;
+    }
+
+    private void setConfigInternal(String config) {
         if (configManager.getConfigName().equals(config)) return;
-        this.config = configManager.loadConfig(config);
-        mapManager.updateAreas();
-        featureRegistry.updateConfig();
-        form.updateConfiguration();
-        setModule(module, true);
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                this.config = configManager.loadConfig(config);
+                mapManager.updateAreas();
+                pluginHandler.updateConfig(); // Get plugins to update what features are enabled
+                featureRegistry.updateConfig(); // Update the features & configurables
+                form.updateConfiguration(); // Rebuild config gui
+                setModule(module, true);
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
 }

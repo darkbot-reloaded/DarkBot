@@ -81,10 +81,13 @@ public class FeatureDefinition<T> {
     public void setStatus(boolean enabled) {
         if (setStatusInternal(enabled)) {
             ConfigEntity.changed();
-            listener.send(this);
+            sendUpdate();
         }
     }
 
+    public void sendUpdate() {
+        listener.send(this);
+    }
 
     private boolean setStatusInternal(boolean enabled) {
         if (enabled) return plugin.getInfo().ENABLED_FEATURES.add(id) | plugin.getInfo().DISABLED_FEATURES.remove(id);
