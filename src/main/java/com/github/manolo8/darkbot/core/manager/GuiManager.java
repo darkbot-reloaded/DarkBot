@@ -69,6 +69,8 @@ public class GuiManager implements Manager {
 
     public int deaths;
 
+    private boolean needRefresh;
+
     public GuiManager(Main main) {
         this.main = main;
 
@@ -79,6 +81,8 @@ public class GuiManager implements Manager {
         this.group = register("group", new GroupManager(main));
 
         this.main.status.add(value -> validTime = System.currentTimeMillis());
+
+        this.needRefresh = false;
     }
 
     public Gui register(String key) {
@@ -153,6 +157,7 @@ public class GuiManager implements Manager {
 
     private boolean isDead() {
         if (repairAddress != 0) {
+            this.needRefresh = true;
             return API.readMemoryBoolean(repairAddress + 40);
         } else if (isInvalidShip()) {
             long[] values = API.queryMemory(ByteUtils.getBytes(guiAddress, mainAddress), 1);
@@ -211,12 +216,12 @@ public class GuiManager implements Manager {
 
         HeroManager hero = main.hero;
         if (main.config.MISCELLANEOUS.REFRESH_AFTER_REVIVE
-                && main.repairManager.wasDead()
-                && System.currentTimeMillis() - lastRepair > 5000
+                && this.needRefresh
+                && System.currentTimeMillis() - lastRepair > 5_000
                 && hero.health.hp >= 1_000 ){
             System.out.println("Triggering refresh: refreshing after death");
             API.handleRefresh();
-            main.repairManager.resetDead();
+            this.needRefresh = false;
             return false;
         }
         if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
