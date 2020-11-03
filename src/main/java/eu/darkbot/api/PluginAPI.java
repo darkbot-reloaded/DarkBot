@@ -11,6 +11,7 @@ public interface PluginAPI {
     /**
      * @return {@link BackpageAPI}
      * @throws WrongThreadException on access backpage with thread other than backpage one.
+     * @see eu.darkbot.api.plugin.Task
      */
     BackpageAPI getBackpageManager() throws WrongThreadException;
 

@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * API for special event: Eternal Gate
  */
-public interface EternalGateAPI extends Gui, API {
+public interface EternalGateAPI extends API {
     int getKeys();
     int getBoosterPoints();
     int getCurrentWave();

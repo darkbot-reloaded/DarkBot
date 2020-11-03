@@ -115,6 +115,9 @@ public interface Ship extends Entity, Health {
         return isInFormation(formation.ordinal());
     }
 
+    /**
+     * Represents in-game fractions.
+     */
     enum Faction {
         NONE,
         MMO,
@@ -123,6 +126,9 @@ public interface Ship extends Entity, Health {
         SATURN
     }
 
+    /**
+     * Represents in-game clans diplomacy types.
+     */
     enum Diplomacy {
         NONE,
         ALLIED,

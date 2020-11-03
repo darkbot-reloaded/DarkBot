@@ -11,9 +11,9 @@ public interface GroupMember extends PartialGroupMember {
     int getFactionId();
     int getLevel();
     int getMapId();
-    boolean getIsAttacked();
-    boolean getIsCloaked();
-    boolean getIsLeader();
-    boolean getIsDead();
-    boolean getIsLocked(); // is selected by hero
+    boolean isAttacked();
+    boolean isCloaked();
+    boolean isLeader();
+    boolean isDead();
+    boolean isLocked(); // is selected by hero
 }

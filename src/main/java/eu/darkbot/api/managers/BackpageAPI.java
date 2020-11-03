@@ -7,6 +7,10 @@ import org.jetbrains.annotations.Nullable;
 import java.net.HttpURLConnection;
 import java.net.URI;
 
+/**
+ * API to manage, connect backpage of the game.
+ * {@link BackpageAPI} should be called only from {@link eu.darkbot.api.plugin.Task} thread.
+ */
 public interface BackpageAPI extends API {
 
     String getSid();

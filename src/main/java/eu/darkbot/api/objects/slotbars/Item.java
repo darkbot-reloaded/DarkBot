@@ -39,11 +39,13 @@ public interface Item {
     //boolean isVisible();
 
     /**
+     * TODO
      * @return time in (ms, sec???) needed to be passed
      */
     double readyIn();
 
     /**
+     * TODO
      * @return total cooldown time in (ms, sec???) of item
      */
     double totalCooldown();

@@ -11,8 +11,8 @@ public interface Group {
     int getId();
     int getSize();
     int getMaxSize();
-    boolean getIsOpen(); // if the group is open to allowing anyone to invite
-    boolean getIsLeader();
+    boolean isOpen(); // if the group is open to allowing anyone to invite
+    boolean isLeader();
 
     /**
      * @return if user is currently in group or not

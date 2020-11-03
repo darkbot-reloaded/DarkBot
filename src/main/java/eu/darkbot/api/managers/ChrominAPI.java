@@ -6,7 +6,7 @@ import eu.darkbot.api.objects.Gui;
 /**
  * API for chromin data
  */
-public interface ChrominAPI extends Gui, API {
+public interface ChrominAPI extends API {
     double getCurrentAmount();
     double getMaxAmount();
 }

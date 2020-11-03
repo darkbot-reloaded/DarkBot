@@ -1,12 +1,13 @@
 package eu.darkbot.api.objects.slotbars;
 
+import eu.darkbot.api.objects.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
 
-public interface CategoryBar {
+public interface CategoryBar extends Point {
 
     /**
      * @param category {@link Category} to be checked

@@ -22,5 +22,5 @@ public interface Portal extends Entity {
     int getPortalType();
 
     // TODO: 01.11.2020 not sure which and when.
-    int getFactionId();
+    Ship.Faction getFactionId();
 }

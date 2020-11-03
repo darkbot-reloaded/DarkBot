@@ -8,7 +8,7 @@ public interface Npc extends Ship {
     int getNpcId();
 
     /**
-     * @return true if {@link} has {@code InstaShield} effect
+     * @return true if {@link Npc} has {@code InstaShield} effect
      */
     boolean hasInstaShield();
 }
