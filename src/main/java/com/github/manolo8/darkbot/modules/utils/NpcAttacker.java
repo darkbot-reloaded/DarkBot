@@ -18,7 +18,7 @@ public class NpcAttacker {
     protected MapManager mapManager;
     protected HeroManager hero;
     protected Drive drive;
-    protected final Config.KeyBinds KEY_BINDS;
+    protected final Config.Miscellaneous.KeyBinds KEY_BINDS;
 
     public Npc target;
     protected Long ability;
@@ -36,7 +36,7 @@ public class NpcAttacker {
         this.mapManager = main.mapManager;
         this.hero = main.hero;
         this.drive = hero.drive;
-        this.KEY_BINDS = main.config.KEY_BINDS;
+        this.KEY_BINDS = main.config.MISCELLANEOUS.KEY_BINDS;
     }
 
     public String status() {

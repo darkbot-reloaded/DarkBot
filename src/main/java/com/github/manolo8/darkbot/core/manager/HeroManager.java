@@ -18,7 +18,7 @@ public class HeroManager extends Ship implements Manager {
     public static HeroManager instance;
     public final Main main;
     private final SettingsManager settings;
-    private final Config.KeyBinds KEY_BINDS;
+    private final Config.Miscellaneous.KeyBinds KEY_BINDS;
 
     private long staticAddress;
 
@@ -45,7 +45,7 @@ public class HeroManager extends Ship implements Manager {
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
         this.map = main.starManager.byId(-1);
-        this.KEY_BINDS = main.config.KEY_BINDS;
+        this.KEY_BINDS = main.config.MISCELLANEOUS.KEY_BINDS;
     }
 
     @Override

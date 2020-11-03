@@ -150,11 +150,4 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
         }
     }
 
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        long start = System.currentTimeMillis();
-        super.paintComponent(g);
-        System.out.println(System.currentTimeMillis() - start);
-    }
 }

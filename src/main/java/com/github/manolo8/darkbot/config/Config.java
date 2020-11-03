@@ -101,15 +101,6 @@ public class Config {
         }
     }
 
-    public @Option KeyBinds KEY_BINDS = new KeyBinds();
-    public static class KeyBinds {
-        public @Option Character CONFIGURATION_KEY = 'C';
-        public @Option Character JUMP_KEY = 'J';
-        public @Option Character PET_KEY = 'E';
-        public @Option Character LASER_KEY = (char) 0x11;
-        public @Option Character ROCKET_KEY = ' ';
-    }
-
     public @Option Collect COLLECT = new Collect();
     public static class Collect {
         public @Option boolean STAY_AWAY_FROM_ENEMIES;
@@ -178,6 +169,15 @@ public class Config {
         public @Option boolean HONOR_LOST_EXACT = true;
         public @Option boolean LOG_CHAT = false;
         public @Option boolean LOG_DEATHS = false;
+
+        public @Option KeyBinds KEY_BINDS = new KeyBinds();
+        public static class KeyBinds {
+            public @Option Character CONFIGURATION_KEY = 'C';
+            public @Option Character JUMP_KEY = 'J';
+            public @Option Character PET_KEY = 'E';
+            public @Option Character LASER_KEY = (char) 0x11;
+            public @Option Character ROCKET_KEY = ' ';
+        }
     }
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
