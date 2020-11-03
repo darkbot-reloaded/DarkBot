@@ -35,8 +35,8 @@ public class GalaxyInfo {
         this.bonusRewardsDay    = XmlHelper.valueToInt(e, "bonusRewardsDay");
         this.energyCost         = XmlHelper.valueToInt(XmlHelper.getElement(e, "energy_cost"));
 
-        if (XmlHelper.hasAnyElement(e, "gates"))       updateGates(XmlHelper.getElement(e, "gates"));
         if (XmlHelper.hasAnyElement(e, "items"))       updateItems(XmlHelper.getElement(e, "items"));
+        if (XmlHelper.hasAnyElement(e, "gates"))       updateGates(XmlHelper.getElement(e, "gates"));
         if (XmlHelper.hasAnyElement(e, "multipliers")) updateMultipliers(XmlHelper.getElement(e, "multipliers"));
 
         if (XmlHelper.hasAnyElement(e, "setup")) {
