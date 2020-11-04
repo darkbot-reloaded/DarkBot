@@ -9,36 +9,40 @@ import java.util.Locale;
 /**
  * API for ore related things such as selling ores or getting ore amount.
  */
-public interface OreAPI extends Gui, API {
-    /**
-     * Sells the specified ore, trade window must be open for this method to work
-     *
-     * @param ore  the {@code Ore} you want to sell it must be {@code sellable}
-     * @see #showTrade
-     * @see #canSellOres
-     * @see Ore#sellable
-     */
-    void sellOre(Ore ore);
+public interface OreAPI extends API {
+    interface Trade extends Gui {
+        /**
+         * Sells the specified ore, trade window must be open for this method to work
+         *
+         * @param ore the {@code Ore} you want to sell it must be {@code sellable}
+         * @see #showTrade
+         * @see #canSellOres
+         * @see Ore#sellable
+         */
+        void sellOre(Ore ore);
 
-    /**
-     * Determines if ores can be sold based on if the ore trade window is open or not.
-     *
-     * @return true if ore trade window is open, false otherwise
-     */
-    boolean canSellOres();
+        /**
+         * Determines if ores can be sold based on if the ore trade window is open or not.
+         *
+         * @return true if ore trade window is open, false otherwise
+         */
+        boolean canSellOres();
 
-    /**
-     * Will either open or close the ore trade window based on the value of {@code show}
-     *
-     * @param show  true for showing ore trade window, false for closing ore trade window
-     * @param base  the {@code BasePoint} of the ore trader base station
-     * @return true if ore trader window has been opened or closed and its animation is done,
-     *         false if animation is not done, or no action is needed to be taken
-     *         to change the visibility status of the ore trader window
-     */
-    boolean showTrade(boolean show, BasePoint base);
+        /**
+         * Will either open or close the ore trade window based on the value of {@code show}
+         *
+         * @param show true for showing ore trade window, false for closing ore trade window
+         * @param base the {@code BasePoint} of the ore trader base station
+         * @return true if ore trader window has been opened or closed and its animation is done,
+         * false if animation is not done, or no action is needed to be taken
+         * to change the visibility status of the ore trader window
+         */
+        boolean showTrade(boolean show, BasePoint base);
+    }
 
-    int getAmount(Ore ore);
+    interface Refinery extends Gui {
+        int getAmount(Ore ore);
+    }
 
     /**
      * Types of Ores visible in refinery window
