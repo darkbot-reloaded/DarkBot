@@ -96,7 +96,7 @@ public class Main extends Thread implements PluginListener {
         super("Main");
         VerifierChecker.getAuthApi().setupAuth();
         API = configManager.getAPI(params);
-        API.setSize(config.BOT_SETTINGS.DISPLAY.width, config.BOT_SETTINGS.DISPLAY.height);
+        API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();
@@ -136,7 +136,7 @@ public class Main extends Thread implements PluginListener {
             avgTick = ((avgTick * 9) + (System.currentTimeMillis() - time)) / 10;
 
             Time.sleepMax(time, botInstaller.invalid.get() ? 1000 :
-                    Math.max(config.BOT_SETTINGS.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
+                    Math.max(config.BOT_SETTINGS.OTHER.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
         }
     }
 

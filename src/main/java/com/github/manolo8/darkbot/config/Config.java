@@ -31,7 +31,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
@@ -173,40 +172,54 @@ public class Config {
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
     public static class BotSettings {
-        public @Option @Editor(LangEditor.class) @Options(LanguageSupplier.class)
-                Locale LOCALE = new Locale(Locale.getDefault().getLanguage());
-        public @Option boolean FORCE_GAME_LANGUAGE = false;
-        public @Option boolean SPOOF_CLIENT = false;
-        public @Option @Num(min = 10, max = 300) int ZONE_RESOLUTION = 30;
-        public @Option boolean MAP_START_STOP = false;
-        public @Option boolean CONFIRM_EXIT = true;
-        public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
-        public @Option boolean DEV_STUFF = false;
-        public @Option @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
-        public @Option boolean FULLY_HIDE_API = true;
-        public @Option boolean SAVE_GUI_POS = false;
-        public @Option boolean ENFORCE_HW_ACCEL = true;
-        public @Option boolean DISABLE_MASTER_PASSWORD = false;
+        public @Option BotGui BOT_GUI = new BotGui();
+        public static class BotGui {
+            @Option @Editor(LangEditor.class) @Options(LanguageSupplier.class)
+            public Locale LOCALE = new Locale(Locale.getDefault().getLanguage());
 
-        public WindowPosition MAIN_GUI_WINDOW = new WindowPosition();
-        public static class WindowPosition {
-            // x and y refer to top left coordinates of window
-            public int x = Integer.MIN_VALUE, y = Integer.MIN_VALUE;
-            public int width = MainGui.DEFAULT_WIDTH, height = MainGui.DEFAULT_HEIGHT;
+            public @Option boolean CONFIRM_EXIT = true;
+            public @Option boolean SAVE_GUI_POS = false;
+            public @Option boolean CONFIG_TREE_TABS = true;
+            public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
+
+            public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
+            public WindowPosition MAIN_GUI_WINDOW = new WindowPosition();
+
+            public static class WindowPosition {
+                // x and y refer to top left coordinates of window
+                public int x = Integer.MIN_VALUE, y = Integer.MIN_VALUE;
+                public int width = MainGui.DEFAULT_WIDTH, height = MainGui.DEFAULT_HEIGHT;
+            }
         }
 
-        public @Option Display DISPLAY = new Display();
-        public static class Display {
-            public @Option @Editor(JCheckboxListField.class) @Options(DisplayFlag.Supplier.class)
-                    Set<DisplayFlag> TOGGLE = EnumSet.of(
-                            HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA);
-            public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
-            public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
-            public @Option(key = "colors") ColorScheme cs = new ColorScheme();
+        public @Option APIConfig API_CONFIG = new APIConfig();
+        public static class APIConfig {
+            public @Option @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
+            public @Option boolean FULLY_HIDE_API = true;
+            public @Option boolean SPOOF_CLIENT = false;
+            public @Option boolean FORCE_GAME_LANGUAGE = false;
+            public @Option boolean ENFORCE_HW_ACCEL = true;
 
             public int width = 1280;
             public int height = 800;
-            public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
+        }
+
+        public @Option MapDisplay MAP_DISPLAY = new MapDisplay();
+        public static class MapDisplay {
+            @Option @Editor(JCheckboxListField.class) @Options(DisplayFlag.Supplier.class)
+            public Set<DisplayFlag> TOGGLE = EnumSet.of(
+                    HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA);
+            public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
+            public @Option boolean MAP_START_STOP = false;
+            public @Option(key = "colors") ColorScheme cs = new ColorScheme();
+        }
+
+        public @Option Other OTHER = new Other();
+        public static class Other {
+            public @Option boolean DISABLE_MASTER_PASSWORD = false;
+            public @Option @Num(min = 10, max = 300) int ZONE_RESOLUTION = 30;
+            public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
+            public @Option boolean DEV_STUFF = false;
         }
     }
 

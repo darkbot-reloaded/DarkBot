@@ -100,7 +100,7 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
             }
         }
 
-        component.setPreferredSize(new Dimension(550, 270));
+        component.setPreferredSize(new Dimension(500, 270));
     }
 
     protected RowFilter<T, Integer> extraFilters() {

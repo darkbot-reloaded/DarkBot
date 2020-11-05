@@ -141,13 +141,13 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             list.add(create("discord", e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
             list.add(create("copy_sid", e -> SystemUtils.toClipboard(main.statsManager.sid)));
             list.add(create("reset_colorscheme", e -> {
-                main.config.BOT_SETTINGS.DISPLAY.cs = new ColorScheme();
+                main.config.BOT_SETTINGS.MAP_DISPLAY.cs = new ColorScheme();
                 ConfigEntity.changed();
                 main.getGui().updateConfiguration();
             }));
 
 
-            if (main.config.BOT_SETTINGS.DEV_STUFF) {
+            if (main.config.BOT_SETTINGS.OTHER.DEV_STUFF) {
                 list.add(createSeparator("Dev stuff"));
                 list.add(create("Save SWF", e -> SWFUtils.dumpMainSWF()));
             }

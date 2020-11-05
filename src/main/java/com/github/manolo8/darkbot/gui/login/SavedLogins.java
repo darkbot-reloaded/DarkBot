@@ -94,7 +94,7 @@ public class SavedLogins extends JPanel implements LoginScreen {
     }
 
     private char[] requestMasterPassword() {
-        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISABLE_MASTER_PASSWORD) return new char[]{};
+        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.OTHER.DISABLE_MASTER_PASSWORD) return new char[]{};
 
         JPasswordField pass = new JPasswordField(10);
 
@@ -108,7 +108,7 @@ public class SavedLogins extends JPanel implements LoginScreen {
     }
 
     private char[] createMasterPassword() {
-        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISABLE_MASTER_PASSWORD) return new char[]{};
+        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.OTHER.DISABLE_MASTER_PASSWORD) return new char[]{};
         JPasswordField pass = new JPasswordField(10);
 
         JOptionPane.showMessageDialog(this, new Object[]{

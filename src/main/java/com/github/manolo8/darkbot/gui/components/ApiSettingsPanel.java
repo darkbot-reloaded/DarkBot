@@ -13,12 +13,12 @@ import javax.swing.*;
 
 public class ApiSettingsPanel extends JPanel {
 
-    private final Config.BotSettings.Display display;
+    private final Config.BotSettings.APIConfig apiConfig;
     private final JSpinner w, h;
 
-    public ApiSettingsPanel(Config.BotSettings.Display display, JComponent parent) {
+    public ApiSettingsPanel(Config.BotSettings.APIConfig display, JComponent parent) {
         super(new MigLayout("wrap 6"));
-        this.display = display;
+        this.apiConfig = display;
 
         setBorder(UIUtils.getBorder());
 
@@ -51,7 +51,7 @@ public class ApiSettingsPanel extends JPanel {
     }
 
     private void updateSize() {
-        Main.API.setSize(display.width = (int) w.getValue(), display.height = (int) h.getValue());
+        Main.API.setSize(apiConfig.width = (int) w.getValue(), apiConfig.height = (int) h.getValue());
         ConfigEntity.changed();
     }
 

@@ -1,10 +1,15 @@
 package com.github.manolo8.darkbot.gui.components;
 
+import com.formdev.flatlaf.ui.FlatButtonBorder;
+import com.github.manolo8.darkbot.gui.utils.CustomTabBorder;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,26 +43,34 @@ public class TabbedPane extends JPanel {
         return tab;
     }
 
-
     private void selectTab(Tab tab) {
         Tab old = current;
         current = tab;
         if (old != null) {
+            old.updateBorder();
             remove(old.component);
         }
+        current.updateBorder();
         add(tab.component, "grow");
         revalidate();
         repaint();
     }
 
     private class Tab extends MainButton {
+        private final Border HIGHLIGHT = new CustomTabBorder(0, 0, 2, 0), DEFAULT = new FlatButtonBorder();
 
         private final JComponent component;
 
         private Tab(Icon icon, String key, JComponent component) {
             super(icon, I18n.getOrDefault(key, null),
                     key == null ? null : I18n.getOrDefault(key + ".desc", null));
+            setFocusPainted(false);
+
             this.component = component;
+        }
+
+        public void updateBorder() {
+            setBorder(current == this ? HIGHLIGHT : DEFAULT);
         }
 
         @Override

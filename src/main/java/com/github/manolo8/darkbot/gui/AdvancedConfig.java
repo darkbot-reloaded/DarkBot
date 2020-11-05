@@ -1,20 +1,34 @@
 package com.github.manolo8.darkbot.gui;
 
+import com.formdev.flatlaf.ui.FlatButtonBorder;
+import com.formdev.flatlaf.ui.FlatLineBorder;
+import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.config.tree.ConfigNode;
 import com.github.manolo8.darkbot.config.tree.ConfigTree;
+import com.github.manolo8.darkbot.config.tree.TreeFilter;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
+import com.github.manolo8.darkbot.gui.components.MainButton;
+import com.github.manolo8.darkbot.gui.utils.CustomTabBorder;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.tree.EditorManager;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.MatteBorder;
 import javax.swing.plaf.LayerUI;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseWheelEvent;
+import java.util.List;
+import java.util.ArrayList;
 
 public class AdvancedConfig extends JPanel implements PluginListener {
 
@@ -24,10 +38,12 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
     private Object config;
     private ConfigTree treeModel;
+    private JPanel tabs;
+    private List<TabButton> buttons = new ArrayList<>();
     private boolean packed = false; // If this is a packed config in a floating window
 
     public AdvancedConfig() {
-        setLayout(new MigLayout("ins 0, gap 0, fill, wrap 1", "[]", "[][grow]"));
+        setLayout(new MigLayout("ins 0, gap 0, fill, wrap 2", "[][grow]", "[][grow]"));
     }
 
     public AdvancedConfig(Object config) {
@@ -42,8 +58,15 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         this.config = config;
         this.treeModel = new ConfigTree(config);
         if (!packed) {
-            add(new SearchField(treeModel::setFilter), "grow");
+            if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.CONFIG_TREE_TABS)
+                treeModel.getFilter().setSelectedRoot(0);
+
+            tabs = new JPanel(new MigLayout("ins 0, gap 0, wrap 1", "[]"));
+
+            add(new SearchField(this::setSearch), "span 2, grow");
+            add(tabs, "grow");
             add(setupUI(), "grow");
+            updateTabs();
         } else {
             add(setupUI());
         }
@@ -63,6 +86,60 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
     public void setCustomConfig(String name, Object config) {
         treeModel.setCustom(name, config);
+        updateTabs();
+    }
+
+    private void setSearch(String search) {
+        TreeFilter filter = treeModel.getFilter();
+        boolean prevUnfiltered = filter.isUnfiltered();
+        treeModel.getFilter().setSearch(search);
+        treeModel.updateListeners();
+        if (prevUnfiltered != filter.isUnfiltered()) updateTabs();
+    }
+
+    private void updateTabs() {
+        if (tabs == null) return;
+        tabs.removeAll();
+        if (treeModel.getFilter().isUnfiltered() &&
+                ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.CONFIG_TREE_TABS) {
+
+            int tlc = treeModel.getTopLevelChildrenCount();
+
+            while (buttons.size() < tlc) buttons.add(new TabButton(buttons.size()));
+
+            for (int i = 0; i < tlc; i++) {
+                TabButton tb = buttons.get(i);
+                tb.update();
+                tabs.add(tb, "grow");
+            }
+        }
+
+        tabs.revalidate();
+    }
+
+    private class TabButton extends MainButton {
+        private final Border HIGHLIGHT = new MatteBorder(0, 0, 0, 3, UIUtils.TAB_HIGLIGHT);
+
+        private final int i;
+
+        public TabButton(int i) {
+            super("");
+            this.i = i;
+            update();
+        }
+
+        public void update() {
+            setBorder(treeModel.getFilter().getSelectedRoot() == i ? HIGHLIGHT : null);
+            ConfigNode node = treeModel.getTopLevelChild(i);
+            if (node != null) setText(I18n.getOrDefault(node.key, node.name));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            treeModel.getFilter().setSelectedRoot(i);
+            buttons.forEach(TabButton::update);
+            treeModel.updateListeners();
+        }
     }
 
     private JComponent setupUI() {
@@ -103,17 +180,25 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     }
 
     private void unfoldTopLevelTree(JTree configTree) {
-        for (int i = 0; i < configTree.getRowCount(); i++) {
-            if (configTree.isExpanded(i)) continue;
+        for (int row = 0; row < configTree.getRowCount(); row++) {
+            if (configTree.isExpanded(row)) continue;
 
-            TreePath path = configTree.getPathForRow(i);
+            TreePath path = configTree.getPathForRow(row);
             if (treeModel.isLeaf(path.getLastPathComponent())) continue; // Ignore leaf nodes
 
             path = path.getParentPath();
 
-            if (path == null || path.getPathCount() == 1 || // Unfold root or top-level nodes
-                    treeModel.getChildCount(path.getLastPathComponent()) == 1) { // Unfold children with no siblings
-                configTree.expandRow(i);
+            if (path == null || path.getPathCount() == 1) configTree.expandRow(row); // Unfold root or top-level nodes
+            else {
+                // Unfold children with no siblings
+                int children = treeModel.getChildCount(path.getLastPathComponent());
+                boolean hasLeaf = false;
+                for (int child = 0; child < children; child++) {
+                    if (!treeModel.isLeaf(treeModel.getChild(path.getLastPathComponent(), child))) continue;
+                    hasLeaf = true;
+                    break;
+                }
+                if (!hasLeaf) configTree.expandRow(row);
             }
         }
     }

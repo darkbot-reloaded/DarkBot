@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -30,14 +29,14 @@ public class VisibilityButton extends TitleBarToggleButton<JFrame> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!SwingUtilities.isRightMouseButton(e)) return;
-                new ApiSettingsPanel(main.config.BOT_SETTINGS.DISPLAY, VisibilityButton.this);
+                new ApiSettingsPanel(main.config.BOT_SETTINGS.API_CONFIG, VisibilityButton.this);
             }
         });
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        toggleVisibility(main.config.BOT_SETTINGS.FULLY_HIDE_API, isSelected());
+        toggleVisibility(main.config.BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API, isSelected());
     }
 
     private void toggleVisibility(boolean minimizing, boolean visible) {

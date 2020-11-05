@@ -27,8 +27,6 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
     public JNpcInfoTable(Config.Loot config) {
         super(new NpcTableModel(config), config.NPC_INFOS, config.MODIFIED_NPC, NpcInfo::new);
 
-        super.getComponent().setPreferredSize(new Dimension(550, 270));
-
         getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(3, SortOrder.DESCENDING),
                 new RowSorter.SortKey(2, SortOrder.ASCENDING),
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
