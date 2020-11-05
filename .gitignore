@@ -3,12 +3,3 @@
 /test
 /out
 dependency-reduced-pom.xml
-plugins/PArekPlugin.jar
-lib/verifier.jar
-lib/DarkFlash.dll
-lib/DarkBot.dll
-lib/DarkBoatAPI.dll
-DarkBOT.iml
-credentials.json
-config_old.json
-config.json

@@ -216,12 +216,11 @@ public class GuiManager implements Manager {
 
         HeroManager hero = main.hero;
         if (this.needRefresh && System.currentTimeMillis() - lastRepair > 5_000){
+            this.needRefresh = false;
             if(main.config.MISCELLANEOUS.REFRESH_AFTER_REVIVE ){
                 System.out.println("Triggering refresh: refreshing after death");
                 API.handleRefresh();
-                return false;
             }
-            this.needRefresh = false;
         }
         if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
             validTime = System.currentTimeMillis();
