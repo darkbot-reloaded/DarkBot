@@ -19,7 +19,7 @@ public class StringQuery {
         else return matches(toStr, query);
     }
 
-    public boolean matches(String toStr, String query) {
+    private boolean matches(String toStr, String query) {
         if (query == null || query.isEmpty()) return true;
         if (!matchCase) {
             toStr = toStr.toLowerCase(Locale.ROOT);

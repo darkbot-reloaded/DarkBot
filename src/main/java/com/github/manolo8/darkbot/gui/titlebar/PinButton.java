@@ -15,14 +15,14 @@ public class PinButton extends TitleBarToggleButton<JFrame> {
         super(PIN, frame);
         setSelectedIcon(UNPIN);
         setToolTipText(I18n.get("gui.pin_button"));
-        setSelected(ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.ALWAYS_ON_TOP);
+        setSelected(ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.ALWAYS_ON_TOP);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         frame.setAlwaysOnTop(isSelected());
 
-        ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.DISPLAY.ALWAYS_ON_TOP = isSelected();
+        ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.ALWAYS_ON_TOP = isSelected();
         ConfigEntity.changed();
     }
 

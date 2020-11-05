@@ -33,7 +33,7 @@ public class LoginUtils {
     private static final Map<String, String> FORCED_PARAMS = new HashMap<>();
     static {
         String lang = I18n.getLocale().getLanguage();
-        if (!lang.isEmpty() && ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.FORCE_GAME_LANGUAGE)
+        if (!lang.isEmpty() && ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.FORCE_GAME_LANGUAGE)
             FORCED_PARAMS.put("lang", lang);
         FORCED_PARAMS.put("display2d", "2");
         FORCED_PARAMS.put("autoStartEnabled", "1");
@@ -139,7 +139,7 @@ public class LoginUtils {
         Http req = Http.create("https://" + loginData.getUrl() + "/indexInternal.es?action=internalMapRevolution", false)
                 .setRawHeader("Cookie", "dosid=" + loginData.getSid());
 
-        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.SPOOF_CLIENT)
+        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.SPOOF_CLIENT)
             req.setUserAgent("BigpointClient/1.1.0");
 
         String flashEmbed = req.consumeInputStream(inputStream ->

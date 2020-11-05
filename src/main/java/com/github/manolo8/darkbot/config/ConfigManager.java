@@ -103,16 +103,16 @@ public class ConfigManager {
     public IDarkBotAPI getAPI(StartupParams params) {
         if (params.useNoOp()) return new NoopApiAdapter();
         try {
-            if (config.BOT_SETTINGS.API == 0) return new DarkBotApiAdapter();
-            else if (config.BOT_SETTINGS.API == 1) return new DarkFlashApiAdapter(params);
-            else if (config.BOT_SETTINGS.API == 2) return new DarkBoatAdapter(params);
-            else if (config.BOT_SETTINGS.API == 3) return new NativeApiAdapter(params);
-            else if (config.BOT_SETTINGS.API == 4) return new NoopApiAdapter();
-            else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API);
+            if (config.BOT_SETTINGS.API_CONFIG.API == 0) return new DarkBotApiAdapter();
+            else if (config.BOT_SETTINGS.API_CONFIG.API == 1) return new DarkFlashApiAdapter(params);
+            else if (config.BOT_SETTINGS.API_CONFIG.API == 2) return new DarkBoatAdapter(params);
+            else if (config.BOT_SETTINGS.API_CONFIG.API == 3) return new NativeApiAdapter(params);
+            else if (config.BOT_SETTINGS.API_CONFIG.API == 4) return new NoopApiAdapter();
+            else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API_CONFIG.API);
         } catch (Error e) {
-            System.out.println("Error enabling API #" + config.BOT_SETTINGS.API + ", using no-op api");
+            System.out.println("Error enabling API #" + config.BOT_SETTINGS.API_CONFIG.API + ", using no-op api");
             e.printStackTrace();
-            config.BOT_SETTINGS.API = 4;
+            config.BOT_SETTINGS.API_CONFIG.API = 4;
             Popups.showMessageAsync(
                     "API failed to load",
                     "The API you had selected is not able to load.\n" +
