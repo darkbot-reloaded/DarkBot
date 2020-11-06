@@ -41,7 +41,6 @@ public class RepairManager implements Manager {
             writtenToLog = true;
             return;
         }
-
         if (repairAddress == 0) updateRepairAddr();
 
         killerName = API.readMemoryString(API.readMemoryLong(repairAddress + 0x68));

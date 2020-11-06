@@ -161,6 +161,7 @@ public class Config {
 
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();
     public static class Miscellaneous {
+        public @Option boolean REFRESH_AFTER_REVIVE = false;
         public @Option @Num(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
         public @Option @Num(max = 60 * 12, step = 10) int PAUSE_FOR = 5;
         public @Option boolean RESET_REFRESH = true;
