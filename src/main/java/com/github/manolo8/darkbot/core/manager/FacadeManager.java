@@ -19,15 +19,16 @@ public class FacadeManager implements Manager {
     private final PairArray mediators        = PairArray.ofArray();
     private final List<Updatable> updatables = new ArrayList<>();
 
-    public final LogMediator log              = registerMediator("LogWindowMediator", new LogMediator());
-    public final ChatProxy chat               = registerProxy("ChatProxy", new ChatProxy());
-    public final StatsProxy stats             = registerProxy("StatsProxy", new StatsProxy());
-    public final EscortProxy escort           = registerProxy("payload_escort", new EscortProxy());
-    public final BoosterProxy booster         = registerProxy("BoosterProxy", new BoosterProxy());
-    public final SlotBarsProxy slotBars       = registerProxy("ItemsControlMenuProxy", new SlotBarsProxy());
-    public final EternalGateProxy eternalGate = registerProxy("eternal_gate", new EternalGateProxy());
-    public final ChrominProxy chrominEvent    = registerProxy("chrominEvent", new ChrominProxy());
-    public final SettingsProxy settings       = registerProxy("SettingsWindowFUIProxy", new SettingsProxy());
+    public final LogMediator log                       = registerMediator("LogWindowMediator", new LogMediator());
+    public final ChatProxy chat                        = registerProxy("ChatProxy", new ChatProxy());
+    public final StatsProxy stats                      = registerProxy("StatsProxy", new StatsProxy());
+    public final EscortProxy escort                    = registerProxy("payload_escort", new EscortProxy());
+    public final BoosterProxy booster                  = registerProxy("BoosterProxy", new BoosterProxy());
+    public final SlotBarsProxy slotBars                = registerProxy("ItemsControlMenuProxy", new SlotBarsProxy());
+    public final EternalGateProxy eternalGate          = registerProxy("eternal_gate", new EternalGateProxy());
+    public final EternalBlacklightProxy blacklightGate = registerProxy("eternal_blacklight", new EternalBlacklightProxy());
+    public final ChrominProxy chrominEvent             = registerProxy("chrominEvent", new ChrominProxy());
+    public final SettingsProxy settings                = registerProxy("SettingsWindowFUIProxy", new SettingsProxy());
 
     public FacadeManager(Main main) {
         this.main = main;
