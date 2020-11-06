@@ -46,6 +46,7 @@ public class GuiManager implements Manager {
     public final Gui logout = register("logout");
     public final Gui eventProgress =  register("eventProgress");
     public final Gui eternalGate = register("eternal_gate");
+    public final Gui blacklightGate = register("eternal_blacklight");
     public final RefinementGui refinement = register("refinement", new RefinementGui());
     public final PetManager pet;
     public final OreTradeGui oreTrade;
