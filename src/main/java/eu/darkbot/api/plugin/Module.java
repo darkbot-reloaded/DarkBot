@@ -1,20 +1,20 @@
 package eu.darkbot.api.plugin;
 
-import eu.darkbot.api.core.Tickable;
-
-public interface Module extends Tickable {
+public interface Module {
 
     void onTickModule();
 
     void onStoppedModule();
 
-    @Override
-    default void onTick() {
-        this.onTickModule();
+    default boolean canRefresh() {
+        return true;
     }
 
-    @Override
-    default void onStopped() {
-        this.onStoppedModule();
+    default String status() {
+        return null;
+    }
+
+    default String onStoppedStatus() {
+        return null;
     }
 }
