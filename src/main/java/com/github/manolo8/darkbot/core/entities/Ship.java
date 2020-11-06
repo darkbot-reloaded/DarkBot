@@ -75,6 +75,10 @@ public class Ship extends Entity {
         }
     }
 
+    public long timeTo(double distance) {
+        return (long) (distance * 1000 / shipInfo.speed);
+    }
+
     public void setTimerTo(long time) {
         timer = System.currentTimeMillis() + time;
 
