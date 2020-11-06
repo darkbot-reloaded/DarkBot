@@ -29,11 +29,11 @@ public class EternalBlacklightProxy extends Updatable {
 
         long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
 
-        this.currentWave    = API.readMemoryInt(data + 0x40);
-        this.furthestWave   = API.readMemoryInt(data + 0x44);
-        this.isEventEnabled = API.readMemoryBoolean(data + 0x48);
-        this.cpuCount       = API.readMemoryInt(API.readMemoryLong(data + 0x78) + 0x28);
-        this.boosterPoints  = API.readMemoryInt(API.readMemoryLong(data + 0x80) + 0x28);
+        this.furthestWave    = API.readMemoryInt(data + 0x40);
+        this.boosterPoints   = API.readMemoryInt(data + 0x44);
+        this.isEventEnabled  = API.readMemoryBoolean(data + 0x48);
+        this.cpuCount        = API.readMemoryInt(API.readMemoryLong(data + 0x68) + 0x28);
+        this.currentWave     = API.readMemoryInt(API.readMemoryLong(data + 0x70) + 0x28);
 
         this.activeBoostersArr.update(API.readMemoryLong( data + 0x78));
         this.boostersOptionsArr.update(API.readMemoryLong(data + 0x80));
