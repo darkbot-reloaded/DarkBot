@@ -220,6 +220,7 @@ public class GuiManager implements Manager {
             if(main.config.MISCELLANEOUS.REFRESH_AFTER_REVIVE ){
                 System.out.println("Triggering refresh: refreshing after death");
                 API.handleRefresh();
+                return false;
             }
         }
         if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
