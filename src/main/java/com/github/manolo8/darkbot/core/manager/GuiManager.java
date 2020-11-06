@@ -81,8 +81,6 @@ public class GuiManager implements Manager {
         this.group = register("group", new GroupManager(main));
 
         this.main.status.add(value -> validTime = System.currentTimeMillis());
-
-        this.needRefresh = false;
     }
 
     public Gui register(String key) {
