@@ -19,10 +19,10 @@ public interface KeyBindsAPI {
      * @param shortcut   to be looked for
      * @param slotNumber between 1 - 10
      * @return {@link Character} associated with {@link Shortcut} otherwise null
-     * @throws IllegalStateException if {@code slotNumber < 1 || slotNumber > 10}
+     * @throws IllegalAccessException if {@code slotNumber < 1 || slotNumber > 10}
      */
     @Nullable
-    Character getKeyBind(@NotNull Shortcut shortcut, int slotNumber) throws IllegalStateException;
+    Character getKeyBind(@NotNull Shortcut shortcut, int slotNumber) throws IllegalAccessException;
 
     enum Shortcut {
         DEFAULT_BAR(0),
@@ -53,16 +53,16 @@ public interface KeyBindsAPI {
             return this.index;
         }
 
-        public int getIndex(int slotNumber) throws IllegalStateException {
+        public int getIndex(int slotNumber) throws IllegalAccessException {
             switch (this) {
                 case DEFAULT_BAR:
                     if (slotNumber < 1 || slotNumber > 10)
-                        throw new IllegalStateException("Invalid slot number!");
+                        throw new IllegalAccessException("Invalid slot number!");
                     return this.index + slotNumber - 1;
 
                 case PREMIUM_BAR:
                     if (slotNumber < 1 || slotNumber > 10)
-                        throw new IllegalStateException("Invalid slot number!");
+                        throw new IllegalAccessException("Invalid slot number!");
                     if (slotNumber == 10) return 33;
                     return this.index + slotNumber - 1;
 

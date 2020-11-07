@@ -34,6 +34,7 @@ public interface MovementAPI extends API {
 
     /**
      * @return current hero location.
+     * @see HeroAPI#getLocationInfo()
      */
     Location getCurrentLocation();
 
