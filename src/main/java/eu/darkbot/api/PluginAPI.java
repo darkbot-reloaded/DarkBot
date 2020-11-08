@@ -25,6 +25,8 @@ public interface PluginAPI {
      */
     Window getWindowUtility();
 
+    double getTickTime();
+
     class WrongThreadException extends RuntimeException {
         public WrongThreadException(String message) {
             super(message);

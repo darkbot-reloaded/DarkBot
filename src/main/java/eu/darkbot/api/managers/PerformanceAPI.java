@@ -24,6 +24,4 @@ public interface PerformanceAPI extends API {
      * @return current ping in milliseconds.
      */
     int getPing();
-
-    double getTickTime();
 }
