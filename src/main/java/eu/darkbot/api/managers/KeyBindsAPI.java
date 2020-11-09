@@ -3,6 +3,8 @@ package eu.darkbot.api.managers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+
 public interface KeyBindsAPI {
     /**
      * Search {@link Character} associated with given {@link Shortcut} in-game.
@@ -23,6 +25,18 @@ public interface KeyBindsAPI {
      */
     @Nullable
     Character getKeyBind(@NotNull Shortcut shortcut, int slotNumber) throws IllegalArgumentException;
+
+    /**
+     * Search {@link Character} associated with given slotEntry
+     *
+     * @param slotEntry with {@link Shortcut} as key and {@link Integer} as value
+     * @return {@link Character} associated with given {@link Map.Entry} otherwise null
+     * @throws IllegalArgumentException if {@code slotEntry.value < 1 || slotEntry.value > 10}
+     */
+    @Nullable
+    default Character getKeyBind(@NotNull Map.Entry<SlotBarAPI.Type, Integer> slotEntry) throws IllegalArgumentException {
+        return getKeyBind(slotEntry.getKey().getShortcutType(), slotEntry.getValue());
+    }
 
     enum Shortcut {
         DEFAULT_BAR(0),
