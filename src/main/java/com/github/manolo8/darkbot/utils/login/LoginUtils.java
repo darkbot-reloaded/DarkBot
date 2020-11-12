@@ -140,7 +140,7 @@ public class LoginUtils {
                 .setRawHeader("Cookie", "dosid=" + loginData.getSid());
 
         if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.SPOOF_CLIENT)
-            req.setUserAgent("BigpointClient/1.1.0");
+            req.setUserAgent("BigpointClient/1.2.0");
 
         String flashEmbed = req.consumeInputStream(inputStream ->
                 new BufferedReader(new InputStreamReader(inputStream))
