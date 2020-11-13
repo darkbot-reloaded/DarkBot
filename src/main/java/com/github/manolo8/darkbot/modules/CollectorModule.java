@@ -206,14 +206,6 @@ public class CollectorModule implements Module {
     }
 
     private boolean canCollect(Box box) {
-        if(config.COLLECT.PREVENT_COLLECTING_TOGETHER && main.mapManager.entities.ships.stream()
-                .filter(ship -> ship.shipInfo.destination.distance(box.locationInfo) == 0)
-                .anyMatch(ship -> hero.timeTo(hero.locationInfo.distance(box.locationInfo)) > ship.timeTo(ship.locationInfo.distance(box.locationInfo)))){
-            //prevent collecting together is enabled
-            //there are ships targeting same ore
-            //other ship can get there before me
-            return false;
-        }
         return box.boxInfo.collect
                 && !box.isCollected()
                 && drive.canMove(box.locationInfo.now)
