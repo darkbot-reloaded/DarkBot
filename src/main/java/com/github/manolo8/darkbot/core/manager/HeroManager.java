@@ -99,9 +99,11 @@ public class HeroManager extends Ship implements Manager {
 
     public void jumpPortal(Portal portal) {
         if (portal.removed) return;
-        if (System.currentTimeMillis() - portalTime > 15000 || (System.currentTimeMillis() - portalTime > 1000 &&
+        if ((System.currentTimeMillis() - portalTime > 15000 || (System.currentTimeMillis() - portalTime > 1000 &&
                 map.id == settings.currMap &&
-                (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id))) {
+                (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id))) &&
+                main.mapManager.entities.portals.stream()
+                        .noneMatch(p -> p != portal && API.readMemoryBoolean(p.clickable.address, 64, 32))) {
             API.keyboardClick(keybinds.getCharCode(JUMP_GATE));
             portalTime = System.currentTimeMillis();
         }
