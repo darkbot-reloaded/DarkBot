@@ -102,7 +102,6 @@ public class Config {
 
     public @Option Collect COLLECT = new Collect();
     public static class Collect {
-        public @Option boolean PREVENT_COLLECTING_TOGETHER;
         public @Option boolean STAY_AWAY_FROM_ENEMIES;
         public @Option boolean AUTO_CLOACK;
         public @Option Character AUTO_CLOACK_KEY;
