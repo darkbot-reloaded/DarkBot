@@ -115,7 +115,7 @@ public class NpcAttacker {
         if (target != hero.target || !hero.isAttacking(target) || castingAbility()) radius = Math.min(550, radius);
         else if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) radius = Math.min(600, radius);
 
-        return radius + bar.findItemById("ability_zephyr").map(i -> i.quantity).orElse(0d) * 5;
+        return radius + bar.findItemById("ability_zephyr_mmt").map(i -> i.quantity).orElse(0d) * 5;
     }
 
     private boolean shouldSab() {
