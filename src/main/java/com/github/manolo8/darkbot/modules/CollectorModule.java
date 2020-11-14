@@ -196,11 +196,21 @@ public class CollectorModule implements Module {
         this.current = current == null || best == null || current.isCollected() || isBetter(best) ? best : current;
     }
 
+    private boolean isContested (Box box){
+        if(config.COLLECT.PREVENT_COLLECTING_TOGETHER){
+            return main.mapManager.entities.ships.stream()
+                    .filter(ship -> ship.shipInfo.destination.distance(box.locationInfo) == 0)
+                    .noneMatch(ship -> hero.timeTo(hero.locationInfo.distance(box.locationInfo)) > ship.timeTo(ship.locationInfo.distance(box.locationInfo)));
+        }
+        return true;
+    }
+
     private boolean canCollect(Box box) {
         return box.boxInfo.collect
                 && !box.isCollected()
                 && drive.canMove(box.locationInfo.now)
-                && (!box.type.equals("FROM_SHIP") || main.statsManager.deposit < main.statsManager.depositTotal);
+                && (!box.type.equals("FROM_SHIP") || main.statsManager.deposit < main.statsManager.depositTotal)
+                && isContested(box);
     }
 
     private Location findClosestEnemyAndAddToDangerousList() {
