@@ -2,29 +2,27 @@ package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import eu.darkbot.api.managers.SlotBarAPI;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotbars.Item {
     // Only has relevant info if !isReady()
     public final ItemTimer itemTimer = new ItemTimer();
-
+    private final Map<SlotBarAPI.Type, Slot> associatedSlots = new EnumMap<>(SlotBarAPI.Type.class);
     public double quantity;
     public boolean selected, buyable, activatable, available, visible;
     public String id, counterType, actionStyle, iconLootId;
-
-    private final Map<SlotBarAPI.Type, Integer> associatedSlots = new EnumMap<>(SlotBarAPI.Type.class);
 
     void removeSlot(SlotBarAPI.Type slotType) {
         this.associatedSlots.remove(slotType);
     }
 
     void addSlot(SlotBarAPI.Type slotType, int slotNumber) {
-        this.associatedSlots.put(slotType, slotNumber);
+        this.associatedSlots.put(slotType, new Slot(slotNumber, slotType));
     }
 
     @Override
@@ -59,8 +57,10 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotba
     }
 
     @Override
-    public @Nullable Map.Entry<SlotBarAPI.Type, Integer> getSlotEntry() {
-        return this.associatedSlots.entrySet().stream().findFirst().orElse(null);
+    public Optional<eu.darkbot.api.objects.slotbars.Slot> getSlot() {
+        return this.associatedSlots.entrySet().stream()
+                .findFirst()
+                .map(Map.Entry::getValue);
     }
 
     @Override
@@ -108,6 +108,37 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotba
         return itemTimer.itemDelay;
     }
 
+    @Override
+    public String toString() {
+        return "Item{" +
+                "id='" + id + '\'' +
+                ", quantity=" + quantity +
+                ", activatable=" + activatable +
+                ", available=" + available +
+                ", itemTimer=" + itemTimer +
+                '}';
+    }
+
+    public static class Slot implements eu.darkbot.api.objects.slotbars.Slot {
+        private final int slotNumber;
+        private final SlotBarAPI.Type slotBarType;
+
+        public Slot(int slotNumber, SlotBarAPI.Type slotBarType) {
+            this.slotNumber = slotNumber;
+            this.slotBarType = slotBarType;
+        }
+
+        @Override
+        public int getSlotNumber() {
+            return slotNumber;
+        }
+
+        @Override
+        public SlotBarAPI.Type getSlotBarType() {
+            return slotBarType;
+        }
+    }
+
     public static class ItemTimer extends UpdatableAuto {
         public double elapsed, startTime, itemDelay, availableIn;
 
@@ -126,6 +157,16 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotba
 
             this.startTime = API.readMemoryDouble(address + 80);
             this.itemDelay = API.readMemoryDouble(address + 88);
+        }
+
+        @Override
+        public String toString() {
+            return "ItemTimer{" +
+                    "elapsed=" + elapsed +
+                    ", startTime=" + startTime +
+                    ", itemDelay=" + itemDelay +
+                    ", availableIn=" + availableIn +
+                    '}';
         }
     }
 }

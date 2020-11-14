@@ -2,15 +2,13 @@ package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
 import eu.darkbot.api.entities.utils.Map;
-import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.Rectangle;
-import eu.darkbot.api.utils.ChangeListener;
+import eu.darkbot.api.utils.Listener;
 import eu.darkbot.utils.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * API to add, manage, retrieve maps.
@@ -61,15 +59,15 @@ public interface StarAPI extends API {
     Map getByName(String mapName) throws MapNotFoundException;
 
     /**
-     * Given {@link ChangeListener} will be executed on each map change.
+     * Given {@link Listener} will be executed on each map change.
      * <p>
-     * Every {@link ChangeListener} need to have strong reference.
+     * Every {@link Listener} need to have strong reference.
      *
      * @param listener to be added
-     * @return given {@code listener} reference
-     * @see ChangeListener
+     * @return given <b>listener</b> reference
+     * @see Listener
      */
-    ChangeListener<Map> addMapChangeListener(ChangeListener<Map> listener);
+    Listener<Map> addMapChangeListener(Listener<Map> listener);
 
     class MapNotFoundException extends Exception {
         public MapNotFoundException(int mapId) {

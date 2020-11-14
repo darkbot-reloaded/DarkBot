@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
 import com.github.manolo8.darkbot.core.objects.slotbars.SlotBar;
 import eu.darkbot.api.managers.SlotBarAPI;
-import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.Point;
 import eu.darkbot.api.objects.slotbars.Item;
 import org.jetbrains.annotations.NotNull;

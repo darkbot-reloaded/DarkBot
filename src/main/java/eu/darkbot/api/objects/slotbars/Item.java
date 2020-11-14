@@ -1,9 +1,8 @@
 package eu.darkbot.api.objects.slotbars;
 
 import eu.darkbot.api.managers.SlotBarAPI;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
+import java.util.Optional;
 
 public interface Item {
 
@@ -19,21 +18,19 @@ public interface Item {
     boolean hasShortcut();
 
     /**
-     * This method returns first slot bar which {@link Item} is associated as {@link Map.Entry}
-     * Where {@link Map.Entry#getKey()} is {@link SlotBarAPI.Type} and {@link Map.Entry#getValue()} is slot number.
+     * This method returns first slot bar which {@link Item} is associated as {@link Slot}
      * <p>
      *
-     * @return first slot entry associated with {@link Item} otherwise null
+     * @return first slot entry associated with {@link Item} otherwise {@link Optional#empty()}
      * @apiNote this method returns first available slot entry in order:
      * <p>
      * {@link SlotBarAPI.Type#DEFAULT_BAR} then
      * <p>
      * {@link SlotBarAPI.Type#PREMIUM_BAR} then
      * <p>
-     * {@link SlotBarAPI.Type#PRO_ACTION_BAR} if none returns {@code null}
+     * {@link SlotBarAPI.Type#PRO_ACTION_BAR} if none returns {@link Optional#empty()}
      */
-    @Nullable
-    Map.Entry<SlotBarAPI.Type, Integer> getSlotEntry();
+    Optional<Slot> getSlot();
 
     /**
      * @return id of the item

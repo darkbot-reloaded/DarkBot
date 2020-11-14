@@ -4,10 +4,10 @@ import eu.darkbot.api.API;
 import eu.darkbot.api.objects.Point;
 import eu.darkbot.api.objects.slotbars.Item;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * API to get info about slot bars,
@@ -27,6 +27,9 @@ public interface SlotBarAPI extends API {
      */
     boolean isSlotBarVisible(SlotBarAPI.Type slotBarType);
 
+    /**
+     * @return position of given {@link SlotBarAPI.Type}
+     */
     Point getSlotBarPosition(SlotBarAPI.Type slotBarType);
 
     /**
@@ -45,17 +48,16 @@ public interface SlotBarAPI extends API {
      * Search every {@link Category} for given {@code itemId}.
      *
      * @param itemId to be searched for
-     * @return first encounter of given item id or null if none
+     * @return first encounter of given item id
      */
-    @Nullable
-    default Item findItemById(String itemId) {
+    default Optional<Item> findItemById(String itemId) {
         for (Category category : Category.values()) {
             if (!hasCategory(category)) continue;
 
-            Item item = findItemById(category, itemId);
-            if (item != null) return item;
+            Optional<Item> item = findItemById(category, itemId);
+            if (item.isPresent()) return item;
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -63,13 +65,14 @@ public interface SlotBarAPI extends API {
      *
      * @param category to be searched
      * @param itemId   to be looked for in given category
-     * @return first encounter of given item id or null if none
+     * @return first encounter of given item id
      */
-    @Nullable
-    default Item findItemById(@NotNull SlotBarAPI.Category category, String itemId) {
-        return getItems(category).stream()
-                .filter(item -> item.getId().equals(itemId))
-                .findAny().orElse(null);
+    default Optional<Item> findItemById(@NotNull SlotBarAPI.Category category, String itemId) {
+        for (Item item : getItems(category))
+            if (item.getId().equals(itemId))
+                return Optional.of(item);
+
+        return Optional.empty();
     }
 
     /**
