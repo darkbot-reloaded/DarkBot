@@ -40,7 +40,7 @@ public class LoginUtils {
     }
 
     public static LoginData performUserLogin(StartupParams params) {
-        if (params != null && params.getAutoLogin()) return LoginUtils.performAutoLogin(params);
+        if (params.getAutoLogin()) return LoginUtils.performAutoLogin(params);
 
         LoginForm panel = new LoginForm();
 
