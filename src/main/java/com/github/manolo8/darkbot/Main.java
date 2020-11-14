@@ -228,8 +228,10 @@ public class Main extends Thread implements PluginListener {
     }
 
     private <A extends Module> A setModule(A module, boolean setConfig) {
-        module.install(this);
-        if (setConfig) updateCustomConfig(module);
+        if (module != null) {
+            module.install(this);
+            if (setConfig) updateCustomConfig(module);
+        }
         this.module = module;
         return module;
     }
