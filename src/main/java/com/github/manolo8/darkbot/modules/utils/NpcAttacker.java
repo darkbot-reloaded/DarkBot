@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.modules.utils;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.backpage.entities.Item;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
@@ -10,6 +11,7 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
+import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
 import com.github.manolo8.darkbot.core.utils.Drive;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -22,6 +24,7 @@ public class NpcAttacker {
     protected HeroManager hero;
     protected Drive drive;
     protected final SettingsProxy keybinds;
+    protected final CategoryBar bar;
 
     public Npc target;
     protected Long ability;
@@ -40,6 +43,7 @@ public class NpcAttacker {
         this.hero = main.hero;
         this.drive = hero.drive;
         this.keybinds = main.facadeManager.settings;
+        this.bar = main.facadeManager.slotBars.categoryBar;
     }
 
     public String status() {
@@ -108,9 +112,10 @@ public class NpcAttacker {
 
     public double modifyRadius(double radius) {
         if (target.health.hpPercent() < 0.25 && target.npcInfo.extra.has(NpcExtra.AGGRESSIVE_FOLLOW)) radius *= 0.75;
-        if (target != hero.target || !hero.isAttacking(target) || castingAbility()) return Math.min(550, radius);
-        if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) return Math.min(600, radius);
-        return radius;
+        if (target != hero.target || !hero.isAttacking(target) || castingAbility()) radius = Math.min(550, radius);
+        else if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) radius = Math.min(600, radius);
+
+        return radius + bar.findItemById("ability_zephyr").map(i -> i.quantity).orElse(0d) * 5;
     }
 
     private boolean shouldSab() {
