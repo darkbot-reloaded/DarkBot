@@ -12,6 +12,8 @@ import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
 
+import java.util.List;
+
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.JUMP_GATE;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.TOGGLE_CONFIG;
@@ -22,6 +24,7 @@ public class HeroManager extends Ship implements Manager {
     public final Main main;
     private final SettingsManager settings;
     private final SettingsProxy keybinds;
+    private final List<Portal> portals;
 
     private long staticAddress;
 
@@ -45,6 +48,7 @@ public class HeroManager extends Ship implements Manager {
         this.main = super.main = main;
         this.settings = main.settingsManager;
         this.keybinds = main.facadeManager.settings;
+        this.portals = main.mapManager.entities.portals;
         this.drive = new Drive(this, main.mapManager);
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
@@ -99,14 +103,18 @@ public class HeroManager extends Ship implements Manager {
 
     public void jumpPortal(Portal portal) {
         if (portal.removed) return;
-        if ((System.currentTimeMillis() - portalTime > 15000 || (System.currentTimeMillis() - portalTime > 1000 &&
-                map.id == settings.currMap &&
-                (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id))) &&
-                main.mapManager.entities.portals.stream()
-                        .noneMatch(p -> p != portal && API.readMemoryBoolean(p.clickable.address, 64, 32))) {
+        if (System.currentTimeMillis() - portalTime < 500) return; // Minimum delay
+        if ((System.currentTimeMillis() - portalTime > 15000 || isNotJumping(portal)) &&
+                (portal.clickable.enabled || portals.stream().noneMatch(p -> p != portal && p.clickable.enabled))) {
             API.keyboardClick(keybinds.getCharCode(JUMP_GATE));
             portalTime = System.currentTimeMillis();
         }
+    }
+
+    // Consider not jumping if still on current map and nextMap is either unset or not the portal target map
+    private boolean isNotJumping(Portal portal) {
+        return map.id == settings.currMap &&
+                (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id);
     }
 
     public boolean attackMode() {
