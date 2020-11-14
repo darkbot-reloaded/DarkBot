@@ -106,14 +106,12 @@ public class Config {
         public @Option boolean AUTO_CLOACK;
         public @Option Character AUTO_CLOACK_KEY;
         public @Option @Num(max = 10000, step = 50) int RADIUS = 400;
-        public @Option boolean PREVENT_COLLECTING_TOGETHER = true;
+        public @Option boolean IGNORE_CONTESTED_BOXES = true;
 
         @Option
         @Editor(value = JBoxInfoTable.class, shared = true)
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy.NoCache<>();
-
-
     }
 
     public @Option Loot LOOT = new Loot();
