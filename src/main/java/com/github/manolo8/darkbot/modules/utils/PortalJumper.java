@@ -3,13 +3,11 @@ package com.github.manolo8.darkbot.modules.utils;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 
-import static com.github.manolo8.darkbot.Main.API;
-
 public class PortalJumper {
 
-    private HeroManager hero;
+    private final HeroManager hero;
     private Portal last;
-    private long lastJumpStart;
+    private long nextMoveClick;
 
     public PortalJumper(HeroManager hero) {
         this.hero = hero;
@@ -24,12 +22,10 @@ public class PortalJumper {
 
         if (target != last) {
             last = target;
-            lastJumpStart = System.currentTimeMillis();
-        } else if (System.currentTimeMillis() - lastJumpStart > 5_000) {
-            if (!API.readMemoryBoolean(target.clickable.address, 64, 32)) { // Do not try moving if jump button in sync
-                hero.drive.clickCenter(true, target.locationInfo.now);
-            }
-            lastJumpStart = System.currentTimeMillis();
+            nextMoveClick = System.currentTimeMillis() + 5000;
+        } else if (System.currentTimeMillis() > nextMoveClick && !target.clickable.enabled) {
+            hero.drive.clickCenter(true, target.locationInfo.now);
+            nextMoveClick = System.currentTimeMillis() + 10000;
         }
     }
 
