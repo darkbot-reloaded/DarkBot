@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.core.api;
 import com.github.manolo8.darkbot.core.DarkFlash;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
-import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;
@@ -13,12 +12,11 @@ import javax.swing.*;
 
 public class DarkFlashApiAdapter extends ApiAdapter {
 
-    private final LoginData loginData;
     private final DarkFlash API = new DarkFlash();
     private long willBeValid = System.currentTimeMillis() + 5_000;
 
     public DarkFlashApiAdapter(StartupParams params) {
-        this.loginData = LoginUtils.performUserLogin(params);
+        super(LoginUtils.performUserLogin(params));
     }
 
     @Override
@@ -48,6 +46,15 @@ public class DarkFlashApiAdapter extends ApiAdapter {
         });
         windowFinder.setDaemon(true);
         windowFinder.start();
+    }
+
+    @Override
+    public void relogin() {
+        super.relogin();
+        String url = "https://" + loginData.getUrl() + "/",
+                sid = "dosid=" + loginData.getSid();
+
+        API.setCookie(url, sid);
     }
 
     private void showForm() {

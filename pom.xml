@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.manolo8.darkbot</groupId>
-    <artifactId>DarkBOT</artifactId>
-    <version>1.13-SNAPSHOT</version>
+    <groupId>com.github.darkbot-reloaded</groupId>
+    <artifactId>DarkBot</artifactId>
+    <version>master-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

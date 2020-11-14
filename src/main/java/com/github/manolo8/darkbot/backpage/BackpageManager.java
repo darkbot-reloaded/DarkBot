@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.api.ApiAdapter;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
@@ -18,6 +19,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.github.manolo8.darkbot.Main.API;
 
 public class BackpageManager extends Thread {
     public  static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
@@ -90,6 +93,14 @@ public class BackpageManager extends Thread {
                     checkDrones = System.currentTimeMillis() + 300_000;
                     e.printStackTrace();
                 }
+            }
+
+            if (sidStat().equals("KO") && (main.module.canRefresh() || main.hero.health.hp <= 0)) {
+                System.out.println("SID is KO, re-logging in");
+                ((ApiAdapter) API).relogin();
+                API.handleRefresh();
+                // update sidStatus
+                sidNextUpdate = -1;
             }
 
             for (Task task : tasks) {
