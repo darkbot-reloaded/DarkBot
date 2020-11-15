@@ -21,12 +21,11 @@ public class NativeApiAdapter extends ApiAdapter {
         if (!API.createBot(botId))
             throw new IllegalStateException("The bot could not successfully setup the browser window");
 
-        API.sendMessage(botId, Headers.LOGIN, loginData.getUrl().split("\\.")[0], loginData.getSid());
+        setData();
     }
 
     @Override
-    public void relogin() {
-        super.relogin();
+    protected void setData() {
         API.sendMessage(botId, Headers.LOGIN, loginData.getUrl().split("\\.")[0], loginData.getSid());
     }
 

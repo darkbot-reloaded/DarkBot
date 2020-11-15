@@ -95,10 +95,9 @@ public class BackpageManager extends Thread {
                 }
             }
 
-            if (sidStat().equals("KO") && (main.module.canRefresh() || main.hero.health.hp <= 0)) {
+            if (sidStat().equals("KO")) {
                 System.out.println("SID is KO, re-logging in");
-                ((ApiAdapter) API).relogin();
-                API.handleRefresh();
+                sid = ((ApiAdapter) API).relogin();
                 // update sidStatus
                 sidNextUpdate = -1;
             }
@@ -122,7 +121,8 @@ public class BackpageManager extends Thread {
     }
 
     private boolean isInvalid() {
-        this.sid = main.statsManager.sid;
+        // only read sid from memory on startup, then it is read from backpage when re-logging in
+        if (this.sid == null || this.sid.isEmpty()) this.sid = main.statsManager.sid;
         this.instance = main.statsManager.instance;
         return sid == null || instance == null || sid.isEmpty() || instance.isEmpty();
     }

@@ -23,12 +23,9 @@ public class DarkFlashApiAdapter extends ApiAdapter {
     public void createWindow() {
         IntByReference parentProcessId = new IntByReference();
 
-        String url = "https://" + loginData.getUrl() + "/",
-                sid = "dosid=" + loginData.getSid();
-
-        API.setCookie(url, sid);
+        setData();
         showForm();
-        Thread apiThread = new Thread(() -> API.loadSWF(loginData.getPreloaderUrl(), loginData.getParams(), url));
+        Thread apiThread = new Thread(() -> API.loadSWF(loginData.getPreloaderUrl(), loginData.getParams(), "https://" + loginData.getUrl() + "/"));
         apiThread.setDaemon(true);
         apiThread.start();
 
@@ -49,8 +46,7 @@ public class DarkFlashApiAdapter extends ApiAdapter {
     }
 
     @Override
-    public void relogin() {
-        super.relogin();
+    protected void setData() {
         String url = "https://" + loginData.getUrl() + "/",
                 sid = "dosid=" + loginData.getSid();
 

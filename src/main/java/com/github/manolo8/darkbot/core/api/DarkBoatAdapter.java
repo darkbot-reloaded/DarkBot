@@ -13,18 +13,14 @@ public class DarkBoatAdapter extends ApiAdapter {
 
     @Override
     public void createWindow() {
-        String url = "https://" + loginData.getUrl() + "/",
-                sid = "dosid=" + loginData.getSid();
-
-        API.setData(url, sid, loginData.getPreloaderUrl(), loginData.getParams());
+        setData();
         Thread apiThread = new Thread(API::createWindow);
         apiThread.setDaemon(true);
         apiThread.start();
     }
 
     @Override
-    public void relogin() {
-        super.relogin();
+    protected void setData() {
         String url = "https://" + loginData.getUrl() + "/",
                 sid = "dosid=" + loginData.getSid();
 

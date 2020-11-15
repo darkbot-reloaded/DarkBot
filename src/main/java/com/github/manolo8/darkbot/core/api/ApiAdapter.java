@@ -28,15 +28,20 @@ public abstract class ApiAdapter implements IDarkBotAPI {
         this.loginData = loginData;
     }
 
-    public void relogin() {
+    public String relogin() {
         if (loginData == null) {
             System.err.println("Re-logging in is unsupported for this browser/API");
-            return;
+            return null;
         }
         System.out.println("Re-logging in: Logging in (1/2)");
         LoginUtils.usernameLogin(loginData);
         System.out.println("Re-logging in: Loading spacemap (2/2)");
         LoginUtils.findPreloader(loginData);
+        setData();
+        return loginData.getSid();
+    }
+
+    protected void setData() {
     }
 
     @Override
