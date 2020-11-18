@@ -7,6 +7,10 @@ public class DarkBotApiAdapter extends ApiAdapter {
 
     private DarkBotAPI API = new DarkBotAPI();
 
+    public DarkBotApiAdapter() {
+        super(null);
+    }
+
     @Override
     public void createWindow() {
         Thread apiThread = new Thread(() -> {

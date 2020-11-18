@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.api.ApiAdapter;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
@@ -18,6 +19,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.github.manolo8.darkbot.Main.API;
 
 public class BackpageManager extends Thread {
     public  static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
@@ -92,6 +95,13 @@ public class BackpageManager extends Thread {
                 }
             }
 
+            if (sidStat().equals("KO")) {
+                System.out.println("SID is KO, re-logging in");
+                sid = ((ApiAdapter) API).relogin();
+                // update sidStatus
+                sidNextUpdate = -1;
+            }
+
             for (Task task : tasks) {
                 synchronized (main.pluginHandler.getBackgroundLock()) {
                     try {
@@ -111,7 +121,8 @@ public class BackpageManager extends Thread {
     }
 
     private boolean isInvalid() {
-        this.sid = main.statsManager.sid;
+        // only read sid from memory on startup, then it is read from backpage when re-logging in
+        if (this.sid == null || this.sid.isEmpty()) this.sid = main.statsManager.sid;
         this.instance = main.statsManager.instance;
         return sid == null || instance == null || sid.isEmpty() || instance.isEmpty();
     }

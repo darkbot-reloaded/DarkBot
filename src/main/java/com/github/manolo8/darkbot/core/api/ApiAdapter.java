@@ -2,6 +2,8 @@ package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.utils.login.LoginData;
+import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 
@@ -9,6 +11,8 @@ import java.awt.*;
 import java.util.Arrays;
 
 public abstract class ApiAdapter implements IDarkBotAPI {
+
+    protected final LoginData loginData;
 
     protected static final User32 USER_32 = User32.INSTANCE;
 
@@ -19,6 +23,26 @@ public abstract class ApiAdapter implements IDarkBotAPI {
 
     private static final String FALLBACK_STRING = "ERROR";
     private final ByteUtils.StringReader stringReader = new ByteUtils.StringReader(this);
+
+    protected ApiAdapter(LoginData loginData) {
+        this.loginData = loginData;
+    }
+
+    public String relogin() {
+        if (loginData == null) {
+            System.err.println("Re-logging in is unsupported for this browser/API");
+            return null;
+        }
+        System.out.println("Re-logging in: Logging in (1/2)");
+        LoginUtils.usernameLogin(loginData);
+        System.out.println("Re-logging in: Loading spacemap (2/2)");
+        LoginUtils.findPreloader(loginData);
+        setData();
+        return loginData.getSid();
+    }
+
+    protected void setData() {
+    }
 
     @Override
     public String readMemoryString(long address) {
