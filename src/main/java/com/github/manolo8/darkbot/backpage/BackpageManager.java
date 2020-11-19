@@ -44,6 +44,7 @@ public class BackpageManager extends Thread {
     private long sidNextUpdate = sidLastUpdate;
     private long checkDrones = Long.MAX_VALUE;
     private int sidStatus = -1;
+    public boolean canRefresh, loadedMap;
 
     public BackpageManager(Main main) {
         super("BackpageManager");
@@ -71,6 +72,8 @@ public class BackpageManager extends Thread {
             } else if (sidStatus == SidStatus.NO_SID) {
                 sidStatus = SidStatus.UNKNOWN;
             }
+
+            if (canRefresh) tryLoadMap();
 
             this.hangarManager.tick();
 
@@ -136,6 +139,21 @@ public class BackpageManager extends Thread {
             return 5 * Time.MINUTE;
         }
         return 10 * Time.MINUTE;
+    }
+
+    private void tryLoadMap() {
+        try {
+            sidStatus = loadMap();
+        } catch (Exception e) {
+            sidStatus = SidStatus.ERROR;
+            e.printStackTrace();
+        }
+        loadedMap = true;
+        canRefresh = false;
+    }
+
+    private int loadMap() throws Exception {
+        return getConnection("indexInternal.es?action=internalMapRevolution", 5000).getResponseCode();
     }
 
     private int sidKeepAlive() throws Exception {

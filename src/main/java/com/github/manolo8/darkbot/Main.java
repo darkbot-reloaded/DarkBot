@@ -211,9 +211,12 @@ public class Main extends Thread implements PluginListener {
     private void checkRefresh() {
         if (config.MISCELLANEOUS.REFRESH_TIME == 0 ||
                 System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
-
         if (!module.canRefresh()) return;
-        if (backpage.sidStatus().equals("KO")) return;
+
+        if (!backpage.canRefresh && !backpage.loadedMap) backpage.canRefresh = true;
+        if (backpage.sidStatus().equals("KO") || !backpage.loadedMap) return;
+        backpage.canRefresh = backpage.loadedMap = false;
+
         lastRefresh = System.currentTimeMillis();
         if (config.MISCELLANEOUS.PAUSE_FOR > 0) {
             System.out.println("Pausing (logging off): time arrived & module allows refresh");
