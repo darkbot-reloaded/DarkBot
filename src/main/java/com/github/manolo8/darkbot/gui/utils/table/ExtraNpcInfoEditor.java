@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 
 public class ExtraNpcInfoEditor extends AbstractCellEditor implements TableCellEditor {
 
-    private JNpcInfoTable.ExtraNpcInfoList curr;
-    private Collection<NpcInfo> infos;
-    private javax.swing.JLabel button = new javax.swing.JLabel();
+    private final javax.swing.JLabel button = new javax.swing.JLabel();
 
     private Map<String, JMenuFlag> options = new HashMap<>();
-    private JPopupMenu extraOptions = new JPopupMenu("Extra options");
+    private final JPopupMenu extraOptions = new JPopupMenu("Extra options");
+
+    private NpcInfo.ExtraNpcInfo value;
 
     private int tooltipDelay = -1;
 
@@ -62,18 +62,16 @@ public class ExtraNpcInfoEditor extends AbstractCellEditor implements TableCellE
     }
 
     public Object getCellEditorValue() {
-        return curr;
+        return value;
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        curr = (JNpcInfoTable.ExtraNpcInfoList) value;
-        infos = curr.infos;
-        button.setText(curr.toString());
+        this.value = (NpcInfo.ExtraNpcInfo) value;
+        button.setText(value.toString());
 
         updateMenuEntries();
 
-        NpcInfo info = infos.iterator().next();
-        options.values().forEach(option -> option.setSelected(info.extra.has(option.flag)));
+        options.values().forEach(option -> option.setSelected(this.value.has(option.flag)));
         return button;
     }
 
@@ -86,8 +84,8 @@ public class ExtraNpcInfoEditor extends AbstractCellEditor implements TableCellE
             this.flag = flag.getId();
             if (flag.getDescription() != null) setToolTipText(flag.getDescription());
             addActionListener(a -> {
-                infos.forEach(info -> info.extra.set(this.flag, isSelected()));
-                button.setText(curr.toString());
+                value.set(this.flag, isSelected());
+                button.setText(value.toString());
             });
         }
     }

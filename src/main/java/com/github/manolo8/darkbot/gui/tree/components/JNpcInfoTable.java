@@ -4,25 +4,26 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.manager.StarManager;
-import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.table.ExtraNpcInfoEditor;
+import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
-import java.awt.*;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInfo> implements OptionEditor {
 
-    private int filteredMap = -1;
-    private JComboBox<Map> mapFilter;
+    private JMapPicker mapPicker;
+    private NpcMapFilter mapFilter;
 
     public JNpcInfoTable(Config.Loot config) {
         super(new NpcTableModel(config), config.NPC_INFOS, config.MODIFIED_NPC, NpcInfo::new);
@@ -31,36 +32,21 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
                 new RowSorter.SortKey(2, SortOrder.ASCENDING),
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
 
-        setDefaultEditor(ExtraNpcInfoList.class, new ExtraNpcInfoEditor());
+        setDefaultEditor(NpcInfo.ExtraNpcInfo.class, new ExtraNpcInfoEditor());
 
-        mapFilter = new JComboBox<>();
+        config.MODIFIED_NPC.add(s -> mapPicker.update(config.NPC_INFOS.values()));
+        mapPicker.update(config.NPC_INFOS.values());
 
-        mapFilter.addActionListener(e -> {
-            if (mapFilter.getSelectedItem() == null) return;
-            filteredMap = ((Map) mapFilter.getSelectedItem()).id;
-            getRowSorter().allRowsChanged();
-        });
-        config.MODIFIED_NPC.add(s -> updateMapList(config.NPC_INFOS.values()));
-        updateMapList(config.NPC_INFOS.values());
-
-        mapFilter.setSelectedIndex(0);
-        getComponent().add(mapFilter, "grow, cell 1 0");
-    }
-
-    private void updateMapList(Collection<NpcInfo> npcInfos) {
-        Map map = (Map) mapFilter.getSelectedItem();
-        mapFilter.removeAllItems();
-        mapFilter.addItem(new Map(-1, "*", false, false));
-
-        Set<Integer> maps = npcInfos.stream().flatMap(n -> n.mapList.stream()).collect(Collectors.toSet());
-        StarManager.getAllMaps().stream().filter(m -> m.id >= 0 && maps.contains(m.id)).forEach(mapFilter::addItem);
-
-        mapFilter.setSelectedItem(map);
+        getComponent().add(mapPicker, "grow, cell 1 0");
     }
 
     @Override
     protected RowFilter<NpcTableModel, Integer> extraFilters() {
-        return new NpcMapFilter();
+        if (mapPicker == null) {
+            mapPicker = new JMapPicker(maps -> getRowSorter().allRowsChanged());
+            mapFilter = new NpcMapFilter(mapPicker.getSelected());
+        }
+        return mapFilter;
     }
 
     @Override
@@ -69,11 +55,15 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
         return super.getComponent();
     }
 
+    private static String simplifyName(String name) {
+        if (!name.matches("^[^\\d]+\\d{1,3}$")) return name;
+        return name.replaceAll("\\d{1,3}$", " *");
+    }
+
     protected static class NpcTableModel extends GenericTableModel<NpcInfo> {
 
-        private Config.Loot config;
+        private final Config.Loot config;
         private boolean grouped;
-        private java.util.Map<String, Collection<NpcInfo>> NPC_INFOS = new HashMap<>();
 
         NpcTableModel(Config.Loot config) {
             super(NpcInfo.class, config.NPC_INFOS, config.MODIFIED_NPC);
@@ -84,89 +74,133 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
         }
 
         public void refreshTable() {
-            if (grouped != config.GROUP_NPCS) {
-                grouped = config.GROUP_NPCS;
-                updateTable();
-            }
+            if (grouped != (grouped = config.GROUP_NPCS)) updateTable();
         }
 
-        public void updateTable() {
-            NPC_INFOS.clear();
-            this.setNumRows(0);
-            config.NPC_INFOS.forEach(this::updateEntry);
+        @Override
+        protected Row createRow(String name, NpcInfo data) {
+            return new NpcRow(name, data);
         }
 
-        protected void updateEntry(String originalName, NpcInfo info) {
+        protected void updateEntry(String name, NpcInfo info) {
             if (config == null) return; // Before setup, just ignore entries
-            String name = simplifyName(originalName);
-
-            if (info == null) { // Remove info
-                if (!NPC_INFOS.containsKey(name)) return;
-                config.NPC_INFOS.entrySet().removeIf(e -> simplifyName(e.getKey()).equals(name));
-                updateTable();
-                return;
-            }
-
-            Collection<NpcInfo> infoGroup;
-            if (name.equals(originalName)) infoGroup = Collections.singleton(info);
-            else (infoGroup = NPC_INFOS.getOrDefault(name, new ArrayList<>())).add(info);
-
-            if (NPC_INFOS.containsKey(name)) {
-                info.copyOf(infoGroup.iterator().next());
-                return;
-            }
-            NPC_INFOS.put(name, infoGroup);
-            addRow(new Object[]{name, info.radius, info.priority, info.kill, info.attackKey, info.attackFormation, new ExtraNpcInfoList(infoGroup)});
-        }
-
-        private String simplifyName(String name) {
-            if (!config.GROUP_NPCS || !name.matches("^[^\\d]+\\d{1,3}$")) return name;
-
-            return name.replaceAll("\\d{1,3}$", " *");
+            super.updateEntry(config.GROUP_NPCS ? simplifyName(name) : name, info);
         }
 
         @Override
-        public Class<?> getColumnClass(int column) {
-            Class<?> cl = super.getColumnClass(column);
-            if (cl == NpcInfo.ExtraNpcInfo.class) return ExtraNpcInfoList.class;
-            return cl;
+        protected Object getValue(GenericTableModel.Row row, GenericTableModel.Column column) {
+            if (column.field == null) return row.name;
+
+            NpcRow r = (NpcRow) row;
+            return ReflectionUtils.get(column.field, r.getInfo());
         }
 
         @Override
-        public void setValueAt(Object value, int row, int column) {
-            super.setValueAt(value, row, column);
-            NPC_INFOS.get((String) this.getValueAt(row, 0)).forEach(info -> {
-                if (column == 1) info.radius = (Double) value;
-                else if (column == 2) info.priority = (Integer) value;
-                else if (column == 3) info.kill = (Boolean) value;
-                else if (column == 4) info.attackKey = (Character) value;
-                else if (column == 5) info.attackFormation = (Character) value;
-            });
+        protected void setValue(Row row, Column column, Object value) {
+            Field field = column.field;
+            if (field == null) throw new UnsupportedOperationException("Can't edit default column");
+
+            if (value instanceof NpcInfo.ExtraNpcInfo) {
+                NpcInfo.ExtraNpcInfo extra = (NpcInfo.ExtraNpcInfo) value;
+
+                for (NpcInfo info : ((NpcRow) row).getInfos())
+                    info.extra.copy(extra);
+            } else {
+                for (NpcInfo info : ((NpcRow) row).getInfos())
+                    ReflectionUtils.set(field, info, value);
+            }
+
             ConfigEntity.changed();
         }
+
+        public static class NpcRow extends GenericTableModel.Row {
+
+            public NpcRow(String name, NpcInfo data) {
+                super(name, Collections.singleton(data));
+            }
+
+            @Override
+            public Row update(Object data) {
+                NpcInfo info = (NpcInfo) data;
+
+                Collection<NpcInfo> infos = getInfos();
+                if (infos.contains(info)) return this;
+
+                if (infos instanceof Set) this.data = infos = new ArrayList<>(infos);
+                info.copyOf(getInfo());
+                infos.add((NpcInfo) data);
+                return this;
+            }
+
+            @SuppressWarnings("unchecked")
+            public Collection<NpcInfo> getInfos() {
+                return (Collection<NpcInfo>) this.data;
+            }
+
+            public NpcInfo getInfo() {
+                return getInfos().iterator().next();
+            }
+        }
     }
 
-    public static class ExtraNpcInfoList {
-        public Collection<NpcInfo> infos;
+    private static class NpcMapFilter extends RowFilter<NpcTableModel, Integer> {
 
-        ExtraNpcInfoList(Collection<NpcInfo> infos) {
-            this.infos = infos;
+        private final Set<Integer> selected;
+
+        public NpcMapFilter(Set<Integer> selected) {
+            this.selected = selected;
         }
 
-        @Override
-        public String toString() {
-            return infos.iterator().next().extra.toString();
-        }
-    }
-
-    private class NpcMapFilter extends RowFilter<NpcTableModel, Integer> {
         @Override
         public boolean include(Entry<? extends NpcTableModel, ? extends Integer> entry) {
-            if (filteredMap == -1) return true;
-            NpcTableModel model = entry.getModel();
-            return model.NPC_INFOS.get((String) model.getValueAt(entry.getIdentifier(), 0))
-                    .stream().anyMatch(n -> n.mapList.contains(filteredMap));
+            if (selected.isEmpty()) return true;
+            NpcTableModel.NpcRow row = (NpcTableModel.NpcRow) entry.getModel().getRow(entry.getIdentifier());
+            return row.getInfos().stream().anyMatch(npc -> !Collections.disjoint(npc.mapList, selected));
         }
+    }
+
+    private static class JMapPicker extends JComboBox<String> {
+        private static final String DEFAULT_ALL = "*";
+
+        private final Set<Integer> selectedMaps = new HashSet<>();
+
+        public JMapPicker(Consumer<Set<Integer>> onChange) {
+            addItem(DEFAULT_ALL);
+            setSelectedItem(DEFAULT_ALL);
+
+            addActionListener(e -> {
+                selectedMaps.clear();
+                String selected = (String) getSelectedItem();
+                if (selected == null || selected.equals(DEFAULT_ALL)) return;
+
+                StarManager.getAllMaps().stream()
+                        .filter(m -> m.id >= 0 && selected.equals(simplifyName(m.name)))
+                        .mapToInt(m -> m.id)
+                        .forEach(selectedMaps::add);
+
+                onChange.accept(selectedMaps);
+            });
+        }
+
+        public Set<Integer> getSelected() {
+            return selectedMaps;
+        }
+
+        private void update(Collection<NpcInfo> npcInfos) {
+            String map = (String) getSelectedItem();
+            removeAllItems();
+            addItem(DEFAULT_ALL);
+
+            Set<Integer> maps = npcInfos.stream().flatMap(n -> n.mapList.stream()).collect(Collectors.toSet());
+            StarManager.getAllMaps().stream()
+                    .filter(m -> m.id >= 0 && maps.contains(m.id))
+                    .map(m -> simplifyName(m.name))
+                    .distinct()
+                    .forEach(this::addItem);
+
+            setSelectedItem(map);
+        }
+
     }
 
 }

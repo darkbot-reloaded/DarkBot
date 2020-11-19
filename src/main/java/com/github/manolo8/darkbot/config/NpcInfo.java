@@ -66,6 +66,12 @@ public class NpcInfo {
             else flags.remove(flagId);
         }
 
+        public void copy(ExtraNpcInfo other) {
+            if (this == other) return;
+            this.flags.clear();
+            this.flags.addAll(other.flags);
+        }
+
         public String toString() {
             if (flags.isEmpty()) return "";
 
