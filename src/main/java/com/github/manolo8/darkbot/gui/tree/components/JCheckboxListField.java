@@ -33,7 +33,6 @@ public class JCheckboxListField extends JComboBox<String> implements OptionEdito
     private transient ActionListener listener;
 
     public JCheckboxListField() {
-        putClientProperty("JComboBox.isTableCellEditor", true);
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {

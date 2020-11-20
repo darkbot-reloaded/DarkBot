@@ -19,7 +19,7 @@ public class TableDoubleRenderer extends TableDelegateRenderer<JSpinner> {
          * No-op methods improve performance when using this as a cell renderer, and they are not needed anyways.
          */
         //public void validate() {} // JSpinner needs it to render
-        public void invalidate() {}
+        //public void invalidate() {} // JSpinner needs it to resize properly
         public void revalidate() {}
         public void repaint(long tm, int x, int y, int width, int height) {}
         public void repaint(Rectangle r) {}

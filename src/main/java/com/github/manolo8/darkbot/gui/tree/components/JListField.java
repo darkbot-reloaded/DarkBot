@@ -22,7 +22,6 @@ public class JListField extends JComboBox<String> implements OptionEditor {
     protected ConfigField field;
 
     public JListField() {
-        putClientProperty("JComboBox.isTableCellEditor", true);
         addActionListener(event -> {
             if (field != null) updateValue();
         });

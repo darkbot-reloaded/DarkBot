@@ -18,15 +18,15 @@ public enum DisplayFlag {
     RESOURCE_NAMES;
 
     public String getName() {
-        return I18n.getOrDefault("config.bot_settings.display.toggle." + name().toLowerCase(Locale.ROOT), name());
+        return I18n.getOrDefault("config.bot_settings.map_display.toggle." + name().toLowerCase(Locale.ROOT), name());
     }
 
     public String getShortName() {
-        return I18n.getOrDefault("config.bot_settings.display.toggle." + name().toLowerCase(Locale.ROOT) + ".short", name());
+        return I18n.getOrDefault("config.bot_settings.map_display.toggle." + name().toLowerCase(Locale.ROOT) + ".short", name());
     }
 
     public String getDescription() {
-        return I18n.getOrDefault("config.bot_settings.display.toggle." + name().toLowerCase(Locale.ROOT) + ".desc", null);
+        return I18n.getOrDefault("config.bot_settings.map_display.toggle." + name().toLowerCase(Locale.ROOT) + ".desc", null);
     }
 
     public static class Supplier extends OptionList<DisplayFlag> {
