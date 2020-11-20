@@ -19,7 +19,6 @@ public class DarkBoatAdapter extends ApiAdapter {
         apiThread.start();
     }
 
-    @Override
     protected void setData() {
         String url = "https://" + loginData.getUrl() + "/",
                 sid = "dosid=" + loginData.getSid();
@@ -144,6 +143,8 @@ public class DarkBoatAdapter extends ApiAdapter {
 
     @Override
     public void handleRefresh() {
+        relogin();
+        setData();
         API.reload();
     }
 }

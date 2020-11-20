@@ -24,7 +24,6 @@ public class NativeApiAdapter extends ApiAdapter {
         setData();
     }
 
-    @Override
     protected void setData() {
         API.sendMessage(botId, Headers.LOGIN, loginData.getUrl().split("\\.")[0], loginData.getSid());
     }
@@ -58,6 +57,8 @@ public class NativeApiAdapter extends ApiAdapter {
     }
 
     public void handleRefresh() {
+        relogin();
+        setData();
         API.sendMessage(botId, Headers.RELOAD);
     }
 
