@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
+import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.gui.utils.table.ExtraNpcInfoEditor;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
@@ -55,11 +56,6 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
         return super.getComponent();
     }
 
-    private static String simplifyName(String name) {
-        if (!name.matches("^[^\\d]+\\d{1,3}$")) return name;
-        return name.replaceAll("\\d{1,3}$", " *");
-    }
-
     protected static class NpcTableModel extends GenericTableModel<NpcInfo> {
 
         private final Config.Loot config;
@@ -84,7 +80,7 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
 
         protected void updateEntry(String name, NpcInfo info) {
             if (config == null) return; // Before setup, just ignore entries
-            super.updateEntry(config.GROUP_NPCS ? simplifyName(name) : name, info);
+            super.updateEntry(config.GROUP_NPCS ? Strings.simplifyName(name) : name, info);
         }
 
         @Override
@@ -174,7 +170,7 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
                 if (selected == null || selected.equals(DEFAULT_ALL)) return;
 
                 StarManager.getAllMaps().stream()
-                        .filter(m -> m.id >= 0 && selected.equals(simplifyName(m.name)))
+                        .filter(m -> m.id >= 0 && selected.equals(Strings.simplifyName(m.name)))
                         .mapToInt(m -> m.id)
                         .forEach(selectedMaps::add);
 
@@ -194,7 +190,7 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
             Set<Integer> maps = npcInfos.stream().flatMap(n -> n.mapList.stream()).collect(Collectors.toSet());
             StarManager.getAllMaps().stream()
                     .filter(m -> m.id >= 0 && maps.contains(m.id))
-                    .map(m -> simplifyName(m.name))
+                    .map(m -> Strings.simplifyName(m.name))
                     .distinct()
                     .forEach(this::addItem);
 
