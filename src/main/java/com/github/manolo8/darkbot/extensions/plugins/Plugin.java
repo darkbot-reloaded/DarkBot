@@ -13,7 +13,7 @@ public class Plugin {
 
     private PluginDefinition definition;
     private PluginInfo info;
-    private IssueHandler issues = new IssueHandler();
+    private final IssueHandler issues = new IssueHandler();
 
     public Plugin(File file, URL jar) {
         this.file = file;
@@ -47,6 +47,17 @@ public class Plugin {
 
     public String getName() {
         return definition != null ? definition.name : new File(jar.getFile()).getName();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Plugin)) return false;
+        return getName().equals(((Plugin) obj).getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return getName().hashCode();
     }
 
 }

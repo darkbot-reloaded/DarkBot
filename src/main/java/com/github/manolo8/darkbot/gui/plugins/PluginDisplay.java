@@ -9,6 +9,8 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class PluginDisplay extends JPanel implements PluginListener {
@@ -44,13 +46,22 @@ public class PluginDisplay extends JPanel implements PluginListener {
 
     private void refreshUI() {
         pluginPanel.removeAll();
+
+        List<PluginName> names = new ArrayList<>();
+        pluginPanel.add(new PluginUpdateHeader(main, names));
         Stream.concat(
                 pluginHandler.LOADING_EXCEPTIONS.stream().map(ExceptionCard::new),
                 Stream.concat(
                         pluginHandler.FAILED_PLUGINS.stream(),
                         pluginHandler.LOADED_PLUGINS.stream()
-                ).map(pl -> new PluginCard(main, pl, main.featureRegistry))
+                ).map(pl -> {
+                    PluginCard card = new PluginCard(main, pl, main.featureRegistry);
+                    if (pluginHandler.AVAILABLE_UPDATES.containsKey(pl))
+                        names.add(card.name);
+                    return card;
+                })
         ).forEach(pluginPanel::add);
+        //todo maybe also add another icon here when update is available?
         pluginTab.setIcon(UIUtils.getIcon(pluginHandler.LOADING_EXCEPTIONS.isEmpty() && pluginHandler.FAILED_PLUGINS.isEmpty() ? "plugins" : "plugins_warn"));
         validate();
         repaint();

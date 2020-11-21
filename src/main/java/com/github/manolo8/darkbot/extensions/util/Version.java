@@ -20,8 +20,13 @@ public class Version implements Comparable<Version> {
             "( ?beta ?([0-9]+)?)?" + // Beta
             "( ?alpha ?([0-9]+)?)?"); // Alpha
 
-    private String version;
-    private int major, minor, patch, revision, beta, alpha;
+    private final String version;
+    private final int major;
+    private final int minor;
+    private final int patch;
+    private final int revision;
+    private int beta;
+    private int alpha;
 
     public Version(String version) {
         this.version = version;
@@ -35,6 +40,16 @@ public class Version implements Comparable<Version> {
         alpha = getInt(matcher, 10);
         if (beta == -1 && alpha == -1) beta = Integer.MAX_VALUE;
         if (alpha == -1) alpha = Integer.MAX_VALUE;
+    }
+
+    public Version(Version version) {
+        this.version = version.version;
+        major = version.major;
+        minor = version.minor;
+        patch = version.patch;
+        revision = version.revision;
+        beta = version.beta;
+        alpha = version.alpha;
     }
 
     private int getInt(Matcher m, int find) {

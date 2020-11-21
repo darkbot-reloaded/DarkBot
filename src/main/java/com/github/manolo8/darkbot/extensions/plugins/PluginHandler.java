@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.utils.AuthAPI;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.google.gson.Gson;
@@ -8,6 +9,7 @@ import com.google.gson.Gson;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
@@ -18,7 +20,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
@@ -26,16 +31,21 @@ public class PluginHandler {
     private static final Gson GSON = new Gson();
 
     public static final File PLUGIN_FOLDER = new File("plugins"),
-            PLUGIN_UPDATE_FOLDER = new File("plugins/updates");
+            PLUGIN_UPDATE_FOLDER = new File("plugins/updates"),
+            PLUGIN_OLD_FOLDER    = new File("plugins/old");
     public static final Path PLUGIN_PATH = PLUGIN_FOLDER.toPath(),
-            PLUGIN_UPDATE_PATH = PLUGIN_UPDATE_FOLDER.toPath();
+            PLUGIN_UPDATE_PATH = PLUGIN_UPDATE_FOLDER.toPath(),
+            PLUGIN_OLD_PATH    = PLUGIN_OLD_FOLDER.toPath();
 
     public URLClassLoader PLUGIN_CLASS_LOADER;
-    public List<Plugin> LOADED_PLUGINS = new ArrayList<>();
-    public List<Plugin> FAILED_PLUGINS = new ArrayList<>();
-    public List<PluginLoadingException> LOADING_EXCEPTIONS = new ArrayList<>();
+    public final List<Plugin> LOADED_PLUGINS = new ArrayList<>();
+    public final List<Plugin> FAILED_PLUGINS = new ArrayList<>();
+    public final List<PluginLoadingException> LOADING_EXCEPTIONS = new ArrayList<>();
 
-    private static List<PluginListener> LISTENERS = new ArrayList<>();
+    public final Map<Plugin, PluginDefinition> AVAILABLE_UPDATES = new ConcurrentHashMap<>();
+    public final Map<Plugin, PluginDefinition> INCOMPATIBLE_UPDATES = new HashMap<>();
+
+    private static final List<PluginListener> LISTENERS = new ArrayList<>();
 
     public void addListener(PluginListener listener) {
         if (!LISTENERS.contains(listener)) LISTENERS.add(listener);
@@ -97,6 +107,7 @@ public class PluginHandler {
             for (File plugin : getJars("plugins/updates")) {
                 Path plPath = plugin.toPath();
                 try {
+                    if (Files.notExists(PLUGIN_PATH)) Files.createDirectory(PLUGIN_PATH);
                     Files.move(plPath, PLUGIN_PATH.resolve(plPath.getFileName()), StandardCopyOption.REPLACE_EXISTING);
                 } catch (Exception e) {
                     LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to update plugin: " + plPath.getFileName(), e));
@@ -139,13 +150,47 @@ public class PluginHandler {
             if (plJson == null) {
                 throw new PluginLoadingException("The plugin is missing a plugin.json in the jar root", plugin);
             }
-            try (InputStreamReader isr = new InputStreamReader(jar.getInputStream(plJson), StandardCharsets.UTF_8)) {
-                PluginDefinition plDef = GSON.fromJson(isr, (Type) PluginDefinition.class);
-                plugin.setDefinition(plDef);
-            }
+            plugin.setDefinition(readPluginDefinition(jar.getInputStream(plJson)));
             testUnique(plugin);
             testCompatibility(plugin);
             testSignature(plugin, jar);
+        }
+    }
+
+    public void checkUpdates() {
+        for (Plugin plugin : LOADED_PLUGINS) {
+            try {
+                checkUpdate(plugin);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void checkUpdate(Plugin plugin) throws IOException {
+        if (plugin.getDefinition().update == null) return;
+
+        Version version = plugin.getDefinition().version;
+        PluginDefinition plDef = readPluginDefinition(plugin.getDefinition().update.openStream());
+        while (plDef.version.compareTo(version) != 0) {
+            version = plDef.version;
+            plDef = readPluginDefinition(plDef.update.openStream());
+        }
+
+        if (plugin.getDefinition().version.compareTo(plDef.version) >= 0) return;
+
+        // creating deep copy of issues and definition within plugin
+        Plugin pl = new Plugin(null, null);
+        pl.setDefinition(new PluginDefinition(plugin.getDefinition()));
+        testCompatibility(pl, plDef);
+        if (pl.getIssues().getIssues().stream().noneMatch(i -> i.getLevel() == PluginIssue.Level.ERROR))
+            AVAILABLE_UPDATES.put(plugin, plDef);
+        else INCOMPATIBLE_UPDATES.put(pl, plDef);
+    }
+
+    private PluginDefinition readPluginDefinition(InputStream is) throws IOException {
+        try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+            return GSON.fromJson(isr, (Type) PluginDefinition.class);
         }
     }
 
@@ -156,8 +201,10 @@ public class PluginHandler {
     }
 
     private void testCompatibility(Plugin plugin) {
-        PluginDefinition pd = plugin.getDefinition();
+        testCompatibility(plugin, plugin.getDefinition());
+    }
 
+    private void testCompatibility(Plugin plugin, PluginDefinition pd) {
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
             plugin.getIssues().addFailure(I18n.get("plugins.issues.invalid_json"),
                     I18n.get("plugins.issues.invalid_json.desc", pd.minVersion, pd.supportedVersion));

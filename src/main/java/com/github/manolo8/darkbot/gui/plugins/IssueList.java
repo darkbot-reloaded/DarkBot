@@ -9,20 +9,29 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.function.Predicate;
 
 class IssueList extends JPanel {
 
     IssueList(IssueHandler issues, boolean inline) {
+        this(issues, i -> true, inline);
+    }
+
+    IssueList(IssueHandler issues, Predicate<PluginIssue> filter, boolean inline) {
         super(new MigLayout((inline ? "ins 0, gapx 5px, " : "") + "wrap 1", "[right]", "[top]"));
 
         setOpaque(false);
-        setupUI(issues);
+        setupUI(issues, filter);
         issues.addListener(this::setupUI);
     }
 
     private void setupUI(IssueHandler issues) {
+        setupUI(issues, i -> true);
+    }
+
+    private void setupUI(IssueHandler issues, Predicate<PluginIssue> filter) {
         removeAll();
-        issues.getIssues().stream().map(this::getError).forEachOrdered(this::add);
+        issues.getIssues().stream().filter(filter).map(this::getError).forEachOrdered(this::add);
         setVisible(!issues.getIssues().isEmpty());
     }
 
