@@ -2,6 +2,7 @@ package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
 import eu.darkbot.api.objects.Gui;
+import eu.darkbot.api.utils.Listener;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -12,6 +13,17 @@ import java.util.Collection;
  * @see Message
  */
 public interface ChatAPI extends Gui, API {
+
+    /**
+     /**
+     * Adds {@link Listener} which will be called on each new message.
+     *
+     * @param onMessage {@link Listener} to be added
+     * @return reference to {@code onMessage} listener
+     * @see Listener
+     */
+    Listener<Message> addListener(Listener<Message> onMessage);
+
     /**
      * Gets the last message sent from the specified chat.
      *

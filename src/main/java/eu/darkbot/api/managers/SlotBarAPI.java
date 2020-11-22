@@ -96,6 +96,9 @@ public interface SlotBarAPI extends API {
         }
     }
 
+    /**
+     * Types of slot bars.
+     */
     enum Type {
         DEFAULT_BAR,
         PREMIUM_BAR(KeyBindsAPI.Shortcut.PREMIUM_BAR),

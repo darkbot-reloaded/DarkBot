@@ -3,12 +3,11 @@ package eu.darkbot.api.objects;
 public interface Health {
 
     int getHp();
-    int getMaxHp();
-
     int getHull();
-    int getMaxHull();
-
     int getShield();
+
+    int getMaxHp();
+    int getMaxHull();
     int getMaxShield();
 
     /**

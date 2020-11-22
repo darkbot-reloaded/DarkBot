@@ -1,12 +1,18 @@
-package eu.darkbot.api.core;
+package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
+import eu.darkbot.api.entities.utils.Area;
 import eu.darkbot.api.objects.Point;
 
 /**
  * Utility to manage game window
  */
-public interface Window extends API {
+public interface WindowAPI extends API {
+
+    /**
+     * @return bounds of game screen
+     */
+    Area.Rectangle getViewBounds();
 
     /**
      * @return version of native api
@@ -19,7 +25,7 @@ public interface Window extends API {
     void reload();
 
     /**
-     * Sets size of game window
+     * Sets size of game API window
      */
     void setSize(int width, int height);
 
@@ -33,11 +39,6 @@ public interface Window extends API {
      * For some is bugged
      */
     void setMinimized(boolean visible);
-
-    /**
-     * @return current process memory usage in MB
-     */
-    long getMemoryUsage();
 
     /**
      * Sends string to game window

@@ -5,7 +5,8 @@ import eu.darkbot.api.entities.Npc;
 import eu.darkbot.api.entities.Ship;
 import eu.darkbot.config.ShipConfig;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 /**
  * From here you can manage your ship.
@@ -14,13 +15,11 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface HeroAPI extends Ship, API {
 
-    boolean hasTarget();
+    /*boolean hasTarget();
 
-    //to remove?
-    @Nullable
-    Ship getTarget();
+    Optional<Ship> getTarget();
 
-    void setTarget(Ship target);
+    void setTarget(Ship target);*/
 
     boolean isInMode(int configuration, Character formation);
 

@@ -1,8 +1,8 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
+import eu.darkbot.api.entities.utils.Area;
 import eu.darkbot.api.entities.utils.Map;
-import eu.darkbot.api.objects.Rectangle;
 import eu.darkbot.api.utils.Listener;
 import eu.darkbot.utils.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,7 @@ public interface StarAPI extends API {
     /**
      * @return bounds of the current map
      */
-    Rectangle getCurrentMapBounds();
+    Area.Rectangle getCurrentMapBounds();
 
     /**
      * Adds given map into list of maps.

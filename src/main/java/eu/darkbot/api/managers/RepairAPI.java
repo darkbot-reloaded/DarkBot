@@ -1,9 +1,10 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Optional;
 
 public interface RepairAPI extends API {
 
@@ -13,16 +14,14 @@ public interface RepairAPI extends API {
 
     /**
      * Tries to repair ship with given repair option
+     *
      * @throws IllegalStateException if ship is already repaired
      */
     void tryRevive(int repairOption) throws IllegalStateException;
 
-    @Nullable
-    int[] getAvailableRepairOptions();
+    Collection<Integer> getAvailableRepairOptions();
 
-    @Nullable
-    String getLastDestroyerName();
+    Optional<String> getLastDestroyerName();
 
-    @Nullable
-    LocalDateTime getLastDeathTime();
+    Optional<LocalDateTime> getLastDeathTime();
 }

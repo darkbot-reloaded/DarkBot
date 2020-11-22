@@ -5,7 +5,8 @@ import eu.darkbot.api.objects.Health;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.LocationInfo;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public interface Ship extends Entity, Health {
 
@@ -21,7 +22,8 @@ public interface Ship extends Entity, Health {
 
     /**
      * Returns true if ship is considered as enemy for {@link HeroAPI}.
-     * Is not in ally clan. Group?
+     * <p>
+     * Is <b>not</b> in ally clan, group?
      * Is from other faction or enemy clan.
      */
     boolean isEnemy();
@@ -40,10 +42,9 @@ public interface Ship extends Entity, Health {
     boolean hasPet();
 
     /**
-     * @return {@link Pet} associated with this ship or null if none.
+     * @return {@link Pet} associated with this ship or {@link Optional#empty()} if none.
      */
-    @Nullable
-    Pet getPet();
+    Optional<Pet> getPet();
 
     int getClanId();
 
@@ -101,10 +102,9 @@ public interface Ship extends Entity, Health {
     long getTargetAddress();
 
     /**
-     * @return {@link LocationInfo} if has destination otherwise null.
+     * @return {@link LocationInfo} if has destination otherwise {@link Optional#empty()}.
      */
-    @Nullable
-    LocationInfo getDestination();
+    Optional<LocationInfo> getDestination();
 
     /**
      * @return true if ship has enabled given formation.

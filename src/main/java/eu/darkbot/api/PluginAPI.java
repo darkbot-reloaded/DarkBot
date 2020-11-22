@@ -1,12 +1,10 @@
 package eu.darkbot.api;
 
-import eu.darkbot.api.core.Memory;
-import eu.darkbot.api.core.Window;
 import eu.darkbot.api.managers.BackpageAPI;
 
 public interface PluginAPI {
 
-    <T extends API> T getAPI(Class<T> api) throws IllegalStateException;
+    <T extends API> T getAPI(Class<T> api) throws IllegalArgumentException;
 
     /**
      * @return {@link BackpageAPI}
@@ -16,15 +14,8 @@ public interface PluginAPI {
     BackpageAPI getBackpageManager() throws WrongThreadException;
 
     /**
-     * @return {@link Memory}
+     * @return avg time of tick in ms.
      */
-    Memory getMemoryUtility();
-
-    /**
-     * @return {@link Window}
-     */
-    Window getWindowUtility();
-
     double getTickTime();
 
     class WrongThreadException extends RuntimeException {

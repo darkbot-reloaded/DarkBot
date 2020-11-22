@@ -6,7 +6,8 @@ import eu.darkbot.api.objects.Gui;
 import eu.darkbot.api.objects.LocationInfo;
 import eu.darkbot.api.utils.ItemNotEquippedException;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 /**
  * API to manage hero's pet.
@@ -34,7 +35,8 @@ public interface PetAPI extends Gui, Pet, API {
      * @return true if pet is repaired.
      */
     boolean isRepaired();
-    // try repair?
+
+    boolean tryRepair();
 
     /**
      * @param gearId to be checked
@@ -58,10 +60,9 @@ public interface PetAPI extends Gui, Pet, API {
 
     /**
      * @return {@link LocationInfo} of pet locator target
-     * or else null if theres none.
+     * or else {@link Optional#empty()} if theres none.
      */
-    @Nullable
-    LocationInfo getLocatorNpcLoc();
+    Optional<LocationInfo> getLocatorNpcLoc();
 
     /**
      * Checks if pet has the given {@link Pet.Cooldown},

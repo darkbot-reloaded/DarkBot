@@ -1,4 +1,4 @@
-package eu.darkbot.api.core;
+package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
 
@@ -8,7 +8,7 @@ import eu.darkbot.api.API;
  * Those calls should be generally safe,
  * every access violation error is handled by native code
  */
-public interface Memory extends API {
+public interface MemoryAPI extends API {
 
     /**
      * Reads signed integer value from memory.
