@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.PluginInfo;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Objects;
 
 public class Plugin {
 
@@ -12,8 +13,10 @@ public class Plugin {
     private final URL jar;
 
     private PluginDefinition definition;
+    private PluginDefinition updateDefinition;
     private PluginInfo info;
     private final IssueHandler issues = new IssueHandler();
+    private IssueHandler updateIssues;
 
     public Plugin(File file, URL jar) {
         this.file = file;
@@ -33,8 +36,20 @@ public class Plugin {
         info = ConfigEntity.INSTANCE.getPluginInfo(definition);
     }
 
+    public void setUpdateDefinition(PluginDefinition definition) {
+        this.updateDefinition = definition;
+    }
+
+    public void initializeUpdateIssues() {
+        updateIssues = new IssueHandler();
+    }
+
     public PluginDefinition getDefinition() {
         return definition;
+    }
+
+    public PluginDefinition getUpdateDefinition() {
+        return updateDefinition;
     }
 
     public PluginInfo getInfo() {
@@ -45,19 +60,26 @@ public class Plugin {
         return issues;
     }
 
+    public IssueHandler getUpdateIssues() {
+        return updateIssues;
+    }
+
     public String getName() {
         return definition != null ? definition.name : new File(jar.getFile()).getName();
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Plugin)) return false;
-        return getName().equals(((Plugin) obj).getName());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Plugin plugin = (Plugin) o;
+        return getName().equals(plugin.getName()) &&
+                definition.version.equals(plugin.definition.version);
     }
 
     @Override
     public int hashCode() {
-        return getName().hashCode();
+        return Objects.hash(getName(), definition.version);
     }
 
 }

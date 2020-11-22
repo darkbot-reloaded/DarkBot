@@ -10,9 +10,7 @@ import java.awt.event.ActionEvent;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicInteger;
 
 //todoo i18n
 public class PluginUpdateHeader extends JPanel {
@@ -28,15 +26,15 @@ public class PluginUpdateHeader extends JPanel {
     private final UpdateAllButton updateAllButton;
     private volatile UpdateProgressBar progressBar;
 
-    private final List<PluginName> names;
+    private final PluginDisplay pluginDisplay;
 
-    PluginUpdateHeader(Main main, List<PluginName> namess) {
+    PluginUpdateHeader(Main main, PluginDisplay display) {
         super(new MigLayout("ins 0, gap 0, fill", "[grow][][]", "[][grow]"));
 
         this.pluginHandler = main.pluginHandler;
         this.status = pluginHandler.AVAILABLE_UPDATES.isEmpty() && pluginHandler.INCOMPATIBLE_UPDATES.isEmpty()
                 ? "You are all up to date, " : "";
-        this.names = namess;
+        this.pluginDisplay = display;
 
         title = new Title();
         updateAllButton = new UpdateAllButton();
@@ -72,6 +70,7 @@ public class PluginUpdateHeader extends JPanel {
                 updateAllButton.setVisible(!pluginHandler.AVAILABLE_UPDATES.isEmpty());
             }
             title.setText(titleFormatter.format(new Object[]{status, dateFormatter.format(lastChecked)}));
+            pluginDisplay.refreshUI();
         }
     }
 
@@ -86,22 +85,8 @@ public class PluginUpdateHeader extends JPanel {
         public void actionPerformed(ActionEvent e) {
             setEnabled(false);
             progressBar.setVisible(true);
-            double total = pluginHandler.AVAILABLE_UPDATES.size();
-            AtomicInteger current = new AtomicInteger();
 
-            names.forEach(n -> {
-                n.update();
-                n.task.addPropertyChangeListener(l -> {
-                    if ("progress".equals(l.getPropertyName())) {
-                        current.addAndGet((int) (25 / total));
-                        progressBar.setValue(current.get());
-                    }
-                });
-            });
-            while (!names.stream().allMatch(n -> n.canReload));
-            names.forEach(n -> n.task.makeReloadable());
-            pluginHandler.updatePlugins();
-            names.forEach(n -> n.task.finishedReloading());
+            pluginDisplay.updateAll(progressBar);
         }
     }
 

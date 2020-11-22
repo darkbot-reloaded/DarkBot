@@ -106,7 +106,6 @@ public class Main extends Thread implements PluginListener {
         this.configChange.add(this::setConfigInternal);
 
         this.pluginHandler.updatePluginsSync();
-        this.pluginHandler.checkUpdates();
         this.pluginHandler.addListener(this);
 
         this.form = new MainGui(this);
