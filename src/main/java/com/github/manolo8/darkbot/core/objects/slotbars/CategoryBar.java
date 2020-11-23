@@ -31,7 +31,6 @@ public class CategoryBar extends MenuBar {
         return null;
     }
 
-
     public Category get(SlotBarAPI.Category type) {
         String id = type.getId();
         for (Category category : categories) {
@@ -47,6 +46,7 @@ public class CategoryBar extends MenuBar {
         }
 
         return false;
+    }
 
     public Optional<Item> findItemById(String itemId) {
         for (Category cat : categories) {
