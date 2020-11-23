@@ -7,6 +7,7 @@ import eu.darkbot.api.managers.SlotBarAPI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -30,6 +31,7 @@ public class CategoryBar extends MenuBar {
         return null;
     }
 
+
     public Category get(SlotBarAPI.Category type) {
         String id = type.getId();
         for (Category category : categories) {
@@ -45,6 +47,15 @@ public class CategoryBar extends MenuBar {
         }
 
         return false;
+
+    public Optional<Item> findItemById(String itemId) {
+        for (Category cat : categories) {
+            for (Item item : cat.items) {
+                if (itemId.equals(item.id)) return Optional.of(item);
+            }
+        }
+        return Optional.empty();
+
     }
 
     public static class Category extends UpdatableAuto {

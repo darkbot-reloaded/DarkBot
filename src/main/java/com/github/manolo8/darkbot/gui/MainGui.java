@@ -38,10 +38,10 @@ public class MainGui extends JFrame {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        Config.BotSettings botSettings = main.config.BOT_SETTINGS;
+        Config.BotSettings.BotGui botSettings = main.config.BOT_SETTINGS.BOT_GUI;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> main.configManager.saveConfig()));
 
-        Config.BotSettings.WindowPosition window = botSettings.MAIN_GUI_WINDOW;
+        Config.BotSettings.BotGui.WindowPosition window = botSettings.MAIN_GUI_WINDOW;
         if (!botSettings.SAVE_GUI_POS || isOutsideScreen(window)) {
             setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
             setLocationRelativeTo(null);
@@ -60,7 +60,7 @@ public class MainGui extends JFrame {
         setAlwaysOnTop(true);
         toFront();
         requestFocus();
-        setAlwaysOnTop(main.config.BOT_SETTINGS.DISPLAY.ALWAYS_ON_TOP);
+        setAlwaysOnTop(main.config.BOT_SETTINGS.BOT_GUI.ALWAYS_ON_TOP);
 
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -107,7 +107,7 @@ public class MainGui extends JFrame {
     }
 
     public void tryClose() {
-        if (main.config.BOT_SETTINGS.CONFIRM_EXIT) exitConfirmation.setVisible(true);
+        if (main.config.BOT_SETTINGS.BOT_GUI.CONFIRM_EXIT) exitConfirmation.setVisible(true);
         else {
             System.out.println("Exit button pressed, exiting");
             System.exit(0);
@@ -119,7 +119,7 @@ public class MainGui extends JFrame {
     }
 
     // https://stackoverflow.com/a/39776624
-    private static boolean isOutsideScreen(Config.BotSettings.WindowPosition window) {
+    private static boolean isOutsideScreen(Config.BotSettings.BotGui.WindowPosition window) {
         Rectangle rec = new Rectangle(window.x, window.y, window.width, window.height);
         int windowArea = rec.width * rec.height;
 

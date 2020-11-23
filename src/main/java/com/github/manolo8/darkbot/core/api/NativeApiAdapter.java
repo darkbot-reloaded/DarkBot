@@ -1,20 +1,18 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.utils.StartupParams;
-import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.NativeApi;
 
 public class NativeApiAdapter extends ApiAdapter {
 
-    private final LoginData loginData;
     private final NativeApi API = new NativeApi();
 
     private static int nextBotId = 0;
     private int botId = -1;
 
     public NativeApiAdapter(StartupParams params) {
-        this.loginData = LoginUtils.performUserLogin(params);
+        super(LoginUtils.performUserLogin(params));
     }
 
     public void createWindow() {
@@ -23,6 +21,10 @@ public class NativeApiAdapter extends ApiAdapter {
         if (!API.createBot(botId))
             throw new IllegalStateException("The bot could not successfully setup the browser window");
 
+        setData();
+    }
+
+    protected void setData() {
         API.sendMessage(botId, Headers.LOGIN, loginData.getUrl().split("\\.")[0], loginData.getSid());
     }
 
@@ -55,6 +57,8 @@ public class NativeApiAdapter extends ApiAdapter {
     }
 
     public void handleRefresh() {
+        relogin();
+        setData();
         API.sendMessage(botId, Headers.RELOAD);
     }
 

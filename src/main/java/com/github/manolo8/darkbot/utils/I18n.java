@@ -27,7 +27,7 @@ public class I18n {
 
     public static void reloadProps() {
         props.clear();
-        locale = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.LOCALE;
+        locale = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.LOCALE;
 
         loadResource(props, getLangFile(Locale.ENGLISH));
         if (!locale.equals(Locale.ENGLISH)) loadResource(props, getLangFile(locale));

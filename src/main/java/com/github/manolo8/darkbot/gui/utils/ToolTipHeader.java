@@ -5,9 +5,9 @@ import javax.swing.table.TableColumnModel;
 import java.awt.event.MouseEvent;
 
 public class ToolTipHeader extends JTableHeader {
-   private final GenericTableModel tableModel;
+   private final GenericTableModel<?> tableModel;
 
-   public ToolTipHeader(TableColumnModel columnModel, GenericTableModel tableModel) {
+   public ToolTipHeader(TableColumnModel columnModel, GenericTableModel<?> tableModel) {
       super(columnModel);
       this.tableModel = tableModel;
    }

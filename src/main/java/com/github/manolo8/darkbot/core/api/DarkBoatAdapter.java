@@ -1,27 +1,29 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.utils.StartupParams;
-import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.DarkBoat;
 
 public class DarkBoatAdapter extends ApiAdapter {
-    private final LoginData loginData;
     private final DarkBoat API = new DarkBoat();
 
     public DarkBoatAdapter(StartupParams params) {
-        this.loginData = LoginUtils.performUserLogin(params);
+        super(LoginUtils.performUserLogin(params));
     }
 
     @Override
     public void createWindow() {
+        setData();
+        Thread apiThread = new Thread(API::createWindow);
+        apiThread.setDaemon(true);
+        apiThread.start();
+    }
+
+    protected void setData() {
         String url = "https://" + loginData.getUrl() + "/",
                 sid = "dosid=" + loginData.getSid();
 
         API.setData(url, sid, loginData.getPreloaderUrl(), loginData.getParams());
-        Thread apiThread = new Thread(API::createWindow);
-        apiThread.setDaemon(true);
-        apiThread.start();
     }
 
     @Override
@@ -141,6 +143,8 @@ public class DarkBoatAdapter extends ApiAdapter {
 
     @Override
     public void handleRefresh() {
+        relogin();
+        setData();
         API.reload();
     }
 }

@@ -46,6 +46,7 @@ public class GuiManager implements Manager {
     public final Gui logout = register("logout");
     public final Gui eventProgress =  register("eventProgress");
     public final Gui eternalGate = register("eternal_gate");
+    public final Gui blacklightGate = register("eternal_blacklight");
     public final RefinementGui refinement = register("refinement", new RefinementGui());
     public final PetManager pet;
     public final OreTradeGui oreTrade;
@@ -68,6 +69,8 @@ public class GuiManager implements Manager {
     }
 
     public int deaths;
+
+    private boolean needRefresh;
 
     public GuiManager(Main main) {
         this.main = main;
@@ -190,6 +193,7 @@ public class GuiManager implements Manager {
         }
 
         if (isDead()) {
+            this.needRefresh = true;
             main.hero.drive.stop(false);
 
             if (lastDeath == -1) lastDeath = System.currentTimeMillis();
@@ -208,7 +212,16 @@ public class GuiManager implements Manager {
         }
 
 
+
         HeroManager hero = main.hero;
+        if (this.needRefresh && System.currentTimeMillis() - lastRepair > 5_000) {
+            this.needRefresh = false;
+            if (main.config.MISCELLANEOUS.REFRESH_AFTER_REVIVE) {
+                System.out.println("Triggering refresh: refreshing after death");
+                API.handleRefresh();
+                return false;
+            }
+        }
         if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
             validTime = System.currentTimeMillis();
             return false;

@@ -1,15 +1,21 @@
 package com.github.manolo8.darkbot.modules.utils;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.backpage.entities.Item;
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
+import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
+import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
 import com.github.manolo8.darkbot.core.utils.Drive;
 
 import static com.github.manolo8.darkbot.Main.API;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.*;
 
 public class NpcAttacker {
 
@@ -17,6 +23,8 @@ public class NpcAttacker {
     protected MapManager mapManager;
     protected HeroManager hero;
     protected Drive drive;
+    protected final SettingsProxy keybinds;
+    protected final CategoryBar bar;
 
     public Npc target;
     protected Long ability;
@@ -34,6 +42,8 @@ public class NpcAttacker {
         this.mapManager = main.mapManager;
         this.hero = main.hero;
         this.drive = hero.drive;
+        this.keybinds = main.facadeManager.settings;
+        this.bar = main.facadeManager.slotBars.categoryBar;
     }
 
     public String status() {
@@ -90,10 +100,10 @@ public class NpcAttacker {
         if ((ammoChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
             laserTime = System.currentTimeMillis() + 750;
             if (!attacking || !bugged || ammoChanged) {
-                API.rawKeyboardClick(getAttackKey());
+                API.keyboardClick(getAttackKey());
                 attacking = true;
             } else {
-                if (API instanceof DarkBoatAdapter) API.rawKeyboardClick((char) 0x11);
+                if (API instanceof DarkBoatAdapter) API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
                 else setRadiusAndClick(false);
                 fixTimes++;
             }
@@ -102,9 +112,10 @@ public class NpcAttacker {
 
     public double modifyRadius(double radius) {
         if (target.health.hpPercent() < 0.25 && target.npcInfo.extra.has(NpcExtra.AGGRESSIVE_FOLLOW)) radius *= 0.75;
-        if (target != hero.target || !hero.isAttacking(target) || castingAbility()) return Math.min(550, radius);
-        if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) return Math.min(600, radius);
-        return radius;
+        if (target != hero.target || !hero.isAttacking(target) || castingAbility()) radius = Math.min(550, radius);
+        else if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) radius = Math.min(600, radius);
+
+        return radius + bar.findItemById("ability_zephyr_mmt").map(i -> i.quantity).orElse(0d) * 5;
     }
 
     private boolean shouldSab() {
@@ -119,7 +130,7 @@ public class NpcAttacker {
         return useRsbUntil > System.currentTimeMillis() - 50;
     }
 
-    private char getAttackKey() {
+    private Character getAttackKey() {
         if (rsb = shouldRsb()) return main.config.LOOT.RSB.KEY;
         if (sab = shouldSab()) return main.config.LOOT.SAB.KEY;
         return this.target == null || this.target.npcInfo.attackKey == null ?

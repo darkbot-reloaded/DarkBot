@@ -35,11 +35,11 @@ public class PluginCard extends JPanel {
         featureRegistry.getFeatures(plugin).forEach(fd -> this.addFeature(main, fd));
     }
 
-    private void addFeature(Main main, FeatureDefinition feature) {
+    private void addFeature(Main main, FeatureDefinition<?> feature) {
         add(new FeatureTypeButton(feature), "growx");
         if (Configurable.class.isAssignableFrom(feature.getClazz())) {
             //noinspection unchecked
-            add(new FeatureConfigButton(main.config, (FeatureDefinition<Configurable>) feature));
+            add(new FeatureConfigButton(main, (FeatureDefinition<Configurable<?>>) feature));
         } else {
             add(new JLabel());
         }

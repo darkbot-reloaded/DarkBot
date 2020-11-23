@@ -10,6 +10,7 @@ public class Clickable extends Updatable {
 
     public int radius;
     public int priority;
+    public boolean enabled;
 
     public int defRadius = -1;
     public int defPriority = -1;
@@ -48,6 +49,7 @@ public class Clickable extends Updatable {
         int oldRad = radius, oldPri = priority;
         this.radius = API.readMemoryInt(address + 40);
         this.priority = API.readMemoryInt(address + 44);
+        this.enabled = API.readMemoryBoolean(address, 64, 32);
 
         if (radius != oldRad) {
             if (oldRad != defRadius) defRadius = radius;

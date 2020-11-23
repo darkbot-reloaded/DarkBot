@@ -4,6 +4,8 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
 
 import static com.github.manolo8.darkbot.Main.API;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.ACTIVE_PET;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.ATTACK_ROCKET;
 
 public class PetNpcAttacker extends NpcAttacker {
 
@@ -37,10 +39,10 @@ public class PetNpcAttacker extends NpcAttacker {
                 && System.currentTimeMillis() > (5000 + laserTime + (fixTimes * 5000));
         if (!hero.pet.isAttacking(target) && System.currentTimeMillis() > laserTime) {
             if (bugged) {
-                API.rawKeyboardClick('E');
+                API.keyboardClick(keybinds.getCharCode(ACTIVE_PET));
                 fixTimes++;
             } else if (hero.locationInfo.distance(target) > 800) {
-                API.rawKeyboardClick(' ');
+                API.keyboardClick(keybinds.getCharCode(ATTACK_ROCKET));
                 laserTime = System.currentTimeMillis() + 5000;
             }
         }

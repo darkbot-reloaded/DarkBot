@@ -14,4 +14,14 @@ public class Strings {
         return Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
 
+    public static String toTooltip(String str) {
+        if (str != null && str.trim().isEmpty()) return null;
+        return str;
+    }
+
+    public static String simplifyName(String name) {
+        if (!name.matches("^[^\\d]+\\d{1,3}$")) return name;
+        return name.replaceAll("\\d{1,3}$", " *");
+    }
+
 }

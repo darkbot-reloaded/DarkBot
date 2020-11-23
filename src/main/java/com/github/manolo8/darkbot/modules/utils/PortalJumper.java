@@ -5,9 +5,9 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 
 public class PortalJumper {
 
-    private HeroManager hero;
+    private final HeroManager hero;
     private Portal last;
-    private long lastJumpStart;
+    private long nextMoveClick;
 
     public PortalJumper(HeroManager hero) {
         this.hero = hero;
@@ -22,10 +22,10 @@ public class PortalJumper {
 
         if (target != last) {
             last = target;
-            lastJumpStart = System.currentTimeMillis();
-        } else if (System.currentTimeMillis() - lastJumpStart > 5_000) {
+            nextMoveClick = System.currentTimeMillis() + 5000;
+        } else if (System.currentTimeMillis() > nextMoveClick && !target.clickable.enabled) {
             hero.drive.clickCenter(true, target.locationInfo.now);
-            lastJumpStart = System.currentTimeMillis();
+            nextMoveClick = System.currentTimeMillis() + 10000;
         }
     }
 

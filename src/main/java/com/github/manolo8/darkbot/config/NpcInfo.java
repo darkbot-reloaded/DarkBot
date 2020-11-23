@@ -66,9 +66,18 @@ public class NpcInfo {
             else flags.remove(flagId);
         }
 
+        public void copy(ExtraNpcInfo other) {
+            if (this == other) return;
+            this.flags.clear();
+            this.flags.addAll(other.flags);
+        }
+
         public String toString() {
-            return flags.stream().map(NPC_FLAGS::get)
-                    .filter(Objects::nonNull)
+            if (flags.isEmpty()) return "";
+
+            return NPC_FLAGS.entrySet().stream()
+                    .filter(e -> flags.contains(e.getKey()))
+                    .map(Map.Entry::getValue)
                     .map(NpcExtraFlag::getShortName)
                     .collect(Collectors.joining(","));
         }

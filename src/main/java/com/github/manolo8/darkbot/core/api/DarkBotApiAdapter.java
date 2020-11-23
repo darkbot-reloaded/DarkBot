@@ -5,7 +5,11 @@ import com.github.manolo8.darkbot.utils.Time;
 
 public class DarkBotApiAdapter extends ApiAdapter {
 
-    private DarkBotAPI API = new DarkBotAPI();
+    private final DarkBotAPI API = new DarkBotAPI();
+
+    public DarkBotApiAdapter() {
+        super(null);
+    }
 
     @Override
     public void createWindow() {

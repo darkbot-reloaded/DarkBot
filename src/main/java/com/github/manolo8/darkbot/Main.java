@@ -41,6 +41,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -48,7 +49,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 51");
+    public static final Version VERSION      = new Version("1.13.17 beta 59");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -66,8 +67,8 @@ public class Main extends Thread implements PluginListener {
     public final StarManager starManager         = new StarManager();
     public final MapManager mapManager           = new MapManager(this);
     public final SettingsManager settingsManager = new SettingsManager(this);
-    public final HeroManager hero                = new HeroManager(this);
     public final FacadeManager facadeManager     = new FacadeManager(this);
+    public final HeroManager hero                = new HeroManager(this);
     public final EffectManager effectManager     = new EffectManager(this);
     public final GuiManager guiManager           = new GuiManager(this);
     public final StatsManager statsManager       = new StatsManager(this);
@@ -95,14 +96,14 @@ public class Main extends Thread implements PluginListener {
         super("Main");
         VerifierChecker.getAuthApi().setupAuth();
         API = configManager.getAPI(params);
-        API.setSize(config.BOT_SETTINGS.DISPLAY.width, config.BOT_SETTINGS.DISPLAY.height);
+        API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();
         });
 
         this.status.add(this::onRunningToggle);
-        this.configChange.add(this::setConfig);
+        this.configChange.add(this::setConfigInternal);
 
         this.pluginHandler.updatePluginsSync();
         this.pluginHandler.addListener(this);
@@ -113,7 +114,7 @@ public class Main extends Thread implements PluginListener {
             Popups.showMessageAsync("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
 
         API.createWindow();
-        if (params != null && params.getAutoStart()) setRunning(true);
+        if (params.getAutoStart()) setRunning(true);
         start();
     }
 
@@ -135,7 +136,7 @@ public class Main extends Thread implements PluginListener {
             avgTick = ((avgTick * 9) + (System.currentTimeMillis() - time)) / 10;
 
             Time.sleepMax(time, botInstaller.invalid.get() ? 1000 :
-                    Math.max(config.BOT_SETTINGS.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
+                    Math.max(config.BOT_SETTINGS.OTHER.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
         }
     }
 
@@ -212,6 +213,7 @@ public class Main extends Thread implements PluginListener {
                 System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
 
         if (!module.canRefresh()) return;
+
         lastRefresh = System.currentTimeMillis();
         if (config.MISCELLANEOUS.PAUSE_FOR > 0) {
             System.out.println("Pausing (logging off): time arrived & module allows refresh");
@@ -227,8 +229,10 @@ public class Main extends Thread implements PluginListener {
     }
 
     private <A extends Module> A setModule(A module, boolean setConfig) {
-        module.install(this);
-        if (setConfig) updateCustomConfig(module);
+        if (module != null) {
+            module.install(this);
+            if (setConfig) updateCustomConfig(module);
+        }
         this.module = module;
         return module;
     }
@@ -290,12 +294,27 @@ public class Main extends Thread implements PluginListener {
     }
 
     public void setConfig(String config) {
+        this.configChange.send(config);
+    }
+
+    public MainGui getGui() {
+        return form;
+    }
+
+    private void setConfigInternal(String config) {
         if (configManager.getConfigName().equals(config)) return;
-        this.config = configManager.loadConfig(config);
-        mapManager.updateAreas();
-        featureRegistry.updateConfig();
-        form.updateConfiguration();
-        setModule(module, true);
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                this.config = configManager.loadConfig(config);
+                mapManager.updateAreas();
+                pluginHandler.updateConfig(); // Get plugins to update what features are enabled
+                featureRegistry.updateConfig(); // Update the features & configurables
+                form.updateConfiguration(); // Rebuild config gui
+                setModule(module, true);
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
 }

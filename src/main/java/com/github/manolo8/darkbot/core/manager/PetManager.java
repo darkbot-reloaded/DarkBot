@@ -155,7 +155,7 @@ public class PetManager extends Gui {
 
     public void setOverride(Integer gearId) {
         this.gearOverride = gearId;
-        this.gearOverrideTime = gearId == null ? 0 : System.currentTimeMillis() + 5000;
+        this.gearOverrideTime = gearId == null ? 0 : System.currentTimeMillis() + 6000;
     }
 
     public boolean hasGear(PetGearSupplier.Gears gear) {
@@ -197,7 +197,7 @@ public class PetManager extends Gui {
 
     private void selectModule(int moduleId, int submoduleIdx) {
         if (System.currentTimeMillis() < this.selectModuleTime) return;
-        this.selectModuleTime = System.currentTimeMillis() + 750;
+        this.selectModuleTime = System.currentTimeMillis() + 1000;
 
         switch (selection) {
             case SELECTED:

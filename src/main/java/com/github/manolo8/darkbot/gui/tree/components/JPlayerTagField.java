@@ -16,13 +16,13 @@ import java.util.stream.IntStream;
 
 public class JPlayerTagField extends JButton implements OptionEditor {
 
+    private static final int MARGIN = 16;
     private static final int ALPHA = 96;
     private ConfigField field;
     private TagPopup tagPopup;
     private TagDefault unset;
 
     public JPlayerTagField() {
-        putClientProperty("JButton.buttonType", "square");
         setEditing(null);
 
         addActionListener(e -> tagPopup.show(this, 0, getHeight(), unset.toString()));
@@ -66,7 +66,7 @@ public class JPlayerTagField extends JButton implements OptionEditor {
     @Override
     public void setText(String text) {
         super.setText(text);
-        setPreferredSize(new Dimension(getFontMetrics(getFont()).stringWidth(getText()) + 16, 0));
+        setPreferredSize(new Dimension(getFontMetrics(getFont()).stringWidth(getText()) + MARGIN, 0));
     }
 
     @Override
@@ -76,9 +76,14 @@ public class JPlayerTagField extends JButton implements OptionEditor {
 
     @Override
     public Dimension getReservedSize() {
-        Dimension popup = tagPopup.getPreferredSize();
-        popup.height = 0;
-        return popup;
+        FontMetrics fm = getFontMetrics(getFont());
+
+        int maxTagSize = ConfigEntity.INSTANCE.getConfig().PLAYER_TAGS.stream()
+                .map(t -> t.name)
+                .mapToInt(fm::stringWidth)
+                .max().orElse(50);
+
+        return new Dimension(maxTagSize + MARGIN, 0);
     }
 
     @Override

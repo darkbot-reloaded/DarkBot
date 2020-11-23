@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.utils.pathfinder;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.utils.Location;
@@ -109,12 +110,14 @@ public class PathFinder {
 
     public boolean changed() {
         if (!obstacleHandler.changed()) return false;
-        points.clear();
+        synchronized (Main.UPDATE_LOCKER) {
+            points.clear();
 
-        for (Area a : obstacleHandler)
-            for (PathPoint p : a.getPoints(this))
-                if (!isOutOfMap(p.x, p.y) && canMove(p.x, p.y))
-                    this.points.add(p);
+            for (Area a : obstacleHandler)
+                for (PathPoint p : a.getPoints(this))
+                    if (!isOutOfMap(p.x, p.y) && canMove(p.x, p.y))
+                        this.points.add(p);
+        }
 
         for (PathPoint point : points) point.fillLineOfSight(this);
         return true;
