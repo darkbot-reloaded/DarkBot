@@ -22,13 +22,6 @@ public interface LogAPI extends Gui, API {
     Listener<String> addListener(Listener<String> onMessage);
 
     /**
-     * Gets the most recent log message
-     *
-     * @return the most recent message in your in-game log
-     */
-    Optional<String> getLastMessage();
-
-    /**
      * @return last 50 massages from in-game log
      */
     Collection<String> getMessages();

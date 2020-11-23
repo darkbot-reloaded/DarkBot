@@ -1,32 +1,18 @@
 package eu.darkbot.api.entities;
 
-import eu.darkbot.api.managers.HeroAPI;
-import eu.darkbot.api.objects.Health;
+import eu.darkbot.api.entities.utils.Attackable;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.LocationInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public interface Ship extends Entity, Health {
-
-    /**
-     * @return ship username.
-     */
-    String getUsername();
+public interface Ship extends Entity, Attackable {
 
     /**
      * @return true if ship is invisible/cloaked.
      */
     boolean isInvisible();
-
-    /**
-     * Returns true if ship is considered as enemy for {@link HeroAPI}.
-     * <p>
-     * Is <b>not</b> in ally clan, group?
-     * Is from other faction or enemy clan.
-     */
-    boolean isEnemy();
 
     /**
      * Returns true if ship aims other ship by checking theirs angle.
@@ -45,33 +31,6 @@ public interface Ship extends Entity, Health {
      * @return {@link Pet} associated with this ship or {@link Optional#empty()} if none.
      */
     Optional<Pet> getPet();
-
-    int getClanId();
-
-    /**
-     * @return {@link Diplomacy}
-     */
-    Diplomacy getClanDiplomacy();
-
-    /**
-     * @return ship's clan tag
-     */
-    String getClanTag();
-
-    /**
-     * @return {@link Faction}
-     */
-    Faction getFaction();
-
-    /**
-     * Probably id of rank icon.
-     */
-    int getRankIconId();
-
-    /**
-     * Probably id of gate circles icon, above rank
-     */
-    int getGalaxyRankIconId();
 
     /**
      * @return speed of ship from memory.
@@ -113,27 +72,6 @@ public interface Ship extends Entity, Health {
 
     default boolean isInFormation(@NotNull Ship.Formation formation) {
         return isInFormation(formation.ordinal());
-    }
-
-    /**
-     * Represents in-game fractions.
-     */
-    enum Faction {
-        NONE,
-        MMO,
-        EIC,
-        VRU,
-        SATURN
-    }
-
-    /**
-     * Represents in-game clans diplomacy types.
-     */
-    enum Diplomacy {
-        NONE,
-        ALLIED,
-        NOT_ATTACK_PACT,
-        WAR
     }
 
     /**

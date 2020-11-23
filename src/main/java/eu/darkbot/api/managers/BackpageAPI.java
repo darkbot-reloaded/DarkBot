@@ -8,8 +8,9 @@ import java.net.URI;
 import java.util.Optional;
 
 /**
- * API to manage, connect backpage of the game.
+ * API to manage, connect to backpage of the game.
  * {@link BackpageAPI} should be called only from {@link eu.darkbot.api.plugin.Task} thread.
+ * @see com.github.manolo8.darkbot.core.itf.Task
  */
 public interface BackpageAPI extends API {
 

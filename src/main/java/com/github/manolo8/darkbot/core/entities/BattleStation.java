@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
+import com.github.manolo8.darkbot.core.objects.Health;
 import com.github.manolo8.darkbot.core.objects.PlayerInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
 import com.github.manolo8.darkbot.core.utils.pathfinder.Circle;
@@ -13,6 +14,7 @@ public class BattleStation
         implements Obstacle {
 
     public PlayerInfo info = new PlayerInfo();
+    public Health health = new Health();
     public Circle area = new Circle(0, 0, 1200);
     public int hullId;
 
@@ -26,6 +28,7 @@ public class BattleStation
         super.update();
 
         info.update();
+        health.update();
         if (locationInfo.isMoving()) {
             area.set(locationInfo.now, 1200);
             ConfigEntity.INSTANCE.updateSafetyFor(this);
@@ -44,6 +47,16 @@ public class BattleStation
 
         hullId = API.readMemoryInt(address + 116);
         info.update(API.readMemoryLong(address + 120));
+
+        health.update(findInTraits(ptr -> {
+            long classType = API.readMemoryLong(ptr, 48, 0x10);
+
+            for (int i = 8; i <= 5 * 8; i += 8)
+                if (API.readMemoryLong(ptr, 48 + i, 0x10) != classType)
+                    return false;
+
+            return true;
+        }));
     }
 
     @Override

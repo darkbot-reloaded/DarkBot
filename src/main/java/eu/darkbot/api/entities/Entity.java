@@ -3,9 +3,9 @@ package eu.darkbot.api.entities;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.LocationInfo;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * Generic entity object in-game.
@@ -34,12 +34,20 @@ public interface Entity extends Locatable {
     boolean isClickable();
 
     /**
-     * Clicks on entity only if distance to {@link eu.darkbot.api.managers.HeroAPI} is lower than 800.
+     * Selects this entity as the target, can instantly attempt to attack with {@code attack} flag.
      *
-     * @param doubleClick should be double clicked
+     * @param attack      instant attempt to attack this entity
+     * @param minDistance minimum distance to {@link eu.darkbot.api.managers.HeroAPI} to select this entity
      * @return true on successful click
      */
-    boolean tryMouseClick(boolean doubleClick);
+    boolean trySelect(boolean attack, double minDistance);
+
+    /**
+     * Same as {@link #trySelect(boolean, double)} with constant 850 minimum distance.
+     */
+    default boolean trySelect(boolean attack) {
+        return trySelect(attack, 850);
+    }
 
     /**
      * @return {@link LocationInfo}
@@ -78,9 +86,10 @@ public interface Entity extends Locatable {
     void setMetadata(String key, Object value);
 
     /**
-     * Returns value associated with key or {@link Optional#empty()} if key doesnt exists.
+     * Returns value associated with key or {@code null} if key doesnt exists.
      */
-    Optional<Object> getMetadata(String key);
+    @Nullable
+    Object getMetadata(String key);
 
     /**
      * Represents in-game entity effects.

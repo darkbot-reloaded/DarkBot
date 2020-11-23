@@ -1,6 +1,7 @@
 package eu.darkbot.api.entities;
 
 import eu.darkbot.api.entities.utils.Map;
+import eu.darkbot.api.objects.Info;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -22,5 +23,5 @@ public interface Portal extends Entity {
     int getPortalType();
 
     // TODO: 01.11.2020 not sure which and when.
-    Ship.Faction getFactionId();
+    Info.Faction getFactionId();
 }

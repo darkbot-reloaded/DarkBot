@@ -1,8 +1,8 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.Entity;
 import eu.darkbot.api.entities.utils.Ammo;
+import eu.darkbot.api.entities.utils.Attackable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,26 +15,26 @@ public interface AttackAPI extends API {
     /**
      * @return currently set target
      */
-    Optional<Entity> getTarget();
+    Optional<Attackable> getTarget();
 
     /**
      * @param entity to be set
-     * @return previously set {@link Entity}
+     * @return previously set {@link Attackable}
      */
-    Optional<Entity> setTarget(@Nullable Entity entity);
+    Optional<Attackable> setTarget(@Nullable Attackable entity);
 
     /**
-     * @return true if selected {@link Entity} is clicked/targeted
+     * @return true if selected {@link Attackable} is targeted
      */
     boolean isTargeted();
 
     /**
-     * Tries to click selected target
+     * Tries to select current target
      *
-     * @return true if click was successful
+     * @return true if selection was successful
      * @see #getTarget()
      */
-    boolean clickTarget();
+    boolean selectTarget();
 
     //lock type 1,2,3,4...
     int getLockType();
@@ -69,6 +69,9 @@ public interface AttackAPI extends API {
     /**
      * Overrides user settings to use given ammo.
      * Call {@code setLaserAmmo(null)} to use default ammo.
+     * <p>
+     * In case {@link Ammo.Laser#hasCooldown()} ammo,
+     * will be used only when available/not in cooldown, otherwise will use the previous one.
      *
      * @param laserId to be set
      * @return previously set {@link Ammo.Laser}
