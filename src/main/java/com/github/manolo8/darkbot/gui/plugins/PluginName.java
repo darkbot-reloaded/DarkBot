@@ -3,8 +3,7 @@ package com.github.manolo8.darkbot.gui.plugins;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
-import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
-import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
+import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import net.miginfocom.swing.MigLayout;
 
@@ -14,20 +13,15 @@ import java.awt.event.ActionEvent;
 
 class PluginName extends JPanel {
 
-    private final PluginHandler pluginHandler;
+    private final PluginUpdater pluginUpdater;
+
     private final Plugin plugin;
-    private final PluginCard pluginCard;
 
-    final JButton updateButton;
-
-    PluginName(Main main, PluginCard card) {
+    PluginName(Main main, Plugin plugin) {
         super(new MigLayout("", "[]5px[]5px[]5px[grow][]"));
 
-        this.pluginHandler = main.pluginHandler;
-        this.plugin = card.plugin;
-        this.pluginCard = card;
-
-        updateButton = new UpdateButton();
+        this.pluginUpdater = main.pluginUpdater;
+        this.plugin = plugin;
 
         PluginDefinition definition = plugin.getDefinition();
         JLabel name = new JLabel(definition.name);
@@ -46,11 +40,9 @@ class PluginName extends JPanel {
         add(version);
         add(by);
         add(author);
-        add(pluginHandler.INCOMPATIBLE_UPDATES.contains(plugin)
-                ? new IssueList(pluginHandler.INCOMPATIBLE_UPDATES.stream()
-                    .filter(pl -> pl.equals(plugin))
-                    .findFirst().get().getIssues(), i -> i.getLevel() == PluginIssue.Level.ERROR,false)
-                : updateButton);
+        add(plugin.getUpdateIssues().getIssues().isEmpty()
+                ? new UpdateButton()
+                : new IssueList(plugin.getUpdateIssues(), false));
         setOpaque(false);
     }
 
@@ -59,17 +51,13 @@ class PluginName extends JPanel {
 
         private UpdateButton() {
             super("Update");
-            setVisible(pluginHandler.AVAILABLE_UPDATES.contains(plugin));
+            setVisible(plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             setEnabled(false);
-            pluginCard.update();
-            pluginCard.updateTask.makeReloadable();
-            while (!pluginCard.updateTask.canReload);
-            pluginHandler.updatePlugins();
-            pluginCard.updateTask.finishedReloading();
+            pluginUpdater.update(plugin);
         }
     }
 

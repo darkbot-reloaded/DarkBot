@@ -16,7 +16,12 @@ public class Plugin {
     private PluginDefinition updateDefinition;
     private PluginInfo info;
     private final IssueHandler issues = new IssueHandler();
-    private IssueHandler updateIssues;
+    private final IssueHandler updateIssues = new IssueHandler();
+
+    private UpdateStatus updateStatus = UpdateStatus.UNCHECKED;
+    public enum UpdateStatus {
+        UNCHECKED, UP_TO_DATE, AVAILABLE, INCOMPATIBLE
+    }
 
     public Plugin(File file, URL jar) {
         this.file = file;
@@ -40,8 +45,8 @@ public class Plugin {
         this.updateDefinition = definition;
     }
 
-    public void initializeUpdateIssues() {
-        updateIssues = new IssueHandler();
+    public void setUpdateStatus(UpdateStatus status) {
+        updateStatus = status;
     }
 
     public PluginDefinition getDefinition() {
@@ -62,6 +67,10 @@ public class Plugin {
 
     public IssueHandler getUpdateIssues() {
         return updateIssues;
+    }
+
+    public UpdateStatus getUpdateStatus() {
+        return updateStatus;
     }
 
     public String getName() {

@@ -27,6 +27,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
+import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
 import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
@@ -75,6 +76,7 @@ public class Main extends Thread implements PluginListener {
     public final PingManager pingManager         = new PingManager();
     public final BackpageManager backpage        = new BackpageManager(this);
     public final PluginHandler pluginHandler     = new PluginHandler();
+    public final PluginUpdater pluginUpdater     = new PluginUpdater(this);
     public final FeatureRegistry featureRegistry = new FeatureRegistry(this, pluginHandler);
     public final RepairManager repairManager     = new RepairManager();
 
@@ -107,6 +109,7 @@ public class Main extends Thread implements PluginListener {
 
         this.pluginHandler.updatePluginsSync();
         this.pluginHandler.addListener(this);
+        this.pluginUpdater.scheduleUpdateChecker();
 
         this.form = new MainGui(this);
 

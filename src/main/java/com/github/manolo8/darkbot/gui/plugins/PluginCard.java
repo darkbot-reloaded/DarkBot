@@ -25,37 +25,21 @@ public class PluginCard extends JPanel {
             WARNING_COLOR = new Color(UIUtils.YELLOW.getRGB() + ALPHA, true),
             ERROR_COLOR = new Color(UIUtils.RED.getRGB() + ALPHA, true);
 
-    private final Main main;
-    final Plugin plugin;
-    final PluginName name;
-
-    private final UpdateProgressBar progressBar;
-    private final JLabel progressLabel;
-    UpdateTask updateTask;
-
     PluginCard(Main main, Plugin plugin, FeatureRegistry featureRegistry) {
         super(new MigLayout("fillx, gapy 0, ins 0 0 5px 0", "5px[]0px[]10px[]10px[grow]", "[]"));
         setColor(plugin.getIssues());
         plugin.getIssues().addListener(this::setColor);
 
-        this.main = main;
-        this.plugin = plugin;
-        this.progressBar = new UpdateProgressBar();
-        this.progressLabel = new JLabel();
-
-        name = new PluginName(main, this);
+        UpdateProgressBar progressBar = new UpdateProgressBar();
+        JLabel progressLabel = new JLabel();
+        main.pluginUpdater.add(plugin, progressBar, progressLabel);
 
         add(progressBar, "dock south, spanx");
         add(progressLabel, "dock south, spanx, gapleft 5px");
         add(new IssueList(plugin.getIssues(), false), "dock east");
-        add(name, "dock north");
+        add(new PluginName(main, plugin), "dock north");
 
         featureRegistry.getFeatures(plugin).forEach(fd -> this.addFeature(main, fd));
-    }
-
-    void update() {
-        updateTask = new UpdateTask(main, plugin, progressBar, progressLabel);
-        updateTask.execute();
     }
 
     private void addFeature(Main main, FeatureDefinition<?> feature) {

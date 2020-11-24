@@ -20,8 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
@@ -39,9 +37,6 @@ public class PluginHandler {
     public final List<Plugin> LOADED_PLUGINS = new ArrayList<>();
     public final List<Plugin> FAILED_PLUGINS = new ArrayList<>();
     public final List<PluginLoadingException> LOADING_EXCEPTIONS = new ArrayList<>();
-
-    public final Queue<Plugin> AVAILABLE_UPDATES = new ConcurrentLinkedQueue<>();
-    public final List<Plugin> INCOMPATIBLE_UPDATES = new ArrayList<>();
 
     private static final List<PluginListener> LISTENERS = new ArrayList<>();
 
@@ -155,48 +150,13 @@ public class PluginHandler {
         }
     }
 
-    public void checkUpdates() {
-        AVAILABLE_UPDATES.clear();
-        INCOMPATIBLE_UPDATES.clear();
-        for (Plugin plugin : LOADED_PLUGINS) {
-            try {
-                checkUpdate(plugin);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void checkUpdate(Plugin plugin) throws IOException {
-        plugin.setUpdateDefinition(findUpdate(plugin.getDefinition()));
-
-        PluginDefinition updateDef = plugin.getUpdateDefinition();
-        if (plugin.getDefinition().version.compareTo(updateDef.version) >= 0) return;
-
-        plugin.initializeUpdateIssues();
-        IssueHandler updateIssues = plugin.getUpdateIssues();
-        testCompatibility(updateIssues, updateDef);
-
-        if (updateIssues.getIssues().stream().noneMatch(i -> i.getLevel() == PluginIssue.Level.ERROR))
-            AVAILABLE_UPDATES.add(plugin);
-        else INCOMPATIBLE_UPDATES.add(plugin);
-    }
-
-    private PluginDefinition findUpdate(PluginDefinition current) throws IOException {
-        if (current.update == null) return current;
-        PluginDefinition next = readPluginDefinition(current.update.openStream());
-        if (current.version.compareTo(next.version) >= 0) return current;
-        if (next.update == null || current.update.equals(next.update)) return next;
-        return findUpdate(next);
-    }
-
-    private PluginDefinition readPluginDefinition(InputStream is) throws IOException {
+    PluginDefinition readPluginDefinition(InputStream is) throws IOException {
         try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8)) {
             return GSON.fromJson(isr, (Type) PluginDefinition.class);
         }
     }
 
-    private void createDirectory(Path path) {
+    void createDirectory(Path path) {
         if (Files.exists(path)) return;
         try {
             Files.createDirectory(path);
@@ -213,22 +173,25 @@ public class PluginHandler {
     }
 
     private void testCompatibility(Plugin plugin) {
-        testCompatibility(plugin.getIssues(), plugin.getDefinition());
+        testCompatibility(plugin.getIssues(), plugin.getDefinition(), false);
     }
 
-    private void testCompatibility(IssueHandler issues, PluginDefinition pd) {
+    //todoo i18n
+    void testCompatibility(IssueHandler issues, PluginDefinition pd, boolean update) {
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
-            issues.addFailure(I18n.get("plugins.issues.invalid_json"),
-                    I18n.get("plugins.issues.invalid_json.desc", pd.minVersion, pd.supportedVersion));
+            issues.addFailure(I18n.get(update ? "plugins.update_issues.invalid_json" : "plugins.issues.invalid_json"),
+                    I18n.get(update ? "plugins.update_issues.invalid_json.desc" : "plugins.issues.invalid_json.desc",
+                            pd.minVersion, pd.supportedVersion));
 
         String supportedRange = "DarkBot v" + (pd.minVersion.compareTo(pd.supportedVersion) == 0 ?
                 pd.minVersion : pd.minVersion + "-v" + pd.supportedVersion);
 
         if (Main.VERSION.compareTo(pd.minVersion) < 0)
-            issues.addFailure(I18n.get("plugins.issues.bot_update"),
-                    I18n.get("plugins.issues.bot_update.desc", supportedRange, Main.VERSION));
+            issues.addFailure(I18n.get(update ? "plugins.update_issues.bot_update" : "plugins.issues.bot_update"),
+                    I18n.get(update ? "plugins.update_issues.bot_update.desc" : "plugins.issues.bot_update.desc",
+                            supportedRange, Main.VERSION));
 
-        if (Main.VERSION.compareTo(pd.supportedVersion) > 0)
+        if (!update && Main.VERSION.compareTo(pd.supportedVersion) > 0)
             issues.addInfo(I18n.get("plugins.issues.plugin_update"),
                     I18n.get("plugins.issues.plugin_update.desc", supportedRange, Main.VERSION));
     }
