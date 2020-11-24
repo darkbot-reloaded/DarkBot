@@ -15,26 +15,12 @@ public interface KeyBindsAPI {
     Character getKeyBind(@NotNull Shortcut shortcut);
 
     /**
-     * Search {@link Character} associated with given {@link Shortcut} and slotNumber in-game.
-     *
-     * @param shortcut   to be looked for
-     * @param slotNumber between 1 - 10
-     * @return {@link Character} associated with {@link Shortcut} otherwise null
-     * @throws IllegalArgumentException if {@code slotNumber < 1 || slotNumber > 10}
-     */
-    @Nullable
-    Character getKeyBind(@NotNull Shortcut shortcut, int slotNumber) throws IllegalArgumentException;
-
-    /**
      * Search {@link Character} associated with given {@link Slot} in-game.
      *
      * @return {@link Character} associated with {@link Slot} otherwise null
-     * @throws IllegalArgumentException if {@code slotNumber < 1 || slotNumber > 10}
      */
     @Nullable
-    default Character getKeyBind(@NotNull Slot slot) throws IllegalArgumentException {
-        return getKeyBind(slot.getSlotBarType().getShortcutType(), slot.getSlotNumber());
-    }
+    Character getKeyBind(@NotNull Slot slot);
 
     enum Shortcut {
         DEFAULT_BAR(0),

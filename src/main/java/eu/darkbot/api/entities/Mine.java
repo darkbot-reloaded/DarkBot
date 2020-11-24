@@ -21,10 +21,10 @@ public interface Mine extends Entity {
         ANTI_SHIELD(3),
         DIRECT_DAMAGE(4),
         PIRATE(5),
-        TITANIC(6),
+        TITANIC(6), //emperor sibeleon's mine?
         SLOWDOWN(7),
-        PLAGUE(17),
-        MEGA(19),
+        INFECTION(17),
+        MEGA(19), //pet's mega mine
         CURCUBITOR(20);
 
         private final int[] ids;

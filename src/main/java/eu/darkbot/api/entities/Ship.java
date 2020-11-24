@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public interface Ship extends Entity, Attackable {
+public interface Ship extends Attackable {
 
     /**
      * @return true if ship is invisible/cloaked.
@@ -15,27 +15,19 @@ public interface Ship extends Entity, Attackable {
     boolean isInvisible();
 
     /**
-     * Returns true if ship aims other ship by checking theirs angle.
-     */
-    boolean isAiming(@NotNull Ship other);
-
-    // TODO: 28.10.2020 need proper doc
-    boolean isAttacking(@NotNull Ship other);
-
-    /**
      * @return true if ship has enabled {@link Pet}.
      */
     boolean hasPet();
 
     /**
-     * @return {@link Pet} associated with this ship or {@link Optional#empty()} if none.
+     * @return {@link Pet} associated with this ship otherwise {@link Optional#empty()}.
      */
     Optional<Pet> getPet();
 
     /**
-     * @return speed of ship from memory.
+     * @return {@link LocationInfo} if has destination otherwise {@link Optional#empty()}.
      */
-    int getSpeed();
+    Optional<LocationInfo> getDestination();
 
     /**
      * Calculates needed time to travel given distance.
@@ -49,21 +41,6 @@ public interface Ship extends Entity, Attackable {
     default long timeTo(@NotNull Locatable destination) {
         return timeTo(getLocationInfo().distanceTo(destination));
     }
-
-    /**
-     * @return angle of ship from memory.
-     */
-    double getAngle();
-
-    /**
-     * @return address of current entity target
-     */
-    long getTargetAddress();
-
-    /**
-     * @return {@link LocationInfo} if has destination otherwise {@link Optional#empty()}.
-     */
-    Optional<LocationInfo> getDestination();
 
     /**
      * @return true if ship has enabled given formation.

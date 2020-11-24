@@ -1,13 +1,13 @@
 package eu.darkbot.api.utils;
 
-import java.util.EventListener;
-
 /**
  * Any {@link Listener} need to have strong reference
  * otherwise will be garbage collected.
+ *
+ * @see java.lang.ref.WeakReference
  */
 @FunctionalInterface
-public interface Listener<T> extends EventListener {
+public interface Listener<T> {
 
     void onEvent(T t);
 }

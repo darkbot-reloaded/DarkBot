@@ -10,7 +10,13 @@ import java.util.Locale;
  * API for ore related things such as selling ores or getting ore amount.
  */
 public interface OreAPI extends API {
-    interface Trade extends Gui {
+
+    Trade getTrade();
+
+    interface Trade extends Gui { //move upper?
+
+        int getAmount(Ore ore);
+
         /**
          * Sells the specified ore, trade window must be open for this method to work
          *
@@ -32,16 +38,12 @@ public interface OreAPI extends API {
          * Will either open or close the ore trade window based on the value of {@code show}
          *
          * @param show true for showing ore trade window, false for closing ore trade window
-         * @param base the {@code BasePoint} of the ore trader base station
+         * @param tradePoint the {@code BasePoint} of the ore trader base station
          * @return true if ore trader window has been opened or closed and its animation is done,
          * false if animation is not done, or no action is needed to be taken
          * to change the visibility status of the ore trader window
          */
-        boolean showTrade(boolean show, BasePoint base);
-    }
-
-    interface Refinery extends Gui {
-        int getAmount(Ore ore);
+        boolean showTrade(boolean show, BasePoint tradePoint);
     }
 
     /**

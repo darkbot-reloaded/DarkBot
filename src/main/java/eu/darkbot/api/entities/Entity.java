@@ -29,25 +29,18 @@ public interface Entity extends Locatable {
     boolean isRemoved();
 
     /**
-     * @return true if {@link Entity} can be clicked.
+     * @return true if {@link Entity} can be selected.
      */
-    boolean isClickable();
+    boolean isSelectable();
 
     /**
      * Selects this entity as the target, can instantly attempt to attack with {@code attack} flag.
      *
-     * @param attack      instant attempt to attack this entity
-     * @param minDistance minimum distance to {@link eu.darkbot.api.managers.HeroAPI} to select this entity
-     * @return true on successful click
+     * @param attack instant attempt to attack this entity
+     * @return true on successful select
      */
-    boolean trySelect(boolean attack, double minDistance);
 
-    /**
-     * Same as {@link #trySelect(boolean, double)} with constant 850 minimum distance.
-     */
-    default boolean trySelect(boolean attack) {
-        return trySelect(attack, 850);
-    }
+    boolean trySelect(boolean attack);
 
     /**
      * @return {@link LocationInfo}

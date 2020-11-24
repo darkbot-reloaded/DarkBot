@@ -51,11 +51,11 @@ public class BattleStation
         health.update(findInTraits(ptr -> {
             long classType = API.readMemoryLong(ptr, 48, 0x10);
 
-            for (int i = 8; i <= 5 * 8; i += 8)
-                if (API.readMemoryLong(ptr, 48 + i, 0x10) != classType)
-                    return false;
-
-            return true;
+            return API.readMemoryLong(ptr, 48 + 8) == classType &&
+                    API.readMemoryLong(ptr, 48 + 8 * 2) == classType &&
+                    API.readMemoryLong(ptr, 48 + 8 * 3) == classType &&
+                    API.readMemoryLong(ptr, 48 + 8 * 4) == classType &&
+                    API.readMemoryLong(ptr, 48 + 8 * 5) == classType;
         }));
     }
 

@@ -51,7 +51,7 @@ public class ByteUtils {
      * Constant value which means that reference to the object,
      * is invalid/doesn't exists and shouldn't be updated.
      */
-    public static final byte NULL = 0;
+    public static final long NULL = 0;
 
     public static int getInt(byte[] data, int offset) {
         return data.length < offset + 4 ? 0 :

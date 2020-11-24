@@ -25,17 +25,6 @@ public interface ChatAPI extends Gui, API {
     Listener<Message> addListener(Listener<Message> onMessage);
 
     /**
-     * Gets the last message sent from the specified chat.
-     *
-     * @param chatType  the {@code Type} of chat
-     * @return the most recent message from the {@code chatType},
-     *         null if the {@code chatType} doesn't exist
-     * @see Type
-     */
-    @Nullable
-    Message getLastMessage(Type chatType);
-
-    /**
      * @param chatType the {@link Type} of chat
      * @return last 150 messages of given chat {@link Type} otherwise {@code null}
      */

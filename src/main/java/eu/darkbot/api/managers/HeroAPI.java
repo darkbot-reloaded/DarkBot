@@ -6,20 +6,12 @@ import eu.darkbot.api.entities.Ship;
 import eu.darkbot.config.ShipConfig;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
-
 /**
  * From here you can manage your ship.
  * Where to move, whats your target etc.
  * TODO more docs
  */
 public interface HeroAPI extends Ship, API {
-
-    /*boolean hasTarget();
-
-    Optional<Ship> getTarget();
-
-    void setTarget(Ship target);*/
 
     boolean isInMode(int configuration, Character formation);
 

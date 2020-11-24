@@ -14,7 +14,7 @@ public interface Npc extends Ship {
     /**
      * @return {@link Info} with some settings for {@link Npc}
      */
-    Info getInfos();
+    Info getInfo();
 
     /**
      * Predefined settings for {@link Npc} customized by user.
@@ -45,7 +45,8 @@ public interface Npc extends Ship {
         }
 
         default String getId() {
-            return getClass().getCanonicalName() + (getClass().isEnum() ? ((Enum<?>) this).name() : getName());
+            return getClass().getCanonicalName() +
+                    (getClass().isEnum() ? ((Enum<?>) this).name() : getName());
         }
     }
 }

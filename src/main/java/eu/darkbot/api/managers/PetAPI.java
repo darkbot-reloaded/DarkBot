@@ -27,7 +27,7 @@ public interface PetAPI extends Gui, Pet, API {
     void setEnabled(boolean enabled);
 
     /**
-     * @return true if pet is active.
+     * @return true if pet is active (alive and on the map).
      */
     boolean isActive();
 
@@ -37,6 +37,8 @@ public interface PetAPI extends Gui, Pet, API {
     boolean isRepaired();
 
     boolean tryRepair();
+
+    int getRepairCount();
 
     /**
      * @param gearId to be checked

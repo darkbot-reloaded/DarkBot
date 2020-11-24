@@ -1,10 +1,10 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
+import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collection;
-import java.util.Optional;
 
 public interface RepairAPI extends API {
 
@@ -21,7 +21,7 @@ public interface RepairAPI extends API {
 
     Collection<Integer> getAvailableRepairOptions();
 
-    Optional<String> getLastDestroyerName();
+    @Nullable String getLastDestroyerName();
 
-    Optional<LocalDateTime> getLastDeathTime();
+    @Nullable Instant getLastDeathTime();
 }

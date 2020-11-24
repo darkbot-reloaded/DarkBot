@@ -6,8 +6,6 @@ import eu.darkbot.api.entities.utils.Attackable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-
 public interface AttackAPI extends API {
 
     boolean hasTarget();
@@ -15,13 +13,13 @@ public interface AttackAPI extends API {
     /**
      * @return currently set target
      */
-    Optional<Attackable> getTarget();
+    @Nullable Attackable getTarget();
 
     /**
      * @param entity to be set
      * @return previously set {@link Attackable}
      */
-    Optional<Attackable> setTarget(@Nullable Attackable entity);
+    @Nullable Attackable setTarget(@Nullable Attackable entity);
 
     /**
      * @return true if selected {@link Attackable} is targeted
@@ -35,9 +33,6 @@ public interface AttackAPI extends API {
      * @see #getTarget()
      */
     boolean selectTarget();
-
-    //lock type 1,2,3,4...
-    int getLockType();
 
     /**
      * @return true if {@link HeroAPI} is laser attacking selected target
@@ -76,8 +71,8 @@ public interface AttackAPI extends API {
      * @param laserId to be set
      * @return previously set {@link Ammo.Laser}
      */
-    Ammo.Laser setLaserAmmo(@Nullable String laserId);
-    Ammo.Laser setLaserAmmo(@Nullable Ammo.Laser laserAmmo);
+    @Nullable Ammo.Laser setLaserAmmo(@Nullable String laserId);
+    @Nullable Ammo.Laser setLaserAmmo(@Nullable Ammo.Laser laserAmmo);
 
     /**
      * Overrides user settings to use given ammo.
@@ -86,6 +81,6 @@ public interface AttackAPI extends API {
      * @param rocketId to be set
      * @return previously set {@link Ammo.Rocket}
      */
-    Ammo.Rocket setRocketAmmo(@Nullable String rocketId);
-    Ammo.Rocket setRocketAmmo(@Nullable Ammo.Rocket rocketAmmo);
+    @Nullable Ammo.Rocket setRocketAmmo(@Nullable String rocketId);
+    @Nullable Ammo.Rocket setRocketAmmo(@Nullable Ammo.Rocket rocketAmmo);
 }

@@ -2,7 +2,7 @@ package eu.darkbot.api.entities;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public interface Box extends Entity {
     /**
@@ -21,7 +21,6 @@ public interface Box extends Entity {
     /**
      * @return true if box is collected or
      * there was a try to collect it and currently is in timer.
-     *
      * @see Entity#isRemoved()
      */
     boolean isCollected();
@@ -30,7 +29,7 @@ public interface Box extends Entity {
      * @return time until box is marked as collected
      */
     @Nullable
-    LocalDateTime isCollectedUntil();
+    Instant isCollectedUntil();
 
     /**
      * Makes box being collected for x amount of time * amount of collect tries.

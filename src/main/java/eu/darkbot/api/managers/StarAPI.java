@@ -5,7 +5,6 @@ import eu.darkbot.api.entities.utils.Area;
 import eu.darkbot.api.entities.utils.Map;
 import eu.darkbot.api.utils.Listener;
 import eu.darkbot.utils.ArrayUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,8 +13,10 @@ import java.util.List;
  * API to add, manage, retrieve maps.
  */
 public interface StarAPI extends API {
-    List<String> HOME_MAPS = ArrayUtils.asImmutableList("1-1", "2-1", "3-1");
+    List<String> HOME_MAPS         = ArrayUtils.asImmutableList("1-1", "2-1", "3-1");
     List<String> OUTPOST_HOME_MAPS = ArrayUtils.asImmutableList("1-8", "2-8", "3-8");
+    List<String> PIRATE_MAPS       = ArrayUtils.asImmutableList("5-1", "5-2", "5-3");
+    List<String> BLACK_LIGHT_MAPS  = ArrayUtils.asImmutableList("1BL", "2BL", "3BL");
 
     /**
      * @return current {@link Map}
@@ -26,13 +27,6 @@ public interface StarAPI extends API {
      * @return bounds of the current map
      */
     Area.Rectangle getCurrentMapBounds();
-
-    /**
-     * Adds given map into list of maps.
-     *
-     * @return true if was added, false when list already contains given {@link Map}
-     */
-    boolean addMap(@NotNull Map map);
 
     /**
      * @return {@link Collection} of all known maps
@@ -49,6 +43,14 @@ public interface StarAPI extends API {
     Map getById(int mapId) throws MapNotFoundException;
 
     /**
+     * Find {@link Map} by given {@code mapId} otherwise will create a new one with given mapId.
+     *
+     * @param mapId to find
+     * @return {@link Map} with given {@code mapId}
+     */
+    Map getOrCreateMapById(int mapId);
+
+    /**
      * Find {@link Map} by given {@code mapName}.
      * {@code mapName} must equals searched {@link Map#getName()}
      *
@@ -63,11 +65,11 @@ public interface StarAPI extends API {
      * <p>
      * Every {@link Listener} need to have strong reference.
      *
-     * @param listener to be added
-     * @return given <b>listener</b> reference
+     * @param onMapChange to be added
+     * @return given {@link Listener} reference
      * @see Listener
      */
-    Listener<Map> addMapChangeListener(Listener<Map> listener);
+    Listener<Map> addMapChangeListener(Listener<Map> onMapChange);
 
     class MapNotFoundException extends Exception {
         public MapNotFoundException(int mapId) {

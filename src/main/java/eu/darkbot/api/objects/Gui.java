@@ -1,6 +1,6 @@
 package eu.darkbot.api.objects;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public interface Gui extends Point {
 
@@ -55,7 +55,7 @@ public interface Gui extends Point {
     void hover(int plusX, int plusY);
 
     /**
-     * @return last {@link LocalDateTime} where gui was visible
+     * @return last {@link Instant} where gui was visible
      */
-    LocalDateTime lastVisibleTime();
+    Instant lastVisibleTime();
 }

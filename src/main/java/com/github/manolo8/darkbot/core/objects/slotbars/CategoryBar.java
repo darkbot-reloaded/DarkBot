@@ -44,7 +44,6 @@ public class CategoryBar extends MenuBar {
         for (Category category : categories) {
             if (id.equals(category.categoryId)) return true;
         }
-
         return false;
     }
 
@@ -55,7 +54,6 @@ public class CategoryBar extends MenuBar {
             }
         }
         return Optional.empty();
-
     }
 
     public static class Category extends UpdatableAuto {

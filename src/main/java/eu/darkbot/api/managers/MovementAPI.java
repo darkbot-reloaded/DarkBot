@@ -72,8 +72,7 @@ public interface MovementAPI extends API {
     }
 
     /**
-     * Returns closest distance to destination,
-     * calculates barriers and any other obstacles.
+     * @return distance to the closest valid (not inside any obstacle) location.
      */
     double getClosestDistance(double x, double y);
 

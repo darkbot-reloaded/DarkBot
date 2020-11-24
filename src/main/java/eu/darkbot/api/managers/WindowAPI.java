@@ -61,36 +61,36 @@ public interface WindowAPI extends API {
     /**
      * Moves mouse to x & y coordinates of game window
      */
-    void mouseMove(double x, double y);  //cast to int here or in implementation?
+    void mouseMove(int x, int y);  //cast to int here or in implementation?
 
     default void mouseMove(Point point) {
-        mouseMove(point.getX(), point.getY());
+        mouseMove((int) point.getX(), (int) point.getY());
     }
 
     /**
      * Simulates hold of left mouse button
      */
-    void mouseDown(double x, double y);
+    void mouseDown(int x, int y);
 
     default void mouseDown(Point point) {
-        mouseDown(point.getX(), point.getY());
+        mouseDown((int) point.getX(), (int) point.getY());
     }
 
     /**
      * Simulates release of left mouse button
      */
-    void mouseUp(double x, double y);
+    void mouseUp(int x, int y);
 
     default void mouseUp(Point point) {
-        mouseUp(point.getX(), point.getY());
+        mouseUp((int) point.getX(), (int) point.getY());
     }
 
     /**
      * Simulates mouse click at x & y coordinates
      */
-    void mouseClick(double x, double y);
+    void mouseClick(int x, int y);
 
     default void mouseClick(Point point) {
-        mouseClick(point.getX(), point.getY());
+        mouseClick((int) point.getX(), (int) point.getY());
     }
 }
