@@ -1,8 +1,11 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.gui.plugins.PluginCard;
+import com.github.manolo8.darkbot.gui.plugins.PluginDisplay;
 import com.github.manolo8.darkbot.gui.plugins.UpdateProgressBar;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 
 import javax.swing.*;
@@ -11,45 +14,28 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 //todoo i18n
 public class PluginUpdater {
 
-    private Date lastChecked = new Date();
+    private static final PluginIssue NO_DOWNLOAD = new PluginIssue(I18n.get("plugins.update_issues.no_download"),
+            I18n.get("plugins.update_issues.no_download.desc"), PluginIssue.Level.INFO);
+    private static final PluginIssue NO_UPDATE = new PluginIssue(I18n.get("plugins.update_issues.no_update"),
+            I18n.get("plugins.update_issues.no_update.desc"), PluginIssue.Level.INFO);
 
-    public final List<Plugin> UPDATES = new ArrayList<>();
+    private long lastChecked = System.currentTimeMillis();
 
     private final PluginHandler pluginHandler;
+    private PluginDisplay pluginDisplay;
 
     private UpdateProgressBar mainProgressBar;
-    private final List<PluginProgress> pluginProgresses = new ArrayList<>();
-
-    private static class PluginProgress {
-        private final Plugin plugin;
-        private final UpdateProgressBar progressBar;
-        private final JLabel progressLabel;
-
-        PluginProgress(Plugin plugin, UpdateProgressBar progressBar, JLabel progressLabel) {
-            this.plugin = plugin;
-            this.progressBar = progressBar;
-            this.progressLabel = progressLabel;
-        }
-
-        void setValue(int val) {
-            progressBar.setValue(val);
-        }
-
-        void setText(String text) {
-            progressLabel.setText(text);
-        }
-    }
 
     public PluginUpdater(Main main) {
         this.pluginHandler = main.pluginHandler;
@@ -60,17 +46,13 @@ public class PluginUpdater {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                checkUpdates();
+                checkUpdates(null);
             }
         }, 0, Time.DAY);
     }
 
-    public void add(Plugin plugin, UpdateProgressBar progressBar, JLabel progressLabel) {
-        pluginProgresses.add(new PluginProgress(plugin, progressBar, progressLabel));
-    }
-
-    public void clear() {
-        pluginProgresses.clear();
+    public void setPluginDisplay(PluginDisplay display) {
+        pluginDisplay = display;
     }
 
     public void setMainProgressBar(UpdateProgressBar progressBar) {
@@ -78,39 +60,58 @@ public class PluginUpdater {
     }
 
     public boolean hasAvailableUpdates() {
-        return UPDATES.stream().anyMatch(pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE);
+        return pluginHandler.getUpdates()
+                .anyMatch(pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE);
     }
 
-    public boolean hasNoUpdates() {
-        return UPDATES.isEmpty();
+    public boolean hasUpdates() {
+        return pluginHandler.getUpdates().findAny().isPresent();
     }
 
-    public Date getLastChecked() {
+    public long getLastChecked() {
         return lastChecked;
     }
 
-    public void checkUpdates() {
-        UPDATES.clear();
-        for (Plugin plugin : pluginHandler.LOADED_PLUGINS) {
-            try {
-                checkUpdate(plugin);
-            } catch (IOException e) {
-                e.printStackTrace();
+    public void checkUpdates(Runnable doneTask) {
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected void done() {
+                if (doneTask != null) doneTask.run();
+                pluginDisplay.refreshUI();
             }
-        }
-        lastChecked = new Date();
+
+            @Override
+            protected Void doInBackground() {
+                for (Plugin plugin : pluginHandler.LOADED_PLUGINS) {
+                    try {
+                        checkUpdate(plugin);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                lastChecked = System.currentTimeMillis();
+                return null;
+            }
+        }.execute();
     }
 
     private void checkUpdate(Plugin plugin) throws IOException {
         plugin.setUpdateDefinition(findUpdate(plugin.getDefinition()));
 
         PluginDefinition updateDef = plugin.getUpdateDefinition();
-        if (plugin.getDefinition().version.compareTo(updateDef.version) >= 0) return;
 
         IssueHandler updateIssues = plugin.getUpdateIssues();
         pluginHandler.testCompatibility(updateIssues, updateDef, true);
 
-        UPDATES.add(plugin);
+        if (updateIssues.getIssues().contains(NO_DOWNLOAD) || updateIssues.getIssues().contains(NO_UPDATE)) {
+            plugin.setUpdateStatus(Plugin.UpdateStatus.UNKNOWN);
+            return;
+        }
+        if (plugin.getDefinition().version.compareTo(updateDef.version) >= 0) {
+            plugin.setUpdateStatus(Plugin.UpdateStatus.UP_TO_DATE);
+            return;
+        }
+
         plugin.setUpdateStatus(updateIssues.getIssues().isEmpty()
                 ? Plugin.UpdateStatus.AVAILABLE
                 : Plugin.UpdateStatus.INCOMPATIBLE);
@@ -137,7 +138,7 @@ public class PluginUpdater {
             @Override
             protected Void doInBackground() {
                 try {
-                    UpdateTask task = new UpdateTask(plugin, null, true);
+                    UpdateTask task = new UpdateTask(plugin, null);
                     task.execute();
                     task.get();
 
@@ -145,7 +146,7 @@ public class PluginUpdater {
                     pluginHandler.updatePlugins();
 
                     task.doneStatus();
-                    if (task.failed) failedUpdate.append(task.plugin.plugin.getName()).append(" failed to update");
+                    if (task.failed) failedUpdate.append(task.plugin.getName()).append(" failed to update");
 
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
@@ -161,16 +162,17 @@ public class PluginUpdater {
 
     private class UpdateAllTask extends SwingWorker<Void, Integer> {
 
-        private final List<Plugin> availableUpdates = UPDATES.stream()
-                .filter(pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE)
-                .collect(Collectors.toList());
         private final StringBuilder failedUpdates = new StringBuilder();
 
         private final AtomicInteger progress = new AtomicInteger(0);
-        private final int increment = (int) (25.0D / availableUpdates.size());
         private final List<UpdateTask> updateTasks = new ArrayList<>();
-        {
-            availableUpdates.forEach(pl -> updateTasks.add(new UpdateTask(pl, this, false)));
+
+        UpdateAllTask() {
+            List<Plugin> availableUpdates = pluginHandler.getUpdates()
+                    .filter(pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE)
+                    .collect(Collectors.toList());
+            availableUpdates.forEach(pl -> updateTasks.add(new UpdateTask(pl, this)));
+            mainProgressBar.setMaximum(availableUpdates.size() * 4 + 1);
         }
 
         public synchronized void publish(int progress) {
@@ -178,14 +180,13 @@ public class PluginUpdater {
         }
 
         @Override
-        protected synchronized void process(List<Integer> chunks) {
+        protected void process(List<Integer> chunks) {
             mainProgressBar.setValue(chunks.get(chunks.size() - 1));
         }
 
         @Override
         protected void done() {
-            pluginProgresses.clear();
-            mainProgressBar.setValue(100);
+            mainProgressBar.setValue(mainProgressBar.getMaximum());
             if (failedUpdates.length() > 0)
                 Popups.showMessageAsync("Update failed", failedUpdates, JOptionPane.ERROR_MESSAGE);
         }
@@ -201,7 +202,7 @@ public class PluginUpdater {
             updateTasks.forEach(UpdateTask::doneStatus);
             updateTasks.forEach(task -> {
                 if (task.failed)
-                   failedUpdates.append(task.plugin.plugin.getName()).append(" failed to update\n");
+                   failedUpdates.append(task.plugin.getName()).append(" failed to update\n");
             });
             return null;
         }
@@ -211,16 +212,16 @@ public class PluginUpdater {
 
         private static final String SUFFIX = "...";
 
-        private final PluginProgress plugin;
+        private final Plugin plugin;
+        private final PluginCard card;
         private final UpdateAllTask updateAllTask;
 
-        private final boolean remove;
         private boolean failed;
 
-        UpdateTask(Plugin plugin, UpdateAllTask updateAllTask, boolean remove) {
-            this.plugin = pluginProgresses.stream().filter(p -> p.plugin.equals(plugin)).findFirst().orElse(null);
+        UpdateTask(Plugin plugin, UpdateAllTask updateAllTask) {
+            this.plugin = plugin;
+            this.card = pluginDisplay.getPluginCard(plugin);
             this.updateAllTask = updateAllTask;
-            this.remove = remove;
         }
 
         private void waitUntilDone() {
@@ -232,51 +233,45 @@ public class PluginUpdater {
         }
 
         private void reloadingStatus() {
-            plugin.setText("Reloading plugins" + UpdateTask.SUFFIX);
-            plugin.setValue(75);
+            card.setUpdateProgress("Reloading plugins" + UpdateTask.SUFFIX, 75);
             publishMainTask();
         }
 
         private void doneStatus() {
-            plugin.setText(failed ? "Update failed!" : "Successfully updated");
-            plugin.setValue(100);
+            card.setUpdateProgress(failed ? "Update failed!" : "Successfully updated", 100);
             publishMainTask();
-            if (!failed) UPDATES.remove(plugin.plugin);
         }
 
         private void publishMainTask() {
             if (updateAllTask == null) return;
-            updateAllTask.publish(updateAllTask.progress.addAndGet(updateAllTask.increment));
+            updateAllTask.publish(updateAllTask.progress.incrementAndGet());
         }
 
         @Override
         protected void done() {
-            if (!failed) plugin.plugin.setUpdateStatus(Plugin.UpdateStatus.UP_TO_DATE);
-            if (remove) pluginProgresses.remove(plugin);
+            plugin.setUpdateStatus(failed ? Plugin.UpdateStatus.FAILED : Plugin.UpdateStatus.UP_TO_DATE);
         }
 
         @Override
         protected Void doInBackground() throws Exception {
-            Plugin pl = plugin.plugin;
-            if (pl.getUpdateDefinition() == null)
-                pl.setUpdateDefinition(findUpdate(pl.getDefinition()));
-            try (InputStream is = pl.getUpdateDefinition().download.openConnection().getInputStream()) {
-                plugin.setValue(0);
-                plugin.progressBar.setVisible(true);
+            card.disableUpdateButton();
+            card.makeProgressBarVisible();
 
-                plugin.setText("Saving old plugin" + SUFFIX);
+            if (plugin.getUpdateDefinition() == null)
+                plugin.setUpdateDefinition(findUpdate(plugin.getDefinition()));
+
+            try (InputStream is = plugin.getUpdateDefinition().download.openConnection().getInputStream()) {
+                card.setUpdateProgress("Saving old plugin" + SUFFIX, 0);
+
                 pluginHandler.createDirectory(PluginHandler.PLUGIN_OLD_PATH);
-                Files.copy(pl.getFile().toPath(), PluginHandler.PLUGIN_OLD_PATH.resolve(pl.getFile().getName()), StandardCopyOption.REPLACE_EXISTING);
-                plugin.setValue(25);
+                Files.copy(plugin.getFile().toPath(), PluginHandler.PLUGIN_OLD_PATH.resolve(plugin.getFile().getName()), StandardCopyOption.REPLACE_EXISTING);
+                card.setUpdateProgress("Downloading plugin to update folder" + SUFFIX, 25);
                 publishMainTask();
 
-                plugin.setText("Downloading plugin to update folder" + SUFFIX);
                 pluginHandler.createDirectory(PluginHandler.PLUGIN_UPDATE_PATH);
-                Files.copy(is, PluginHandler.PLUGIN_UPDATE_PATH.resolve(pl.getFile().getName()), StandardCopyOption.REPLACE_EXISTING);
-                plugin.setValue(50);
+                Files.copy(is, PluginHandler.PLUGIN_UPDATE_PATH.resolve(plugin.getFile().getName()), StandardCopyOption.REPLACE_EXISTING);
+                card.setUpdateProgress("Waiting to reload" + SUFFIX, 50);
                 publishMainTask();
-
-                plugin.setText("Waiting to reload" + SUFFIX);
 
             } catch (IOException e) {
                 System.err.println("Failed to download update");

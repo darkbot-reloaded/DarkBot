@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.function.Supplier;
 
 //todoo i18n
 public class PluginUpdateHeader extends JPanel {
@@ -22,15 +23,12 @@ public class PluginUpdateHeader extends JPanel {
     private final Title title;
     private final UpdateProgressBar progressBar;
 
-    private final PluginDisplay pluginDisplay;
-
-    PluginUpdateHeader(PluginUpdater pluginUpdater, PluginDisplay display) {
+    PluginUpdateHeader(PluginUpdater pluginUpdater) {
         super(new MigLayout("ins 0, gap 0, fill", "[grow][][]", "[][grow]"));
 
         this.pluginUpdater = pluginUpdater;
 
-        this.status = pluginUpdater.hasNoUpdates() ? "You are all up to date, " : "";
-        this.pluginDisplay = display;
+        this.status = !pluginUpdater.hasUpdates() ? "You are all up to date, " : "";
 
         title = new Title();
         progressBar = new UpdateProgressBar();
@@ -56,11 +54,12 @@ public class PluginUpdateHeader extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            pluginUpdater.checkUpdates();
-
-            status = pluginUpdater.hasNoUpdates() ? "You are all up to date" : "";
-            title.setText(titleFormatter.format(new Object[]{status, dateFormatter.format(pluginUpdater.getLastChecked())}));
-            pluginDisplay.refreshUI();
+            setEnabled(false);
+            Runnable doneTask = () -> {
+                status = !pluginUpdater.hasUpdates() ? "You are all up to date" : "";
+                title.setText(titleFormatter.format(new Object[]{status, dateFormatter.format(pluginUpdater.getLastChecked())}));
+            };
+            pluginUpdater.checkUpdates(doneTask);
         }
     }
 

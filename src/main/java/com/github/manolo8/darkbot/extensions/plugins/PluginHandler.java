@@ -20,7 +20,9 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.jar.JarFile;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
 public class PluginHandler {
@@ -83,6 +85,8 @@ public class PluginHandler {
 
     private void updatePluginsInternal() {
         synchronized (this) {
+            List<Plugin> plugins = new ArrayList<>(LOADED_PLUGINS);
+
             LOADED_PLUGINS.clear();
             FAILED_PLUGINS.clear();
             LOADING_EXCEPTIONS.clear();
@@ -108,7 +112,7 @@ public class PluginHandler {
                 }
             }
             try {
-                loadPlugins(getJars(PLUGIN_FOLDER));
+                loadPlugins(getJars(PLUGIN_FOLDER), plugins);
             } catch (Exception e) {
                 LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugins", e));
                 e.printStackTrace();
@@ -118,12 +122,24 @@ public class PluginHandler {
         LISTENERS.forEach(PluginListener::afterLoadComplete);
     }
 
-    private void loadPlugins(File[] pluginFiles) {
+    public Stream<Plugin> getUpdates() {
+        Predicate<Plugin> available = pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE;
+        Predicate<Plugin> incompatible = pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.INCOMPATIBLE;
+        return LOADED_PLUGINS.stream()
+                .filter(available.or(incompatible));
+    }
+
+    private void loadPlugins(File[] pluginFiles, List<Plugin> plugins) {
         for (File pluginFile : pluginFiles) {
             Plugin pl = null;
             try {
                 pl = new Plugin(pluginFile, pluginFile.toURI().toURL());
                 loadPlugin(pl);
+                if (plugins.contains(pl)) {
+                    Plugin plugin = plugins.get(plugins.indexOf(pl));
+                    pl.setUpdateStatus(plugin.getUpdateStatus());
+                    pl.setUpdateIssues(plugin.getUpdateIssues());
+                }
                 if (pl.getIssues().canLoad()) LOADED_PLUGINS.add(pl);
                 else FAILED_PLUGINS.add(pl);
             } catch (PluginLoadingException e) {
@@ -150,13 +166,13 @@ public class PluginHandler {
         }
     }
 
-    PluginDefinition readPluginDefinition(InputStream is) throws IOException {
+    public PluginDefinition readPluginDefinition(InputStream is) throws IOException {
         try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8)) {
             return GSON.fromJson(isr, (Type) PluginDefinition.class);
         }
     }
 
-    void createDirectory(Path path) {
+    public void createDirectory(Path path) {
         if (Files.exists(path)) return;
         try {
             Files.createDirectory(path);
@@ -178,6 +194,13 @@ public class PluginHandler {
 
     //todoo i18n
     void testCompatibility(IssueHandler issues, PluginDefinition pd, boolean update) {
+        if (update && pd.download == null)
+            issues.addInfo(I18n.get("plugins.update_issues.no_download"),
+                    I18n.get("plugins.update_issues.no_download.desc"));
+        if (update && pd.update == null)
+            issues.addInfo(I18n.get("plugins.update_issues.no_update"),
+                    I18n.get("plugins.update_issues.no_update.desc"));
+
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
             issues.addFailure(I18n.get(update ? "plugins.update_issues.invalid_json" : "plugins.issues.invalid_json"),
                     I18n.get(update ? "plugins.update_issues.invalid_json.desc" : "plugins.issues.invalid_json.desc",

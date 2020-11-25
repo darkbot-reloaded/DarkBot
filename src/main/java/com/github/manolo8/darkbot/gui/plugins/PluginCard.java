@@ -7,12 +7,15 @@ import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
+import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
+import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 // todoo i18n
 public class PluginCard extends JPanel {
@@ -25,21 +28,50 @@ public class PluginCard extends JPanel {
             WARNING_COLOR = new Color(UIUtils.YELLOW.getRGB() + ALPHA, true),
             ERROR_COLOR = new Color(UIUtils.RED.getRGB() + ALPHA, true);
 
+    private final UpdateProgressBar progressBar;
+    private final JLabel progressLabel;
+    private final UpdateButton updateButton;
+
+    private final Plugin plugin;
+    private final PluginUpdater pluginUpdater;
+
     PluginCard(Main main, Plugin plugin, FeatureRegistry featureRegistry) {
         super(new MigLayout("fillx, gapy 0, ins 0 0 5px 0", "5px[]0px[]10px[]10px[grow]", "[]"));
         setColor(plugin.getIssues());
         plugin.getIssues().addListener(this::setColor);
 
-        UpdateProgressBar progressBar = new UpdateProgressBar();
-        JLabel progressLabel = new JLabel();
-        main.pluginUpdater.add(plugin, progressBar, progressLabel);
+        this.plugin = plugin;
+        this.pluginUpdater = main.pluginUpdater;
+        this.progressBar = new UpdateProgressBar();
+        this.progressLabel = new JLabel();
+        this.updateButton = new UpdateButton();
 
         add(progressBar, "dock south, spanx");
         add(progressLabel, "dock south, spanx, gapleft 5px");
         add(new IssueList(plugin.getIssues(), false), "dock east");
-        add(new PluginName(main, plugin), "dock north");
+        add(plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE
+                ? new UpdateButtonPanel()
+                : new IssueList(plugin.getUpdateIssues(), false), "dock east");
+        add(new PluginName(plugin), "dock north");
 
         featureRegistry.getFeatures(plugin).forEach(fd -> this.addFeature(main, fd));
+    }
+
+    public Plugin getPlugin() {
+        return plugin;
+    }
+
+    public void setUpdateProgress(String text, int progress) {
+        progressLabel.setText(text);
+        progressBar.setValue(progress);
+    }
+
+    public void makeProgressBarVisible() {
+        progressBar.setVisible(true);
+    }
+
+    public void disableUpdateButton() {
+        updateButton.setEnabled(false);
     }
 
     private void addFeature(Main main, FeatureDefinition<?> feature) {
@@ -76,4 +108,28 @@ public class PluginCard extends JPanel {
         g.fillRect(0, 0, getWidth(), getHeight());
         super.paintComponent(g);
     }
+
+    //todoo i18n
+    private class UpdateButtonPanel extends JPanel {
+
+        private UpdateButtonPanel() {
+            setOpaque(false);
+            add(updateButton);
+        }
+    }
+
+    private class UpdateButton extends MainButton {
+
+        private UpdateButton() {
+            super("Update");
+            setVisible(plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            setEnabled(false);
+            pluginUpdater.update(plugin);
+        }
+    }
+
 }

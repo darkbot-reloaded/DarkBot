@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
@@ -9,7 +10,7 @@ import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import java.awt.*;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 public class PluginDisplay extends JPanel implements PluginListener {
@@ -22,7 +23,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
     private JPanel pluginPanel;
 
     public PluginDisplay() {
-        super(new BorderLayout());
+        super(new MigLayout("wrap 1, fillx", "[fill]", ""));
         setBorder(BorderFactory.createEmptyBorder());
     }
 
@@ -31,25 +32,24 @@ public class PluginDisplay extends JPanel implements PluginListener {
         this.pluginTab = pluginTab;
         this.pluginHandler = main.pluginHandler;
         this.pluginUpdater = main.pluginUpdater;
-        if (pluginPanel == null) add(setupUI());
+        pluginUpdater.setPluginDisplay(this);
+        setupUI();
         refreshUI();
         pluginHandler.addListener(this);
     }
 
-    private JComponent setupUI() {
+    private void setupUI() {
+        if (pluginPanel != null) return;
         pluginPanel = new JPanel(new MigLayout("wrap 1, fillx", "[fill]", ""));
-        JScrollPane scrollPane = new JScrollPane(pluginPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getVerticalScrollBar().setUnitIncrement(25);
-        return scrollPane;
+        add(new PluginUpdateHeader(pluginUpdater));
+        add(new ScrollPane(pluginPanel));
     }
 
-    void refreshUI() {
+    public void refreshUI() {
+        removeAll();
         pluginPanel.removeAll();
-        pluginUpdater.clear();
 
-        pluginPanel.add(new PluginUpdateHeader(pluginUpdater, this));
         Stream.concat(
                 pluginHandler.LOADING_EXCEPTIONS.stream().map(ExceptionCard::new),
                 Stream.concat(
@@ -58,10 +58,24 @@ public class PluginDisplay extends JPanel implements PluginListener {
                 ).map(pl -> new PluginCard(main, pl, main.featureRegistry))
         ).forEach(pluginPanel::add);
 
-        //todo maybe also add another icon here when update is available?
-        pluginTab.setIcon(UIUtils.getIcon(pluginHandler.LOADING_EXCEPTIONS.isEmpty() && pluginHandler.FAILED_PLUGINS.isEmpty() ? "plugins" : "plugins_warn"));
+        add(new PluginUpdateHeader(pluginUpdater));
+        add(new ScrollPane(pluginPanel));
+
+        if (!pluginHandler.LOADING_EXCEPTIONS.isEmpty() || !pluginHandler.FAILED_PLUGINS.isEmpty())
+            pluginTab.setIcon(UIUtils.getIcon("plugin_warn"));
+        else if (pluginUpdater.hasUpdates()) pluginTab.setIcon(UIUtils.getIcon("plugins"));//todoo add "plugins_update" icon here
+        else pluginTab.setIcon(UIUtils.getIcon("plugins"));
+
         validate();
         repaint();
+    }
+
+    public PluginCard getPluginCard(Plugin plugin) {
+        return Arrays.stream(pluginPanel.getComponents())
+                .map(comp -> (PluginCard) comp)
+                .filter(pl -> pl.getPlugin().equals(plugin))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -72,6 +86,15 @@ public class PluginDisplay extends JPanel implements PluginListener {
     @Override
     public void afterLoadComplete() {
         SwingUtilities.invokeLater(this::refreshUI);
+    }
+
+    private static class ScrollPane extends JScrollPane {
+        private ScrollPane(JPanel panel) {
+            super(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+            setBorder(BorderFactory.createEmptyBorder());
+            getVerticalScrollBar().setUnitIncrement(25);
+        }
     }
 
 }
