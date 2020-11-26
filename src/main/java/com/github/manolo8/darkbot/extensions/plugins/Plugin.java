@@ -16,7 +16,7 @@ public class Plugin {
     private PluginDefinition updateDefinition;
     private PluginInfo info;
     private final IssueHandler issues = new IssueHandler();
-    private IssueHandler updateIssues = new IssueHandler();
+    private final IssueHandler updateIssues = new IssueHandler();
 
     private UpdateStatus updateStatus = UpdateStatus.UNCHECKED;
     public enum UpdateStatus {
@@ -49,8 +49,8 @@ public class Plugin {
         updateStatus = status;
     }
 
-    public void setUpdateIssues(IssueHandler issues) {
-        updateIssues = issues;
+    public void add(PluginIssue issue) {
+        updateIssues.getIssues().add(issue);
     }
 
     public PluginDefinition getDefinition() {

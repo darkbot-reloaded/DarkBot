@@ -16,11 +16,12 @@ import java.util.stream.Stream;
 public class PluginDisplay extends JPanel implements PluginListener {
 
     private Main main;
-    private MainButton pluginTab;
     private PluginHandler pluginHandler;
     private PluginUpdater pluginUpdater;
 
+    private MainButton pluginTab;
     private JPanel pluginPanel;
+    private PluginUpdateHeader header;
 
     public PluginDisplay() {
         super(new MigLayout("wrap 1, fillx", "[fill]", ""));
@@ -32,22 +33,28 @@ public class PluginDisplay extends JPanel implements PluginListener {
         this.pluginTab = pluginTab;
         this.pluginHandler = main.pluginHandler;
         this.pluginUpdater = main.pluginUpdater;
-        pluginUpdater.setPluginDisplay(this);
         setupUI();
         refreshUI();
         pluginHandler.addListener(this);
+        pluginUpdater.setup(this);
     }
 
     private void setupUI() {
         if (pluginPanel != null) return;
         pluginPanel = new JPanel(new MigLayout("wrap 1, fillx", "[fill]", ""));
+        header = new PluginUpdateHeader(pluginUpdater);
 
-        add(new PluginUpdateHeader(pluginUpdater));
-        add(new ScrollPane(pluginPanel));
+        JScrollPane scrollPane = new JScrollPane(pluginPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(25);
+
+        add(header);
+        add(scrollPane);
     }
 
     public void refreshUI() {
-        removeAll();
+        header.refreshUI();
         pluginPanel.removeAll();
 
         Stream.concat(
@@ -58,12 +65,9 @@ public class PluginDisplay extends JPanel implements PluginListener {
                 ).map(pl -> new PluginCard(main, pl, main.featureRegistry))
         ).forEach(pluginPanel::add);
 
-        add(new PluginUpdateHeader(pluginUpdater));
-        add(new ScrollPane(pluginPanel));
-
         if (!pluginHandler.LOADING_EXCEPTIONS.isEmpty() || !pluginHandler.FAILED_PLUGINS.isEmpty())
             pluginTab.setIcon(UIUtils.getIcon("plugin_warn"));
-        else if (pluginUpdater.hasUpdates()) pluginTab.setIcon(UIUtils.getIcon("plugins"));//todoo add "plugins_update" icon here
+        else if (pluginUpdater.hasAnyUpdates()) pluginTab.setIcon(UIUtils.getIcon("plugins"));//todoo add "plugins_update" icon here
         else pluginTab.setIcon(UIUtils.getIcon("plugins"));
 
         validate();
@@ -78,6 +82,10 @@ public class PluginDisplay extends JPanel implements PluginListener {
                 .orElse(null);
     }
 
+    public JProgressBar getMainProgressBar() {
+        return header.getProgressBar();
+    }
+
     @Override
     public void beforeLoad() {
         pluginPanel.removeAll();
@@ -86,15 +94,6 @@ public class PluginDisplay extends JPanel implements PluginListener {
     @Override
     public void afterLoadComplete() {
         SwingUtilities.invokeLater(this::refreshUI);
-    }
-
-    private static class ScrollPane extends JScrollPane {
-        private ScrollPane(JPanel panel) {
-            super(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-            setBorder(BorderFactory.createEmptyBorder());
-            getVerticalScrollBar().setUnitIncrement(25);
-        }
     }
 
 }

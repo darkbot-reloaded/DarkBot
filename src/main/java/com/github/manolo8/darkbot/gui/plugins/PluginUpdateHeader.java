@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
-import java.util.function.Supplier;
 
 //todoo i18n
 public class PluginUpdateHeader extends JPanel {
@@ -21,23 +20,42 @@ public class PluginUpdateHeader extends JPanel {
     private final PluginUpdater pluginUpdater;
 
     private final Title title;
-    private final UpdateProgressBar progressBar;
+    private final JProgressBar progressBar;
+    private final UpdateAllButton updateAllButton;
+    private final CheckUpdateButton checkUpdateButton;
 
     PluginUpdateHeader(PluginUpdater pluginUpdater) {
         super(new MigLayout("ins 0, gap 0, fill", "[grow][][]", "[][grow]"));
 
         this.pluginUpdater = pluginUpdater;
+        this.status = !pluginUpdater.hasAnyUpdates() ? "You are all up to date, " : "";
+        this.title = new Title();
+        this.progressBar = new JProgressBar();
+        this.updateAllButton = new UpdateAllButton();
+        this.checkUpdateButton = new CheckUpdateButton();
 
-        this.status = !pluginUpdater.hasUpdates() ? "You are all up to date, " : "";
-
-        title = new Title();
-        progressBar = new UpdateProgressBar();
-        pluginUpdater.setMainProgressBar(progressBar);
+        progressBar.setVisible(false);
+        progressBar.setBorderPainted(false);
 
         add(title);
-        add(new UpdateAllButton());
-        add(new CheckUpdateButton());
+        add(updateAllButton);
+        add(checkUpdateButton);
         add(progressBar, "dock south, spanx");
+    }
+
+    void refreshUI() {
+        updateAllButton.setEnabled(true);
+        updateAllButton.setVisible(pluginUpdater.hasAvailableUpdates());
+
+        progressBar.setVisible(false);
+
+        checkUpdateButton.setEnabled(true);
+        status = !pluginUpdater.hasAnyUpdates() ? "You are all up to date" : "";
+        title.setText(titleFormatter.format(new Object[]{status, dateFormatter.format(pluginUpdater.getLastChecked())}));
+    }
+
+    public JProgressBar getProgressBar() {
+        return progressBar;
     }
 
     private class Title extends JLabel {
@@ -55,11 +73,7 @@ public class PluginUpdateHeader extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             setEnabled(false);
-            Runnable doneTask = () -> {
-                status = !pluginUpdater.hasUpdates() ? "You are all up to date" : "";
-                title.setText(titleFormatter.format(new Object[]{status, dateFormatter.format(pluginUpdater.getLastChecked())}));
-            };
-            pluginUpdater.checkUpdates(doneTask);
+            pluginUpdater.checkUpdates();
         }
     }
 

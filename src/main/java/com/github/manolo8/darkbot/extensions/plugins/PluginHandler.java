@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.AuthAPI;
+import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.google.gson.Gson;
 
@@ -20,13 +21,17 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
 public class PluginHandler {
     private static final Gson GSON = new Gson();
+
+    public static final PluginIssue NO_DOWNLOAD = new PluginIssue(I18n.get("plugins.update_issues.no_download"),
+            I18n.get("plugins.update_issues.no_download.desc"), PluginIssue.Level.INFO);
+    public static final PluginIssue NO_UPDATE = new PluginIssue(I18n.get("plugins.update_issues.no_update"),
+            I18n.get("plugins.update_issues.no_update.desc"), PluginIssue.Level.INFO);
 
     public static final File PLUGIN_FOLDER = new File("plugins"),
             PLUGIN_UPDATE_FOLDER = new File("plugins/updates"),
@@ -101,7 +106,7 @@ public class PluginHandler {
                 }
             }
 
-            createDirectory(PLUGIN_PATH);
+            FileUtils.createDirectory(PLUGIN_PATH);
             for (File plugin : getJars(PLUGIN_UPDATE_FOLDER)) {
                 Path plPath = plugin.toPath();
                 try {
@@ -122,11 +127,9 @@ public class PluginHandler {
         LISTENERS.forEach(PluginListener::afterLoadComplete);
     }
 
-    public Stream<Plugin> getUpdates() {
-        Predicate<Plugin> available = pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE;
-        Predicate<Plugin> incompatible = pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.INCOMPATIBLE;
+    public Stream<Plugin> getAvailableUpdates() {
         return LOADED_PLUGINS.stream()
-                .filter(available.or(incompatible));
+                .filter(pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE);
     }
 
     private void loadPlugins(File[] pluginFiles, List<Plugin> plugins) {
@@ -135,11 +138,14 @@ public class PluginHandler {
             try {
                 pl = new Plugin(pluginFile, pluginFile.toURI().toURL());
                 loadPlugin(pl);
+
+                // need to copy over previous update status and update issues or else they will be lost
                 if (plugins.contains(pl)) {
                     Plugin plugin = plugins.get(plugins.indexOf(pl));
                     pl.setUpdateStatus(plugin.getUpdateStatus());
-                    pl.setUpdateIssues(plugin.getUpdateIssues());
+                    plugin.getUpdateIssues().getIssues().forEach(pl::add);
                 }
+
                 if (pl.getIssues().canLoad()) LOADED_PLUGINS.add(pl);
                 else FAILED_PLUGINS.add(pl);
             } catch (PluginLoadingException e) {
@@ -172,16 +178,6 @@ public class PluginHandler {
         }
     }
 
-    public void createDirectory(Path path) {
-        if (Files.exists(path)) return;
-        try {
-            Files.createDirectory(path);
-        } catch (IOException e) {
-            System.err.println("Failed to create: " + path);
-            e.printStackTrace();
-        }
-    }
-
     private void testUnique(Plugin plugin) {
         if (LOADED_PLUGINS.stream().anyMatch(other -> other.getName().equals(plugin.getName())))
             plugin.getIssues().addFailure(I18n.get("plugins.issues.loaded_twice"),
@@ -193,28 +189,26 @@ public class PluginHandler {
     }
 
     //todoo i18n
-    void testCompatibility(IssueHandler issues, PluginDefinition pd, boolean update) {
-        if (update && pd.download == null)
-            issues.addInfo(I18n.get("plugins.update_issues.no_download"),
-                    I18n.get("plugins.update_issues.no_download.desc"));
-        if (update && pd.update == null)
-            issues.addInfo(I18n.get("plugins.update_issues.no_update"),
-                    I18n.get("plugins.update_issues.no_update.desc"));
+    void testCompatibility(IssueHandler issues, PluginDefinition pd, boolean isUpdate) {
+        if (isUpdate && pd.download == null)
+            issues.getIssues().add(NO_DOWNLOAD);
+        if (isUpdate && pd.update == null)
+            issues.getIssues().add(NO_UPDATE);
 
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
-            issues.addFailure(I18n.get(update ? "plugins.update_issues.invalid_json" : "plugins.issues.invalid_json"),
-                    I18n.get(update ? "plugins.update_issues.invalid_json.desc" : "plugins.issues.invalid_json.desc",
+            issues.addFailure(I18n.get(isUpdate ? "plugins.update_issues.invalid_json" : "plugins.issues.invalid_json"),
+                    I18n.get(isUpdate ? "plugins.update_issues.invalid_json.desc" : "plugins.issues.invalid_json.desc",
                             pd.minVersion, pd.supportedVersion));
 
         String supportedRange = "DarkBot v" + (pd.minVersion.compareTo(pd.supportedVersion) == 0 ?
                 pd.minVersion : pd.minVersion + "-v" + pd.supportedVersion);
 
         if (Main.VERSION.compareTo(pd.minVersion) < 0)
-            issues.addFailure(I18n.get(update ? "plugins.update_issues.bot_update" : "plugins.issues.bot_update"),
-                    I18n.get(update ? "plugins.update_issues.bot_update.desc" : "plugins.issues.bot_update.desc",
+            issues.addFailure(I18n.get(isUpdate ? "plugins.update_issues.bot_update" : "plugins.issues.bot_update"),
+                    I18n.get(isUpdate ? "plugins.update_issues.bot_update.desc" : "plugins.issues.bot_update.desc",
                             supportedRange, Main.VERSION));
 
-        if (!update && Main.VERSION.compareTo(pd.supportedVersion) > 0)
+        if (!isUpdate && Main.VERSION.compareTo(pd.supportedVersion) > 0)
             issues.addInfo(I18n.get("plugins.issues.plugin_update"),
                     I18n.get("plugins.issues.plugin_update.desc", supportedRange, Main.VERSION));
     }

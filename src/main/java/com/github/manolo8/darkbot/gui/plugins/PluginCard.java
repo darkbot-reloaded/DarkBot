@@ -28,7 +28,7 @@ public class PluginCard extends JPanel {
             WARNING_COLOR = new Color(UIUtils.YELLOW.getRGB() + ALPHA, true),
             ERROR_COLOR = new Color(UIUtils.RED.getRGB() + ALPHA, true);
 
-    private final UpdateProgressBar progressBar;
+    private final JProgressBar progressBar;
     private final JLabel progressLabel;
     private final UpdateButton updateButton;
 
@@ -42,9 +42,12 @@ public class PluginCard extends JPanel {
 
         this.plugin = plugin;
         this.pluginUpdater = main.pluginUpdater;
-        this.progressBar = new UpdateProgressBar();
+        this.progressBar = new JProgressBar();
         this.progressLabel = new JLabel();
         this.updateButton = new UpdateButton();
+
+        progressBar.setVisible(false);
+        progressBar.setBorderPainted(false);
 
         add(progressBar, "dock south, spanx");
         add(progressLabel, "dock south, spanx, gapleft 5px");
@@ -61,17 +64,18 @@ public class PluginCard extends JPanel {
         return plugin;
     }
 
+    public void setProgressBarMaximum(int max) {
+        progressBar.setMaximum(max);
+    }
+
     public void setUpdateProgress(String text, int progress) {
         progressLabel.setText(text);
         progressBar.setValue(progress);
     }
 
-    public void makeProgressBarVisible() {
-        progressBar.setVisible(true);
-    }
-
-    public void disableUpdateButton() {
+    public void startPluginUpdate() {
         updateButton.setEnabled(false);
+        progressBar.setVisible(true);
     }
 
     private void addFeature(Main main, FeatureDefinition<?> feature) {
