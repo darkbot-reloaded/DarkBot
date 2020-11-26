@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
+import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import net.miginfocom.swing.MigLayout;
@@ -18,16 +20,18 @@ public class PluginUpdateHeader extends JPanel {
     private String status;
 
     private final PluginUpdater pluginUpdater;
+    private final PluginHandler pluginHandler;
 
     private final Title title;
     private final JProgressBar progressBar;
     private final UpdateAllButton updateAllButton;
     private final CheckUpdateButton checkUpdateButton;
 
-    PluginUpdateHeader(PluginUpdater pluginUpdater) {
+    PluginUpdateHeader(Main main) {
         super(new MigLayout("ins 0, gap 0, fill", "[grow][][]", "[][grow]"));
 
-        this.pluginUpdater = pluginUpdater;
+        this.pluginUpdater = main.pluginUpdater;
+        this.pluginHandler = main.pluginHandler;
         this.status = !pluginUpdater.hasAnyUpdates() ? "You are all up to date, " : "";
         this.title = new Title();
         this.progressBar = new JProgressBar();
@@ -44,9 +48,7 @@ public class PluginUpdateHeader extends JPanel {
     }
 
     void refreshUI() {
-        updateAllButton.setEnabled(true);
-        updateAllButton.setVisible(pluginUpdater.hasAvailableUpdates());
-
+        updateAllButton.refresh();
         progressBar.setVisible(false);
 
         checkUpdateButton.setEnabled(true);
@@ -81,7 +83,27 @@ public class PluginUpdateHeader extends JPanel {
 
         private UpdateAllButton() {
             super("Update all");
-            setVisible(pluginUpdater.hasAvailableUpdates());
+            refresh();
+        }
+
+        private void refresh() {
+            setEnabled(true);
+
+            StringBuilder toolTipText = new StringBuilder();
+            pluginHandler.getAvailableUpdates()
+                    .map(pl -> pl.getName() + ": Current version: " + pl.getDefinition().version +
+                            " → New version: " + pl.getUpdateDefinition().version + "\n")
+                    .forEach(toolTipText::append);
+
+            int length = toolTipText.length();
+            if (length > 0) {
+                toolTipText.deleteCharAt(length - 1); // removing last newline character
+                setToolTipText(toolTipText.toString());
+                setVisible(true);
+            } else  {
+                setToolTipText(null);
+                setVisible(false);
+            }
         }
 
         @Override

@@ -5,7 +5,7 @@ import java.util.Objects;
 public class PluginIssue implements Comparable<PluginIssue> {
 
     public enum Level {
-        INFO, WARNING, ERROR;
+        INFO, WARNING, ERROR
     }
 
     private final String message, description;

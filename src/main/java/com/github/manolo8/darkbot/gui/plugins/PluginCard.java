@@ -126,7 +126,11 @@ public class PluginCard extends JPanel {
 
         private UpdateButton() {
             super("Update");
-            setVisible(plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE);
+
+            if (plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE) {
+                setVisible(true);
+                setToolTipText("Current version: " + plugin.getDefinition().version + " → New version: " + plugin.getUpdateDefinition().version);
+            } else setVisible(false);
         }
 
         @Override

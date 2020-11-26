@@ -42,7 +42,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
     private void setupUI() {
         if (pluginPanel != null) return;
         pluginPanel = new JPanel(new MigLayout("wrap 1, fillx", "[fill]", ""));
-        header = new PluginUpdateHeader(pluginUpdater);
+        header = new PluginUpdateHeader(main);
 
         JScrollPane scrollPane = new JScrollPane(pluginPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 

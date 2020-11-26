@@ -144,6 +144,7 @@ public class PluginHandler {
                     Plugin plugin = plugins.get(plugins.indexOf(pl));
                     pl.setUpdateStatus(plugin.getUpdateStatus());
                     plugin.getUpdateIssues().getIssues().forEach(pl::add);
+                    pl.setUpdateDefinition(plugin.getUpdateDefinition());
                 }
 
                 if (pl.getIssues().canLoad()) LOADED_PLUGINS.add(pl);

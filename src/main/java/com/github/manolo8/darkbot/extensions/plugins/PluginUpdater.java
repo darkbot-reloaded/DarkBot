@@ -48,10 +48,6 @@ public class PluginUpdater {
         mainProgressBar = display.getMainProgressBar();
     }
 
-    public boolean hasAvailableUpdates() {
-        return pluginHandler.getAvailableUpdates().findAny().isPresent();
-    }
-
     public boolean hasAnyUpdates() {
         return pluginHandler.LOADED_PLUGINS.stream()
                 .anyMatch(pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE ||
