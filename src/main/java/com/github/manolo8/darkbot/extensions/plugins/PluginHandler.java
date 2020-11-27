@@ -43,7 +43,7 @@ public class PluginHandler {
     public URLClassLoader PLUGIN_CLASS_LOADER;
     public final List<Plugin> LOADED_PLUGINS = new ArrayList<>();
     public final List<Plugin> FAILED_PLUGINS = new ArrayList<>();
-    public final List<PluginLoadingException> LOADING_EXCEPTIONS = new ArrayList<>();
+    public final List<PluginException> LOADING_EXCEPTIONS = new ArrayList<>();
 
     private static final List<PluginListener> LISTENERS = new ArrayList<>();
 
@@ -112,14 +112,14 @@ public class PluginHandler {
                 try {
                     Files.move(plPath, PLUGIN_PATH.resolve(plPath.getFileName()), StandardCopyOption.REPLACE_EXISTING);
                 } catch (Exception e) {
-                    LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to update plugin: " + plPath.getFileName(), e));
+                    LOADING_EXCEPTIONS.add(new PluginException("Failed to update plugin: " + plPath.getFileName(), e));
                     e.printStackTrace();
                 }
             }
             try {
                 loadPlugins(getJars(PLUGIN_FOLDER), previousPlugins);
             } catch (Exception e) {
-                LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugins", e));
+                LOADING_EXCEPTIONS.add(new PluginException("Failed to load plugins", e));
                 e.printStackTrace();
             }
             LISTENERS.forEach(PluginListener::afterLoad);
@@ -150,22 +150,22 @@ public class PluginHandler {
 
                 if (pl.getIssues().canLoad()) LOADED_PLUGINS.add(pl);
                 else FAILED_PLUGINS.add(pl);
-            } catch (PluginLoadingException e) {
+            } catch (PluginException e) {
                 LOADING_EXCEPTIONS.add(e);
                 e.printStackTrace();
             } catch (Throwable e) {
-                LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugin", e, pl));
+                LOADING_EXCEPTIONS.add(new PluginException("Failed to load plugin", e, pl));
                 e.printStackTrace();
             }
         }
         PLUGIN_CLASS_LOADER = new URLClassLoader(LOADED_PLUGINS.stream().map(Plugin::getJar).toArray(URL[]::new));
     }
 
-    private void loadPlugin(Plugin plugin) throws IOException, PluginLoadingException {
+    private void loadPlugin(Plugin plugin) throws IOException, PluginException {
         try (JarFile jar = new JarFile(plugin.getFile(), true)) {
             ZipEntry plJson = jar.getEntry("plugin.json");
             if (plJson == null) {
-                throw new PluginLoadingException("The plugin is missing a plugin.json in the jar root", plugin);
+                throw new PluginException("The plugin is missing a plugin.json in the jar root", plugin);
             }
             plugin.setDefinition(readPluginDefinition(jar.getInputStream(plJson)));
             testUnique(plugin);

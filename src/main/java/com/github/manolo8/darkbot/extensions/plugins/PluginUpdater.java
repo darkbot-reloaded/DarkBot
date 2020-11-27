@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 //todoo i18n
 public class PluginUpdater {
 
-    public final List<PluginLoadingException> UPDATING_EXCEPTIONS = new ArrayList<>();
+    public final List<PluginException> UPDATING_EXCEPTIONS = new ArrayList<>();
     private long lastChecked = System.currentTimeMillis();
 
     private final PluginHandler pluginHandler;
@@ -246,7 +246,7 @@ public class PluginUpdater {
             } catch (IOException e) {
                 System.err.println("Failed to download update");
                 failed = true;
-                UPDATING_EXCEPTIONS.add(new PluginLoadingException("Failed to download update", e, plugin));
+                UPDATING_EXCEPTIONS.add(new PluginException("Failed to download update", e, plugin));
                 plugin.getUpdateIssues().addFailure(I18n.get("plugins.update_issues.download_failed"), IssueHandler.createDescription(e));
                 plugin.setUpdateStatus(Plugin.UpdateStatus.FAILED);
                 e.printStackTrace();
