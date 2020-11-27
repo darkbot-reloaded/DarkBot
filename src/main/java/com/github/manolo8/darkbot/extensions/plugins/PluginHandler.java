@@ -28,8 +28,21 @@ import java.util.zip.ZipEntry;
 public class PluginHandler {
     private static final Gson GSON = new Gson();
 
+    public static final PluginIssue LOADED_TWICE = new PluginIssue("plugins.issues.loaded_twice",
+            I18n.get("plugins.issues.loaded_twice.desc"), PluginIssue.Level.ERROR);
     public static final PluginIssue UPDATE_NOT_POSSIBLE = new PluginIssue("plugins.update_issues.updates_not_possible",
             I18n.get("plugins.update_issues.updates_not_possible.desc"), PluginIssue.Level.INFO);
+    public static final String INVALID_UPDATE_JSON = "plugins.update_issues.invalid_json";
+    public static final String INVALID_JSON = "plugins.issues.invalid_json";
+    public static final String BOT_UPDATE_REQUIRED = "plugins.update_issues.bot_update";
+    public static final String BOT_UPDATE = "plugins.issues.bot_update";
+    public static final String MAY_NEED_UPDATE = "plugins.issues.plugin_update";
+    public static final PluginIssue PLUGIN_NOT_SIGNED = new PluginIssue("plugins.issues.signature.plugin_not_signed",
+            I18n.get("plugins.issues.signature.plugin_not_signed.desc"), PluginIssue.Level.ERROR);
+    public static final PluginIssue UNKNOWN_SIGNATURE = new PluginIssue("plugins.issues.signature.unknown_signature",
+            I18n.get( "plugins.issues.signature.unknown_signature.desc"), PluginIssue.Level.ERROR);
+    public static final PluginIssue INVALID_SIGNATURE = new PluginIssue("plugins.issues.signature.invalid_signature",
+            I18n.get("plugins.issues.signature.invalid_signature.desc"), PluginIssue.Level.ERROR);
 
     public static final File PLUGIN_FOLDER = new File("plugins"),
             PLUGIN_UPDATE_FOLDER = new File("plugins/updates"),
@@ -180,8 +193,7 @@ public class PluginHandler {
 
     private void testUnique(Plugin plugin) {
         if (LOADED_PLUGINS.stream().anyMatch(other -> other.getName().equals(plugin.getName())))
-            plugin.getIssues().addFailure("plugins.issues.loaded_twice",
-                    I18n.get("plugins.issues.loaded_twice.desc"));
+            plugin.getIssues().getIssues().add(LOADED_TWICE);
     }
 
     private void testCompatibility(Plugin plugin) {
@@ -193,34 +205,30 @@ public class PluginHandler {
             issues.getIssues().add(UPDATE_NOT_POSSIBLE);
 
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
-            issues.addFailure((isUpdate ? "plugins.update_issues.invalid_json" : "plugins.issues.invalid_json"),
+            issues.addFailure((isUpdate ? INVALID_UPDATE_JSON : INVALID_JSON),
                     I18n.get("plugins.issues.invalid_json.desc", pd.minVersion, pd.supportedVersion));
 
         String supportedRange = "DarkBot v" + (pd.minVersion.compareTo(pd.supportedVersion) == 0 ?
                 pd.minVersion : pd.minVersion + "-v" + pd.supportedVersion);
 
         if (Main.VERSION.compareTo(pd.minVersion) < 0)
-            issues.addFailure((isUpdate ? "plugins.update_issues.bot_update" : "plugins.issues.bot_update"),
+            issues.addFailure((isUpdate ? BOT_UPDATE_REQUIRED : BOT_UPDATE),
                     I18n.get(isUpdate ? "plugins.update_issues.bot_update.desc" : "plugins.issues.bot_update.desc",
                             supportedRange, Main.VERSION));
 
         if (!isUpdate && Main.VERSION.compareTo(pd.supportedVersion) > 0)
-            issues.addInfo("plugins.issues.plugin_update",
-                    I18n.get("plugins.issues.plugin_update.desc", supportedRange, Main.VERSION));
+            issues.addInfo(MAY_NEED_UPDATE, I18n.get("plugins.issues.plugin_update.desc", supportedRange, Main.VERSION));
     }
 
     private void testSignature(Plugin plugin, JarFile jar) throws IOException {
         try {
             Boolean signatureValid = AuthAPI.getInstance().checkPluginJarSignature(jar);
             if (signatureValid == null)
-                plugin.getIssues().addFailure("plugins.issues.signature.plugin_not_signed",
-                        I18n.get("plugins.issues.signature.plugin_not_signed.desc"));
+                plugin.getIssues().getIssues().add(PLUGIN_NOT_SIGNED);
             else if (!signatureValid)
-                plugin.getIssues().addFailure("plugins.issues.signature.unknown_signature",
-                        I18n.get("plugins.issues.signature.unknown_signature.desc"));
+                plugin.getIssues().getIssues().add(UNKNOWN_SIGNATURE);
         } catch (SecurityException e) {
-            plugin.getIssues().addFailure("plugins.issues.signature.invalid_signature",
-                    I18n.get("plugins.issues.signature.invalid_signature.desc"));
+            plugin.getIssues().getIssues().add(INVALID_SIGNATURE);
         }
     }
 
