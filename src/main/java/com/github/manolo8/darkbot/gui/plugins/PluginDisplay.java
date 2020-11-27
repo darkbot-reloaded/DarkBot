@@ -58,7 +58,10 @@ public class PluginDisplay extends JPanel implements PluginListener {
         pluginPanel.removeAll();
 
         Stream.concat(
-                pluginHandler.LOADING_EXCEPTIONS.stream().map(ExceptionCard::new),
+                Stream.concat(
+                        pluginHandler.LOADING_EXCEPTIONS.stream(),
+                        pluginUpdater.UPDATING_EXCEPTIONS.stream()
+                ).map(ExceptionCard::new),
                 Stream.concat(
                         pluginHandler.FAILED_PLUGINS.stream(),
                         pluginHandler.LOADED_PLUGINS.stream()
@@ -67,7 +70,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
 
         if (!pluginHandler.LOADING_EXCEPTIONS.isEmpty() || !pluginHandler.FAILED_PLUGINS.isEmpty())
             pluginTab.setIcon(UIUtils.getIcon("plugin_warn"));
-        else if (pluginUpdater.hasAnyUpdates()) pluginTab.setIcon(UIUtils.getIcon("plugins"));//todoo add "plugins_update" icon here
+        else if (pluginUpdater.hasAnyUpdates()) pluginTab.setIcon(UIUtils.getIcon("plugins_update"));
         else pluginTab.setIcon(UIUtils.getIcon("plugins"));
 
         validate();
@@ -76,6 +79,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
 
     public PluginCard getPluginCard(Plugin plugin) {
         return Arrays.stream(pluginPanel.getComponents())
+                .filter(comp -> comp instanceof PluginCard)
                 .map(comp -> (PluginCard) comp)
                 .filter(pl -> pl.getPlugin().equals(plugin))
                 .findFirst()

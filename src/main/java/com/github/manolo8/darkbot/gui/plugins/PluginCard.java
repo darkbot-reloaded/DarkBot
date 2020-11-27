@@ -10,12 +10,14 @@ import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Locale;
 
 // todoo i18n
 public class PluginCard extends JPanel {
@@ -68,14 +70,34 @@ public class PluginCard extends JPanel {
         progressBar.setMaximum(max);
     }
 
-    public void setUpdateProgress(String text, int progress) {
-        progressLabel.setText(text);
-        progressBar.setValue(progress);
+    public void setUpdateProgress(UpdateStatus status) {
+        if (status == UpdateStatus.STARTING) {
+            updateButton.setEnabled(false);
+            progressBar.setVisible(true);
+        }
+        //todoo i18n
+        progressLabel.setText(I18n.get("plugin.update.something" + status.toString()));
+        progressBar.setValue(status.progress);
     }
 
-    public void startPluginUpdate() {
-        updateButton.setEnabled(false);
-        progressBar.setVisible(true);
+    public enum UpdateStatus {
+        STARTING(0),
+        SAVING_OLD(1),
+        DOWNLOADING(2),
+        RELOADING(3),
+        INDIVIDUALLY_DONE(3),
+        DONE(4),
+        FAILED(4);
+
+        private final int progress;
+        UpdateStatus(int progress) {
+            this.progress = progress;
+        }
+
+        @Override
+        public String toString() {
+            return name().toLowerCase(Locale.ROOT);
+        }
     }
 
     private void addFeature(Main main, FeatureDefinition<?> feature) {

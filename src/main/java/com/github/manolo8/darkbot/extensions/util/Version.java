@@ -38,16 +38,6 @@ public class Version implements Comparable<Version> {
         alpha = tmpAlpha == -1 ? Integer.MAX_VALUE : tmpAlpha;
     }
 
-    public Version(Version version) {
-        this.version = version.version;
-        major = version.major;
-        minor = version.minor;
-        patch = version.patch;
-        revision = version.revision;
-        beta = version.beta;
-        alpha = version.alpha;
-    }
-
     private int getInt(Matcher m, int find) {
         if (m.group(find) == null) return -1;
         String num = m.group(find + 1);

@@ -90,7 +90,7 @@ public class PluginHandler {
 
     private void updatePluginsInternal() {
         synchronized (this) {
-            List<Plugin> plugins = new ArrayList<>(LOADED_PLUGINS);
+            List<Plugin> previousPlugins = new ArrayList<>(LOADED_PLUGINS);
 
             LOADED_PLUGINS.clear();
             FAILED_PLUGINS.clear();
@@ -117,7 +117,7 @@ public class PluginHandler {
                 }
             }
             try {
-                loadPlugins(getJars(PLUGIN_FOLDER), plugins);
+                loadPlugins(getJars(PLUGIN_FOLDER), previousPlugins);
             } catch (Exception e) {
                 LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugins", e));
                 e.printStackTrace();
@@ -132,7 +132,7 @@ public class PluginHandler {
                 .filter(pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE);
     }
 
-    private void loadPlugins(File[] pluginFiles, List<Plugin> plugins) {
+    private void loadPlugins(File[] pluginFiles, List<Plugin> previousPlugins) {
         for (File pluginFile : pluginFiles) {
             Plugin pl = null;
             try {
@@ -140,8 +140,9 @@ public class PluginHandler {
                 loadPlugin(pl);
 
                 // need to copy over previous update status and update issues or else they will be lost
-                if (plugins.contains(pl)) {
-                    Plugin plugin = plugins.get(plugins.indexOf(pl));
+                int prevIndex = previousPlugins.indexOf(pl);
+                if (prevIndex != -1) {
+                    Plugin plugin = previousPlugins.get(prevIndex);
                     pl.setUpdateStatus(plugin.getUpdateStatus());
                     plugin.getUpdateIssues().getIssues().forEach(pl::add);
                     pl.setUpdateDefinition(plugin.getUpdateDefinition());

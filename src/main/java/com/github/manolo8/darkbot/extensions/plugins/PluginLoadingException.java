@@ -4,6 +4,7 @@ public class PluginLoadingException extends Exception {
 
     private Plugin plugin;
 
+    //todoo rename
     public PluginLoadingException(String message, Throwable cause, Plugin plugin) {
         super(message, cause);
         this.plugin = plugin;
