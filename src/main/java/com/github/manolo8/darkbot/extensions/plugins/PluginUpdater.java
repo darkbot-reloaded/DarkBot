@@ -21,8 +21,10 @@ import java.util.stream.Collectors;
 
 public class PluginUpdater {
 
+    private static final String DOWNLOAD_FAILED = "plugins.update_issues.download_failed";
+
     public final List<PluginException> UPDATING_EXCEPTIONS = new ArrayList<>();
-    private long lastChecked = System.currentTimeMillis();
+    private volatile long lastChecked = System.currentTimeMillis();
 
     private final PluginHandler pluginHandler;
     private PluginDisplay pluginDisplay;
@@ -71,7 +73,7 @@ public class PluginUpdater {
             protected Void doInBackground() {
                 for (Plugin plugin : pluginHandler.LOADED_PLUGINS) {
                     plugin.getUpdateIssues().getIssues()
-                            .removeIf(pl -> pl.getMessage().equals(I18n.get("plugins.update_issues.download_failed")));
+                            .removeIf(pl -> pl.getMessage().equals(I18n.get(DOWNLOAD_FAILED)));
                     try {
                         checkUpdate(plugin);
                     } catch (IOException e) {
@@ -92,8 +94,7 @@ public class PluginUpdater {
         IssueHandler updateIssues = plugin.getUpdateIssues();
         pluginHandler.testCompatibility(updateIssues, updateDef, true);
 
-        if (updateIssues.getIssues().contains(PluginHandler.NO_DOWNLOAD) ||
-                updateIssues.getIssues().contains(PluginHandler.NO_UPDATE)) {
+        if (updateIssues.getIssues().contains(PluginHandler.UPDATE_NOT_POSSIBLE)) {
             plugin.setUpdateStatus(Plugin.UpdateStatus.UNKNOWN);
             return;
         }
@@ -126,12 +127,13 @@ public class PluginUpdater {
     private class UpdateAllTask extends SwingWorker<Void, Integer> {
 
         private int progress = 0;
-        private final List<UpdateTask> updateTasks = new ArrayList<>();
+        private final List<UpdateTask> updateTasks;
 
         UpdateAllTask() {
-            List<Plugin> availableUpdates = pluginHandler.getAvailableUpdates().collect(Collectors.toList());
-            availableUpdates.forEach(pl -> updateTasks.add(new UpdateTask(pl, this)));
-            mainProgressBar.setMaximum(availableUpdates.size() * 4 + 1);
+            updateTasks = pluginHandler.getAvailableUpdates()
+                    .map(pl -> new UpdateTask(pl, this))
+                    .collect(Collectors.toList());
+            mainProgressBar.setMaximum(updateTasks.size() * 4 + 1);
         }
 
         public synchronized void tickUpdate() {
@@ -205,15 +207,8 @@ public class PluginUpdater {
                 return;
             }
 
-            if (failed) {
-                card.setUpdateProgress(PluginCard.UpdateStatus.FAILED);
-                // refreshUI() if updating individually and failed to generate ExceptionCards
-                pluginDisplay.refreshUI();
-            }
-            else {
-                plugin.setUpdateStatus(Plugin.UpdateStatus.UP_TO_DATE);
-                card.setUpdateProgress(PluginCard.UpdateStatus.DONE);
-            }
+            card.setUpdateProgress(failed ? PluginCard.UpdateStatus.FAILED : PluginCard.UpdateStatus.DONE);
+            if (failed) pluginDisplay.refreshUI(); // Ensure the exception card is shown
         }
 
         @Override
@@ -226,16 +221,16 @@ public class PluginUpdater {
             try (InputStream is = plugin.getUpdateDefinition().download.openConnection().getInputStream()) {
                 publish(PluginCard.UpdateStatus.SAVING_OLD);
 
-                FileUtils.createDirectory(PluginHandler.PLUGIN_OLD_PATH);
+                FileUtils.ensureDirectoryExists(PluginHandler.PLUGIN_OLD_PATH);
                 Files.copy(plugin.getFile().toPath(), PluginHandler.PLUGIN_OLD_PATH.resolve(plugin.getFile().getName()), StandardCopyOption.REPLACE_EXISTING);
                 publish(PluginCard.UpdateStatus.DOWNLOADING);
 
-                FileUtils.createDirectory(PluginHandler.PLUGIN_UPDATE_PATH);
+                FileUtils.ensureDirectoryExists(PluginHandler.PLUGIN_UPDATE_PATH);
                 Files.copy(is, PluginHandler.PLUGIN_UPDATE_PATH.resolve(plugin.getFile().getName()), StandardCopyOption.REPLACE_EXISTING);
 
+                plugin.setUpdateStatus(Plugin.UpdateStatus.UP_TO_DATE);
                 if (isUpdatingAll) {
                     publish(PluginCard.UpdateStatus.INDIVIDUALLY_DONE);
-                    plugin.setUpdateStatus(Plugin.UpdateStatus.UP_TO_DATE);
                     return null;
                 }
 
@@ -246,7 +241,7 @@ public class PluginUpdater {
                 System.err.println("Failed to download update");
                 failed = true;
                 UPDATING_EXCEPTIONS.add(new PluginException("Failed to download update", e, plugin));
-                plugin.getUpdateIssues().addFailure(I18n.get("plugins.update_issues.download_failed"), IssueHandler.createDescription(e));
+                plugin.getUpdateIssues().addFailure(DOWNLOAD_FAILED, IssueHandler.createDescription(e));
                 plugin.setUpdateStatus(Plugin.UpdateStatus.FAILED);
                 e.printStackTrace();
             }

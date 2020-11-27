@@ -196,7 +196,7 @@ public class Main extends Thread implements PluginListener {
                 else module.tickStopped();
             } catch (Throwable e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
-                if (modDef != null) modDef.getIssues().addWarning(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
             }
             for (Behaviour behaviour : behaviours) {
                 try {
@@ -205,7 +205,7 @@ public class Main extends Thread implements PluginListener {
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
-                            .addFailure(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                            .addFailure("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
                 }
             }
         }

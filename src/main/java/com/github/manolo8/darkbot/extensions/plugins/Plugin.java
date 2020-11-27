@@ -49,10 +49,6 @@ public class Plugin {
         updateStatus = status;
     }
 
-    public void add(PluginIssue issue) {
-        updateIssues.getIssues().add(issue);
-    }
-
     public PluginDefinition getDefinition() {
         return definition;
     }

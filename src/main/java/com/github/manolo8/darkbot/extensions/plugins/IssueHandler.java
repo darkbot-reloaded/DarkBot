@@ -45,8 +45,8 @@ public class IssueHandler {
                 .collect(Collectors.joining("<br>", "<html>", "</html>"));
     }
 
-    public void add(String message, String description, PluginIssue.Level level) {
-        if (this.issues.add(new PluginIssue(message, description, level)))
+    public void add(String messageKey, String description, PluginIssue.Level level) {
+        if (this.issues.add(new PluginIssue(messageKey, description, level)))
             listener.send(this);
     }
 

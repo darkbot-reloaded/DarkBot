@@ -18,6 +18,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 public class PluginCard extends JPanel {
 
@@ -50,13 +51,19 @@ public class PluginCard extends JPanel {
         progressBar.setVisible(false);
         progressBar.setBorderPainted(false);
 
+        IssueHandler issues = new IssueHandler();
+        Stream.concat(
+                plugin.getIssues().getIssues().stream(),
+                plugin.getUpdateIssues().getIssues().stream()
+        ).forEach(i -> issues.add(i.getMessage(), i.getDescription(), i.getLevel()));
+
         add(progressBar, "dock south, spanx");
         add(progressLabel, "dock south, spanx, gapleft 5px");
-        add(new IssueList(plugin.getIssues(), false), "dock east");
-        add(plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE
-                ? new UpdateButtonPanel()
-                : new IssueList(plugin.getUpdateIssues(), false), "dock east");
-        add(new PluginName(plugin), "dock north");
+        if (!issues.getIssues().isEmpty())
+            add(new IssueList(issues, false), "dock east");
+        if (plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE)
+            add(new UpdateButtonPanel(), "dock east");
+        add(new PluginName(plugin.getDefinition()), "dock north");
 
         featureRegistry.getFeatures(plugin).forEach(fd -> this.addFeature(main, fd));
     }

@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
-import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
 import net.miginfocom.swing.MigLayout;
 
@@ -9,10 +8,9 @@ import java.awt.*;
 
 class PluginName extends JPanel {
 
-    PluginName(Plugin plugin) {
+    PluginName(PluginDefinition definition) {
         super(new MigLayout("", "[]5px[]5px[]5px[]"));
 
-        PluginDefinition definition = plugin.getDefinition();
         JLabel name = new JLabel(definition.name);
         Font baseFont = name.getFont();
         name.setFont(baseFont.deriveFont(baseFont.getStyle() | Font.BOLD));

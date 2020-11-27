@@ -94,7 +94,7 @@ public class PluginUpdateHeader extends JPanel {
                     .map(pl -> I18n.get("plugins.config_button.update_all.desc",
                             pl.getName(),
                             pl.getDefinition().version,
-                            pl.getUpdateDefinition().version))
+                            pl.getUpdateDefinition().version) + "\n")
                     .forEach(toolTipText::append);
 
             int length = toolTipText.length();

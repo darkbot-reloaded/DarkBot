@@ -69,7 +69,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
         ).forEach(pluginPanel::add);
 
         if (!pluginHandler.LOADING_EXCEPTIONS.isEmpty() || !pluginHandler.FAILED_PLUGINS.isEmpty())
-            pluginTab.setIcon(UIUtils.getIcon("plugin_warn"));
+            pluginTab.setIcon(UIUtils.getIcon("plugins_warn"));
         else if (pluginUpdater.hasAnyUpdates()) pluginTab.setIcon(UIUtils.getIcon("plugins_update"));
         else pluginTab.setIcon(UIUtils.getIcon("plugins"));
 
