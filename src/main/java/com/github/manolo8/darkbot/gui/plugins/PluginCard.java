@@ -7,8 +7,6 @@ import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
-import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
-import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
@@ -16,9 +14,7 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.Locale;
-import java.util.stream.Stream;
 
 public class PluginCard extends JPanel {
 
@@ -32,10 +28,9 @@ public class PluginCard extends JPanel {
 
     private final JProgressBar progressBar;
     private final JLabel progressLabel;
-    private final UpdateButton updateButton;
+    private final PluginName.UpdateButton updateButton;
 
     private final Plugin plugin;
-    private final PluginUpdater pluginUpdater;
 
     PluginCard(Main main, Plugin plugin, FeatureRegistry featureRegistry) {
         super(new MigLayout("fillx, gapy 0, ins 0 0 5px 0", "5px[]0px[]10px[]10px[grow]", "[]"));
@@ -43,27 +38,19 @@ public class PluginCard extends JPanel {
         plugin.getIssues().addListener(this::setColor);
 
         this.plugin = plugin;
-        this.pluginUpdater = main.pluginUpdater;
         this.progressBar = new JProgressBar();
         this.progressLabel = new JLabel();
-        this.updateButton = new UpdateButton();
 
         progressBar.setVisible(false);
         progressBar.setBorderPainted(false);
 
-        IssueHandler issues = new IssueHandler();
-        Stream.concat(
-                plugin.getIssues().getIssues().stream(),
-                plugin.getUpdateIssues().getIssues().stream()
-        ).forEach(i -> issues.add(i.getMessage(), i.getDescription(), i.getLevel()));
+        PluginName name = new PluginName(plugin, main.pluginUpdater);
+        this.updateButton = name.getUpdateButton();
 
         add(progressBar, "dock south, spanx");
         add(progressLabel, "dock south, spanx, gapleft 5px");
-        if (!issues.getIssues().isEmpty())
-            add(new IssueList(issues, false), "dock east");
-        if (plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE)
-            add(new UpdateButtonPanel(), "dock east");
-        add(new PluginName(plugin.getDefinition()), "dock north");
+        add(new IssueList(plugin.getIssues(), plugin.getUpdateIssues()), "hidemode 2, dock east");
+        add(name, "dock north");
 
         featureRegistry.getFeatures(plugin).forEach(fd -> this.addFeature(main, fd));
     }
@@ -114,7 +101,7 @@ public class PluginCard extends JPanel {
             add(new JLabel());
         }
         add(new FeatureCheckbox(feature));
-        add(new IssueList(feature.getIssues(), true), "hidemode 2, wrap");
+        add(new IssueList(feature.getIssues()), "hidemode 2, wrap");
     }
 
     private void setColor(IssueHandler issues) {
@@ -140,32 +127,5 @@ public class PluginCard extends JPanel {
         super.paintComponent(g);
     }
 
-    private class UpdateButtonPanel extends JPanel {
-
-        private UpdateButtonPanel() {
-            setOpaque(false);
-            add(updateButton);
-        }
-    }
-
-    private class UpdateButton extends MainButton {
-
-        private UpdateButton() {
-            super(I18n.get("plugins.config_button.update"));
-
-            if (plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE) {
-                setVisible(true);
-                setToolTipText(I18n.get("plugins.config_button.update.desc",
-                        plugin.getDefinition().version,
-                        plugin.getUpdateDefinition().version));
-            } else setVisible(false);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            setEnabled(false);
-            pluginUpdater.update(plugin);
-        }
-    }
 
 }

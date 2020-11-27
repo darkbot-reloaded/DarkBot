@@ -202,13 +202,9 @@ public class PluginUpdater {
 
         @Override
         protected void done() {
-            if (isUpdatingAll) {
-                if (failed) card.setUpdateProgress(PluginCard.UpdateStatus.FAILED);
-                return;
-            }
-
-            card.setUpdateProgress(failed ? PluginCard.UpdateStatus.FAILED : PluginCard.UpdateStatus.DONE);
-            if (failed) pluginDisplay.refreshUI(); // Ensure the exception card is shown
+            card.setUpdateProgress(failed ? PluginCard.UpdateStatus.FAILED :
+                    isUpdatingAll ? PluginCard.UpdateStatus.INDIVIDUALLY_DONE : PluginCard.UpdateStatus.DONE);
+            if (!isUpdatingAll && failed) pluginDisplay.refreshUI(); // Ensure the exception card is shown
         }
 
         @Override
@@ -229,10 +225,7 @@ public class PluginUpdater {
                 Files.copy(is, PluginHandler.PLUGIN_UPDATE_PATH.resolve(plugin.getFile().getName()), StandardCopyOption.REPLACE_EXISTING);
 
                 plugin.setUpdateStatus(Plugin.UpdateStatus.UP_TO_DATE);
-                if (isUpdatingAll) {
-                    publish(PluginCard.UpdateStatus.INDIVIDUALLY_DONE);
-                    return null;
-                }
+                if (isUpdatingAll) return null;
 
                 publish(PluginCard.UpdateStatus.RELOADING);
                 pluginHandler.updatePlugins();

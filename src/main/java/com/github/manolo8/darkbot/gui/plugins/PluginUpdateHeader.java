@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class PluginUpdateHeader extends JPanel {
 
@@ -89,18 +90,15 @@ public class PluginUpdateHeader extends JPanel {
         private void refresh() {
             setEnabled(true);
 
-            StringBuilder toolTipText = new StringBuilder();
-            pluginHandler.getAvailableUpdates()
+            String toolTipText = pluginHandler.getAvailableUpdates()
                     .map(pl -> I18n.get("plugins.config_button.update_all.desc",
                             pl.getName(),
                             pl.getDefinition().version,
-                            pl.getUpdateDefinition().version) + "\n")
-                    .forEach(toolTipText::append);
+                            pl.getUpdateDefinition().version))
+                    .collect(Collectors.joining("\n"));
 
-            int length = toolTipText.length();
-            if (length > 0) {
-                toolTipText.deleteCharAt(length - 1); // removing last newline character
-                setToolTipText(toolTipText.toString());
+            if (!toolTipText.isEmpty()) {
+                setToolTipText(toolTipText);
                 setVisible(true);
             } else  {
                 setToolTipText(null);

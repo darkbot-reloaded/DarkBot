@@ -9,15 +9,28 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.stream.Stream;
 
 class IssueList extends JPanel {
 
-    IssueList(IssueHandler issues, boolean inline) {
-        super(new MigLayout((inline ? "ins 0, gapx 5px, " : "") + "wrap 1", "[right]", "[top]"));
+    IssueList(IssueHandler issues) {
+        super(new MigLayout("ins 0, gapx 5px, wrap 1", "[right]", "[top]"));
 
+        setup(issues);
+    }
+
+    IssueList(IssueHandler... issues) {
+        super(new MigLayout("wrap 1", "[right]", "[top]"));
+        IssueHandler issueHandler = new IssueHandler();
+        Stream.of(issues).flatMap(issue -> issue.getIssues().stream()).forEach(issueHandler::add);
+
+        setup(issueHandler);
+    }
+
+    private void setup(IssueHandler issue) {
         setOpaque(false);
-        setupUI(issues);
-        issues.addListener(this::setupUI);
+        setupUI(issue);
+        issue.addListener(this::setupUI);
     }
 
     private void setupUI(IssueHandler issues) {

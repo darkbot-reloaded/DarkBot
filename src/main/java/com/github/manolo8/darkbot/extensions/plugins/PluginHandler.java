@@ -155,7 +155,7 @@ public class PluginHandler {
                 if (prevIndex != -1) {
                     Plugin plugin = previousPlugins.get(prevIndex);
                     pl.setUpdateStatus(plugin.getUpdateStatus());
-                    plugin.getUpdateIssues().getIssues().forEach(pl.getUpdateIssues().getIssues()::add);
+                    plugin.getUpdateIssues().getIssues().forEach(pl.getUpdateIssues()::add);
                     pl.setUpdateDefinition(plugin.getUpdateDefinition());
                 }
 
@@ -193,7 +193,7 @@ public class PluginHandler {
 
     private void testUnique(Plugin plugin) {
         if (LOADED_PLUGINS.stream().anyMatch(other -> other.getName().equals(plugin.getName())))
-            plugin.getIssues().getIssues().add(LOADED_TWICE);
+            plugin.getIssues().add(LOADED_TWICE);
     }
 
     private void testCompatibility(Plugin plugin) {
@@ -202,7 +202,7 @@ public class PluginHandler {
 
     void testCompatibility(IssueHandler issues, PluginDefinition pd, boolean isUpdate) {
         if (isUpdate && (pd.download == null || pd.update == null))
-            issues.getIssues().add(UPDATE_NOT_POSSIBLE);
+            issues.add(UPDATE_NOT_POSSIBLE);
 
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
             issues.addFailure((isUpdate ? INVALID_UPDATE_JSON : INVALID_JSON),
@@ -223,12 +223,10 @@ public class PluginHandler {
     private void testSignature(Plugin plugin, JarFile jar) throws IOException {
         try {
             Boolean signatureValid = AuthAPI.getInstance().checkPluginJarSignature(jar);
-            if (signatureValid == null)
-                plugin.getIssues().getIssues().add(PLUGIN_NOT_SIGNED);
-            else if (!signatureValid)
-                plugin.getIssues().getIssues().add(UNKNOWN_SIGNATURE);
+            if (signatureValid == null) plugin.getIssues().add(PLUGIN_NOT_SIGNED);
+            else if (!signatureValid) plugin.getIssues().add(UNKNOWN_SIGNATURE);
         } catch (SecurityException e) {
-            plugin.getIssues().getIssues().add(INVALID_SIGNATURE);
+            plugin.getIssues().add(INVALID_SIGNATURE);
         }
     }
 
