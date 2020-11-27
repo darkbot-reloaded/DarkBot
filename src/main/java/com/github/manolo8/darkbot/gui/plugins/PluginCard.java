@@ -19,7 +19,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Locale;
 
-// todoo i18n
 public class PluginCard extends JPanel {
 
     private static final Border LOADED_BORDER = BorderFactory.createLineBorder(UIUtils.GREEN),
@@ -75,8 +74,7 @@ public class PluginCard extends JPanel {
             updateButton.setEnabled(false);
             progressBar.setVisible(true);
         }
-        //todoo i18n
-        progressLabel.setText(I18n.get("plugin.update.something" + status.toString()));
+        progressLabel.setText(I18n.get("plugins.update." + status.toString()));
         progressBar.setValue(status.progress);
     }
 
@@ -135,7 +133,6 @@ public class PluginCard extends JPanel {
         super.paintComponent(g);
     }
 
-    //todoo i18n
     private class UpdateButtonPanel extends JPanel {
 
         private UpdateButtonPanel() {
@@ -147,11 +144,13 @@ public class PluginCard extends JPanel {
     private class UpdateButton extends MainButton {
 
         private UpdateButton() {
-            super("Update");
+            super(I18n.get("plugins.config_button.update"));
 
             if (plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE) {
                 setVisible(true);
-                setToolTipText("Current version: " + plugin.getDefinition().version + " → New version: " + plugin.getUpdateDefinition().version);
+                setToolTipText(I18n.get("plugins.config_button.update.desc",
+                        plugin.getDefinition().version,
+                        plugin.getUpdateDefinition().version));
             } else setVisible(false);
         }
 

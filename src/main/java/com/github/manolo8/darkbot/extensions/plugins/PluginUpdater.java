@@ -19,7 +19,6 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-//todoo i18n
 public class PluginUpdater {
 
     public final List<PluginException> UPDATING_EXCEPTIONS = new ArrayList<>();

@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.gui.components.MainButton;
+import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -12,10 +13,9 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-//todoo i18n
 public class PluginUpdateHeader extends JPanel {
 
-    private static final MessageFormat titleFormatter = new MessageFormat("Plugin Updates: {0} Last Checked: {1}");
+    private static final MessageFormat titleFormatter = new MessageFormat(I18n.get("plugins.config_button.update_header"));
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("EEE, d MMM, hh:mm a", Locale.ROOT);
     private String status;
 
@@ -32,7 +32,7 @@ public class PluginUpdateHeader extends JPanel {
 
         this.pluginUpdater = main.pluginUpdater;
         this.pluginHandler = main.pluginHandler;
-        this.status = !pluginUpdater.hasAnyUpdates() ? "You are all up to date, " : "";
+        this.status = !pluginUpdater.hasAnyUpdates() ? I18n.get("plugins.config_button.up_to_date") + " ," : "";
         this.title = new Title();
         this.progressBar = new JProgressBar();
         this.updateAllButton = new UpdateAllButton();
@@ -52,7 +52,7 @@ public class PluginUpdateHeader extends JPanel {
         progressBar.setVisible(false);
 
         checkUpdateButton.setEnabled(true);
-        status = !pluginUpdater.hasAnyUpdates() ? "You are all up to date" : "";
+        status = !pluginUpdater.hasAnyUpdates() ? I18n.get("plugins.config_button.up_to_date") + " ," : "";
         title.setText(titleFormatter.format(new Object[]{status, dateFormatter.format(pluginUpdater.getLastChecked())}));
     }
 
@@ -69,7 +69,7 @@ public class PluginUpdateHeader extends JPanel {
     private class CheckUpdateButton extends MainButton {
 
         private CheckUpdateButton() {
-            super("Check for updates");
+            super(I18n.get("plugins.config_button.check_updates"));
         }
 
         @Override
@@ -82,7 +82,7 @@ public class PluginUpdateHeader extends JPanel {
     private class UpdateAllButton extends MainButton {
 
         private UpdateAllButton() {
-            super("Update all");
+            super(I18n.get("plugins.config_button.update_all"));
             refresh();
         }
 
@@ -91,8 +91,10 @@ public class PluginUpdateHeader extends JPanel {
 
             StringBuilder toolTipText = new StringBuilder();
             pluginHandler.getAvailableUpdates()
-                    .map(pl -> pl.getName() + ": Current version: " + pl.getDefinition().version +
-                            " → New version: " + pl.getUpdateDefinition().version + "\n")
+                    .map(pl -> I18n.get("plugins.config_button.update_all.desc",
+                            pl.getName(),
+                            pl.getDefinition().version,
+                            pl.getUpdateDefinition().version))
                     .forEach(toolTipText::append);
 
             int length = toolTipText.length();

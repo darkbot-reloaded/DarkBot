@@ -190,7 +190,6 @@ public class PluginHandler {
         testCompatibility(plugin.getIssues(), plugin.getDefinition(), false);
     }
 
-    //todoo i18n
     void testCompatibility(IssueHandler issues, PluginDefinition pd, boolean isUpdate) {
         if (isUpdate && pd.download == null)
             issues.getIssues().add(NO_DOWNLOAD);
@@ -199,8 +198,7 @@ public class PluginHandler {
 
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
             issues.addFailure(I18n.get(isUpdate ? "plugins.update_issues.invalid_json" : "plugins.issues.invalid_json"),
-                    I18n.get(isUpdate ? "plugins.update_issues.invalid_json.desc" : "plugins.issues.invalid_json.desc",
-                            pd.minVersion, pd.supportedVersion));
+                    I18n.get("plugins.issues.invalid_json.desc", pd.minVersion, pd.supportedVersion));
 
         String supportedRange = "DarkBot v" + (pd.minVersion.compareTo(pd.supportedVersion) == 0 ?
                 pd.minVersion : pd.minVersion + "-v" + pd.supportedVersion);
