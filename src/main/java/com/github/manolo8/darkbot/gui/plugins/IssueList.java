@@ -13,20 +13,12 @@ import java.util.Arrays;
 
 class IssueList extends JPanel {
 
-    private IssueHandler[] issueHandlers;
+    private final IssueHandler[] issueHandlers;
 
-    IssueList(IssueHandler issues) {
-        super(new MigLayout("ins 0, gapx 5px, wrap 1", "[right]", "[top]"));
+    IssueList(boolean inline, IssueHandler... issues) {
+        super(new MigLayout((inline ? "ins 0, gapx 5px, " : "") + "wrap 1", "[right]", "[top]"));
 
-        setOpaque(false);
-        setupUI(issues);
-        issues.addListener(this::setupUI);
-    }
-
-    IssueList(IssueHandler... issues) {
-        super(new MigLayout("wrap 1", "[right]", "[top]"));
         this.issueHandlers = issues;
-
         setOpaque(false);
         setupUI();
         for (IssueHandler issue : issues) {
@@ -35,16 +27,12 @@ class IssueList extends JPanel {
     }
 
     private void setupUI() {
+        removeAll();
         Arrays.stream(this.issueHandlers)
                 .flatMap(issue -> issue.getIssues().stream())
                 .map(this::getError)
                 .forEachOrdered(this::add);
-    }
-
-    private void setupUI(IssueHandler issues) {
-        removeAll();
-        issues.getIssues().stream().map(this::getError).forEachOrdered(this::add);
-        setVisible(!issues.getIssues().isEmpty());
+        setVisible(getComponents().length > 0);
     }
 
     private JLabel getError(PluginIssue pluginIssue) {

@@ -52,7 +52,7 @@ public class PluginCard extends JPanel {
 
         add(progressBar, "dock south, spanx");
         add(progressLabel, "dock south, spanx, gapleft 5px");
-        add(new IssueList(plugin.getIssues(), plugin.getUpdateIssues()), "hidemode 2, dock east");
+        add(new IssueList(false, plugin.getIssues(), plugin.getUpdateIssues()), "hidemode 2, dock east");
         add(new PluginName(plugin.getDefinition(), updateButton), "dock north");
 
         featureRegistry.getFeatures(plugin).forEach(fd -> this.addFeature(main, fd));
@@ -104,7 +104,7 @@ public class PluginCard extends JPanel {
             add(new JLabel());
         }
         add(new FeatureCheckbox(feature));
-        add(new IssueList(feature.getIssues()), "hidemode 2, wrap");
+        add(new IssueList(true, feature.getIssues()), "hidemode 2, wrap");
     }
 
     private void setColor(IssueHandler issues) {

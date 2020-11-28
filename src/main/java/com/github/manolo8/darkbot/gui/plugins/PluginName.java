@@ -8,7 +8,7 @@ import java.awt.*;
 
 class PluginName extends JPanel {
 
-    PluginName(PluginDefinition definition, PluginCard.UpdateButton updateButton) {
+    PluginName(PluginDefinition definition, JButton updateButton) {
         super(new MigLayout("", "[]5px[]5px[]5px[grow][]"));
 
         JLabel name = new JLabel(definition.name);

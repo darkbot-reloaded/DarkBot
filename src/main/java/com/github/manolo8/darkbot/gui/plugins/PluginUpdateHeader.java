@@ -10,13 +10,17 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.stream.Collectors;
 
 public class PluginUpdateHeader extends JPanel {
 
-    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("EEE, d MMM, hh:mm a", Locale.ROOT);
+    // zone id required to format an Instant
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM)
+            .withZone(ZoneId.systemDefault());
 
     private final PluginUpdater pluginUpdater;
     private final PluginHandler pluginHandler;
@@ -50,8 +54,9 @@ public class PluginUpdateHeader extends JPanel {
         String status = !pluginUpdater.hasAnyUpdates()
                 ? I18n.get("plugins.config_button.up_to_date")
                 : I18n.get("plugins.config_button.out_of_date", getOutOfDateCount());
+        Instant lastUpdate = Instant.ofEpochMilli(pluginUpdater.getLastChecked());
         title.setText(I18n.get("plugins.config_button.update_header",
-                status, dateFormatter.format(pluginUpdater.getLastChecked())));
+                status, dateFormatter.format(lastUpdate)));
     }
 
     private long getOutOfDateCount() {

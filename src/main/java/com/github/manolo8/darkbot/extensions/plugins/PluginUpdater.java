@@ -73,7 +73,7 @@ public class PluginUpdater {
             protected Void doInBackground() {
                 for (Plugin plugin : pluginHandler.LOADED_PLUGINS) {
                     plugin.getUpdateIssues().getIssues()
-                            .removeIf(pl -> pl.getMessage().equals(I18n.get(DOWNLOAD_FAILED)));
+                            .removeIf(pl -> pl.getMessageKey().equals(DOWNLOAD_FAILED));
                     try {
                         checkUpdate(plugin);
                     } catch (IOException e) {

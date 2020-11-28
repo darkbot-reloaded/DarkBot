@@ -109,9 +109,9 @@ public class Main extends Thread implements PluginListener {
 
         this.pluginHandler.updatePluginsSync();
         this.pluginHandler.addListener(this);
-        this.pluginUpdater.scheduleUpdateChecker();
 
         this.form = new MainGui(this);
+        this.pluginUpdater.scheduleUpdateChecker();
 
         if (configManager.getConfigFailed())
             Popups.showMessageAsync("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
