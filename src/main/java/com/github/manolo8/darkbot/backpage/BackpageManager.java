@@ -102,7 +102,7 @@ public class BackpageManager extends Thread {
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
-                                .addWarning(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                                .addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
                     }
                 }
             }
