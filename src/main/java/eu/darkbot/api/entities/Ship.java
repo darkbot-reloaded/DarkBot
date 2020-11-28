@@ -1,13 +1,13 @@
 package eu.darkbot.api.entities;
 
-import eu.darkbot.api.entities.utils.Attackable;
+import eu.darkbot.api.entities.utils.Attacker;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.LocationInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public interface Ship extends Attackable {
+public interface Ship extends Attacker {
 
     /**
      * @return true if ship is invisible/cloaked.

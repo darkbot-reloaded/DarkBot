@@ -3,16 +3,8 @@ package eu.darkbot.api.entities.utils;
 import eu.darkbot.api.entities.Entity;
 import eu.darkbot.api.objects.Health;
 import eu.darkbot.api.objects.Info;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public interface Attackable extends Entity, Health, Info {
-
-    /**
-     * @return the target of this {@link Attackable} if present else {@code null}
-     */
-    @Nullable
-    Entity getTarget();
 
     /**
      * Check lock type for this {@link Attackable}
@@ -20,19 +12,6 @@ public interface Attackable extends Entity, Health, Info {
      * @return {@link Lock}
      */
     Lock getLockType();
-
-    /**
-     * @return true if attacks current target of this {@link Attackable}
-     * @see #getTarget()
-     */
-    boolean isAttacking();
-
-    /**
-     * Returns true if ship aims other ship by checking theirs angle.
-     *
-     * @see #getAngle()
-     */
-    boolean isAiming(@NotNull Attackable other);
 
     /**
      * @return speed of the {@link Attackable} in-game.

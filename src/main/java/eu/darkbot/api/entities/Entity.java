@@ -23,6 +23,12 @@ public interface Entity extends Locatable {
     long getAddress();
 
     /**
+     * @return true if and only if {@link Entity} is loaded in-game and isn't removed
+     * @see #isRemoved()
+     */
+    boolean isValid();
+
+    /**
      * Checks that entity is removed.
      * If (isRemoved() == true) then this entity wont be updated anymore.
      */

@@ -1,10 +1,9 @@
 package eu.darkbot.api.objects;
 
+/**
+ * Represents in-game {@link eu.darkbot.api.entities.Entity}'s location point.
+ */
 public interface LocationInfo extends Location {
-    /**
-     * @return true if current entity is loaded and valid.
-     */
-    boolean isLoaded();
 
     /**
      * @return true if current entity is moving.
@@ -12,7 +11,7 @@ public interface LocationInfo extends Location {
     boolean isMoving();
 
     /**
-     * @return speed of entity.
+     * @return speed of entity based on traveled distance.
      */
     double getSpeed();
 
@@ -25,9 +24,4 @@ public interface LocationInfo extends Location {
      * Calculates future destination of entity in time(ms)
      */
     Location destinationInTime(long time);
-
-    /**
-     * @return current {@link Location}
-     */
-    Location getLocation();
 }

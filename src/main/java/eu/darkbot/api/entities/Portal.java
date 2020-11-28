@@ -46,7 +46,7 @@ public interface Portal extends Entity {
         TOT(81),            ZETA_FROST(83), //Tunnel of Terror
 
         //?
-        INVISIBLE(18),
+        INVISIBLE(18), //4-5 center portal?
         BREACH(22),
         LOW_LEFT(77),
         HIGH_RIGHT(78);

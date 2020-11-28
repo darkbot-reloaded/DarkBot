@@ -3,6 +3,7 @@ package eu.darkbot.api.objects;
 import org.jetbrains.annotations.NotNull;
 
 public interface Location extends Locatable, Point {
+
     /**
      * @return the distance from the current point {@code (getX(), getY())}
      *         to the point {@code (ox, oy)}
