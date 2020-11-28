@@ -7,6 +7,8 @@ import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
+import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
+import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
@@ -14,6 +16,7 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.Locale;
 
 public class PluginCard extends JPanel {
@@ -28,9 +31,10 @@ public class PluginCard extends JPanel {
 
     private final JProgressBar progressBar;
     private final JLabel progressLabel;
-    private final PluginName.UpdateButton updateButton;
+    private final UpdateButton updateButton;
 
     private final Plugin plugin;
+    private final PluginUpdater pluginUpdater;
 
     PluginCard(Main main, Plugin plugin, FeatureRegistry featureRegistry) {
         super(new MigLayout("fillx, gapy 0, ins 0 0 5px 0", "5px[]0px[]10px[]10px[grow]", "[]"));
@@ -38,19 +42,18 @@ public class PluginCard extends JPanel {
         plugin.getIssues().addListener(this::setColor);
 
         this.plugin = plugin;
+        this.pluginUpdater = main.pluginUpdater;
         this.progressBar = new JProgressBar();
         this.progressLabel = new JLabel();
+        this.updateButton = new UpdateButton();
 
         progressBar.setVisible(false);
         progressBar.setBorderPainted(false);
 
-        PluginName name = new PluginName(plugin, main.pluginUpdater);
-        this.updateButton = name.getUpdateButton();
-
         add(progressBar, "dock south, spanx");
         add(progressLabel, "dock south, spanx, gapleft 5px");
         add(new IssueList(plugin.getIssues(), plugin.getUpdateIssues()), "hidemode 2, dock east");
-        add(name, "dock north");
+        add(new PluginName(plugin.getDefinition(), updateButton), "dock north");
 
         featureRegistry.getFeatures(plugin).forEach(fd -> this.addFeature(main, fd));
     }
@@ -127,5 +130,23 @@ public class PluginCard extends JPanel {
         super.paintComponent(g);
     }
 
+    class UpdateButton extends MainButton {
 
+        private UpdateButton() {
+            super(I18n.get("plugins.config_button.update"));
+
+            if (plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE) {
+                setVisible(true);
+                setToolTipText(I18n.get("plugins.config_button.update.desc",
+                        plugin.getDefinition().version,
+                        plugin.getUpdateDefinition().version));
+            } else setVisible(false);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            setEnabled(false);
+            pluginUpdater.update(plugin);
+        }
+    }
 }

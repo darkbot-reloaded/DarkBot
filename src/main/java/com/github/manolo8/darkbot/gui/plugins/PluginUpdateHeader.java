@@ -9,21 +9,18 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class PluginUpdateHeader extends JPanel {
 
-    private static final MessageFormat titleFormatter = new MessageFormat(I18n.get("plugins.config_button.update_header"));
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("EEE, d MMM, hh:mm a", Locale.ROOT);
-    private String status;
 
     private final PluginUpdater pluginUpdater;
     private final PluginHandler pluginHandler;
 
-    private final Title title;
+    private final JLabel title;
     private final JProgressBar progressBar;
     private final UpdateAllButton updateAllButton;
     private final CheckUpdateButton checkUpdateButton;
@@ -31,21 +28,17 @@ public class PluginUpdateHeader extends JPanel {
     PluginUpdateHeader(Main main) {
         super(new MigLayout("ins 0, gap 0, fill", "[grow][][]", "[][grow]"));
 
-        this.pluginUpdater = main.pluginUpdater;
         this.pluginHandler = main.pluginHandler;
-        this.status = !pluginUpdater.hasAnyUpdates() ? I18n.get("plugins.config_button.up_to_date") + " ," : "";
-        this.title = new Title();
-        this.progressBar = new JProgressBar();
-        this.updateAllButton = new UpdateAllButton();
-        this.checkUpdateButton = new CheckUpdateButton();
+        this.pluginUpdater = main.pluginUpdater;
 
-        progressBar.setVisible(false);
+        add(this.title = new JLabel());
+        add(this.updateAllButton = new UpdateAllButton());
+        add(this.checkUpdateButton = new CheckUpdateButton());
+        add(this.progressBar = new JProgressBar(), "dock south, spanx");
+
         progressBar.setBorderPainted(false);
 
-        add(title);
-        add(updateAllButton);
-        add(checkUpdateButton);
-        add(progressBar, "dock south, spanx");
+        refreshUI();
     }
 
     void refreshUI() {
@@ -53,18 +46,15 @@ public class PluginUpdateHeader extends JPanel {
         progressBar.setVisible(false);
 
         checkUpdateButton.setEnabled(true);
-        status = !pluginUpdater.hasAnyUpdates() ? I18n.get("plugins.config_button.up_to_date") + " ," : "";
-        title.setText(titleFormatter.format(new Object[]{status, dateFormatter.format(pluginUpdater.getLastChecked())}));
+        String status = !pluginUpdater.hasAnyUpdates()
+                ? I18n.get("plugins.config_button.up_to_date")
+                : I18n.get("plugins.config_button.updates_available", pluginHandler.getAvailableUpdates().count());
+        title.setText(I18n.get("plugins.config_button.update_header",
+                status, dateFormatter.format(pluginUpdater.getLastChecked())));
     }
 
     public JProgressBar getProgressBar() {
         return progressBar;
-    }
-
-    private class Title extends JLabel {
-        private Title() {
-            super(titleFormatter.format(new Object[]{status, dateFormatter.format(pluginUpdater.getLastChecked())}));
-        }
     }
 
     private class CheckUpdateButton extends MainButton {

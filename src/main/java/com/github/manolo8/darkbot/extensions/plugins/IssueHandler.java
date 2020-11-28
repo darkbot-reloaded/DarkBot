@@ -46,12 +46,11 @@ public class IssueHandler {
     }
 
     public void add(PluginIssue issue) {
-        issues.add(issue);
+        if (this.issues.add(issue)) listener.send(this);
     }
 
     public void add(String messageKey, String description, PluginIssue.Level level) {
-        if (this.issues.add(new PluginIssue(messageKey, description, level)))
-            listener.send(this);
+        add(new PluginIssue(messageKey, description, level));
     }
 
     public void addListener(Consumer<IssueHandler> listener) {

@@ -9,28 +9,36 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.stream.Stream;
+import java.util.Arrays;
 
 class IssueList extends JPanel {
+
+    private IssueHandler[] issueHandlers;
 
     IssueList(IssueHandler issues) {
         super(new MigLayout("ins 0, gapx 5px, wrap 1", "[right]", "[top]"));
 
-        setup(issues);
+        setOpaque(false);
+        setupUI(issues);
+        issues.addListener(this::setupUI);
     }
 
     IssueList(IssueHandler... issues) {
         super(new MigLayout("wrap 1", "[right]", "[top]"));
-        IssueHandler issueHandler = new IssueHandler();
-        Stream.of(issues).flatMap(issue -> issue.getIssues().stream()).forEach(issueHandler::add);
+        this.issueHandlers = issues;
 
-        setup(issueHandler);
+        setOpaque(false);
+        setupUI();
+        for (IssueHandler issue : issues) {
+            issue.addListener(h -> this.setupUI());
+        }
     }
 
-    private void setup(IssueHandler issue) {
-        setOpaque(false);
-        setupUI(issue);
-        issue.addListener(this::setupUI);
+    private void setupUI() {
+        Arrays.stream(this.issueHandlers)
+                .flatMap(issue -> issue.getIssues().stream())
+                .map(this::getError)
+                .forEachOrdered(this::add);
     }
 
     private void setupUI(IssueHandler issues) {
