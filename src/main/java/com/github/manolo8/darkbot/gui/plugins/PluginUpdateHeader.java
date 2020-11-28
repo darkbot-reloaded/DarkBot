@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.gui.components.MainButton;
@@ -48,9 +49,16 @@ public class PluginUpdateHeader extends JPanel {
         checkUpdateButton.setEnabled(true);
         String status = !pluginUpdater.hasAnyUpdates()
                 ? I18n.get("plugins.config_button.up_to_date")
-                : I18n.get("plugins.config_button.updates_available", pluginHandler.getAvailableUpdates().count());
+                : I18n.get("plugins.config_button.out_of_date", getOutOfDateCount());
         title.setText(I18n.get("plugins.config_button.update_header",
                 status, dateFormatter.format(pluginUpdater.getLastChecked())));
+    }
+
+    private long getOutOfDateCount() {
+        return pluginHandler.LOADED_PLUGINS.stream()
+                .filter(pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE ||
+                        pl.getUpdateStatus() == Plugin.UpdateStatus.INCOMPATIBLE ||
+                        pl.getUpdateStatus() == Plugin.UpdateStatus.FAILED).count();
     }
 
     public JProgressBar getProgressBar() {
