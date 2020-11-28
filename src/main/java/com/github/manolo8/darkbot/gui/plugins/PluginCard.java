@@ -17,7 +17,10 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.font.TextAttribute;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Map;
 
 public class PluginCard extends JPanel {
 
@@ -50,8 +53,8 @@ public class PluginCard extends JPanel {
         progressBar.setVisible(false);
         progressBar.setBorderPainted(false);
 
-        add(progressBar, "dock south, spanx");
-        add(progressLabel, "dock south, spanx, gapleft 5px");
+        add(progressBar, "hidemode 2, dock south, spanx");
+        add(progressLabel, "hidemode 2, dock south, spanx, gapleft 5px");
         add(new IssueList(false, plugin.getIssues(), plugin.getUpdateIssues()), "hidemode 2, dock east");
         add(new PluginName(plugin.getDefinition(), updateButton), "dock north");
 
@@ -130,17 +133,23 @@ public class PluginCard extends JPanel {
         super.paintComponent(g);
     }
 
+    private static final Map<TextAttribute, Object> UNDERLINE =
+            Collections.singletonMap(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+
     class UpdateButton extends MainButton {
 
         private UpdateButton() {
             super(I18n.get("plugins.config_button.update"));
 
-            if (plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE) {
-                setVisible(true);
+            setVisible(plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE);
+            if (plugin.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE)
                 setToolTipText(I18n.get("plugins.config_button.update.desc",
-                        plugin.getDefinition().version,
-                        plugin.getUpdateDefinition().version));
-            } else setVisible(false);
+                        plugin.getDefinition().version, plugin.getUpdateDefinition().version));
+
+            // Display as a link, blue & underlined plain-text
+            setContentAreaFilled(false);
+            setForeground(UIManager.getColor("Component.linkColor"));
+            setFont(getFont().deriveFont(UNDERLINE));
         }
 
         @Override

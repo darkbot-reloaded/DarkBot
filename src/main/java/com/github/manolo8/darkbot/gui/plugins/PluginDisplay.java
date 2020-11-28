@@ -24,7 +24,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
     private PluginUpdateHeader header;
 
     public PluginDisplay() {
-        super(new MigLayout("wrap 1, fillx", "[fill]", ""));
+        super(new MigLayout("ins 0, gap 0, wrap 1, fillx", "[fill]", ""));
         setBorder(BorderFactory.createEmptyBorder());
     }
 

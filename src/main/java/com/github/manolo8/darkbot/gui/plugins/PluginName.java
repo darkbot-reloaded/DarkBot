@@ -8,8 +8,8 @@ import java.awt.*;
 
 class PluginName extends JPanel {
 
-    PluginName(PluginDefinition definition, JButton updateButton) {
-        super(new MigLayout("", "[]5px[]5px[]5px[grow][]"));
+    PluginName(PluginDefinition definition, JComponent updateButton) {
+        super(new MigLayout("", "[]5px[]5px[]5px[]20px[]"));
 
         JLabel name = new JLabel(definition.name);
         Font baseFont = name.getFont();
@@ -27,7 +27,7 @@ class PluginName extends JPanel {
         add(version);
         add(by);
         add(author);
-        add(updateButton, "hidemode 2");
+        add(updateButton, "hidemode 2, height 16!");
         setOpaque(false);
     }
 

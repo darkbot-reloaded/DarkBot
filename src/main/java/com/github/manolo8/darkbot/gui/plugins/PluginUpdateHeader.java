@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.gui.components.MainButton;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
@@ -36,11 +37,12 @@ public class PluginUpdateHeader extends JPanel {
         this.pluginHandler = main.pluginHandler;
         this.pluginUpdater = main.pluginUpdater;
 
-        add(this.title = new JLabel());
-        add(this.updateAllButton = new UpdateAllButton());
+        add(this.title = new JLabel(), "grow");
+        add(this.updateAllButton = new UpdateAllButton(), "hidemode 2");
         add(this.checkUpdateButton = new CheckUpdateButton());
-        add(this.progressBar = new JProgressBar(), "dock south, spanx");
+        add(this.progressBar = new JProgressBar(), "hidemode 2, dock south, spanx");
 
+        title.setBorder(UIUtils.getBorderWithInsets(true));
         progressBar.setBorderPainted(false);
 
         refreshUI();
