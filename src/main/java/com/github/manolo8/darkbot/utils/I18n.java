@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 public class I18n {
 
+    private static final Object[] EMPTY = {};
     public static final List<Locale> SUPPORTED_LOCALES = Stream.of(
             "bg", "cs", "de", "el", "en", "es", "fr", "hu", "it", "pl", "pt", "ro", "ru", "tr", "uk"
     ).map(Locale::new).sorted(Comparator.comparing(Locale::getDisplayName)).collect(Collectors.toList());
@@ -55,24 +56,36 @@ public class I18n {
 
     private I18n() {}
 
-    public static String get(String key) {
+    private static String getInternal(String key) {
         if (key == null) throw new IllegalArgumentException("Translation key must not be null");
         String res = (String) props.get(key);
         return res != null ? res : "Missing " + key;
     }
 
-    public static String getOrDefault(String key, String fallback) {
+    private static String getOrDefaultInternal(String key, String fallback) {
         if (key == null) return fallback;
         String res = (String) props.get(key);
         return res != null ? res : fallback;
     }
 
+    public static String get(String key) {
+        return MessageFormat.format(getInternal(key), EMPTY);
+    }
+
     public static String get(String key, Object... arguments) {
-        return MessageFormat.format(get(key), arguments);
+        return MessageFormat.format(getInternal(key), arguments);
+    }
+
+    private static String getOrDefault(String key, String fallback) {
+        String text = getOrDefaultInternal(key, fallback);
+        if (text == null) return null;
+        return MessageFormat.format(text, EMPTY);
     }
 
     public static String getOrDefault(String key, String fallback, Object... arguments) {
-        return MessageFormat.format(getOrDefault(key, fallback), arguments);
+        String text = getOrDefaultInternal(key, fallback);
+        if (text == null) return null;
+        return MessageFormat.format(text, arguments);
     }
 
 }
