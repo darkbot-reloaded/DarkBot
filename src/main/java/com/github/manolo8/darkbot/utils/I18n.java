@@ -76,7 +76,7 @@ public class I18n {
         return MessageFormat.format(getInternal(key), arguments);
     }
 
-    private static String getOrDefault(String key, String fallback) {
+    public static String getOrDefault(String key, String fallback) {
         String text = getOrDefaultInternal(key, fallback);
         if (text == null) return null;
         return MessageFormat.format(text, EMPTY);
