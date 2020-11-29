@@ -6,6 +6,7 @@ import eu.darkbot.api.API;
  * API to get info about hero statistics, running time, current/earned money etc.
  */
 public interface StatsAPI extends API {
+
     /**
      * @return current hero level
      */

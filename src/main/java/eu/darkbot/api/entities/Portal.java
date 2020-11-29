@@ -2,7 +2,8 @@ package eu.darkbot.api.entities;
 
 import eu.darkbot.api.entities.utils.Map;
 import eu.darkbot.api.objects.Info;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 /**
  * Represent in-game portal {@link Entity}
@@ -12,8 +13,7 @@ public interface Portal extends Entity {
     /**
      * @return destination {@link Map} of this {@link Portal}
      */
-    @Nullable
-    Map getTargetMap();
+    Optional<Map> getTargetMap();
 
     /**
      * Portal type id in generally is id of the portal's graphic.

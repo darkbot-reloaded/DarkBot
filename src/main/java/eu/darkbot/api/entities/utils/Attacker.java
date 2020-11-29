@@ -21,6 +21,8 @@ public interface Attacker extends Attackable {
      */
     boolean isAttacking();
 
+    boolean isAttacking(Attackable other);
+
     /**
      * @return true if ship aims {code other} by checking theirs angle
      * @see #getAngle()

@@ -42,11 +42,11 @@ public interface Entity extends Locatable {
     /**
      * Selects this entity as the target, can instantly attempt to attack with {@code attack} flag.
      *
-     * @param attack instant attempt to attack this entity
+     * @param tryAttack instant attempt to attack this entity
      * @return true on successful select
      */
 
-    boolean trySelect(boolean attack);
+    boolean trySelect(boolean tryAttack);
 
     /**
      * @return {@link LocationInfo}

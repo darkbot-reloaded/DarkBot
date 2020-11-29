@@ -4,17 +4,18 @@ public interface Module {
 
     void onTickModule();
 
-    void onStoppedModule();
+    default void onStoppedModule() {
+    }
 
     default boolean canRefresh() {
         return true;
     }
 
-    default String status() {
+    default String getStatus() {
         return null;
     }
 
-    default String onStoppedStatus() {
+    default String getStoppedStatus() {
         return null;
     }
 }

@@ -1,6 +1,7 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
+import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.utils.Area;
 import eu.darkbot.api.entities.utils.Map;
 import eu.darkbot.api.utils.Listener;
@@ -70,6 +71,11 @@ public interface StarAPI extends API {
      * @see Listener
      */
     Listener<Map> addMapChangeListener(Listener<Map> onMapChange);
+
+    /**
+     * @return best {@link Portal} which leads to {@code targetMap}
+     */
+    Portal findNext(Map targetMap);
 
     class MapNotFoundException extends Exception {
         public MapNotFoundException(int mapId) {

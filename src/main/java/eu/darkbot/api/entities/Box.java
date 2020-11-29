@@ -18,6 +18,8 @@ public interface Box extends Entity {
      */
     String getTypeName();
 
+    Box.Info getInfo();
+
     /**
      * @return true if box is collected or
      * there was a try to collect it and currently is in timer.
@@ -25,14 +27,30 @@ public interface Box extends Entity {
      */
     boolean isCollected();
 
+    boolean tryCollect();
+
+    /**
+     * Makes box being collected for x amount of time * amount of collect tries.
+     */
+    void setCollected();
+
+    /**
+     * @return amount of collect retries
+     */
+    int getRetries();
+
     /**
      * @return time until box is marked as collected
      */
     @Nullable
     Instant isCollectedUntil();
 
-    /**
-     * Makes box being collected for x amount of time * amount of collect tries.
-     */
-    void setCollected();
+    interface Info {
+
+        boolean shouldCollect();
+
+        int getWaitTime();
+
+        int getPriority();
+    }
 }

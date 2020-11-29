@@ -8,8 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface MovementAPI extends API {
+
     /**
-     * Tries to jump through portal.
+     * Tries to move to and jump through portal.
      *
      * @param portal to jump through
      * @return true if jump button was clicked
@@ -43,6 +44,14 @@ public interface MovementAPI extends API {
      * and omits `avoided zones`
      */
     void moveRandom();
+
+    /**
+     * Tries to move random around a location with given radius
+     *
+     * @param loc {@link Locatable} to move random
+     * @param radius of the circle to move random
+     */
+    void moveRandom(Locatable loc, double radius);
 
     /**
      * Stops ship, removes destination path.

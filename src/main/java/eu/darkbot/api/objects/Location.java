@@ -4,9 +4,16 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Location extends Locatable, Point {
 
+    static Location of(double x, double y) {
+        return new com.github.manolo8.darkbot.core.utils.Location(x, y);
+    }
+
+    static Location of(Locatable loc, double angle, double radius) {
+        return Location.of(loc.getX() - Math.cos(angle) * radius, loc.getY() - Math.sin(angle) * radius);
+    }
+
     /**
-     * @return the distance from the current point {@code (getX(), getY())}
-     *         to the point {@code (ox, oy)}
+     * @return the distance between current {@link Location} and other.
      */
     default double distanceTo(double ox, double oy) {
         ox -= getX();
