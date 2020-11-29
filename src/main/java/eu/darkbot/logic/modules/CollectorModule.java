@@ -2,20 +2,29 @@ package eu.darkbot.logic.modules;
 
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Box;
+import eu.darkbot.api.entities.Entity;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.Ship;
-import eu.darkbot.api.managers.*;
+import eu.darkbot.api.managers.EntitiesAPI;
+import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.api.managers.MovementAPI;
+import eu.darkbot.api.managers.PetAPI;
+import eu.darkbot.api.managers.StarAPI;
+import eu.darkbot.api.managers.StatsAPI;
+import eu.darkbot.api.managers.WindowAPI;
 import eu.darkbot.api.objects.Location;
 import eu.darkbot.api.plugin.Feature;
 import eu.darkbot.api.plugin.Inject;
 import eu.darkbot.api.plugin.Module;
 import eu.darkbot.config.ConfigAPI;
 import eu.darkbot.logic.SafetyFinder;
+import eu.darkbot.utils.Time;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
-import static com.github.manolo8.darkbot.Main.API;
 import static java.lang.Math.cos;
 import static java.lang.StrictMath.sin;
 
@@ -29,6 +38,7 @@ public class CollectorModule implements Module {
     protected final StarAPI star;
     protected final StatsAPI stats;
     protected final ConfigAPI config;
+    protected final WindowAPI window;
     protected final PluginAPI pluginAPI;
     protected final MovementAPI movement;
 
@@ -37,7 +47,7 @@ public class CollectorModule implements Module {
     protected final Collection<Box> boxes;
     protected final Collection<Ship> ships;
     protected final Collection<Portal> portals;
-
+    protected final Map<Integer, String> attackers = new HashMap<>();
     public Box currentBox;
     protected long refreshing;
     private long invisibleUntil, waitingUntil;
@@ -48,6 +58,7 @@ public class CollectorModule implements Module {
                            StarAPI star,
                            StatsAPI stats,
                            ConfigAPI config,
+                           WindowAPI window,
                            PluginAPI pluginAPI,
                            MovementAPI movement,
                            EntitiesAPI entities) {
@@ -56,6 +67,7 @@ public class CollectorModule implements Module {
         this.star = star;
         this.stats = stats;
         this.config = config;
+        this.window = window;
         this.pluginAPI = pluginAPI;
         this.movement = movement;
 
@@ -107,27 +119,23 @@ public class CollectorModule implements Module {
     }
 
     protected boolean checkMap() {
-        if (this.config.GENERAL.WORKING_MAP != this.star.getCurrentMap().getId() && !portals.isEmpty()) {
+        if (!portals.isEmpty() && config.GENERAL.WORKING_MAP != star.getCurrentMap().getId()) {
             this.pluginAPI.setModule(new MapModule(pluginAPI, star.getOrCreateMapById(config.GENERAL.WORKING_MAP)));
             return false;
         }
+
         return true;
     }
 
     public void findBox() {
-        Location heroLoc = hero.getLocationInfo();
-
         Box best = boxes
                 .stream()
                 .filter(this::canCollect)
                 .min(Comparator.<Box>comparingInt(b -> b.getInfo().getPriority())
-                        .thenComparingDouble(heroLoc::distanceTo)).orElse(null);
+                        .thenComparingDouble(hero.getLocationInfo()::distanceTo)).orElse(null);
 
-        this.currentBox = currentBox == null ||
-                best == null ||
-                currentBox.isCollected() ||
-                isBetter(best) ?
-                best : currentBox;
+        this.currentBox = currentBox == null || best == null || currentBox.isCollected() || isBetter(best)
+                ? best : currentBox;
     }
 
     protected boolean canCollect(Box box) {
@@ -139,7 +147,6 @@ public class CollectorModule implements Module {
     }
 
     public boolean tryCollectNearestBox() {
-
         if (currentBox != null) {
             collectBox();
             return true;
@@ -149,13 +156,15 @@ public class CollectorModule implements Module {
     }
 
     protected void collectBox() {
+
         double distance = hero.getLocationInfo().distanceTo(currentBox);
 
         if (distance < 200) {
-            movement.stop(false);
-
-            if (currentBox.tryCollect())
-                currentBox.setCollected();
+            //movement.stop(false);
+            if (!hero.hasEffect(Entity.Effect.BOX_COLLECTING)
+                    || hero.getLocationInfo().distanceTo(currentBox) == 0)
+                currentBox.tryCollect();
+            else return;
 
             waitingUntil = System.currentTimeMillis()
                     + currentBox.getInfo().getWaitTime()
@@ -168,9 +177,7 @@ public class CollectorModule implements Module {
 
     protected void checkDangerous() {
         if (config.COLLECT.STAY_AWAY_FROM_ENEMIES) {
-
             Location dangerous = findClosestEnemyAndAddToDangerousList();
-
             if (dangerous != null) stayAwayFromLocation(dangerous);
         }
     }
@@ -180,61 +187,42 @@ public class CollectorModule implements Module {
                 && !hero.isInvisible()
                 && System.currentTimeMillis() - invisibleUntil > 60000) {
             invisibleUntil = System.currentTimeMillis();
-            API.keyboardClick(config.COLLECT.AUTO_CLOACK_KEY);
+            window.keyClick(config.COLLECT.AUTO_CLOACK_KEY); //TODO replace with keybinds
         }
     }
 
     protected void stayAwayFromLocation(Location awayLocation) {
-
-        Location heroLocation = hero.getLocationInfo();
-
-        double angle = awayLocation.angleTo(heroLocation);
+        double angle = awayLocation.angleTo(hero);
         double moveDistance = hero.getSpeed();
         double distance = DISTANCE_FROM_DANGEROUS + 100;
 
         Location target = Location.of(awayLocation, angle, distance);
-
-        moveDistance = moveDistance - target.distanceTo(heroLocation);
+        moveDistance = moveDistance - target.distanceTo(hero);
 
         if (moveDistance > 0) {
-
             angle += moveDistance / 3000;
             target.setTo(awayLocation.getX() - cos(angle) * distance,
                     awayLocation.getY() - sin(angle) * distance);
-
         }
 
         movement.moveTo(target);
     }
 
     protected Location findClosestEnemyAndAddToDangerousList() {
-        for (Ship ship : ships) {
-            if (ship.isEnemy()
-                    && !ship.isInvisible()
-                    && ship.getLocationInfo().distanceTo(hero) < DISTANCE_FROM_DANGEROUS) {
-
-                if (ship instanceof com.github.manolo8.darkbot.core.entities.Ship) {
-                    com.github.manolo8.darkbot.core.entities.Ship ship1 = (com.github.manolo8.darkbot.core.entities.Ship) ship;
-
-                    if (ship1.isInTimer()) {
-                        return ship.getLocationInfo();
-                    } else if (ship.isAttacking(hero)) {
-                        ship1.setTimerTo(config.GENERAL.RUNNING.REMEMBER_ENEMIES_FOR * 1000L);
-                        return ship.getLocationInfo();
-                    }
-                }
-            }
-        }
-
-        return null;
+        return ships.stream()
+                .filter(ship -> ship.isBlacklisted() || (ship.isAttacking(hero)
+                        && ship.markBlacklisted((long) config.GENERAL.RUNNING.REMEMBER_ENEMIES_FOR * Time.SECOND)))
+                .peek(ship -> attackers.put(ship.getId(), ship.getUsername()))
+                .filter(ship -> ship.isEnemy() && !ship.isInvisible()
+                        && ship.getLocationInfo().distanceTo(hero) < DISTANCE_FROM_DANGEROUS)
+                .map(Entity::getLocationInfo)
+                .min(Comparator.comparingDouble(location -> location.distanceTo(hero)))
+                .orElse(null);
     }
 
     private boolean isBetter(Box box) {
-
         double currentDistance = currentBox.getLocationInfo().distanceTo(hero);
-        double newDistance = box.getLocationInfo().distanceTo(hero);
-
-        return currentDistance > 100 && currentDistance - 150 > newDistance;
+        return currentDistance > 100 && currentDistance - 150 > box.getLocationInfo().distanceTo(hero);
     }
 
     protected boolean isContested(Box box) {

@@ -30,6 +30,14 @@ public interface Ship extends Attacker {
     Optional<LocationInfo> getDestination();
 
     /**
+     * Adds this {@link Ship} to blacklist for give time in milliseconds.
+     * @param forTime time in milliseconds
+     */
+    boolean markBlacklisted(long forTime);
+
+    boolean isBlacklisted();
+
+    /**
      * Calculates needed time to travel given distance.
      *
      * @return time in milliseconds needed to travel given distance

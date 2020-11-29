@@ -100,6 +100,8 @@ public interface Entity extends Locatable {
         PET_SPAWN(2),
         ENERGY_LEECH(11),
         NPC_ISH(16),
+        BOX_COLLECTING(20),
+        BOOTY_COLLECTING(21),
         DRAW_FIRE(36),
         ISH(84),
         STICKY_BOMB(56),
