@@ -18,11 +18,6 @@ public interface Entity extends Locatable {
     int getId();
 
     /**
-     * @return memory address of {@link Entity} object
-     */
-    long getAddress();
-
-    /**
      * @return true if and only if {@link Entity} is loaded in-game and isn't removed
      * @see #isRemoved()
      */
@@ -40,10 +35,10 @@ public interface Entity extends Locatable {
     boolean isSelectable();
 
     /**
-     * Selects this entity as the target, can instantly attempt to attack with {@code attack} flag.
+     * Selects this entity as the target in-game, can instantly attempt to attack with {@code attack} flag.
      *
      * @param tryAttack instant attempt to attack this entity
-     * @return true on successful select
+     * @return true on successful selection
      */
 
     boolean trySelect(boolean tryAttack);

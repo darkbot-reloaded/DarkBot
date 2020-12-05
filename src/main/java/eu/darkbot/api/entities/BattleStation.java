@@ -10,8 +10,8 @@ public interface BattleStation extends Zone, Obstacle, Attackable {
     /**
      * BattleStation's module
      */
-    interface Module extends Zone, Obstacle, Attackable {
+    interface Module extends Zone, Obstacle, Attackable /*should be attacker but...*/ {
 
-        String getAssetId();
+        String getModuleId();
     }
 }

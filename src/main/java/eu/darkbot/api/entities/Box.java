@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 
 public interface Box extends Entity {
+
     /**
      * Hash is generated on server.
      * Hash remains the same for entire box life.
@@ -18,7 +19,10 @@ public interface Box extends Entity {
      */
     String getTypeName();
 
-    Box.Info getInfo();
+    /**
+     * @return {@link Info} with some settings for {@link Box}
+     */
+    Info getInfo();
 
     /**
      * @return true if box is collected or
@@ -45,6 +49,9 @@ public interface Box extends Entity {
     @Nullable
     Instant isCollectedUntil();
 
+    /**
+     * Predefined settings for {@link Box} customized by user.
+     */
     interface Info {
 
         boolean shouldCollect();

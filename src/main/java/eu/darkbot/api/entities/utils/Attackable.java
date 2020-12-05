@@ -14,16 +14,6 @@ public interface Attackable extends Entity, Health, Info {
     Lock getLockType();
 
     /**
-     * @return speed of the {@link Attackable} in-game.
-     */
-    int getSpeed();
-
-    /**
-     * @return angle of the {@link Attackable} in-game as radians.
-     */
-    double getAngle();
-
-    /**
      * Represents lock types in-game.
      */
     enum Lock {

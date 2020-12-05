@@ -23,7 +23,7 @@ public @interface Feature {
     String description();
 
     /**
-     * Should feature be enabled by default?
+     * Should {@link Feature} be enabled by default.
      */
     boolean enabledByDefault() default false;
 }

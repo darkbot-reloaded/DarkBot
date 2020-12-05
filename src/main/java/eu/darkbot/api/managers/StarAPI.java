@@ -86,5 +86,4 @@ public interface StarAPI extends API {
             super("Map " + mapName + " was not found");
         }
     }
-
 }

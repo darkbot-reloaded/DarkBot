@@ -1,7 +1,6 @@
 package eu.darkbot.api.entities.utils;
 
 import eu.darkbot.api.entities.Entity;
-import eu.darkbot.api.objects.Locatable;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -21,11 +20,9 @@ public interface Attacker extends Attackable {
      */
     boolean isAttacking();
 
-    boolean isAttacking(Attackable other);
-
     /**
-     * @return true if ship aims {code other} by checking theirs angle
-     * @see #getAngle()
+     * @param other {@link Attackable} to check
+     * @return true if attacks {@code other}
      */
-    boolean isAiming(Locatable other);
+    boolean isAttacking(Attackable other);
 }

@@ -24,4 +24,11 @@ public interface LocationInfo extends Location {
      * Calculates future destination of entity in time(ms)
      */
     Location destinationInTime(long time);
+
+    /**
+     * @return previous {@link Location} of this {@link LocationInfo}
+     */
+    Location getLast();
+
+    Location getPast();
 }

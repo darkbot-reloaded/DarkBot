@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 public interface MovementAPI extends API {
 
     /**
-     * Tries to move to and jump through portal.
+     * Tries to move to and jump through given {@link Portal}.
      *
      * @param portal to jump through
      * @return true if jump button was clicked

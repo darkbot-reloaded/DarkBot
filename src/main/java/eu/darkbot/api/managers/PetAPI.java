@@ -3,7 +3,7 @@ package eu.darkbot.api.managers;
 import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Pet;
 import eu.darkbot.api.objects.Gui;
-import eu.darkbot.api.objects.LocationInfo;
+import eu.darkbot.api.objects.Location;
 import eu.darkbot.api.utils.ItemNotEquippedException;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,10 +61,10 @@ public interface PetAPI extends Gui, Pet, API {
     }
 
     /**
-     * @return {@link LocationInfo} of pet locator target
+     * @return {@link Location} of pet locator target
      * or else {@link Optional#empty()} if theres none.
      */
-    Optional<LocationInfo> getLocatorNpcLoc();
+    Optional<Location> getLocatorNpcLoc();
 
     /**
      * Checks if pet has the given {@link Pet.Cooldown},

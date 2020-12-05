@@ -33,7 +33,7 @@ public interface Item {
     Optional<Slot> getSlot();
 
     /**
-     * @return id of the item
+     * @return id of the {@link Item}
      */
     String getId();
 

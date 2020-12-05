@@ -66,6 +66,7 @@ public interface HeroAPI extends Ship, API {
      */
     interface Mode {
 
+        // TODO
         static Mode of(int config, Ship.Formation formation) {
             //return new ShipConfig(config, formation);
             return null;

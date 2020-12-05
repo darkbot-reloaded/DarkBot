@@ -16,12 +16,9 @@ public interface EntitiesAPI extends API {
     Collection<Obstacle> getObstacles();
 
     /**
-     * Use {@code Entity.class} to get {@link Collection} of all entities.
-     *
-     * @param entityType to get collection of
-     * @return {@link Collection} of given entity type
+     * @return reference to {@link Collection} of all entities
      */
-    <T extends Entity> Collection<T> getEntities(Class<T> entityType);
+    Collection<Entity> getAllEntities();
 
     /**
      * @return {@link Collection} of unknown entities
@@ -29,9 +26,18 @@ public interface EntitiesAPI extends API {
     Collection<Entity> getUnknownEntities();
 
     /**
+     * Use {@code Entity.class} to get {@link Collection} of all entities.
+     *
+     * @param entityType to get collection of
+     * @return {@link Collection} of given entity type
+     */
+    <T extends Entity>
+    Collection<T> getEntities(Class<T> entityType);
+
+    /**
      * Adds listeners on create or remove of the {@link Entity}
      * <p>
-     * Remember to store references for give listeners!
+     * Remember to store references for given listeners!
      * Otherwise they will be garbage collected.
      *
      * @param onCreate {@link Listener} which can be null

@@ -1,9 +1,11 @@
 package eu.darkbot;
 
+import com.formdev.flatlaf.FlatLaf;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.API;
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.plugin.Module;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DarkBot extends Main implements PluginAPI {
+public class DarkBot extends Main implements PluginAPI, BotAPI {
 
     private final Map<Class<? extends API>, API> apis = new HashMap<>();
 
@@ -24,18 +26,18 @@ public class DarkBot extends Main implements PluginAPI {
     @Override
     @Nullable
     @SuppressWarnings("unchecked")
-    public <T extends eu.darkbot.api.API> T getAPI(@NotNull Class<T> api) {
-        return (T) apis.get(api);
+    public <T extends eu.darkbot.api.API> T getAPI(@NotNull Class<T> clazz) {
+        return (T) apis.get(clazz);
     }
 
     @Override
     @NotNull
-    public <T extends eu.darkbot.api.API> T requireAPI(@NotNull Class<T> api) throws UnsupportedOperationException {
-        T theApi = getAPI(api);
-        if (theApi == null)
-            throw new UnsupportedOperationException("API " + api.getName() + " not supported!");
+    public <T extends eu.darkbot.api.API> T requireAPI(@NotNull Class<T> clazz) throws UnsupportedOperationException {
+        T api = getAPI(clazz);
+        if (api == null)
+            throw new UnsupportedOperationException("API " + clazz.getName() + " not supported!");
 
-        return theApi;
+        return api;
     }
 
     @Override
@@ -47,6 +49,11 @@ public class DarkBot extends Main implements PluginAPI {
     // TODO: 29.11.2020
     public Module setModule(@NotNull Module module) {
         return (this.module = module);
+    }
+
+    @Override
+    public void setTheme(FlatLaf theme) {
+
     }
 
     @Override

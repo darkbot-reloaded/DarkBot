@@ -5,6 +5,7 @@ import eu.darkbot.api.entities.Box;
 import eu.darkbot.api.entities.Entity;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.Ship;
+import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.MovementAPI;
@@ -33,6 +34,7 @@ public class CollectorModule implements Module {
 
     protected static final int DISTANCE_FROM_DANGEROUS = 1500;
 
+    protected final BotAPI bot;
     protected final PetAPI pet;
     protected final HeroAPI hero;
     protected final StarAPI star;
@@ -53,7 +55,8 @@ public class CollectorModule implements Module {
     private long invisibleUntil, waitingUntil;
 
     @Inject
-    public CollectorModule(PetAPI pet,
+    public CollectorModule(BotAPI bot,
+                           PetAPI pet,
                            HeroAPI hero,
                            StarAPI star,
                            StatsAPI stats,
@@ -62,6 +65,7 @@ public class CollectorModule implements Module {
                            PluginAPI pluginAPI,
                            MovementAPI movement,
                            EntitiesAPI entities) {
+        this.bot = bot;
         this.pet = pet;
         this.hero = hero;
         this.star = star;
@@ -120,7 +124,7 @@ public class CollectorModule implements Module {
 
     protected boolean checkMap() {
         if (!portals.isEmpty() && config.GENERAL.WORKING_MAP != star.getCurrentMap().getId()) {
-            this.pluginAPI.setModule(new MapModule(pluginAPI, star.getOrCreateMapById(config.GENERAL.WORKING_MAP)));
+            this.bot.setModule(new MapModule(pluginAPI, star.getOrCreateMapById(config.GENERAL.WORKING_MAP)));
             return false;
         }
 
@@ -211,7 +215,7 @@ public class CollectorModule implements Module {
     protected Location findClosestEnemyAndAddToDangerousList() {
         return ships.stream()
                 .filter(ship -> ship.isBlacklisted() || (ship.isAttacking(hero)
-                        && ship.markBlacklisted((long) config.GENERAL.RUNNING.REMEMBER_ENEMIES_FOR * Time.SECOND)))
+                        && ship.setBlacklisted((long) config.GENERAL.RUNNING.REMEMBER_ENEMIES_FOR * Time.SECOND)))
                 .peek(ship -> attackers.put(ship.getId(), ship.getUsername()))
                 .filter(ship -> ship.isEnemy() && !ship.isInvisible()
                         && ship.getLocationInfo().distanceTo(hero) < DISTANCE_FROM_DANGEROUS)

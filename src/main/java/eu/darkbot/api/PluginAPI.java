@@ -1,16 +1,9 @@
 package eu.darkbot.api;
 
-import eu.darkbot.api.plugin.Module;
-import eu.darkbot.api.utils.Version;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface PluginAPI {
-
-    /**
-     * {@link Version} of the DarkBot.
-     */
-    Version VERSION = Version.of("1.13.17 beta 59");
 
     /**
      * @param api to get
@@ -29,17 +22,6 @@ public interface PluginAPI {
      * @throws IllegalArgumentException if class type was not found.
      */
     @NotNull <T extends API> T requireAPI(@NotNull Class<T> api) throws UnsupportedOperationException;
-
-    /**
-     * @return current used {@link Module}
-     */
-    Module getModule();
-
-    /**
-     * @param module to set
-     * @return {@code module}
-     */
-    Module setModule(@NotNull Module module);
 
     /**
      * @return avg time of tick in ms.

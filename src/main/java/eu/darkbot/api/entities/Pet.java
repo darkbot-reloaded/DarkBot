@@ -4,7 +4,14 @@ import eu.darkbot.api.utils.EquippableItem;
 
 public interface Pet extends Ship {
 
+    /**
+     * @return level of the {@link Pet}
+     */
     int getLevel();
+
+    /**
+     * @return userId of the pet's owner
+     */
     int getOwnerId();
 
     /**

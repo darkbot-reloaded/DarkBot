@@ -4,12 +4,19 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Location extends Locatable, Point {
 
+    /**
+     * Creates new instance of {@link Location} with given parameters.
+     * @param x coordinate
+     * @param y coordinate
+     * @return {@link Location} with given coordinates
+     */
     static Location of(double x, double y) {
         return new com.github.manolo8.darkbot.core.utils.Location(x, y);
     }
 
-    static Location of(Locatable loc, double angle, double radius) {
-        return Location.of(loc.getX() - Math.cos(angle) * radius, loc.getY() - Math.sin(angle) * radius);
+    static Location of(Locatable center, double angle, double radius) {
+        return Location.of(center.getX() - Math.cos(angle) * radius,
+                           center.getY() - Math.sin(angle) * radius);
     }
 
     /**
