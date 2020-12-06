@@ -1,33 +1,14 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.BasePoint;
-import eu.darkbot.api.entities.BattleStation;
-import eu.darkbot.api.entities.Box;
-import eu.darkbot.api.entities.Entity;
-import eu.darkbot.api.entities.Mine;
-import eu.darkbot.api.entities.Npc;
-import eu.darkbot.api.entities.Pet;
-import eu.darkbot.api.entities.Portal;
-import eu.darkbot.api.entities.Ship;
+import eu.darkbot.api.entities.*;
 import eu.darkbot.api.objects.Obstacle;
 import eu.darkbot.api.utils.Listener;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Optional;
 
 public interface EntitiesAPI extends API {
-
-    /**
-     * @return {@link BattleStation} if present, otherwise {@link Optional#empty()}
-     */
-    Optional<BattleStation> getBattleStation();
-
-    /**
-     * @return {@link Collection} of {@link BattleStation.Module}
-     */
-    Collection<BattleStation.Module> getBaseModules();
 
     /**
      * @return {@link Collection} of {@link Npc}
@@ -65,6 +46,16 @@ public interface EntitiesAPI extends API {
     Collection<BasePoint> getBasePoints();
 
     /**
+     * @return {@link Collection} of {@link BattleStation}
+     */
+    Collection<BattleStation> getBattleStation();
+
+    /**
+     * @return {@link Collection} of {@link BattleStation.Module}
+     */
+    Collection<BattleStation.Module> getBaseModules();
+
+    /**
      * @return reference to {@link Collection} of all entities
      */
     Collection<Entity> getAll();
@@ -78,15 +69,6 @@ public interface EntitiesAPI extends API {
      * @return {@link Collection} of {@link Obstacle}
      */
     Collection<Obstacle> getObstacles();
-
-    /**
-     * Use {@code Entity.class} to get {@link Collection} of all entities.
-     *
-     * @param entityType to get collection of
-     * @return {@link Collection} of given entity type
-     */
-    <T extends Entity>
-    Collection<T> get(Class<T> entityType);
 
     /**
      * Adds listeners on create or remove of the {@link Entity}

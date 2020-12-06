@@ -75,9 +75,9 @@ public class CollectorModule implements Module {
         this.pluginAPI = pluginAPI;
         this.movement = movement;
 
-        this.boxes = entities.get(Box.class);
-        this.ships = entities.get(Ship.class);
-        this.portals = entities.get(Portal.class);
+        this.boxes = entities.getBoxes();
+        this.ships = entities.getPlayers();
+        this.portals = entities.getPortals();
 
         this.safetyFinder = new SafetyFinder(pluginAPI); //TODO replace lazy with weak listener in safety
     }
