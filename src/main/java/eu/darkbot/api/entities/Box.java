@@ -60,4 +60,8 @@ public interface Box extends Entity {
 
         int getPriority();
     }
+
+    interface Ore extends Box {
+
+    }
 }

@@ -35,7 +35,7 @@ public class MapTraveler {
         this.jumper = new PortalJumper(movement);
 
         this.star.addMapChangeListener(listener);
-        this.portals = api.requireAPI(EntitiesAPI.class).getEntities(Portal.class);
+        this.portals = api.requireAPI(EntitiesAPI.class).get(Portal.class);
     }
 
     public void setTarget(Map target) {
