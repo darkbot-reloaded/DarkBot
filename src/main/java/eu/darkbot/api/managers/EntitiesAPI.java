@@ -25,6 +25,11 @@ public interface EntitiesAPI extends API {
     Optional<BattleStation> getBattleStation();
 
     /**
+     * @return {@link Collection} of {@link BattleStation.Module}
+     */
+    Collection<BattleStation.Module> getBaseModules();
+
+    /**
      * @return {@link Collection} of {@link Npc}
      */
     Collection<Npc> getNpcs();
