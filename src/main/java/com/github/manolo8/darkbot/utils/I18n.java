@@ -18,7 +18,7 @@ public class I18n {
 
     private static final Object[] EMPTY = {};
     public static final List<Locale> SUPPORTED_LOCALES = Stream.of(
-            "bg", "cs", "de", "el", "en", "es", "fr", "hu", "it", "pl", "pt", "ro", "ru", "tr", "uk"
+            "bg", "cs", "de", "el", "en", "es", "fr", "hu", "it", "lt", "pl", "pt", "ro", "ru", "sv", "tr", "uk"
     ).map(Locale::new).sorted(Comparator.comparing(Locale::getDisplayName)).collect(Collectors.toList());
     private static final Properties props = new Properties();
     private static Locale locale;
