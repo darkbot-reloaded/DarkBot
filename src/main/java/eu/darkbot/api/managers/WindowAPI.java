@@ -10,11 +10,6 @@ import eu.darkbot.api.objects.Point;
 public interface WindowAPI extends API {
 
     /**
-     * @return bounds of game screen
-     */
-    Area.Rectangle getViewBounds();
-
-    /**
      * @return version of native api
      */
     int getVersion();

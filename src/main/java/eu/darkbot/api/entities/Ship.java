@@ -36,6 +36,11 @@ public interface Ship extends Attacker, Movable {
     Optional<Pet> getPet();
 
     /**
+     * @return used {@link Formation} by the {@link Ship}
+     */
+    Formation getFormation();
+
+    /**
      * @return true if ship has enabled given formation.
      */
     boolean isInFormation(int formationId);

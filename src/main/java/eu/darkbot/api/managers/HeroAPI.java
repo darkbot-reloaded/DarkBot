@@ -12,6 +12,16 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface HeroAPI extends Ship, API {
 
+    int getConfiguration();
+
+    void toggleConfiguration();
+
+    void sendLaserAttack();
+
+    void sendRocketAttack();
+
+    void tryLogout();
+
     /**
      * Will check if {@link HeroAPI} is in given {@code mode}.
      *

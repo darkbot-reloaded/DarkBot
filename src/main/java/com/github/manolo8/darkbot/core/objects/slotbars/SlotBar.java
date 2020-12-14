@@ -2,9 +2,9 @@ package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Point;
+import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import eu.darkbot.api.managers.KeyBindsAPI;
-import eu.darkbot.api.managers.SlotBarAPI;
+import eu.darkbot.api.managers.HeroItemsAPI;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -16,12 +16,12 @@ import static com.github.manolo8.darkbot.Main.API;
 public class SlotBar extends MenuBar {
     private final ObjArray slotsArr = ObjArray.ofVector(true);
     private final CategoryBar categoryBar;
-    private final SlotBarAPI.Type slotType;
+    private final SlotBarsProxy.Type slotType;
     public boolean isVisible;
     public Point stickOffset = new Point();
     public List<Slot> slots = new ArrayList<>();
 
-    public SlotBar(CategoryBar categoryBar, SlotBarAPI.Type type) {
+    public SlotBar(CategoryBar categoryBar, SlotBarsProxy.Type type) {
         this.categoryBar = categoryBar;
         this.slotType = type;
     }

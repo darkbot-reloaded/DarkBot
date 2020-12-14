@@ -19,7 +19,7 @@ public class PortalJumper {
     }
 
     public void jump(Portal target) {
-        movement.jumpPortal(target);
+        if (movement.moveToPortal(target)) movement.jumpPortal(target);
 
         if (target != last) {
             last = target;

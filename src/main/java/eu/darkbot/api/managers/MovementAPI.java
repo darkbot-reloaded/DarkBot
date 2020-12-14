@@ -10,12 +10,17 @@ import org.jetbrains.annotations.Nullable;
 public interface MovementAPI extends API {
 
     /**
-     * Tries to move to and jump through given {@link Portal}.
+     * @param portal to move to
+     * @return true if can jump through given {@link Portal}
+     */
+    boolean moveToPortal(@NotNull Portal portal);
+
+    /**
+     * Tries jump through given {@link Portal}.
      *
      * @param portal to jump through
-     * @return true if jump button was clicked
      */
-    boolean jumpPortal(@NotNull Portal portal);
+    void jumpPortal(@NotNull Portal portal);
 
     /**
      * @return true if hero is moving or destination path isn't empty.
@@ -48,7 +53,7 @@ public interface MovementAPI extends API {
     /**
      * Tries to move random around a location with given radius
      *
-     * @param loc {@link Locatable} to move random
+     * @param loc    {@link Locatable} to move random
      * @param radius of the circle to move random
      */
     void moveRandom(Locatable loc, double radius);

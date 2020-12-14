@@ -1,39 +1,49 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
-import eu.darkbot.api.managers.SlotBarAPI;
+import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
+import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotbars.Item {
     // Only has relevant info if !isReady()
     public final ItemTimer itemTimer = new ItemTimer();
-    private final Map<SlotBarAPI.Type, Slot> associatedSlots = new EnumMap<>(SlotBarAPI.Type.class);
+    private final Map<SlotBarsProxy.Type, Slot> associatedSlots = new EnumMap<>(SlotBarsProxy.Type.class);
+    private final SettingsProxy settings;
+
     public double quantity;
     public boolean selected, buyable, activatable, available, visible;
     public String id, counterType, actionStyle, iconLootId;
 
-    void removeSlot(SlotBarAPI.Type slotType) {
+    public Item() {
+        this(null);
+    }
+
+    public Item(SettingsProxy settingsProxy) {
+        this.settings = settingsProxy;
+    }
+
+    void removeSlot(SlotBarsProxy.Type slotType) {
         this.associatedSlots.remove(slotType);
     }
 
-    void addSlot(SlotBarAPI.Type slotType, int slotNumber) {
+    void addSlot(SlotBarsProxy.Type slotType, int slotNumber) {
         this.associatedSlots.put(slotType, new Slot(slotNumber, slotType));
     }
 
     @Override
     public void update() {
-        this.buyable     = API.readMemoryBoolean(address + 36);
+        this.buyable = API.readMemoryBoolean(address + 36);
         this.activatable = API.readMemoryBoolean(address + 40);
-        this.selected    = API.readMemoryBoolean(address + 44);
-        this.available   = API.readMemoryBoolean(address + 48);
-        this.visible     = API.readMemoryBoolean(address + 52);
+        this.selected = API.readMemoryBoolean(address + 44);
+        this.available = API.readMemoryBoolean(address + 48);
+        this.visible = API.readMemoryBoolean(address + 52);
         //this.blocked   = API.readMemoryBoolean(address + 56); // doesnt work
-        this.quantity    = API.readMemoryDouble(address + 128);
+        this.quantity = API.readMemoryDouble(address + 128);
 
         long tempAddr = API.readMemoryLong(address, 88, 40);
         if (itemTimer.address != tempAddr) this.itemTimer.update(tempAddr);
@@ -51,16 +61,14 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotba
         super.update(address);
     }
 
-    @Override
     public boolean hasShortcut() {
         return !associatedSlots.isEmpty();
     }
 
-    @Override
-    public Optional<eu.darkbot.api.objects.slotbars.Slot> getSlot() {
+    public Slot getSlot() {
         return this.associatedSlots.entrySet().stream()
                 .findFirst()
-                .map(Map.Entry::getValue);
+                .map(Map.Entry::getValue).orElse(null);
     }
 
     @Override
@@ -74,18 +82,33 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotba
     }
 
     @Override
+    public boolean isActivatable() {
+        return activatable && hasShortcut();
+    }
+
+    @Override
     public boolean isSelected() {
         return selected;
     }
 
     @Override
-    public boolean isBuyable() {
-        return buyable;
+    public boolean trySelect() {
+        Slot slot = getSlot();
+        if (settings == null || slot == null) return false;
+
+        if (slot.slotBarType == SlotBarsProxy.Type.PRO_ACTION_BAR)
+            API.keyboardClick(settings.getCharCode(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION));
+
+        API.keyboardClick(settings.getCharCode(SettingsProxy.KeyBind.valueOf(
+                (slot.slotBarType == SlotBarsProxy.Type.PREMIUM_BAR ?
+                        "PREMIUM_" : "SLOTBAR_") + (slot.slotNumber == 10 ? 0 : slot.slotNumber))));
+
+        return true;
     }
 
     @Override
-    public boolean isActivatable() {
-        return activatable;
+    public boolean isBuyable() {
+        return buyable;
     }
 
     @Override
@@ -119,23 +142,13 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotba
                 '}';
     }
 
-    public static class Slot implements eu.darkbot.api.objects.slotbars.Slot {
+    public static class Slot {
         private final int slotNumber;
-        private final SlotBarAPI.Type slotBarType;
+        private final SlotBarsProxy.Type slotBarType;
 
-        public Slot(int slotNumber, SlotBarAPI.Type slotBarType) {
+        public Slot(int slotNumber, SlotBarsProxy.Type slotBarType) {
             this.slotNumber = slotNumber;
             this.slotBarType = slotBarType;
-        }
-
-        @Override
-        public int getSlotNumber() {
-            return slotNumber;
-        }
-
-        @Override
-        public SlotBarAPI.Type getSlotBarType() {
-            return slotBarType;
         }
     }
 
