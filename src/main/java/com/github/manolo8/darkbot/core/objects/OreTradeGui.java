@@ -30,7 +30,7 @@ public class OreTradeGui extends Gui {
     }
 
     public enum Ore {
-        PROMETIUM, ENDRIUM, TERBIUM, PROMETID, DURANIUM, PROMERIUM, SEPROM, PALLADIUM, OSMIUM;
+        PROMETIUM, ENDURIUM, TERBIUM, PROMETID, DURANIUM, PROMERIUM, SEPROM, PALLADIUM, OSMIUM;
 
         int getXOffset() {
             return ordinal() * SELLING_X_OFFSET;
