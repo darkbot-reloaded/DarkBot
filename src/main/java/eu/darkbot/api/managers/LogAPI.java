@@ -1,16 +1,14 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.objects.Gui;
 import eu.darkbot.api.utils.Listener;
 
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * API for in-game log messages
  */
-public interface LogAPI extends Gui, API {
+public interface LogAPI extends API {
 
     /**
      * Adds {@link Listener} which will be called on each new message.

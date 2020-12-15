@@ -23,13 +23,6 @@ public interface Item {
     boolean isSelected();
 
     /**
-     * Tries to select this {@link Item} in-game.
-     *
-     * @return true if selection was successful, otherwise false
-     */
-    boolean trySelect();
-
-    /**
      * @return true if item can be bought via click
      */
     boolean isBuyable();

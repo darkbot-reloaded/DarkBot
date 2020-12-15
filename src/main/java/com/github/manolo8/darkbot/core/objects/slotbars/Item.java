@@ -13,19 +13,10 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotba
     // Only has relevant info if !isReady()
     public final ItemTimer itemTimer = new ItemTimer();
     private final Map<SlotBarsProxy.Type, Slot> associatedSlots = new EnumMap<>(SlotBarsProxy.Type.class);
-    private final SettingsProxy settings;
 
     public double quantity;
     public boolean selected, buyable, activatable, available, visible;
     public String id, counterType, actionStyle, iconLootId;
-
-    public Item() {
-        this(null);
-    }
-
-    public Item(SettingsProxy settingsProxy) {
-        this.settings = settingsProxy;
-    }
 
     void removeSlot(SlotBarsProxy.Type slotType) {
         this.associatedSlots.remove(slotType);
@@ -92,21 +83,6 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotba
     }
 
     @Override
-    public boolean trySelect() {
-        Slot slot = getSlot();
-        if (settings == null || slot == null) return false;
-
-        if (slot.slotBarType == SlotBarsProxy.Type.PRO_ACTION_BAR)
-            API.keyboardClick(settings.getCharCode(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION));
-
-        API.keyboardClick(settings.getCharCode(SettingsProxy.KeyBind.valueOf(
-                (slot.slotBarType == SlotBarsProxy.Type.PREMIUM_BAR ?
-                        "PREMIUM_" : "SLOTBAR_") + (slot.slotNumber == 10 ? 0 : slot.slotNumber))));
-
-        return true;
-    }
-
-    @Override
     public boolean isBuyable() {
         return buyable;
     }
@@ -143,8 +119,8 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotba
     }
 
     public static class Slot {
-        private final int slotNumber;
-        private final SlotBarsProxy.Type slotBarType;
+        public final int slotNumber;
+        public final SlotBarsProxy.Type slotBarType;
 
         public Slot(int slotNumber, SlotBarsProxy.Type slotBarType) {
             this.slotNumber = slotNumber;

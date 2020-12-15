@@ -36,6 +36,7 @@ public class Portal extends Entity {
     public void update() {
         super.update();
 
+        clickable.update();
         type = Main.API.readMemoryInt(address + 112);
         if (locationInfo.isMoving()) {
             ConfigEntity.INSTANCE.updateSafetyFor(this);

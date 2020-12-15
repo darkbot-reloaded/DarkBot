@@ -14,6 +14,20 @@ import java.util.Optional;
 public interface HeroItemsAPI extends API {
 
     /**
+     * This method checks if given {@link Item} can be selected in-game.
+     *
+     * @param item to check
+     * @return true if item can beb selected
+     */
+    boolean isSelectable(@NotNull Item item);
+
+    /**
+     * @param item to be selected
+     * @return true on successful select
+     */
+    boolean selectItem(@NotNull Item item);
+
+    /**
      * @param category {@link Category} to be checked
      * @return true if contains given Category
      */

@@ -1,7 +1,6 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.objects.Gui;
 import eu.darkbot.api.utils.Listener;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +11,7 @@ import java.util.Collection;
  *
  * @see Message
  */
-public interface ChatAPI extends Gui, API {
+public interface ChatAPI extends API {
 
     /**
      /**

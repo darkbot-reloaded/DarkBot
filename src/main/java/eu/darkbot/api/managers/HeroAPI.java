@@ -20,6 +20,8 @@ public interface HeroAPI extends Ship, API {
 
     void sendRocketAttack();
 
+    boolean isLogout();
+
     void tryLogout();
 
     /**

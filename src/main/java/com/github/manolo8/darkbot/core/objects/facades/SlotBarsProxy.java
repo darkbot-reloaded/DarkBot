@@ -2,9 +2,9 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
+import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.core.objects.slotbars.SlotBar;
 import eu.darkbot.api.managers.HeroItemsAPI;
-import eu.darkbot.api.objects.slotbars.Item;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -12,16 +12,16 @@ import java.util.Collection;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
-    public CategoryBar categoryBar;
-    public SlotBar standardBar;
-    public SlotBar premiumBar; //104
-    public SlotBar proActionBar; //112
+
+    public final CategoryBar categoryBar = new CategoryBar();
+    public final SlotBar standardBar = new SlotBar(categoryBar, Type.DEFAULT_BAR);
+    public final SlotBar premiumBar = new SlotBar(categoryBar, Type.PREMIUM_BAR); //104
+    public final SlotBar proActionBar = new SlotBar(categoryBar, Type.PRO_ACTION_BAR); //112
+
+    private final SettingsProxy settings;
 
     public SlotBarsProxy(SettingsProxy settingsProxy) {
-        this.categoryBar = new CategoryBar(settingsProxy);
-        this.standardBar = new SlotBar(categoryBar, Type.DEFAULT_BAR);
-        this.premiumBar = new SlotBar(categoryBar, Type.PREMIUM_BAR);
-        this.proActionBar = new SlotBar(categoryBar, Type.PRO_ACTION_BAR);
+        this.settings = settingsProxy;
     }
 
     @Override
@@ -34,21 +34,35 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     }
 
     @Override
+    public boolean isSelectable(@NotNull eu.darkbot.api.objects.slotbars.Item item) {
+        return item.isActivatable();
+    }
+
+    @Override
+    public boolean selectItem(@NotNull eu.darkbot.api.objects.slotbars.Item item) {
+        Item.Slot slot = null;
+
+        if (item instanceof Item) slot = ((Item) item).getSlot();
+        if (slot == null) return false;
+
+        if (slot.slotBarType == SlotBarsProxy.Type.PRO_ACTION_BAR)
+            API.keyboardClick(settings.getCharCode(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION));
+
+        API.keyboardClick(settings.getCharCode(SettingsProxy.KeyBind.valueOf(
+                (slot.slotBarType == SlotBarsProxy.Type.PREMIUM_BAR ?
+                        "PREMIUM_" : "SLOTBAR_") + (slot.slotNumber == 10 ? 0 : slot.slotNumber))));
+
+        return true;
+    }
+
+    @Override
     public boolean hasCategory(@NotNull Category category) {
         return categoryBar.hasCategory(category);
     }
 
     @Override
-    public Collection<? extends Item> getItems(@NotNull Category category) {
+    public Collection<? extends eu.darkbot.api.objects.slotbars.Item> getItems(@NotNull Category category) {
         return categoryBar.get(category).items;
-    }
-
-    private SlotBar getSlotBarByType(Type slotBarType) {
-        switch (slotBarType){
-            case PREMIUM_BAR: return premiumBar;
-            case PRO_ACTION_BAR: return proActionBar;
-            default: return standardBar;
-        }
     }
 
     public enum Type {

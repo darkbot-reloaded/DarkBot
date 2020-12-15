@@ -2,7 +2,6 @@ package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Pet;
-import eu.darkbot.api.objects.Gui;
 import eu.darkbot.api.objects.Location;
 import eu.darkbot.api.utils.ItemNotEquippedException;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +11,7 @@ import java.util.Optional;
 /**
  * API to manage hero's pet.
  */
-public interface PetAPI extends Gui, Pet, API {
+public interface PetAPI extends Pet, API {
 
     /**
      * @return true if pet by module was marked to be enabled.
