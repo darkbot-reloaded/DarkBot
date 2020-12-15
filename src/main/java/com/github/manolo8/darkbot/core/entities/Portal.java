@@ -35,6 +35,7 @@ public class Portal extends Entity {
     @Override
     public void update() {
         super.update();
+        clickable.update();
 
         type = Main.API.readMemoryInt(address + 112);
         if (locationInfo.isMoving()) {
