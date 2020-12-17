@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.objects.Map;
 
 public class Portal extends Entity {
+    public static final int TYPE_OFFSET = 120;
 
     public final Map target;
     public final int factionId;
@@ -37,7 +38,7 @@ public class Portal extends Entity {
         super.update();
         clickable.update();
 
-        type = Main.API.readMemoryInt(address + 120);
+        type = Main.API.readMemoryInt(address + TYPE_OFFSET);
         if (locationInfo.isMoving()) {
             ConfigEntity.INSTANCE.updateSafetyFor(this);
         }
