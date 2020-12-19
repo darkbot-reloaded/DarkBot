@@ -7,6 +7,9 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.Circle;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Mine extends Entity implements Obstacle {
+    // A bit of a bigger avoid area on these
+    private static final int FROZEN_LAB_MINE = 21;
+
     public int typeId;
 
     private final Circle area = new Circle(0, 0, 200);
@@ -28,7 +31,7 @@ public class Mine extends Entity implements Obstacle {
         super.update();
 
         if (locationInfo.isMoving())
-            area.set(locationInfo.now, 200);
+            area.set(locationInfo.now, typeId == FROZEN_LAB_MINE ? 350 : 200);
     }
 
     @Override
@@ -44,5 +47,10 @@ public class Mine extends Entity implements Obstacle {
     @Override
     public boolean use() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return typeId + "";
     }
 }
