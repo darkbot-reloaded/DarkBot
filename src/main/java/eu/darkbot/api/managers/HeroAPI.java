@@ -5,6 +5,7 @@ import eu.darkbot.api.entities.Npc;
 import eu.darkbot.api.entities.Ship;
 import eu.darkbot.config.ConfigAPI;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This {@link API} represent hero entity,
@@ -12,16 +13,53 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface HeroAPI extends Ship, API {
 
-    int getConfiguration();
+    /**
+     * @return current used {@link HeroAPI.Config}
+     * @see #toggleConfiguration()
+     */
+    HeroAPI.Config getConfiguration();
 
+    /**
+     * Toggles in-game {@link HeroAPI.Config}
+     *
+     * @see #getConfiguration()
+     */
     void toggleConfiguration();
 
+    /**
+     * Will try to abort laser attack if is attacking, otherwise will do nothing.
+     *
+     * @see #sendLaserAttack()
+     */
+    void abortLaserAttack();
+
+    /**
+     * Sends laser attack.
+     *
+     * @see #abortLaserAttack()
+     */
     void sendLaserAttack();
 
+    /**
+     * Sends rocket attack.
+     */
     void sendRocketAttack();
 
-    boolean isLogout();
+    /**
+     * Returns needed time in seconds till hero will be logged out.
+     * Returns {@code null} if hero doesn't try to logout or is aborted.
+     *
+     * @return time(sec) needed to logout otherwise {@code null}
+     * @see #tryLogout()
+     */
+    @Nullable
+    Integer getLogoutTime();
 
+    /**
+     * Tries to logout hero ship.
+     *
+     * @see #getLogoutTime()
+     */
     void tryLogout();
 
     /**
@@ -32,7 +70,7 @@ public interface HeroAPI extends Ship, API {
      */
     boolean isInMode(@NotNull HeroAPI.Mode mode);
 
-    boolean isInMode(int configuration, Character formation);
+    boolean isInMode(int config, Character formation);
 
     default boolean isInMode(@NotNull ConfigAPI.ShipConfig shipConfig) {
         return isInMode(shipConfig.CONFIG, shipConfig.FORMATION);
@@ -47,7 +85,7 @@ public interface HeroAPI extends Ship, API {
      */
     boolean setMode(@NotNull HeroAPI.Mode mode);
 
-    boolean setMode(int configuration, Character formation);
+    boolean setMode(int config, Character formation);
 
     default boolean setMode(@NotNull ConfigAPI.ShipConfig shipConfig) {
         return setMode(shipConfig.CONFIG, shipConfig.FORMATION);
@@ -78,14 +116,24 @@ public interface HeroAPI extends Ship, API {
      */
     interface Mode {
 
-        // TODO
-        static Mode of(int config, Ship.Formation formation) {
-            //return new ShipConfig(config, formation);
-            return null;
+        static Mode of(Config config, Ship.Formation formation) {
+            return new Mode() {
+                public Config getConfig() { return config; }
+
+                public Formation getFormation() { return formation; }
+            };
         }
 
-        int getConfig();
+        Config getConfig();
 
         Ship.Formation getFormation();
+    }
+
+    /**
+     * Represents in-game {@link Ship} configs.
+     */
+    enum Config {
+        FIRST,
+        SECOND
     }
 }
