@@ -4,12 +4,15 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.objects.Map;
 
+import static com.github.manolo8.darkbot.Main.API;
+
 public class Portal extends Entity {
     public static final int TYPE_OFFSET = 120;
 
     public final Map target;
     public final int factionId;
     private final PortalMatcher matcher;
+    public boolean isJumping;
     public int type;
 
     public Portal(int id, int type, int x, int y) {
@@ -38,7 +41,8 @@ public class Portal extends Entity {
         super.update();
         clickable.update();
 
-        type = Main.API.readMemoryInt(address + TYPE_OFFSET);
+        isJumping = API.readMemoryBoolean(address + 112) || API.readMemoryBoolean(address + 116);
+        type = API.readMemoryInt(address + TYPE_OFFSET);
         if (locationInfo.isMoving()) {
             ConfigEntity.INSTANCE.updateSafetyFor(this);
         }
