@@ -139,8 +139,6 @@ public class LoginUtils {
         Http req = Http.create("https://" + loginData.getUrl() + "/indexInternal.es?action=internalMapRevolution", false)
                 .setRawHeader("Cookie", "dosid=" + loginData.getSid());
 
-        req.setUserAgent("BigpointClient/1.4.6");
-
         String flashEmbed = req.consumeInputStream(inputStream ->
                 new BufferedReader(new InputStreamReader(inputStream))
                         .lines()
