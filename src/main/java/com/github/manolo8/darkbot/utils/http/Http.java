@@ -20,7 +20,8 @@ import java.util.function.Function;
  * Use it like builder, just one time for instance
  */
 public class Http {
-    private static String DEFAULT_USER_AGENT = "BigpointClient/1.4.6";
+    public static final String BIGPOINT_USER_AGENT = "BigpointClient/1.4.6";
+    private static String DEFAULT_USER_AGENT = BIGPOINT_USER_AGENT;
 
     public static String getDefaultUserAgent() {
         return DEFAULT_USER_AGENT;

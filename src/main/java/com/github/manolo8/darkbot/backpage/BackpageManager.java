@@ -146,6 +146,7 @@ public class BackpageManager extends Thread {
         conn.setConnectTimeout(30_000);
         conn.setReadTimeout(30_000);
         conn.setInstanceFollowRedirects(false);
+        conn.setRequestProperty("User-Agent", Http.BIGPOINT_USER_AGENT);
         conn.setRequestProperty("Cookie", "dosid=" + this.sid);
         lastRequest = System.currentTimeMillis();
         return conn;
