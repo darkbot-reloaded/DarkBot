@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.utils;
 
 import java.io.File;
+import java.util.Locale;
 
 public class Strings {
 
@@ -22,6 +23,10 @@ public class Strings {
     public static String simplifyName(String name) {
         if (!name.matches("^[^\\d]+\\d{1,3}$")) return name;
         return name.replaceAll("\\d{1,3}$", " *");
+    }
+
+    public static String fuzzyMatcher(String string) {
+        return string.replace("x", "").toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
     }
 
 }
