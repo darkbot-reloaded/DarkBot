@@ -198,7 +198,6 @@ public class Config {
         public static class APIConfig {
             public @Option @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
             public @Option boolean FULLY_HIDE_API = true;
-            public @Option boolean SPOOF_CLIENT = false;
             public @Option boolean FORCE_GAME_LANGUAGE = false;
             public @Option boolean ENFORCE_HW_ACCEL = true;
 
