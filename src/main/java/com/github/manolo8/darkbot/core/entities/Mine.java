@@ -31,7 +31,7 @@ public class Mine extends Entity implements Obstacle {
         super.update();
 
         if (locationInfo.isMoving())
-            area.set(locationInfo.now, typeId == FROZEN_LAB_MINE ? 450 : 200);
+            area.set(locationInfo.now, typeId == FROZEN_LAB_MINE ? 500 : 200);
     }
 
     @Override
