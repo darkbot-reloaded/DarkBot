@@ -40,7 +40,7 @@ public class JCharField extends JButton implements OptionEditor {
         addKeyListener(new KeyListener() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyChar() == KeyEvent.VK_BACK_SPACE || e.getKeyChar() == KeyEvent.VK_DELETE) setValue(EMPTY);
+                if (e.getKeyChar() == KeyEvent.VK_BACK_SPACE || e.getKeyChar() == KeyEvent.VK_DELETE) setValue(null);
                 else setValue((char) e.getKeyCode());
                 e.consume();
             }

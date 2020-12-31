@@ -30,11 +30,14 @@ public class StarManager {
     public StarManager() {
         INSTANCE = this;
 
+        // https://www.darkorbit.com/spacemap/graphics/maps-config.xml
+
         StarBuilder mapBuild = new StarBuilder();
         mapBuild.addMap(-1, I18n.get("gui.map.loading"), "?")
                 .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1")
                 //.addGG(-3, "GG Escort").accessOnlyBy(54, 10500, 6500, /*"1-1", "2-1", "3-1",*/ OUTPOST_HOME_MAPS) // Gotta "reserve" x-1 maps for GG eternal.
-                .addGG(-4, "GG Eternal").accessBy(54, BL_MAPS);
+                .addGG(-4, "GG Eternal").accessBy(54, BL_MAPS)
+                .addGG(-5, "Labyrinth").accessBy(83, HOME_MAPS);
                 // MMO
         mapBuild.addMap(1, "1-1").addPortal(18500, 11500, "1-2").addPortal(10500, 6750, "Experiment Zone 1")
                 .addMap(2, "1-2").addPortal(2000, 2000, "1-1").addPortal(18500, 2000, "1-3").addPortal(18500, 11500, "1-4")
@@ -151,25 +154,26 @@ public class StarManager {
                 .addMap(156, "R-Zone 7").addMap(157, "R-Zone 8")
                 .addMap(158, "R-Zone 9").addMap(159, "R-Zone 10")
                 .addMap(420, "WarGame 1").addMap(421, "WarGame 2").addMap(422, "WarGame 3")
-                .addMap(423, "WarGame 4").addMap(423, "WarGame 5").addMap(423, "WarGame 6");
-                // Mimesis escort
-        mapBuild.addGG(430, "Escort VRU 1", "ESC-V1").exitBy(1)
-                .addGG(431, "Escort VRU 2", "ESC-V2").exitBy(1)
-                .addGG(432, "Escort VRU 3", "ESC-V3").exitBy(1)
-                .addGG(433, "Escort MMO 1", "ESC-M1").exitBy(1)
-                .addGG(434, "Escort MMO 2", "ESC-M2").exitBy(1)
-                .addGG(435, "Escort MMO 3", "ESC-M3").exitBy(1)
-                .addGG(436, "Escort EIC 1", "ESC-E1").exitBy(1)
-                .addGG(437, "Escort EIC 2", "ESC-E2").exitBy(1)
-                .addGG(438, "Escort EIC 3", "ESC-E3").exitBy(1)
-                .addGG(439, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(440, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(441, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(442, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(443, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(444, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(445, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(460, "Eternal Blacklight", "GG ∞ BL")
+                .addMap(423, "WarGame 4").addMap(424, "WarGame 5").addMap(425, "WarGame 6");
+                // Frozen laberynth
+        mapBuild.addMap(430, "ATLAS A"  ).exitBy(55)
+                .addMap(431, "ATLAS B"  ).exitBy(55)
+                .addMap(432, "ATLAS C"  ).exitBy(55)
+                .addMap(433, "Cygni"    ).exitBy(55)
+                .addMap(434, "Helvetios").exitBy(55)
+                .addMap(435, "Eridani"  ).exitBy(55)
+                .addMap(436, "Sirius"   ).exitBy(55)
+                .addMap(437, "Sadatoni" ).exitBy(55)
+                .addMap(438, "Persei"   ).exitBy(55)
+                .addMap(439, "Volantis" ).exitBy(55)
+                .addMap(440, "Alcyone"  ).exitBy(55)
+                .addMap(441, "Auriga"   ).exitBy(55)
+                .addMap(442, "Bootes"   ).exitBy(55)
+                .addMap(443, "Aquila"   ).exitBy(55)
+                .addMap(444, "Orion"    ).exitBy(55)
+                .addMap(445, "Maia"     ).exitBy(55);
+                // Eternal BL maps
+        mapBuild.addGG(460, "Eternal Blacklight", "GG ∞ BL")
                 .addGG(461, "Eternal Blacklight", "GG ∞ BL")
                 .addGG(462, "Eternal Blacklight", "GG ∞ BL")
                 .addGG(463, "Eternal Blacklight", "GG ∞ BL")
@@ -185,16 +189,21 @@ public class StarManager {
     }
 
     public Portal getOrCreate(int id, int type, int x, int y) {
-        return starSystem.outgoingEdgesOf(HeroManager.instance.map).stream()
+        Portal portal = starSystem.outgoingEdgesOf(HeroManager.instance.map).stream()
                 .filter(p -> p.matches(x, y, type))
-                .peek(p -> p.id = id)
                 .findFirst()
-                .orElse(new Portal(id, type, x, y));
+                .orElse(null);
+        // We have no idea of the portal this is, just add it
+        if (portal == null) return new Portal(id, type, x, y);
+        if (portal.removed) { // Reuse portal, assign id and return
+            portal.id = id;
+            return portal;
+        } else return new Portal(id, type, x, y, portal.target, portal.factionId); // Create a copy portal
     }
 
     public Portal next(HeroManager hero, Map target) {
         DijkstraShortestPath<Map, Portal> path = new DijkstraShortestPath<>(starSystem);
-        return starSystem.outgoingEdgesOf(hero.map).stream().filter(p -> !p.removed).min(
+        return hero.main.mapManager.entities.portals.stream().filter(p -> !p.removed && p.target != null).min(
                 Comparator.<Portal>comparingDouble(p -> path.getPaths(p.target).getWeight(target))
                         .thenComparing(p -> p.factionId == -1 ? 0 : p.factionId == hero.playerInfo.factionId ? -1 : 1)
                         .thenComparing(p -> hero.locationInfo.distance(p.locationInfo))).orElse(null);

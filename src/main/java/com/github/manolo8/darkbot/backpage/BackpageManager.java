@@ -98,7 +98,7 @@ public class BackpageManager extends Thread {
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
-                                .addWarning(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                                .addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
                     }
                 }
             }
@@ -142,6 +142,7 @@ public class BackpageManager extends Thread {
         conn.setConnectTimeout(30_000);
         conn.setReadTimeout(30_000);
         conn.setInstanceFollowRedirects(false);
+        conn.setRequestProperty("User-Agent", Http.getDefaultUserAgent());
         conn.setRequestProperty("Cookie", "dosid=" + this.sid);
         lastRequest = System.currentTimeMillis();
         return conn;

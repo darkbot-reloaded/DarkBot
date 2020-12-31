@@ -19,7 +19,7 @@ public class MapTraveler {
     private final Drive drive;
     private final StarManager star;
     private final Consumer<Map> listener = this::onMapChange;
-    private final PortalJumper jumper;
+    protected PortalJumper jumper;
 
     public Portal current;
     public Map target;

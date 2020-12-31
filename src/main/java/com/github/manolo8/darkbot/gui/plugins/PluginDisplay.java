@@ -1,26 +1,30 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
+import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import java.awt.*;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 public class PluginDisplay extends JPanel implements PluginListener {
 
     private Main main;
-    private MainButton pluginTab;
     private PluginHandler pluginHandler;
+    private PluginUpdater pluginUpdater;
 
+    private MainButton pluginTab;
     private JPanel pluginPanel;
+    private PluginUpdateHeader header;
 
     public PluginDisplay() {
-        super(new BorderLayout());
+        super(new MigLayout("ins 0, gap 0, wrap 1, fillx", "[fill]", ""));
         setBorder(BorderFactory.createEmptyBorder());
     }
 
@@ -28,32 +32,62 @@ public class PluginDisplay extends JPanel implements PluginListener {
         this.main = main;
         this.pluginTab = pluginTab;
         this.pluginHandler = main.pluginHandler;
-        if (pluginPanel == null) add(setupUI());
+        this.pluginUpdater = main.pluginUpdater;
+        setupUI();
         refreshUI();
         pluginHandler.addListener(this);
+        pluginUpdater.setup(this);
     }
 
-    private JComponent setupUI() {
+    private void setupUI() {
+        if (pluginPanel != null) return;
         pluginPanel = new JPanel(new MigLayout("wrap 1, fillx", "[fill]", ""));
+        header = new PluginUpdateHeader(main);
+
         JScrollPane scrollPane = new JScrollPane(pluginPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getVerticalScrollBar().setUnitIncrement(25);
-        return scrollPane;
+
+        add(header);
+        add(scrollPane);
     }
 
-    private void refreshUI() {
+    public void refreshUI() {
+        header.refreshUI();
         pluginPanel.removeAll();
+
         Stream.concat(
-                pluginHandler.LOADING_EXCEPTIONS.stream().map(ExceptionCard::new),
+                Stream.concat(
+                        pluginHandler.LOADING_EXCEPTIONS.stream(),
+                        pluginUpdater.UPDATING_EXCEPTIONS.stream()
+                ).map(ExceptionCard::new),
                 Stream.concat(
                         pluginHandler.FAILED_PLUGINS.stream(),
                         pluginHandler.LOADED_PLUGINS.stream()
                 ).map(pl -> new PluginCard(main, pl, main.featureRegistry))
         ).forEach(pluginPanel::add);
-        pluginTab.setIcon(UIUtils.getIcon(pluginHandler.LOADING_EXCEPTIONS.isEmpty() && pluginHandler.FAILED_PLUGINS.isEmpty() ? "plugins" : "plugins_warn"));
+
+        if (!pluginHandler.LOADING_EXCEPTIONS.isEmpty() || !pluginHandler.FAILED_PLUGINS.isEmpty())
+            pluginTab.setIcon(UIUtils.getIcon("plugins_warn"));
+        else if (pluginUpdater.hasAnyUpdates()) pluginTab.setIcon(UIUtils.getIcon("plugins_update"));
+        else pluginTab.setIcon(UIUtils.getIcon("plugins"));
+
         validate();
         repaint();
+    }
+
+    public PluginCard getPluginCard(Plugin plugin) {
+        return Arrays.stream(pluginPanel.getComponents())
+                .filter(comp -> comp instanceof PluginCard)
+                .map(comp -> (PluginCard) comp)
+                .filter(pl -> pl.getPlugin().equals(plugin))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public JProgressBar getMainProgressBar() {
+        return header.getProgressBar();
     }
 
     @Override

@@ -164,7 +164,7 @@ public class Config {
     public static class Miscellaneous {
         public @Option boolean REFRESH_AFTER_REVIVE = false;
         public @Option @Num(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
-        public @Option @Num(max = 60 * 12, step = 10) int PAUSE_FOR = 5;
+        public @Option @Num(max = 60 * 12, step = 10) int PAUSE_FOR = 0;
         public @Option boolean RESET_REFRESH = true;
         public @Option @Editor(JPercentField.class) double DRONE_REPAIR_PERCENTAGE = 0.9;
         public @Option boolean HONOR_LOST_EXACT = true;
@@ -198,7 +198,6 @@ public class Config {
         public static class APIConfig {
             public @Option @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
             public @Option boolean FULLY_HIDE_API = true;
-            public @Option boolean SPOOF_CLIENT = false;
             public @Option boolean FORCE_GAME_LANGUAGE = false;
             public @Option boolean ENFORCE_HW_ACCEL = true;
 

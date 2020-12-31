@@ -177,7 +177,7 @@ public class MapDrawer extends JPanel {
             g2.setColor(cs.TEXT_DARK);
             synchronized (Main.UPDATE_LOCKER) {
                 List<Entity> entities = mapManager.entities.allEntities.stream().flatMap(Collection::stream)
-                        .filter(e -> e.id > 150_000_000 && e.id < 160_000_000)
+                        .filter(e -> e.id > 150_000_000 && e.id < 160_000_000 || e instanceof Mine)
                         .filter(e -> e.locationInfo.isLoaded())
                         .collect(Collectors.toList());
 

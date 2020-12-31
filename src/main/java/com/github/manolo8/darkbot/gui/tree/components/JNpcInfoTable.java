@@ -167,12 +167,12 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
             addActionListener(e -> {
                 selectedMaps.clear();
                 String selected = (String) getSelectedItem();
-                if (selected == null || selected.equals(DEFAULT_ALL)) return;
-
-                StarManager.getAllMaps().stream()
-                        .filter(m -> m.id >= 0 && selected.equals(Strings.simplifyName(m.name)))
-                        .mapToInt(m -> m.id)
-                        .forEach(selectedMaps::add);
+                if (selected == null) return;
+                if (!selected.equals(DEFAULT_ALL))
+                    StarManager.getAllMaps().stream()
+                            .filter(m -> m.id >= 0 && selected.equals(Strings.simplifyName(m.name)))
+                            .mapToInt(m -> m.id)
+                            .forEach(selectedMaps::add);
 
                 onChange.accept(selectedMaps);
             });

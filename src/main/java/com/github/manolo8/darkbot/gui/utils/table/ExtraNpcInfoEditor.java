@@ -4,14 +4,10 @@ import com.github.manolo8.darkbot.config.NpcExtraFlag;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.gui.utils.JCheckBoxMenuItemNoClose;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
-import sun.swing.DefaultLookup;
 
 import javax.swing.*;
-import javax.swing.event.MouseInputListener;
 import javax.swing.event.PopupMenuEvent;
-import javax.swing.table.TableCellEditor;
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;

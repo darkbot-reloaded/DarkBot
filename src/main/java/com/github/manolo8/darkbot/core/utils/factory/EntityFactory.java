@@ -167,7 +167,7 @@ public enum EntityFactory {
     }
 
     private static Portal getOrCreatePortal(int id, long address) {
-        int portalType = API.readMemoryInt(address + 112);
+        int portalType = API.readMemoryInt(address + Portal.TYPE_OFFSET);
         int x          = (int) API.readMemoryDouble(address, 64, 32);
         int y          = (int) API.readMemoryDouble(address, 64, 40);
 

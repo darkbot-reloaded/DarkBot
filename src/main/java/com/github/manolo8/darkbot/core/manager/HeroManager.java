@@ -104,7 +104,7 @@ public class HeroManager extends Ship implements Manager {
     public void jumpPortal(Portal portal) {
         if (portal.removed) return;
         if (System.currentTimeMillis() - portalTime < 500) return; // Minimum delay
-        if ((System.currentTimeMillis() - portalTime > 15000 || isNotJumping(portal)) &&
+        if ((System.currentTimeMillis() - portalTime > 20000 || isNotJumping(portal)) &&
                 (portal.clickable.enabled || portals.stream().noneMatch(p -> p != portal && p.clickable.enabled))) {
             API.keyboardClick(keybinds.getCharCode(JUMP_GATE));
             portalTime = System.currentTimeMillis();
@@ -113,7 +113,7 @@ public class HeroManager extends Ship implements Manager {
 
     // Consider not jumping if still on current map and nextMap is either unset or not the portal target map
     private boolean isNotJumping(Portal portal) {
-        return map.id == settings.currMap &&
+        return !portal.isJumping && map.id == settings.currMap &&
                 (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id);
     }
 

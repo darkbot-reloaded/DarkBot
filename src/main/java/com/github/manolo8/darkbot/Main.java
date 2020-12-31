@@ -27,6 +27,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
+import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
 import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
@@ -50,7 +51,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener, API {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 59");
+    public static final Version VERSION      = new Version("1.13.17 beta 68");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -76,6 +77,7 @@ public class Main extends Thread implements PluginListener, API {
     public final PingManager pingManager         = new PingManager();
     public final BackpageManager backpage        = new BackpageManager(this);
     public final PluginHandler pluginHandler     = new PluginHandler();
+    public final PluginUpdater pluginUpdater     = new PluginUpdater(this);
     public final FeatureRegistry featureRegistry = new FeatureRegistry(this, pluginHandler);
     public final RepairManager repairManager     = new RepairManager();
 
@@ -110,6 +112,7 @@ public class Main extends Thread implements PluginListener, API {
         this.pluginHandler.addListener(this);
 
         this.form = new MainGui(this);
+        this.pluginUpdater.scheduleUpdateChecker();
 
         if (configManager.getConfigFailed())
             Popups.showMessageAsync("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
@@ -194,7 +197,7 @@ public class Main extends Thread implements PluginListener, API {
                 else module.tickStopped();
             } catch (Throwable e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
-                if (modDef != null) modDef.getIssues().addWarning(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
             }
             for (Behaviour behaviour : behaviours) {
                 try {
@@ -203,7 +206,7 @@ public class Main extends Thread implements PluginListener, API {
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
-                            .addFailure(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                            .addFailure("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
                 }
             }
         }
