@@ -1,6 +1,6 @@
-package eu.darkbot.api.plugins;
+package eu.darkbot.api.extensions;
 
-import eu.darkbot.api.utils.Version;
+import eu.darkbot.utils.Version;
 
 import java.net.URL;
 import java.util.Collection;

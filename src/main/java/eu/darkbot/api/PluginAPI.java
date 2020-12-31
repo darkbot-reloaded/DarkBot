@@ -1,7 +1,7 @@
 package eu.darkbot.api;
 
-import eu.darkbot.api.plugins.PluginInfo;
-import eu.darkbot.api.plugins.FeatureInfo;
+import eu.darkbot.api.extensions.PluginInfo;
+import eu.darkbot.api.extensions.FeatureInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

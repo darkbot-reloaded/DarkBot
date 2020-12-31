@@ -2,7 +2,15 @@ package eu.darkbot.api.objects;
 
 import java.time.Instant;
 
+/**
+ * In-game gui.
+ */
 public interface Gui extends Point {
+
+    /**
+     * @return name of the {@link Gui}
+     */
+    String getName();
 
     /**
      * @return width of the gui

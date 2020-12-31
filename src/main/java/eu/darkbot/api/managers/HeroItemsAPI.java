@@ -1,7 +1,7 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.objects.slotbars.Item;
+import eu.darkbot.api.objects.Item;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

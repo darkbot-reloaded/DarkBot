@@ -1,4 +1,4 @@
-package eu.darkbot.api.plugins;
+package eu.darkbot.api.extensions;
 
 import eu.darkbot.api.PluginAPI;
 

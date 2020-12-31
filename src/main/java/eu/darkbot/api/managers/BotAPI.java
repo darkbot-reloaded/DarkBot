@@ -2,8 +2,8 @@ package eu.darkbot.api.managers;
 
 import com.formdev.flatlaf.FlatLaf;
 import eu.darkbot.api.API;
-import eu.darkbot.api.plugins.Module;
-import eu.darkbot.api.utils.Version;
+import eu.darkbot.api.extensions.Module;
+import eu.darkbot.utils.Version;
 import org.jetbrains.annotations.NotNull;
 
 /**

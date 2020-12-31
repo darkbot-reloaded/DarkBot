@@ -1,4 +1,4 @@
-package eu.darkbot.api.objects.slotbars;
+package eu.darkbot.api.objects;
 
 public interface Item {
 

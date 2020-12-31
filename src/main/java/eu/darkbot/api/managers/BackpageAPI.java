@@ -1,7 +1,7 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.plugins.Task;
+import eu.darkbot.api.extensions.Task;
 import eu.darkbot.utils.Time;
 
 import java.net.HttpURLConnection;
@@ -35,7 +35,7 @@ public interface BackpageAPI extends API {
      *
      * @param params query to be added
      */
-    HttpURLConnection getConnection(String params);
+    HttpURLConnection getConnection(String params) throws Exception;
 
     /**
      * Returns connection with current instance + params
@@ -43,7 +43,7 @@ public interface BackpageAPI extends API {
      * <p>
      * If minWait(ms) has not passed since last action, will sleep the difference.
      */
-    default HttpURLConnection getConnection(String params, int minWait) {
+    default HttpURLConnection getConnection(String params, int minWait) throws Exception {
         Time.sleep(getLastRequestTime().toEpochMilli() + minWait - System.currentTimeMillis());
         return getConnection(params);
     }

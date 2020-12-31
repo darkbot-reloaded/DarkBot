@@ -34,12 +34,12 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     }
 
     @Override
-    public boolean isSelectable(@NotNull eu.darkbot.api.objects.slotbars.Item item) {
+    public boolean isSelectable(@NotNull eu.darkbot.api.objects.Item item) {
         return item.isActivatable();
     }
 
     @Override
-    public boolean selectItem(@NotNull eu.darkbot.api.objects.slotbars.Item item) {
+    public boolean selectItem(@NotNull eu.darkbot.api.objects.Item item) {
         Item.Slot slot = null;
 
         if (item instanceof Item) slot = ((Item) item).getSlot();
@@ -61,7 +61,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.objects.slotbars.Item> getItems(@NotNull Category category) {
+    public Collection<? extends eu.darkbot.api.objects.Item> getItems(@NotNull Category category) {
         return categoryBar.get(category).items;
     }
 

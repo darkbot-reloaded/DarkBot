@@ -2,8 +2,21 @@ package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
 import eu.darkbot.api.entities.utils.Area;
+import eu.darkbot.api.objects.Gui;
+
+import java.util.Collection;
 
 public interface GameScreenAPI extends API {
+
+    /**
+     * @return bounds of game screen
+     */
+    Area.Rectangle getViewBounds();
+
+    /**
+     * @return {@link Collection} of in-game guis
+     */
+    Collection<Gui> getGuis();
 
     /**
      * Tries to zoom in view.
@@ -36,9 +49,4 @@ public interface GameScreenAPI extends API {
     boolean toggleCategoryBar(boolean visible);
 
     boolean toggleProActionBar(boolean visible);
-
-    /**
-     * @return bounds of game screen
-     */
-    Area.Rectangle getViewBounds();
 }

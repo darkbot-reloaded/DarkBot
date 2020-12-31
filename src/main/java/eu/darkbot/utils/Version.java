@@ -1,4 +1,4 @@
-package eu.darkbot.api.utils;
+package eu.darkbot.utils;
 
 public class Version extends com.github.manolo8.darkbot.extensions.util.Version {
 
