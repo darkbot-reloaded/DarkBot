@@ -1,4 +1,4 @@
-package eu.darkbot.api.entities.utils;
+package eu.darkbot.api.entities.other;
 
 /**
  * Represents ammunition in-game
@@ -80,5 +80,15 @@ public interface Ammo {
             return "ammunition_" + (isSpecial ? "specialammo_" : "rocket_") +
                     name().toLowerCase().replace("_", "-");
         }
+    }
+
+    enum Mine {
+        ACM_01,
+        EMPM_01,
+        SABM_01,
+        DDM_01,
+        SLM_01,
+        IM_01,
+        AGL_M01,
     }
 }

@@ -5,18 +5,18 @@ import eu.darkbot.api.entities.Box;
 import eu.darkbot.api.entities.Entity;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.Ship;
+import eu.darkbot.api.entities.other.Effect;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.MovementAPI;
 import eu.darkbot.api.managers.PetAPI;
-import eu.darkbot.api.managers.StarAPI;
+import eu.darkbot.api.managers.StarSystemAPI;
 import eu.darkbot.api.managers.StatsAPI;
 import eu.darkbot.api.managers.WindowAPI;
 import eu.darkbot.api.objects.Location;
-import eu.darkbot.api.plugin.Feature;
-import eu.darkbot.api.plugin.Inject;
-import eu.darkbot.api.plugin.Module;
+import eu.darkbot.api.plugins.Feature;
+import eu.darkbot.api.plugins.Module;
 import eu.darkbot.config.ConfigAPI;
 import eu.darkbot.logic.SafetyFinder;
 import eu.darkbot.utils.Time;
@@ -37,7 +37,7 @@ public class CollectorModule implements Module {
     protected final BotAPI bot;
     protected final PetAPI pet;
     protected final HeroAPI hero;
-    protected final StarAPI star;
+    protected final StarSystemAPI star;
     protected final StatsAPI stats;
     protected final ConfigAPI config;
     protected final WindowAPI window;
@@ -54,11 +54,11 @@ public class CollectorModule implements Module {
     protected long refreshing;
     private long invisibleUntil, waitingUntil;
 
-    @Inject
+    //@Feature.Inject
     public CollectorModule(BotAPI bot,
                            PetAPI pet,
                            HeroAPI hero,
-                           StarAPI star,
+                           StarSystemAPI star,
                            StatsAPI stats,
                            ConfigAPI config,
                            WindowAPI window,
@@ -165,7 +165,7 @@ public class CollectorModule implements Module {
 
         if (distance < 200) {
             //movement.stop(false);
-            if (!hero.hasEffect(Entity.Effect.BOX_COLLECTING)
+            if (!hero.hasEffect(Effect.BOX_COLLECTING)
                     || hero.getLocationInfo().distanceTo(currentBox) == 0)
                 currentBox.tryCollect();
             else return;

@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * API to add, manage, retrieve maps.
  */
-public interface StarAPI extends API {
+public interface StarSystemAPI extends API {
     List<String> HOME_MAPS         = ArrayUtils.asImmutableList("1-1", "2-1", "3-1");
     List<String> OUTPOST_HOME_MAPS = ArrayUtils.asImmutableList("1-8", "2-8", "3-8");
     List<String> PIRATE_MAPS       = ArrayUtils.asImmutableList("5-1", "5-2", "5-3");

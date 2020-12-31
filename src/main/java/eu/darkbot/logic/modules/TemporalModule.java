@@ -2,7 +2,7 @@ package eu.darkbot.logic.modules;
 
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.managers.BotAPI;
-import eu.darkbot.api.plugin.Module;
+import eu.darkbot.api.plugins.Module;
 
 abstract class TemporalModule implements Module {
 

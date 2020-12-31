@@ -13,9 +13,9 @@ public interface Info {
     boolean isEnemy();
 
     /**
-     * @return {@link Faction}
+     * @return {@link Fraction}
      */
-    Faction getFaction();
+    Fraction getFraction();
 
     /**
      * @return ship username.
@@ -58,7 +58,7 @@ public interface Info {
     /**
      * Represents in-game fractions.
      */
-    enum Faction {
+    enum Fraction {
         NONE,
         MMO,
         EIC,

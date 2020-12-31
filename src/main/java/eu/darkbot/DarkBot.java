@@ -3,19 +3,11 @@ package eu.darkbot;
 import com.formdev.flatlaf.FlatLaf;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.StartupParams;
-import eu.darkbot.api.API;
-import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.managers.BotAPI;
-import eu.darkbot.api.plugin.Module;
+import eu.darkbot.api.plugins.Module;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public class DarkBot extends Main implements PluginAPI, BotAPI {
-
-    private final Map<Class<? extends API>, API> apis = new HashMap<>();
+public class DarkBot extends Main implements BotAPI {
 
     private Module module;
 
@@ -23,6 +15,7 @@ public class DarkBot extends Main implements PluginAPI, BotAPI {
         super(params);
     }
 
+/*
     @Override
     @Nullable
     @SuppressWarnings("unchecked")
@@ -39,6 +32,7 @@ public class DarkBot extends Main implements PluginAPI, BotAPI {
 
         return api;
     }
+*/
 
     @Override
     public Module getModule() {

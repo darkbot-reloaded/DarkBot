@@ -2,6 +2,7 @@ package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Pet;
+import eu.darkbot.api.entities.other.Gear;
 import eu.darkbot.api.objects.Location;
 import eu.darkbot.api.utils.ItemNotEquippedException;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +36,7 @@ public interface PetAPI extends Pet, API {
      */
     boolean isRepaired();
 
-    boolean tryRepair();
+    void tryRepair();
 
     int getRepairCount();
 
@@ -45,7 +46,7 @@ public interface PetAPI extends Pet, API {
      */
     boolean isGearAvailable(int gearId);
 
-    default boolean isGearAvailable(@NotNull Pet.Gear gear) {
+    default boolean isGearAvailable(@NotNull Gear gear) {
         return isGearAvailable(gear.getId());
     }
 
@@ -55,7 +56,7 @@ public interface PetAPI extends Pet, API {
      */
     void setGear(int gearId) throws ItemNotEquippedException;
 
-    default void setGear(@NotNull Pet.Gear gear) throws ItemNotEquippedException {
+    default void setGear(@NotNull Gear gear) throws ItemNotEquippedException {
         setGear(gear.getId());
     }
 
@@ -66,16 +67,16 @@ public interface PetAPI extends Pet, API {
     Optional<Location> getLocatorNpcLoc();
 
     /**
-     * Checks if pet has the given {@link Pet.Cooldown},
+     * Checks if pet has the given {@link Gear.Cooldown},
      * which can make gears unavailable temporally.
      *
      * @param cooldownId to be checked
      * @return true if pet has given {@code cooldownId}
-     * @see Pet.Cooldown
+     * @see Gear.Cooldown
      */
     boolean hasCooldown(int cooldownId);
 
-    default boolean hasCooldown(@NotNull Pet.Cooldown cooldown) {
+    default boolean hasCooldown(@NotNull Gear.Cooldown cooldown) {
         return hasCooldown(cooldown.getId());
     }
 
@@ -83,8 +84,8 @@ public interface PetAPI extends Pet, API {
      * @param gear to be checked
      * @return true if given gear is currently cooling down
      */
-    default boolean hasCooldown(@NotNull Pet.Gear gear) {
-        Pet.Cooldown cooldown = gear.getCooldown();
+    default boolean hasCooldown(@NotNull Gear gear) {
+        Gear.Cooldown cooldown = gear.getCooldown();
         return cooldown != null && hasCooldown(cooldown);
     }
 

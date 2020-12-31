@@ -1,5 +1,6 @@
 package eu.darkbot.api.entities;
 
+import eu.darkbot.api.config.BoxInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -20,9 +21,9 @@ public interface Box extends Entity {
     String getTypeName();
 
     /**
-     * @return {@link Info} with some settings for {@link Box}
+     * @return {@link BoxInfo} with some settings for {@link Box}
      */
-    Info getInfo();
+    BoxInfo getInfo();
 
     /**
      * @return true if box is collected or
@@ -49,19 +50,4 @@ public interface Box extends Entity {
     @Nullable
     Instant isCollectedUntil();
 
-    /**
-     * Predefined settings for {@link Box} customized by user.
-     */
-    interface Info {
-
-        boolean shouldCollect();
-
-        int getWaitTime();
-
-        int getPriority();
-    }
-
-    interface Ore extends Box {
-
-    }
 }

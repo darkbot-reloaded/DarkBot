@@ -8,6 +8,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
+/**
+ * References to those collections doesn't change for whole runtime of the bot.
+ */
 public interface EntitiesAPI extends API {
 
     /**
@@ -41,14 +44,14 @@ public interface EntitiesAPI extends API {
     Collection<Portal> getPortals();
 
     /**
-     * @return {@link Collection} of {@link BasePoint}
+     * @return {@link Collection} of {@link Station}
      */
-    Collection<BasePoint> getBasePoints();
+    Collection<? extends Station> getStations();
 
     /**
      * @return {@link Collection} of {@link BattleStation}
      */
-    Collection<BattleStation> getBattleStation();
+    Collection<BattleStation> getBattleStations();
 
     /**
      * @return {@link Collection} of {@link BattleStation.Module}
@@ -76,11 +79,10 @@ public interface EntitiesAPI extends API {
      * Remember to store references for given listeners!
      * Otherwise they will be garbage collected.
      *
-     * @param onCreate {@link Listener} which can be null
-     * @param onRemove {@link Listener} which can be null
+     * @param onCreate {@link Listener} which will be consumed on {@link Entity} creation.
+     * @param onRemove {@link Listener} which will be consumed on {@link Entity} removal.
      * @see Listener
      */
     void addListener(@Nullable Listener<Entity> onCreate,
                      @Nullable Listener<Entity> onRemove);
-
 }

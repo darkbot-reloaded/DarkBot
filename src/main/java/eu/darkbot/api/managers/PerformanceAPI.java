@@ -19,9 +19,11 @@ public interface PerformanceAPI extends API {
 
     /**
      * Gets current ping.
-     * Ping is updated every 15 seconds.
      *
      * @return current ping in milliseconds.
+     * @see #getPingUpdateFrequency()
      */
     int getPing();
+
+    int getPingUpdateFrequency();
 }

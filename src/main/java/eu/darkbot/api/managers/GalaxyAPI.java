@@ -8,17 +8,17 @@ import java.util.Collection;
 
 public interface GalaxyAPI {
 
-    GateInfo getGateInfo(Gate gate);
+    Boolean updateInfo(int expiryTime);
 
-    @Nullable
-    Collection<Item> spinGate(Gate gate, int useMultiAt, int spinAmount, int minWat);
+    GateInfo getGateInfo(Gate gate);
 
     @Nullable
     GateInfo placeGate(Gate gate, int minWait);
 
-    Boolean updateInfo(int expiryTime);
+    @Nullable
+    Collection<Item> spinGate(Gate gate, int useMultiAt, int spinAmount, int minWat);
 
-    int getMoney();
+    int getUridium();
     int getSamples();
     int getEnergyCost();
     int getSpinAmount();

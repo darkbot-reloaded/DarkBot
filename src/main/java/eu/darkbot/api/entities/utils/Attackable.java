@@ -16,7 +16,7 @@ public interface Attackable extends Entity, Health, Info {
     /**
      * Represents lock types in-game.
      */
-    enum Lock {
+    enum Lock { //or "Mark"
 
         /**
          * Unknown

@@ -1,4 +1,4 @@
-package eu.darkbot.api.plugin;
+package eu.darkbot.api.plugins;
 
 public interface Task {
 

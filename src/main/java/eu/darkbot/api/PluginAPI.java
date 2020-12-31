@@ -1,9 +1,13 @@
 package eu.darkbot.api;
 
+import eu.darkbot.api.plugins.PluginInfo;
+import eu.darkbot.api.plugins.FeatureInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface PluginAPI {
+import java.util.Collection;
+
+public interface PluginAPI extends API {
 
     /**
      * @param api to get
@@ -14,17 +18,38 @@ public interface PluginAPI {
 
     /**
      * This method makes you sure that returned instance of given type is not null,
-     * otherwise exception will be thrown on init time.
+     * otherwise exception will be thrown.
      *
      * @param api to get
      * @param <T> type of api which extends {@link API}
      * @return instance of given {@link API} type
-     * @throws IllegalArgumentException if class type was not found.
+     * @throws UnsupportedOperationException if given api isn't supported
      */
     @NotNull <T extends API> T requireAPI(@NotNull Class<T> api) throws UnsupportedOperationException;
 
     /**
-     * @return avg time of tick in ms.
+     * @return {@link PluginInfo} of your plugin.
      */
-    double getTickTime();
+    PluginInfo getPluginInfo();
+
+    /**
+     * @return {@link Collection} of all available and loaded plugins.
+     */
+    Collection<PluginInfo> getPluginsInfo();
+
+    /**
+     * @param featureId to get instance of
+     * @return instance of given feature
+     * @throws ClassNotFoundException when given feature wasn't found
+     */
+    @NotNull <T> T getFeature(String featureId) throws ClassNotFoundException;
+    @NotNull <T> T getFeature(Class<T> feature) throws ClassNotFoundException;
+
+    /**
+     * @param featureId of the feature
+     * @return {@link FeatureInfo} of given feature.
+     * @throws ClassNotFoundException when given feature wasn't found
+     */
+    @NotNull <T> FeatureInfo<T> getFeatureInfo(String featureId) throws ClassNotFoundException;
+    @NotNull <T> FeatureInfo<T> getFeatureInfo(Class<T> feature) throws ClassNotFoundException;
 }

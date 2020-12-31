@@ -2,7 +2,7 @@ package eu.darkbot.api.managers;
 
 import com.formdev.flatlaf.FlatLaf;
 import eu.darkbot.api.API;
-import eu.darkbot.api.plugin.Module;
+import eu.darkbot.api.plugins.Module;
 import eu.darkbot.api.utils.Version;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,6 +17,11 @@ public interface BotAPI extends API {
     Version VERSION = Version.of("1.13.17 beta 59");
 
     /**
+     * @return avg time of tick in ms.
+     */
+    double getTickTime();
+
+    /**
      * @return current used {@link Module}
      */
     Module getModule();
@@ -27,5 +32,9 @@ public interface BotAPI extends API {
      */
     Module setModule(@NotNull Module module);
 
+    /**
+     *
+     * @param theme
+     */
     void setTheme(FlatLaf theme);
 }

@@ -3,6 +3,7 @@ package eu.darkbot.api.managers;
 import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Npc;
 import eu.darkbot.api.entities.Ship;
+import eu.darkbot.api.entities.other.Formation;
 import eu.darkbot.config.ConfigAPI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,25 +26,6 @@ public interface HeroAPI extends Ship, API {
      * @see #getConfiguration()
      */
     void toggleConfiguration();
-
-    /**
-     * Will try to abort laser attack if is attacking, otherwise will do nothing.
-     *
-     * @see #sendLaserAttack()
-     */
-    void abortLaserAttack();
-
-    /**
-     * Sends laser attack.
-     *
-     * @see #abortLaserAttack()
-     */
-    void sendLaserAttack();
-
-    /**
-     * Sends rocket attack.
-     */
-    void sendRocketAttack();
 
     /**
      * Returns needed time in seconds till hero will be logged out.
@@ -116,7 +98,7 @@ public interface HeroAPI extends Ship, API {
      */
     interface Mode {
 
-        static Mode of(Config config, Ship.Formation formation) {
+        static Mode of(Config config, Formation formation) {
             return new Mode() {
                 public Config getConfig() { return config; }
 
@@ -126,11 +108,11 @@ public interface HeroAPI extends Ship, API {
 
         Config getConfig();
 
-        Ship.Formation getFormation();
+        Formation getFormation();
     }
 
     /**
-     * Represents in-game {@link Ship} configs.
+     * Represents in-game {@link HeroAPI} configs.
      */
     enum Config {
         FIRST,

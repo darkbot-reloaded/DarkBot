@@ -1,15 +1,17 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
+import eu.darkbot.api.plugins.Task;
 import eu.darkbot.utils.Time;
 
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.time.Instant;
 import java.util.Optional;
 
 /**
  * API to manage, connect to backpage of the game.
- * {@link BackpageAPI} should be called only from {@link eu.darkbot.api.plugin.Task} thread.
+ * {@link BackpageAPI} should be called only from {@link Task} thread.
  * @see com.github.manolo8.darkbot.core.itf.Task
  */
 public interface BackpageAPI extends API {
@@ -23,9 +25,9 @@ public interface BackpageAPI extends API {
     URI getInstanceURI();
 
     /**
-     * @return last request time in milliseconds
+     * @return last request time.
      */
-    long getLastRequestTime();
+    Instant getLastRequestTime();
 
     /**
      * Returns connection with current instance + params
@@ -42,16 +44,18 @@ public interface BackpageAPI extends API {
      * If minWait(ms) has not passed since last action, will sleep the difference.
      */
     default HttpURLConnection getConnection(String params, int minWait) {
-        Time.sleep(getLastRequestTime() + minWait - System.currentTimeMillis());
+        Time.sleep(getLastRequestTime().toEpochMilli() + minWait - System.currentTimeMillis());
         return getConnection(params);
     }
 
     /**
      * Use random string anyway.
-     * UUID.randomUUID().toString().replaceAll("-", "");
+     * {@code
+     *      UUID.randomUUID().toString().replaceAll("-", "");
+     * }
      *
      * @param body which will be searched for reload token
-     * @return reload token or null if wasn't found
+     * @return reload token or {@link Optional#empty()} if wasn't found
      */
     Optional<String> findReloadToken(String body);
 }

@@ -1,8 +1,7 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.BasePoint;
-import eu.darkbot.api.objects.Gui;
+import eu.darkbot.api.entities.Station;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -44,7 +43,7 @@ public interface OreAPI extends API {
      * false if animation is not done, or no action is needed to be taken
      * to change the visibility status of the ore trader window
      */
-    boolean showTrade(boolean show, @NotNull BasePoint tradePoint);
+    boolean showTrade(boolean show, @NotNull Station.Refinery tradePoint);
 
     /**
      * Types of Ores visible in refinery window

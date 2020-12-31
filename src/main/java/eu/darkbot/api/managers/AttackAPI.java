@@ -1,14 +1,18 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.utils.Ammo;
+import eu.darkbot.api.entities.other.Ammo;
 import eu.darkbot.api.entities.utils.Attackable;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface AttackAPI extends API {
 
-    boolean hasTarget();
+    /**
+     * @return true if target is non-null
+     */
+    default boolean hasTarget() {
+        return getTarget() != null;
+    }
 
     /**
      * @return currently set target
@@ -16,23 +20,24 @@ public interface AttackAPI extends API {
     @Nullable Attackable getTarget();
 
     /**
-     * @param entity to be set
+     * Setting attackable to null stops attacking and removes target.
+     *
+     * @param attackable to be set
      * @return previously set {@link Attackable}
      */
-    @Nullable Attackable setTarget(@Nullable Attackable entity);
+    @Nullable Attackable setTarget(@Nullable Attackable attackable);
 
     /**
-     * @return true if selected {@link Attackable} is targeted
-     */
-    boolean isTargeted();
-
-    /**
-     * Tries to select current target
+     * This method checks if {@link #getTarget()} is locked/marked/targeted in-game.
      *
-     * @return true if selection was successful
-     * @see #getTarget()
+     * @return true if target is locked in-game
      */
-    boolean selectTarget();
+    boolean isLocked();
+
+    /**
+     * Tries to lock target in-game.
+     */
+    void tryLockTarget();
 
     /**
      * @return true if {@link HeroAPI} is laser attacking selected target
@@ -41,7 +46,8 @@ public interface AttackAPI extends API {
     boolean isAttacking();
 
     /**
-     * Tries to start laser attack.
+     * This method will try to attack {@link #getTarget()}
+     * Target doesn't need to be locked, this method will handle that.
      *
      * @return true on successful try
      */
@@ -55,32 +61,39 @@ public interface AttackAPI extends API {
     boolean laserAbort();
 
     /**
-     * @param laser ammo to be checked
-     * @return true if given ammo can be handled via keyboard shortcut
+     * @return currently used {@link Ammo.Laser}
+     * @see #setLaser(Ammo.Laser)
      */
-    boolean hasShortcut(@NotNull Ammo.Laser laser);
-    boolean hasShortcut(@NotNull Ammo.Rocket rocket);
+    @Nullable Ammo.Laser getLaser();
 
     /**
-     * Overrides user settings to use given ammo.
-     * Call {@code setLaserAmmo(null)} to use default ammo.
-     * <p>
-     * In case {@link Ammo.Laser#hasCooldown()} ammo,
-     * will be used only when available/not in cooldown, otherwise will use the previous one.
+     * Tries to set {@link Ammo.Laser} ammunition.
      *
-     * @param laserId to be set
-     * @return previously set {@link Ammo.Laser}
+     * @param laser to be set
+     * @return true if laser is available and successfully/already set
+     * @see #getLaser()
      */
-    @Nullable Ammo.Laser setLaserAmmo(@Nullable String laserId);
-    @Nullable Ammo.Laser setLaserAmmo(@Nullable Ammo.Laser laserAmmo);
+    boolean setLaser(@Nullable Ammo.Laser laser);
 
     /**
-     * Overrides user settings to use given ammo.
-     * Call {@code setRocketAmmo(null)} to use default ammo.
-     *
-     * @param rocketId to be set
-     * @return previously set {@link Ammo.Rocket}
+     * Tries to launch rocket.
+     * @see #getRocket()
      */
-    @Nullable Ammo.Rocket setRocketAmmo(@Nullable String rocketId);
-    @Nullable Ammo.Rocket setRocketAmmo(@Nullable Ammo.Rocket rocketAmmo);
+    void launchRocket();
+
+    /**
+     * @return currently used {@link Ammo.Rocket}
+     * @see #setRocket(Ammo.Rocket)
+     */
+    @Nullable Ammo.Rocket getRocket();
+
+    /**
+     * Tries to set {@link Ammo.Rocket} ammunition.
+     *
+     * @param rocket to be set
+     * @return true if rocket is available and successfully/already set.
+     * @see #getRocket()
+     * @see #launchRocket()
+     */
+    boolean setRocket(@Nullable Ammo.Rocket rocket);
 }

@@ -12,7 +12,7 @@ import java.util.Collection;
 public class MapTraveler {
     protected final PetAPI pet;
     protected final HeroAPI hero;
-    protected final StarAPI star;
+    protected final StarSystemAPI star;
     protected final MovementAPI movement;
 
     protected final Collection<Portal> portals;
@@ -30,7 +30,7 @@ public class MapTraveler {
     public MapTraveler(PluginAPI api) {
         this.pet = api.requireAPI(PetAPI.class);
         this.hero = api.requireAPI(HeroAPI.class);
-        this.star = api.requireAPI(StarAPI.class);
+        this.star = api.requireAPI(StarSystemAPI.class);
         this.movement = api.requireAPI(MovementAPI.class);
         this.jumper = new PortalJumper(movement);
 
