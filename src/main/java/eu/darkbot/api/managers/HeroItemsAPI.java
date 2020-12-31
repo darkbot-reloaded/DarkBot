@@ -45,11 +45,11 @@ public interface HeroItemsAPI extends API {
      * @param itemId to be searched for
      * @return first encounter of given item id
      */
-    default Optional<Item> findItemById(String itemId) {
+    default Optional<Item> findItem(String itemId) {
         for (Category category : Category.values()) {
             if (!hasCategory(category)) continue;
 
-            Optional<Item> item = findItemById(category, itemId);
+            Optional<Item> item = findItem(category, itemId);
             if (item.isPresent()) return item;
         }
         return Optional.empty();
@@ -62,7 +62,10 @@ public interface HeroItemsAPI extends API {
      * @param itemId   to be looked for in given category
      * @return first encounter of given item id
      */
-    default Optional<Item> findItemById(@NotNull HeroItemsAPI.Category category, String itemId) {
+    default Optional<Item> findItem(@NotNull HeroItemsAPI.Category category, String itemId) {
+        if (!hasCategory(category))
+            return Optional.empty();
+
         for (Item item : getItems(category))
             if (item.getId().equals(itemId))
                 return Optional.of(item);

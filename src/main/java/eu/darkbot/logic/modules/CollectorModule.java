@@ -9,11 +9,11 @@ import eu.darkbot.api.entities.other.Effect;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.api.managers.HeroItemsAPI;
 import eu.darkbot.api.managers.MovementAPI;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 import eu.darkbot.api.managers.StatsAPI;
-import eu.darkbot.api.managers.WindowAPI;
 import eu.darkbot.api.objects.Location;
 import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.Module;
@@ -32,6 +32,7 @@ import static java.lang.StrictMath.sin;
 @Feature(name = "Collector", description = "Resource-only collector module. Can cloak.")
 public class CollectorModule implements Module {
 
+    protected static final String CLOAK_ITEM_ID = "equipment_extra_cpu_cl04k";
     protected static final int DISTANCE_FROM_DANGEROUS = 1500;
 
     protected final BotAPI bot;
@@ -40,18 +41,21 @@ public class CollectorModule implements Module {
     protected final StarSystemAPI star;
     protected final StatsAPI stats;
     protected final ConfigAPI config;
-    protected final WindowAPI window;
     protected final PluginAPI pluginAPI;
     protected final MovementAPI movement;
+    protected final HeroItemsAPI heroItems;
 
     protected final SafetyFinder safetyFinder;
 
     protected final Collection<Box> boxes;
     protected final Collection<Ship> ships;
     protected final Collection<Portal> portals;
+
     protected final Map<Integer, String> attackers = new HashMap<>();
+
     public Box currentBox;
     protected long refreshing;
+
     private long invisibleUntil, waitingUntil;
 
     //@Feature.Inject
@@ -61,9 +65,9 @@ public class CollectorModule implements Module {
                            StarSystemAPI star,
                            StatsAPI stats,
                            ConfigAPI config,
-                           WindowAPI window,
                            PluginAPI pluginAPI,
                            MovementAPI movement,
+                           HeroItemsAPI heroItems,
                            EntitiesAPI entities) {
         this.bot = bot;
         this.pet = pet;
@@ -71,8 +75,8 @@ public class CollectorModule implements Module {
         this.star = star;
         this.stats = stats;
         this.config = config;
-        this.window = window;
         this.pluginAPI = pluginAPI;
+        this.heroItems = heroItems;
         this.movement = movement;
 
         this.boxes = entities.getBoxes();
@@ -191,7 +195,11 @@ public class CollectorModule implements Module {
                 && !hero.isInvisible()
                 && System.currentTimeMillis() - invisibleUntil > 60000) {
             invisibleUntil = System.currentTimeMillis();
-            window.keyClick(config.COLLECT.AUTO_CLOACK_KEY); //TODO replace with keybinds
+
+            heroItems.findItem(HeroItemsAPI.Category.CPUS, CLOAK_ITEM_ID)
+                    .filter(heroItems::isSelectable)
+                    .filter(cloak -> cloak.getQuantity() > 0)
+                    .ifPresent(heroItems::selectItem);
         }
     }
 

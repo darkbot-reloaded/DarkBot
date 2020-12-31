@@ -35,7 +35,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
 
     @Override
     public boolean isSelectable(@NotNull eu.darkbot.api.objects.Item item) {
-        return item.isActivatable();
+        return ((Item) item).hasShortcut();
     }
 
     @Override

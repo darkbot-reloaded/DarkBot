@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
-import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 
 import java.util.EnumMap;
@@ -9,7 +8,7 @@ import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotbars.Item {
+public class Item extends UpdatableAuto implements eu.darkbot.api.objects.Item {
     // Only has relevant info if !isReady()
     public final ItemTimer itemTimer = new ItemTimer();
     private final Map<SlotBarsProxy.Type, Slot> associatedSlots = new EnumMap<>(SlotBarsProxy.Type.class);
@@ -110,11 +109,15 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.slotba
     @Override
     public String toString() {
         return "Item{" +
-                "id='" + id + '\'' +
+                "isReady=" + isReady() +
+                ", associatedSlots=" + associatedSlots +
                 ", quantity=" + quantity +
+                ", selected=" + selected +
+                ", buyable=" + buyable +
                 ", activatable=" + activatable +
                 ", available=" + available +
-                ", itemTimer=" + itemTimer +
+                ", visible=" + visible +
+                ", id='" + id + '\'' +
                 '}';
     }
 
