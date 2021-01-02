@@ -62,7 +62,7 @@ public class RefinementGui extends Gui {
 
         @Override
         public void update(long address) {
-            if (address != this.address) {
+            if (address != this.address || !name.contains("ore")) {
                 name = API.readMemoryString(address, 184);
 
                 if (name != null && !name.isEmpty()) {
@@ -87,7 +87,7 @@ public class RefinementGui extends Gui {
         OSMIUM(Attribute.UPGRADABLE);
 
         private enum Attribute {
-            BASIC, UPGRADABLE;
+            BASIC, UPGRADABLE
         }
 
         private final Attribute attribute;
