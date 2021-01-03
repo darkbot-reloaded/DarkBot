@@ -40,8 +40,14 @@ public class Group extends UpdatableAuto {
         maxSize = API.readMemoryInt(address + 0x27);
         isOpen  = API.readMemoryBoolean(address + 0x2B);
 
-        if (!isValid() && !hasGroup) return;
-        hasGroup = isValid();
+        if (!isValid()) {
+            if (hasGroup) {
+                members.clear();
+                hasGroup = false;
+            }
+            return;
+        }
+        hasGroup = true;
 
         long selectedAddr = API.readMemoryLong(address + 0x3F);
 
