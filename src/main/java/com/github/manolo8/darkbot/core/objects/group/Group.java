@@ -21,6 +21,7 @@ public class Group extends UpdatableAuto {
     public int maxSize;
     public boolean isOpen; // if the group is open to allowing anyone to invite
     public boolean isLeader;
+    public boolean hasGroup;
 
     private ObjArray membersPtr = ObjArray.ofVector(true);
 
@@ -39,7 +40,8 @@ public class Group extends UpdatableAuto {
         maxSize = API.readMemoryInt(address + 0x27);
         isOpen  = API.readMemoryBoolean(address + 0x2B);
 
-        if (!isValid()) return;
+        if (!isValid() && !hasGroup) return;
+        hasGroup = isValid();
 
         long selectedAddr = API.readMemoryLong(address + 0x3F);
 
