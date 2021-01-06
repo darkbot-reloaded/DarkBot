@@ -11,10 +11,7 @@ public interface Point {
      * @return {@link Point} with given coordinates
      */
     static Point of(double x, double y) {
-        return new Point() {
-            public double getX() { return x; }
-            public double getY() { return y; }
-        };
+        return new PointImpl(x, y);
     }
 
     /**
@@ -26,4 +23,19 @@ public interface Point {
      * @return y coordinate of the {@link Point}
      */
     double getY();
+
+    //Point implementation
+    class PointImpl implements Point {
+        private final double x;
+        private final double y;
+
+        public PointImpl(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public double getX() { return x; }
+
+        public double getY() { return y; }
+    }
 }

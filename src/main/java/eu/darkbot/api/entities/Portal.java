@@ -25,7 +25,11 @@ public interface Portal extends Entity {
     @Nullable
     PortalType getPortalType();
 
-    // TODO: 01.11.2020 not sure which and when.
-    Info.Fraction getFactionId();
-
+    /**
+     * Is {@link Portal} accessible only for a certain {@link Info.Fraction}.
+     * Mainly used for 5-x portals.
+     *
+     * @return the {@link Info.Fraction} of the {@link Portal}
+     */
+    Info.Fraction getFaction();
 }

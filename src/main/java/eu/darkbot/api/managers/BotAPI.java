@@ -14,7 +14,7 @@ public interface BotAPI extends API {
     /**
      * {@link Version} of the DarkBot.
      */
-    Version VERSION = Version.of("1.13.17 beta 59");
+    Version VERSION = Version.of("1.13.17 beta 69");
 
     /**
      * @return avg time of tick in ms.

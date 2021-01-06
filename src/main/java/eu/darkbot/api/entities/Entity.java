@@ -19,16 +19,13 @@ public interface Entity extends Locatable {
     int getId();
 
     /**
-     * @return true if and only if {@link Entity} is loaded in-game and isn't removed
-     * @see #isRemoved()
+     * Is {@link Entity} valid and being updated, //(?out of map?).
+     * If that method returns {@code false} dont use this {@link Entity} anymore,
+     * values etc. wont be updated.
+     *
+     * @return true if {@link Entity} is valid and being updated
      */
     boolean isValid();
-
-    /**
-     * Checks that entity is removed.
-     * If (isRemoved() == true) then this entity wont be updated anymore.
-     */
-    boolean isRemoved();
 
     /**
      * @return true if {@link Entity} can be selected.
@@ -36,12 +33,11 @@ public interface Entity extends Locatable {
     boolean isSelectable();
 
     /**
-     * Selects this entity as the target in-game, can instantly attempt to attack with {@code attack} flag.
+     * Selects this entity as the target in-game, can instantly attempt to attack with {@code tryAttack} param.
      *
      * @param tryAttack instant attempt to attack this entity
      * @return true on successful selection
      */
-
     boolean trySelect(boolean tryAttack);
 
     /**
@@ -83,6 +79,5 @@ public interface Entity extends Locatable {
     /**
      * Returns value associated with key or {@code null} if key doesnt exists.
      */
-    @Nullable
-    Object getMetadata(String key);
+    @Nullable Object getMetadata(String key);
 }

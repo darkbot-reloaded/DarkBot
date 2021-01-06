@@ -4,14 +4,14 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
-import com.github.manolo8.darkbot.utils.I18n;
-import com.github.manolo8.darkbot.utils.IOUtils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -172,8 +172,15 @@ public class BackpageManager extends Thread {
     }
 
     public String getReloadToken(InputStream input) {
-        try {
-            return getReloadToken(IOUtils.read(input));
+        Matcher matcher = RELOAD_TOKEN_PATTERN.matcher("");
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
+            return br.lines()
+                    .map(matcher::reset)
+                    .filter(Matcher::find)
+                    .map(m -> m.group(1))
+                    .findFirst().orElse(null);
+
         } catch (IOException e) {
             e.printStackTrace();
             return null;

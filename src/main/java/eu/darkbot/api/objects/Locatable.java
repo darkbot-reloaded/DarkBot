@@ -11,10 +11,7 @@ public interface Locatable {
      * @return {@link Locatable} with given coordinates
      */
     static Locatable of(double x, double y) {
-        return new Locatable() {
-            public double getX() { return x; }
-            public double getY() { return y; }
-        };
+        return new LocatableImpl(x, y);
     }
 
     /**
@@ -26,4 +23,19 @@ public interface Locatable {
      * @return y coordinate of the {@link Locatable}
      */
     double getY();
+
+    //Locatable implementation
+    class LocatableImpl implements Locatable {
+        private final double x;
+        private final double y;
+
+        public LocatableImpl(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public double getX() { return x; }
+
+        public double getY() { return y; }
+    }
 }

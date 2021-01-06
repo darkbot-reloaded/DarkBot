@@ -12,7 +12,7 @@ public interface PluginAPI extends API {
     /**
      * @param api to get
      * @param <T> type of api which extends {@link API}
-     * @return instance of given {@link API} type
+     * @return instance of given {@link API} type, null if not present
      */
     @Nullable <T extends API> T getAPI(@NotNull Class<T> api);
 
@@ -38,18 +38,16 @@ public interface PluginAPI extends API {
     Collection<PluginInfo> getPluginsInfo();
 
     /**
-     * @param featureId to get instance of
+     * @param feature class to get instance of
      * @return instance of given feature
      * @throws ClassNotFoundException when given feature wasn't found
      */
-    @NotNull <T> T getFeature(String featureId) throws ClassNotFoundException;
     @NotNull <T> T getFeature(Class<T> feature) throws ClassNotFoundException;
 
     /**
-     * @param featureId of the feature
+     * @param feature class to get {@link FeatureInfo} of
      * @return {@link FeatureInfo} of given feature.
      * @throws ClassNotFoundException when given feature wasn't found
      */
-    @NotNull <T> FeatureInfo<T> getFeatureInfo(String featureId) throws ClassNotFoundException;
     @NotNull <T> FeatureInfo<T> getFeatureInfo(Class<T> feature) throws ClassNotFoundException;
 }

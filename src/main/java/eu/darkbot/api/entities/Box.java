@@ -21,14 +21,14 @@ public interface Box extends Entity {
     String getTypeName();
 
     /**
-     * @return {@link BoxInfo} with some settings for {@link Box}
+     * @return {@link BoxInfo} with some user defined settings for {@link Box}
      */
     BoxInfo getInfo();
 
     /**
      * @return true if box is collected or
      * there was a try to collect it and currently is in timer.
-     * @see Entity#isRemoved()
+     * @see Entity#isValid()
      */
     boolean isCollected();
 

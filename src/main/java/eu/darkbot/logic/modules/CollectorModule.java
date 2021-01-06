@@ -118,7 +118,7 @@ public class CollectorModule implements Module {
     protected boolean isNotWaiting() {
         return System.currentTimeMillis() > waitingUntil ||
                 currentBox == null ||
-                currentBox.isRemoved();
+                currentBox.isValid();
     }
 
     protected boolean checkDangerousAndCurrentMap() {
