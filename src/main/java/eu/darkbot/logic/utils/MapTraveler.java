@@ -60,7 +60,7 @@ public class MapTraveler {
         if ((shipTpWait == -1) != (mapChangeWait == -1)) {
             if (System.currentTimeMillis() < Math.max(shipTpWait, mapChangeWait)) return;
         }
-        if (current == null || current.isValid() || lastPortals != portals.size()) {
+        if (current == null || !current.isValid() || lastPortals != portals.size()) {
             current = star.findNext(target);
             lastPortals = portals.size();
             jumper.reset();
