@@ -9,25 +9,22 @@ import com.github.manolo8.darkbot.core.api.DarkFlashApiAdapter;
 import com.github.manolo8.darkbot.core.api.NativeApiAdapter;
 import com.github.manolo8.darkbot.core.api.NoopApiAdapter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.utils.APIErrors;
 import com.github.manolo8.darkbot.utils.StartupParams;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-
-import static com.github.manolo8.darkbot.gui.utils.Popups.showMessageSync;
 
 public class ConfigManager {
 
@@ -110,6 +107,7 @@ public class ConfigManager {
     public IDarkBotAPI getAPI(StartupParams params) {
         if (params.useNoOp()) return new NoopApiAdapter();
         try {
+
             if (config.BOT_SETTINGS.API_CONFIG.API == 0) return new DarkBotApiAdapter();
             else if (config.BOT_SETTINGS.API_CONFIG.API == 1) return new DarkFlashApiAdapter(params);
             else if (config.BOT_SETTINGS.API_CONFIG.API == 2) return new DarkBoatAdapter(params);
@@ -117,83 +115,26 @@ public class ConfigManager {
             else if (config.BOT_SETTINGS.API_CONFIG.API == 4) return new NoopApiAdapter();
             else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API_CONFIG.API);
         } catch (Error e) {
-            JPanel pnl = new JPanel();
-
-            boolean notApiRelated = false;
-            String workingDir     = System.getProperty("user.dir");
-
-            if(e.getMessage().contains("not found in resource path")) {
-                String arch      = System.getenv("PROCESSOR_ARCHITECTURE");
-                String wow64Arch = System.getenv("PROCESSOR_ARCHITEW6432");
-
-                String os_arch = arch != null && arch.endsWith("64")
-                        || wow64Arch != null && wow64Arch.endsWith("64")
-                        ? "64" : "32";
-
-                if (os_arch.equals("32")) {
-                    String msg = "<html>The bot requires a <b>64-bit</b> operating system<br /> " +
-                            "It's not possible to run DarkBot on a <b>32-bit</b> OS!<br /><br />";
-                    pnl.add(new JLabel(msg));
-                } else {
-                    String rnt = "https://darkbot.eu/downloads/Runtimes4DarkBot.exe";
-                    String msg = "<html>You tried to run the bot on a <b>32-bit</b> Java, but a <b>64-bit</b> one is required!<br/>" +
-                            "To quickly fix this issue, consider installing our runtime:";
-                    String dwn = "<html><p>Download link: <a href=\"" + rnt +"\">" + rnt + "</a>";
-                    JLabel dwnLink = new JLabel(dwn);
-                    dwnLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                    dwnLink.addMouseListener(new MouseAdapter() {
-                        @Override
-                        public void mouseClicked(MouseEvent e) {
-                            try {
-                                Desktop.getDesktop().browse(new URI(rnt));
-                            } catch (URISyntaxException | IOException ignored) {}
-                        }
-                    });
-                    pnl.setLayout(new GridLayout( 2 , 1 ));
-                    pnl.add(new JLabel(msg));
-                    pnl.add(dwnLink);
-                }
-                notApiRelated = true;
-            } else if(!workingDir.matches("[\\x00-\\x7F]+")) {
-
-                String[] folderNames = workingDir.split("\\\\");
-                String charPointers  = workingDir
-                        .replaceAll("[\\x00-\\x7F]", "&nbsp")
-                        .replaceAll("[^\\x00-\\x7F]", "^");
-                StringBuilder path = new StringBuilder("<p style=\"font-family: Consolas\">");
-
-                for (String name : folderNames) {
-                    path.append(!name.matches("[\\x00-\\x7F]+")
-                            ? "<font color=\"#ff7d7d\">" + name + "/</font>"
-                            : name + '/'
-                    );
-                }
-
-                String msg = "<html>The bot folder path contains <b>non-ANSI</b> characters. Rename the folders<br/>"
-                        + "where they occur or move the bot folder to <b>D:\\</b> and then run again<br/><br/>"
-                        +  path.toString() + "<br/>" + charPointers;
-
-                pnl.add(new JLabel(msg));
-                notApiRelated = true;
-            }
-            if (notApiRelated) {
-                JOptionPane options = new JOptionPane(pnl,
-                        JOptionPane.ERROR_MESSAGE,
-                        JOptionPane.DEFAULT_OPTION,
-                        null, new Object[]{}, null
-                );
-                showMessageSync("Error", options);
-                System.exit(0);
-            }
-            System.out.println("Error enabling API #" + config.BOT_SETTINGS.API_CONFIG.API + ", using no-op api");
             e.printStackTrace();
-            config.BOT_SETTINGS.API_CONFIG.API = 4;
-            Popups.showMessageAsync(
-                    "API failed to load",
-                    "The API you had selected is not able to load.\n" +
-                    "You probably do not have the required DLL in your lib folder.\n" +
-                    "The bot will start on no-operation API, change it in the settings and restart.",
-                    JOptionPane.ERROR_MESSAGE);
+
+            APIErrors err = new APIErrors();
+
+            final String WORKING_DIR  = System.getProperty("user.dir");
+            final String ERR_MSG      = e.getMessage();
+            final String JAVA_32_ERR  = "not found in resource path";
+
+            if      (ERR_MSG.contains(JAVA_32_ERR))          err.displayUnsupportedJavaError();
+            else if (!WORKING_DIR.matches("[\\x00-\\x7F]+")) err.displayInvalidPathError(WORKING_DIR);
+            else {
+                System.out.println("Error enabling API #" + config.BOT_SETTINGS.API_CONFIG.API + ", using no-op api");
+                config.BOT_SETTINGS.API_CONFIG.API = 4;
+                Popups.showMessageAsync(
+                        "API failed to load",
+                        "The API you had selected is not able to load.\n" +
+                                "You probably do not have the required DLL in your lib folder.\n" +
+                                "The bot will start on no-operation API, change it in the settings and restart.",
+                        JOptionPane.ERROR_MESSAGE);
+            }
             return new NoopApiAdapter();
         }
     }
