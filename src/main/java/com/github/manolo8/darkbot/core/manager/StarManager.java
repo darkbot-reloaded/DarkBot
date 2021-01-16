@@ -123,7 +123,7 @@ public class StarManager {
                 .addGG(235, "GG VoT 7").accessOnlyBy(81, "GG VoT 6")
                 .addGG(236, "GG VoT 8").accessBy(81, "GG VoT 7")
                 .addGG(305, "Compromising Invasion") // (No access)
-                .addGG(410, "GoP Normal 1").accessOnlyBy(24, "1-8", "2-8", "3-8")
+                .addGG(410, "GoP Normal 1").accessOnlyBy(24, OUTPOST_HOME_MAPS)
                 .addGG(411, "GoP Normal 2").accessOnlyBy(24, "GoP Normal 1")
                 .addGG(412, "GoP Normal 3").accessOnlyBy(24, "GoP Normal 2")
                 .addGG(413, "GoP Normal 4").accessOnlyBy(24, "GoP Normal 3")
