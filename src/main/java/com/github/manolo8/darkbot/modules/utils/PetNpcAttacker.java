@@ -36,11 +36,11 @@ public class PetNpcAttacker extends NpcAttacker {
 
     protected void tryAttackOrFix() {
         boolean bugged = !target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 350
-                && System.currentTimeMillis() > (5000 + laserTime + (fixTimes * 5000));
+                && System.currentTimeMillis() > (5000 + laserTime + (fixedTimes * 5000L));
         if (!hero.pet.isAttacking(target) && System.currentTimeMillis() > laserTime) {
             if (bugged) {
                 API.keyboardClick(keybinds.getCharCode(ACTIVE_PET));
-                fixTimes++;
+                fixedTimes++;
             } else if (hero.locationInfo.distance(target) > 800) {
                 API.keyboardClick(keybinds.getCharCode(ATTACK_ROCKET));
                 laserTime = System.currentTimeMillis() + 5000;
