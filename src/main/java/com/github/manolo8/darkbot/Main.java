@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigManager;
+import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
@@ -57,6 +58,7 @@ public class Main extends Thread implements PluginListener {
             .setLenient()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
+            .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
             .create();
 
     public ConfigManager configManager = new ConfigManager();

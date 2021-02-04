@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
+import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
@@ -13,6 +14,7 @@ import com.github.manolo8.darkbot.utils.ApiErrors;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapterFactory;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -30,6 +32,7 @@ public class ConfigManager {
             .setLenient()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
+            .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
             .create();
 
     public static final String DEFAULT = "config",
