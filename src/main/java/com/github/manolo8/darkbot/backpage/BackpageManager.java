@@ -1,11 +1,9 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.api.ApiAdapter;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
-import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
@@ -20,14 +18,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.manolo8.darkbot.Main.API;
-
 public class BackpageManager extends Thread {
     public  static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
-    private static final String[] ACTIONS = new String[]{
+    protected static final String[] ACTIONS = new String[]{
             "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
 
-    private static class SidStatus {
+    protected static class SidStatus {
         private static final int NO_SID = -1, ERROR = -2, UNKNOWN = -3;
     }
 
@@ -35,15 +31,15 @@ public class BackpageManager extends Thread {
     public final LegacyHangarManager legacyHangarManager;
     public final GalaxyManager galaxyManager;
 
-    private final Main main;
-    private String sid, instance;
-    private List<Task> tasks;
+    protected final Main main;
+    protected String sid, instance;
+    protected List<Task> tasks;
 
-    private long lastRequest;
-    private long sidLastUpdate = System.currentTimeMillis();
-    private long sidNextUpdate = sidLastUpdate;
-    private long checkDrones = Long.MAX_VALUE;
-    private int sidStatus = -1;
+    protected long lastRequest;
+    protected long sidLastUpdate = System.currentTimeMillis();
+    protected long sidNextUpdate = sidLastUpdate;
+    protected long checkDrones = Long.MAX_VALUE;
+    protected int sidStatus = -1;
 
     public BackpageManager(Main main) {
         super("BackpageManager");
@@ -176,17 +172,24 @@ public class BackpageManager extends Thread {
     }
 
     public String getReloadToken(InputStream input) {
+        Matcher matcher = RELOAD_TOKEN_PATTERN.matcher("");
+
         try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             return br.lines()
-                    .map(RELOAD_TOKEN_PATTERN::matcher)
+                    .map(matcher::reset)
                     .filter(Matcher::find)
                     .map(m -> m.group(1))
                     .findFirst().orElse(null);
 
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String getReloadToken(String body) {
+        Matcher m = RELOAD_TOKEN_PATTERN.matcher(body);
+        return m.find() ? m.group(1) : null;
     }
 
     public void setTasks(List<Task> tasks) {

@@ -40,6 +40,8 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import eu.darkbot.api.API;
+import eu.darkbot.api.managers.BotAPI;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -48,9 +50,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class Main extends Thread implements PluginListener {
+public class Main extends Thread implements PluginListener, API {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 71");
+    public static final Version VERSION      = BotAPI.VERSION;
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
