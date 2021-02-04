@@ -222,7 +222,7 @@ public class CollectorModule implements Module {
                 if (ship.isInTimer()) {
                     return ship.locationInfo.now;
                 } else if (ship.isAttacking(hero)) {
-                    ship.setTimerTo(config.GENERAL.RUNNING.REMEMBER_ENEMIES_FOR * 1000);
+                    ship.setTimerTo(config.GENERAL.RUNNING.REMEMBER_ENEMIES_FOR * 1000L);
                     return ship.locationInfo.now;
                 }
 
