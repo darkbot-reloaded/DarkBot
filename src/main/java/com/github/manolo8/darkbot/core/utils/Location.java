@@ -11,7 +11,7 @@ import static java.lang.StrictMath.atan2;
 import static java.lang.StrictMath.cos;
 import static java.lang.StrictMath.sin;
 
-public class Location {
+public class Location implements eu.darkbot.api.objects.Location {
 
     public double x;
     public double y;
@@ -69,6 +69,11 @@ public class Location {
     }
 
     @Override
+    public eu.darkbot.api.objects.Location setTo(double x, double y) {
+        return set(x, y);
+    }
+
+    @Override
     public String toString() {
         return (int) x + "," + (int) y;
     }
@@ -85,5 +90,15 @@ public class Location {
     @Override
     public int hashCode() {
         return Objects.hash(x, y);
+    }
+
+    @Override
+    public double getX() {
+        return x;
+    }
+
+    @Override
+    public double getY() {
+        return y;
     }
 }
