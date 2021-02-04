@@ -1,7 +1,9 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
+import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import eu.darkbot.api.managers.HeroItemsAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,22 @@ public class CategoryBar extends MenuBar {
             if (id.equals(category.categoryId)) return category;
         }
         return null;
+    }
+
+    public Category get(HeroItemsAPI.Category type) {
+        String id = type.getId();
+        for (Category category : categories) {
+            if (id.equals(category.categoryId)) return category;
+        }
+        return null;
+    }
+
+    public boolean hasCategory(HeroItemsAPI.Category type) {
+        String id = type.getId();
+        for (Category category : categories) {
+            if (id.equals(category.categoryId)) return true;
+        }
+        return false;
     }
 
     public Optional<Item> findItemById(String itemId) {

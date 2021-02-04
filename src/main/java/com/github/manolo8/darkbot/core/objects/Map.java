@@ -1,8 +1,9 @@
 package com.github.manolo8.darkbot.core.objects;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class Map implements Comparable<Map> {
+public class Map implements Comparable<Map>, eu.darkbot.api.entities.utils.Map {
 
     public int id;
     public String name, shortName;
@@ -29,6 +30,31 @@ public class Map implements Comparable<Map> {
     @Override
     public int compareTo(@NotNull Map o) {
         return name.compareTo(o.name);
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public @Nullable String getShortName() {
+        return shortName;
+    }
+
+    @Override
+    public boolean isPvp() {
+        return pvp;
+    }
+
+    @Override
+    public boolean isGg() {
+        return gg;
     }
 
 }
