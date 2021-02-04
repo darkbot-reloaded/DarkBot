@@ -6,9 +6,11 @@ import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -60,18 +62,26 @@ public class Entity extends Updatable {
         this.locationInfo.update(API.readMemoryLong(address + 64));
         this.traits.update(API.readMemoryLong(address + 48));
 
-        for (int c = 0; c < traits.getSize(); c++) {
-            long adr = traits.get(c);
+        this.clickable.update(findInTraits(ptr -> {
+            int radius   = API.readMemoryInt(ptr + 40);
+            int priority = API.readMemoryInt(ptr + 44);
+            int enabled  = API.readMemoryInt(ptr + 48);
 
-            int radius   = API.readMemoryInt(adr + 40);
-            int priority = API.readMemoryInt(adr + 44);
-            int enabled  = API.readMemoryInt(adr + 48);
+            return radius >= 0 && radius < 4000 &&
+                    priority > -4 && priority < 1000 &&
+                    (enabled == 1 || enabled == 0);
+        }));
+    }
 
-            if (radius >= 0 && radius < 4000 && priority > -4 && priority < 1000 && (enabled == 1 || enabled == 0)) {
-                clickable.update(adr);
-                break;
-            }
+    protected long findInTraits(Predicate<Long> filter) {
+        ObjArray traits = this.traits;
+
+        for (int i = 0; i < traits.getSize(); i++) {
+            long ptr = traits.getPtr(i);
+            if (filter.test(ptr)) return ptr;
         }
+
+        return ByteUtils.NULL;
     }
 
     public boolean hasEffect(EffectManager.Effect effect) {
