@@ -21,10 +21,10 @@ import java.util.regex.Pattern;
 
 public class BackpageManager extends Thread {
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
-    private static final String[] ACTIONS = new String[]{
+    protected static final String[] ACTIONS = new String[]{
             "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
 
-    private static class SidStatus {
+    protected static class SidStatus {
         private static final int NO_SID = -1, ERROR = -2, UNKNOWN = -3;
     }
 
@@ -34,15 +34,15 @@ public class BackpageManager extends Thread {
     public final DispatchManager dispatchManager;
     public final AuctionManager auctionManager;
 
-    private final Main main;
-    private String sid, instance;
-    private List<Task> tasks = new ArrayList<>();
+    protected final Main main;
+    protected String sid, instance;
+    protected List<Task> tasks = new ArrayList<>();
 
-    private long lastRequest;
-    private long sidLastUpdate = System.currentTimeMillis();
-    private long sidNextUpdate = sidLastUpdate;
-    private long checkDrones = Long.MAX_VALUE;
-    private int sidStatus = -1;
+    protected long lastRequest;
+    protected long sidLastUpdate = System.currentTimeMillis();
+    protected long sidNextUpdate = sidLastUpdate;
+    protected long checkDrones = Long.MAX_VALUE;
+    protected int sidStatus = -1;
 
     public BackpageManager(Main main) {
         super("BackpageManager");
@@ -190,9 +190,11 @@ public class BackpageManager extends Thread {
     }
 
     public String getReloadToken(InputStream input) {
+        Matcher matcher = RELOAD_TOKEN_PATTERN.matcher("");
+
         try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             return br.lines()
-                    .map(RELOAD_TOKEN_PATTERN::matcher)
+                    .map(matcher::reset)
                     .filter(Matcher::find)
                     .map(m -> m.group(1))
                     .findFirst().orElse(null);
@@ -201,6 +203,11 @@ public class BackpageManager extends Thread {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String getReloadToken(String body) {
+        Matcher m = RELOAD_TOKEN_PATTERN.matcher(body);
+        return m.find() ? m.group(1) : null;
     }
 
     public void setTasks(List<Task> tasks) {
