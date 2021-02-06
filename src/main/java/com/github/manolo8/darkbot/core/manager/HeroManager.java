@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
+import eu.darkbot.api.managers.HeroAPI;
 
 import java.util.List;
 
@@ -163,5 +164,8 @@ public class HeroManager extends Ship implements Manager {
     public boolean isInMode(int config, Character formation) {
         return this.config == config && this.formation == formation;
     }
+
+
+
 
 }

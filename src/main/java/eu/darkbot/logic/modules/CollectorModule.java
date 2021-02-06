@@ -2,7 +2,6 @@ package eu.darkbot.logic.modules;
 
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Box;
-import eu.darkbot.api.entities.Entity;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.Ship;
 import eu.darkbot.api.entities.other.Effect;
@@ -19,12 +18,9 @@ import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.Module;
 import eu.darkbot.config.ConfigAPI;
 import eu.darkbot.logic.SafetyFinder;
-import eu.darkbot.utils.Time;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 
 import static java.lang.Math.cos;
 import static java.lang.StrictMath.sin;
@@ -51,8 +47,6 @@ public class CollectorModule implements Module {
     protected final Collection<Ship> ships;
     protected final Collection<Portal> portals;
 
-    protected final Map<Integer, String> attackers = new HashMap<>();
-
     public Box currentBox;
     protected long refreshing;
 
@@ -68,7 +62,8 @@ public class CollectorModule implements Module {
                            PluginAPI pluginAPI,
                            MovementAPI movement,
                            HeroItemsAPI heroItems,
-                           EntitiesAPI entities) {
+                           EntitiesAPI entities,
+                           SafetyFinder safetyFinder) {
         this.bot = bot;
         this.pet = pet;
         this.hero = hero;
@@ -83,7 +78,7 @@ public class CollectorModule implements Module {
         this.ships = entities.getPlayers();
         this.portals = entities.getPortals();
 
-        this.safetyFinder = new SafetyFinder(pluginAPI); //TODO replace lazy with weak listener in safety
+        this.safetyFinder = safetyFinder;
     }
 
     @Override
@@ -128,7 +123,8 @@ public class CollectorModule implements Module {
 
     protected boolean checkMap() {
         if (!portals.isEmpty() && config.GENERAL.WORKING_MAP != star.getCurrentMap().getId()) {
-            this.bot.setModule(new MapModule(pluginAPI, star.getOrCreateMapById(config.GENERAL.WORKING_MAP)));
+            this.bot.setModule(pluginAPI.requireInstance(MapModule.class))
+                    .setTarget(star.getOrCreateMapById(config.GENERAL.WORKING_MAP));
             return false;
         }
 
@@ -222,12 +218,12 @@ public class CollectorModule implements Module {
 
     protected Location findClosestEnemyAndAddToDangerousList() {
         return ships.stream()
-                .filter(ship -> ship.isBlacklisted() || (ship.isAttacking(hero)
-                        && ship.setBlacklisted((long) config.GENERAL.RUNNING.REMEMBER_ENEMIES_FOR * Time.SECOND)))
-                .peek(ship -> attackers.put(ship.getId(), ship.getUsername()))
-                .filter(ship -> ship.isEnemy() && !ship.isInvisible()
-                        && ship.getLocationInfo().distanceTo(hero) < DISTANCE_FROM_DANGEROUS)
-                .map(Entity::getLocationInfo)
+                .filter(s -> s.getEntityInfo().isEnemy() && !s.isInvisible() && s.distanceTo(hero) < DISTANCE_FROM_DANGEROUS)
+                .peek(s -> {
+                    if (!s.isBlacklisted() && s.isAttacking(hero))
+                        s.setBlacklisted(config.GENERAL.RUNNING.REMEMBER_ENEMIES_FOR * 1000L);
+                })
+                .map(Ship::getLocationInfo)
                 .min(Comparator.comparingDouble(location -> location.distanceTo(hero)))
                 .orElse(null);
     }
