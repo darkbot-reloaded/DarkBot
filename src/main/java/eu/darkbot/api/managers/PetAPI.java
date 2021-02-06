@@ -95,23 +95,4 @@ public interface PetAPI extends Pet, API {
     int getHeat();
     int getMaxHeat();
 
-    @Override
-    default int getHull() {
-        return 0;
-    }
-
-    @Override
-    default int getMaxHull() {
-        return 0;
-    }
-
-    @Override
-    default boolean hullDecreasedIn(int time) {
-        return false;
-    }
-
-    @Override
-    default boolean hullIncreasedIn(int time) {
-        return false;
-    }
 }

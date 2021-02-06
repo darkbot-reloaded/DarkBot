@@ -2,7 +2,7 @@ package eu.darkbot.api.entities;
 
 import eu.darkbot.api.entities.other.PortalType;
 import eu.darkbot.api.entities.utils.Map;
-import eu.darkbot.api.objects.Info;
+import eu.darkbot.api.objects.EntityInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -18,18 +18,24 @@ public interface Portal extends Entity {
     Optional<Map> getTargetMap();
 
     /**
+     * @return portal type id
+     */
+    int getTypeId();
+
+    /**
      * Portal type id in generally is id of the portal's graphic.
      *
      * @return {@link Portal}'s {@link PortalType}
      */
-    @Nullable
-    PortalType getPortalType();
+    default PortalType getPortalType() {
+        return PortalType.of(getTypeId());
+    }
 
     /**
-     * Is {@link Portal} accessible only for a certain {@link Info.Fraction}.
+     * Is {@link Portal} accessible only for a certain {@link EntityInfo.Faction}.
      * Mainly used for 5-x portals.
      *
-     * @return the {@link Info.Fraction} of the {@link Portal}
+     * @return the {@link EntityInfo.Faction} of the {@link Portal}
      */
-    Info.Fraction getFaction();
+    EntityInfo.Faction getFaction();
 }
