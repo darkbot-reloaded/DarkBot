@@ -1,5 +1,7 @@
 package eu.darkbot.api.objects;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Represents location point in-game.
  */
@@ -23,6 +25,31 @@ public interface Locatable {
      * @return y coordinate of the {@link Locatable}
      */
     double getY();
+
+
+    /**
+     * @return the distance between current {@link Location} and other.
+     */
+    default double distanceTo(double ox, double oy) {
+        ox -= getX();
+        oy -= getY();
+        return Math.sqrt(ox * ox + oy * oy);
+    }
+
+    default double distanceTo(@NotNull Locatable other) {
+        return distanceTo(other.getX(), other.getY());
+    }
+
+    /**
+     * @return angle to other location as radians.
+     */
+    default double angleTo(double ox, double oy) {
+        return Math.atan2(getY() - oy, getX() - ox);
+    }
+
+    default double angleTo(@NotNull Locatable other) {
+        return angleTo(other.getX(), other.getY());
+    }
 
     //Locatable implementation
     class LocatableImpl implements Locatable {

@@ -25,7 +25,8 @@ public enum PortalType {
     INVISIBLE(18), //4-5 center portal?
     BREACH(22),
     LOW_LEFT(77),
-    HIGH_RIGHT(78);
+    HIGH_RIGHT(78),
+    UNKNOWN(-1);
 
     private final int id;
 
@@ -35,5 +36,12 @@ public enum PortalType {
 
     public int getId() {
         return id;
+    }
+
+    public static PortalType of(int typeId) {
+        for (PortalType type : values())
+            if (type.id == typeId) return type;
+
+        return UNKNOWN;
     }
 }

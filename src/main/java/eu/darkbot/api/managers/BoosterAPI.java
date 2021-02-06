@@ -1,5 +1,7 @@
 package eu.darkbot.api.managers;
 
+import eu.darkbot.api.API;
+
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
@@ -8,11 +10,11 @@ import java.util.stream.Collectors;
 /**
  * API for boosters (seeing which boosters are currently active, how much time they have, etc.)
  */
-public interface BoosterAPI {
+public interface BoosterAPI extends API.Singleton {
     /**
      * @return {@code List} of all Boosters currently active on ship
      */
-    List<Booster> getBoosters();
+    List<? extends Booster> getBoosters();
 
     /**
      * Booster object for {@link BoosterAPI}
@@ -30,6 +32,10 @@ public interface BoosterAPI {
 
         String getCategory();
         String getName();
+
+        default Type getType() {
+            return Type.of(getCategory());
+        }
 
     }
 

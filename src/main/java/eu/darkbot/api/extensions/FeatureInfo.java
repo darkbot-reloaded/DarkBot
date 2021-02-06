@@ -13,6 +13,5 @@ public interface FeatureInfo<T> {
     Class<T> getFeatureClass();
     PluginInfo getPluginInfo();
 
-    // TODO: 31.12.2020 issues
-    //boolean hasIssues();
+    boolean canLoad();
 }

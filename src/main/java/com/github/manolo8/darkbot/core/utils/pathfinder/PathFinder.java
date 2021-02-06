@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.core.utils.pathfinder;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.manager.MapManager;
-import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.utils.Location;
 
 import java.util.HashSet;
@@ -12,7 +11,7 @@ import java.util.Set;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
-public class PathFinder {
+public class PathFinder implements eu.darkbot.api.utils.PathFinder {
 
     private final MapManager map;
     public final Set<PathPoint> points;
@@ -55,9 +54,9 @@ public class PathFinder {
     }
 
     public PathPoint fixToClosest(PathPoint point) {
-        int initialX = point.x, initialY = point.y;
+        double initialX = point.x, initialY = point.y;
 
-        Area area = areaTo(point);
+        AreaImpl area = areaTo(point);
         if (area != null) area = areaTo(area.toSide(point)); // Inside an area, get out of it
         if (map.isOutOfMap(point.x, point.y)) { // In radiation, get out of it
             point.x = Math.min(Math.max(point.x, 0), MapManager.internalWidth);
@@ -104,8 +103,8 @@ public class PathFinder {
         return map.isOutOfMap(x, y);
     }
 
-    public boolean canMove(int x, int y) {
-        return obstacleHandler.stream().noneMatch(a -> a.inside(x, y));
+    public boolean canMove(double x, double y) {
+        return obstacleHandler.stream().noneMatch(a -> a.containsPoint(x, y));
     }
 
     public boolean changed() {
@@ -113,7 +112,7 @@ public class PathFinder {
         synchronized (Main.UPDATE_LOCKER) {
             points.clear();
 
-            for (Area a : obstacleHandler)
+            for (AreaImpl a : obstacleHandler)
                 for (PathPoint p : a.getPoints(this))
                     if (!isOutOfMap(p.x, p.y) && canMove(p.x, p.y))
                         this.points.add(p);
@@ -123,12 +122,12 @@ public class PathFinder {
         return true;
     }
 
-    private Area areaTo(PathPoint point) {
-        return obstacleHandler.stream().filter(a -> a.inside(point.x, point.y)).findAny().orElse(null);
+    private AreaImpl areaTo(PathPoint point) {
+        return obstacleHandler.stream().filter(a -> a.containsPoint(point.x, point.y)).findAny().orElse(null);
     }
 
     boolean hasLineOfSight(PathPoint point1, PathPoint point2) {
-        return obstacleHandler.stream().allMatch(a -> a.hasLineOfSight(point1, point2));
+        return obstacleHandler.stream().noneMatch(a -> a.intersectsLine(point1, point2));
     }
 
 }

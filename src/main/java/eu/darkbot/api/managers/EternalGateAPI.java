@@ -7,14 +7,14 @@ import java.util.List;
 /**
  * API for special event: Eternal Gate
  */
-public interface EternalGateAPI extends API {
+public interface EternalGateAPI extends API.Singleton {
     int getKeys();
     int getBoosterPoints();
     int getCurrentWave();
     int getFurthestWave();
 
-    List<Booster> getActiveBoosters();
-    List<Booster> getBoosterOptions();
+    List<? extends Booster> getActiveBoosters();
+    List<? extends Booster> getBoosterOptions();
 
     /**
      * Booster for special event: eternal gate

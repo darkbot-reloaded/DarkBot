@@ -5,7 +5,7 @@ import eu.darkbot.api.API;
 /**
  * API for chromin data
  */
-public interface ChrominAPI extends API {
+public interface ChrominAPI extends API.Singleton {
     double getCurrentAmount();
     double getMaxAmount();
 }

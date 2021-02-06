@@ -34,29 +34,33 @@ public interface Area {
      */
     Rectangle getBounds();
 
-    Collection<Locatable> getPoints(@NotNull PathFinder pf);
+    /**
+     * @param point The original point to start at
+     * @return The location outside the area that is closest to the original
+     */
+    Locatable toSide(Locatable point);
+
+    /**
+     * Generates navigation points from the sharp corners around the area
+     * @param pf The current path finder to filter points on
+     * @return The list of points to use for pathfinding around this area
+     */
+    Collection<? extends Locatable> getPoints(@NotNull PathFinder pf);
 
     /**
      * @return true if Area is empty.
      */
-    boolean isEmpty();
+    default boolean isEmpty() {
+        return getBounds().isEmpty();
+    }
 
     /**
-     * @return true if Area contains point of x&y.
+     * @return true if Area contains point of x & y.
      */
     boolean containsPoint(double x, double y);
 
     default boolean containsPoint(@NotNull Locatable point) {
         return containsPoint(point.getX(), point.getY());
-    }
-
-    /**
-     * Tests if given coordinates are in this {@link Area}.
-     */
-    boolean intersects(double x, double y, double w, double h);
-
-    default boolean intersects(@NotNull Rectangle rect) {
-        return intersects(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
     /**
@@ -87,12 +91,16 @@ public interface Area {
         /**
          * @return width of the {@link Rectangle}
          */
-        double getWidth();
+        default double getWidth() {
+            return getX2() - getX();
+        }
 
         /**
          * @return height of the {@link Rectangle}
          */
-        double getHeight();
+        default double getHeight() {
+            return getY2() - getY();
+        }
 
         /**
          * @return second x coordinate of the {@link Rectangle}
@@ -111,5 +119,11 @@ public interface Area {
         default Rectangle getBounds() {
             return this;
         }
+
+        default boolean containsPoint(double x, double y) {
+            return (getX() <= x && x <= getX2() &&
+                    getY() <= y && y <= getY2());
+        }
+
     }
 }

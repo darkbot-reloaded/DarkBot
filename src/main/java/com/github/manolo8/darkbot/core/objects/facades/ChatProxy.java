@@ -6,11 +6,14 @@ import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.LogUtils;
+import eu.darkbot.api.events.EventHandler;
+import eu.darkbot.api.events.Listener;
+import eu.darkbot.api.managers.ChatAPI;
+import eu.darkbot.api.managers.EventSenderAPI;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,77 +21,52 @@ import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class ChatProxy extends Updatable {
-    public List<Chat> chats = new ArrayList<>();
+public class ChatProxy extends Updatable implements ChatAPI, Listener {
 
-    private ObjArray chatsArr = ObjArray.ofVector(true);
-    private Map<String, OutputStream> streams = new HashMap<>();
+    private final ObjArray chatsArr = ObjArray.ofVector(true);
+    private final List<ChatRoom> chats = new ArrayList<>();
 
-    private int clanLength = 7, nameLength = 10;
+    private final Map<String, OutputStream> fileWriters = new HashMap<>();
+
+    private final EventSenderAPI eventSender;
+
+    public ChatProxy(EventSenderAPI eventSender) {
+        this.eventSender = eventSender;
+        this.eventSender.registerListener(this);
+    }
 
     @Override
     public void update() {
-        if (!ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.LOG_CHAT) return;
         long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
 
         this.chatsArr.update(API.readMemoryLong(data + 64));
-        if (chatsArr.getSize() > 10) return;
-        this.chatsArr.sync(chats, Chat::new, null);
+        if (chatsArr.getSize() > 20) return;
+        this.chatsArr.sync(chats, ChatRoom::new, null);
 
-        for (Chat chat : chats) {
+        for (ChatRoom chat : chats) {
             if (chat.messagesArr.getSize() > 150) continue;
-            chat.messagesArr.forEachIncremental(ptr -> writeToFile(chat.chatName, new Message(ptr)));
+            chat.messagesArr.forEachIncremental(ptr ->
+                    eventSender.sendEvent(new MessageSentEvent(chat.chatName, new Message(ptr))));
         }
     }
 
-    private void writeToFile(String chatName, Message message) {
-        try {
-            OutputStream os = getOrCreateStream(chatName);
-            if (os == null) return;
-
-            os.write(formatMessage(message).getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String formatMessage(Message message) {
-        if (message.clanTag.length() + 2 > clanLength) clanLength = message.clanTag.length() + 2;
-        if (message.username.length() > nameLength) nameLength = message.username.length();
-
-        return String.format("[%s] |%-7s, %-9s| %-" + clanLength + "s%-" + nameLength + "s: %s" + System.lineSeparator(),
-                LocalDateTime.now().format(LogUtils.LOG_DATE),
-                message.role,
-                message.userId,
-                "[" + message.clanTag + "]",
-                message.username,
-                message.message);
-    }
-
-    private OutputStream getOrCreateStream(String chatName) {
-        return this.streams.computeIfAbsent(chatName, LogUtils::createLogFile);
-    }
-
-    public static class Chat extends UpdatableAuto {
-        public String chatName;
-        //public List<Message> messages = new ArrayList<>();
-
-        private ObjArray messagesArr = ObjArray.ofVector(true);
+    public static class ChatRoom extends UpdatableAuto {
+        private String chatName;
+        private final ObjArray messagesArr = ObjArray.ofVector(true);
 
         @Override
         public void update() {
             this.chatName = API.readMemoryString(address, 56);
-
             this.messagesArr.update(API.readMemoryLong(address + 80));
-            //this.messagesArr.sync(messages, Message::new, null);
         }
     }
 
-    public static class Message extends UpdatableAuto {
+    public static class Message extends UpdatableAuto implements ChatAPI.Message {
         public String message, username, role, clanTag, globalId, userId;
 
-        public Message() {}
-        private Message(long address) { update(address); }
+        public Message(long address) {
+            update(address);
+        }
 
         @Override
         public void update() {
@@ -99,5 +77,47 @@ public class ChatProxy extends Updatable {
             this.globalId = API.readMemoryString(address, 56, 56);
             this.userId   = API.readMemoryString(address, 56, 64);
         }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public String getUsername() {
+            return username;
+        }
+
+        @Override
+        public String getType() {
+            return role;
+        }
+
+        @Override
+        public String getClanTag() {
+            return clanTag;
+        }
+
+        @Override
+        public String getGlobalId() {
+            return globalId;
+        }
+
+        @Override
+        public String getUserId() {
+            return userId;
+        }
     }
+
+    @EventHandler
+    public void onChatMessage(MessageSentEvent event) {
+        if (!ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.LOG_CHAT) return;
+
+        try (OutputStream os = fileWriters.computeIfAbsent(event.getRoom(), LogUtils::createLogFile)) {
+            if (os != null) os.write(event.getMessage().formatted().getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

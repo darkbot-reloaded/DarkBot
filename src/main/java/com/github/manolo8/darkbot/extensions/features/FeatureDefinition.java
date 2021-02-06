@@ -5,10 +5,12 @@ import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
+import eu.darkbot.api.extensions.FeatureInfo;
+import eu.darkbot.api.extensions.PluginInfo;
 
 import java.util.function.Consumer;
 
-public class FeatureDefinition<T> {
+public class FeatureDefinition<T> implements FeatureInfo<T> {
 
     private final Plugin plugin;
     private final Class<T> clazz;
@@ -56,7 +58,6 @@ public class FeatureDefinition<T> {
         return issues;
     }
 
-
     public String getId() {
         return id;
     }
@@ -100,6 +101,20 @@ public class FeatureDefinition<T> {
 
     public boolean isEnabled() {
         return plugin == null || plugin.getInfo().ENABLED_FEATURES.contains(id);
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.setStatus(enabled);
+    }
+
+    @Override
+    public Class<T> getFeatureClass() {
+        return getClazz();
+    }
+
+    @Override
+    public PluginInfo getPluginInfo() {
+        return plugin;
     }
 
     public boolean canLoad() {

@@ -1,16 +1,17 @@
 package com.github.manolo8.darkbot.core.utils.pathfinder;
 
 import com.github.manolo8.darkbot.core.utils.Location;
+import eu.darkbot.api.objects.Locatable;
 
 import java.util.HashSet;
 
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
-public class PathPoint {
+public class PathPoint implements Locatable {
 
-    public int x;
-    public int y;
+    public double x;
+    public double y;
 
     public int f;
     public int g;
@@ -18,7 +19,7 @@ public class PathPoint {
 
     public HashSet<PathPoint> lineOfSight = new HashSet<>();
 
-    public PathPoint(int x, int y) {
+    public PathPoint(double x, double y) {
         this.x = x;
         this.y = y;
     }
@@ -42,9 +43,32 @@ public class PathPoint {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PathPoint pathPoint = (PathPoint) o;
+
+        if (Double.compare(pathPoint.x, x) != 0) return false;
+        return Double.compare(pathPoint.y, y) == 0;
+    }
+
+    @Override
     public int hashCode() {
-        int var1 = 1664525 * this.x + 1013904223;
-        int var2 = 1664525 * (this.y ^ -559038737) + 1013904223;
-        return var1 ^ var2;
+        long temp = Double.doubleToLongBits(x);
+        int result = (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(y);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
+    public double getX() {
+        return x;
+    }
+
+    @Override
+    public double getY() {
+        return y;
     }
 }

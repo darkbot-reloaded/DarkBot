@@ -5,7 +5,7 @@ import eu.darkbot.api.API;
 /**
  * API for special event: Mimesis Mutiny
  */
-public interface EscortAPI extends API {
+public interface EscortAPI extends API.Singleton {
     double getTime();
     double getKeys();
 }

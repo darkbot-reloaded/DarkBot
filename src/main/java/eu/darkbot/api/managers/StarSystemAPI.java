@@ -4,7 +4,7 @@ import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.utils.Area;
 import eu.darkbot.api.entities.utils.Map;
-import eu.darkbot.api.utils.Listener;
+import eu.darkbot.api.events.Event;
 import eu.darkbot.utils.ArrayUtils;
 
 import java.util.Collection;
@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * API to add, manage, retrieve maps.
  */
-public interface StarSystemAPI extends API {
+public interface StarSystemAPI extends API.Singleton {
     List<String> HOME_MAPS         = ArrayUtils.asImmutableList("1-1", "2-1", "3-1");
     List<String> OUTPOST_HOME_MAPS = ArrayUtils.asImmutableList("1-8", "2-8", "3-8");
     List<String> PIRATE_MAPS       = ArrayUtils.asImmutableList("5-1", "5-2", "5-3");
@@ -32,7 +32,7 @@ public interface StarSystemAPI extends API {
     /**
      * @return {@link Collection} of all known maps
      */
-    Collection<Map> getMaps();
+    Collection<? extends Map> getMaps();
 
     /**
      * Find {@link Map} by given {@code mapId}.
@@ -62,17 +62,6 @@ public interface StarSystemAPI extends API {
     Map getByName(String mapName) throws MapNotFoundException;
 
     /**
-     * Given {@link Listener} will be executed on each map change.
-     * <p>
-     * Every {@link Listener} need to have strong reference.
-     *
-     * @param onMapChange to be added
-     * @return given {@link Listener} reference
-     * @see Listener
-     */
-    Listener<Map> addMapChangeListener(Listener<Map> onMapChange);
-
-    /**
      * @return best {@link Portal} which leads to {@code targetMap}
      */
     Portal findNext(Map targetMap);
@@ -84,6 +73,23 @@ public interface StarSystemAPI extends API {
 
         public MapNotFoundException(String mapName) {
             super("Map " + mapName + " was not found");
+        }
+    }
+
+    class MapChangeEvent implements Event {
+        private final Map previous, next;
+
+        public MapChangeEvent(Map previous, Map next) {
+            this.previous = previous;
+            this.next = next;
+        }
+
+        public Map getPrevious() {
+            return previous;
+        }
+
+        public Map getNext() {
+            return next;
         }
     }
 }

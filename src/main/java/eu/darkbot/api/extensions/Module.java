@@ -4,8 +4,7 @@ public interface Module {
 
     void onTickModule();
 
-    default void onStoppedModule() {
-    }
+    default void onTickStopped() {}
 
     default boolean canRefresh() {
         return true;

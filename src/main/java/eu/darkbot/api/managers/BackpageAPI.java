@@ -14,7 +14,7 @@ import java.util.Optional;
  * {@link BackpageAPI} should be called only from {@link Task} thread.
  * @see com.github.manolo8.darkbot.core.itf.Task
  */
-public interface BackpageAPI extends API {
+public interface BackpageAPI extends API.Singleton {
 
     String getSid();
 

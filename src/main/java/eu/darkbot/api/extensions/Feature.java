@@ -30,11 +30,4 @@ public @interface Feature {
      */
     boolean enabledByDefault() default false;
 
-    /**
-     *
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.CONSTRUCTOR)
-    @interface Inject {
-    }
 }
