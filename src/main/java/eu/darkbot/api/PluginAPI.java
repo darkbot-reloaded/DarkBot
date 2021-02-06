@@ -1,13 +1,9 @@
 package eu.darkbot.api;
 
-import eu.darkbot.api.extensions.PluginInfo;
-import eu.darkbot.api.extensions.FeatureInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-
-public interface PluginAPI extends API {
+public interface PluginAPI extends API.Singleton {
 
     /**
      * @param api to get
@@ -28,26 +24,14 @@ public interface PluginAPI extends API {
     @NotNull <T extends API> T requireAPI(@NotNull Class<T> api) throws UnsupportedOperationException;
 
     /**
-     * @return {@link PluginInfo} of your plugin.
+     * This method will attempt to create an instance of the asked class, by calling the
+     * appropriate constructor
+     *
+     * @param clazz The class to create an instance of
+     * @param <T> type of instance to create
+     * @return instance of given type, if a suitable constructor was found
+     * @throws UnsupportedOperationException if given api isn't supported
      */
-    PluginInfo getPluginInfo();
+    @NotNull <T> T createInstance(@NotNull Class<T> clazz) throws UnsupportedOperationException;
 
-    /**
-     * @return {@link Collection} of all available and loaded plugins.
-     */
-    Collection<PluginInfo> getPluginsInfo();
-
-    /**
-     * @param feature class to get instance of
-     * @return instance of given feature
-     * @throws ClassNotFoundException when given feature wasn't found
-     */
-    @NotNull <T> T getFeature(Class<T> feature) throws ClassNotFoundException;
-
-    /**
-     * @param feature class to get {@link FeatureInfo} of
-     * @return {@link FeatureInfo} of given feature.
-     * @throws ClassNotFoundException when given feature wasn't found
-     */
-    @NotNull <T> FeatureInfo<T> getFeatureInfo(Class<T> feature) throws ClassNotFoundException;
 }

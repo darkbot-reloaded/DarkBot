@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.utils.pathfinder;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,13 +12,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class ObstacleHandler implements Iterable<Area> {
+public class ObstacleHandler implements Iterable<AreaImpl> {
 
     private final MapManager map;
     private final List<Obstacle> obstacles;
     private boolean[] used = new boolean[0];
     private ZoneInfo avoided;
-    private List<Area> areas = new ArrayList<>();
+    private List<AreaImpl> areas = new ArrayList<>();
 
     public ObstacleHandler(MapManager map) {
         this.map = map;
@@ -31,11 +32,11 @@ public class ObstacleHandler implements Iterable<Area> {
         return changed;
     }
 
-    public List<Area> get() {
+    public List<AreaImpl> get() {
         return areas;
     }
 
-    public Stream<Area> stream() {
+    public Stream<AreaImpl> stream() {
         return areas.stream();
     }
 
@@ -72,12 +73,12 @@ public class ObstacleHandler implements Iterable<Area> {
                 IntStream.range(0, used.length).filter(i -> used[i])
                         .mapToObj(obstacles::get).map(Obstacle::getArea),
                 avoided.getZones().stream()
-                        .map(zi -> Rectangle.ofSize(zi.x * width, zi.y * height, width, height)))
+                        .map(zi -> RectangleImpl.ofSize(zi.x * width, zi.y * height, width, height)))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Iterator<Area> iterator() {
+    public @NotNull Iterator<AreaImpl> iterator() {
         return areas.iterator();
     }
 }

@@ -24,7 +24,7 @@ public interface Ship extends Attacker, Movable {
      *
      * @param forTime time in milliseconds
      */
-    boolean setBlacklisted(long forTime);
+    void setBlacklisted(long forTime);
 
     /**
      * @return true if ship has enabled {@link Pet}.

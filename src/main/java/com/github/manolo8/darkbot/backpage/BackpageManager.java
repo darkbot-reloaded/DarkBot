@@ -7,18 +7,22 @@ import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
+import eu.darkbot.api.managers.BackpageAPI;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BackpageManager extends Thread {
+public class BackpageManager extends Thread implements BackpageAPI {
     public  static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
     protected static final String[] ACTIONS = new String[]{
             "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
@@ -213,4 +217,23 @@ public class BackpageManager extends Thread {
         }
     }
 
+    @Override
+    public String getSid() {
+        return sid;
+    }
+
+    @Override
+    public URI getInstanceURI() {
+        return URI.create(instance);
+    }
+
+    @Override
+    public Instant getLastRequestTime() {
+        return Instant.ofEpochMilli(lastRequest);
+    }
+
+    @Override
+    public Optional<String> findReloadToken(String body) {
+        return Optional.ofNullable(getReloadToken(body));
+    }
 }

@@ -4,17 +4,17 @@ import com.formdev.flatlaf.FlatLaf;
 import eu.darkbot.api.API;
 import eu.darkbot.api.extensions.Module;
 import eu.darkbot.utils.Version;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Bot's management API
  */
-public interface BotAPI extends API {
+public interface BotAPI extends API.Singleton {
 
     /**
      * {@link Version} of the DarkBot.
      */
-    Version VERSION = Version.of("1.13.17 beta 69");
+    Version VERSION = Version.of("1.13.17 beta 72 alpha");
 
     /**
      * @return avg time of tick in ms.
@@ -30,7 +30,7 @@ public interface BotAPI extends API {
      * @param module to set
      * @return {@code module}
      */
-    Module setModule(@NotNull Module module);
+    <M extends Module> M setModule(@Nullable M module);
 
     /**
      *

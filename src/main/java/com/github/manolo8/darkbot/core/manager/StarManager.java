@@ -4,6 +4,8 @@ import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.API;
+import eu.darkbot.api.managers.StarSystemAPI;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
@@ -17,7 +19,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class StarManager {
+public class StarManager implements API.Singleton {
     public static final String[] HOME_MAPS = new String[]{"1-1", "2-1", "3-1"};
     public static final String[] OUTPOST_HOME_MAPS = new String[]{"1-8", "2-8", "3-8"};
     public static final String[] BL_MAPS = new String[]{"1BL", "2BL", "3BL"};
@@ -214,13 +216,27 @@ public class StarManager {
                 .orElseGet(() -> addMap(new Map(--INVALID_MAP_ID, name, false, false)));
     }
 
+    public Map getByName(String name) throws StarSystemAPI.MapNotFoundException {
+        return starSystem.vertexSet().stream().filter(m -> m.name.equals(name)).findAny()
+                .orElseThrow(() -> new StarSystemAPI.MapNotFoundException(name));
+    }
+
     public Stream<Map> mapSet() {
         return starSystem.vertexSet().stream();
+    }
+
+    public Collection<Map> getMaps() {
+        return starSystem.vertexSet();
     }
 
     public Map byId(int id) {
         return starSystem.vertexSet().stream().filter(m -> m.id == id).findAny()
                 .orElseGet(() -> addMap(new Map(id, "Unknown map " + id, false, false)));
+    }
+
+    public Map getById(int id) throws StarSystemAPI.MapNotFoundException {
+        return starSystem.vertexSet().stream().filter(m -> m.id == id).findAny()
+                .orElseThrow(() -> new StarSystemAPI.MapNotFoundException(id));
     }
 
     private Map addMap(Map map) {

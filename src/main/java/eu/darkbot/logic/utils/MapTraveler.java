@@ -3,13 +3,17 @@ package eu.darkbot.logic.utils;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.utils.Map;
+import eu.darkbot.api.events.EventHandler;
+import eu.darkbot.api.events.Listener;
+import eu.darkbot.api.extensions.Installable;
 import eu.darkbot.api.managers.*;
 import eu.darkbot.api.objects.Location;
-import eu.darkbot.api.utils.Listener;
 
 import java.util.Collection;
 
-public class MapTraveler {
+public class MapTraveler implements Listener, Installable {
+    protected final EventSenderAPI eventSender;
+
     protected final PetAPI pet;
     protected final HeroAPI hero;
     protected final StarSystemAPI star;
@@ -17,7 +21,6 @@ public class MapTraveler {
 
     protected final Collection<Portal> portals;
 
-    protected final Listener<Map> listener = this::onMapChange;
     protected final PortalJumper jumper;
 
     public Portal current;
@@ -27,15 +30,29 @@ public class MapTraveler {
     protected long shipTpWait = -1, mapChangeWait = -1;
     protected boolean done;
 
-    public MapTraveler(PluginAPI api) {
-        this.pet = api.requireAPI(PetAPI.class);
-        this.hero = api.requireAPI(HeroAPI.class);
-        this.star = api.requireAPI(StarSystemAPI.class);
-        this.movement = api.requireAPI(MovementAPI.class);
+    public MapTraveler(PetAPI petApi,
+                       HeroAPI heroApi,
+                       StarSystemAPI starSystem,
+                       MovementAPI movement,
+                       EntitiesAPI entities,
+                       EventSenderAPI eventSender) {
+        this.pet = petApi;
+        this.hero = heroApi;
+        this.star = starSystem;
+        this.movement = movement;
         this.jumper = new PortalJumper(movement);
+        this.portals = entities.getPortals();
+        this.eventSender = eventSender;
+    }
 
-        this.star.addMapChangeListener(listener);
-        this.portals = api.requireAPI(EntitiesAPI.class).getPortals();
+    @Override
+    public void install(PluginAPI pluginAPI) {
+        eventSender.registerListener(this);
+    }
+
+    @Override
+    public void uninstall() {
+        eventSender.unregisterListener(this);
     }
 
     public void setTarget(Map target) {
@@ -92,7 +109,8 @@ public class MapTraveler {
         return hero.getLocationInfo().distanceTo(current) <= leniency && !movement.isMoving();
     }
 
-    protected void onMapChange(Map map) {
+    @EventHandler
+    protected void onMapChange(StarSystemAPI.MapChangeEvent event) {
         mapChangeWait = System.currentTimeMillis() + 2000;
         lastPortals = -1;
     }
