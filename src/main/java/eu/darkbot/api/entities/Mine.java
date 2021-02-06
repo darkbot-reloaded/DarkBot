@@ -8,7 +8,7 @@ public interface Mine extends Entity {
     int getTypeId();
 
     default Mine.Type getType() {
-        return Type.get(getTypeId());
+        return Type.of(getTypeId());
     }
 
     /**
@@ -33,7 +33,7 @@ public interface Mine extends Entity {
             this.ids = ids;
         }
 
-        private static Type get(int typeId) {
+        private static Type of(int typeId) {
             for (Type type : values())
                 for (int id : type.ids)
                     if (id == typeId) return type;

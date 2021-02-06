@@ -1,8 +1,7 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
-import com.github.manolo8.darkbot.extensions.util.Version;
+import eu.darkbot.utils.Version;
 
-import java.net.URI;
 import java.net.URL;
 
 public class PluginDefinition {
@@ -21,7 +20,7 @@ public class PluginDefinition {
     // Array of fully qualified class names of modules
     public String[] features = NULL_ARRAY;
     // Donation url
-    public URI donation;
+    public URL donation;
     // URL to download the plugin from
     public URL download;
     // URI to get an updated plugin definition (a plugin.json)

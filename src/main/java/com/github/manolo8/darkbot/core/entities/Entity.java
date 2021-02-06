@@ -8,13 +8,14 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Entity extends Updatable {
+public class Entity extends Updatable implements eu.darkbot.api.entities.Entity {
     public Main main;
     public Map<String, Object> metadata;
     public LocationInfo locationInfo = new LocationInfo();
@@ -115,4 +116,28 @@ public class Entity extends Updatable {
     public String toString() {
         return String.valueOf(id);
     }
+
+    @Override
+    public boolean isValid() {
+        return !removed;
+    }
+
+    @Override
+    public boolean isSelectable() {
+        return clickable.enabled;
+    }
+
+    @Override
+    public boolean trySelect(boolean tryAttack) {
+        clickable.setRadius(800);
+        main.hero.drive.clickCenter(!tryAttack, locationInfo.now);
+        clickable.setRadius(0);
+        return true; // We can't know if successful...
+    }
+
+    @Override
+    public Collection<Integer> getEffects() {
+        return null;
+    }
+
 }

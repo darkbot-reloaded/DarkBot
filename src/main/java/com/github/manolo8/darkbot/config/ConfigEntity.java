@@ -83,8 +83,8 @@ public class ConfigEntity {
         return config.SAFETY.computeIfAbsent(MapManager.id, id -> new HashSet<>());
     }
 
-    public PluginInfo getPluginInfo(PluginDefinition plugin) {
-        return config.PLUGIN_INFOS.computeIfAbsent(plugin.name + "_by_" + plugin.author, id -> new PluginInfo());
+    public PluginConfig getPluginInfo(PluginDefinition plugin) {
+        return config.PLUGIN_INFOS.computeIfAbsent(plugin.name + "_by_" + plugin.author, id -> new PluginConfig());
     }
 
     public static void changed() {

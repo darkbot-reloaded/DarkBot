@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * API to manage {@link HeroAPI} items.
  */
-public interface HeroItemsAPI extends API {
+public interface HeroItemsAPI extends API.Singleton {
 
     /**
      * This method checks if given {@link Item} can be selected in-game.
