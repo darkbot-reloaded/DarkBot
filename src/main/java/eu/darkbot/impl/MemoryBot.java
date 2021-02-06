@@ -24,7 +24,7 @@ public class MemoryBot extends Main implements BotAPI {
     }
 
     @Override
-    public Module setModule(@NotNull Module module) {
+    public <A extends Module> A setModule(A module) {
         return null;
     }
 

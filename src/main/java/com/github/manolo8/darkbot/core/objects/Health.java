@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Health extends Updatable implements HealthHolder {
+public class Health extends Updatable implements HealthHolder, eu.darkbot.api.objects.Health {
 
     public int hp;
     public int maxHp;
@@ -20,7 +20,6 @@ public class Health extends Updatable implements HealthHolder {
 
     @Override
     public void update() {
-
         int hpLast = hp, maxHpLast = maxHp,
                 hullLast = hp, maxHullLast = maxHp,
                 shieldLast = shield, maxShieldLast = maxShield;
@@ -82,7 +81,6 @@ public class Health extends Updatable implements HealthHolder {
         return System.currentTimeMillis() - shieldLastIncreased < time;
     }
 
-
     @Override
     public int getHp() {
         return hp;
@@ -111,5 +109,15 @@ public class Health extends Updatable implements HealthHolder {
     @Override
     public int getMaxShield() {
         return maxShield;
+    }
+
+    @Override
+    public boolean shieldDecreasedIn(int time) {
+        return shDecreasedIn(time);
+    }
+
+    @Override
+    public boolean shieldIncreasedIn(int time) {
+        return shIncreasedIn(time);
     }
 }
