@@ -1,10 +1,10 @@
 package com.github.manolo8.darkbot.core.itf;
 
-import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
+import com.github.manolo8.darkbot.core.utils.pathfinder.AreaImpl;
 
 public interface Obstacle {
 
-    Area getArea();
+    AreaImpl getArea();
 
     boolean isRemoved();
 

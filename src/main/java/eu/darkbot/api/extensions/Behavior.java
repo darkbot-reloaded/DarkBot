@@ -4,5 +4,5 @@ public interface Behavior {
 
     void onTickBehavior();
 
-    void onStoppedBehavior();
+    default void onStoppedBehavior() {}
 }

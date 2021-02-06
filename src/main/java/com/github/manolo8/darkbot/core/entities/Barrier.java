@@ -2,14 +2,14 @@ package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.manager.MapManager;
-import com.github.manolo8.darkbot.core.utils.pathfinder.Rectangle;
+import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 
 public class Barrier
         extends Zone
         implements Obstacle {
 
     private static final int BARRIER_RADIUS = 60;
-    private Rectangle area = new Rectangle(0, 0, 0, 0);
+    private final RectangleImpl area = new RectangleImpl(0, 0, 0, 0);
 
     public Barrier(int id, long address) {
         super(id, address);
@@ -19,7 +19,7 @@ public class Barrier
     public void update() {
         super.update();
 
-        Rectangle zone = getZone();
+        RectangleImpl zone = getZone();
         area.minX = zone.minX - BARRIER_RADIUS;
         area.minY = zone.minY - BARRIER_RADIUS;
         area.maxX = zone.maxX + BARRIER_RADIUS;
@@ -27,7 +27,7 @@ public class Barrier
     }
 
     @Override
-    public Rectangle getArea() {
+    public RectangleImpl getArea() {
         return area;
     }
 
