@@ -76,8 +76,8 @@ public class Config {
             public @Option ShipConfig REPAIR = new ShipConfig(1, '9');
             public @Option @Num(min = 1, max = 9999) int MAX_DEATHS = 10;
             public @Option @Editor(JListField.class) @Options(ReviveSpotSupplier.class) long REVIVE_LOCATION = 1L;
-            public @Option @Num(min = 5, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
-            public @Option @Num(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
+            public @Option @Num(min = 5, max = 60, step = 5) int WAIT_BEFORE_REVIVE = 5;
+            public @Option @Num(min = 5, max = 15 * 60, step = 5) int WAIT_AFTER_REVIVE = 5;
         }
 
         public @Option Running RUNNING = new Running();
