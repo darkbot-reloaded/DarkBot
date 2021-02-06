@@ -1,20 +1,25 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.config.PluginInfo;
+import com.github.manolo8.darkbot.config.PluginConfig;
+import eu.darkbot.api.extensions.FeatureInfo;
+import eu.darkbot.api.extensions.PluginInfo;
+import eu.darkbot.utils.Version;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
-public class Plugin {
+public class Plugin implements PluginInfo {
 
     private final File file;
     private final URL jar;
 
     private PluginDefinition definition;
     private PluginDefinition updateDefinition;
-    private PluginInfo info;
+    private PluginConfig info;
     private final IssueHandler issues = new IssueHandler();
     private final IssueHandler updateIssues = new IssueHandler();
 
@@ -57,7 +62,7 @@ public class Plugin {
         return updateDefinition;
     }
 
-    public PluginInfo getInfo() {
+    public PluginConfig getInfo() {
         return info;
     }
 
@@ -73,8 +78,44 @@ public class Plugin {
         return updateStatus;
     }
 
+    @Override
     public String getName() {
         return definition != null ? definition.name : new File(jar.getFile()).getName();
+    }
+
+    @Override
+    public String getAuthor() {
+        return definition.author;
+    }
+
+    @Override
+    public Version getVersion() {
+        return definition.version;
+    }
+
+    @Override
+    public Version getMinimumVersion() {
+        return definition.minVersion;
+    }
+
+    @Override
+    public Version getSupportedVersion() {
+        return definition.supportedVersion;
+    }
+
+    @Override
+    public URL getUpdateURL() {
+        return definition.update;
+    }
+
+    @Override
+    public URL getDonationURL() {
+        return definition.donation;
+    }
+
+    @Override
+    public URL getDownloadURL() {
+        return definition.download;
     }
 
     @Override

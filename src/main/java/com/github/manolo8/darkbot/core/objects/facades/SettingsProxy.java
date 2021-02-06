@@ -3,11 +3,12 @@ package com.github.manolo8.darkbot.core.objects.facades;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import eu.darkbot.api.API;
 import org.jetbrains.annotations.Nullable;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class SettingsProxy extends Updatable {
+public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singleton {
 
     private final Character[] keycodes = new Character[KeyBind.values().length];
     private final PairArray keycodesDictionary = PairArray.ofDictionary().setAutoUpdatable(true);

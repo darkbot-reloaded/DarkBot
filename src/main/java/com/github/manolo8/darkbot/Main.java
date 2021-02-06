@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot;
 
+import com.formdev.flatlaf.FlatLaf;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigManager;
@@ -10,7 +11,6 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
-import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.FacadeManager;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
@@ -22,6 +22,7 @@ import com.github.manolo8.darkbot.core.manager.SettingsManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.extensions.DarkBotPluginApiImpl;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
@@ -41,7 +42,8 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import eu.darkbot.api.API;
+import eu.darkbot.api.extensions.Installable;
+import eu.darkbot.api.extensions.Module;
 import eu.darkbot.api.managers.BotAPI;
 
 import javax.swing.*;
@@ -51,7 +53,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class Main extends Thread implements PluginListener, API {
+public class Main extends Thread implements PluginListener, BotAPI {
 
     public static final Version VERSION      = BotAPI.VERSION;
     public static final Object UPDATE_LOCKER = new Object();
@@ -67,6 +69,8 @@ public class Main extends Thread implements PluginListener, API {
     public ConfigManager configManager = new ConfigManager();
     public Config config;
     public static IDarkBotAPI API;
+
+    public DarkBotPluginApiImpl pluginAPI;
 
     public final Lazy.Sync<Boolean> status      = new Lazy.Sync<>();
     public final Lazy.Sync<String> configChange = new Lazy.Sync<>();
@@ -104,15 +108,16 @@ public class Main extends Thread implements PluginListener, API {
 
         VerifierChecker.getAuthApi().setupAuth();
 
+        this.pluginAPI       = new DarkBotPluginApiImpl(this);
         this.starManager     = StarManager.getInstance();
-        this.mapManager      = new MapManager(this);
+        this.mapManager      = pluginAPI.createInstance(MapManager.class);
         this.settingsManager = new SettingsManager(this);
-        this.facadeManager   = new FacadeManager(this);
+        this.facadeManager   = pluginAPI.createInstance(FacadeManager.class);
         this.hero            = new HeroManager(this);
         this.effectManager   = new EffectManager(this);
         this.guiManager      = new GuiManager(this);
         this.statsManager    = new StatsManager(this);
-        this.pingManager     = new PingManager();
+        this.pingManager     = pluginAPI.createInstance(PingManager.class);
         this.backpage        = new BackpageManager(this);
         this.pluginHandler   = new PluginHandler();
         this.pluginUpdater   = new PluginUpdater(this);
@@ -219,8 +224,8 @@ public class Main extends Thread implements PluginListener, API {
     private void tickLogic(boolean running) {
         synchronized (pluginHandler) {
             try {
-                if (running) module.tickModule();
-                else module.tickStopped();
+                if (running) module.onTickModule();
+                else module.onTickStopped();
             } catch (Throwable e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
                 if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
@@ -260,7 +265,8 @@ public class Main extends Thread implements PluginListener, API {
 
     private <A extends Module> A setModule(A module, boolean setConfig) {
         if (module != null) {
-            module.install(this);
+            if (module instanceof Installable)
+                ((Installable) module).install(pluginAPI);
             if (setConfig) updateCustomConfig(module);
         }
         this.module = module;
@@ -347,4 +353,18 @@ public class Main extends Thread implements PluginListener, API {
         }
     }
 
+    @Override
+    public double getTickTime() {
+        return avgTick;
+    }
+
+    @Override
+    public eu.darkbot.api.extensions.Module getModule() {
+        return module;
+    }
+
+    @Override
+    public void setTheme(FlatLaf theme) {
+
+    }
 }

@@ -3,18 +3,26 @@ package eu.darkbot.logic.modules;
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.utils.Map;
+import eu.darkbot.api.extensions.Installable;
 import eu.darkbot.logic.utils.MapTraveler;
 
-public class MapModule extends TemporalModule {
+public class MapModule extends TemporalModule implements Installable {
 
-    private MapTraveler traveler;
+    protected MapTraveler traveler;
 
-    public MapModule(PluginAPI api, Map target) {
+    public MapModule(PluginAPI api) {
         super(api);
-        if (traveler == null)
-            this.traveler = new MapTraveler(api);
+        this.traveler = api.createInstance(MapTraveler.class);
+    }
 
-        this.traveler.setTarget(target);
+    @Override
+    public void install(PluginAPI pluginAPI) {
+        traveler.install(pluginAPI);
+    }
+
+    @Override
+    public void uninstall() {
+        traveler.uninstall();
     }
 
     public void setTarget(Map target) {

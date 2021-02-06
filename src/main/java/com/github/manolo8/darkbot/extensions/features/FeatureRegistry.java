@@ -6,15 +6,20 @@ import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.extensions.FeatureInfo;
+import eu.darkbot.api.extensions.PluginInfo;
+import eu.darkbot.api.managers.ExtensionsAPI;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class FeatureRegistry implements PluginListener {
+public class FeatureRegistry implements PluginListener, ExtensionsAPI {
 
     private final PluginHandler pluginHandler;
     private final Map<String, FeatureDefinition<?>> FEATURES_BY_ID = new LinkedHashMap<>();
@@ -123,6 +128,10 @@ public class FeatureRegistry implements PluginListener {
         return getFeatureDefinition(feature.getClass().getCanonicalName());
     }
 
+    public <T> FeatureDefinition<T> getFeatureDefinition(Class<T> feature) {
+        return getFeatureDefinition(feature.getCanonicalName());
+    }
+
     public <T> FeatureDefinition<T> getFeatureDefinition(String id) {
         synchronized (pluginHandler) {
             //noinspection unchecked
@@ -130,4 +139,13 @@ public class FeatureRegistry implements PluginListener {
         }
     }
 
+    @Override
+    public @NotNull Collection<? extends PluginInfo> getPluginInfos() {
+        return pluginHandler.LOADED_PLUGINS;
+    }
+
+    @Override
+    public <T> FeatureInfo<T> getFeatureInfo(Class<T> feature) {
+        return getFeatureDefinition(feature);
+    }
 }

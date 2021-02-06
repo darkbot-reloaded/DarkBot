@@ -89,7 +89,7 @@ public class ReflectionUtils {
         return (Class<T>) PRIMITIVE_TO_WRAPPER.get(type);
     }
 
-    public static Type[] findGenericParameters(Class clazz, Class generic) {
+    public static Type[] findGenericParameters(Class<?> clazz, Class<?> generic) {
         Type[] params;
         for (Type itf : clazz.getGenericInterfaces()) {
             if ((params = getTypes(itf, generic)) != null) return params;
@@ -100,12 +100,12 @@ public class ReflectionUtils {
         }
         if ((params = getTypes(clazz.getGenericSuperclass(), generic)) != null) return params;
 
-        Class parent = clazz.getSuperclass();
+        Class<?> parent = clazz.getSuperclass();
         if (parent != null) return findGenericParameters(parent, generic);
         return null;
     }
 
-    public static Type[] getTypes(Type type, Class expected) {
+    public static Type[] getTypes(Type type, Class<?> expected) {
         if (!(type instanceof ParameterizedType)) return null;
         ParameterizedType paramType = (ParameterizedType) type;
         if (paramType.getRawType() == expected) return paramType.getActualTypeArguments();

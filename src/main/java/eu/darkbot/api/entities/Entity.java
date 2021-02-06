@@ -45,6 +45,16 @@ public interface Entity extends Locatable {
      */
     LocationInfo getLocationInfo();
 
+    @Override
+    default double getX() {
+        return getLocationInfo().getX();
+    }
+
+    @Override
+    default double getY() {
+        return getLocationInfo().getY();
+    }
+
     /**
      * Checks that {@link Entity} have given effect id.
      *
