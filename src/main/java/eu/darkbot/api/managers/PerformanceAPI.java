@@ -5,7 +5,7 @@ import eu.darkbot.api.API;
 /**
  * API for fps and memory usage
  */
-public interface PerformanceAPI extends API {
+public interface PerformanceAPI extends API.Singleton {
 
     /**
      * @return in-game FPS.
@@ -21,9 +21,7 @@ public interface PerformanceAPI extends API {
      * Gets current ping.
      *
      * @return current ping in milliseconds.
-     * @see #getPingUpdateFrequency()
      */
     int getPing();
 
-    int getPingUpdateFrequency();
 }

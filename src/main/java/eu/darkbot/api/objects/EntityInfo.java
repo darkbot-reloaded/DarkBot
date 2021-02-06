@@ -2,7 +2,7 @@ package eu.darkbot.api.objects;
 
 import eu.darkbot.api.managers.HeroAPI;
 
-public interface Info {
+public interface EntityInfo {
 
     /**
      * Returns true if ship is considered as enemy for {@link HeroAPI}.
@@ -13,20 +13,14 @@ public interface Info {
     boolean isEnemy();
 
     /**
-     * @return {@link Fraction}
+     * @return {@link Faction}
      */
-    Fraction getFraction();
+    Faction getFaction();
 
     /**
      * @return ship username.
      */
     String getUsername();
-
-    /**
-     *
-     * @return title id
-     */
-    String getTitleId();
 
     /**
      * @return ship's clan tag
@@ -53,17 +47,20 @@ public interface Info {
      */
     int getGalaxyRankIconId();
 
-    int getReputation();
-
     /**
      * Represents in-game fractions.
      */
-    enum Fraction {
+    enum Faction {
         NONE,
         MMO,
         EIC,
         VRU,
-        SATURN
+        SATURN;
+
+        public static Faction of(int factionId) {
+            if (factionId >= values().length || factionId < 0) return NONE;
+            return values()[factionId];
+        }
     }
 
     /**
@@ -73,6 +70,11 @@ public interface Info {
         NONE,
         ALLIED,
         NOT_ATTACK_PACT,
-        WAR
+        WAR;
+
+        public static Diplomacy of(int diplomacyId) {
+            if (diplomacyId >= values().length || diplomacyId < 0) return NONE;
+            return values()[diplomacyId];
+        }
     }
 }

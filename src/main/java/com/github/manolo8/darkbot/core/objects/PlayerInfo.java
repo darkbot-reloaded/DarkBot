@@ -1,11 +1,12 @@
 package com.github.manolo8.darkbot.core.objects;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import eu.darkbot.api.objects.EntityInfo;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.manager.HeroManager.instance;
 
-public class PlayerInfo extends Updatable {
+public class PlayerInfo extends Updatable implements EntityInfo {
 
     public int clanId;
     public int clanDiplomacy;
@@ -16,7 +17,12 @@ public class PlayerInfo extends Updatable {
     public int gg;
 
     public boolean isEnemy() {
-        return (clanDiplomacy != 0 || clanId != 0 || factionId != 0) && (factionId != instance.playerInfo.factionId && clanDiplomacy != 1 && clanDiplomacy != 2 || clanDiplomacy == 3);
+        if (getClanDiplomacy() == Diplomacy.NONE && getClanId() == 0 && getFaction() == Faction.NONE) return false;
+        if (getClanDiplomacy() == Diplomacy.WAR) return true;
+
+        return getClanDiplomacy() != Diplomacy.ALLIED
+                && getClanDiplomacy() != Diplomacy.NOT_ATTACK_PACT
+                && getFaction() != instance.getEntityInfo().getFaction();
     }
 
     @Override
@@ -39,4 +45,40 @@ public class PlayerInfo extends Updatable {
     private String readStringFromStringHolder(int holderOffset) {
         return API.readMemoryStringFallback(API.readMemoryLong(API.readMemoryLong(address + holderOffset) + 40), "");
     }
+
+    @Override
+    public Faction getFaction() {
+        return Faction.of(factionId);
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getClanTag() {
+        return clanTag;
+    }
+
+    @Override
+    public int getClanId() {
+        return clanId;
+    }
+
+    @Override
+    public Diplomacy getClanDiplomacy() {
+        return Diplomacy.of(clanDiplomacy);
+    }
+
+    @Override
+    public int getRankIconId() {
+        return rank;
+    }
+
+    @Override
+    public int getGalaxyRankIconId() {
+        return gg;
+    }
+
 }

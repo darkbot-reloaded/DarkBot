@@ -12,15 +12,23 @@ import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.core.utils.Location;
+import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import com.github.manolo8.darkbot.utils.debug.ReadObjNames;
+import eu.darkbot.api.entities.Portal;
+import eu.darkbot.api.entities.utils.Area;
+import eu.darkbot.api.managers.EventSenderAPI;
+import eu.darkbot.api.managers.StarSystemAPI;
 
+import java.util.Collection;
 import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class MapManager implements Manager {
+public class MapManager implements Manager, StarSystemAPI {
 
     private final Main main;
+    private final EventSenderAPI eventSender;
+    private final StarManager starManager;
 
     public final EntityList entities;
 
@@ -51,13 +59,18 @@ public class MapManager implements Manager {
     public double boundMaxY;
     public double width;
     public double height;
+    private final RectangleImpl bound = new RectangleImpl();
 
     private final ObjArray minimapLayers = ObjArray.ofVector(true);
     private final Location pingLocationCache = new Location();
     public Location pingLocation = null;
 
-    public MapManager(Main main) {
+    public MapManager(Main main,
+                      EventSenderAPI eventSender,
+                      StarManager starManager) {
         this.main = main;
+        this.eventSender = eventSender;
+        this.starManager = starManager;
 
         this.entities = new EntityList(main);
     }
@@ -101,7 +114,12 @@ public class MapManager implements Manager {
         boolean switched = currMap != id;
         if (switched) {
             id = currMap;
-            main.hero.map = main.starManager.byId(id);
+
+            Map old = main.hero.map;
+            Map next = main.hero.map = main.starManager.byId(id);
+
+            eventSender.sendEvent(new MapChangeEvent(old, next));
+
             updateAreas();
         }
         entities.update(address);
@@ -140,6 +158,7 @@ public class MapManager implements Manager {
         boundY = API.readMemoryDouble(updated + 88);
         boundMaxX = API.readMemoryDouble(updated + 112);
         boundMaxY = API.readMemoryDouble(updated + 120);
+        bound.set(boundX, boundY, boundMaxX, boundMaxY);
         width = boundMaxX - boundX;
         height = boundMaxY - boundY;
     }
@@ -211,4 +230,39 @@ public class MapManager implements Manager {
         return lockStatus == 1 || lockStatus < 1 || lockStatus > 4;
     }
 
+
+    @Override
+    public eu.darkbot.api.entities.utils.Map getCurrentMap() {
+        return main.hero.map;
+    }
+
+    @Override
+    public Area.Rectangle getCurrentMapBounds() {
+        return bound;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.utils.Map> getMaps() {
+        return starManager.getMaps();
+    }
+
+    @Override
+    public eu.darkbot.api.entities.utils.Map getById(int mapId) throws MapNotFoundException {
+        return starManager.getById(mapId);
+    }
+
+    @Override
+    public eu.darkbot.api.entities.utils.Map getOrCreateMapById(int mapId) {
+        return starManager.byId(mapId);
+    }
+
+    @Override
+    public eu.darkbot.api.entities.utils.Map getByName(String mapName) throws MapNotFoundException {
+        return starManager.getByName(mapName);
+    }
+
+    @Override
+    public Portal findNext(eu.darkbot.api.entities.utils.Map targetMap) {
+        return starManager.next(main.hero, starManager.byId(targetMap.getId()));
+    }
 }

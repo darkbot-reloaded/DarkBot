@@ -5,8 +5,8 @@ import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.Health;
 import com.github.manolo8.darkbot.core.objects.PlayerInfo;
-import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
-import com.github.manolo8.darkbot.core.utils.pathfinder.Circle;
+import com.github.manolo8.darkbot.core.utils.pathfinder.AreaImpl;
+import com.github.manolo8.darkbot.core.utils.pathfinder.CircleImpl;
 
 import java.util.Collection;
 
@@ -18,7 +18,7 @@ public class BattleStation
 
     public PlayerInfo info = new PlayerInfo();
     public Health health = new Health();
-    public Circle area = new Circle(0, 0, 1200);
+    public CircleImpl area = new CircleImpl(0, 0, 1200);
     public int hullId;
 
     public BattleStation(int id, long address) {
@@ -26,7 +26,7 @@ public class BattleStation
         this.update(address);
     }
 
-    public Target target =new Target();
+    public Target target = new Target();
     public long lockPtr;
 
     @Override
@@ -115,7 +115,7 @@ public class BattleStation
 
 
     @Override
-    public Area getArea() {
+    public AreaImpl getArea() {
         return area;
     }
 
@@ -133,4 +133,7 @@ public class BattleStation
     public String toString() {
         return target.toString() + " | " + API.readMemoryLong(lockPtr, 48, 40);
     }
+
+
+
 }

@@ -3,10 +3,15 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.objects.Map;
+import eu.darkbot.api.entities.other.PortalType;
+import eu.darkbot.api.objects.EntityInfo;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Portal extends Entity {
+public class Portal extends Entity implements eu.darkbot.api.entities.Portal {
     public static final int TYPE_OFFSET = 120;
 
     public final Map target;
@@ -74,5 +79,20 @@ public class Portal extends Entity {
             return (searchType != -1 && searchType == type) || // By type
                     (searchX != -1 && searchY != -1 && searchX == x && searchY == y); // By pos
         }
+    }
+
+    @Override
+    public Optional<eu.darkbot.api.entities.utils.Map> getTargetMap() {
+        return Optional.empty();
+    }
+
+    @Override
+    public int getTypeId() {
+        return type;
+    }
+
+    @Override
+    public EntityInfo.Faction getFaction() {
+        return EntityInfo.Faction.of(factionId);
     }
 }

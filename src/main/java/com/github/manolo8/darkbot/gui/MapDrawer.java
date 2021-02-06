@@ -31,7 +31,7 @@ import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
-import com.github.manolo8.darkbot.core.utils.pathfinder.Rectangle;
+import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.gui.trail.Line;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -231,7 +231,7 @@ public class MapDrawer extends JPanel {
     protected void drawZones(Graphics2D g2) {
         for (Barrier barrier : mapManager.entities.barriers) {
             if (!barrier.use()) continue;
-            Rectangle area = barrier.getZone();
+            RectangleImpl area = barrier.getZone();
             g2.setColor(cs.BARRIER);
             g2.fillRect(
                     translateX(area.minX), translateY(area.minY),
@@ -244,7 +244,7 @@ public class MapDrawer extends JPanel {
 
         g2.setColor(cs.NO_CLOACK);
         for (NoCloack noCloack : mapManager.entities.noCloack) {
-            Rectangle area = noCloack.getZone();
+            RectangleImpl area = noCloack.getZone();
             g2.fillRect(
                     translateX(area.minX), translateY(area.minY),
                     translateX(area.maxX - area.minX), translateY(area.maxY - area.minY));
@@ -277,10 +277,10 @@ public class MapDrawer extends JPanel {
                 Main.VERSION.toString(),
                 (main.isRunning() || !config.MISCELLANEOUS.RESET_REFRESH ?
                         Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"),
-                Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000));
+                Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000L));
         drawString(g2, info, 5, 12, Align.LEFT);
         if (main.module != null) {
-            drawString(g2, main.tickingModule ? main.module.status() : main.module.stoppedStatus(), 5, 26, Align.LEFT);
+            drawString(g2, main.tickingModule ? main.module.getStatus() : main.module.getStoppedStatus(), 5, 26, Align.LEFT);
         }
 
         drawString(g2, String.format("%.1ftick %dms ping", main.avgTick, pingManager.ping), width - 5, 12, Align.RIGHT);

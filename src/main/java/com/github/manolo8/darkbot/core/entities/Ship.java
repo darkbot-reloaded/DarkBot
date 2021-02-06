@@ -5,13 +5,21 @@ import com.github.manolo8.darkbot.core.objects.Health;
 import com.github.manolo8.darkbot.core.objects.PlayerInfo;
 import com.github.manolo8.darkbot.core.objects.ShipInfo;
 import com.github.manolo8.darkbot.utils.MathUtils;
+import eu.darkbot.api.entities.Pet;
+import eu.darkbot.api.entities.other.Formation;
+import eu.darkbot.api.entities.utils.Attackable;
+import eu.darkbot.api.objects.EntityInfo;
+import eu.darkbot.api.objects.Locatable;
+import eu.darkbot.api.objects.Location;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Ship extends Entity {
+public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
 
     private static HashMap<Integer, Long> cacheTimer = new HashMap<>();
 
@@ -137,5 +145,90 @@ public class Ship extends Entity {
                         .filter(entity -> entity.address == entityPtr)
                         .findAny().orElse(null);
         }
+    }
+
+    @Override
+    public boolean isInvisible() {
+        return invisible;
+    }
+
+    @Override
+    public boolean isBlacklisted() {
+        return isInTimer();
+    }
+
+    @Override
+    public void setBlacklisted(long forTime) {
+        setTimerTo(forTime);
+    }
+
+    @Override
+    public boolean hasPet() {
+        return false;
+    }
+
+    @Override
+    public Optional<Pet> getPet() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Formation getFormation() {
+        return null;
+    }
+
+    @Override
+    public boolean isInFormation(int formationId) {
+        return false;
+    }
+
+    @Override
+    public Lock getLockType() {
+        return null;
+    }
+
+    @Override
+    public eu.darkbot.api.objects.Health getHealth() {
+        return null;
+    }
+
+    @Override
+    public EntityInfo getEntityInfo() {
+        return null;
+    }
+
+    @Override
+    public eu.darkbot.api.entities.@Nullable Entity getTarget() {
+        return null;
+    }
+
+    @Override
+    public boolean isAttacking() {
+        return false;
+    }
+
+    @Override
+    public boolean isAttacking(Attackable other) {
+        return false;
+    }
+
+    @Override
+    public int getSpeed() {
+        return 0;
+    }
+
+    @Override
+    public double getAngle() {
+        return 0;
+    }
+
+    @Override
+    public boolean isAiming(Locatable other) {
+        return false;
+    }
+
+    @Override
+    public Optional<Location> getDestination() {
+        return Optional.empty();
     }
 }

@@ -2,9 +2,8 @@ package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
 import eu.darkbot.api.entities.*;
+import eu.darkbot.api.events.Event;
 import eu.darkbot.api.objects.Obstacle;
-import eu.darkbot.api.utils.Listener;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -73,16 +72,28 @@ public interface EntitiesAPI extends API {
      */
     Collection<Obstacle> getObstacles();
 
-    /**
-     * Adds listeners on create or remove of the {@link Entity}
-     * <p>
-     * Remember to store references for given listeners!
-     * Otherwise they will be garbage collected.
-     *
-     * @param onCreate {@link Listener} which will be consumed on {@link Entity} creation.
-     * @param onRemove {@link Listener} which will be consumed on {@link Entity} removal.
-     * @see Listener
-     */
-    void addListener(@Nullable Listener<Entity> onCreate,
-                     @Nullable Listener<Entity> onRemove);
+    class EntityEvent implements Event {
+        private final Entity entity;
+
+        public EntityEvent(Entity entity) {
+            this.entity = entity;
+        }
+
+        public Entity getEntity() {
+            return entity;
+        }
+    }
+
+    class EntityCreateEvent extends EntityEvent {
+        public EntityCreateEvent(Entity entity) {
+            super(entity);
+        }
+    }
+
+    class EntityRemoveEvent extends EntityEvent  {
+        public EntityRemoveEvent(Entity entity) {
+            super(entity);
+        }
+    }
+
 }

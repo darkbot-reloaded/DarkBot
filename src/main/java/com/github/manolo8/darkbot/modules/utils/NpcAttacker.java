@@ -95,7 +95,7 @@ public class NpcAttacker {
         firstAttack = false;
         if (hero.locationInfo.distance(target) < 800 && System.currentTimeMillis() - clickDelay > 500) {
             hero.setTarget(target);
-            setRadiusAndClick(true);
+            target.trySelect(false);
             clickDelay = System.currentTimeMillis();
             if (main.config.LOOT.SHIP_ABILITY != null) ability = clickDelay + 4000;
         }
@@ -124,7 +124,7 @@ public class NpcAttacker {
         isAttacking = Math.max(isAttacking, laserTime + bugTime);
         if (normal) API.keyboardClick(getAttackKey());
         else if (API instanceof DarkBoatAdapter) API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
-        else setRadiusAndClick(false);
+        else target.trySelect(true);
     }
 
     public double modifyRadius(double radius) {
@@ -152,12 +152,6 @@ public class NpcAttacker {
         if (sab = shouldSab()) return main.config.LOOT.SAB.KEY;
         return this.target == null || this.target.npcInfo.attackKey == null ?
                 main.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;
-    }
-
-    private void setRadiusAndClick(boolean single) {
-        target.clickable.setRadius(800);
-        drive.clickCenter(single, target.locationInfo.now);
-        target.clickable.setRadius(0);
     }
 
 }
