@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,11 +16,11 @@ public class PluginApiImpl implements PluginAPI {
     private final Set<Singleton> singletons = new HashSet<>();
     private final Set<Class<?>> implClasses = new HashSet<>();
 
-    public PluginApiImpl(Collection<Singleton> singletons,
-                         Collection<Class<? extends API>> implementations) {
+    public PluginApiImpl(Singleton singleton,
+                         Class<? extends API>... implementations) {
         this.singletons.add(this);
-        this.singletons.addAll(singletons);
-        this.implClasses.addAll(implementations);
+        this.singletons.add(singleton);
+        Collections.addAll(this.implClasses, implementations);
     }
 
     private <T extends Singleton> T getOrCreateSingleton(Class<T> clazz) throws UnsupportedOperationException {
@@ -28,9 +28,38 @@ public class PluginApiImpl implements PluginAPI {
             if (clazz.isInstance(implementation))
                 return clazz.cast(implementation);
         }
-        T impl = createInstance(clazz);
+        T impl = createNewInstance(clazz);
         singletons.add(impl);
         return impl;
+    }
+
+    private <T> T createNewInstance(Class<T> clazz) throws UnsupportedOperationException {
+        if (clazz.isInterface())
+            return (T) createNewInstance(implClasses.stream()
+                    .filter(clazz::isAssignableFrom)
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new UnsupportedOperationException("No implementation found for " + clazz.getName())));
+
+        Constructor<?> constructor = Arrays.stream(clazz.getConstructors())
+                .filter(c ->
+                        Arrays.stream(c.getParameterTypes()).allMatch(API.class::isAssignableFrom))
+                .findFirst()
+                .orElseThrow(() -> new UnsupportedOperationException("No API-only constructor in " + clazz.getName()));
+
+        try {
+            return (T) constructor.newInstance(Arrays.stream(constructor.getParameterTypes())
+                    .map(p -> getOrCreate((Class<API>) p))
+                    .toArray(Object[]::new));
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("Exception calling constructor for API: " + clazz.getName(), e);
+        }
+    }
+
+    private <T> T getOrCreate(Class<T> clazz) {
+        if (Singleton.class.isAssignableFrom(clazz))
+            return (T) getOrCreateSingleton((Class<Singleton>) clazz);
+        return createNewInstance(clazz);
     }
 
     @Override
@@ -45,35 +74,20 @@ public class PluginApiImpl implements PluginAPI {
 
     @Override
     public <T extends API> @NotNull T requireAPI(@NotNull Class<T> api) throws UnsupportedOperationException {
-        if (api.isAssignableFrom(Singleton.class)) return (T) getOrCreateSingleton((Class<Singleton>) api);
-        return createInstance(api);
+        if (!api.isInterface())
+            throw new UnsupportedOperationException("Can't get API from implementation " +
+                    api.getName() + ", use the API interface");
+
+        return getOrCreate(api);
     }
 
     @Override
-    public @NotNull <T> T createInstance(@NotNull Class<T> clazz) {
-        if (clazz.isAssignableFrom(Singleton.class)) return (T) getOrCreateSingleton((Class<Singleton>) clazz);
+    public @NotNull <T> T requireInstance(@NotNull Class<T> clazz) throws UnsupportedOperationException {
+        if (clazz.isInterface())
+            throw new UnsupportedOperationException("Can't create instance from interface " +
+                    clazz.getName() + ", use requireAPI instead");
 
-        Class<?> impl = implClasses.stream()
-                .filter(implCl -> implCl.isAssignableFrom(clazz))
-                .findFirst()
-                .orElse(clazz);
-
-        if (impl.isInterface())
-            throw new UnsupportedOperationException("No implementation found for " + clazz.getName());
-
-        Constructor<?> constructor = Arrays.stream(impl.getConstructors())
-                .filter(c ->
-                        Arrays.stream(c.getParameterTypes()).allMatch(cl -> cl.isAssignableFrom(API.class)))
-                .findFirst()
-                .orElseThrow(() -> new UnsupportedOperationException("No API-only constructor in " + impl.getName()));
-
-        try {
-            return (T) constructor.newInstance(Arrays.stream(constructor.getParameterTypes())
-                    .map(p -> requireAPI((Class<API>) p))
-                    .toArray(Object[]::new));
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("Exception calling constructor for API: " + clazz.getName(), e);
-        }
+        return getOrCreate(clazz);
     }
 
 }

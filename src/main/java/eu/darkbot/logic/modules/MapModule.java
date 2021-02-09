@@ -12,7 +12,7 @@ public class MapModule extends TemporalModule implements Installable {
 
     public MapModule(PluginAPI api) {
         super(api);
-        this.traveler = api.createInstance(MapTraveler.class);
+        this.traveler = api.requireInstance(MapTraveler.class);
     }
 
     @Override
