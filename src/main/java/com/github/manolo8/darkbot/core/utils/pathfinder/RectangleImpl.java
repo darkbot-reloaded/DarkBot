@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.utils.pathfinder;
 
 import com.github.manolo8.darkbot.core.utils.Location;
+import eu.darkbot.api.entities.utils.Area;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.utils.PathFinder;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +12,7 @@ import java.util.List;
 
 import static java.lang.Math.min;
 
-public class RectangleImpl extends AreaImpl implements eu.darkbot.api.entities.utils.Area.Rectangle {
+public class RectangleImpl extends AreaImpl implements Area.Rectangle {
 
     public double minX;
     public double minY;
@@ -134,14 +135,14 @@ public class RectangleImpl extends AreaImpl implements eu.darkbot.api.entities.u
 
     @Override
     public boolean intersectsLine(double x1, double y1, double x2, double y2) {
-        if (x1 < x2 && eu.darkbot.api.entities.utils.Area.linesIntersect(x1, y1, x2, y2, minX, minY, minX, maxY))
+        if (x1 < x2 && Area.linesIntersect(x1, y1, x2, y2, minX, minY, minX, maxY))
             return true;
-        else if (x1 > x2 && eu.darkbot.api.entities.utils.Area.linesIntersect(x1, y1, x2, y2, maxX, minY, maxX, maxY))
+        else if (x1 > x2 && Area.linesIntersect(x1, y1, x2, y2, maxX, minY, maxX, maxY))
             return true;
-        else if (y1 < y2 && eu.darkbot.api.entities.utils.Area.linesIntersect(x1, y1, x2, y2, minX, minY, maxX, minY))
+        else if (y1 < y2 && Area.linesIntersect(x1, y1, x2, y2, minX, minY, maxX, minY))
             return true;
         else
-            return y1 > y2 && eu.darkbot.api.entities.utils.Area.linesIntersect(x1, y1, x2, y2, minX, maxY, maxX, maxY);
+            return y1 > y2 && Area.linesIntersect(x1, y1, x2, y2, minX, maxY, maxX, maxY);
     }
 
 }

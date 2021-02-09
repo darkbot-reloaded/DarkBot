@@ -55,6 +55,11 @@ public enum Formation {
         this.sps = sps;
     }
 
+    public static Formation of(int formationId) {
+        if (formationId < 0 || formationId >= values().length) return STANDARD;
+        return values()[formationId];
+    }
+
     public double getShieldMultiplier() {
         return sh;
     }

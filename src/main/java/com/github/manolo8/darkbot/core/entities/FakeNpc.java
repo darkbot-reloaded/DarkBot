@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.utils.Location;
+import eu.darkbot.api.objects.Locatable;
 
 public class FakeNpc extends Npc {
 
@@ -21,7 +22,7 @@ public class FakeNpc extends Npc {
     }
 
     @Override
-    public boolean isAiming(Ship other) {
+    public boolean isAiming(Locatable other) {
         return false;
     }
 

@@ -43,7 +43,7 @@ public interface Attackable extends Entity {
          */
         GRAY_DARK;
 
-        public static Lock getType(int lockId) {
+        public static Lock of(int lockId) {
             if (lockId >= values().length || lockId < 0) return UNKNOWN;
             return values()[lockId];
         }

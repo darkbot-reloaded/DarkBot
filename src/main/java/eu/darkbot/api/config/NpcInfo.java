@@ -17,10 +17,7 @@ public interface NpcInfo {
     Optional<Ammo.Laser> getAmmo();
     Optional<Formation> getFormation();
 
-    boolean hasExtraFlag(String flagId);
     boolean hasExtraFlag(ExtraFlag flag);
-
-    void setExtraFlag(String flagId, boolean active);
     void setExtraFlag(ExtraFlag flag, boolean active);
 
     interface ExtraFlag {
