@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.Npc;
+import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
@@ -110,7 +111,8 @@ public class NpcAttacker {
             sendAttack(250, 5000, true);
         } else if (!hero.isAttacking(target) || !hero.isAiming(target)) {
             sendAttack(1500, 5000, false);
-        } else if (target.health.hpDecreasedIn(1500) || hero.locationInfo.distance(target) > 700) {
+        } else if (target.health.hpDecreasedIn(1500) || target.hasEffect(EffectManager.Effect.NPC_ISH)
+                || hero.locationInfo.distance(target) > 700) {
             isAttacking = Math.max(isAttacking, System.currentTimeMillis() + 2000);
         } else if (System.currentTimeMillis() > isAttacking) {
             sendAttack(1500, ++fixedTimes * 3000L, false);
