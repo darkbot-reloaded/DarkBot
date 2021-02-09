@@ -9,6 +9,6 @@ public interface Installable extends eu.darkbot.api.extensions.Installable {
 
     @Override
     default void install(PluginAPI pluginAPI) {
-        install(pluginAPI.getAPI(Main.class));
+        install(pluginAPI.requireInstance(Main.class));
     }
 }

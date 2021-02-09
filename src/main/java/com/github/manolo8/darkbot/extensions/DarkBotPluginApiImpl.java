@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.backpage.HangarManager;
 import eu.darkbot.api.API;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.PluginApiImpl;
+import eu.darkbot.api.events.EventManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,12 +20,7 @@ import java.util.Set;
 public class DarkBotPluginApiImpl extends PluginApiImpl {
 
     public DarkBotPluginApiImpl(Main main) {
-        super(Arrays.asList(
-                main,
-                main.featureRegistry
-        ), Arrays.asList(
-                BackpageManager.class
-        ));
+        super(main, EventManager.class);
     }
 
 }
