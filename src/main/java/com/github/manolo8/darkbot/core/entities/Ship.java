@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.Health;
 import com.github.manolo8.darkbot.core.objects.PlayerInfo;
 import com.github.manolo8.darkbot.core.objects.ShipInfo;
@@ -27,6 +28,8 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
     public PlayerInfo playerInfo = new PlayerInfo();
     public ShipInfo shipInfo     = new ShipInfo();
 
+    private com.github.manolo8.darkbot.core.entities.Pet pet;
+
     public boolean invisible;
     public long timer;
 
@@ -51,13 +54,10 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
         return shipInfo.target == other.address;
     }
 
-    public boolean isAiming(Ship other) {
-        return MathUtils.angleDiff(shipInfo.angle, locationInfo.now.angle(other.locationInfo.now)) < 0.2;
-    }
+    private final Target target = new Target();
+    private long lockPtr;
 
-    //private Target target = new Target(); to implement in attackableImpl
-    //private long lockPtr;
-
+    private int formationId;
     @Override
     public void update() {
         super.update();
@@ -66,9 +66,18 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
         health.update();
         shipInfo.update();
         playerInfo.update();
-        //target.update();
+        target.update();
 
+        formationId = API.readMemoryInt(address, 280, 40, 40);
         invisible = API.readMemoryBoolean(API.readMemoryLong(address + 160) + 32);
+
+        if (this instanceof HeroManager) return;
+
+        long petAddress = API.readMemoryLong(address + 176);
+        if (petAddress != 0 && (pet == null || petAddress != pet.address))
+            pet = main.mapManager.entities.pets.stream()
+                    .filter(p -> p.address == petAddress)
+                    .findAny().orElse(null);
     }
 
     @Override
@@ -79,7 +88,7 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
         health.update(API.readMemoryLong(address + 184));
         shipInfo.update(API.readMemoryLong(address + 232));
 
-        /*target.update(findInTraits(ptr -> API.readMemoryString(ptr, 48, 32).equals("attackLaser")));
+        target.update(findInTraits(ptr -> API.readMemoryString(ptr, 48, 32).equals("attackLaser")));
 
         lockPtr = findInTraits(ptr -> {
             long temp = API.readMemoryLong(ptr + 48);
@@ -88,7 +97,7 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
             return (lockType == 1 || lockType == 2 || lockType == 3 || lockType == 4) &&
                     API.readMemoryInt(temp + 32) == Integer.MIN_VALUE &&
                     API.readMemoryInt(temp + 36) == Integer.MAX_VALUE;
-        });*/
+        });
     }
 
     @Override
@@ -138,6 +147,9 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
                 if (entityPtr == main.hero.address) {
                     targetedEntity = main.hero;
                     return;
+                } else if (main.hero.pet.address != 0 && entityPtr == main.hero.pet.address) {
+                    targetedEntity = main.hero.pet;
+                    return;
                 }
 
                 targetedEntity = main.mapManager.entities.allEntities.stream()
@@ -164,71 +176,72 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
 
     @Override
     public boolean hasPet() {
-        return false;
+        return pet != null;
     }
 
     @Override
     public Optional<Pet> getPet() {
-        return Optional.empty();
+        return Optional.ofNullable(pet);
     }
 
     @Override
     public Formation getFormation() {
-        return null;
+        return Formation.of(formationId);
     }
 
     @Override
     public boolean isInFormation(int formationId) {
-        return false;
+        return formationId == this.formationId;
     }
 
     @Override
     public Lock getLockType() {
-        return null;
+        return Lock.of(API.readMemoryInt(lockPtr, 48, 40));
     }
 
     @Override
     public eu.darkbot.api.objects.Health getHealth() {
-        return null;
+        return health;
     }
 
     @Override
     public EntityInfo getEntityInfo() {
-        return null;
+        return playerInfo;
     }
 
     @Override
     public eu.darkbot.api.entities.@Nullable Entity getTarget() {
-        return null;
+        return target.targetedEntity;
     }
 
     @Override
     public boolean isAttacking() {
-        return false;
+        return target.laserAttacking;
     }
 
     @Override
     public boolean isAttacking(Attackable other) {
-        return false;
+        return other == target.targetedEntity;
     }
 
     @Override
     public int getSpeed() {
-        return 0;
+        return shipInfo.speed == 0 ? (int) locationInfo.speed : shipInfo.speed;
     }
 
     @Override
     public double getAngle() {
-        return 0;
+        return shipInfo.angle;
     }
 
     @Override
     public boolean isAiming(Locatable other) {
-        return false;
+        return MathUtils.angleDiff(shipInfo.angle, getLocationInfo().angleTo(other)) < 0.2;
     }
 
     @Override
     public Optional<Location> getDestination() {
-        return Optional.empty();
+        if (shipInfo.destination.address == 0) return Optional.empty();
+        return Optional.of(shipInfo.destination);
     }
 }

@@ -3,9 +3,7 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.objects.Map;
-import eu.darkbot.api.entities.other.PortalType;
 import eu.darkbot.api.objects.EntityInfo;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -83,7 +81,7 @@ public class Portal extends Entity implements eu.darkbot.api.entities.Portal {
 
     @Override
     public Optional<eu.darkbot.api.entities.utils.Map> getTargetMap() {
-        return Optional.empty();
+        return Optional.ofNullable(target);
     }
 
     @Override
