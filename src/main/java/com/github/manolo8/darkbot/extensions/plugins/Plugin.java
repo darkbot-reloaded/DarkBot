@@ -90,17 +90,17 @@ public class Plugin implements PluginInfo {
 
     @Override
     public Version getVersion() {
-        return definition.version;
+        return new Version(definition.minVersion.toString());
     }
 
     @Override
     public Version getMinimumVersion() {
-        return definition.minVersion;
+        return new Version(definition.minVersion.toString());
     }
 
     @Override
     public Version getSupportedVersion() {
-        return definition.supportedVersion;
+        return new Version(definition.minVersion.toString());
     }
 
     @Override

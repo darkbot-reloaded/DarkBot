@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
-import eu.darkbot.utils.Version;
+import com.github.manolo8.darkbot.extensions.util.Version;
 
 import java.net.URL;
 

@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.utils.AuthAPI;
 import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.google.gson.Gson;
+import eu.darkbot.api.API;
 
 import javax.swing.*;
 import java.io.File;
@@ -25,7 +26,7 @@ import java.util.jar.JarFile;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
-public class PluginHandler {
+public class PluginHandler implements API.Singleton {
     private static final Gson GSON = new Gson();
 
     public static final PluginIssue LOADED_TWICE = new PluginIssue("plugins.issues.loaded_twice",

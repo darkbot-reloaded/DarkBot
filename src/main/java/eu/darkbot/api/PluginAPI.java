@@ -32,6 +32,6 @@ public interface PluginAPI extends API.Singleton {
      * @return instance of given type, if a suitable constructor was found
      * @throws UnsupportedOperationException if given api isn't supported
      */
-    @NotNull <T> T createInstance(@NotNull Class<T> clazz) throws UnsupportedOperationException;
+    @NotNull <T> T requireInstance(@NotNull Class<T> clazz) throws UnsupportedOperationException;
 
 }

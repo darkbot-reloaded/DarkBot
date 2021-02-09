@@ -72,18 +72,18 @@ public class Main extends Thread implements PluginListener, BotAPI {
     public final Lazy.Sync<Boolean> status       = new Lazy.Sync<>();
     public final Lazy.Sync<String> configChange  = new Lazy.Sync<>();
     public final StarManager starManager         = new StarManager();
-    public final MapManager mapManager           = pluginAPI.createInstance(MapManager.class);
+    public final MapManager mapManager           = pluginAPI.requireInstance(MapManager.class);
     public final SettingsManager settingsManager = new SettingsManager(this);
-    public final FacadeManager facadeManager     = pluginAPI.createInstance(FacadeManager.class);
+    public final FacadeManager facadeManager     = pluginAPI.requireInstance(FacadeManager.class);
     public final HeroManager hero                = new HeroManager(this);
     public final EffectManager effectManager     = new EffectManager(this);
     public final GuiManager guiManager           = new GuiManager(this);
     public final StatsManager statsManager       = new StatsManager(this);
-    public final PingManager pingManager         = pluginAPI.createInstance(PingManager.class);
-    public final BackpageManager backpage        = new BackpageManager(this);
-    public final PluginHandler pluginHandler     = new PluginHandler();
-    public final PluginUpdater pluginUpdater     = new PluginUpdater(this);
-    public final FeatureRegistry featureRegistry = new FeatureRegistry(this, pluginHandler);
+    public final PingManager pingManager         = pluginAPI.requireInstance(PingManager.class);
+    public final BackpageManager backpage        = pluginAPI.requireInstance(BackpageManager.class);
+    public final PluginHandler pluginHandler     = pluginAPI.requireInstance(PluginHandler.class);
+    public final PluginUpdater pluginUpdater     = pluginAPI.requireInstance(PluginUpdater.class);
+    public final FeatureRegistry featureRegistry = pluginAPI.requireInstance(FeatureRegistry.class);
     public final RepairManager repairManager     = new RepairManager();
 
     private final MainGui form;
