@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.entities;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Pet extends Ship {
+public class Pet extends Ship implements eu.darkbot.api.entities.Pet {
 
     private int level, playerId;
 
@@ -34,6 +34,11 @@ public class Pet extends Ship {
 
     public int getLevel() {
         return level;
+    }
+
+    @Override
+    public int getOwnerId() {
+        return playerId;
     }
 
     public int getPlayerId() {
