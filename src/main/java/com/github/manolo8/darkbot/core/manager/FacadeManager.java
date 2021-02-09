@@ -56,21 +56,21 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     }
 
     public <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
-        T command = pluginAPI.createInstance(commandClass);
+        T command = pluginAPI.requireInstance(commandClass);
         this.commands.addLazy(key, ((Updatable) command)::update);
         updatables.add(command);
         return command;
     }
 
     public <T extends Updatable> T registerProxy(String key, Class<T> proxyClass) {
-        T proxy = pluginAPI.createInstance(proxyClass);
+        T proxy = pluginAPI.requireInstance(proxyClass);
         this.proxies.addLazy(key, ((Updatable) proxy)::update);
         this.updatables.add(proxy);
         return proxy;
     }
 
     public <T extends Updatable> T registerMediator(String key, Class<T> mediatorClass) {
-        T mediator = pluginAPI.createInstance(mediatorClass);
+        T mediator = pluginAPI.requireInstance(mediatorClass);
         this.mediators.addLazy(key, ((Updatable) mediator)::update);
         updatables.add(mediator);
         return mediator;
