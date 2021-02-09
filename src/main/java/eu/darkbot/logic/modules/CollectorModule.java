@@ -2,7 +2,6 @@ package eu.darkbot.logic.modules;
 
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Box;
-import eu.darkbot.api.entities.Entity;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.Ship;
 import eu.darkbot.api.entities.other.Effect;
@@ -19,12 +18,9 @@ import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.Module;
 import eu.darkbot.config.ConfigAPI;
 import eu.darkbot.logic.SafetyFinder;
-import eu.darkbot.utils.Time;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 
 import static java.lang.Math.cos;
 import static java.lang.StrictMath.sin;
@@ -127,7 +123,7 @@ public class CollectorModule implements Module {
 
     protected boolean checkMap() {
         if (!portals.isEmpty() && config.GENERAL.WORKING_MAP != star.getCurrentMap().getId()) {
-            this.bot.setModule(pluginAPI.createInstance(MapModule.class))
+            this.bot.setModule(pluginAPI.requireInstance(MapModule.class))
                     .setTarget(star.getOrCreateMapById(config.GENERAL.WORKING_MAP));
             return false;
         }

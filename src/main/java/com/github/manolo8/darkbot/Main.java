@@ -110,24 +110,23 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
         this.pluginAPI       = new DarkBotPluginApiImpl(this);
         this.starManager     = StarManager.getInstance();
-        this.mapManager      = pluginAPI.createInstance(MapManager.class);
+        this.mapManager      = pluginAPI.requireInstance(MapManager.class);
         this.settingsManager = new SettingsManager(this);
-        this.facadeManager   = pluginAPI.createInstance(FacadeManager.class);
+        this.facadeManager   = pluginAPI.requireInstance(FacadeManager.class);
         this.hero            = new HeroManager(this);
         this.effectManager   = new EffectManager(this);
         this.guiManager      = new GuiManager(this);
         this.statsManager    = new StatsManager(this);
-        this.pingManager     = pluginAPI.createInstance(PingManager.class);
-        this.backpage        = new BackpageManager(this);
-        this.pluginHandler   = new PluginHandler();
-        this.pluginUpdater   = new PluginUpdater(this);
-        this.featureRegistry = new FeatureRegistry(this, pluginHandler);
+        this.pingManager     = pluginAPI.requireInstance(PingManager.class);
+        this.backpage        = pluginAPI.requireInstance(BackpageManager.class);
+        this.pluginHandler   = pluginAPI.requireInstance(PluginHandler.class);
+        this.pluginUpdater   = pluginAPI.requireInstance(PluginUpdater.class);
+        this.featureRegistry = pluginAPI.requireInstance(FeatureRegistry.class);
         this.repairManager   = new RepairManager();
 
         this.botInstaller = new BotInstaller(
                 settingsManager, facadeManager, effectManager, guiManager, mapManager,
                 hero, statsManager, pingManager, repairManager);
-
 
         API = configManager.getAPI(params);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);

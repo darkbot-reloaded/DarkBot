@@ -1,10 +1,8 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.plugins.PluginCard;
 import com.github.manolo8.darkbot.gui.plugins.PluginDisplay;
 import com.github.manolo8.darkbot.utils.FileUtils;
-import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 
 import javax.swing.*;
@@ -31,8 +29,8 @@ public class PluginUpdater {
 
     private JProgressBar mainProgressBar;
 
-    public PluginUpdater(Main main) {
-        this.pluginHandler = main.pluginHandler;
+    public PluginUpdater(PluginHandler pluginHandler) {
+        this.pluginHandler = pluginHandler;
     }
 
     public void scheduleUpdateChecker() {
