@@ -111,7 +111,7 @@ public class NpcAttacker {
             sendAttack(250, 5000, true);
         } else if (!hero.isAttacking(target) || !hero.isAiming(target)) {
             sendAttack(1500, 5000, false);
-        } else if ((target.health.hpDecreasedIn(1500) || target.hasEffect(EffectManager.Effect.NPC_ISH))
+        } else if (target.health.hpDecreasedIn(1500) || target.hasEffect(EffectManager.Effect.NPC_ISH)
                 || hero.locationInfo.distance(target) > 700) {
             isAttacking = Math.max(isAttacking, System.currentTimeMillis() + 2000);
         } else if (System.currentTimeMillis() > isAttacking) {
