@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -129,15 +130,17 @@ public class Entity extends Updatable implements eu.darkbot.api.entities.Entity 
 
     @Override
     public boolean trySelect(boolean tryAttack) {
+        if (!isSelectable() || distanceTo(main.hero) > 900) return false;
+
         clickable.setRadius(800);
         main.hero.drive.clickCenter(!tryAttack, locationInfo.now);
         clickable.setRadius(0);
+
         return true; // We can't know if successful...
     }
 
     @Override
     public Collection<Integer> getEffects() {
-        return null;
+        return main == null ? Collections.emptyList() : main.effectManager.getEffects(this);
     }
-
 }
