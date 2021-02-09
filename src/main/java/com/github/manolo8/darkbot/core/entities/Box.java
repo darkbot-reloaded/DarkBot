@@ -2,15 +2,18 @@ package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.config.BoxInfo;
 import com.github.manolo8.darkbot.config.ConfigEntity;
+import org.jetbrains.annotations.Nullable;
+
+import java.time.Instant;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Box extends Entity {
+public class Box extends Entity implements eu.darkbot.api.entities.Box {
 
     private long collectedUntil;
     private int retries = 0;
 
-    public String type;
+    public String type, hash;
 
     public BoxInfo boxInfo;
 
@@ -19,8 +22,34 @@ public class Box extends Entity {
         this.update(address);
     }
 
+    @Override
+    public String getHash() {
+        return hash;
+    }
+
+    @Override
+    public String getTypeName() {
+        return type;
+    }
+
+    @Override
+    public eu.darkbot.api.config.BoxInfo getInfo() {
+        return boxInfo;
+    }
+
     public boolean isCollected() {
         return removed || System.currentTimeMillis() < collectedUntil;
+    }
+
+    @Override
+    public boolean tryCollect() {
+        if (!clickable.enabled || distanceTo(main.hero) > 850) return false;
+
+        clickable.setRadius(800);
+        main.hero.drive.clickCenter(true, locationInfo.now);
+        clickable.setRadius(0);
+
+        return true;
     }
 
     public void setCollected() {
@@ -30,6 +59,11 @@ public class Box extends Entity {
 
     public int getRetries() {
         return retries;
+    }
+
+    @Override
+    public @Nullable Instant isCollectedUntil() {
+        return Instant.ofEpochMilli(collectedUntil);
     }
 
     public int getNextWait() {
@@ -55,6 +89,7 @@ public class Box extends Entity {
         data = API.readMemoryLong(data + 24);
 
         type = API.readMemoryString(data);
+        hash = API.readMemoryString(address, 160);
 
         if (type.length() > 5) type = type.split(",")[0].replace("box_", "").replace("_box", "");
 
