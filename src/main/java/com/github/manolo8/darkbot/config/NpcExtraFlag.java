@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.config;
 
-public interface NpcExtraFlag {
+import eu.darkbot.api.config.NpcInfo;
+
+public interface NpcExtraFlag extends NpcInfo.ExtraFlag {
     String getName();
     String getShortName();
     String getDescription();

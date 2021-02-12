@@ -102,7 +102,4 @@ public class Npc extends Ship implements eu.darkbot.api.entities.Npc {
             npcInfo.extra.set(flag.getId(), active);
         }
     }
-
-
-
 }
