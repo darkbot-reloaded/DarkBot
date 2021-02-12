@@ -19,8 +19,11 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.factory.EntityFactory;
 import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
+import eu.darkbot.api.entities.Station;
+import eu.darkbot.api.managers.EntitiesAPI;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +32,7 @@ import java.util.function.Consumer;
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.*;
 
-public class EntityList extends Updatable {
+public class EntityList extends Updatable implements EntitiesAPI {
     public final EntityRegistry entityRegistry = new EntityRegistry();
 
     public final List<Obstacle> obstacles                 = new ArrayList<>();
@@ -154,5 +157,65 @@ public class EntityList extends Updatable {
             if (value) doInEachEntity(entity -> entity.clickable.setRadius(0));
             else doInEachEntity(entity -> entity.clickable.reset());
         }
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.Npc> getNpcs() {
+        return npcs;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.Pet> getPets() {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.Ship> getPlayers() {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.Box> getBoxes() {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.Mine> getMines() {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.Portal> getPortals() {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends Station> getStations() {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.BattleStation> getBattleStations() {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.BattleStation.Module> getBaseModules() {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.Entity> getAll() {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.Entity> getUnknown() {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.objects.Obstacle> getObstacles() {
+        return null;
     }
 }
