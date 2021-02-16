@@ -8,6 +8,7 @@ import eu.darkbot.api.managers.HeroItemsAPI;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -40,9 +41,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
 
     @Override
     public boolean selectItem(@NotNull eu.darkbot.api.objects.Item item) {
-        Item.Slot slot = null;
-
-        if (item instanceof Item) slot = ((Item) item).getSlot();
+        Item.Slot slot = ((Item) item).getSlot();
         if (slot == null) return false;
 
         if (slot.slotBarType == SlotBarsProxy.Type.PRO_ACTION_BAR)
@@ -53,6 +52,13 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
                         "PREMIUM_" : "SLOTBAR_") + (slot.slotNumber == 10 ? 0 : slot.slotNumber))));
 
         return true;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.objects.Item> getItems() {
+        return categoryBar.categories.stream()
+                .flatMap(category -> category.items.stream())
+                .collect(Collectors.toList());
     }
 
     @Override
