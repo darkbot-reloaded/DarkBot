@@ -49,6 +49,14 @@ public interface Ammo {
         public boolean hasCooldown() {
             return cooldown;
         }
+
+        public static Laser of(String id) {
+            for (Laser laser : values())
+                if (id.endsWith(laser.name().replaceAll("_", "-").toLowerCase()))
+                    return laser;
+
+            return null;
+        }
     }
 
     enum Rocket {
