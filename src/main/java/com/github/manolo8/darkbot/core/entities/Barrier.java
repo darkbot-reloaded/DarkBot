@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 
 public class Barrier
         extends Zone
-        implements Obstacle {
+        implements Obstacle, eu.darkbot.api.entities.Barrier {
 
     private static final int BARRIER_RADIUS = 60;
     private final RectangleImpl area = new RectangleImpl(0, 0, 0, 0);
