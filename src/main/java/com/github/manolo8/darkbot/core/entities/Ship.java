@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.Health;
 import com.github.manolo8.darkbot.core.objects.PlayerInfo;
 import com.github.manolo8.darkbot.core.objects.ShipInfo;
+import com.github.manolo8.darkbot.core.utils.TraitPattern;
 import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.entities.Pet;
 import eu.darkbot.api.entities.other.Formation;
@@ -22,7 +23,7 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
 
-    private static HashMap<Integer, Long> cacheTimer = new HashMap<>();
+    private static final HashMap<Integer, Long> cacheTimer = new HashMap<>();
 
     public Health health         = new Health();
     public PlayerInfo playerInfo = new PlayerInfo();
@@ -52,6 +53,10 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
 
     public boolean isAttacking(Ship other) {
         return shipInfo.target == other.address;
+    }
+
+    public boolean isAiming(Ship other) {
+        return isAiming((Locatable) other);
     }
 
     private final Target target = new Target();
@@ -90,14 +95,7 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
 
         target.update(findInTraits(ptr -> API.readMemoryString(ptr, 48, 32).equals("attackLaser")));
 
-        lockPtr = findInTraits(ptr -> {
-            long temp = API.readMemoryLong(ptr + 48);
-            int lockType = API.readMemoryInt(temp + 40);
-
-            return (lockType == 1 || lockType == 2 || lockType == 3 || lockType == 4) &&
-                    API.readMemoryInt(temp + 32) == Integer.MIN_VALUE &&
-                    API.readMemoryInt(temp + 36) == Integer.MAX_VALUE;
-        });
+        lockPtr = findInTraits(TraitPattern::ofLockType);
     }
 
     @Override
@@ -236,12 +234,12 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
 
     @Override
     public boolean isAiming(Locatable other) {
-        return MathUtils.angleDiff(shipInfo.angle, getLocationInfo().angleTo(other)) < 0.2;
+        return MathUtils.angleDiff(getAngle(), getLocationInfo().angleTo(other)) < 0.2;
     }
 
     @Override
     public Optional<Location> getDestination() {
-        if (shipInfo.destination.address == 0) return Optional.empty();
-        return Optional.of(shipInfo.destination);
+        return shipInfo.destination.address == 0 ?
+                Optional.empty() : Optional.of(shipInfo.destination);
     }
 }
