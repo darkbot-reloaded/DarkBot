@@ -22,7 +22,7 @@ public class FakeNpc extends Npc {
     }
 
     @Override
-    public boolean isAiming(Locatable other) {
+    public boolean isAiming(Ship other) {
         return false;
     }
 

@@ -2,6 +2,9 @@ package eu.darkbot.api.entities;
 
 public interface Station extends Entity {
 
+    interface HomeBase extends Station {
+    }
+
     interface Hangar extends Station {
     }
 

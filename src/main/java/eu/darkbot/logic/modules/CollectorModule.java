@@ -43,9 +43,9 @@ public class CollectorModule implements Module {
 
     protected final SafetyFinder safetyFinder;
 
-    protected final Collection<Box> boxes;
-    protected final Collection<Ship> ships;
-    protected final Collection<Portal> portals;
+    protected final Collection<? extends Box> boxes;
+    protected final Collection<? extends Ship> ships;
+    protected final Collection<? extends Portal> portals;
 
     public Box currentBox;
     protected long refreshing;

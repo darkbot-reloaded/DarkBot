@@ -15,32 +15,32 @@ public interface EntitiesAPI extends API {
     /**
      * @return {@link Collection} of {@link Npc}
      */
-    Collection<Npc> getNpcs();
+    Collection<? extends Npc> getNpcs();
 
     /**
      * @return {@link Collection} of {@link Pet}
      */
-    Collection<Pet> getPets();
+    Collection<? extends Pet> getPets();
 
     /**
      * @return {@link Collection} of {@link Ship}
      */
-    Collection<Ship> getPlayers();
+    Collection<? extends Ship> getPlayers();
 
     /**
      * @return {@link Collection} of {@link Box}
      */
-    Collection<Box> getBoxes();
+    Collection<? extends Box> getBoxes();
 
     /**
      * @return {@link Collection} of {@link Mine}
      */
-    Collection<Mine> getMines();
+    Collection<? extends Mine> getMines();
 
     /**
      * @return {@link Collection} of {@link Portal}
      */
-    Collection<Portal> getPortals();
+    Collection<? extends Portal> getPortals();
 
     /**
      * @return {@link Collection} of {@link Station}
@@ -50,27 +50,27 @@ public interface EntitiesAPI extends API {
     /**
      * @return {@link Collection} of {@link BattleStation}
      */
-    Collection<BattleStation> getBattleStations();
+    Collection<? extends BattleStation> getBattleStations();
 
     /**
      * @return {@link Collection} of {@link BattleStation.Module}
      */
-    Collection<BattleStation.Module> getBaseModules();
+    Collection<? extends BattleStation.Module> getBaseModules();
 
     /**
      * @return reference to {@link Collection} of all entities
      */
-    Collection<Entity> getAll();
+    Collection<? extends Entity> getAll();
 
     /**
      * @return {@link Collection} of unknown entities
      */
-    Collection<Entity> getUnknown();
+    Collection<? extends Entity> getUnknown();
 
     /**
      * @return {@link Collection} of {@link Obstacle}
      */
-    Collection<Obstacle> getObstacles();
+    Collection<? extends Obstacle> getObstacles();
 
     class EntityEvent implements Event {
         private final Entity entity;
