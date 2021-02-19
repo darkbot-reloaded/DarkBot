@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.core.utils.TraitPattern;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -64,15 +65,7 @@ public class Entity extends Updatable implements eu.darkbot.api.entities.Entity 
         this.locationInfo.update(API.readMemoryLong(address + 64));
         this.traits.update(API.readMemoryLong(address + 48));
 
-        this.clickable.update(findInTraits(ptr -> {
-            int radius   = API.readMemoryInt(ptr + 40);
-            int priority = API.readMemoryInt(ptr + 44);
-            int enabled  = API.readMemoryInt(ptr + 48);
-
-            return radius >= 0 && radius < 4000 &&
-                    priority > -4 && priority < 1000 &&
-                    (enabled == 1 || enabled == 0);
-        }));
+        this.clickable.update(findInTraits(TraitPattern::ofClickable));
     }
 
     protected long findInTraits(Predicate<Long> filter) {
