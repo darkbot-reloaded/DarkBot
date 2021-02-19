@@ -19,7 +19,7 @@ public class MapTraveler implements Listener, Installable {
     protected final StarSystemAPI star;
     protected final MovementAPI movement;
 
-    protected final Collection<Portal> portals;
+    protected final Collection<? extends Portal> portals;
 
     protected final PortalJumper jumper;
 
