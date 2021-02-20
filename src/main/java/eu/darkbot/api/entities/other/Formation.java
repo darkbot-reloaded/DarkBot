@@ -90,4 +90,8 @@ public enum Formation {
     public double getShieldRegen() {
         return sps;
     }
+    
+    public String getId(){
+        return "drone_formation_" + id;
+    }
 }
