@@ -49,7 +49,7 @@ public class FakeNpc extends Npc {
             return;
         }
         removed = false;
-        pingAlive = System.currentTimeMillis() + 2_000;
+        pingAlive = System.currentTimeMillis() + 3_000;
         locationInfo.updatePosition(loc.x, loc.y);
         npcInfo = type;
     }
