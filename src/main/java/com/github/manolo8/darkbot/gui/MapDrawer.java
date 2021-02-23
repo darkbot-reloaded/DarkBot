@@ -277,7 +277,7 @@ public class MapDrawer extends JPanel {
                 Main.VERSION.toString(),
                 (main.isRunning() || !config.MISCELLANEOUS.RESET_REFRESH ?
                         Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"),
-                Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000));
+                Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000L));
         drawString(g2, info, 5, 12, Align.LEFT);
         if (main.module != null) {
             drawString(g2, main.tickingModule ? main.module.status() : main.module.stoppedStatus(), 5, 26, Align.LEFT);
@@ -323,7 +323,7 @@ public class MapDrawer extends JPanel {
         } else if (distance > 100) {
             positions.put(System.currentTimeMillis(), new Line(last, last = heroLocation.copy()));
         }
-        positions.headMap(System.currentTimeMillis() - config.BOT_SETTINGS.MAP_DISPLAY.TRAIL_LENGTH * 1000).clear();
+        positions.headMap(System.currentTimeMillis() - config.BOT_SETTINGS.MAP_DISPLAY.TRAIL_LENGTH * 1000L).clear();
 
         if (positions.isEmpty()) return;
 
