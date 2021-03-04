@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Module;
+import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
@@ -224,6 +225,7 @@ public class LootModule implements Module {
     protected boolean shouldKill(Npc n) {
         boolean attacked = this.isAttackedByOthers(n);
         return n.npcInfo.kill && !n.isInTimer() &&
+                (hero.hasEffect(EffectManager.Effect.ENERGY_LEECH) || !n.npcInfo.extra.has(NpcExtra.LEECH_ONLY)) &&
                 (n.npcInfo.extra.has(NpcExtra.IGNORE_ATTACKED) || !attacked) && // Either ignore attacked, or not being attacked
                 (!n.npcInfo.extra.has(NpcExtra.ATTACK_SECOND) || attacked) &&   // Either don't want to attack second, or being attacked
                 (n.playerInfo.username.contains("Invoke") || !n.npcInfo.extra.has(NpcExtra.PASSIVE) || n.isAttacking(hero));
