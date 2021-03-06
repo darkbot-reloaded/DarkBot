@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.modules;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.NpcExtra;
+import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Module;
@@ -114,6 +115,9 @@ public class LootModule implements Module {
                 || (hero.locationInfo.distance(attack.target) > config.LOOT.NPC_DISTANCE_IGNORE) // Too far away from ship
                 || (closestDist > 650 && attack.target.health.hpPercent() > 0.90)   // Too far into obstacle and full hp
                 || (closestDist > 500 && !attack.target.locationInfo.isMoving() // Inside obstacle, waiting & and regen shields
+                || (main.mapManager.safeties.stream().filter(s -> s.type == SafetyInfo.Type.BASE)
+                .anyMatch(s -> attack.target.locationInfo.now.distance(s.x, s.y) <= s.radius())
+                && !attack.target.locationInfo.isMoving()) // Inside base, not moving
                         && (attack.target.health.shIncreasedIn(1000) || attack.target.health.shieldPercent() > 0.99))) {
             attack.target.setTimerTo(5000);
             hero.setTarget(attack.target = null);
