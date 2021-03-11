@@ -46,6 +46,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
     public final List<Npc> npcs                     = register(NPC, LOW_RELAY);
     public final List<Portal> portals               = register(PORTAL);
     public final List<Ship> ships                   = register(PLAYER, PET);
+    public final List<Ship> players                 = register(PLAYER);
     public final List<Pet> pets                     = register(PET);
     public final List<BattleStation> battleStations = register(CBS_ASTEROID, CBS_MODULE, CBS_STATION, CBS_MODULE_CON, CBS_CONSTRUCTION);
     public final List<BattleStation.Module> modules = register(CBS_MODULE, CBS_MODULE_CON);
@@ -173,6 +174,11 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
     @Override
     public Collection<? extends eu.darkbot.api.entities.Ship> getPlayers() {
+        return players;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.entities.Ship> getShips() {
         return ships;
     }
 
