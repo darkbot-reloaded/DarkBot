@@ -28,6 +28,11 @@ public interface EntitiesAPI extends API {
     Collection<? extends Ship> getPlayers();
 
     /**
+     * @return {@link Collection} of {@link Ship}
+     */
+    Collection<? extends Ship> getShips();
+
+    /**
      * @return {@link Collection} of {@link Box}
      */
     Collection<? extends Box> getBoxes();
