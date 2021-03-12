@@ -57,10 +57,10 @@ public class NativeApiAdapter extends ApiAdapter {
     }
 
     public void handleRefresh() {
-        super.handleRefresh();
         relogin();
         setData();
         API.sendMessage(botId, Headers.RELOAD);
+        resetCache();
     }
 
     public void blockUserInput(boolean block) {

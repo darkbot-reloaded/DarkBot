@@ -91,7 +91,7 @@ public abstract class ApiAdapter implements IDarkBotAPI {
         return 0;
     }
 
-    public void handleRefresh() {
+    public void resetCache() {
         stringReader.reset();
     }
 

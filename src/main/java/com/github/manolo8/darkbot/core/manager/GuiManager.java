@@ -106,6 +106,7 @@ public class GuiManager implements Manager {
                 validTime = System.currentTimeMillis();
                 checks = LoadStatus.WAITING;
             }
+            API.resetCache();
         });
 
         botInstaller.guiManagerAddress.add(value -> {
