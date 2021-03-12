@@ -91,6 +91,10 @@ public abstract class ApiAdapter implements IDarkBotAPI {
         return 0;
     }
 
+    public void handleRefresh() {
+        stringReader.reset();
+    }
+
     public void setSize(int width, int height) {
         if (width == -1 && height == -1) {
             width = this.initialWidth;

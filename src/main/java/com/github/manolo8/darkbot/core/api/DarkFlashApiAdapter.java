@@ -142,6 +142,7 @@ public class DarkFlashApiAdapter extends ApiAdapter {
 
     @Override
     public void handleRefresh() {
+        super.handleRefresh();
         relogin();
         setData();
         willBeValid = System.currentTimeMillis() + 5_000;

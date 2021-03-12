@@ -143,6 +143,7 @@ public class DarkBoatAdapter extends ApiAdapter {
 
     @Override
     public void handleRefresh() {
+        super.handleRefresh();
         relogin();
         setData();
         API.reload();

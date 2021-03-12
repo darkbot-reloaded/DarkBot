@@ -89,6 +89,6 @@ public class NoopApiAdapter extends ApiAdapter {
 
     @Override
     public void handleRefresh() {
-
+        super.handleRefresh();
     }
 }
