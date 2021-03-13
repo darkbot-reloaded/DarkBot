@@ -58,7 +58,8 @@ public class BattleStation
 
     @Override
     public boolean use() {
-        return hullId > 0 && hullId < 255 && info.isEnemy();
+        boolean allowEnemy = main.hero.invisible && main.config.GENERAL.ROAMING.ENEMY_CBS_INVISIBLE;
+        return hullId > 0 && hullId < 255 && (info.isEnemy() && !allowEnemy);
     }
 
     @Override
