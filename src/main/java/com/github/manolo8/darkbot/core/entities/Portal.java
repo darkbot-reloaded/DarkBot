@@ -70,7 +70,7 @@ public class Portal extends Entity {
             this.searchType = searchType;
             this.searchX    = searchX;
             this.searchY    = searchY;
-            this.noCenter = noCenter;
+            this.noCenter   = noCenter;
         }
 
         boolean matches(int x, int y, int type) {
