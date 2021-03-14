@@ -25,7 +25,7 @@ public class Portal extends Entity {
 
     public Portal(int id, int searchType, int searchX, int searchY, Map target, int factionId) {
         super(id);
-        this.matcher = new PortalMatcher(searchType, searchX, searchY);
+        this.matcher = new PortalMatcher(searchType, searchX, searchY, target != null && target.id == 71);
 
         super.removed  = true;
         this.target    = target;
@@ -63,16 +63,20 @@ public class Portal extends Entity {
     // Holds the search criteria portals in the star manager
     private static class PortalMatcher {
         private final int searchType, searchX, searchY;
+        // Avoid matching if portal is centered. Used to avoid zeta being in the wrong place
+        private final boolean noCenter;
 
-        PortalMatcher(int searchType, int searchX, int searchY) {
+        PortalMatcher(int searchType, int searchX, int searchY, boolean noCenter) {
             this.searchType = searchType;
             this.searchX    = searchX;
             this.searchY    = searchY;
+            this.noCenter = noCenter;
         }
 
         boolean matches(int x, int y, int type) {
-            return (searchType != -1 && searchType == type) || // By type
-                    (searchX != -1 && searchY != -1 && searchX == x && searchY == y); // By pos
+            return ((searchType != -1 && searchType == type) || // By type
+                    (searchX != -1 && searchY != -1 && searchX == x && searchY == y)) && // By pos
+                    (!noCenter || x != 10500 && y != 6500); // Avoid centered
         }
     }
 }
