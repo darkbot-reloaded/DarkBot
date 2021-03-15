@@ -74,8 +74,8 @@ public class Portal extends Entity {
         }
 
         boolean matches(int x, int y, int type) {
-            return ((searchType != -1 && searchType == type) || // By type
-                    (searchX != -1 && searchY != -1 && searchX == x && searchY == y)) && // By pos
+            return (searchType != -1 && searchType == type) && // By type
+                    (searchX != -1 && searchY != -1 && searchX == x && searchY == y) && // By pos
                     (!noCenter || x != 10500 && y != 6500); // Avoid centered
         }
     }
