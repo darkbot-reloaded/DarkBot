@@ -136,7 +136,9 @@ public class NpcAttacker {
     }
 
     private boolean shouldSab() {
-        return main.config.LOOT.SAB.ENABLED && hero.health.shieldPercent() < main.config.LOOT.SAB.PERCENT
+        if (!main.config.LOOT.SAB.ENABLED || target.npcInfo.extra.has(NpcExtra.NO_SAB)) return false;
+
+        return hero.health.shieldPercent() < main.config.LOOT.SAB.PERCENT
                 && target.health.shield > main.config.LOOT.SAB.NPC_AMOUNT;
     }
 
