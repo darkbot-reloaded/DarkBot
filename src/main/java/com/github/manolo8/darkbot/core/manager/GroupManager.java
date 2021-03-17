@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -41,6 +42,7 @@ public class GroupManager extends Gui {
     private Runnable pending;
 
     private final Map<String, Long> pastInvites = new HashMap<>();
+    private int shouldLeave = 0;
 
     public GroupManager(Main main) {
         this.main = main;
@@ -71,6 +73,7 @@ public class GroupManager extends Gui {
 
         this.config = main.config.GROUP;
 
+        tryQueueLeave();
         tryQueueAcceptInvite();
         tryOpenInvites();
         tryQueueSendInvite();
@@ -104,13 +107,31 @@ public class GroupManager extends Gui {
         if (pending != null || !canInvite() || config.INVITE_TAG == null) return;
 
         for (PlayerInfo player : main.config.PLAYER_INFOS.values()) {
-            if (!config.INVITE_TAG.has(player) ||
-                    group.getMember(player.userId) != null ||
-                    System.currentTimeMillis() < pastInvites.getOrDefault(player.username, 0L)) continue;
+            if (!config.INVITE_TAG.has(player) || group.getMember(player.userId) != null) continue;
 
-            pending = () -> sendInvite(player.username);
+            Long inviteTime = pastInvites.get(player.username);
+            if (inviteTime != null && System.currentTimeMillis() < inviteTime) continue;
+
+            pending = () -> sendInvite(player.username, inviteTime == null ? 60_000 : 300_000);
             break;
         }
+    }
+
+    public void tryQueueLeave() {
+        if (pending != null) return;
+
+        if (shouldLeave()) shouldLeave = Math.min(20, shouldLeave + 1);
+        else shouldLeave = 0;
+
+        if (shouldLeave >= 20)
+            pending = () -> click(GroupAction.LEAVE);
+    }
+
+    public boolean shouldLeave() {
+        return group.isValid() && config.WHITELIST_TAG != null && config.LEAVE_NO_WHITELISTED &&
+                group.members.stream()
+                        .map(m -> main.config.PLAYER_INFOS.get(m.id))
+                        .noneMatch(i -> i != null && i.hasTag(config.WHITELIST_TAG));
     }
 
     public void acceptInvite(Invite inv) {
@@ -120,13 +141,15 @@ public class GroupManager extends Gui {
     }
 
     public void sendInvite(String username) {
-        System.out.println("Sending invite to " + username);
+        sendInvite(username, 60_000);
+    }
+    public void sendInvite(String username, long wait) {
         click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
         Time.sleep(75); // This should not be here, but will stay for now
         API.sendText(username);
         Time.sleep(75); // This should not be here, but will stay for now
         click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
-        pastInvites.put(username, System.currentTimeMillis() + 60_000); // Wait at least 60s to re-invite
+        pastInvites.put(username, System.currentTimeMillis() + wait); // Wait until re-invite
     }
 
     public void kick(int id) {

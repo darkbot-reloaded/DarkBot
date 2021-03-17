@@ -158,6 +158,7 @@ public class Config {
         public @Option @Tag(TagDefault.ALL) PlayerTag WHITELIST_TAG = null;
         public @Option @Tag(TagDefault.NONE) PlayerTag INVITE_TAG = null;
         public @Option boolean OPEN_INVITES = false;
+        public @Option boolean LEAVE_NO_WHITELISTED = false;
         //public @Option @Tag(TagDefault.NONE) PlayerTag KICK_TAG = null;
     }
 
