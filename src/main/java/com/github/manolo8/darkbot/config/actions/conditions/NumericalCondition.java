@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiPredicate;
 
-@ValueData("check")
+@ValueData("if")
 public class NumericalCondition implements Condition, Parser {
 
     public Value<Number> a;
@@ -19,10 +19,10 @@ public class NumericalCondition implements Condition, Parser {
     public Value<Number> b;
 
     @Override
-    public @NotNull Condition.Result getValue(Main main) {
-        if (a == null || operation == null || b == null) return Condition.Result.ABSTAIN;
-        Number numA = a.getValue(main), numB = b.getValue(main);
-        if (numA == null || numB == null) return Condition.Result.ABSTAIN;
+    public @NotNull Condition.Result get(Main main) {
+        Number numA, numB;
+        if ((numA = Value.get(a, main)) == null || (numB = Value.get(b, main)) == null ||
+                operation == null) return Condition.Result.ABSTAIN;
 
         return Condition.Result.fromBoolean(operation.check.test(numA, numB));
     }
@@ -57,7 +57,7 @@ public class NumericalCondition implements Condition, Parser {
 
     @Override
     public String toString() {
-        return "check(" + a + " " + operation + " " + b + ")";
+        return "if(" + a + " " + operation + " " + b + ")";
     }
 
     @Override
@@ -65,11 +65,13 @@ public class NumericalCondition implements Condition, Parser {
         ValueParser.Result prA = ValueParser.parse(str, Number.class);
 
         String[] params = prA.leftover.trim().split(" *,? *", 2);
-        if (params.length != 2) throw new SyntaxException("Invalid operation syntax", prA.leftover);
 
         operation = Operation.of(params[0].trim());
         if (operation == null)
-            throw new SyntaxException("Invalid operation '" + params[0] + "'", prA.leftover, Operation.class);
+            throw new SyntaxException("Unknown operation '" + params[0] + "'", prA.leftover, Operation.class);
+
+        if (params.length != 2)
+            throw new SyntaxException("Missing end separator in 'if'", prA.leftover);
 
         ValueParser.Result prB = ValueParser.parse(params[1], Number.class);
 
@@ -78,7 +80,7 @@ public class NumericalCondition implements Condition, Parser {
 
         str = prB.leftover.trim();
         if (str.isEmpty() || str.charAt(0) != ')')
-            throw new SyntaxException("check: No end separator found", str, ")");
+            throw new SyntaxException("Missing end separator in 'if'", str, ")");
 
         return str.substring(1);
     }

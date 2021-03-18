@@ -9,7 +9,7 @@ import com.github.manolo8.darkbot.core.entities.Ship;
 public class TargetValue implements Value<Ship> {
 
     @Override
-    public Ship getValue(Main main) {
+    public Ship get(Main main) {
         return main.hero.target;
     }
 

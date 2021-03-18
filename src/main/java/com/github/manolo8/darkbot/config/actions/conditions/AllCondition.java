@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class AllCondition extends AbstractCondition {
 
     @Override
-    public @NotNull Result getValue(Main main) {
+    public @NotNull Result get(Main main) {
         return super.getValue(main, children.size(), children.size());
     }
 

@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Condition extends Value<Condition.Result> {
 
-    @NotNull Result getValue(Main main);
+    @NotNull Result get(Main main);
 
     enum Result {
         ALLOW, DENY, ABSTAIN;

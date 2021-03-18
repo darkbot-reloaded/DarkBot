@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.config;
 
+import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Option;
@@ -226,8 +227,12 @@ public class Config {
         }
     }
 
-    public /*@Option("Extra actions")*/ ExtraActions EXTRA = new ExtraActions();
+    public @Option("Extra actions") ExtraActions EXTRA = new ExtraActions();
     public static class ExtraActions {
+        @Option()
+        public Condition CONDITION;
+
+
         @Option
         @Editor(value = JActionTable.class, shared = true)
         public Map<String, ActionInfo> ACTION_INFOS = new HashMap<>();

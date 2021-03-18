@@ -23,7 +23,7 @@ public abstract class AbstractCondition implements Condition, Parser {
     public Result getValue(Main main, int min, int max) {
         int[] states = new int[]{0, 0, 0};
         for (int i = 0; i < children.size(); i++) {
-            states[children.get(i).getValue(main).ordinal()]++;
+            states[children.get(i).get(main).ordinal()]++;
             if ((states[1] + states[2] > children.size() - min && states[0] + states[1] > 0) /* Can't reach min anymore */
                     || states[0] > max /* Allow bigger than max */ ) {
                 return Condition.Result.DENY;

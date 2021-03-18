@@ -13,19 +13,24 @@ public class BooleanConstant implements Condition, Parser {
     private Boolean value;
 
     @Override
-    public @NotNull Result getValue(Main main) {
+    public @NotNull Result get(Main main) {
         return Result.fromBoolean(value);
     }
 
     @Override
     public String parse(String str) throws SyntaxException {
         String[] params = str.split("\\)", 2);
-        if (params.length != 2)
-            throw new SyntaxException("Invalid syntax for boolean, missing ')'", str);
 
-        value = parse(params[0].trim(), params[1]);
+        value = parse(params[0].trim(), params.length == 1 ? "" : params[1]);
+        if (params.length != 2)
+            throw new SyntaxException("Missing end separator in boolean", str, ")");
 
         return params[1];
+    }
+
+    @Override
+    public String toString() {
+        return "boolean(" + value + ")";
     }
 
     private Boolean parse(String bool, String ex) throws SyntaxException {

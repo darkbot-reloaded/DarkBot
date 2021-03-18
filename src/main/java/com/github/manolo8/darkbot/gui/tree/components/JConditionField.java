@@ -67,7 +67,8 @@ public class JConditionField extends JTextField implements OptionEditor {
 
             try {
                 Rectangle rect = getUI().modelToView(this, start);
-                popup = new Point((int) rect.getX(), (int) rect.getMaxY());
+                if (rect != null)
+                    popup = new Point((int) rect.getX(), (int) rect.getMaxY());
             } catch (BadLocationException ble) {
                 ble.printStackTrace();
             }

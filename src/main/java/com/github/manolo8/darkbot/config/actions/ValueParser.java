@@ -2,9 +2,11 @@ package com.github.manolo8.darkbot.config.actions;
 
 import com.github.manolo8.darkbot.config.actions.conditions.AllCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.AnyCondition;
+import com.github.manolo8.darkbot.config.actions.conditions.EqualCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NoneCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NumericalCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.OneCondition;
+import com.github.manolo8.darkbot.config.actions.values.BooleanConstant;
 import com.github.manolo8.darkbot.config.actions.values.HealthTypeValue;
 import com.github.manolo8.darkbot.config.actions.values.HealthValue;
 import com.github.manolo8.darkbot.config.actions.values.HeroValue;
@@ -29,12 +31,14 @@ public class ValueParser {
                     OneCondition.class,
                     NoneCondition.class,
                     NumericalCondition.class,
+                    EqualCondition.class,
                     HealthTypeValue.class,
                     HealthValue.class,
                     HeroValue.class,
                     TargetValue.class,
                     NumberConstant.class,
-                    PercentConstant.class);
+                    PercentConstant.class,
+                    BooleanConstant.class);
 
     private static final Map<String, ValueMeta> VALUES = buildMetadata();
 
@@ -67,8 +71,6 @@ public class ValueParser {
 
     public static Result parse(String str, Class<?> type) throws SyntaxException {
         String[] parts = str.trim().split(" *\\( *", 2);
-        if (parts.length != 2) throw new SyntaxException("No start separator found", str, "(");
-
 
         Stream<String> params = VALUES.values().stream()
                 .filter(v -> type.isAssignableFrom(v.type)).map(v -> v.valueData.value());
@@ -77,6 +79,9 @@ public class ValueParser {
             throw new SyntaxException("Unknown value type '" + parts[0] + "'", str, params);
         if (!type.isAssignableFrom(vm.type))
             throw new SyntaxException("Invalid type, expected '" + type.getSimpleName() + "'", str, params);
+
+        if (parts.length != 2)
+            throw new SyntaxException("No start separator found", str, "(");
 
         str = parts[1].trim();
 
@@ -100,12 +105,12 @@ public class ValueParser {
                 str = pr.leftover.trim();
                 char expected = field == vm.params[vm.params.length - 1] ? ')' : ',';
                 if (str.isEmpty() || str.charAt(0) != expected)
-                    throw new SyntaxException(vm.valueData.value() + ": Missing separator", str, expected + "");
+                    throw new SyntaxException("Missing separator in " + vm.valueData.value(), str, expected + "");
                 str = str.substring(1);
             }
             if (vm.params.length == 0) { // No-param case
                 if (str.isEmpty() || str.charAt(0) != ')')
-                    throw new SyntaxException(vm.valueData.value() + ": No end separator found", str, ")");
+                    throw new SyntaxException("Missing end separator in " + vm.valueData.value(), str, ")");
                 str = str.substring(1);
             }
         }

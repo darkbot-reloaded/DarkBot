@@ -12,7 +12,7 @@ public class PercentConstant implements Value<Number>, Parser {
     public double percent;
 
     @Override
-    public Number getValue(Main main) {
+    public Number get(Main main) {
         return percent;
     }
 
@@ -24,14 +24,15 @@ public class PercentConstant implements Value<Number>, Parser {
     @Override
     public String parse(String str) throws SyntaxException {
         String[] params = str.split("\\)", 2);
-        if (params.length != 2)
-            throw new SyntaxException("Invalid syntax for percent", str);
 
         try {
             percent = Double.parseDouble(params[0]) / 100;
         } catch (NumberFormatException e) {
-            throw new SyntaxException("Failed to parse percentage '" + params[0] + "'", str);
+            throw new SyntaxException("Failed to parse percent '" + params[0] + "'", str);
         }
+
+        if (params.length != 2)
+            throw new SyntaxException("Missing end separator in percent", str, ")");
 
         return params[1];
     }

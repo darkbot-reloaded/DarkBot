@@ -12,7 +12,7 @@ import javax.swing.*;
 public class HeroValue implements Value<Ship> {
 
     @Override
-    public Ship getValue(Main main) {
+    public Ship get(Main main) {
         return main.hero;
     }
 

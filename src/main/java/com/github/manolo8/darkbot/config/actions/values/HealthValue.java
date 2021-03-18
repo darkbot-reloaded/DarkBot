@@ -6,19 +6,15 @@ import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.objects.Health;
 
-import javax.swing.*;
-
 @ValueData("health")
 public class HealthValue implements Value<Health> {
 
     public Value<Ship> ship;
 
     @Override
-    public Health getValue(Main main) {
-        if (ship == null) return null;
-        Ship shValue = ship.getValue(main);
-        if (shValue == null) return null;
-        return shValue.health;
+    public Health get(Main main) {
+        Ship sh = Value.get(ship, main);
+        return sh == null ? null : sh.health;
     }
 
     @Override

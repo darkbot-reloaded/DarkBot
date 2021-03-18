@@ -10,7 +10,7 @@ public class NoneCondition extends AbstractCondition {
     public NoneCondition() {}
 
     @Override
-    public @NotNull Result getValue(Main main) {
+    public @NotNull Result get(Main main) {
         return super.getValue(main, 0, 0);
     }
 

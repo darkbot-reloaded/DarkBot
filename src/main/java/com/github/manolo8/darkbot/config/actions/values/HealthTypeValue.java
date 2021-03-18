@@ -20,8 +20,9 @@ public class HealthTypeValue implements Value<Number>, Parser {
     public HealthTypeValue() {}
 
     @Override
-    public Number getValue(Main main) {
-        return healthType != null && health != null ? healthType.getter.apply(health.getValue(main)) : null;
+    public Number get(Main main) {
+        HealthHolder hh = Value.get(health, main);
+        return healthType != null && hh != null ? healthType.getter.apply(hh) : null;
     }
 
     public enum HealthType {
@@ -57,10 +58,13 @@ public class HealthTypeValue implements Value<Number>, Parser {
 
     @Override
     public String parse(String str) throws SyntaxException {
-        String[] params = str.split(",", 2);
-        if (params.length != 2) throw new SyntaxException("hp-type requires 2 parameters", str);
+        String[] params = str.split(" *, *", 2);
         healthType = HealthType.of(params[0].trim());
-        if (healthType == null) throw new SyntaxException("Invalid hp-type: '" + params[0] + "'", str, HealthType.class);
+        if (healthType == null)
+            throw new SyntaxException("Unknown hp-type: '" + params[0] + "'", str, HealthType.class);
+
+        if (params.length != 2)
+            throw new SyntaxException("Missing separator in hp-type", str, ",");
 
         ValueParser.Result pr = ValueParser.parse(params[1], HealthHolder.class);
         if (!HealthHolder.class.isAssignableFrom(pr.type))
@@ -70,7 +74,7 @@ public class HealthTypeValue implements Value<Number>, Parser {
 
         str = pr.leftover.trim();
         if (str.isEmpty() || str.charAt(0) != ')')
-            throw new SyntaxException("hp-type: Expected ')'", str);
+            throw new SyntaxException("Missing end separator in hp-type", str, ")");
 
         return pr.leftover.substring(1);
     }

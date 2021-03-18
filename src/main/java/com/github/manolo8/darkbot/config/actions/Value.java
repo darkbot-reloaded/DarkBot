@@ -6,6 +6,11 @@ import org.jetbrains.annotations.Nullable;
 
 public interface Value<R> {
 
-    @Nullable R getValue(Main main);
+    @Nullable R get(Main main);
+
+    static <T> T get(Value<T> val, Main main) {
+        if (val == null) return null;
+        return val.get(main);
+    }
 
 }
