@@ -7,11 +7,14 @@ import com.github.manolo8.darkbot.config.actions.conditions.NoneCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NumericalCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.OneCondition;
 import com.github.manolo8.darkbot.config.actions.values.BooleanConstant;
+import com.github.manolo8.darkbot.config.actions.values.DistanceValue;
 import com.github.manolo8.darkbot.config.actions.values.HealthTypeValue;
 import com.github.manolo8.darkbot.config.actions.values.HealthValue;
 import com.github.manolo8.darkbot.config.actions.values.HeroValue;
+import com.github.manolo8.darkbot.config.actions.values.LocationConstant;
 import com.github.manolo8.darkbot.config.actions.values.NumberConstant;
 import com.github.manolo8.darkbot.config.actions.values.PercentConstant;
+import com.github.manolo8.darkbot.config.actions.values.ShipLocationValue;
 import com.github.manolo8.darkbot.config.actions.values.TargetValue;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
@@ -32,13 +35,16 @@ public class ValueParser {
                     NoneCondition.class,
                     NumericalCondition.class,
                     EqualCondition.class,
+                    DistanceValue.class,
+                    ShipLocationValue.class,
                     HealthTypeValue.class,
                     HealthValue.class,
                     HeroValue.class,
                     TargetValue.class,
                     NumberConstant.class,
                     PercentConstant.class,
-                    BooleanConstant.class);
+                    BooleanConstant.class,
+                    LocationConstant.class);
 
     private static final Map<String, ValueMeta> VALUES = buildMetadata();
 

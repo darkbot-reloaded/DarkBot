@@ -28,15 +28,20 @@ public class NumberConstant implements Value<Number>, Parser {
     public String parse(String str) throws SyntaxException {
         String[] params = str.split("\\)", 2);
 
-        try {
-            number = Double.parseDouble(params[0]);
-        } catch (NumberFormatException e) {
-            throw new SyntaxException("Failed to parse number '" + params[0] + "'", str);
-        }
+        number = parseNumber(params[0], str);
+
         if (params.length != 2)
             throw new SyntaxException("Missing end separator in number", str, ")");
 
         return params[1];
+    }
+
+    public static double parseNumber(String val, String ex) throws SyntaxException {
+        try {
+            return Double.parseDouble(val);
+        } catch (NumberFormatException e) {
+            throw new SyntaxException("Failed to parse number '" + val + "'", ex);
+        }
     }
 
 }
