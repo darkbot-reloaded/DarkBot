@@ -64,16 +64,15 @@ public class NumericalCondition implements Condition, Parser {
     public String parse(String str) throws SyntaxException {
         ValueParser.Result prA = ValueParser.parse(str, Number.class);
 
-        String[] params = prA.leftover.trim().split("( *, *| +)", 2);
+        str = prA.leftover.trim();
+        int chars = Math.min(str.length(), str.length() > 1 && str.charAt(1) == '=' ? 2 : 1);
 
-        operation = Operation.of(params[0].trim());
+        String op = str.substring(0, chars);
+        operation = Operation.of(op);
         if (operation == null)
-            throw new SyntaxException("Unknown operation '" + params[0] + "'", prA.leftover, Operation.class);
+            throw new SyntaxException("Unknown operation '" + op + "'", str, Operation.class);
 
-        if (params.length != 2)
-            throw new SyntaxException("Missing end separator in 'if'", prA.leftover);
-
-        ValueParser.Result prB = ValueParser.parse(params[1], Number.class);
+        ValueParser.Result prB = ValueParser.parse(str.substring(chars), Number.class);
 
         a = (Value<Number>) prA.value;
         b = (Value<Number>) prB.value;

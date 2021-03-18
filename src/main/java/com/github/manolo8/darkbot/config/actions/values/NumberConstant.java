@@ -37,6 +37,9 @@ public class NumberConstant implements Value<Number>, Parser {
     }
 
     public static double parseNumber(String val, String ex) throws SyntaxException {
+        if (val.isEmpty())
+            throw new SyntaxException("Empty number, add digits", ex);
+
         try {
             return Double.parseDouble(val);
         } catch (NumberFormatException e) {

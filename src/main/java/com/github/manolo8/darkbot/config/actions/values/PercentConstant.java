@@ -25,6 +25,9 @@ public class PercentConstant implements Value<Number>, Parser {
     public String parse(String str) throws SyntaxException {
         String[] params = str.split("\\)", 2);
 
+        if (params[0].isEmpty())
+            throw new SyntaxException("Empty percent, add digits", str);
+
         try {
             percent = Double.parseDouble(params[0]) / 100;
         } catch (NumberFormatException e) {

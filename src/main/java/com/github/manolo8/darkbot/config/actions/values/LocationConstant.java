@@ -25,17 +25,18 @@ public class LocationConstant implements Value<Location>, Parser {
 
     @Override
     public String parse(String str) throws SyntaxException {
-        String[] params = str.split(" *[,)] *", 3);
+        String[] params = str.split(",", 2);
 
         double x = NumberConstant.parseNumber(params[0], str);
         if (params.length < 2) throw new SyntaxException("Missing separator in location", str, ",");
+        params = (str = params[1]).split("\\)", 2);
 
-        double y = NumberConstant.parseNumber(params[1], str);
-        if (params.length < 3) throw new SyntaxException("Missing end separator in location", str, ")");
+        double y = NumberConstant.parseNumber(params[0], str);
+        if (params.length < 2) throw new SyntaxException("Missing end separator in location", str, ")");
 
         location = new Location(x, y);
 
-        return params[2];
+        return params[1];
     }
 
 }
