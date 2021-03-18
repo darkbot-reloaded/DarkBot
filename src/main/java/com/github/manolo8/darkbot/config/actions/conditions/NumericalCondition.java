@@ -64,7 +64,7 @@ public class NumericalCondition implements Condition, Parser {
     public String parse(String str) throws SyntaxException {
         ValueParser.Result prA = ValueParser.parse(str, Number.class);
 
-        String[] params = prA.leftover.trim().split(" *,? *", 2);
+        String[] params = prA.leftover.trim().split("( *, *| +)", 2);
 
         operation = Operation.of(params[0].trim());
         if (operation == null)
