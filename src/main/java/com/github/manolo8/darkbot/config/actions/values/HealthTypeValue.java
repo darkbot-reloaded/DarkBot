@@ -28,11 +28,11 @@ public class HealthTypeValue implements Value<Number>, Parser {
     }
 
     public enum HealthType {
+        HP_PERCENT(HealthHolder::hpPercent),
+        SHIELD_PERCENT(HealthHolder::shieldPercent),
         HP(HealthHolder::getHp),
         SHIELD(HealthHolder::getShield),
-        NANO_HULL(HealthHolder::getHull),
-        HP_PERCENT(HealthHolder::hpPercent),
-        SHIELD_PERCENT(HealthHolder::shieldPercent);
+        NANO_HULL(HealthHolder::getHull);
 
         private final Function<HealthHolder, Number> getter;
 

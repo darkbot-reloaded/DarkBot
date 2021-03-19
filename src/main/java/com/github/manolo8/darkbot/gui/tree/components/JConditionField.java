@@ -15,6 +15,10 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 
 public class JConditionField extends JTextField implements OptionEditor {
@@ -27,8 +31,14 @@ public class JConditionField extends JTextField implements OptionEditor {
     public JConditionField() {
         this.getDocument().addDocumentListener((GeneralDocumentListener) e -> {
             if (field != null) {
-                Condition val = getValue();
+                Condition val = updateDisplay();
                 if (val != null || (getText() != null && getText().isEmpty())) field.set(val);
+            }
+        });
+        addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (field != null && !popup.isOpen()) updateDisplay();
             }
         });
     }
@@ -42,24 +52,22 @@ public class JConditionField extends JTextField implements OptionEditor {
     public void edit(ConfigField field) {
         this.field = null;
         setText(Objects.toString(field.get(), ""));
-        getValue();
         setColumns(40);
         this.field = field;
     }
 
-    public Condition getValue() {
-        if (getText() == null) return null;
-
+    public Condition updateDisplay() {
         if (highlight != null) {
             getHighlighter().removeHighlight(highlight);
             highlight = null;
         }
+        if (getText() == null) return null;
 
-        Condition cond = null;
         try {
-            cond = ValueParser.parseCondition(getText());
+            Condition cond = ValueParser.parseCondition(getText());
             setHighlight(0, getText().length(), UIUtils.GREEN_HIGHLIGHT);
             popup.update(null, 0, null);
+            return cond;
         } catch (SyntaxException e) {
             int s = getText().lastIndexOf(e.getAt()), start = Math.max(0, s);
 
@@ -67,17 +75,12 @@ public class JConditionField extends JTextField implements OptionEditor {
 
             try {
                 Rectangle rect = getUI().modelToView(this, start);
-                if (field != null) popup.update(e, start, new Point((int) rect.getX(), (int) rect.getMaxY()));
-                else SwingUtilities.invokeLater(() -> {
-                    if (isShowing() && rect != null)
-                        popup.update(e, start, new Point((int) rect.getX(), (int) rect.getMaxY()));
-                });
+                popup.update(e, start, new Point((int) rect.getX(), (int) rect.getMaxY()));
             } catch (BadLocationException ble) {
                 ble.printStackTrace();
             }
+            return null;
         }
-
-        return cond;
     }
 
     private void setHighlight(int start, int end, Color color) {
@@ -97,7 +100,7 @@ public class JConditionField extends JTextField implements OptionEditor {
         private final JPanel expected = new JPanel();
 
         public SyntaxInfo() {
-            super(new MigLayout("ins 5px, fillx, gapy 0", "[grow]15px[grow]15px[grow]", "[]"));
+            super(new MigLayout("ins 0px 5px, fillx, gapy 0", "[grow]15px[grow]15px[grow]", "[]"));
 
             popup.setBorder(BorderFactory.createEmptyBorder());
             popup.setFocusable(false);
@@ -106,22 +109,26 @@ public class JConditionField extends JTextField implements OptionEditor {
             setBorder(UIUtils.getBorder());
         }
 
+        public boolean isOpen() {
+            return popup.isVisible();
+        }
+
         public void update(SyntaxException syntax, int at, Point loc) {
             if (syntax == null) {
                 popup.setVisible(false);
                 return;
             }
 
-            setLayout(new MigLayout("ins 5px, fillx, gapy 0", "[grow]15px[grow]15px[grow]", "[]"));
+            setLayout(new MigLayout("ins 0px 5px, fillx, gapy 0", "[grow]15px[grow]15px[grow]", "[]"));
             removeAll();
 
             if (syntax.getMessage() != null) {
                 message.setText(syntax.getMessage());
-                add(message, "gapleft 5px, gaptop 5px, dock north, spanx, align left");
+                add(message, "gap 5px 5px 5px 0px, dock north, spanx, align left");
             }
 
-            expected.removeAll();
             if (syntax.getExpected().length > 0) {
+                expected.removeAll();
                 expected.setLayout(new FlowLayout(FlowLayout.LEFT));
                 expected.add(new JLabel("Expected: "));
                 for (String val : syntax.getExpected())
@@ -130,6 +137,7 @@ public class JConditionField extends JTextField implements OptionEditor {
                 add(expected, "dock north, align left");
             }
 
+            syntax.getMetadata().sort(Comparator.comparing(Values.Meta::getName));
             for (Values.Meta<?> meta : syntax.getMetadata()) {
                 add(syntax.isSingleMeta() ?
                         new JLabel(meta.getName()) :
@@ -145,36 +153,35 @@ public class JConditionField extends JTextField implements OptionEditor {
     }
 
     private class InsertButton extends JButton {
-        private final String insert;
-        private final int at;
 
         public InsertButton(String insert, int at, boolean inline) {
             super(insert);
             // Allow minimum size, otherwise L&F forces big buttons
             putClientProperty("JComponent.minimumWidth", 0);
-
-            this.insert = insert;
-            this.at = at;
             if (!inline) setHorizontalAlignment(SwingConstants.LEFT);
 
             setMargin(new Insets(2, 3, 2, 3));
-            addActionListener(a -> JConditionField.this.setText(complete()));
-        }
+            addActionListener(a -> {
+                String text = JConditionField.this.getText();
+                text = text.substring(0, at) + insert + text.substring(at);
 
-        private String complete() {
-            String text = JConditionField.this.getText();
-            text = text.substring(0, at) + insert + text.substring(at);
+                int lastLoc = at + insert.length();
 
-            for (int i = 0; i < 100; i++) {
-                try {
-                    ValueParser.parseCondition(text);
-                } catch (SyntaxException e) {
-                    if (e.getExpected().length != 1) break;
-                    int loc = text.lastIndexOf(e.getAt());
-                    text = text.substring(0, loc) + e.getExpected()[0] + text.substring(loc);
+                for (int i = 0; i < 100; i++) {
+                    try {
+                        ValueParser.parseCondition(text);
+                    } catch (SyntaxException e) {
+                        lastLoc = text.lastIndexOf(e.getAt());
+                        if (e.getExpected().length != 1) break;
+                        text = text.substring(0, lastLoc) + e.getExpected()[0] + text.substring(lastLoc);
+                        lastLoc += e.getExpected()[0].length();
+                    }
                 }
-            }
-            return text;
+
+                JConditionField.this.setText(text);
+                JConditionField.this.setCaretPosition(lastLoc);
+                JConditionField.this.requestFocus();
+            });
         }
 
     }

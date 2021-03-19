@@ -36,7 +36,7 @@ public class PercentConstant implements Value<Number>, Parser {
         }
 
         if (params.length != 2)
-            throw new SyntaxException("Missing end separator in percent", str, Values.getMeta(getClass()), ")");
+            throw new SyntaxException("Missing end separator in percent", "", Values.getMeta(getClass()), ")");
 
         return params[1];
     }
