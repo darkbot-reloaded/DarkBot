@@ -2,35 +2,35 @@ package com.github.manolo8.darkbot.gui.tree.components;
 
 import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
-import com.github.manolo8.darkbot.config.actions.ValueParser;
+import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import net.miginfocom.swing.MigLayout;
 
+import javax.swing.JLabel;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 public class JConditionField extends JTextField implements OptionEditor {
 
     private ConfigField field;
     private Object highlight;
-    private Point popup;
-    private String message;
+
+    private final SyntaxInfo popup = new SyntaxInfo();
 
     public JConditionField() {
-        this.getDocument().addDocumentListener((GeneralDocumentListener) e ->  {
+        this.getDocument().addDocumentListener((GeneralDocumentListener) e -> {
             if (field != null) {
                 Condition val = getValue();
-                if (val != null) field.set(val);
+                if (val != null || (getText() != null && getText().isEmpty())) field.set(val);
             }
         });
-        ((DefaultHighlighter) getHighlighter()).setDrawsLayeredHighlights(true);
-        ToolTipManager.sharedInstance().registerComponent(this);
     }
 
     @Override
@@ -49,32 +49,33 @@ public class JConditionField extends JTextField implements OptionEditor {
 
     public Condition getValue() {
         if (getText() == null) return null;
-        clearHighlight();
+
+        if (highlight != null) {
+            getHighlighter().removeHighlight(highlight);
+            highlight = null;
+        }
 
         Condition cond = null;
         try {
             cond = ValueParser.parseCondition(getText());
-            setHighlight(0, getText().length(),UIUtils.GREEN_HIGHLIGHT);
-
+            setHighlight(0, getText().length(), UIUtils.GREEN_HIGHLIGHT);
+            popup.update(null, 0, null);
         } catch (SyntaxException e) {
-            int start = e.getStart(getText());
-            if (start < 0) start = 0;
+            int s = getText().lastIndexOf(e.getAt()), start = Math.max(0, s);
 
-            setHighlight(start, getText().length(),UIUtils.RED_HIGHLIGHT);
-
-            message = e.getMessage();
-            if (e.getExpected() != null) message += "\nExpected: " + e.getExpected();
+            setHighlight(start, getText().length(), UIUtils.RED_HIGHLIGHT);
 
             try {
                 Rectangle rect = getUI().modelToView(this, start);
-                if (rect != null)
-                    popup = new Point((int) rect.getX(), (int) rect.getMaxY());
+                if (field != null) popup.update(e, start, new Point((int) rect.getX(), (int) rect.getMaxY()));
+                else SwingUtilities.invokeLater(() -> {
+                    if (isShowing() && rect != null)
+                        popup.update(e, start, new Point((int) rect.getX(), (int) rect.getMaxY()));
+                });
             } catch (BadLocationException ble) {
                 ble.printStackTrace();
             }
         }
-
-        if (field != null) showTooltip(this);
 
         return cond;
     }
@@ -89,35 +90,93 @@ public class JConditionField extends JTextField implements OptionEditor {
         }
     }
 
-    @Override
-    public Point getToolTipLocation(MouseEvent event) {
-        if (popup != null) return popup;
-        return super.getToolTipLocation(event);
-    }
+    private class SyntaxInfo extends JPanel {
 
-    @Override
-    public String getToolTipText(MouseEvent event) {
-        if (message != null) return message;
-        return super.getToolTipText(event);
-    }
+        private final JPopupMenu popup = new JPopupMenu();
+        private final JLabel message = new JLabel();
+        private final JPanel expected = new JPanel();
 
-    private void showTooltip(Component component) {
-        final ToolTipManager ttm = ToolTipManager.sharedInstance();
-        final int oldDelay = ttm.getInitialDelay();
-        ttm.setInitialDelay(0);
-        ttm.mouseMoved(new MouseEvent(component, 0, 0, 0,
-                0, 0, // X-Y of the mouse for the tool tip
-                0, false));
-        SwingUtilities.invokeLater(() -> ttm.setInitialDelay(oldDelay));
-    }
+        public SyntaxInfo() {
+            super(new MigLayout("ins 5px, fillx, gapy 0", "[grow]15px[grow]15px[grow]", "[]"));
 
-    private void clearHighlight() {
-        popup = null;
-        message = null;
-        if (highlight != null) {
-            getHighlighter().removeHighlight(highlight);
-            highlight = null;
+            popup.setBorder(BorderFactory.createEmptyBorder());
+            popup.setFocusable(false);
+            popup.add(this);
+
+            setBorder(UIUtils.getBorder());
         }
+
+        public void update(SyntaxException syntax, int at, Point loc) {
+            if (syntax == null) {
+                popup.setVisible(false);
+                return;
+            }
+
+            setLayout(new MigLayout("ins 5px, fillx, gapy 0", "[grow]15px[grow]15px[grow]", "[]"));
+            removeAll();
+
+            if (syntax.getMessage() != null) {
+                message.setText(syntax.getMessage());
+                add(message, "gapleft 5px, gaptop 5px, dock north, spanx, align left");
+            }
+
+            expected.removeAll();
+            if (syntax.getExpected().length > 0) {
+                expected.setLayout(new FlowLayout(FlowLayout.LEFT));
+                expected.add(new JLabel("Expected: "));
+                for (String val : syntax.getExpected())
+                    expected.add(new InsertButton(val, at, true));
+
+                add(expected, "dock north, align left");
+            }
+
+            for (Values.Meta<?> meta : syntax.getMetadata()) {
+                add(syntax.isSingleMeta() ?
+                        new JLabel(meta.getName()) :
+                        new InsertButton(meta.getName() + "(", at, false), "grow");
+                add(new JLabel(meta.getDescription()), "grow");
+                add(new JLabel(meta.getExample()), "grow, wrap");
+            }
+
+            popup.setVisible(false);
+            popup.show(JConditionField.this, loc.x, loc.y);
+        }
+
+    }
+
+    private class InsertButton extends JButton {
+        private final String insert;
+        private final int at;
+
+        public InsertButton(String insert, int at, boolean inline) {
+            super(insert);
+            // Allow minimum size, otherwise L&F forces big buttons
+            putClientProperty("JComponent.minimumWidth", 0);
+
+            this.insert = insert;
+            this.at = at;
+            if (!inline) setHorizontalAlignment(SwingConstants.LEFT);
+
+            setMargin(new Insets(2, 3, 2, 3));
+            addActionListener(a -> JConditionField.this.setText(complete()));
+        }
+
+        private String complete() {
+            String text = JConditionField.this.getText();
+            text = text.substring(0, at) + insert + text.substring(at);
+
+            for (int i = 0; i < 100; i++) {
+                try {
+                    ValueParser.parseCondition(text);
+                } catch (SyntaxException e) {
+                    if (e.getExpected().length != 1) break;
+                    int loc = text.lastIndexOf(e.getAt());
+                    text = text.substring(0, loc) + e.getExpected()[0] + text.substring(loc);
+                }
+            }
+            return text;
+        }
+
     }
 
 }

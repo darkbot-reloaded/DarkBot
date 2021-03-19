@@ -4,9 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.stream.Collectors;
-
-@ValueData("all")
+@ValueData(name = "all", description = "Returns true if all child conditions return true", example = "all(a, b)")
 public class AllCondition extends AbstractCondition {
 
     @Override

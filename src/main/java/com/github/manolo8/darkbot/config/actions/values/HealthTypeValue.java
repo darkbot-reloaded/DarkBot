@@ -5,13 +5,15 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.ValueParser;
+import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
+import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 
 import java.util.Locale;
 import java.util.function.Function;
 
-@ValueData("hp-type")
+@ValueData(name = "hp-type", description = "Gets a certain HP type from a health", example = "hp-type(hp-percent, a)")
 public class HealthTypeValue implements Value<Number>, Parser {
 
     public HealthType healthType;
@@ -64,17 +66,14 @@ public class HealthTypeValue implements Value<Number>, Parser {
             throw new SyntaxException("Unknown hp-type: '" + params[0] + "'", str, HealthType.class);
 
         if (params.length != 2)
-            throw new SyntaxException("Missing separator in hp-type", str, ",");
+            throw new SyntaxException("Missing separator in hp-type", "", Values.getMeta(getClass()), ",");
 
-        ValueParser.Result pr = ValueParser.parse(params[1], HealthHolder.class);
-        if (!HealthHolder.class.isAssignableFrom(pr.type))
-            throw new SyntaxException("Invalid parameter type, expected Health", params[1]);
-
-        health = (Value<? extends HealthHolder>) pr.value;
+        ParseResult<HealthHolder> pr = ValueParser.parse(params[1], HealthHolder.class);
+        health = pr.value;
 
         str = pr.leftover.trim();
         if (str.isEmpty() || str.charAt(0) != ')')
-            throw new SyntaxException("Missing end separator in hp-type", str, ")");
+            throw new SyntaxException("Missing end separator in hp-type", str, Values.getMeta(getClass()), ")");
 
         return pr.leftover.substring(1);
     }

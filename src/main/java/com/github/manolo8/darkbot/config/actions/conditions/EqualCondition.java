@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-@ValueData("equal")
+@ValueData(name = "equal", description = "Returns true if both parameters are the same", example = "equal(a, b)")
 public class EqualCondition implements Condition {
 
     public Value<Object> a, b;

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.Collectors;
 
-@ValueData("any")
+@ValueData(name = "any", description = "Returns true if any child conditions return true", example = "any(a, b)")
 public class AnyCondition extends AbstractCondition {
 
     @Override

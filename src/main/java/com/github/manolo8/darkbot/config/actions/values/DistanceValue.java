@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.core.utils.Location;
 import org.jetbrains.annotations.Nullable;
 
-@ValueData("distance")
+@ValueData(name = "distance", description = "Returns the distance between two locations", example = "distance(a, b)")
 public class DistanceValue implements Value<Number> {
 
     public Value<Location> a, b;

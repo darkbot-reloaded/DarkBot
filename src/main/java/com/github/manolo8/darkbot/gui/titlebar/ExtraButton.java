@@ -117,6 +117,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
     @Override
     public void actionPerformed(ActionEvent e) {
         rebuild(main);
+        System.out.println(e);
         if (isSelected()) extraOptions.show(this, 0, getHeight() - 1);
     }
 

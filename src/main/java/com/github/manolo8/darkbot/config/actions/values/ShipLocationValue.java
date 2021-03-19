@@ -7,7 +7,7 @@ import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.utils.Location;
 import org.jetbrains.annotations.Nullable;
 
-@ValueData("ship-loc")
+@ValueData(name = "ship-loc", description = "Gets the current location of a ship", example = "ship-loc(a)")
 public class ShipLocationValue implements Value<Location> {
 
     public Value<Ship> ship;

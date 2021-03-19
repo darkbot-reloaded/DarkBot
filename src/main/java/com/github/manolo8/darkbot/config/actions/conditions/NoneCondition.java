@@ -4,7 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import org.jetbrains.annotations.NotNull;
 
-@ValueData("none")
+@ValueData(name = "none", description = "Returns true if no child conditions return true", example = "none(a, b)")
 public class NoneCondition extends AbstractCondition {
 
     public NoneCondition() {}

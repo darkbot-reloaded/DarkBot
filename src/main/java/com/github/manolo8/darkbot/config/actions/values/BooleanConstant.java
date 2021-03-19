@@ -5,9 +5,10 @@ import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.ValueData;
+import com.github.manolo8.darkbot.config.actions.parser.Values;
 import org.jetbrains.annotations.NotNull;
 
-@ValueData("boolean")
+@ValueData(name = "boolean", description = "Boolean constant", example = "boolean(true)")
 public class BooleanConstant implements Condition, Parser {
 
     private Boolean value;
@@ -21,9 +22,9 @@ public class BooleanConstant implements Condition, Parser {
     public String parse(String str) throws SyntaxException {
         String[] params = str.split("\\)", 2);
 
-        value = parse(params[0].trim(), params.length == 1 ? "" : params[1]);
+        value = parse(params[0].trim(), str);
         if (params.length != 2)
-            throw new SyntaxException("Missing end separator in boolean", str, ")");
+            throw new SyntaxException("Missing end separator in boolean", "", Values.getMeta(getClass()), ")");
 
         return params[1];
     }
@@ -39,7 +40,7 @@ public class BooleanConstant implements Condition, Parser {
             case "true": return true;
             case "false": return false;
             default:
-                throw new SyntaxException("Failed to parse boolean '" + bool + "'", ex, "true", "false");
+                throw new SyntaxException("Failed to parse boolean '" + bool + "'", ex, Values.getMeta(getClass()), "true", "false");
         }
     }
 

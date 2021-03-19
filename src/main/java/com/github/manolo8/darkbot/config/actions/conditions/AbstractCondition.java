@@ -5,7 +5,9 @@ import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.ValueParser;
+import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
+import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.parser.Values;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,7 @@ public abstract class AbstractCondition implements Condition, Parser {
         for (int i = 0; i < children.size(); i++) {
             states[children.get(i).get(main).ordinal()]++;
             if ((states[1] + states[2] > children.size() - min && states[0] + states[1] > 0) /* Can't reach min anymore */
-                    || states[0] > max /* Allow bigger than max */ ) {
+                    || states[0] > max /* Allow bigger than max */) {
                 return Condition.Result.DENY;
             }
             if (states[0] >= min && states[0] + (children.size() - 1 - i) >= max) { /* Won't go bigger than max */
@@ -36,7 +38,7 @@ public abstract class AbstractCondition implements Condition, Parser {
     }
 
     protected String name() {
-        return getClass().getAnnotation(ValueData.class).value();
+        return getClass().getAnnotation(ValueData.class).name();
     }
 
     @Override
@@ -48,15 +50,15 @@ public abstract class AbstractCondition implements Condition, Parser {
     public String parse(String str) throws SyntaxException {
         char lastCh;
         do {
-            ValueParser.Result pr = ValueParser.parse(str, Result.class);
+            ParseResult<Result> pr = ValueParser.parse(str, Result.class);
             if (!(pr.value instanceof Condition))
-                throw new SyntaxException("Expected boolean condition", str);
+                throw new SyntaxException("Error: Expected boolean condition", str, Values.getMeta(getClass()));
 
             children.add((Condition) pr.value);
             str = pr.leftover.trim();
             lastCh = str.isEmpty() ? '\0' : str.charAt(0);
             if (lastCh != ',' && lastCh != ')')
-                throw new SyntaxException(name() + ": No end separator found", str, ",", ")");
+                throw new SyntaxException("Missing end separator in '" + name() + "'", str, Values.getMeta(getClass()), ",", ")");
             str = str.substring(1);
         } while (lastCh == ',');
         return str;

@@ -8,5 +8,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValueData {
-    String value();
+    String name();
+    String description();
+    String example();
 }

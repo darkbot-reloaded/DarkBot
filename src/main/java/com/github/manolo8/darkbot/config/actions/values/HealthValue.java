@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.objects.Health;
 
-@ValueData("health")
+@ValueData(name = "health", description = "Gets the health of a ship", example = "health(a)")
 public class HealthValue implements Value<Health> {
 
     public Value<Ship> ship;

@@ -6,12 +6,14 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.ValueParser;
+import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
+import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.parser.Values;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiPredicate;
 
-@ValueData("if")
+@ValueData(name = "if", description = "Compares two numbers", example = "if(a > b)")
 public class NumericalCondition implements Condition, Parser {
 
     public Value<Number> a;
@@ -53,6 +55,7 @@ public class NumericalCondition implements Condition, Parser {
             }
             return null;
         }
+
     }
 
     @Override
@@ -62,7 +65,7 @@ public class NumericalCondition implements Condition, Parser {
 
     @Override
     public String parse(String str) throws SyntaxException {
-        ValueParser.Result prA = ValueParser.parse(str, Number.class);
+        ParseResult<Number> prA = ValueParser.parse(str, Number.class);
 
         str = prA.leftover.trim();
         int chars = Math.min(str.length(), str.length() > 1 && str.charAt(1) == '=' ? 2 : 1);
@@ -72,14 +75,14 @@ public class NumericalCondition implements Condition, Parser {
         if (operation == null)
             throw new SyntaxException("Unknown operation '" + op + "'", str, Operation.class);
 
-        ValueParser.Result prB = ValueParser.parse(str.substring(chars), Number.class);
+        ParseResult<Number> prB = ValueParser.parse(str.substring(chars), Number.class);
 
-        a = (Value<Number>) prA.value;
-        b = (Value<Number>) prB.value;
+        a = prA.value;
+        b = prB.value;
 
         str = prB.leftover.trim();
         if (str.isEmpty() || str.charAt(0) != ')')
-            throw new SyntaxException("Missing end separator in 'if'", str, ")");
+            throw new SyntaxException("Missing end separator in 'if'", str, Values.getMeta(getClass()), ")");
 
         return str.substring(1);
     }

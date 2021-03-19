@@ -4,9 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.stream.Collectors;
-
-@ValueData("one")
+@ValueData(name = "one", description = "Returns true if exactly one child condition return true", example = "one(a, b)")
 public class OneCondition extends AbstractCondition {
 
     @Override
