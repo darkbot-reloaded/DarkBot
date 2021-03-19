@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.conditions.AllCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.AnyCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.EqualCondition;
+import com.github.manolo8.darkbot.config.actions.conditions.HasEffectCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NoneCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NumericalCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.OneCondition;
@@ -29,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Values {
     private static final List<Class<? extends Value<?>>> AVAILABLE_VALUES =
@@ -40,6 +40,7 @@ public class Values {
                     NoneCondition.class,
                     NumericalCondition.class,
                     EqualCondition.class,
+                    HasEffectCondition.class,
                     DistanceValue.class,
                     ShipLocationValue.class,
                     HealthTypeValue.class,

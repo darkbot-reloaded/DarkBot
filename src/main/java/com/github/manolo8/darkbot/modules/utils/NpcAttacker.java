@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.modules.utils;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
@@ -138,8 +139,10 @@ public class NpcAttacker {
     private boolean shouldSab() {
         if (!main.config.LOOT.SAB.ENABLED || target.npcInfo.extra.has(NpcExtra.NO_SAB)) return false;
 
-        return hero.health.shieldPercent() < main.config.LOOT.SAB.PERCENT
-                && target.health.shield > main.config.LOOT.SAB.NPC_AMOUNT;
+        Config.Loot.Sab SAB = main.config.LOOT.SAB;
+        return hero.health.shieldPercent() < SAB.PERCENT
+                && target.health.shield > SAB.NPC_AMOUNT
+                && (SAB.CONDITION == null || SAB.CONDITION.get(main).toBoolean());
     }
 
     private boolean shouldRsb() {

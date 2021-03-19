@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
+import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -17,7 +18,6 @@ import javax.swing.text.DefaultHighlighter;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -29,6 +29,7 @@ public class JConditionField extends JTextField implements OptionEditor {
     private final SyntaxInfo popup = new SyntaxInfo();
 
     public JConditionField() {
+        setMargin(new Insets(0, 5, 0, 5));
         this.getDocument().addDocumentListener((GeneralDocumentListener) e -> {
             if (field != null) {
                 Condition val = updateDisplay();
@@ -52,7 +53,7 @@ public class JConditionField extends JTextField implements OptionEditor {
     public void edit(ConfigField field) {
         this.field = null;
         setText(Objects.toString(field.get(), ""));
-        setColumns(40);
+        setColumns(30);
         this.field = field;
     }
 
@@ -91,6 +92,11 @@ public class JConditionField extends JTextField implements OptionEditor {
         } catch (BadLocationException ble) {
             ble.printStackTrace();
         }
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
     private class SyntaxInfo extends JPanel {

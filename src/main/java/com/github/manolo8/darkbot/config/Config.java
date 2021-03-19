@@ -125,6 +125,7 @@ public class Config {
             public @Option Character KEY = '2';
             public @Option @Editor(JPercentField.class) double PERCENT = 0.8;
             public @Option @Num(min = 500, max = 1_000_000, step = 1000) int NPC_AMOUNT = 12000;
+            public @Option() Condition CONDITION;
         }
         public static class Rsb {
             public @Option boolean ENABLED = false;
@@ -227,11 +228,11 @@ public class Config {
         }
     }
 
-    public @Option("Extra actions") ExtraActions EXTRA = new ExtraActions();
+    public /*@Option("Extra actions")*/ ExtraActions EXTRA = new ExtraActions();
     public static class ExtraActions {
+        // Dummy testing condition
         @Option()
         public Condition CONDITION;
-
 
         @Option
         @Editor(value = JActionTable.class, shared = true)
