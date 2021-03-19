@@ -243,13 +243,13 @@ public class Drive implements MovementAPI {
     }
 
     @Override
-    public eu.darkbot.api.objects.Location getCurrentLocation() {
-        return hero.getLocationInfo();
+    public Location getCurrentLocation() {
+        return hero.getLocationInfo().now;
     }
 
     @Override
     public void moveRandom(Locatable loc, double radius) {
-        moveRandom();
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override

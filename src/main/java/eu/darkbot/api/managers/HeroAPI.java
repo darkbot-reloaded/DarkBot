@@ -26,6 +26,12 @@ public interface HeroAPI extends Ship, API {
     void toggleConfiguration();
 
     /**
+     *
+     * @param formation
+     */
+    void setFormation(Formation formation);
+
+    /**
      * Returns needed time in seconds till hero will be logged out.
      * Returns {@code null} if hero doesn't try to logout or is aborted.
      *

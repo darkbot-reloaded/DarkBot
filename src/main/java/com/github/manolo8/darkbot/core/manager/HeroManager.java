@@ -171,7 +171,6 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         return this.config == config && this.formation == formation;
     }
 
-
     @Override
     public Configuration getConfiguration() {
         return configuration;
@@ -179,10 +178,24 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
 
     @Override
     public void toggleConfiguration() {
-        if (System.currentTimeMillis() - configTime > 5500L) {
-            Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
-            this.configTime = System.currentTimeMillis();
-        }
+        if (System.currentTimeMillis() - configTime <= 5500L) return;
+
+        Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
+        this.configTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void setFormation(Formation formation) {
+        if (formation == getFormation() ||
+                System.currentTimeMillis() - formationTime <= 3500L) return;
+
+        SlotBarsProxy slotBars = main.facadeManager.slotBars;
+
+        slotBars.filterItem(HeroItemsAPI.Category.DRONE_FORMATIONS, formation::matches)
+                .filter(slotBars::isSelectable)
+                .ifPresent(slotBars::selectItem);
+
+        this.formationTime = System.currentTimeMillis();
     }
 
     @Override
@@ -202,18 +215,8 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
 
     @Override
     public boolean setMode(Configuration configuration, Formation formation) {
+        setFormation(formation);
         if (configuration != getConfiguration()) toggleConfiguration();
-        if (formation != getFormation() && System.currentTimeMillis() - formationTime > 3500L) {
-            SlotBarsProxy proxy = main.facadeManager.slotBars;
-
-            proxy.categoryBar.get(HeroItemsAPI.Category.DRONE_FORMATIONS).items.stream()
-                    .filter(proxy::isSelectable)
-                    .filter(item -> formation.endsWith(item.id))
-                    .findAny()
-                    .ifPresent(proxy::selectItem);
-
-            this.formationTime = System.currentTimeMillis();
-        }
 
         return isInMode(configuration, formation);
     }

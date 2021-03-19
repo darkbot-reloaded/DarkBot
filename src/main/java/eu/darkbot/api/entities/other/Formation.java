@@ -70,13 +70,13 @@ public enum Formation {
 
     public static Formation of(String id) {
         for (Formation formation : values())
-            if (formation.endsWith(id))
+            if (formation.matches(id))
                 return formation;
 
         return null;
     }
 
-    public boolean endsWith(String formationId) {
+    public boolean matches(String formationId) {
         return id != null && formationId.endsWith(id);
     }
 
