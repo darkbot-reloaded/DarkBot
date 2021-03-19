@@ -95,6 +95,7 @@ public class LocationInfo extends Updatable implements eu.darkbot.api.objects.Lo
         return address != 0;
     }
 
+    @Override
     public boolean isMoving() {
         return !now.equals(last) || !now.equals(past);
     }

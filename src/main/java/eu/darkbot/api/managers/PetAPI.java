@@ -44,10 +44,10 @@ public interface PetAPI extends Pet, API {
      * @param gearId to be checked
      * @return true if given gear is available.
      */
-    boolean isGearAvailable(int gearId);
+    boolean hasGear(int gearId);
 
-    default boolean isGearAvailable(@NotNull Gear gear) {
-        return isGearAvailable(gear.getId());
+    default boolean hasGear(@NotNull Gear gear) {
+        return hasGear(gear.getId());
     }
 
     /**
@@ -89,10 +89,10 @@ public interface PetAPI extends Pet, API {
         return cooldown != null && hasCooldown(cooldown);
     }
 
-    int getFuel();
-    int getMaxFuel();
+    double getFuel();
+    double getMaxFuel();
 
-    int getHeat();
-    int getMaxHeat();
+    double getHeat();
+    double getMaxHeat();
 
 }

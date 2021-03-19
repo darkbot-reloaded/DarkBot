@@ -10,8 +10,12 @@ import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
+import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
+import eu.darkbot.api.entities.other.Formation;
 import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.api.managers.HeroItemsAPI;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -19,7 +23,7 @@ import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.JUMP_GATE;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.TOGGLE_CONFIG;
 
-public class HeroManager extends Ship implements Manager {
+public class HeroManager extends Ship implements Manager, HeroAPI {
 
     public static HeroManager instance;
     public final Main main;
@@ -36,6 +40,7 @@ public class HeroManager extends Ship implements Manager {
 
     public Ship target;
 
+    private Configuration configuration = Configuration.UNKNOWN;
     public int config;
     public int formationId;
     private long configTime;
@@ -74,6 +79,7 @@ public class HeroManager extends Ship implements Manager {
     public void update() {
         super.update();
         config = settings.config;
+        configuration = Configuration.of(config);
         formationId = API.readMemoryInt(address, 280, 40, 40);
 
         long petAddress = API.readMemoryLong(address + 176);
@@ -166,6 +172,69 @@ public class HeroManager extends Ship implements Manager {
     }
 
 
+    @Override
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 
+    @Override
+    public void toggleConfiguration() {
+        if (System.currentTimeMillis() - configTime > 5500L) {
+            Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
+            this.configTime = System.currentTimeMillis();
+        }
+    }
 
+    @Override
+    public @Nullable Integer getLogoutTime() {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public void tryLogout() {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public boolean isInMode(Configuration configuration, Formation formation) {
+        return configuration == getConfiguration() && formation == getFormation();
+    }
+
+    @Override
+    public boolean setMode(Configuration configuration, Formation formation) {
+        if (configuration != getConfiguration()) toggleConfiguration();
+        if (formation != getFormation() && System.currentTimeMillis() - formationTime > 3500L) {
+            SlotBarsProxy proxy = main.facadeManager.slotBars;
+
+            proxy.categoryBar.get(HeroItemsAPI.Category.DRONE_FORMATIONS).items.stream()
+                    .filter(proxy::isSelectable)
+                    .filter(item -> formation.endsWith(item.id))
+                    .findAny()
+                    .ifPresent(proxy::selectItem);
+
+            this.formationTime = System.currentTimeMillis();
+        }
+
+        return isInMode(configuration, formation);
+    }
+
+    @Override
+    public boolean setAttackMode(eu.darkbot.api.entities.Npc target) {
+        return attackMode((Npc) target);
+    }
+
+    @Override
+    public boolean setAttackMode() {
+        return attackMode();
+    }
+
+    @Override
+    public boolean setRoamMode() {
+        return roamMode();
+    }
+
+    @Override
+    public boolean setRunMode() {
+        return runMode();
+    }
 }
