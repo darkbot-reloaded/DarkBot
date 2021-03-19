@@ -345,7 +345,7 @@ public class MapDrawer extends JPanel {
         g2.setColor(cs.PORTALS);
         for (Portal portal : portals) {
             Location loc = portal.locationInfo.now;
-            g2.drawOval(translateX(loc.x) - 6, translateY(loc.y) - 6, 11, 11);
+            g2.drawOval(translateX(loc.x) - 6, translateY(loc.y) - 6, 12, 12);
         }
 
         for (BattleStation station : this.battleStations) {
