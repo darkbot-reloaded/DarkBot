@@ -128,7 +128,6 @@ public class Config {
         public static class Rsb {
             public @Option boolean ENABLED = false;
             public @Option Character KEY = '3';
-            // public @Option boolean EMPOWERED_BURST = false; TODO: See NpcAttacker shouldRsb()
         }
         public @Option Character AMMO_KEY = '1';
         public @Option Character SHIP_ABILITY;

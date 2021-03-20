@@ -147,7 +147,6 @@ public class NpcAttacker {
         boolean isReady = bar.findItemById("ammunition_laser_rsb-75").map(i -> i.activatable).orElse(false);
 
         if (isReady && usedRsb < System.currentTimeMillis() - 2000) usedRsb = System.currentTimeMillis();
-                // && (!main.config.LOOT.RSB.EMPOWERED_BURST || hero.hasEffect(98)) TODO: Find a way to determine lastShootedTime, doesn't work stable if you don't guess it before effect.
 
         return isReady && usedRsb > System.currentTimeMillis() - 100;
     }
