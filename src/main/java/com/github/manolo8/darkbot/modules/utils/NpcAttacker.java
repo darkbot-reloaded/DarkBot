@@ -144,9 +144,12 @@ public class NpcAttacker {
 
     private boolean shouldRsb() {
         if (!main.config.LOOT.RSB.ENABLED || !target.npcInfo.extra.has(NpcExtra.USE_RSB)) return false;
-        if (usedRsb < System.currentTimeMillis() - main.config.LOOT.RSB.AMMO_REFRESH) usedRsb = System.currentTimeMillis();
+        boolean isReady = bar.findItemById("ammunition_laser_rsb-75").map(i -> i.activatable).orElse(false);
 
-        return usedRsb > System.currentTimeMillis() - 50;
+        if (isReady && usedRsb < System.currentTimeMillis() - 2000) usedRsb = System.currentTimeMillis();
+                // && (!main.config.LOOT.RSB.EMPOWERED_BURST || hero.hasEffect(98)) TODO: Find a way to determine lastShootedTime, doesn't work stable if you don't guess it before effect.
+
+        return isReady && usedRsb > System.currentTimeMillis() - 100;
     }
 
     private Character getAttackKey() {
