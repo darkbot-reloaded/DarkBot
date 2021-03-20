@@ -6,7 +6,7 @@ import eu.darkbot.api.objects.Gui;
 
 import java.util.Collection;
 
-public interface GameScreenAPI extends API {
+public interface GameScreenAPI extends API.Singleton {
 
     /**
      * @return bounds of game screen

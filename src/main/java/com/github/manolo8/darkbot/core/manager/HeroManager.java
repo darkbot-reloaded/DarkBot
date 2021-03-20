@@ -12,6 +12,8 @@ import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
+import com.github.manolo8.darkbot.extensions.plugins.Plugin;
+import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.other.Formation;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
@@ -48,14 +50,14 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     private long formationTime;
     private long portalTime;
 
-    public HeroManager(Main main) {
+    public HeroManager(Main main, PluginAPI pluginAPI) {
         instance = this;
 
         this.main = super.main = main;
         this.settings = main.settingsManager;
         this.keybinds = main.facadeManager.settings;
         this.portals = main.mapManager.entities.portals;
-        this.drive = new Drive(this, main.mapManager);
+        this.drive = pluginAPI.requireInstance(Drive.class);
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
         this.map = main.starManager.byId(-1);

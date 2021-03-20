@@ -7,7 +7,7 @@ import eu.darkbot.api.objects.Point;
 /**
  * Utility to manage game window
  */
-public interface WindowAPI extends API {
+public interface WindowAPI extends API.Singleton {
 
     /**
      * @return version of native api

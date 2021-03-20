@@ -14,6 +14,7 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import com.github.manolo8.darkbot.utils.debug.ReadObjNames;
+import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.utils.Area;
 import eu.darkbot.api.managers.EventSenderAPI;
@@ -67,13 +68,14 @@ public class MapManager implements Manager, StarSystemAPI {
     public Location pingLocation = null;
 
     public MapManager(Main main,
+                      PluginAPI pluginAPI,
                       EventSenderAPI eventSender,
                       StarManager starManager) {
         this.main = main;
         this.eventSender = eventSender;
         this.starManager = starManager;
 
-        this.entities = new EntityList(main);
+        this.entities = pluginAPI.requireInstance(EntityList.class);
     }
 
 

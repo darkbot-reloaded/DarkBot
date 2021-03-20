@@ -69,7 +69,7 @@ public class PetManager extends Gui implements PetAPI {
         SELECTED
     }
 
-    PetManager(Main main) {
+    public PetManager(Main main) {
         this.main = main;
         this.ships = main.mapManager.entities.ships;
         this.pet = main.hero.pet;

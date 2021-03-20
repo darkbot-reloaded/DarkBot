@@ -8,7 +8,7 @@ import eu.darkbot.api.API;
  * Those calls should be generally safe,
  * every access violation error is handled by native code
  */
-public interface MemoryAPI extends API {
+public interface MemoryAPI extends API.Singleton {
 
     /**
      * Reads signed integer value from memory.

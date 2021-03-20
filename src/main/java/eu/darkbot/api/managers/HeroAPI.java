@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
  * This {@link API} represent hero entity,
  * from here you can manage your ship.
  */
-public interface HeroAPI extends Ship, API {
+public interface HeroAPI extends Ship, API.Singleton {
 
     /**
      * @return current used {@link Configuration}

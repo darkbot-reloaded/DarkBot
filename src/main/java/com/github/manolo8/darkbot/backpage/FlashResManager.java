@@ -5,12 +5,15 @@ import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.utils.XmlHelper;
 import com.github.manolo8.darkbot.utils.http.Http;
+import eu.darkbot.api.managers.GameResourcesAPI;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -20,13 +23,14 @@ import java.util.stream.Collectors;
  * manner we will substring all resources to the first N characters to be able to do an initial fast search.
  */
 @Feature(name = "Flash resource manager", description = "Holds the resources for the in-game language")
-public class FlashResManager implements Task {
+public class FlashResManager implements Task, GameResourcesAPI {
 
     private static final String URL = "https://darkorbit-22.bpsecure.com/spacemap/templates/{lang}/flashres.xml";
 
     private Main main;
 
     private String lang = null;
+    private Locale inGameLocale;
 
     private volatile Map<String, String> ALL_TRANSLATIONS = Collections.emptyMap();
 
@@ -45,6 +49,8 @@ public class FlashResManager implements Task {
                 || currLang.equals(lang)) return;
 
         try {
+            inGameLocale = new Locale(currLang);
+
             Element root = Http.create(URL.replace("{lang}", currLang))
                     .consumeInputStream(inputStream -> DocumentBuilderFactory
                             .newInstance()
@@ -65,5 +71,15 @@ public class FlashResManager implements Task {
 
     public String getTranslation(String key) {
         return ALL_TRANSLATIONS.get(key);
+    }
+
+    @Override
+    public Locale getLanguage() {
+        return inGameLocale;
+    }
+
+    @Override
+    public Optional<String> findTranslation(String translationId) {
+        return Optional.ofNullable(getTranslation(translationId));
     }
 }

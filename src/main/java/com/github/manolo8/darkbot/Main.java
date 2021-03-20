@@ -71,20 +71,20 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     public final Lazy.Sync<Boolean> status       = new Lazy.Sync<>();
     public final Lazy.Sync<String> configChange  = new Lazy.Sync<>();
-    public final StarManager starManager         = new StarManager();
+    public final StarManager starManager         = pluginAPI.requireInstance(StarManager.class);
     public final MapManager mapManager           = pluginAPI.requireInstance(MapManager.class);
-    public final SettingsManager settingsManager = new SettingsManager(this);
+    public final SettingsManager settingsManager = pluginAPI.requireInstance(SettingsManager.class);
     public final FacadeManager facadeManager     = pluginAPI.requireInstance(FacadeManager.class);
-    public final HeroManager hero                = new HeroManager(this);
-    public final EffectManager effectManager     = new EffectManager(this);
-    public final GuiManager guiManager           = new GuiManager(this);
-    public final StatsManager statsManager       = new StatsManager(this);
+    public final HeroManager hero                = pluginAPI.requireInstance(HeroManager.class);
+    public final EffectManager effectManager     = pluginAPI.requireInstance(EffectManager.class);
+    public final GuiManager guiManager           = pluginAPI.requireInstance(GuiManager.class);
+    public final StatsManager statsManager       = pluginAPI.requireInstance(StatsManager.class);
     public final PingManager pingManager         = pluginAPI.requireInstance(PingManager.class);
     public final BackpageManager backpage        = pluginAPI.requireInstance(BackpageManager.class);
     public final PluginHandler pluginHandler     = pluginAPI.requireInstance(PluginHandler.class);
     public final PluginUpdater pluginUpdater     = pluginAPI.requireInstance(PluginUpdater.class);
     public final FeatureRegistry featureRegistry = pluginAPI.requireInstance(FeatureRegistry.class);
-    public final RepairManager repairManager     = new RepairManager();
+    public final RepairManager repairManager     = pluginAPI.requireInstance(RepairManager.class);
 
     private final MainGui form;
     private final BotInstaller botInstaller = new BotInstaller(
@@ -219,7 +219,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     private void checkRefresh() {
         if (config.MISCELLANEOUS.REFRESH_TIME == 0 ||
-                System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
+                System.currentTimeMillis() - lastRefresh < (long) config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
 
         if (!module.canRefresh()) return;
 

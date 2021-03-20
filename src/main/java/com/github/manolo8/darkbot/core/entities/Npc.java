@@ -38,7 +38,7 @@ public class Npc extends Ship implements eu.darkbot.api.entities.Npc {
     public void added(Main main) {
         super.added(main);
         this.apiNpcInfo = new NpcInfoImpl(main.pluginAPI.requireAPI(HeroItemsAPI.class),
-                main.pluginAPI.requireAPI(SettingsProxy.class));
+                main.pluginAPI.requireInstance(SettingsProxy.class));
     }
 
     @Override

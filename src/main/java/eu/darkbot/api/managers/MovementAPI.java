@@ -6,7 +6,7 @@ import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.Location;
 import org.jetbrains.annotations.NotNull;
 
-public interface MovementAPI extends API {
+public interface MovementAPI extends API.Singleton {
 
     /**
      * @param portal to move to

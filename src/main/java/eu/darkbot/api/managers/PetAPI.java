@@ -12,7 +12,7 @@ import java.util.Optional;
 /**
  * API to manage hero's pet.
  */
-public interface PetAPI extends Pet, API {
+public interface PetAPI extends Pet, API.Singleton {
 
     /**
      * @return true if pet by module was marked to be enabled.

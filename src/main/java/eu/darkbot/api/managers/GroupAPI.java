@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * API for group
  */
-public interface GroupAPI extends API {
+public interface GroupAPI extends API.Singleton {
 
     Group getGroup();
     boolean canPing();

@@ -28,10 +28,10 @@ public class Drive implements MovementAPI {
     private static final Random RANDOM = new Random();
     private boolean force = false;
 
+    private final Main main;
     private final MapManager map;
     private final MouseManager mouse;
-    private final HeroManager hero;
-    private final LocationInfo heroLoc;
+    private LocationInfo heroLoc = new LocationInfo();
 
     public PathFinder pathFinder;
     public LinkedList<PathPoint> paths = new LinkedList<>();
@@ -42,15 +42,16 @@ public class Drive implements MovementAPI {
     private long lastClick;
     public long lastMoved;
 
-    public Drive(HeroManager hero, MapManager map) {
+    public Drive(Main main, MapManager map) {
+        this.main = main;
         this.map = map;
         this.mouse = new MouseManager(map);
-        this.hero = hero;
-        this.heroLoc = hero.locationInfo;
         this.pathFinder = new PathFinder(map);
     }
 
     public void checkMove() {
+        this.heroLoc = main.hero.locationInfo;
+
         // Path-finder changed and bot is already traveling, re-create route
         if (endLoc != null && pathFinder.changed() && tempDest == null) tempDest = endLoc;
 
@@ -73,12 +74,12 @@ public class Drive implements MovementAPI {
             // If direction roughly similar, and changed dir little ago, and you're still gonna be moving, ignore change
             // This smooths out paths in short distances
             if (next.distance(lastSegment) + (System.currentTimeMillis() - lastDirChange) < 500 &&
-                    hero.timeTo(now.distance(lastSegment)) > 50) return;
+                    main.hero.timeTo(now.distance(lastSegment)) > 50) return;
             lastDirChange = System.currentTimeMillis();
         }
         lastSegment = next;
 
-        if (newPath || hero.timeTo(now.distance(next)) > 25) {
+        if (newPath || main.hero.timeTo(now.distance(next)) > 25) {
             double dirAngle = next.angle(last),
                     maxDiff = Math.max(0.02, MathUtils.angleDiff(next.angle(Location.of(heroLoc.last, dirAngle + (Math.PI / 2), 100)), dirAngle));
             if (!newPath && heroLoc.isMoving() && MathUtils.angleDiff(heroLoc.angle, dirAngle) < maxDiff) {
@@ -177,14 +178,14 @@ public class Drive implements MovementAPI {
     @Override
     public void moveRandom() {
         ZoneInfo area = map.preferred;
-        boolean sequential = hero.main.config.GENERAL.ROAMING.SEQUENTIAL;
+        boolean sequential = main.config.GENERAL.ROAMING.SEQUENTIAL;
 
         List<ZoneInfo.Zone> zones = area == null ? Collections.emptyList() :
                 sequential ? area.getSortedZones() : area.getZones();
         boolean changed = !zones.equals(lastZones);
         lastZones = zones;
 
-        if ( hero.main.config.GENERAL.ROAMING.KEEP && !changed && lastRandomMove != null) {
+        if (main.config.GENERAL.ROAMING.KEEP && !changed && lastRandomMove != null) {
             move(lastRandomMove);
             return;
         }
@@ -228,13 +229,13 @@ public class Drive implements MovementAPI {
             moveTo(eu.darkbot.api.objects.Location.of(portal, Math.random() * Math.PI * 2, Math.random() * 200));
             return false;
         }
-        return hero.distanceTo(portal) <= leniency && !isMoving();
+        return heroLoc.distanceTo(portal) <= leniency && !isMoving();
     }
 
     @Override
     public void jumpPortal(Portal portal) {
         if (portal instanceof com.github.manolo8.darkbot.core.entities.Portal)
-            hero.jumpPortal((com.github.manolo8.darkbot.core.entities.Portal) portal);
+            main.hero.jumpPortal((com.github.manolo8.darkbot.core.entities.Portal) portal);
     }
 
     @Override
@@ -244,7 +245,7 @@ public class Drive implements MovementAPI {
 
     @Override
     public Location getCurrentLocation() {
-        return hero.getLocationInfo().now;
+        return heroLoc.now;
     }
 
     @Override
