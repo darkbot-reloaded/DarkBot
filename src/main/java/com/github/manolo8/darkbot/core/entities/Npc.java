@@ -113,7 +113,8 @@ public class Npc extends Ship implements eu.darkbot.api.entities.Npc {
 
             return proxy.categoryBar.get(category).items.stream()
                     .filter(Item::hasShortcut)
-                    .filter(item -> item.getSlot().slotBarType == k.getType() && item.getSlot().slotNumber == slotNumber)
+                    .filter(item -> item.getSlotBarType() == k.getType())
+                    .filter(item -> item.containsSlotNumber(slotNumber))
                     .findAny();
         }
 

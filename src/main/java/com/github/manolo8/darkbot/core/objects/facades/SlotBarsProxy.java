@@ -41,15 +41,16 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
 
     @Override
     public boolean selectItem(@NotNull eu.darkbot.api.objects.Item item) {
-        Item.Slot slot = ((Item) item).getSlot();
-        if (slot == null) return false;
+        SlotBarsProxy.Type slotBarType = ((Item) item).getSlotBarType();
+        int slotNumber = ((Item) item).getFirstSlotNumber();
 
-        if (slot.slotBarType == SlotBarsProxy.Type.PRO_ACTION_BAR)
+        if (slotBarType == null || slotNumber == -1) return false;
+        if (slotBarType == SlotBarsProxy.Type.PRO_ACTION_BAR)
             API.keyboardClick(settings.getCharCode(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION));
 
         API.keyboardClick(settings.getCharCode(SettingsProxy.KeyBind.valueOf(
-                (slot.slotBarType == SlotBarsProxy.Type.PREMIUM_BAR ?
-                        "PREMIUM_" : "SLOTBAR_") + (slot.slotNumber == 10 ? 0 : slot.slotNumber))));
+                (slotBarType == SlotBarsProxy.Type.PREMIUM_BAR ?
+                        "PREMIUM_" : "SLOTBAR_") + (slotNumber == 10 ? 0 : slotNumber))));
 
         return true;
     }

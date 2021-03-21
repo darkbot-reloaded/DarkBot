@@ -26,7 +26,7 @@ public interface Ammo {
         SPACECUP_GROUP_G,
         SPACECUP_GROUP_H,
         A_BL,
-        RCB_140,
+        RCB_140(true),
         IDB_125,
         VB_142,
         EMAA_20,
