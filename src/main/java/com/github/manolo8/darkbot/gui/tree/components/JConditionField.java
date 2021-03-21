@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
@@ -25,6 +26,9 @@ public class JConditionField extends JTextField implements OptionEditor {
 
     private ConfigField field;
     private Object highlight;
+
+    private String lastParsed;
+    private SyntaxException lastEx;
 
     private final SyntaxInfo popup = new SyntaxInfo();
 
@@ -64,23 +68,40 @@ public class JConditionField extends JTextField implements OptionEditor {
         }
         if (getText() == null) return null;
 
+        if (getText().equals(lastParsed)) {
+            handleSyntaxEx(lastEx);
+            return null;
+        }
+
+        lastParsed = getText();
+
         try {
             Condition cond = ValueParser.parseCondition(getText());
-            setHighlight(0, getText().length(), UIUtils.GREEN_HIGHLIGHT);
-            popup.update(null, 0, null);
+            handleSyntaxEx(lastEx = null);
+            cond.get(HeroManager.instance.main);
             return cond;
         } catch (SyntaxException e) {
-            int s = getText().lastIndexOf(e.getAt()), start = Math.max(0, s);
-
-            setHighlight(start, getText().length(), UIUtils.RED_HIGHLIGHT);
-
-            try {
-                Rectangle rect = getUI().modelToView(this, start);
-                popup.update(e, start, new Point((int) rect.getX(), (int) rect.getMaxY()));
-            } catch (BadLocationException ble) {
-                ble.printStackTrace();
-            }
+            handleSyntaxEx(lastEx = e);
             return null;
+        }
+    }
+
+    private void handleSyntaxEx(SyntaxException e) {
+        if (e == null) {
+            setHighlight(0, getText().length(), UIUtils.GREEN_HIGHLIGHT);
+            popup.update(null, 0, null);
+            return;
+        }
+
+        int s = getText().lastIndexOf(e.getAt()), start = Math.max(0, s);
+
+        setHighlight(start, getText().length(), UIUtils.RED_HIGHLIGHT);
+
+        try {
+            Rectangle rect = getUI().modelToView(this, start);
+            popup.update(e, start, new Point((int) rect.getX(), (int) rect.getMaxY()));
+        } catch (BadLocationException ble) {
+            ble.printStackTrace();
         }
     }
 
@@ -107,6 +128,8 @@ public class JConditionField extends JTextField implements OptionEditor {
         private final JPanel expected = new JPanel(new MigLayout("ins 0px, wrap 6"));
         private final JPanel metadata = new JPanel(new MigLayout("ins 0px, gapy 0", "[grow]15px[grow]15px[grow]", "[]"));
 
+        private SyntaxException lastEx;
+
         public SyntaxInfo() {
             super(new MigLayout("ins 5px, fillx, gapy 5px, wrap 1", "[grow]15px[grow]15px[grow]push", "[]"));
 
@@ -129,7 +152,11 @@ public class JConditionField extends JTextField implements OptionEditor {
             if (syntax == null) {
                 popup.setVisible(false);
                 return;
+            } else if (lastEx == syntax) {
+                popup.show(JConditionField.this, loc.x, loc.y);
+                return;
             }
+            lastEx = syntax;
 
             if (syntax.getMessage() != null) message.setText(syntax.getMessage());
             message.setVisible(syntax.getMessage() != null);

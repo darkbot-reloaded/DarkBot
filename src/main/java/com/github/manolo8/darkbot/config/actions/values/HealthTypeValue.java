@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
+import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
@@ -65,16 +66,11 @@ public class HealthTypeValue implements Value<Number>, Parser {
         if (healthType == null)
             throw new SyntaxException("Unknown hp-type: '" + params[0] + "'", str, HealthType.class);
 
-        if (params.length != 2)
-            throw new SyntaxException("Missing separator in hp-type", "", Values.getMeta(getClass()), ",");
+        str = ParseUtil.separate(params, getClass(), ",");
 
-        ParseResult<HealthHolder> pr = ValueParser.parse(params[1], HealthHolder.class);
+        ParseResult<HealthHolder> pr = ValueParser.parse(str, HealthHolder.class);
         health = pr.value;
 
-        str = pr.leftover.trim();
-        if (str.isEmpty() || str.charAt(0) != ')')
-            throw new SyntaxException("Missing end separator in hp-type", str, Values.getMeta(getClass()), ")");
-
-        return pr.leftover.substring(1);
+        return ParseUtil.separate(pr.leftover.trim(), getClass(), ")");
     }
 }

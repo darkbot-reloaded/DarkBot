@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
+import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
 
 import java.text.NumberFormat;
@@ -32,11 +33,7 @@ public class NumberConstant implements Value<Number>, Parser {
         String[] params = str.split("\\)", 2);
 
         number = parseNumber(params[0], str, getClass());
-
-        if (params.length != 2)
-            throw new SyntaxException("Missing end separator in number", "", Values.getMeta(getClass()), ")");
-
-        return params[1];
+        return ParseUtil.separate(params, getClass(), ")");
     }
 
     public static Number parseNumber(String val, String str, Class<? extends Value<?>> type) throws SyntaxException {

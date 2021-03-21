@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
+import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
 import org.jetbrains.annotations.NotNull;
@@ -66,8 +67,9 @@ public class NumericalCondition implements Condition, Parser {
     @Override
     public String parse(String str) throws SyntaxException {
         ParseResult<Number> prA = ValueParser.parse(str, Number.class);
-
+        a = prA.value;
         str = prA.leftover.trim();
+
         int chars = Math.min(str.length(), str.length() > 1 && str.charAt(1) == '=' ? 2 : 1);
 
         String op = str.substring(0, chars);
@@ -76,14 +78,7 @@ public class NumericalCondition implements Condition, Parser {
             throw new SyntaxException("Unknown operation '" + op + "'", str, Operation.class);
 
         ParseResult<Number> prB = ValueParser.parse(str.substring(chars), Number.class);
-
-        a = prA.value;
         b = prB.value;
-
-        str = prB.leftover.trim();
-        if (str.isEmpty() || str.charAt(0) != ')')
-            throw new SyntaxException("Missing end separator in 'if'", str, Values.getMeta(getClass()), ")");
-
-        return str.substring(1);
+        return ParseUtil.separate(prB.leftover.trim(), getClass(), ")");
     }
 }

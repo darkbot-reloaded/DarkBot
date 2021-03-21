@@ -9,7 +9,6 @@ import com.github.manolo8.darkbot.config.actions.conditions.AnyCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.EqualCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.HasEffectCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.HasFormationCondition;
-import com.github.manolo8.darkbot.config.actions.conditions.InMapCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NoneCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NumericalCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.OneCondition;
@@ -17,8 +16,10 @@ import com.github.manolo8.darkbot.config.actions.values.BooleanConstant;
 import com.github.manolo8.darkbot.config.actions.values.DistanceValue;
 import com.github.manolo8.darkbot.config.actions.values.HealthTypeValue;
 import com.github.manolo8.darkbot.config.actions.values.HealthValue;
+import com.github.manolo8.darkbot.config.actions.values.HeroMap;
 import com.github.manolo8.darkbot.config.actions.values.HeroValue;
 import com.github.manolo8.darkbot.config.actions.values.LocationConstant;
+import com.github.manolo8.darkbot.config.actions.values.MapConstant;
 import com.github.manolo8.darkbot.config.actions.values.NumberConstant;
 import com.github.manolo8.darkbot.config.actions.values.PercentConstant;
 import com.github.manolo8.darkbot.config.actions.values.ShipLocationValue;
@@ -44,9 +45,9 @@ public class Values {
                     EqualCondition.class,
                     HasEffectCondition.class,
                     HasFormationCondition.class,
-                    InMapCondition.class,
                     DistanceValue.class,
                     ShipLocationValue.class,
+                    HeroMap.class,
                     HealthTypeValue.class,
                     HealthValue.class,
                     HeroValue.class,
@@ -54,7 +55,8 @@ public class Values {
                     NumberConstant.class,
                     PercentConstant.class,
                     BooleanConstant.class,
-                    LocationConstant.class);
+                    LocationConstant.class,
+                    MapConstant.class);
 
     private static final Map<String, Meta<?>> VALUES = buildMetadata();
 
@@ -68,12 +70,12 @@ public class Values {
         return metadata;
     }
 
-    public static <T extends Value<?>> Meta<T> getMeta(Class<T> type) {
+    public static <T extends Value<?>> Meta<T> getMeta(Class<T> type) throws SyntaxException {
         for (Meta<?> value : VALUES.values()) {
-            if (value.clazz == type)//noinspection unchecked
+            if (value.clazz == type) //noinspection unchecked
                 return (Meta<T>) value;
         }
-        return null;
+        throw new SyntaxException("Error: failed to find value meta for " + type.getSimpleName(), null);
     }
 
     public static <T> Meta<T> getMeta(String name, String ex, Class<T> type) throws SyntaxException {

@@ -26,10 +26,6 @@ public class SyntaxException extends Exception {
                 .map(Objects::toString).toArray(String[]::new));
     }
 
-    /*public SyntaxException(String message, String at, List<String> chars) {
-        this(message, at, (List<Values.Meta<?>>) null, chars.toArray(EMPTY));
-    }*/
-
     public SyntaxException(String message, String at, Values.Meta<?> meta, String... chars) {
         this(message, at, meta == null ? null : Collections.singletonList(meta), chars);
         singleMeta = true;
@@ -37,7 +33,7 @@ public class SyntaxException extends Exception {
 
     public SyntaxException(String message, String at, List<Values.Meta<?>> metas, String... chars) {
         super(message);
-        this.at = at;
+        this.at = at == null ? "" : at;
         this.chars = chars == null ? EMPTY : chars;
         this.metadatas = metas == null ? Collections.emptyList() : metas;
     }

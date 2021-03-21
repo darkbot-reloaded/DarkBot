@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
+import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
 
@@ -48,7 +49,7 @@ public abstract class AbstractCondition implements Condition, Parser {
 
     @Override
     public String parse(String str) throws SyntaxException {
-        char lastCh;
+        boolean hasNext;
         do {
             ParseResult<Result> pr = ValueParser.parse(str, Result.class);
             if (!(pr.value instanceof Condition))
@@ -56,11 +57,10 @@ public abstract class AbstractCondition implements Condition, Parser {
 
             children.add((Condition) pr.value);
             str = pr.leftover.trim();
-            lastCh = str.isEmpty() ? '\0' : str.charAt(0);
-            if (lastCh != ',' && lastCh != ')')
-                throw new SyntaxException("Missing end separator in '" + name() + "'", str, Values.getMeta(getClass()), ",", ")");
-            str = str.substring(1);
-        } while (lastCh == ',');
+
+            hasNext = !str.isEmpty() && str.charAt(0) == ',';
+            str = ParseUtil.separate(str, getClass(), ",", ")");
+        } while (hasNext);
         return str;
     }
 

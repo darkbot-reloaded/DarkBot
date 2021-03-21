@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
+import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.core.utils.Location;
 import org.jetbrains.annotations.Nullable;
@@ -26,18 +27,16 @@ public class LocationConstant implements Value<Location>, Parser {
 
     @Override
     public String parse(String str) throws SyntaxException {
-        String[] params = str.split(",", 2);
+        String[] params = str.split(" *, *", 2);
 
         double x = NumberConstant.parseNumber(params[0], str, getClass()).doubleValue();
-        if (params.length < 2) throw new SyntaxException("Missing separator in location", "", Values.getMeta(getClass()), ",");
-        params = (str = params[1]).split("\\)", 2);
 
+        params = (str = ParseUtil.separate(params, getClass(), ",")).split("\\)", 2);
         double y = NumberConstant.parseNumber(params[0], str, getClass()).doubleValue();
-        if (params.length < 2) throw new SyntaxException("Missing end separator in location", "", Values.getMeta(getClass()), ")");
 
         location = new Location(x, y);
 
-        return params[1];
+        return ParseUtil.separate(params, getClass(), ")");
     }
 
 }

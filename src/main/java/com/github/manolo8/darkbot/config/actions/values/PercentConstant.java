@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
+import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
 
 @ValueData(name = "percent", description = "Creates a percent constant", example = "percent(5)")
@@ -35,9 +36,6 @@ public class PercentConstant implements Value<Number>, Parser {
             throw new SyntaxException("Failed to parse percent '" + params[0] + "'", str, Values.getMeta(getClass()));
         }
 
-        if (params.length != 2)
-            throw new SyntaxException("Missing end separator in percent", "", Values.getMeta(getClass()), ")");
-
-        return params[1];
+        return ParseUtil.separate(params, getClass(), ")");
     }
 }

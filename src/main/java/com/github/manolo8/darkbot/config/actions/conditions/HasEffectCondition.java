@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
+import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.core.entities.Ship;
@@ -66,16 +67,11 @@ public class HasEffectCondition implements Condition, Parser {
         if (effect == null)
             throw new SyntaxException("Unknown effect: '" + params[0] + "'", str, Effect.class);
 
-        if (params.length != 2)
-            throw new SyntaxException("Missing separator in has-effect", "", Values.getMeta(getClass()), ",");
+        str = ParseUtil.separate(params, getClass(), ",");
 
-        ParseResult<Ship> pr = ValueParser.parse(params[1], Ship.class);
+        ParseResult<Ship> pr = ValueParser.parse(str, Ship.class);
         ship = pr.value;
 
-        str = pr.leftover.trim();
-        if (str.isEmpty() || str.charAt(0) != ')')
-            throw new SyntaxException("Missing end separator in has-effect", str, Values.getMeta(getClass()), ")");
-
-        return pr.leftover.substring(1);
+        return ParseUtil.separate(pr.leftover.trim(), getClass(), ")");
     }
 }

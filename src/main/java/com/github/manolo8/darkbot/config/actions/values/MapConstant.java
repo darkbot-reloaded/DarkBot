@@ -1,36 +1,37 @@
-package com.github.manolo8.darkbot.config.actions.conditions;
+package com.github.manolo8.darkbot.config.actions.values;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
+import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
+import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Map;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-@ValueData(name = "in-map", description = "Checks if you are on a specific map", example = "in-map(map)")
-public class InMapCondition implements Condition, Parser {
+@ValueData(name = "map", description = "Creates a map constant", example = "map(5-2)")
+public class MapConstant implements Value<Map>, Parser {
 
-    private static final Set<String> ACCESSIBLE_MAPS = new HashSet<>(StarManager.getInstance().getAccessibleMaps());
+    private static final Set<String> ACCESSIBLE_MAPS =
+            new HashSet<>(StarManager.getInstance().getAccessibleMaps());
 
-    public Map map;
+    private Map map;
 
     @Override
-    public @NotNull Condition.Result get(Main main) {
-        if (map == null) return Result.ABSTAIN;
-        return Result.fromBoolean(main.hero.map.name.equals(map.name));
+    public @Nullable Map get(Main main) {
+        return map;
     }
 
     @Override
     public String toString() {
-        return "in-map(" + map.name + ")";
+        return "map(" + map.name + ")";
     }
 
     @Override
@@ -55,9 +56,7 @@ public class InMapCondition implements Condition, Parser {
                             .distinct()
                             .toArray(String[]::new));
 
-        if (params.length != 2)
-            throw new SyntaxException("Missing end separator in in-map", "", Values.getMeta(getClass()), ")");
-
-        return params[1];
+        return ParseUtil.separate(params, getClass(), ")");
     }
+
 }
