@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.core.entities.Ship;
 
-@ValueData(name = "target", description = "Gets the current target ship", example = "target()")
+@ValueData(name = "target", description = "Gets the ship or npc that you're shooting at", example = "target()")
 public class TargetValue implements Value<Ship> {
 
     @Override

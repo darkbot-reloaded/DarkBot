@@ -8,6 +8,8 @@ import com.github.manolo8.darkbot.config.actions.conditions.AllCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.AnyCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.EqualCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.HasEffectCondition;
+import com.github.manolo8.darkbot.config.actions.conditions.HasFormationCondition;
+import com.github.manolo8.darkbot.config.actions.conditions.InMapCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NoneCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NumericalCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.OneCondition;
@@ -41,6 +43,8 @@ public class Values {
                     NumericalCondition.class,
                     EqualCondition.class,
                     HasEffectCondition.class,
+                    HasFormationCondition.class,
+                    InMapCondition.class,
                     DistanceValue.class,
                     ShipLocationValue.class,
                     HealthTypeValue.class,

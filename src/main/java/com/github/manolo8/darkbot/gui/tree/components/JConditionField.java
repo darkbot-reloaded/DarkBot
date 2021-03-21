@@ -103,16 +103,22 @@ public class JConditionField extends JTextField implements OptionEditor {
 
         private final JPopupMenu popup = new JPopupMenu();
         private final JLabel message = new JLabel();
-        private final JPanel expected = new JPanel();
+        private final JLabel expectedLabel = new JLabel("Expected");
+        private final JPanel expected = new JPanel(new MigLayout("ins 0px, wrap 6"));
+        private final JPanel metadata = new JPanel(new MigLayout("ins 0px, gapy 0", "[grow]15px[grow]15px[grow]", "[]"));
 
         public SyntaxInfo() {
-            super(new MigLayout("ins 0px 5px, fillx, gapy 0", "[grow]15px[grow]15px[grow]", "[]"));
+            super(new MigLayout("ins 5px, fillx, gapy 5px, wrap 1", "[grow]15px[grow]15px[grow]push", "[]"));
 
             popup.setBorder(BorderFactory.createEmptyBorder());
             popup.setFocusable(false);
             popup.add(this);
 
             setBorder(UIUtils.getBorder());
+
+            add(message, "grow, hidemode 3");
+            add(expected, "grow, hidemode 3");
+            add(metadata, "grow, hidemode 3");
         }
 
         public boolean isOpen() {
@@ -125,32 +131,29 @@ public class JConditionField extends JTextField implements OptionEditor {
                 return;
             }
 
-            setLayout(new MigLayout("ins 0px 5px, fillx, gapy 0", "[grow]15px[grow]15px[grow]", "[]"));
-            removeAll();
-
-            if (syntax.getMessage() != null) {
-                message.setText(syntax.getMessage());
-                add(message, "gap 5px 5px 5px 0px, dock north, spanx, align left");
-            }
+            if (syntax.getMessage() != null) message.setText(syntax.getMessage());
+            message.setVisible(syntax.getMessage() != null);
 
             if (syntax.getExpected().length > 0) {
                 expected.removeAll();
-                expected.setLayout(new FlowLayout(FlowLayout.LEFT));
-                expected.add(new JLabel("Expected: "));
+                expected.add(expectedLabel, "spany, gapright 10px");
                 for (String val : syntax.getExpected())
-                    expected.add(new InsertButton(val, at, true));
-
-                add(expected, "dock north, align left");
+                    expected.add(new InsertButton(val, at, true), "grow");
             }
+            expected.setVisible(syntax.getExpected().length > 0);
 
-            syntax.getMetadata().sort(Comparator.comparing(Values.Meta::getName));
-            for (Values.Meta<?> meta : syntax.getMetadata()) {
-                add(syntax.isSingleMeta() ?
-                        new JLabel(meta.getName()) :
-                        new InsertButton(meta.getName() + "(", at, false), "grow");
-                add(new JLabel(meta.getDescription()), "grow");
-                add(new JLabel(meta.getExample()), "grow, wrap");
+            if (!syntax.getMetadata().isEmpty()) {
+                metadata.removeAll();
+                syntax.getMetadata().sort(Comparator.comparing(Values.Meta::getName));
+                for (Values.Meta<?> meta : syntax.getMetadata()) {
+                    metadata.add(syntax.isSingleMeta() ?
+                            new JLabel(meta.getName()) :
+                            new InsertButton(meta.getName() + "(", at, false), "grow");
+                    metadata.add(new JLabel(meta.getDescription()), "grow");
+                    metadata.add(new JLabel(meta.getExample()), "grow, wrap");
+                }
             }
+            metadata.setVisible(!syntax.getMetadata().isEmpty());
 
             popup.setVisible(false);
             popup.show(JConditionField.this, loc.x, loc.y);

@@ -67,7 +67,7 @@ public class Main extends Thread implements PluginListener {
 
     public final Lazy.Sync<Boolean> status       = new Lazy.Sync<>();
     public final Lazy.Sync<String> configChange  = new Lazy.Sync<>();
-    public final StarManager starManager         = new StarManager();
+    public final StarManager starManager         = StarManager.getInstance();
     public final MapManager mapManager           = new MapManager(this);
     public final SettingsManager settingsManager = new SettingsManager(this);
     public final FacadeManager facadeManager     = new FacadeManager(this);
