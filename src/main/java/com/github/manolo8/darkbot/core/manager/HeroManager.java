@@ -73,7 +73,7 @@ public class HeroManager extends Ship implements Manager {
     public void update() {
         super.update();
         config = settings.config;
-        formationId = API.readMemoryInt(address, 280, 40, 40);
+        formationId = super.formationId;
 
         long petAddress = API.readMemoryLong(address + 176);
         if (petAddress != pet.address) pet.update(petAddress);

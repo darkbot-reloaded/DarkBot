@@ -77,7 +77,7 @@ public class StarBuilder {
 
     protected StarBuilder addGG(int id, String name) {
         String shortName = name;
-        if (name.matches("GG .{0,3} [0-9]+")) {
+        if (name.matches("GG .+ [0-9]+")) {
             shortName = name.substring(0, name.lastIndexOf(" "));
         }
         return setCurrent(new TempMap(id, name, shortName, true));

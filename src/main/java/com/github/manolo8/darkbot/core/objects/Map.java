@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.core.objects;
 
-public class Map {
+import org.jetbrains.annotations.NotNull;
+
+public class Map implements Comparable<Map> {
 
     public int id;
     public String name, shortName;
@@ -23,4 +25,10 @@ public class Map {
     public String toString() {
         return name;
     }
+
+    @Override
+    public int compareTo(@NotNull Map o) {
+        return name.compareTo(o.name);
+    }
+
 }

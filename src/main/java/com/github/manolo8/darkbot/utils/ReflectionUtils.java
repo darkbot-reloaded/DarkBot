@@ -93,15 +93,19 @@ public class ReflectionUtils {
         Type[] params;
         for (Type itf : clazz.getGenericInterfaces()) {
             if ((params = getTypes(itf, generic)) != null) return params;
+            if (itf instanceof Class) {
+                params = findGenericParameters((Class) itf, generic);
+                if (params != null) return params;
+            }
         }
         if ((params = getTypes(clazz.getGenericSuperclass(), generic)) != null) return params;
 
         Class parent = clazz.getSuperclass();
-        if (parent != null) return findGenericParameters(generic, parent);
+        if (parent != null) return findGenericParameters(parent, generic);
         return null;
     }
 
-    private static Type[] getTypes(Type type, Class expected) {
+    public static Type[] getTypes(Type type, Class expected) {
         if (!(type instanceof ParameterizedType)) return null;
         ParameterizedType paramType = (ParameterizedType) type;
         if (paramType.getRawType() == expected) return paramType.getActualTypeArguments();

@@ -28,13 +28,11 @@ public class StarManager {
 
     private static int INVALID_MAP_ID = -999;
 
-    public StarManager() {
-        INSTANCE = this;
-
+    private StarManager() {
         // https://www.darkorbit.com/spacemap/graphics/maps-config.xml
 
         StarBuilder mapBuild = new StarBuilder();
-        mapBuild.addMap(-1, I18n.get("gui.map.loading"), "?")
+        mapBuild.addMap(-1, "Loading", "?")
                 .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1")
                 .addGG(-3, "GG Escort").accessOnlyBy(54, 10500, 6500, BASE_MAPS)
                 .addGG(-4, "GG Eternal").accessBy(54, BL_MAPS)
@@ -81,7 +79,7 @@ public class StarManager {
                 .addMap(307, "2BL").addPortal(9893,   862, "1BL").addPortal(  593,  5884, "2-8").addPortal(20377,  7996, "3BL")
                 .addMap(308, "3BL").addPortal(1545, 12210, "1BL").addPortal(19400, 11854, "2BL").addPortal(14027,  3181, "3-8");
                 // EX
-        mapBuild.addMap(401, "Experiment Zone 1", "EZ1").addPortal(1200, 1100, "Home Map")
+        mapBuild.addMap(401, "Experiment Zone 1", "EZ 1").addPortal(1200, 1100, "Home Map")
                 .addMap(402, "Experiment Zone 2-1", "EZ 2-1").addPortal(1200, 1100, "1-5")
                 .addMap(403, "Experiment Zone 2-2", "EZ 2-2").addPortal(1200, 1100, "2-5")
                 .addMap(404, "Experiment Zone 2-3", "EZ 2-3").addPortal(1200, 1100, "3-5");
@@ -101,13 +99,13 @@ public class StarManager {
                 .addGG(74, "GG κ").accessBy(70, HOME_MAPS) // TODO: Find portal exit ids for kappa, lambda, kronos
                 .addGG(75, "GG λ").accessBy(71, HOME_MAPS)
                 .addGG(76, "GG Kronos", "GG K").accessBy(72, HOME_MAPS)
-                .addGG(77, "GG Cold Wave (Easy)", "GG Cold").accessBy(73, "1-4", "2-4", "3-4")
-                .addGG(78, "GG Cold Wave (Hard)", "GG Cold").accessBy(73, "1-4", "2-4", "3-4")
+                .addGG(77, "GG Cold Wave Easy", "GG Cold E").accessBy(73, "1-4", "2-4", "3-4")
+                .addGG(78, "GG Cold Wave Hard", "GG Cold H").accessBy(73, "1-4", "2-4", "3-4")
                 .addGG(203, "GG Hades", "Hades").accessBy(74, HOME_MAPS).exitBy(1)
                 .addGG(223, "Devolarium Attack", "DA") // (No access), missing type ID (HOME_MAPS)
-                .addGG(225, "GG PET Attack (easy)") // (No access)
-                .addGG(226, "GG PET Attack (hard)") // (No access)
-                .addGG(228, "Permafrost Fissure")   // (No access), missing type ID (HOME_MAPS)
+                .addGG(225, "GG PET Attack Easy", "GG PET E") // (No access)
+                .addGG(226, "GG PET Attack Hard", "GG PET H") // (No access)
+                .addGG(228, "Permafrost Fissure", "GG PF")   // (No access), missing type ID (HOME_MAPS)
                 .addGG(300, "GG ς 1").accessOnlyBy(82, HOME_MAPS)
                 .addGG(301, "GG ς 2").accessOnlyBy(82, "GG ς 1")
                 .addGG(302, "GG ς 3").accessOnlyBy(82, "GG ς 2")
@@ -123,24 +121,24 @@ public class StarManager {
                 .addGG(234, "GG VoT 6").accessOnlyBy(81, "GG VoT 5")
                 .addGG(235, "GG VoT 7").accessOnlyBy(81, "GG VoT 6")
                 .addGG(236, "GG VoT 8").accessBy(81, "GG VoT 7")
-                .addGG(305, "Compromising Invasion") // (No access)
-                .addGG(410, "GoP Normal 1").accessOnlyBy(24, OUTPOST_HOME_MAPS)
-                .addGG(411, "GoP Normal 2").accessOnlyBy(24, "GoP Normal 1")
-                .addGG(412, "GoP Normal 3").accessOnlyBy(24, "GoP Normal 2")
-                .addGG(413, "GoP Normal 4").accessOnlyBy(24, "GoP Normal 3")
-                .addGG(414, "GoP Normal 5").accessOnlyBy(24, "GoP Normal 4")
-                .addGG(415, "GoP Normal Final").accessOnlyBy(24, "GoP Normal 5").exitBy(1)
-                .addGG(450, "GoP Easy 1").accessOnlyBy(235, HOME_MAPS)
-                .addGG(451, "GoP Easy 2").accessOnlyBy(235, "GoP Easy 1")
-                .addGG(452, "GoP Easy 3").accessOnlyBy(235, "GoP Easy 2")
-                .addGG(453, "GoP Easy 4").accessOnlyBy(235, "GoP Easy 3")
-                .addGG(454, "GoP Easy 5").accessOnlyBy(235, "GoP Easy 4")
-                .addGG(455, "GoP Easy Final").accessOnlyBy(235, "GoP Easy 5").exitBy(1);
+                .addGG(305, "Compromising Invasion", "CI") // (No access)
+                .addGG(410, "GoP Normal 1", "GoP N").accessOnlyBy(24, OUTPOST_HOME_MAPS)
+                .addGG(411, "GoP Normal 2", "GoP N").accessOnlyBy(24, "GoP Normal 1")
+                .addGG(412, "GoP Normal 3", "GoP N").accessOnlyBy(24, "GoP Normal 2")
+                .addGG(413, "GoP Normal 4", "GoP N").accessOnlyBy(24, "GoP Normal 3")
+                .addGG(414, "GoP Normal 5", "GoP N").accessOnlyBy(24, "GoP Normal 4")
+                .addGG(415, "GoP Normal Final", "GoP N").accessOnlyBy(24, "GoP Normal 5").exitBy(1)
+                .addGG(450, "GoP Easy 1", "GoP E").accessOnlyBy(235, HOME_MAPS)
+                .addGG(451, "GoP Easy 2", "GoP E").accessOnlyBy(235, "GoP Easy 1")
+                .addGG(452, "GoP Easy 3", "GoP E").accessOnlyBy(235, "GoP Easy 2")
+                .addGG(453, "GoP Easy 4", "GoP E").accessOnlyBy(235, "GoP Easy 3")
+                .addGG(454, "GoP Easy 5", "GoP E").accessOnlyBy(235, "GoP Easy 4")
+                .addGG(455, "GoP Easy Final", "GoP E").accessOnlyBy(235, "GoP Easy 5").exitBy(1);
                 // Special (No direct access)
         mapBuild.addMap(42, "???")
-                .addMap(61, "MMO Invasion").addMap(62, "EIC Invasion").addMap(63, "VRU Invasion")
-                .addMap(64, "MMO Invasion").addMap(65, "EIC Invasion").addMap(66, "VRU Invasion")
-                .addMap(67, "MMO Invasion").addMap(68, "EIC Invasion").addMap(69, "VRU Invasion")
+                .addMap(61, "MMO Invasion", "MMO Inv").addMap(62, "EIC Invasion", "EIC Inv").addMap(63, "VRU Invasion", "VRU Inv")
+                .addMap(64, "MMO Invasion", "MMO Inv").addMap(65, "EIC Invasion", "EIC Inv").addMap(66, "VRU Invasion", "VRU Inv")
+                .addMap(67, "MMO Invasion", "MMO Inv").addMap(68, "EIC Invasion", "EIC Inv").addMap(69, "VRU Invasion", "VRU Inv")
                 .addMap(81, "TDM I").addMap(82, "TDM II")
                 .addMap(101, "JP").addMap(102, "JP").addMap(103, "JP").addMap(104, "JP")
                 .addMap(105, "JP").addMap(106, "JP").addMap(107, "JP").addMap(108, "JP")
@@ -148,14 +146,14 @@ public class StarManager {
                 .addMap(112, "UBA").addMap(113, "UBA").addMap(114, "UBA").addMap(115, "UBA").addMap(116, "UBA")
                 .addMap(117, "UBA").addMap(118, "UBA").addMap(119, "UBA").addMap(120, "UBA").addMap(121, "UBA")
                 .addMap(201, "SC-1").addMap(202, "SC-2") // Sector Control
-                .addMap(224, "Custom Tournament")
-                .addMap(150, "R-Zone 1").addMap(151, "R-Zone 2")
-                .addMap(152, "R-Zone 3").addMap(153, "R-Zone 4")
-                .addMap(154, "R-Zone 5").addMap(155, "R-Zone 6")
-                .addMap(156, "R-Zone 7").addMap(157, "R-Zone 8")
-                .addMap(158, "R-Zone 9").addMap(159, "R-Zone 10")
-                .addMap(420, "WarGame 1").addMap(421, "WarGame 2").addMap(422, "WarGame 3")
-                .addMap(423, "WarGame 4").addMap(424, "WarGame 5").addMap(425, "WarGame 6");
+                .addMap(224, "Custom Tournament", "CT")
+                .addMap(150, "R-Zone 1", "R-Z").addMap(151, "R-Zone 2", "R-Z")
+                .addMap(152, "R-Zone 3", "R-Z").addMap(153, "R-Zone 4", "R-Z")
+                .addMap(154, "R-Zone 5", "R-Z").addMap(155, "R-Zone 6", "R-Z")
+                .addMap(156, "R-Zone 7", "R-Z").addMap(157, "R-Zone 8", "R-Z")
+                .addMap(158, "R-Zone 9", "R-Z").addMap(159, "R-Zone 10", "R-Z")
+                .addMap(420, "WarGame 1", "WG").addMap(421, "WarGame 2", "WG").addMap(422, "WarGame 3", "WG")
+                .addMap(423, "WarGame 4", "WG").addMap(424, "WarGame 5", "WG").addMap(425, "WarGame 6", "WG");
                 // Frozen laberynth
         /*
         mapBuild.addMap(430, "ATLAS A"  ).exitBy(55)
@@ -267,10 +265,11 @@ public class StarManager {
     }
 
     public static Collection<Map> getAllMaps() {
-        return INSTANCE.starSystem.vertexSet();
+        return getInstance().starSystem.vertexSet();
     }
 
     public static StarManager getInstance() {
+        if (INSTANCE == null) INSTANCE = new StarManager();
         return INSTANCE;
     }
 
@@ -278,17 +277,17 @@ public class StarManager {
 
         @Override
         public Integer getValue(String text) {
-            return INSTANCE.byName(text).id;
+            return getInstance().byName(text).id;
         }
 
         @Override
         public String getText(Integer value) {
-            return INSTANCE.byId(value).name;
+            return getInstance().byId(value).name;
         }
 
         @Override
         public List<String> getOptions() {
-            return INSTANCE.getAccessibleMaps();
+            return getInstance().getAccessibleMaps();
         }
     }
 

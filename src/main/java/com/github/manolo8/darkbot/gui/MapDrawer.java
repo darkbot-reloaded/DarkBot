@@ -292,7 +292,8 @@ public class MapDrawer extends JPanel {
     protected void drawMap(Graphics2D g2) {
         g2.setColor(cs.TEXT_DARK);
         g2.setFont(cs.FONTS.BIG);
-        drawString(g2, hero.map.name, mid, (height / 2) - 5, Align.MID);
+        String name = hero.map.id == -1 ? I18n.get("gui.map.loading") : hero.map.name;
+        drawString(g2, name, mid, (height / 2) - 5, Align.MID);
     }
 
     private void drawHealth(Graphics2D g2) {
