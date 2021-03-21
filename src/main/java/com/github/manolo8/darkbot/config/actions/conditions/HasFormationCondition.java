@@ -85,6 +85,6 @@ public class HasFormationCondition implements Condition, Parser {
         ParseResult<Ship> pr = ValueParser.parse(str, Ship.class);
         ship = pr.value;
 
-        return ParseUtil.separate(params, getClass(), ")");
+        return ParseUtil.separate(pr.leftover.trim(), getClass(), ")");
     }
 }
