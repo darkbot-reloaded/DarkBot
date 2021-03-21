@@ -146,9 +146,8 @@ public class NpcAttacker {
         if (!main.config.LOOT.RSB.ENABLED || !target.npcInfo.extra.has(NpcExtra.USE_RSB)) return false;
         boolean isReady = bar.findItemById("ammunition_laser_rsb-75").map(i -> i.activatable).orElse(false);
 
-        if (isReady && usedRsb < System.currentTimeMillis() - 2000) usedRsb = System.currentTimeMillis();
-
-        return isReady && usedRsb > System.currentTimeMillis() - 100;
+        if (isReady && usedRsb < System.currentTimeMillis() - 1000) usedRsb = System.currentTimeMillis();
+        return usedRsb > System.currentTimeMillis() - 50;
     }
 
     private Character getAttackKey() {
