@@ -40,7 +40,7 @@ public class ValueParser {
                 ParseResult<?> pr = parse(str, param.type);
                 ReflectionUtils.set(param.field, val, pr.value);
 
-                str = ParseUtil.separate(str, vm, param == vm.params[vm.params.length - 1] ? ")" : ",");
+                str = ParseUtil.separate(pr.leftover.trim(), vm, param == vm.params[vm.params.length - 1] ? ")" : ",");
             }
 
             if (vm.params.length == 0) str = ParseUtil.separate(str, vm, ")");
