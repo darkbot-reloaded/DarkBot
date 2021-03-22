@@ -10,7 +10,6 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
-import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.core.utils.Drive;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -145,13 +144,9 @@ public class NpcAttacker {
 
     private boolean shouldRsb() {
         if (!main.config.LOOT.RSB.ENABLED || !target.npcInfo.extra.has(NpcExtra.USE_RSB)) return false;
-        String itemId = main.facadeManager.slotBars.getItemIdByKey(main.config.LOOT.RSB.KEY);
-        if (itemId == null || (!itemId.equals("ammunition_laser_rsb-75")
-                && !itemId.equals("ammunition_laser_rcb-140"))) return false;
-        Item item = bar.findItemById(itemId).orElse(null);
-        if (item == null) return false;
+        boolean isReady = bar.findItemById("ammunition_laser_rsb-75").map(i -> i.activatable).orElse(false);
 
-        if (item.activatable && usedRsb < System.currentTimeMillis() - 1000) usedRsb = System.currentTimeMillis();
+        if (isReady && usedRsb < System.currentTimeMillis() - 1000) usedRsb = System.currentTimeMillis();
         return usedRsb > System.currentTimeMillis() - 50;
     }
 

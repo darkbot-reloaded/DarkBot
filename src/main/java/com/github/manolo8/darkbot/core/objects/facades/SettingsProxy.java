@@ -21,16 +21,6 @@ public class SettingsProxy extends Updatable {
         return keycodes[keyBind.ordinal()];
     }
 
-    public KeyBind getAtChar(Character c) {
-        if (c == null) return null;
-
-        for (int i = 0; i < keycodes.length; i++)
-            if (c == keycodes[i])
-                return KeyBind.of(i);
-
-        return null;
-    }
-
     @Override
     public void update() {
         long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
@@ -86,11 +76,6 @@ public class SettingsProxy extends Updatable {
         FOCUS_CHAT,
         TOGGLE_CATEGORYBAR,
         PREMIUM_0,
-        TOGGLE_PRO_ACTION;
-
-        public static KeyBind of(int index) {
-            if (index < 0 || index >= values().length) return null;
-            return values()[index];
-        }
+        TOGGLE_PRO_ACTION
     }
 }
