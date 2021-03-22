@@ -1,5 +1,6 @@
 package eu.darkbot.api.objects.group;
 
+import eu.darkbot.api.objects.EntityInfo;
 import eu.darkbot.api.objects.Location;
 
 public interface GroupMember extends PartialGroupMember {
@@ -8,7 +9,7 @@ public interface GroupMember extends PartialGroupMember {
     MemberInfo getMemberInfo();
     MemberInfo getTargetInfo();
 
-    int getFactionId();
+    EntityInfo.Faction getFactionId();
     int getLevel();
     int getMapId();
     boolean isAttacked();

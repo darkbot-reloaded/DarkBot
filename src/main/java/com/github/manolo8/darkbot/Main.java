@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
+import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
@@ -179,11 +180,11 @@ public class Main extends Thread implements PluginListener, BotAPI {
         if (tickingModule) tickRunning();
         else tickLogic(false);
 
-        if (!running && (!hero.hasTarget() || !mapManager.isTarget(hero.target))) {
+        /*if (!running && (!hero.hasTarget() || !mapManager.isTarget(hero.target))) {
             hero.setTarget(Stream.concat(mapManager.entities.ships.stream(), mapManager.entities.npcs.stream())
                     .filter(mapManager::isTarget)
                     .findFirst().orElse(null));
-        }
+        }*/
 
         pingManager.tick();
     }

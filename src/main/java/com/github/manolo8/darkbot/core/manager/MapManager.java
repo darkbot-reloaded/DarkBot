@@ -37,7 +37,7 @@ public class MapManager implements Manager, StarSystemAPI {
     private long mapAddressStatic;
     private long viewAddressStatic;
     private long minimapAddressStatic;
-    private long mapAddress;
+    public long mapAddress;
     private long viewAddress;
     private long boundsAddress;
     long eventAddress;

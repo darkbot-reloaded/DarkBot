@@ -14,11 +14,13 @@ import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.entities.Entity;
 import eu.darkbot.api.entities.other.Formation;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -41,6 +43,8 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     public Map map;
 
     public Ship target;
+
+    private Entity inGameTarget;
 
     private Configuration configuration = Configuration.UNKNOWN;
     public int config;
@@ -87,6 +91,15 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         long petAddress = API.readMemoryLong(address + 176);
         if (petAddress != pet.address) pet.update(petAddress);
         pet.update();
+
+
+        long targetPtr = API.readMemoryLong(main.mapManager.mapAddress, 120, 40);
+
+        if (targetPtr == 0) inGameTarget = null;
+        else inGameTarget =  main.mapManager.entities.allEntities.stream()
+                .flatMap(Collection::stream)
+                .filter(entity -> entity.address == targetPtr)
+                .findAny().orElse(null);
     }
 
     @Override
@@ -171,6 +184,12 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
 
     public boolean isInMode(int config, Character formation) {
         return this.config == config && this.formation == formation;
+    }
+
+    @Nullable
+    @Override
+    public Entity getTarget() {
+        return inGameTarget;
     }
 
     @Override

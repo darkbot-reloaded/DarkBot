@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.core.objects.group.Invite;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.gui.trail.Line;
 import com.github.manolo8.darkbot.utils.Time;
+import eu.darkbot.api.managers.GroupAPI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +21,7 @@ import java.util.TreeMap;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class GroupManager extends Gui {
+public class GroupManager extends Gui implements GroupAPI {
     private static final int HEADER_HEIGHT = 26; // Height of the top margin of the group
     private static final int BUTTON_HEIGHT = 28; // Height of one invite or button set
     private static final int MEMBER_HEIGHT = 48; // Height of one member
@@ -218,4 +219,48 @@ public class GroupManager extends Gui {
         }
     }
 
+    @Override
+    public eu.darkbot.api.objects.group.Group getGroup() {
+        return group;
+    }
+
+    @Override
+    public boolean canPing() {
+        return pinging;
+    }
+
+    @Override
+    public List<? extends eu.darkbot.api.objects.group.Group.Invite> getInvites() {
+        return invites;
+    }
+
+    @Override
+    public boolean canOpenInvites() {
+        return getGroup().isLeader();
+    }
+
+    @Override
+    public void kick(eu.darkbot.api.objects.group.GroupMember member) {
+        this.kick(member.getId());
+    }
+
+    @Override
+    public void acceptInvite(eu.darkbot.api.objects.group.Group.Invite invite) {
+        this.acceptInvite((Invite) invite);
+    }
+
+    @Override
+    public void openInvites() {
+        tryOpenInvites();
+    }
+
+    @Override
+    public void tryAcceptInvites() {
+        tryQueueAcceptInvite();
+    }
+
+    @Override
+    public void trySendInvites() {
+        tryQueueSendInvite();
+    }
 }

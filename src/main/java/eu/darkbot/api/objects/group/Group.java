@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface Group {
-    List<GroupMember> getMembers();
+    List<? extends GroupMember> getMembers();
     GroupMember getSelectedMember();
 
     int getId();

@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import eu.darkbot.api.PluginApiImpl;
 import eu.darkbot.api.events.EventManager;
+import eu.darkbot.impl.managers.AttackApiImpl;
 
 public class DarkBotPluginApiImpl extends PluginApiImpl {
 
@@ -27,6 +28,7 @@ public class DarkBotPluginApiImpl extends PluginApiImpl {
                 RepairManager.class,
                 MapManager.class,
                 StatsManager.class,
+                AttackApiImpl.class,
 
                 //facades
                 LogMediator.class,

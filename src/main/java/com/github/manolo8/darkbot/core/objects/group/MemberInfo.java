@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class MemberInfo extends UpdatableAuto implements HealthHolder {
+public class MemberInfo extends UpdatableAuto implements HealthHolder, eu.darkbot.api.objects.group.MemberInfo {
     public int shipType;
     public int hp;
     public int maxHp;
@@ -55,5 +55,45 @@ public class MemberInfo extends UpdatableAuto implements HealthHolder {
     @Override
     public int getMaxShield() {
         return maxShield;
+    }
+
+    @Override
+    public boolean hpDecreasedIn(int time) {
+        return false;
+    }
+
+    @Override
+    public boolean hullDecreasedIn(int time) {
+        return false;
+    }
+
+    @Override
+    public boolean shieldDecreasedIn(int time) {
+        return false;
+    }
+
+    @Override
+    public boolean hpIncreasedIn(int time) {
+        return false;
+    }
+
+    @Override
+    public boolean hullIncreasedIn(int time) {
+        return false;
+    }
+
+    @Override
+    public boolean shieldIncreasedIn(int time) {
+        return false;
+    }
+
+    @Override
+    public int getShipType() {
+        return shipType;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
     }
 }

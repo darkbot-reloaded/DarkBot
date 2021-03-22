@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Group extends UpdatableAuto {
+public class Group extends UpdatableAuto implements eu.darkbot.api.objects.group.Group {
     private final HeroManager hero;
 
     public List<GroupMember> members = new ArrayList<>();
@@ -75,4 +75,38 @@ public class Group extends UpdatableAuto {
         return -1;
     }
 
+    @Override
+    public List<? extends eu.darkbot.api.objects.group.GroupMember> getMembers() {
+        return members;
+    }
+
+    @Override
+    public eu.darkbot.api.objects.group.GroupMember getSelectedMember() {
+        return selectedMember;
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public int getSize() {
+        return size;
+    }
+
+    @Override
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    @Override
+    public boolean isOpen() {
+        return isOpen;
+    }
+
+    @Override
+    public boolean isLeader() {
+        return isLeader;
+    }
 }

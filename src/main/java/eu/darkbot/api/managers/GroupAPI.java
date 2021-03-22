@@ -13,7 +13,7 @@ public interface GroupAPI extends API.Singleton {
 
     Group getGroup();
     boolean canPing();
-    List<Group.Invite> getInvites();
+    List<? extends Group.Invite> getInvites();
 
     boolean canKick();
     boolean canInvite();
