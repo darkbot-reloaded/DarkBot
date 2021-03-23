@@ -97,11 +97,14 @@ public class GuiManager implements Manager, eu.darkbot.api.API.Singleton {
         return register(key, Gui.class);
     }
 
+    @SuppressWarnings({"unchecked", "CastCanBeRemovedNarrowingVariableType"})
     public <T extends Gui> T register(String key, Class<T> gui) {
-        T guiFix = pluginAPI.requireInstance(gui); // Workaround for a java compiler assertion bug having issues with types
+        Gui guiFix = pluginAPI.requireInstance(gui);
         this.guis.addLazy(key, guiFix::update);
         this.registeredGuis.add(guiFix);
-        return guiFix;
+
+        // Workaround for a java compiler assertion bug having issues with types
+        return (T) guiFix;
     }
 
     @Override

@@ -17,4 +17,12 @@ public interface GroupMember extends PartialGroupMember {
     boolean isLeader();
     boolean isDead();
     boolean isLocked(); // is selected by hero
+
+    interface Invite {
+        PartialGroupMember getInviter();
+        PartialGroupMember getInvited();
+
+        boolean isIncoming();
+        boolean isValid();
+    }
 }
