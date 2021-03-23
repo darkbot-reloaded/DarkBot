@@ -6,6 +6,8 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.API;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 import static com.github.manolo8.darkbot.Main.API;
 
 public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singleton {
@@ -20,6 +22,10 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
     @Nullable
     public Character getCharCode(KeyBind keyBind) {
         return keycodes[keyBind.ordinal()];
+    }
+
+    public Optional<Character> getCharacterOf(KeyBind keyBind) {
+        return Optional.ofNullable(getCharCode(keyBind));
     }
 
     public KeyBind getAtChar(Character c) {

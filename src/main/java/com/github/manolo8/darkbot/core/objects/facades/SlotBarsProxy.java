@@ -19,6 +19,8 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     public final SlotBar premiumBar = new SlotBar(categoryBar, Type.PREMIUM_BAR); //104
     public final SlotBar proActionBar = new SlotBar(categoryBar, Type.PRO_ACTION_BAR); //112
 
+    public boolean categoryBarVisible, proActionBarVisible;
+
     private final SettingsProxy settings;
 
     public SlotBarsProxy(SettingsProxy settingsProxy) {
@@ -32,6 +34,9 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         this.proActionBar.update(API.readMemoryLong(address + 112));
         this.premiumBar.update(API.readMemoryLong(address + 104));
         this.standardBar.update(API.readMemoryLong(address + 96));
+
+        this.categoryBarVisible = API.readBoolean(address + 72);
+        this.proActionBarVisible = API.readBoolean(address + 76);
     }
 
     @Override

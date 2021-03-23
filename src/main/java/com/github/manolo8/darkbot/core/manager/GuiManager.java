@@ -7,20 +7,29 @@ import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.RefinementGui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
+import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
+import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.entities.utils.Area;
+import eu.darkbot.api.managers.GameScreenAPI;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class GuiManager implements Manager, eu.darkbot.api.API.Singleton {
+public class GuiManager implements Manager, GameScreenAPI {
 
     private final Main main;
     private final PluginAPI pluginAPI;
+    private final SlotBarsProxy slotBarsProxy;
+    private final SettingsProxy settingsProxy;
+
     private final PairArray guis = PairArray.ofDictionary();
 
     private long reconnectTime;
@@ -73,6 +82,8 @@ public class GuiManager implements Manager, eu.darkbot.api.API.Singleton {
     public GuiManager(Main main, PluginAPI pluginAPI) {
         this.main = main;
         this.pluginAPI = pluginAPI;
+        this.slotBarsProxy = pluginAPI.requireInstance(SlotBarsProxy.class);
+        this.settingsProxy = pluginAPI.requireInstance(SettingsProxy.class);
 
         this.validTime = System.currentTimeMillis();
 
@@ -250,4 +261,61 @@ public class GuiManager implements Manager, eu.darkbot.api.API.Singleton {
         return main.hero.locationInfo.isLoaded();
     }
 
+    private final RectangleImpl gameScreenRect = new RectangleImpl();
+
+    @Override
+    public Area.Rectangle getViewBounds() {
+        gameScreenRect.set(0, 0, MapManager.clientWidth, MapManager.clientHeight);
+        return gameScreenRect;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.objects.Gui> getGuis() {
+        return registeredGuis;
+    }
+
+    @Override
+    public void zoomIn() {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.ZOOM_IN)
+                .ifPresent(API::keyboardClick);
+    }
+
+    @Override
+    public void zoomOut() {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.ZOOM_OUT)
+                .ifPresent(API::keyboardClick);
+    }
+
+    //??
+    @Override
+    public void focusOnChat() {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.FOCUS_CHAT)
+                .ifPresent(API::keyboardClick);
+    }
+
+    @Override
+    public void toggleMonitoring() {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_MONITORING)
+                .ifPresent(API::keyboardClick);
+    }
+
+    @Override
+    public void toggleWindows() {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_WINDOWS)
+                .ifPresent(API::keyboardClick);
+    }
+
+    @Override
+    public void toggleCategoryBar(boolean visible) {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_CATEGORYBAR)
+                .filter(c -> slotBarsProxy.categoryBarVisible != visible)
+                .ifPresent(API::keyboardClick);
+    }
+
+    @Override
+    public void toggleProActionBar(boolean visible) {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION)
+                .filter(c -> slotBarsProxy.proActionBar.address != 0 && slotBarsProxy.proActionBarVisible != visible)
+                .ifPresent(API::keyboardClick);
+    }
 }
