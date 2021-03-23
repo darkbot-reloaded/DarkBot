@@ -10,10 +10,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -64,7 +61,7 @@ public class FlashResManager implements Task, GameResourcesAPI {
 
             try {
                 inGameLocale = new Locale(currLang);
-            } catch (Exception e) {
+            } catch (IllformedLocaleException e) {
                 e.printStackTrace();
                 inGameLocale = null;
             }

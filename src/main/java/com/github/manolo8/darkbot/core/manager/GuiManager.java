@@ -11,7 +11,6 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
-import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.utils.Area;
 import eu.darkbot.api.managers.GameScreenAPI;
@@ -262,7 +261,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     @Override
     public Area.Rectangle getViewBounds() {
-        return main.mapManager.bound;
+        return main.mapManager.screenBound;
     }
 
     @Override
