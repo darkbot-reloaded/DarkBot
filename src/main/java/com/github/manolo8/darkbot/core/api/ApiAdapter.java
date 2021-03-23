@@ -6,6 +6,8 @@ import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
+import eu.darkbot.api.managers.MemoryAPI;
+import eu.darkbot.api.managers.WindowAPI;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -119,4 +121,18 @@ public abstract class ApiAdapter implements IDarkBotAPI {
         USER_32.MoveWindow(window, x > minX ? x : minX - w - 100, y, w, h, true);
     }
 
+    @Override
+    public void writeBytes(long address, byte... bytes) {
+        throw new UnsupportedOperationException("writeBytes() not implemented!");
+    }
+
+    @Override
+    public void mouseDown(int x, int y) {
+        throw new UnsupportedOperationException("mouseDown() not implemented!");
+    }
+
+    @Override
+    public void mouseUp(int x, int y) {
+        throw new UnsupportedOperationException("mouseUp() not implemented!");
+    }
 }

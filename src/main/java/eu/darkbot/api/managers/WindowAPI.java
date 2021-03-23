@@ -17,7 +17,7 @@ public interface WindowAPI extends API.Singleton {
     /**
      * Triggers reload
      */
-    void reload();
+    void handleRefresh();
 
     /**
      * Sets size of game API window

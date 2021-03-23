@@ -13,8 +13,8 @@ import java.util.Set;
 @SuppressWarnings("unchecked")
 public class PluginApiImpl implements PluginAPI {
 
-    private final Set<Singleton> singletons = new HashSet<>();
-    private final Set<Class<?>> implClasses = new HashSet<>();
+    protected final Set<Singleton> singletons = new HashSet<>();
+    protected final Set<Class<?>> implClasses = new HashSet<>();
 
     public PluginApiImpl(Singleton singleton,
                          Class<? extends API>... implementations) {

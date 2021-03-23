@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.core.objects.facades.*;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
+import eu.darkbot.api.API;
 import eu.darkbot.api.PluginApiImpl;
 import eu.darkbot.api.events.EventManager;
 import eu.darkbot.impl.managers.AttackApiImpl;
@@ -39,5 +40,9 @@ public class DarkBotPluginApiImpl extends PluginApiImpl {
                 EternalGateProxy.class,
                 EternalBlacklightProxy.class,
                 BoosterProxy.class);
+    }
+
+    public void addInstance(API.Singleton apiInstance) {
+        this.singletons.add(apiInstance);
     }
 }

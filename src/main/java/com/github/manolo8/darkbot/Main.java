@@ -106,6 +106,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         VerifierChecker.getAuthApi().setupAuth();
         API = configManager.getAPI(params);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
+        pluginAPI.addInstance(API);
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();
