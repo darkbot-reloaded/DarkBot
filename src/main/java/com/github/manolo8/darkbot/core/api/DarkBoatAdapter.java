@@ -165,6 +165,11 @@ public class DarkBoatAdapter extends ApiAdapter {
     }
 
     @Override
+    public void writeBytes(long address, byte... bytes) {
+        API.writeBytes(address, bytes);
+    }
+
+    @Override
     public void keyClick(int keyCode) {
         API.keyClick(keyCode);
     }
