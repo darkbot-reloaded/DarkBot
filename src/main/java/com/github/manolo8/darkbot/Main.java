@@ -221,7 +221,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     private void checkRefresh() {
         if (config.MISCELLANEOUS.REFRESH_TIME == 0 ||
-                System.currentTimeMillis() - lastRefresh < (long) config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
+                System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000L) return;
 
         if (!module.canRefresh()) return;
 

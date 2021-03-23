@@ -110,11 +110,10 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     @SuppressWarnings({"unchecked", "CastCanBeRemovedNarrowingVariableType"})
     public <T extends Gui> T register(String key, Class<T> gui) {
-        Gui guiFix = pluginAPI.requireInstance(gui);
+        Gui guiFix = pluginAPI.requireInstance(gui); // Workaround for a java compiler assertion bug having issues with types
         this.guis.addLazy(key, guiFix::update);
         this.registeredGuis.add(guiFix);
 
-        // Workaround for a java compiler assertion bug having issues with types
         return (T) guiFix;
     }
 
@@ -261,12 +260,9 @@ public class GuiManager implements Manager, GameScreenAPI {
         return main.hero.locationInfo.isLoaded();
     }
 
-    private final RectangleImpl gameScreenRect = new RectangleImpl();
-
     @Override
     public Area.Rectangle getViewBounds() {
-        gameScreenRect.set(0, 0, MapManager.clientWidth, MapManager.clientHeight);
-        return gameScreenRect;
+        return main.mapManager.bound;
     }
 
     @Override

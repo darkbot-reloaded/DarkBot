@@ -61,7 +61,7 @@ public class MapManager implements Manager, StarSystemAPI {
     public double boundMaxY;
     public double width;
     public double height;
-    private final RectangleImpl bound = new RectangleImpl();
+    public final RectangleImpl bound = new RectangleImpl();
 
     private final ObjArray minimapLayers = ObjArray.ofVector(true);
     private final Location pingLocationCache = new Location();
@@ -250,7 +250,7 @@ public class MapManager implements Manager, StarSystemAPI {
 
     @Override
     public Area.Rectangle getCurrentMapBounds() {
-        return bound;
+        return bound; //what there?
     }
 
     @Override

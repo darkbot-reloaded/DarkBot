@@ -63,7 +63,6 @@ public interface GroupAPI extends API.Singleton {
 
     boolean canInvite();
 
-    void openInvites();
     void sendInvite(String username);
     void acceptInvite(GroupMember.Invite invite);
 }

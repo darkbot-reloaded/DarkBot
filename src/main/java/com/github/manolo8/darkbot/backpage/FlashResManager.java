@@ -49,8 +49,6 @@ public class FlashResManager implements Task, GameResourcesAPI {
                 || currLang.equals(lang)) return;
 
         try {
-            inGameLocale = new Locale(currLang);
-
             Element root = Http.create(URL.replace("{lang}", currLang))
                     .consumeInputStream(inputStream -> DocumentBuilderFactory
                             .newInstance()
@@ -63,6 +61,14 @@ public class FlashResManager implements Task, GameResourcesAPI {
 
             // TODO: store in an efficient way to reverse-translate
             lang = currLang;
+
+            try {
+                inGameLocale = new Locale(currLang);
+            } catch (Exception e) {
+                e.printStackTrace();
+                inGameLocale = null;
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             lang = null;

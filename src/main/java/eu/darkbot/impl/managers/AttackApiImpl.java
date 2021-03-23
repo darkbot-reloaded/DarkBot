@@ -33,11 +33,8 @@ public class AttackApiImpl implements AttackAPI {
     }
 
     @Override
-    public @Nullable Attackable setTarget(@Nullable Attackable attackable) {
-        Attackable previous = target;
+    public void setTarget(@Nullable Attackable attackable) {
         this.target = attackable;
-
-        return previous;
     }
 
     @Override

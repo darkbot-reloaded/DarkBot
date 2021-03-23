@@ -20,12 +20,9 @@ public interface AttackAPI extends API.Singleton {
     @Nullable Attackable getTarget();
 
     /**
-     * Setting attackable to null stops attacking and removes target.
-     *
      * @param attackable to be set
-     * @return previously set {@link Attackable}
      */
-    @Nullable Attackable setTarget(@Nullable Attackable attackable);
+    void setTarget(@Nullable Attackable attackable);
 
     /**
      * This method checks if {@link #getTarget()} is locked/marked/targeted in-game.

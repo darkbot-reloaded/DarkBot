@@ -274,11 +274,6 @@ public class GroupManager extends Gui  implements GroupAPI {
     }
 
     @Override
-    public void openInvites() {
-        tryOpenInvites();
-    }
-
-    @Override
     public void acceptInvite(eu.darkbot.api.objects.group.GroupMember.Invite invite) {
         acceptInvite((Invite) invite);
     }
