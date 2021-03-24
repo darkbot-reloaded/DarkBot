@@ -151,8 +151,8 @@ public class NpcAttacker {
                 .filter(slot -> Objects.equals(main.facadeManager.settings.getCharCode(valueOf
                         ("SLOTBAR_" + (slot.slotNumber == 10 ? 0 : slot.slotNumber))), main.config.LOOT.RSB.KEY))
                 .findFirst().map(slot -> slot.item).map(item -> item.id).orElse(null);
-        if (!Objects.equals(itemId, "ammunition_laser_rsb-75")
-                && !Objects.equals(itemId, "ammunition_laser_rcb-140")) return false; // TODO: Check bool cooldown from enum, after API gets merged.
+        if (itemId == null || 
+            !(itemId.equals("ammunition_laser_rsb-75") || itemId.equals("ammunition_laser_rcb-140"))) return false;
         boolean isReady = bar.findItemById(itemId).map(i -> i.activatable).orElse(false);
 
         if (isReady && usedRsb < System.currentTimeMillis() - 1000) usedRsb = System.currentTimeMillis();
