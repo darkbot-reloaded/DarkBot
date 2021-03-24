@@ -47,4 +47,8 @@ public class NumberConstant implements Value<Number>, Parser {
         }
     }
 
+    public static String format(Number number) {
+        return NUMBER_FORMAT.format(number);
+    }
+
 }

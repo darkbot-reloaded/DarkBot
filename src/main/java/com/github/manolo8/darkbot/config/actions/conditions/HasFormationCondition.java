@@ -9,13 +9,12 @@ import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
-import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-@ValueData(name = "has-formation", description = "Checks if a ship has a formation", example = "has-formation(a, b)")
+@ValueData(name = "has-formation", description = "Checks if a ship has a formation", example = "has-formation(formation, ship)")
 public class HasFormationCondition implements Condition, Parser {
 
     public Formation formation;

@@ -4,8 +4,6 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.stream.Collectors;
-
 @ValueData(name = "any", description = "Returns true if any child conditions return true", example = "any(a, b)")
 public class AnyCondition extends AbstractCondition {
 

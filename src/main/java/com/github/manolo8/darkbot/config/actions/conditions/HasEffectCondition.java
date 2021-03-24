@@ -9,13 +9,12 @@ import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
-import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-@ValueData(name = "has-effect", description = "Checks if a ship has an effect", example = "has-effect(a, b)")
+@ValueData(name = "has-effect", description = "Checks if a ship has an effect", example = "has-effect(effect, ship)")
 public class HasEffectCondition implements Condition, Parser {
 
     public Effect effect;

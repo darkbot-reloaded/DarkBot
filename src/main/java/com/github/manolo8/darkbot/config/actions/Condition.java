@@ -18,8 +18,20 @@ public interface Condition extends Value<Condition.Result> {
             return !this.equals(DENY);
         }
 
+        public boolean allows() {
+            return this == ALLOW;
+        }
+
+        public boolean denies() {
+            return this == DENY;
+        }
+
+        public boolean abstains() {
+            return this == ABSTAIN;
+        }
+
         public boolean hasResult() {
-            return !this.equals(ABSTAIN);
+            return this != ABSTAIN;
         }
     }
 

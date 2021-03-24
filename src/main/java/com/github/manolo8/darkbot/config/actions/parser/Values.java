@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
+import com.github.manolo8.darkbot.config.actions.conditions.AfterCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.AllCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.AnyCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.EqualCondition;
@@ -43,6 +44,7 @@ public class Values {
                     NoneCondition.class,
                     NumericalCondition.class,
                     EqualCondition.class,
+                    AfterCondition.class,
                     HasEffectCondition.class,
                     HasFormationCondition.class,
                     DistanceValue.class,
