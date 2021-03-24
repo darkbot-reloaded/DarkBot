@@ -142,4 +142,12 @@ public class StatsManager implements Manager {
     public double earnedHonor() {
         return earnedHonor / ((double) runningTime() / 3600000);
     }
+
+    public void resetValues() {
+        runningTime = 1;
+        earnedCredits = 0;
+        earnedUridium = 0;
+        earnedHonor = 0;
+        earnedExperience = 0;
+    }
 }
