@@ -58,7 +58,7 @@ public class PetManager extends Gui implements PetAPI {
 
     private Integer gearOverride = null;
     private long gearOverrideTime = 0;
-    private boolean repaired;
+    private boolean repaired = true;
 
     private final Map<PetStatsType, PetStats> petStats = new EnumMap<>(PetStatsType.class);
 
@@ -245,6 +245,7 @@ public class PetManager extends Gui implements PetAPI {
         return 0;
     }
 
+    private int repairCount;
     @Override
     public void update() {
         super.update();
@@ -262,7 +263,11 @@ public class PetManager extends Gui implements PetAPI {
         updatePetBuffs(elementsListAddress);
 
         long element = getSpriteElement(elementsListAddress, 67);
+
+        boolean wasRepaired = repaired;
         repaired = API.readMemoryLong(getSpriteChildWrapper(element, 0), 0x148) == 0;
+
+        if (!wasRepaired && repaired) repairCount++;
 
         updatePetStats(elementsListAddress);
     }
@@ -551,13 +556,8 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
-    public void tryRepair() {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
     public int getRepairCount() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return repairCount;
     }
 
     @Override

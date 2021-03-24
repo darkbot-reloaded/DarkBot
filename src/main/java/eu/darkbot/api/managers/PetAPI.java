@@ -36,8 +36,6 @@ public interface PetAPI extends Pet, API.Singleton {
      */
     boolean isRepaired();
 
-    void tryRepair();
-
     int getRepairCount();
 
     /**

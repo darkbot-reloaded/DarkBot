@@ -145,6 +145,11 @@ public class StatsManager implements Manager, StatsAPI {
     }
 
     @Override
+    public int getPing() {
+        return main.pingManager.ping;
+    }
+
+    @Override
     public long getRunningTime() {
         return runningTime();
     }

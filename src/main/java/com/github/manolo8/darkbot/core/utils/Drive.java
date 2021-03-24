@@ -249,11 +249,6 @@ public class Drive implements MovementAPI {
     }
 
     @Override
-    public void moveRandom(Locatable loc, double radius) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
     public boolean canMove(double x, double y) {
         return !map.isOutOfMap(x, y) && pathFinder.canMove((int) x, (int) y);
     }

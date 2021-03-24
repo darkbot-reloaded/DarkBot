@@ -220,16 +220,6 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     @Override
-    public @Nullable Integer getLogoutTime() {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    public void tryLogout() {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
     public boolean isInMode(Configuration configuration, Formation formation) {
         return configuration == getConfiguration() && formation == getFormation();
     }

@@ -8,6 +8,13 @@ import eu.darkbot.api.API;
 public interface StatsAPI extends API.Singleton {
 
     /**
+     * Gets current ping.
+     *
+     * @return current ping in milliseconds.
+     */
+    int getPing();
+
+    /**
      * @return current hero level
      */
     int getLevel();

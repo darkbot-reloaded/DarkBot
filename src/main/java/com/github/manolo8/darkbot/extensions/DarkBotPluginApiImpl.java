@@ -35,7 +35,6 @@ public class DarkBotPluginApiImpl extends PluginApiImpl {
                 LogMediator.class,
                 ChatProxy.class,
                 ChrominProxy.class,
-                StatsProxy.class,
                 EscortProxy.class,
                 EternalGateProxy.class,
                 EternalBlacklightProxy.class,

@@ -49,14 +49,6 @@ public interface MovementAPI extends API.Singleton {
     void moveRandom();
 
     /**
-     * Tries to move random around a location with given radius
-     *
-     * @param loc    {@link Locatable} to move random
-     * @param radius of the circle to move random
-     */
-    void moveRandom(Locatable loc, double radius);
-
-    /**
      * Stops ship, removes destination path.
      *
      * @param currentLocation should stop at current location.

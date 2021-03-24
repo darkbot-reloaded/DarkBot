@@ -19,6 +19,16 @@ public interface GameScreenAPI extends API.Singleton {
     Collection<? extends Gui> getGuis();
 
     /**
+     * @return in-game FPS.
+     */
+    int getFps();
+
+    /**
+     * @return memory used by the game in MB
+     */
+    int getMemory();
+
+    /**
      * Tries to zoom in view.
      */
     void zoomIn();

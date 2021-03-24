@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.core.objects.RefinementGui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
+import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.PluginAPI;
@@ -28,6 +29,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     private final PluginAPI pluginAPI;
     private final SlotBarsProxy slotBarsProxy;
     private final SettingsProxy settingsProxy;
+    private final StatsProxy statsProxy;
 
     private final PairArray guis = PairArray.ofDictionary();
 
@@ -83,6 +85,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.pluginAPI = pluginAPI;
         this.slotBarsProxy = pluginAPI.requireInstance(SlotBarsProxy.class);
         this.settingsProxy = pluginAPI.requireInstance(SettingsProxy.class);
+        this.statsProxy = pluginAPI.requireInstance(StatsProxy.class);
 
         this.validTime = System.currentTimeMillis();
 
@@ -267,6 +270,16 @@ public class GuiManager implements Manager, GameScreenAPI {
     @Override
     public Collection<? extends eu.darkbot.api.objects.Gui> getGuis() {
         return registeredGuis;
+    }
+
+    @Override
+    public int getFps() {
+        return statsProxy.getFps();
+    }
+
+    @Override
+    public int getMemory() {
+        return statsProxy.getMemory();
     }
 
     @Override

@@ -32,23 +32,6 @@ public interface HeroAPI extends Ship, API.Singleton {
     void setFormation(Formation formation);
 
     /**
-     * Returns needed time in seconds till hero will be logged out.
-     * Returns {@code null} if hero doesn't try to logout or is aborted.
-     *
-     * @return time(sec) needed to logout otherwise {@code null}
-     * @see #tryLogout()
-     */
-    @Nullable
-    Integer getLogoutTime();
-
-    /**
-     * Tries to logout hero ship.
-     *
-     * @see #getLogoutTime()
-     */
-    void tryLogout();
-
-    /**
      * Will check if {@link HeroAPI} is in given {@code mode}.
      *
      * @param configuration to check
