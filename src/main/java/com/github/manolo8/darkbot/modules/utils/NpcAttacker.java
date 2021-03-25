@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
+import com.github.manolo8.darkbot.core.objects.slotbars.SlotBar;
 import com.github.manolo8.darkbot.core.utils.Drive;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -146,9 +147,15 @@ public class NpcAttacker {
     }
 
     private boolean shouldRsb() {
-        if (!main.config.LOOT.RSB.ENABLED || !target.npcInfo.extra.has(NpcExtra.USE_RSB)) return false;
-        if (usedRsb < System.currentTimeMillis() - main.config.LOOT.RSB.AMMO_REFRESH) usedRsb = System.currentTimeMillis();
+        if (!main.config.LOOT.RSB.ENABLED || main.config.LOOT.RSB.KEY == null
+                || !target.npcInfo.extra.has(NpcExtra.USE_RSB)) return false;
 
+        SettingsProxy.KeyBind keybind = main.facadeManager.settings.getKeyBind(main.config.LOOT.RSB.KEY);
+        SlotBar.Slot slot = main.facadeManager.slotBars.getSlot(keybind);
+        if (slot == null || slot.item == null) return false;
+        boolean isReady = bar.findItemById(slot.item.id).map(i -> i.activatable).orElse(false);
+
+        if (isReady && usedRsb < System.currentTimeMillis() - 1000) usedRsb = System.currentTimeMillis();
         return usedRsb > System.currentTimeMillis() - 50;
     }
 
