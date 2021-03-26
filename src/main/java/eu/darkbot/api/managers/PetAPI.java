@@ -12,7 +12,7 @@ import java.util.Optional;
 /**
  * API to manage hero's pet.
  */
-public interface PetAPI extends Pet, API {
+public interface PetAPI extends Pet, API.Singleton {
 
     /**
      * @return true if pet by module was marked to be enabled.
@@ -36,18 +36,16 @@ public interface PetAPI extends Pet, API {
      */
     boolean isRepaired();
 
-    void tryRepair();
-
     int getRepairCount();
 
     /**
      * @param gearId to be checked
      * @return true if given gear is available.
      */
-    boolean isGearAvailable(int gearId);
+    boolean hasGear(int gearId);
 
-    default boolean isGearAvailable(@NotNull Gear gear) {
-        return isGearAvailable(gear.getId());
+    default boolean hasGear(@NotNull Gear gear) {
+        return hasGear(gear.getId());
     }
 
     /**
@@ -89,10 +87,10 @@ public interface PetAPI extends Pet, API {
         return cooldown != null && hasCooldown(cooldown);
     }
 
-    int getFuel();
-    int getMaxFuel();
+    double getFuel();
+    double getMaxFuel();
 
-    int getHeat();
-    int getMaxHeat();
+    double getHeat();
+    double getMaxHeat();
 
 }

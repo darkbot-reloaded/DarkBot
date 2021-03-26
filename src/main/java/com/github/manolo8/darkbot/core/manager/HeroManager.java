@@ -10,16 +10,23 @@ import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
+import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.entities.Entity;
+import eu.darkbot.api.entities.other.Formation;
 import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.api.managers.HeroItemsAPI;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.JUMP_GATE;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.TOGGLE_CONFIG;
 
-public class HeroManager extends Ship implements Manager {
+public class HeroManager extends Ship implements Manager, HeroAPI {
 
     public static HeroManager instance;
     public final Main main;
@@ -36,6 +43,9 @@ public class HeroManager extends Ship implements Manager {
 
     public Ship target;
 
+    private Entity inGameTarget;
+
+    private Configuration configuration = Configuration.UNKNOWN;
     public int config;
     public int formationId;
     private long configTime;
@@ -43,14 +53,14 @@ public class HeroManager extends Ship implements Manager {
     private long formationTime;
     private long portalTime;
 
-    public HeroManager(Main main) {
+    public HeroManager(Main main, PluginAPI pluginAPI) {
         instance = this;
 
         this.main = super.main = main;
         this.settings = main.settingsManager;
         this.keybinds = main.facadeManager.settings;
         this.portals = main.mapManager.entities.portals;
-        this.drive = new Drive(this, main.mapManager);
+        this.drive = pluginAPI.requireInstance(Drive.class);
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
         this.map = main.starManager.byId(-1);
@@ -74,11 +84,21 @@ public class HeroManager extends Ship implements Manager {
     public void update() {
         super.update();
         config = settings.config;
+        configuration = Configuration.of(config);
         formationId = super.formationId;
 
         long petAddress = API.readMemoryLong(address + 176);
         if (petAddress != pet.address) pet.update(petAddress);
         pet.update();
+
+
+        long targetPtr = API.readMemoryLong(main.mapManager.mapAddress, 120, 40);
+
+        if (targetPtr == 0) inGameTarget = null;
+        else inGameTarget =  main.mapManager.entities.allEntities.stream()
+                .flatMap(Collection::stream)
+                .filter(entity -> entity.address == targetPtr)
+                .findAny().orElse(null);
     }
 
     @Override
@@ -165,7 +185,69 @@ public class HeroManager extends Ship implements Manager {
         return this.config == config && this.formation == formation;
     }
 
+    @Nullable
+    @Override
+    public Entity getTarget() {
+        return inGameTarget;
+    }
 
+    @Override
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 
+    @Override
+    public void toggleConfiguration() {
+        if (System.currentTimeMillis() - configTime <= 5500L) return;
 
+        Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
+        this.configTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void setFormation(Formation formation) {
+        if (formation == getFormation() ||
+                System.currentTimeMillis() - formationTime <= 3500L) return;
+
+        SlotBarsProxy slotBars = main.facadeManager.slotBars;
+
+        slotBars.filterItem(HeroItemsAPI.Category.DRONE_FORMATIONS, formation::matches)
+                .filter(slotBars::isSelectable)
+                .ifPresent(slotBars::selectItem);
+
+        this.formationTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public boolean isInMode(Configuration configuration, Formation formation) {
+        return configuration == getConfiguration() && formation == getFormation();
+    }
+
+    @Override
+    public boolean setMode(Configuration configuration, Formation formation) {
+        setFormation(formation);
+        if (configuration != getConfiguration()) toggleConfiguration();
+
+        return isInMode(configuration, formation);
+    }
+
+    @Override
+    public boolean setAttackMode(eu.darkbot.api.entities.Npc target) {
+        return attackMode((Npc) target);
+    }
+
+    @Override
+    public boolean setAttackMode() {
+        return attackMode();
+    }
+
+    @Override
+    public boolean setRoamMode() {
+        return roamMode();
+    }
+
+    @Override
+    public boolean setRunMode() {
+        return runMode();
+    }
 }

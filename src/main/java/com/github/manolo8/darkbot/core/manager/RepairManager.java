@@ -6,16 +6,19 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.swf.IntArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.LogUtils;
+import eu.darkbot.api.managers.RepairAPI;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class RepairManager implements Manager {
+public class RepairManager implements Manager, RepairAPI {
     private boolean writtenToLog = true;
     private long guiAddress, mainAddress, userDataAddress, repairAddress;
 
@@ -23,6 +26,11 @@ public class RepairManager implements Manager {
     private final IntArray repairOptions = IntArray.ofArray(true);
 
     private final Map<String, OutputStream> streams = new HashMap<>();
+    private final GuiManager guiManager;
+
+    public RepairManager(GuiManager guiManager) {
+        this.guiManager = guiManager;
+    }
 
     @Override
     public void install(BotInstaller botInstaller) {
@@ -34,6 +42,7 @@ public class RepairManager implements Manager {
         botInstaller.heroInfoAddress.add(value -> userDataAddress = value);
     }
 
+    private final List<Integer> repairOptionsList = new ArrayList<>();
     public void tick() {
         if (isDead()) writtenToLog = false;
         else {
@@ -45,6 +54,10 @@ public class RepairManager implements Manager {
 
         killerName = API.readMemoryString(API.readMemoryLong(repairAddress + 0x68));
         repairOptions.update(API.readMemoryLong(repairAddress + 0x58));
+
+        repairOptionsList.clear();
+        for (int i = 0; i < repairOptions.getSize(); i++)
+            this.repairOptionsList.add(repairOptions.get(i));
     }
 
     private void updateRepairAddr() {
@@ -80,11 +93,15 @@ public class RepairManager implements Manager {
         return options;
     }
 
+    private int deaths;
+    private Instant lastDeath;
     private void writeKiller() {
         String killerMessage = killerName == null || killerName.isEmpty()
                 ? "You were destroyed by a radiation/mine/unknown"
                 : "You have been destroyed by: " + killerName;
         System.out.println(killerMessage);
+        deaths++;
+        lastDeath = Instant.now();
 
         if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.LOG_DEATHS)
             writeToFile(LogUtils.START_TIME + "death", formatLogMessage(killerMessage));
@@ -110,4 +127,36 @@ public class RepairManager implements Manager {
         return this.streams.computeIfAbsent(name, LogUtils::createLogFile);
     }
 
+    @Override
+    public int getDeathsAmount() {
+        return deaths;
+    }
+
+    @Override
+    public boolean isDestroyed() {
+        return isDead();
+    }
+
+    @Override
+    public void tryRevive(int repairOption) throws IllegalStateException {
+        if (!isDead())
+            throw new IllegalStateException("Ship already revived!");
+
+        guiManager.tryRevive();
+    }
+
+    @Override
+    public Collection<Integer> getAvailableRepairOptions() {
+        return repairOptionsList;
+    }
+
+    @Override
+    public @Nullable String getLastDestroyerName() {
+        return getKillerName();
+    }
+
+    @Override
+    public @Nullable Instant getLastDeathTime() {
+        return lastDeath;
+    }
 }

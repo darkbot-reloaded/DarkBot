@@ -60,7 +60,7 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
         return isAiming((Locatable) other);
     }
 
-    private final Target target = new Target();
+    private final Target attackTarget = new Target();
     private long lockPtr;
 
     @Override
@@ -71,7 +71,7 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
         health.update();
         shipInfo.update();
         playerInfo.update();
-        target.update();
+        attackTarget.update();
 
         formationId = API.readMemoryInt(address, 280, 40, 40);
         invisible = API.readMemoryBoolean(API.readMemoryLong(address + 160) + 32);
@@ -93,7 +93,7 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
         health.update(API.readMemoryLong(address + 184));
         shipInfo.update(API.readMemoryLong(address + 232));
 
-        target.update(findInTraits(ptr -> API.readMemoryString(ptr, 48, 32).equals("attackLaser")));
+        attackTarget.update(findInTraits(ptr -> API.readMemoryString(ptr, 48, 32).equals("attackLaser")));
 
         lockPtr = findInTraits(TraitPattern::ofLockType);
     }
@@ -136,7 +136,7 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
         @Override
         public void update() {
             laserAttacking = API.readMemoryLong(address + 64) != 0;
-            if (!laserAttacking) return;
+            //if (!laserAttacking) return;
 
             long entityPtr = API.readMemoryLong(address, 64, 32);
 
@@ -209,17 +209,17 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
 
     @Override
     public eu.darkbot.api.entities.@Nullable Entity getTarget() {
-        return target.targetedEntity;
+        return attackTarget.targetedEntity;
     }
 
     @Override
     public boolean isAttacking() {
-        return target.laserAttacking;
+        return attackTarget.laserAttacking;
     }
 
     @Override
     public boolean isAttacking(Attackable other) {
-        return other == target.targetedEntity;
+        return other == attackTarget.targetedEntity;
     }
 
     @Override

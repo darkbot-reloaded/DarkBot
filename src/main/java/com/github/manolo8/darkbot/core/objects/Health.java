@@ -14,7 +14,7 @@ public class Health extends Updatable implements HealthHolder, eu.darkbot.api.ob
     public int shield;
     public int maxShield;
 
-    private long hpLastIncreased, hpLastDecreased,
+    protected long hpLastIncreased, hpLastDecreased,
             hullLastIncreased, hullLastDecreased,
             shieldLastIncreased, shieldLastDecreased;
 
@@ -31,16 +31,22 @@ public class Health extends Updatable implements HealthHolder, eu.darkbot.api.ob
         shield = readIntFromIntHolder(80);
         maxShield = readIntFromIntHolder(88);
 
-        if (maxHpLast == maxHp && hpLast != hp) {
-            if (hpLast > hp) hpLastDecreased = System.currentTimeMillis();
+        checkHealth(hpLast, maxHpLast,
+                hullLast, maxHullLast,
+                shieldLast, maxShieldLast);
+    }
+
+    protected void checkHealth(int hp, int maxHp, int hull, int maxHull, int shield, int maxShield) {
+        if (maxHp == this.maxHp && hp != this.hp) {
+            if (hp > this.hp) hpLastDecreased = System.currentTimeMillis();
             else hpLastIncreased = System.currentTimeMillis();
         }
-        if (maxHullLast == maxHull && hullLast != hull) {
-            if (hullLast > hull) hullLastDecreased = System.currentTimeMillis();
+        if (maxHull == this.maxHull && hull != this.hull) {
+            if (hull > this.hull) hullLastDecreased = System.currentTimeMillis();
             else hullLastIncreased = System.currentTimeMillis();
         }
-        if (maxShieldLast == maxShield && shieldLast != shield) {
-            if (shieldLast > shield) shieldLastDecreased = System.currentTimeMillis();
+        if (maxShield == this.maxShield && shield != this.shield) {
+            if (shield > this.shield) shieldLastDecreased = System.currentTimeMillis();
             else shieldLastIncreased = System.currentTimeMillis();
         }
     }

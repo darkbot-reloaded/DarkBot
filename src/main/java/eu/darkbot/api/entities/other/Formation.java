@@ -70,10 +70,14 @@ public enum Formation {
 
     public static Formation of(String id) {
         for (Formation formation : values())
-            if (formation.id != null && id.endsWith(formation.id))
+            if (formation.matches(id))
                 return formation;
 
         return null;
+    }
+
+    public boolean matches(String formationId) {
+        return id != null && formationId.endsWith(id);
     }
 
     public double getShieldMultiplier() {

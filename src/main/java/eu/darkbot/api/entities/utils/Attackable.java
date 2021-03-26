@@ -1,8 +1,8 @@
 package eu.darkbot.api.entities.utils;
 
 import eu.darkbot.api.entities.Entity;
-import eu.darkbot.api.objects.Health;
 import eu.darkbot.api.objects.EntityInfo;
+import eu.darkbot.api.objects.Health;
 
 public interface Attackable extends Entity {
 
@@ -12,6 +12,16 @@ public interface Attackable extends Entity {
      * @return {@link Lock}
      */
     Lock getLockType();
+
+    /**
+     * @return The health representation of this attackable
+     */
+    Health getHealth();
+
+    /**
+     * @return The info representation of this attackable
+     */
+    EntityInfo getEntityInfo();
 
     /**
      * Represents lock types in-game.
@@ -48,15 +58,5 @@ public interface Attackable extends Entity {
             return values()[lockId];
         }
     }
-
-    /**
-     * @return The health representation of this attackable
-     */
-    Health getHealth();
-
-    /**
-     * @return The info representation of this attackable
-     */
-    EntityInfo getEntityInfo();
 
 }

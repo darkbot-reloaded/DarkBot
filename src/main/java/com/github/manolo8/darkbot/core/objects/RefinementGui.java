@@ -2,14 +2,19 @@ package com.github.manolo8.darkbot.core.objects;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import eu.darkbot.api.API;
+import eu.darkbot.api.managers.OreAPI;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class RefinementGui extends Gui {
+public class RefinementGui extends Gui implements API.Singleton {
 
     private final ObjArray basicOresArr      = ObjArray.ofArrObj();
     private final ObjArray upgradableOresArr = ObjArray.ofArrObj();
@@ -25,6 +30,13 @@ public class RefinementGui extends Gui {
         }
 
         return null;
+    }
+
+    public int getAmount(OreAPI.Ore ore) {
+        return Stream.concat(basicOres.stream(), upgradableOres.stream())
+                .filter(o -> o.name.endsWith(ore.name().toLowerCase()))
+                .map(o -> o.amount)
+                .findFirst().orElse(-1);
     }
 
     @Override

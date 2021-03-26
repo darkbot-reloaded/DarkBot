@@ -37,6 +37,8 @@ import com.github.manolo8.darkbot.gui.trail.Line;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
+import eu.darkbot.api.entities.utils.Attackable;
+import eu.darkbot.api.objects.Health;
 
 import javax.swing.*;
 import java.awt.*;
@@ -303,14 +305,16 @@ public class MapDrawer extends JPanel {
             drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40, Align.MID);
         drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20, 12);
 
-        if (hero.target != null && !hero.target.removed) {
-            if (hero.target instanceof Npc || hero.target.playerInfo.isEnemy()) g2.setColor(cs.ENEMIES);
+        Attackable target = hero.getTarget() instanceof Attackable ? (Attackable) hero.getTarget() : null;
+
+        if (target != null) {
+            if (target instanceof Npc || target.getEntityInfo().isEnemy()) g2.setColor(cs.ENEMIES);
             else g2.setColor(cs.ALLIES);
             g2.setFont(cs.FONTS.MID);
-            String name = hero.target.playerInfo.username;
+            String name = target.getEntityInfo().getUsername();
             drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40, Align.MID);
 
-            drawHealth(g2, hero.target.health, mid + 10, height - 34, mid - 20, 12);
+            drawHealth(g2, target.getHealth(), mid + 10, height - 34, mid - 20, 12);
         }
     }
 
@@ -589,7 +593,7 @@ public class MapDrawer extends JPanel {
                 translateX(safetyInfo.diameter()), translateY(safetyInfo.diameter()));
     }
 
-    private void drawHealth(Graphics2D g2, HealthHolder health, int x, int y, int width, int height) {
+    private void drawHealth(Graphics2D g2, Health health, int x, int y, int width, int height) {
         g2.setFont(cs.FONTS.SMALL);
 
         boolean displayAmount = height >= 8 && hasFlag(DisplayFlag.HP_SHIELD_NUM);

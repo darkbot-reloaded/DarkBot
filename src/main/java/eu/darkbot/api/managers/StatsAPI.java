@@ -5,7 +5,14 @@ import eu.darkbot.api.API;
 /**
  * API to get info about hero statistics, running time, current/earned money etc.
  */
-public interface StatsAPI extends API {
+public interface StatsAPI extends API.Singleton {
+
+    /**
+     * Gets current ping.
+     *
+     * @return current ping in milliseconds.
+     */
+    int getPing();
 
     /**
      * @return current hero level

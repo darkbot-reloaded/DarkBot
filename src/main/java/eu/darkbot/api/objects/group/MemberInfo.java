@@ -6,6 +6,8 @@ import eu.darkbot.api.objects.Health;
  * Group member info
  */
 public interface MemberInfo extends Health {
+
     int getShipType();
+
     String getUsername();
 }

@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
+import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
@@ -109,20 +110,20 @@ public class Main extends Thread implements PluginListener, BotAPI {
         VerifierChecker.getAuthApi().setupAuth();
 
         this.pluginAPI       = new DarkBotPluginApiImpl(this);
-        this.starManager     = StarManager.getInstance();
+        this.starManager     = pluginAPI.requireInstance(StarManager.class);
         this.mapManager      = pluginAPI.requireInstance(MapManager.class);
-        this.settingsManager = new SettingsManager(this);
+        this.settingsManager = pluginAPI.requireInstance(SettingsManager.class);
         this.facadeManager   = pluginAPI.requireInstance(FacadeManager.class);
-        this.hero            = new HeroManager(this);
-        this.effectManager   = new EffectManager(this);
-        this.guiManager      = new GuiManager(this);
-        this.statsManager    = new StatsManager(this);
+        this.hero            = pluginAPI.requireInstance(HeroManager.class);
+        this.effectManager   = pluginAPI.requireInstance(EffectManager.class);
+        this.guiManager      = pluginAPI.requireInstance(GuiManager.class);
+        this.statsManager    = pluginAPI.requireInstance(StatsManager.class);
         this.pingManager     = pluginAPI.requireInstance(PingManager.class);
         this.pluginHandler   = pluginAPI.requireInstance(PluginHandler.class);
         this.pluginUpdater   = pluginAPI.requireInstance(PluginUpdater.class);
         this.backpage        = pluginAPI.requireInstance(BackpageManager.class);
         this.featureRegistry = pluginAPI.requireInstance(FeatureRegistry.class);
-        this.repairManager   = new RepairManager();
+        this.repairManager   = pluginAPI.requireInstance(RepairManager.class);
 
         this.botInstaller = new BotInstaller(
                 settingsManager, facadeManager, effectManager, guiManager, mapManager,
@@ -130,6 +131,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
         API = configManager.getAPI(params);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
+        pluginAPI.addInstance(API);
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();
@@ -244,7 +246,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     private void checkRefresh() {
         if (config.MISCELLANEOUS.REFRESH_TIME == 0 ||
-                System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
+                System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000L) return;
 
         if (!module.canRefresh()) return;
 

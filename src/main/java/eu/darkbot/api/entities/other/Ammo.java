@@ -1,5 +1,7 @@
 package eu.darkbot.api.entities.other;
 
+import eu.darkbot.utils.StringUtils;
+
 /**
  * Represents ammunition in-game
  */
@@ -26,7 +28,7 @@ public interface Ammo {
         SPACECUP_GROUP_G,
         SPACECUP_GROUP_H,
         A_BL,
-        RCB_140,
+        RCB_140(true),
         IDB_125,
         VB_142,
         EMAA_20,
@@ -52,10 +54,15 @@ public interface Ammo {
 
         public static Laser of(String id) {
             for (Laser laser : values())
-                if (id.endsWith(laser.name().replaceAll("_", "-").toLowerCase()))
+                if (id.endsWith(laser.toString()))
                     return laser;
 
             return null;
+        }
+
+        @Override
+        public String toString() {
+            return StringUtils.replaceLastOccurrence(name().toLowerCase(), '_', '-');
         }
     }
 
@@ -87,6 +94,14 @@ public interface Ammo {
         public String getId() {
             return "ammunition_" + (isSpecial ? "specialammo_" : "rocket_") +
                     name().toLowerCase().replace("_", "-");
+        }
+
+        public static Rocket of(String id) {
+            for (Rocket rocket : values())
+                if (id.endsWith(rocket.name().replaceAll("_", "-").toLowerCase()))
+                    return rocket;
+
+            return null;
         }
     }
 

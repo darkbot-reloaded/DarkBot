@@ -5,7 +5,7 @@ import eu.darkbot.api.entities.other.Ammo;
 import eu.darkbot.api.entities.utils.Attackable;
 import org.jetbrains.annotations.Nullable;
 
-public interface AttackAPI extends API {
+public interface AttackAPI extends API.Singleton {
 
     /**
      * @return true if target is non-null
@@ -20,12 +20,9 @@ public interface AttackAPI extends API {
     @Nullable Attackable getTarget();
 
     /**
-     * Setting attackable to null stops attacking and removes target.
-     *
      * @param attackable to be set
-     * @return previously set {@link Attackable}
      */
-    @Nullable Attackable setTarget(@Nullable Attackable attackable);
+    void setTarget(@Nullable Attackable attackable);
 
     /**
      * This method checks if {@link #getTarget()} is locked/marked/targeted in-game.
@@ -48,21 +45,17 @@ public interface AttackAPI extends API {
     /**
      * This method will try to attack {@link #getTarget()}
      * Target doesn't need to be locked, this method will handle that.
-     *
-     * @return true on successful try
      */
-    boolean laserAttack();
+    void laserAttack();
 
     /**
      * Tries to stop laser attack.
-     *
-     * @return true on successful try
      */
-    boolean laserAbort();
+    void laserAbort();
 
     /**
      * @return currently used {@link Ammo.Laser}
-     * @see #setLaser(Ammo.Laser)
+     //* @see #setLaser(Ammo.Laser)
      */
     @Nullable Ammo.Laser getLaser();
 
@@ -73,7 +66,7 @@ public interface AttackAPI extends API {
      * @return true if laser is available and successfully/already set
      * @see #getLaser()
      */
-    boolean setLaser(@Nullable Ammo.Laser laser);
+    //boolean setLaser(@Nullable Ammo.Laser laser);
 
     /**
      * Tries to launch rocket.
@@ -83,7 +76,7 @@ public interface AttackAPI extends API {
 
     /**
      * @return currently used {@link Ammo.Rocket}
-     * @see #setRocket(Ammo.Rocket)
+     //* @see #setRocket(Ammo.Rocket)
      */
     @Nullable Ammo.Rocket getRocket();
 
@@ -95,5 +88,5 @@ public interface AttackAPI extends API {
      * @see #getRocket()
      * @see #launchRocket()
      */
-    boolean setRocket(@Nullable Ammo.Rocket rocket);
+    //boolean setRocket(@Nullable Ammo.Rocket rocket);
 }

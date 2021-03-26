@@ -3,8 +3,7 @@ package com.github.manolo8.darkbot.core.objects.slotbars;
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -15,18 +14,22 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.Item {
     private static final byte[] BUFFER = new byte[END - START];
     // Only has relevant info if !isReady()
     public final ItemTimer itemTimer = new ItemTimer();
-    private final Map<SlotBarsProxy.Type, Slot> associatedSlots = new EnumMap<>(SlotBarsProxy.Type.class);
+    private final Map<SlotBarsProxy.Type, Set<Integer>> associatedSlots = new EnumMap<>(SlotBarsProxy.Type.class);
 
     public double quantity;
     public boolean selected, buyable, activatable, available, visible;
     public String id, counterType, actionStyle, iconLootId;
 
-    void removeSlot(SlotBarsProxy.Type slotType) {
-        this.associatedSlots.remove(slotType);
+    void removeSlot(SlotBarsProxy.Type slotType, int slotNumber) {
+        getShortcutList(slotType).remove(slotNumber);
     }
 
     void addSlot(SlotBarsProxy.Type slotType, int slotNumber) {
-        this.associatedSlots.put(slotType, new Slot(slotNumber, slotType));
+        getShortcutList(slotType).add(slotNumber);
+    }
+
+    private Set<Integer> getShortcutList(SlotBarsProxy.Type type) {
+        return this.associatedSlots.computeIfAbsent(type, l -> new HashSet<>());
     }
 
     @Override
@@ -75,13 +78,29 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.Item {
     }
 
     public boolean hasShortcut() {
-        return !associatedSlots.isEmpty();
+        return getSlotBarType() != null;
     }
 
-    public Slot getSlot() {
+    public SlotBarsProxy.Type getSlotBarType() {
         return this.associatedSlots.entrySet().stream()
-                .findFirst()
-                .map(Map.Entry::getValue).orElse(null);
+                .filter(entry -> entry.getValue() != null && !entry.getValue().isEmpty())
+                .map(Map.Entry::getKey)
+                .findFirst().orElse(null);
+    }
+
+    public int getFirstSlotNumber() {
+        SlotBarsProxy.Type slotBarType = getSlotBarType();
+        if (slotBarType == null) return -1;
+
+        return getShortcutList(slotBarType).stream()
+                .findFirst().orElse(-1);
+    }
+
+    public boolean containsSlotNumber(int slotNumber) {
+        SlotBarsProxy.Type slotBarType = getSlotBarType();
+        if (slotBarType == null) return false;
+
+        return getShortcutList(slotBarType).contains(slotNumber == 0 ? 10 : slotNumber);
     }
 
     @Override
@@ -142,16 +161,6 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.Item {
                 ", visible=" + visible +
                 ", id='" + id + '\'' +
                 '}';
-    }
-
-    public static class Slot {
-        public final int slotNumber;
-        public final SlotBarsProxy.Type slotBarType;
-
-        public Slot(int slotNumber, SlotBarsProxy.Type slotBarType) {
-            this.slotNumber = slotNumber;
-            this.slotBarType = slotBarType;
-        }
     }
 
     public static class ItemTimer extends UpdatableAuto {
