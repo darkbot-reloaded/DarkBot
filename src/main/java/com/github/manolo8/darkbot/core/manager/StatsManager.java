@@ -5,10 +5,11 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.managers.StatsAPI;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class StatsManager implements Manager {
+public class StatsManager implements Manager, StatsAPI {
 
     private Main main;
 
@@ -150,5 +151,65 @@ public class StatsManager implements Manager {
         earnedUridium = 0;
         earnedHonor = 0;
         earnedExperience = 0;
+    }
+
+    @Override
+    public int getPing() {
+        return main.pingManager.ping;
+    }
+
+    @Override
+    public long getRunningTime() {
+        return runningTime();
+    }
+
+    @Override
+    public int getCargo() {
+        return deposit;
+    }
+
+    @Override
+    public int getMaxCargo() {
+        return depositTotal;
+    }
+
+    @Override
+    public double getTotalCredits() {
+        return credits;
+    }
+
+    @Override
+    public double getEarnedCredits() {
+        return earnedCredits;
+    }
+
+    @Override
+    public double getTotalUridium() {
+        return uridium;
+    }
+
+    @Override
+    public double getEarnedUridium() {
+        return earnedUridium;
+    }
+
+    @Override
+    public double getTotalExperience() {
+        return experience;
+    }
+
+    @Override
+    public double getEarnedExperience() {
+        return earnedExperience;
+    }
+
+    @Override
+    public double getTotalHonor() {
+        return honor;
+    }
+
+    @Override
+    public double getEarnedHonor() {
+        return earnedHonor;
     }
 }

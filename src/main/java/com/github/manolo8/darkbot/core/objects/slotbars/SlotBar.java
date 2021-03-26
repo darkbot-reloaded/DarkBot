@@ -56,7 +56,7 @@ public class SlotBar extends MenuBar {
             long itemPtr = API.readMemoryLong(address + 40);
 
             if (itemPtr == 0 && item != null) {
-                editItem(item.id, i -> i.removeSlot(slotType));
+                editItem(item.id, i -> i.removeSlot(slotType, slotNumber));
 
                 this.item = null;
             } else if (itemPtr != 0 && item == null) {
@@ -65,7 +65,7 @@ public class SlotBar extends MenuBar {
 
                 editItem(item.id, i -> i.addSlot(slotType, slotNumber));
             } else if (itemPtr != 0 && itemPtr != item.address) {
-                editItem(item.id, i -> i.removeSlot(slotType));
+                editItem(item.id, i -> i.removeSlot(slotType, slotNumber));
 
                 item.update(itemPtr);
                 editItem(item.id, i -> i.addSlot(slotType, slotNumber));

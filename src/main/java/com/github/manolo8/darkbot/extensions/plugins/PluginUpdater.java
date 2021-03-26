@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.gui.plugins.PluginCard;
 import com.github.manolo8.darkbot.gui.plugins.PluginDisplay;
 import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.Time;
+import eu.darkbot.api.API;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -17,7 +18,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-public class PluginUpdater {
+public class PluginUpdater implements API.Singleton {
 
     private static final String DOWNLOAD_FAILED = "plugins.update_issues.download_failed";
 

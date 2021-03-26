@@ -10,7 +10,7 @@ import java.util.Collection;
 /**
  * References to those collections doesn't change for whole runtime of the bot.
  */
-public interface EntitiesAPI extends API {
+public interface EntitiesAPI extends API.Singleton {
 
     /**
      * @return {@link Collection} of {@link Npc}

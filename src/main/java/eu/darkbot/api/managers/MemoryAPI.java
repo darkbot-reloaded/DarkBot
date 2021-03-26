@@ -8,7 +8,7 @@ import eu.darkbot.api.API;
  * Those calls should be generally safe,
  * every access violation error is handled by native code
  */
-public interface MemoryAPI extends API {
+public interface MemoryAPI extends API.Singleton {
 
     /**
      * Reads signed integer value from memory.
@@ -254,7 +254,7 @@ public interface MemoryAPI extends API {
      * @param maxSize max length of returned array
      * @return array of direct pointers to searched value
      */
-    long[] queryInt(int value, int maxSize);
+    long[] searchInt(int value, int maxSize);
 
     /**
      * Search current process memory for given value
@@ -264,7 +264,7 @@ public interface MemoryAPI extends API {
      * @param maxSize max length of returned array
      * @return array of direct pointers to searched value
      */
-    long[] queryLong(long value, int maxSize);
+    long[] searchLong(long value, int maxSize);
 
     /**
      * Search current process memory for given pattern
@@ -274,5 +274,5 @@ public interface MemoryAPI extends API {
      * @param maxSize max length of returned array
      * @return array of direct pointers to searched pattern
      */
-    long[] queryBytes(byte[] pattern, int maxSize);
+    long[] searchPattern(byte[] pattern, int maxSize);
 }
