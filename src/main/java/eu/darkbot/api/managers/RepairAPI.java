@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 import java.util.Collection;
 
-public interface RepairAPI extends API {
+public interface RepairAPI extends API.Singleton {
 
     int getDeathsAmount();
 

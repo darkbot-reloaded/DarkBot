@@ -13,8 +13,8 @@ import java.util.Set;
 @SuppressWarnings("unchecked")
 public class PluginApiImpl implements PluginAPI {
 
-    private final Set<Singleton> singletons = new HashSet<>();
-    private final Set<Class<?>> implClasses = new HashSet<>();
+    protected final Set<Singleton> singletons = new HashSet<>();
+    protected final Set<Class<?>> implClasses = new HashSet<>();
 
     public PluginApiImpl(Singleton singleton,
                          Class<? extends API>... implementations) {
@@ -63,7 +63,7 @@ public class PluginApiImpl implements PluginAPI {
     }
 
     @Override
-    public <T extends API> @Nullable T getAPI(@NotNull Class<T> api) {
+    public @Nullable <T extends API> T getAPI(@NotNull Class<T> api) {
         try {
             return requireAPI(api);
         } catch (UnsupportedOperationException e) {
@@ -73,7 +73,7 @@ public class PluginApiImpl implements PluginAPI {
     }
 
     @Override
-    public <T extends API> @NotNull T requireAPI(@NotNull Class<T> api) throws UnsupportedOperationException {
+    public @NotNull <T extends API> T requireAPI(@NotNull Class<T> api) throws UnsupportedOperationException {
         if (!api.isInterface())
             throw new UnsupportedOperationException("Can't get API from implementation " +
                     api.getName() + ", use the API interface");

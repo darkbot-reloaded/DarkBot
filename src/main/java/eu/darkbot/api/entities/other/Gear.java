@@ -24,7 +24,8 @@ public enum Gear implements EquippableItem {
     HP_LINK("HP Link P.E.T. Gear", Cooldown.HP_LINK),
     MEGA_MINE("Mega-Mine Gear", Cooldown.MEGA_MINE),
     BEACON_COMBAT("Beacon-Combat Gear", Cooldown.BEACON_COMBAT),
-    BEACON_HP("Beacon-HP Gear", Cooldown.BEACON_HP);
+    BEACON_HP("Beacon-HP Gear", Cooldown.BEACON_HP),
+    UNKNOWN("Unknown Gear");
 
     private final String name;
     private final Cooldown cooldown;
@@ -36,6 +37,11 @@ public enum Gear implements EquippableItem {
     Gear(String name, Cooldown cooldown) {
         this.name = name;
         this.cooldown = cooldown;
+    }
+
+    public static Gear of(int gearId) {
+        if (gearId < 0 || gearId >= values().length) return UNKNOWN;
+        return values()[gearId];
     }
 
     public static String getName(Integer id) {

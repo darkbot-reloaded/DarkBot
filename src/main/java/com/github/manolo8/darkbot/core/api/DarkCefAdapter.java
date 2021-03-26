@@ -69,6 +69,16 @@ public class DarkCefAdapter extends ApiAdapter {
     }
 
     @Override
+    public void mouseDown(int x, int y) {
+        CEF.mouseDown(x, y);
+    }
+
+    @Override
+    public void mouseUp(int x, int y) {
+        CEF.mouseUp(x, y);
+    }
+
+    @Override
     public void mouseClick(int x, int y) {
         CEF.mouseClick(x, y);
     }

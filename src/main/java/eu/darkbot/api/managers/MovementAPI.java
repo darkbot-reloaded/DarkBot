@@ -5,9 +5,8 @@ import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.Location;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public interface MovementAPI extends API {
+public interface MovementAPI extends API.Singleton {
 
     /**
      * @param portal to move to
@@ -20,7 +19,7 @@ public interface MovementAPI extends API {
      *
      * @param portal to jump through
      */
-    void jumpPortal(@NotNull Portal portal);
+    void jumpPortal(Portal portal);
 
     /**
      * @return true if hero is moving or destination path isn't empty.
@@ -35,7 +34,6 @@ public interface MovementAPI extends API {
     /**
      * @return current destination {@link Location}
      */
-    @Nullable
     Location getDestination();
 
     /**
@@ -49,14 +47,6 @@ public interface MovementAPI extends API {
      * and omits `avoided zones`
      */
     void moveRandom();
-
-    /**
-     * Tries to move random around a location with given radius
-     *
-     * @param loc    {@link Locatable} to move random
-     * @param radius of the circle to move random
-     */
-    void moveRandom(Locatable loc, double radius);
 
     /**
      * Stops ship, removes destination path.
