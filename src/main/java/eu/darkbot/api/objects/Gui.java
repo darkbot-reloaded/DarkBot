@@ -1,16 +1,9 @@
 package eu.darkbot.api.objects;
 
-import java.time.Instant;
-
 /**
  * In-game gui.
  */
 public interface Gui extends Point {
-
-    /**
-     * @return name of the {@link Gui}
-     */
-    String getName();
 
     /**
      * @return width of the gui
@@ -61,9 +54,4 @@ public interface Gui extends Point {
      * Moves mouse at gui position + plusX/Y
      */
     void hover(int plusX, int plusY);
-
-    /**
-     * @return last {@link Instant} where gui was visible
-     */
-    Instant lastVisibleTime();
 }

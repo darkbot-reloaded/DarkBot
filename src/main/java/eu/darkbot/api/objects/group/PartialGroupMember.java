@@ -5,6 +5,8 @@ package eu.darkbot.api.objects.group;
  * but are waiting for their invite to be accepted or declined.
  */
 public interface PartialGroupMember {
+
     int getId();
+
     String getUsername();
 }

@@ -8,7 +8,8 @@ import eu.darkbot.api.API;
  * Those calls should be generally safe,
  * every access violation error is handled by native code
  */
-public interface MemoryAPI extends API {
+@Deprecated
+public interface MemoryAPI extends API.Singleton {
 
     /**
      * Reads signed integer value from memory.
@@ -82,6 +83,22 @@ public interface MemoryAPI extends API {
 
     default String readString(long address, int... offsets) {
         return readString(readLong(address, offsets));
+    }
+
+    /**
+     * Reads {@link String} from memory.
+     *
+     * @param address  to read from
+     * @param fallback to return in case of null/empty result
+     * @return string from memory if present, fallback otherwise
+     */
+    default String readString(long address, String fallback) {
+        String value = readString(address);
+        return value == null || value.isEmpty() ? fallback : value;
+    }
+
+    default String readString(long address, String fallback, int... offsets) {
+        return readString(readLong(address, offsets), fallback);
     }
 
     /**
@@ -238,13 +255,14 @@ public interface MemoryAPI extends API {
     }
 
     /**
-     * Overrides memory region at given address with bytes array.
-     * Region from (address) to (address + bytes.length) will be overridden.
+     * Search current process memory for given value
+     * until it reaches maxSize array length or no more memory regions to be searched.
      *
-     * @param address where writing starts
-     * @param bytes   to be written
+     * @param value   to look for
+     * @param maxSize max length of returned array
+     * @return array of direct pointers to searched value
      */
-    void writeBytes(long address, byte... bytes);
+    long[] searchInt(int value, int maxSize);
 
     /**
      * Search current process memory for given value
@@ -254,25 +272,15 @@ public interface MemoryAPI extends API {
      * @param maxSize max length of returned array
      * @return array of direct pointers to searched value
      */
-    long[] queryInt(int value, int maxSize);
-
-    /**
-     * Search current process memory for given value
-     * until it reaches maxSize array length or no more memory regions to be searched.
-     *
-     * @param value   to look for
-     * @param maxSize max length of returned array
-     * @return array of direct pointers to searched value
-     */
-    long[] queryLong(long value, int maxSize);
+    long[] searchLong(long value, int maxSize);
 
     /**
      * Search current process memory for given pattern
      * until it reaches maxSize array length or no more memory regions to be searched.
      *
-     * @param pattern to look for
      * @param maxSize max length of returned array
+     * @param pattern to look for
      * @return array of direct pointers to searched pattern
      */
-    long[] queryBytes(byte[] pattern, int maxSize);
+    long[] searchPattern(int maxSize, byte... pattern);
 }

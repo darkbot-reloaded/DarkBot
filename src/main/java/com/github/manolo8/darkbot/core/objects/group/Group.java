@@ -74,5 +74,4 @@ public class Group extends UpdatableAuto {
             if (members.get(i) == member) return i;
         return -1;
     }
-
 }
