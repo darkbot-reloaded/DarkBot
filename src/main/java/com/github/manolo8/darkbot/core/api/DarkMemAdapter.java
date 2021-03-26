@@ -66,6 +66,17 @@ public class DarkMemAdapter extends NoopApiAdapter {
         if (inputReady()) INPUT.mouseMove(x, y);
     }
 
+
+    @Override
+    public void mouseDown(int x, int y) {
+        if (inputReady()) INPUT.mouseDown(x, y);
+    }
+
+    @Override
+    public void mouseUp(int x, int y) {
+        if (inputReady()) INPUT.mouseUp(x, y);
+    }
+
     @Override
     public void mouseClick(int x, int y) {
         if (inputReady()) {

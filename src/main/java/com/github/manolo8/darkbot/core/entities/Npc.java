@@ -38,7 +38,7 @@ public class Npc extends Ship implements eu.darkbot.api.entities.Npc {
     public void added(Main main) {
         super.added(main);
         this.apiNpcInfo = new NpcInfoImpl(main.pluginAPI.requireAPI(HeroItemsAPI.class),
-                main.pluginAPI.requireAPI(SettingsProxy.class));
+                main.pluginAPI.requireInstance(SettingsProxy.class));
     }
 
     @Override
@@ -113,7 +113,8 @@ public class Npc extends Ship implements eu.darkbot.api.entities.Npc {
 
             return proxy.categoryBar.get(category).items.stream()
                     .filter(Item::hasShortcut)
-                    .filter(item -> item.getSlot().slotBarType == k.getType() && item.getSlot().slotNumber == slotNumber)
+                    .filter(item -> item.getSlotBarType() == k.getType())
+                    .filter(item -> item.containsSlotNumber(slotNumber))
                     .findAny();
         }
 

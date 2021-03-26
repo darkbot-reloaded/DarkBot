@@ -63,6 +63,16 @@ public class DarkBoatAdapter extends ApiAdapter {
     }
 
     @Override
+    public void mouseDown(int x, int y) {
+        API.mouseDown(x, y);
+    }
+
+    @Override
+    public void mouseUp(int x, int y) {
+        API.mouseUp(x, y);
+    }
+
+    @Override
     public void mouseClick(int x, int y) {
         API.mouseClick(x, y);
     }
@@ -149,5 +159,4 @@ public class DarkBoatAdapter extends ApiAdapter {
         API.reload();
         resetCache();
     }
-
 }

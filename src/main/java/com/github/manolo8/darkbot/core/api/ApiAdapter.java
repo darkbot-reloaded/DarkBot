@@ -80,4 +80,5 @@ public abstract class ApiAdapter implements IDarkBotAPI {
     public boolean isInitiallyShown() {
         return true;
     }
+
 }

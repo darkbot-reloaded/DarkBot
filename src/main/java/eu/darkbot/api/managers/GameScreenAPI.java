@@ -6,7 +6,7 @@ import eu.darkbot.api.objects.Gui;
 
 import java.util.Collection;
 
-public interface GameScreenAPI extends API {
+public interface GameScreenAPI extends API.Singleton {
 
     /**
      * @return bounds of game screen
@@ -16,7 +16,17 @@ public interface GameScreenAPI extends API {
     /**
      * @return {@link Collection} of in-game guis
      */
-    Collection<Gui> getGuis();
+    Collection<? extends Gui> getGuis();
+
+    /**
+     * @return in-game FPS.
+     */
+    int getFps();
+
+    /**
+     * @return memory used by the game in MB
+     */
+    int getMemory();
 
     /**
      * Tries to zoom in view.
@@ -40,13 +50,10 @@ public interface GameScreenAPI extends API {
 
     /**
      * Will try to toggle visibility for all windows in-game.
-     * Will toggle only when current state != visible parameter.
-     *
-     * @return current state of visibility
      */
-    boolean toggleWindows(boolean visible);
+    void toggleWindows();
 
-    boolean toggleCategoryBar(boolean visible);
+    void toggleCategoryBar(boolean visible);
 
-    boolean toggleProActionBar(boolean visible);
+    void toggleProActionBar(boolean visible);
 }
