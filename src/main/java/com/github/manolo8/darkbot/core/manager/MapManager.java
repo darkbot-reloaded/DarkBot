@@ -13,14 +13,13 @@ import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
-import com.github.manolo8.darkbot.utils.debug.ReadObjNames;
+import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.utils.Area;
 import eu.darkbot.api.managers.EventSenderAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -36,7 +35,7 @@ public class MapManager implements Manager, StarSystemAPI {
     private long mapAddressStatic;
     private long viewAddressStatic;
     private long minimapAddressStatic;
-    private long mapAddress;
+    public long mapAddress;
     private long viewAddress;
     private long boundsAddress;
     long eventAddress;
@@ -60,20 +59,22 @@ public class MapManager implements Manager, StarSystemAPI {
     public double boundMaxY;
     public double width;
     public double height;
-    private final RectangleImpl bound = new RectangleImpl();
+    public final RectangleImpl screenBound = new RectangleImpl();
+    private final RectangleImpl mapBound = new RectangleImpl();
 
     private final ObjArray minimapLayers = ObjArray.ofVector(true);
     private final Location pingLocationCache = new Location();
     public Location pingLocation = null;
 
     public MapManager(Main main,
+                      PluginAPI pluginAPI,
                       EventSenderAPI eventSender,
                       StarManager starManager) {
         this.main = main;
         this.eventSender = eventSender;
         this.starManager = starManager;
 
-        this.entities = new EntityList(main);
+        this.entities = pluginAPI.requireInstance(EntityList.class);
     }
 
 
@@ -111,6 +112,9 @@ public class MapManager implements Manager, StarSystemAPI {
         internalHeight = API.readMemoryInt(address + 72);
         if (internalHeight == 13100) internalHeight = 13500;
         if (internalHeight == 26200) internalHeight = 27000;
+
+        mapBound.set(0, 0, internalWidth, internalHeight);
+
         int currMap = API.readMemoryInt(address + 76);
         boolean switched = currMap != id;
         if (switched) {
@@ -159,7 +163,7 @@ public class MapManager implements Manager, StarSystemAPI {
         boundY = API.readMemoryDouble(updated + 88);
         boundMaxX = API.readMemoryDouble(updated + 112);
         boundMaxY = API.readMemoryDouble(updated + 120);
-        bound.set(boundX, boundY, boundMaxX, boundMaxY);
+        screenBound.set(boundX, boundY, boundMaxX, boundMaxY);
         width = boundMaxX - boundX;
         height = boundMaxY - boundY;
     }
@@ -248,7 +252,7 @@ public class MapManager implements Manager, StarSystemAPI {
 
     @Override
     public Area.Rectangle getCurrentMapBounds() {
-        return bound;
+        return mapBound;
     }
 
     @Override

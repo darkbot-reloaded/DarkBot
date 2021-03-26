@@ -2,10 +2,11 @@ package com.github.manolo8.darkbot.core.objects.group;
 
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Location;
+import eu.darkbot.api.objects.EntityInfo;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class GroupMember extends PartialGroupMember {
+public class GroupMember extends PartialGroupMember implements eu.darkbot.api.objects.group.GroupMember {
     public Location location = new Location();
     public MemberInfo memberInfo = new MemberInfo();
     public MemberInfo targetInfo = new MemberInfo();
@@ -43,5 +44,60 @@ public class GroupMember extends PartialGroupMember {
         isLocked   = API.readMemoryBoolean(address + 0x60);
 
         super.update();
+    }
+
+    @Override
+    public eu.darkbot.api.objects.Location getLocation() {
+        return location;
+    }
+
+    @Override
+    public eu.darkbot.api.objects.group.MemberInfo getMemberInfo() {
+        return memberInfo;
+    }
+
+    @Override
+    public eu.darkbot.api.objects.group.MemberInfo getTargetInfo() {
+        return targetInfo;
+    }
+
+    @Override
+    public EntityInfo.Faction getFactionId() {
+        return EntityInfo.Faction.of(factionId);
+    }
+
+    @Override
+    public int getLevel() {
+        return level;
+    }
+
+    @Override
+    public int getMapId() {
+        return mapId;
+    }
+
+    @Override
+    public boolean isAttacked() {
+        return isAttacked;
+    }
+
+    @Override
+    public boolean isCloaked() {
+        return isCloacked;
+    }
+
+    @Override
+    public boolean isLeader() {
+        return isLeader;
+    }
+
+    @Override
+    public boolean isDead() {
+        return isDead;
+    }
+
+    @Override
+    public boolean isLocked() {
+        return isLocked;
     }
 }

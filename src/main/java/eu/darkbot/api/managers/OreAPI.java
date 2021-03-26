@@ -9,7 +9,7 @@ import java.util.Locale;
 /**
  * API for ore related things such as selling ores or getting ore amount.
  */
-public interface OreAPI extends API {
+public interface OreAPI extends API.Singleton {
 
     /**
      * @param ore or to check

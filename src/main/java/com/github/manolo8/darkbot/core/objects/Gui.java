@@ -3,12 +3,13 @@ package com.github.manolo8.darkbot.core.objects;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import eu.darkbot.api.API;
 
 import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Gui extends Updatable {
+public class Gui extends Updatable implements API, eu.darkbot.api.objects.Gui {
 
     protected final Point pos = new Point();
     protected final Point size = new Point();
@@ -76,10 +77,12 @@ public class Gui extends Updatable {
         return update != 0 && System.currentTimeMillis() - update > time;
     }
 
+    @Override
     public void click(int plusX, int plusY) {
         API.mouseClick(x + plusX, y + plusY);
     }
 
+    @Override
     public void hover(int plusX, int plusY) {
         API.mouseMove(x + plusX, y + plusY);
     }
@@ -175,5 +178,35 @@ public class Gui extends Updatable {
                 return tempArray.get(i);
 
         return 0;
+    }
+
+    @Override
+    public double getWidth() {
+        return width;
+    }
+
+    @Override
+    public double getHeight() {
+        return height;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return visible;
+    }
+
+    @Override
+    public boolean setVisible(boolean visible) {
+        return show(visible);
+    }
+
+    @Override
+    public double getX() {
+        return x;
+    }
+
+    @Override
+    public double getY() {
+        return y;
     }
 }

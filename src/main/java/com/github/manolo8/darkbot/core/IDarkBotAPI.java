@@ -1,6 +1,9 @@
 package com.github.manolo8.darkbot.core;
 
-public interface IDarkBotAPI {
+import eu.darkbot.api.managers.MemoryAPI;
+import eu.darkbot.api.managers.WindowAPI;
+
+public interface IDarkBotAPI extends MemoryAPI, WindowAPI {
 
     void createWindow();
     void setSize(int width, int height);
@@ -75,4 +78,90 @@ public interface IDarkBotAPI {
     void handleRefresh();
     void resetCache();
 
+    //MemoryAPI
+    @Override
+    default int readInt(long address) {
+        return readMemoryInt(address);
+    }
+
+    @Override
+    default long readLong(long address) {
+        return readMemoryLong(address);
+    }
+
+    @Override
+    default double readDouble(long address) {
+        return readMemoryDouble(address);
+    }
+
+    @Override
+    default boolean readBoolean(long address) {
+        return readMemoryBoolean(address);
+    }
+
+    @Override
+    default String readString(long address) {
+        return readMemoryString(address);
+    }
+
+    @Override
+    default byte[] readBytes(long address, int length) {
+        return readMemory(address, length);
+    }
+
+    @Override
+    default void replaceLong(long address, long oldValue, long newValue) {
+        if (readLong(address) == oldValue) writeLong(address, newValue);
+    }
+
+    @Override
+    default void replaceDouble(long address, double oldValue, double newValue) {
+        if (readDouble(address) == oldValue) writeDouble(address, newValue);
+    }
+
+    @Override
+    default void replaceBoolean(long address, boolean oldValue, boolean newValue) {
+        if (readBoolean(address) == oldValue) writeBoolean(address, newValue);
+    }
+
+    @Override
+    default void writeInt(long address, int value) {
+        writeMemoryInt(address, value);
+    }
+
+    @Override
+    default void writeLong(long address, long value) {
+        writeMemoryLong(address, value);
+    }
+
+    @Override
+    default void writeDouble(long address, double value) {
+        writeMemoryDouble(address, value);
+    }
+
+    @Override
+    default void writeBoolean(long address, boolean value) {
+        writeInt(address, value ? 1 : 0);
+    }
+
+    @Override
+    default long[] searchInt(int value, int maxSize) {
+        return queryMemoryInt(value, maxSize);
+    }
+
+    @Override
+    default long[] searchLong(long value, int maxSize) {
+        return queryMemoryLong(value, maxSize);
+    }
+
+    @Override
+    default long[] searchPattern(byte[] pattern, int maxSize) {
+        return queryMemory(pattern, maxSize);
+    }
+
+    //WindowAPI
+    @Override
+    default void keyClick(int keyCode) {
+        keyboardClick((char) keyCode);
+    }
 }

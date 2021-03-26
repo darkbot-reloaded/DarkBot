@@ -148,4 +148,39 @@ public class DarkBoatAdapter extends ApiAdapter {
         API.reload();
         resetCache();
     }
+
+    @Override
+    public void replaceLong(long address, long oldValue, long newValue) {
+        API.replaceLong(address, oldValue, newValue);
+    }
+
+    @Override
+    public void replaceDouble(long address, double oldValue, double newValue) {
+        API.replaceDouble(address, oldValue, newValue);
+    }
+
+    @Override
+    public void replaceBoolean(long address, boolean oldValue, boolean newValue) {
+        API.replaceBoolean(address, oldValue, newValue);
+    }
+
+    @Override
+    public void writeBytes(long address, byte... bytes) {
+        API.writeBytes(address, bytes);
+    }
+
+    @Override
+    public void keyClick(int keyCode) {
+        API.keyClick(keyCode);
+    }
+
+    @Override
+    public void mouseUp(int x, int y) {
+        API.mouseUp(x, y);
+    }
+
+    @Override
+    public void mouseDown(int x, int y) {
+        API.mouseDown(x, y);
+    }
 }
