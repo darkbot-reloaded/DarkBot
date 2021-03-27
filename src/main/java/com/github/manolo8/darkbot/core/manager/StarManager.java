@@ -31,6 +31,7 @@ public class StarManager implements API.Singleton {
     private static int INVALID_MAP_ID = -999;
 
     private StarManager() {
+        if (INSTANCE == null) INSTANCE = this;
         // https://www.darkorbit.com/spacemap/graphics/maps-config.xml
 
         StarBuilder mapBuild = new StarBuilder();

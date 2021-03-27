@@ -16,10 +16,16 @@ public class PluginApiImpl implements PluginAPI {
     protected final Set<Singleton> singletons = new HashSet<>();
     protected final Set<Class<?>> implClasses = new HashSet<>();
 
-    public PluginApiImpl(Singleton singleton,
-                         Class<? extends API>... implementations) {
-        this.singletons.add(this);
-        this.singletons.add(singleton);
+    public PluginApiImpl() {
+        singletons.add(this);
+    }
+
+    public void addInstance(Singleton... singletons) {
+        Collections.addAll(this.singletons, singletons);
+    }
+
+    @SafeVarargs
+    public final void addImplementations(Class<? extends API>... implementations) {
         Collections.addAll(this.implClasses, implementations);
     }
 
