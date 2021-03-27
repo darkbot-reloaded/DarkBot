@@ -16,7 +16,8 @@ import eu.darkbot.impl.managers.AttackApiImpl;
 public class DarkBotPluginApiImpl extends PluginApiImpl {
 
     public DarkBotPluginApiImpl(Main main) {
-        super(main, //BotAPI & PluginAPI
+        addInstance(main, StarManager.getInstance());
+        addImplementations(
                 BackpageManager.class,
                 EntityList.class,
                 EventManager.class,
@@ -29,19 +30,7 @@ public class DarkBotPluginApiImpl extends PluginApiImpl {
                 RepairManager.class,
                 MapManager.class,
                 StatsManager.class,
-                AttackApiImpl.class,
-
-                //facades
-                LogMediator.class,
-                ChatProxy.class,
-                ChrominProxy.class,
-                EscortProxy.class,
-                EternalGateProxy.class,
-                EternalBlacklightProxy.class,
-                BoosterProxy.class);
+                AttackApiImpl.class);
     }
 
-    public void addInstance(API.Singleton apiInstance) {
-        this.singletons.add(apiInstance);
-    }
 }
