@@ -20,8 +20,12 @@ public class UIUtils {
             TAB_HIGLIGHT = UIManager.getColor("TabbedPane.underlineColor");
 
     public static ImageIcon getIcon(String name) {
+        return getIcon(name, 16, 16);
+    }
+
+    public static ImageIcon getIcon(String name, int width, int height) {
         return new ImageIcon(new ImageIcon(UIUtils.class.getResource("/" + name + ".png")).getImage()
-                .getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+                .getScaledInstance(width, height, Image.SCALE_SMOOTH));
     }
 
     public static Image getImage(String name) {
