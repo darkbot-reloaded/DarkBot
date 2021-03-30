@@ -316,14 +316,14 @@ public class GuiManager implements Manager, GameScreenAPI {
     @Override
     public void toggleCategoryBar(boolean visible) {
         settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_CATEGORYBAR)
-                .filter(c -> slotBarsProxy.categoryBarVisible != visible)
+                .filter(c -> slotBarsProxy.isCategoryBarVisible() != visible)
                 .ifPresent(API::keyboardClick);
     }
 
     @Override
     public void toggleProActionBar(boolean visible) {
         settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION)
-                .filter(c -> slotBarsProxy.proActionBar.address != 0 && slotBarsProxy.proActionBarVisible != visible)
+                .filter(c -> slotBarsProxy.proActionBar.address != 0 && slotBarsProxy.isProActionBarVisible() != visible)
                 .ifPresent(API::keyboardClick);
     }
 }

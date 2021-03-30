@@ -14,7 +14,7 @@ public interface BotAPI extends API.Singleton {
     /**
      * {@link Version} of the DarkBot.
      */
-    Version VERSION = Version.of("1.13.17 beta 72 alpha");
+    Version VERSION = Version.of("1.13.17 beta 84");
 
     /**
      * @return avg time of tick in ms.

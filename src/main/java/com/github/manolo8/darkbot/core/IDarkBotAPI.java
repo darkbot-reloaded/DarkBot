@@ -155,7 +155,7 @@ public interface IDarkBotAPI extends MemoryAPI, WindowAPI {
     }
 
     @Override
-    default long[] searchPattern(byte[] pattern, int maxSize) {
+    default long[] searchPattern(int maxSize, byte... pattern) {
         return queryMemory(pattern, maxSize);
     }
 
