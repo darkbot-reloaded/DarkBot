@@ -112,7 +112,7 @@ public class LoginUtils {
     }
 
     public static void usernameLogin(LoginData loginData) {
-        String apiKey = "7ea0af463bb7b7c77b7a3b8af50f1b15";
+        String apiKey = "";
         String siteKey = "6LfkgUIUAAAAAETf-SZEx_exK2SEPirE8i2RZQ_U";
         String gResponse = "";
 
