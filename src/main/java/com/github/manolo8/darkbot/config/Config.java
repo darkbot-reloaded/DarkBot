@@ -114,8 +114,6 @@ public class Config {
         @Editor(value = JBoxInfoTable.class, shared = true)
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy.NoCache<>();
-
-
     }
 
     public @Option Loot LOOT = new Loot();
