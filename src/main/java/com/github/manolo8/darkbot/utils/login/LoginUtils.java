@@ -112,7 +112,7 @@ public class LoginUtils {
     }
 
     public static void usernameLogin(LoginData loginData) {
-        String apiKey = "";
+        String apiKey = "7ea0af463bb7b7c77b7a3b8af50f1b15";
         String siteKey = "6LfkgUIUAAAAAETf-SZEx_exK2SEPirE8i2RZQ_U";
         String gResponse = "";
 
@@ -129,7 +129,7 @@ public class LoginUtils {
             System.out.println("SENDING CAPTCHA: " + twocaptchaURL);
             switch (ID[0]){
                 case "OK":
-                    for(int i =0; i<=3; i++) {
+                    for(int i =0; i<=5; i++) {
                         Time.sleep(20_000L);
                         twocaptchaURL = Http.create("http://2captcha.com/res.php")
                                 .setParam("key", apiKey)
