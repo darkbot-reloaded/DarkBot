@@ -127,59 +127,70 @@ public class LoginUtils {
 
             String[] ID = twocaptchaURL.split("\\|");
             System.out.println("SENDING CAPTCHA: " + twocaptchaURL);
+            switch (ID[0]){
+                case "OK":
+                    for(int i =0; i<=3; i++) {
+                        Time.sleep(20_000L);
+                        twocaptchaURL = Http.create("http://2captcha.com/res.php")
+                                .setParam("key", apiKey)
+                                .setParam("action", "get")
+                                .setParam("id", ID[1])
+                                .getContent();
 
-            if(ID[0].equalsIgnoreCase("OK")){
-                for(int i =0; i<3; i++) {
-                    Time.sleep(20_000L);
-                    twocaptchaURL = Http.create("http://2captcha.com/res.php")
-                            .setParam("key", apiKey)
-                            .setParam("action", "get")
-                            .setParam("id", ID[1])
-                            .getContent();
-
-                    String[] responseKEY = twocaptchaURL.split("\\|");
-                    System.out.println("GETTING CAPTCHA SOLUTION: " + twocaptchaURL);
-
-                    switch (responseKEY[0]){
-                        case "OK":
-                            gResponse = responseKEY[1];System.out.println("FOUND SOLUTION: " + gResponse); i = 4; break;
-                        case "CAPCHA_NOT_READY":
-                            System.out.println("SOLUTION NOT READY"); break;
-                        case "ERROR_CAPTCHA_UNSOLVABLE":
-                            System.out.println("NO SOLUTION FOUND - RETRY"); break;
-                        case "ERROR_WRONG_USER_KEY":
-                        case "ERROR_KEY_DOES_NOT_EXIST":
-                            System.out.println("WRONG API KEY"); break;
-                        case "ERROR_WRONG_ID_FORMAT":
-                        case "ERROR_WRONG_CAPTCHA_ID":
-                            System.out.println("WRONG SOLUTION ID - RETRY"); break;
-                        case "ERROR_BAD_DUPLICATES":
-                            System.out.println("UNKNOWN ERROR - RETRY"); break;
-                        case "REPORT_NOT_RECORDED":
-                            System.out.println("CAPTCHA REPORTED OR DELETED"); break;
-                        case "ERROR_DUPLICATE_REPORT":
-                            System.out.println("REPORTED CAPTCHA ALREADY"); break;
-                        case "ERROR_EMPTY_ACTION":
-                            System.out.println("EMPTY ACTION - CONTACT DEV"); break;
+                        String[] responseKEY = twocaptchaURL.split("\\|");
+                        System.out.println("GETTING CAPTCHA SOLUTION: " + twocaptchaURL);
+                        switch (responseKEY[0]) {
+                            case "OK":
+                                gResponse = responseKEY[1];
+                                System.out.println("FOUND SOLUTION: " + gResponse);
+                                break;
+                            case "CAPCHA_NOT_READY":
+                                System.out.println("SOLUTION NOT READY");
+                                break;
+                            case "ERROR_CAPTCHA_UNSOLVABLE":
+                                System.out.println("NO SOLUTION FOUND - RETRY");
+                                break;
+                            case "ERROR_WRONG_USER_KEY":
+                            case "ERROR_KEY_DOES_NOT_EXIST":
+                                System.out.println("WRONG API KEY");
+                                break;
+                            case "ERROR_WRONG_ID_FORMAT":
+                            case "ERROR_WRONG_CAPTCHA_ID":
+                                System.out.println("WRONG SOLUTION ID - RETRY");
+                                break;
+                            case "ERROR_BAD_DUPLICATES":
+                                System.out.println("UNKNOWN ERROR - RETRY");
+                                break;
+                            case "REPORT_NOT_RECORDED":
+                                System.out.println("CAPTCHA REPORTED OR DELETED");
+                                break;
+                            case "ERROR_DUPLICATE_REPORT":
+                                System.out.println("REPORTED CAPTCHA ALREADY");
+                                break;
+                            case "ERROR_EMPTY_ACTION":
+                                System.out.println("EMPTY ACTION - CONTACT DEV");
+                                break;
+                        }
                     }
-
-                }
-            }else if(ID[0].equalsIgnoreCase("ERROR_WRONG_USER_KEY")
-                        ||ID[0].equalsIgnoreCase("ERROR_KEY_DOES_NOT_EXIST")){
-                System.out.println("WRONG API KEY");
-            }else if(ID[0].equalsIgnoreCase("ERROR_ZERO_BALANCE")){
-                System.out.println("NO BALANCE");
-            }else if(ID[0].equalsIgnoreCase("ERROR_NO_SLOT_AVAILABLE")){
-                //RETRY
-                System.out.println("RETRY - NO WORKERS");
-            }else if(ID[0].equalsIgnoreCase("ERROR_IP_NOT_ALLOWED")){
-                System.out.println("IP LOCKED - Please ADD IP or Unlock");
-            }else if(ID[0].equalsIgnoreCase("IP_BANNED")){
-                System.out.println("IP BANNED - TRY AGAIN IN 5 MINS");
-            }else if(ID[0].equalsIgnoreCase("ERROR_BAD_TOKEN_OR_PAGEURL")
-                    ||ID[0].equalsIgnoreCase("ERROR_GOOGLEKEY")
-                    ||ID[0].equalsIgnoreCase("ERROR_WRONG_GOOGLEKEY")){
-                System.out.println("CAPTCHA KEY ERROR - CONTACT DEV");
+                    break;
+                case "ERROR_WRONG_USER_KEY":
+                case "ERROR_KEY_DOES_NOT_EXIST":
+                    System.out.println("WRONG API KEY"); break;
+                case "ERROR_ZERO_BALANCE":
+                    System.out.println("NO BALANCE"); break;
+                case "ERROR_NO_SLOT_AVAILABLE":
+                    //RETRY
+                    System.out.println("RETRY - NO WORKERS"); break;
+                case "ERROR_IP_NOT_ALLOWED":
+                    System.out.println("IP LOCKED - Please ADD IP or Unlock"); break;
+                case "IP_BANNED":
+                    System.out.println("IP BANNED - TRY AGAIN IN 5 MINS"); break;
+                case "ERROR_BAD_TOKEN_OR_PAGEURL":
+                case "ERROR_GOOGLEKEY":
+                case "ERROR_WRONG_GOOGLEKEY":
+                    System.out.println("CAPTCHA KEY ERROR - CONTACT DEV"); break;
+                case "":
+                    break;
             }
         }catch (IOException e){
             e.printStackTrace();
