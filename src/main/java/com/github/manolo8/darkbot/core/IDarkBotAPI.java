@@ -73,5 +73,6 @@ public interface IDarkBotAPI {
     void setMinimized(boolean visible);
 
     void handleRefresh();
+    void resetCache();
 
 }

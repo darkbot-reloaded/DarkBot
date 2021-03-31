@@ -4,6 +4,11 @@ package com.github.manolo8.darkbot.core.api;
  * No-operation API adapter. Will do nothing. Useful for testing purposes, and as fallback if no API is loaded.
  */
 public class NoopApiAdapter extends ApiAdapter {
+
+    public NoopApiAdapter() {
+        super(null);
+    }
+
     @Override
     public void createWindow() {}
 
@@ -84,6 +89,6 @@ public class NoopApiAdapter extends ApiAdapter {
 
     @Override
     public void handleRefresh() {
-
+        resetCache();
     }
 }

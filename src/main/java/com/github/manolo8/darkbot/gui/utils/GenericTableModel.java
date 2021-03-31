@@ -6,75 +6,91 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.AbstractTableModel;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
 
-public class GenericTableModel<T> extends DefaultTableModel {
-    private final Field[] FIELDS;
-    private final String[] TOOLTIPS;
-    private final Class[] TYPES;
+public class GenericTableModel<T> extends AbstractTableModel {
+    protected Map<String, T> config;
 
-    private Map<String, T> table = new HashMap<>();
+    protected final Column[] columns;
+    protected final List<Row> rows = new ArrayList<>();
+    private final Map<String, Row> table = new HashMap<>();
 
     public GenericTableModel(Class<T> clazz, Map<String, T> config, Lazy<String> modified) {
-        super(getNames(clazz), 0);
+        this.config = config;
 
-        FIELDS = Arrays.stream(clazz.getDeclaredFields())
-                .filter(f -> f.getAnnotation(Option.class) != null)
-                .toArray(Field[]::new);
+        this.columns = Stream.concat(Stream.of(clazz), Arrays.stream(clazz.getDeclaredFields()))
+                .filter(el -> el.isAnnotationPresent(Option.class))
+                .map(Column::new)
+                .toArray(Column[]::new);
 
-        TOOLTIPS = prepend(clazz, Arrays.stream(FIELDS))
-                .map(annotated -> annotated.getAnnotation(Option.class))
-                .map(op -> I18n.getOrDefault(op.key() + ".desc", op.description()))
-                .map(s -> s.isEmpty() ? null : s)
-                .toArray(String[]::new);
-
-        TYPES = prepend(String.class, Arrays.stream(FIELDS).map(Field::getType)
-                .map(ReflectionUtils::wrapped)).toArray(Class[]::new);
-
-        config.forEach(this::updateEntry);
         if (modified != null) modified.add(n -> updateEntry(n, config.get(n)));
+        updateTable();
     }
 
-    public String getToolTipAt(int column) {
-        return TOOLTIPS[column];
+    public void updateTable() {
+        rows.clear();
+        table.clear();
+        config.forEach(this::updateEntry);
+        fireTableDataChanged();
     }
 
     protected void updateEntry(String name, T data) {
         if (data == null) {
-            if (table.containsKey(name)) removeEntry(name);
+            Row r = table.remove(name);
+            if (r != null) rows.remove(r);
         } else {
-            if (table.containsKey(name)) updateEntryRow(name, data);
-            else addEntry(name, data);
+            table.compute(name, (n, row) -> {
+                if (row == null) {
+                    row = createRow(name, data);
+                    rows.add(row);
+                    return row;
+                }
+                return row.update(data);
+            });
         }
+        fireTableDataChanged();
     }
 
-    private void addEntry(String name, T data) {
-        table.put(name, data);
-        addRow(prepend(name, Arrays.stream(FIELDS).map(f -> ReflectionUtils.get(f, data))).toArray(Object[]::new));
+    protected Row createRow(String name, T data) {
+        return new Row(name, data);
     }
 
-    private void updateEntryRow(String name, T data) {
-        table.put(name, data);
-        for (int row = 0; row < getRowCount(); row++) {
-            if (!getValueAt(row, 0).equals(name)) continue;
-            for (int field = 0; field < FIELDS.length;) {
-                setValueAt(ReflectionUtils.get(FIELDS[field], data), row, ++field);
-            }
-        }
+    protected void clear() {
+        rows.clear();
+        table.clear();
+        fireTableDataChanged();
     }
 
-    private void removeEntry(String name) {
-        table.remove(name);
+    @Override
+    public int getColumnCount() {
+        return columns.length;
+    }
 
-        for (int i = 0; i < getRowCount(); i++) {
-            if (getValueAt(i, 0).equals(name)) removeRow(i--);
-        }
+    @Override
+    public String getColumnName(int column) {
+        return columns[column].name;
+    }
+
+    @Override
+    public Class<?> getColumnClass(int column) {
+        return columns[column].type;
+    }
+
+    public String getToolTipAt(int column) {
+        return columns[column].tooltip;
+    }
+
+    @Override
+    public int getRowCount() {
+        return table.size();
     }
 
     @Override
@@ -83,30 +99,59 @@ public class GenericTableModel<T> extends DefaultTableModel {
     }
 
     @Override
-    public Class<?> getColumnClass(int column) {
-        return TYPES[column];
+    public Object getValueAt(int row, int column) {
+        return getValue(rows.get(row), columns[column]);
     }
 
     @Override
     public void setValueAt(Object value, int row, int column) {
-        super.setValueAt(value, row, column);
+        setValue(rows.get(row), columns[column], value);
+        ConfigEntity.changed();
+    }
 
-        if (!table.isEmpty()) { // Npc table ignore this table
-            ReflectionUtils.set(FIELDS[column - 1], table.get((String) this.getValueAt(row, 0)), value);
-            ConfigEntity.changed();
+    public Row getRow(int row) {
+        return rows.get(row);
+    }
+
+    protected Object getValue(Row row, Column column) {
+        if (column.field == null) return row.name;
+        return ReflectionUtils.get(column.field, row.data);
+    }
+
+    protected void setValue(Row row, Column column, Object value) {
+        Field field = column.field;
+        if (field == null) throw new UnsupportedOperationException("Can't edit default column");
+        ReflectionUtils.set(field, row.data, value);
+    }
+
+    protected static class Column {
+        public final String name;
+        public final String tooltip;
+        public final Field field;
+        public final Class<?> type;
+
+        public Column(AnnotatedElement el) {
+            Option op = el.getAnnotation(Option.class);
+            this.name = I18n.getOrDefault(op.key(), op.value());
+            this.tooltip = Strings.toTooltip(I18n.getOrDefault(op.key() + ".desc", op.description()));
+            this.field = el instanceof Field ? (Field) el : null;
+            this.type = field == null ? String.class : ReflectionUtils.wrapped(field.getType());
         }
     }
 
-    private static <T> Stream<T> prepend(T type, Stream<T> stream) {
-        return Stream.concat(Stream.of(type), stream);
-    }
+    protected static class Row {
+        public final String name;
+        public Object data;
 
-    private static String[] getNames(Class clazz) {
-        return prepend(clazz, Arrays.stream(clazz.getDeclaredFields()))
-                .map(annotated -> annotated.getAnnotation(Option.class))
-                .filter(Objects::nonNull)
-                .map(op -> I18n.getOrDefault(op.key(), op.value()))
-                .toArray(String[]::new);
+        public Row(String name, Object data) {
+            this.name = name;
+            this.data = data;
+        }
+
+        public Row update(Object data) {
+            this.data = data;
+            return this;
+        }
     }
 
 }

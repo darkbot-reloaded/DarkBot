@@ -20,7 +20,7 @@ import java.util.function.Function;
  * Use it like builder, just one time for instance
  */
 public class Http {
-    private static String DEFAULT_USER_AGENT = "Mozilla/5.0";
+    private static String DEFAULT_USER_AGENT = "BigpointClient/1.5.2";
 
     public static String getDefaultUserAgent() {
         return DEFAULT_USER_AGENT;
@@ -168,7 +168,6 @@ public class Http {
 
     /**
      * Sets user agent used in connection.
-     * Default is "Mozilla/5.0".
      *
      * @param userAgent to use.
      * @return current instance of Http

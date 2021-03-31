@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigManager;
+import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
@@ -27,6 +28,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
+import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
 import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
@@ -49,13 +51,14 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 56");
+    public static final Version VERSION      = new Version("1.13.17 beta 85");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
             .setLenient()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
+            .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
             .create();
 
     public ConfigManager configManager = new ConfigManager();
@@ -64,7 +67,7 @@ public class Main extends Thread implements PluginListener {
 
     public final Lazy.Sync<Boolean> status       = new Lazy.Sync<>();
     public final Lazy.Sync<String> configChange  = new Lazy.Sync<>();
-    public final StarManager starManager         = new StarManager();
+    public final StarManager starManager         = StarManager.getInstance();
     public final MapManager mapManager           = new MapManager(this);
     public final SettingsManager settingsManager = new SettingsManager(this);
     public final FacadeManager facadeManager     = new FacadeManager(this);
@@ -75,6 +78,7 @@ public class Main extends Thread implements PluginListener {
     public final PingManager pingManager         = new PingManager();
     public final BackpageManager backpage        = new BackpageManager(this);
     public final PluginHandler pluginHandler     = new PluginHandler();
+    public final PluginUpdater pluginUpdater     = new PluginUpdater(this);
     public final FeatureRegistry featureRegistry = new FeatureRegistry(this, pluginHandler);
     public final RepairManager repairManager     = new RepairManager();
 
@@ -109,6 +113,7 @@ public class Main extends Thread implements PluginListener {
         this.pluginHandler.addListener(this);
 
         this.form = new MainGui(this);
+        this.pluginUpdater.scheduleUpdateChecker();
 
         if (configManager.getConfigFailed())
             Popups.showMessageAsync("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
@@ -193,7 +198,7 @@ public class Main extends Thread implements PluginListener {
                 else module.tickStopped();
             } catch (Throwable e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
-                if (modDef != null) modDef.getIssues().addWarning(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
             }
             for (Behaviour behaviour : behaviours) {
                 try {
@@ -202,7 +207,7 @@ public class Main extends Thread implements PluginListener {
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
-                            .addFailure(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                            .addFailure("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
                 }
             }
         }
@@ -213,6 +218,7 @@ public class Main extends Thread implements PluginListener {
                 System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
 
         if (!module.canRefresh()) return;
+
         lastRefresh = System.currentTimeMillis();
         if (config.MISCELLANEOUS.PAUSE_FOR > 0) {
             System.out.println("Pausing (logging off): time arrived & module allows refresh");
@@ -228,8 +234,10 @@ public class Main extends Thread implements PluginListener {
     }
 
     private <A extends Module> A setModule(A module, boolean setConfig) {
-        module.install(this);
-        if (setConfig) updateCustomConfig(module);
+        if (module != null) {
+            module.install(this);
+            if (setConfig) updateCustomConfig(module);
+        }
         this.module = module;
         return module;
     }

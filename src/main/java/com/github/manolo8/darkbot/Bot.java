@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 
 public class Bot {
@@ -20,6 +21,7 @@ public class Bot {
             UIManager.put("Button.arc", 0);
             UIManager.put("Component.arc", 0);
             UIManager.put("Button.default.boldText", false);
+            UIManager.put("Table.cellFocusColor", new Color(0, 0, 0, 160));
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }

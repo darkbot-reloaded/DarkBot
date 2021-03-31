@@ -177,7 +177,7 @@ public class MapDrawer extends JPanel {
             g2.setColor(cs.TEXT_DARK);
             synchronized (Main.UPDATE_LOCKER) {
                 List<Entity> entities = mapManager.entities.allEntities.stream().flatMap(Collection::stream)
-                        .filter(e -> e.id > 150_000_000 && e.id < 160_000_000)
+                        .filter(e -> e.id > 150_000_000 && e.id < 160_000_000 || e instanceof Mine)
                         .filter(e -> e.locationInfo.isLoaded())
                         .collect(Collectors.toList());
 
@@ -277,7 +277,7 @@ public class MapDrawer extends JPanel {
                 Main.VERSION.toString(),
                 (main.isRunning() || !config.MISCELLANEOUS.RESET_REFRESH ?
                         Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"),
-                Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000));
+                Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000L));
         drawString(g2, info, 5, 12, Align.LEFT);
         if (main.module != null) {
             drawString(g2, main.tickingModule ? main.module.status() : main.module.stoppedStatus(), 5, 26, Align.LEFT);
@@ -292,7 +292,8 @@ public class MapDrawer extends JPanel {
     protected void drawMap(Graphics2D g2) {
         g2.setColor(cs.TEXT_DARK);
         g2.setFont(cs.FONTS.BIG);
-        drawString(g2, hero.map.name, mid, (height / 2) - 5, Align.MID);
+        String name = hero.map.id == -1 ? I18n.get("gui.map.loading") : hero.map.name;
+        drawString(g2, name, mid, (height / 2) - 5, Align.MID);
     }
 
     private void drawHealth(Graphics2D g2) {
@@ -323,7 +324,7 @@ public class MapDrawer extends JPanel {
         } else if (distance > 100) {
             positions.put(System.currentTimeMillis(), new Line(last, last = heroLocation.copy()));
         }
-        positions.headMap(System.currentTimeMillis() - config.BOT_SETTINGS.MAP_DISPLAY.TRAIL_LENGTH * 1000).clear();
+        positions.headMap(System.currentTimeMillis() - config.BOT_SETTINGS.MAP_DISPLAY.TRAIL_LENGTH * 1000L).clear();
 
         if (positions.isEmpty()) return;
 
@@ -345,7 +346,7 @@ public class MapDrawer extends JPanel {
         g2.setColor(cs.PORTALS);
         for (Portal portal : portals) {
             Location loc = portal.locationInfo.now;
-            g2.drawOval(translateX(loc.x) - 6, translateY(loc.y) - 6, 11, 11);
+            g2.drawOval(translateX(loc.x) - 6, translateY(loc.y) - 6, 12, 12);
         }
 
         for (BattleStation station : this.battleStations) {

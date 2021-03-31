@@ -210,7 +210,16 @@ public class CollectorModule implements Module {
                 && !box.isCollected()
                 && drive.canMove(box.locationInfo.now)
                 && (!box.type.equals("FROM_SHIP") || main.statsManager.deposit < main.statsManager.depositTotal)
-                && isContested(box);
+                && !isContested(box);
+    }
+
+    private boolean isContested(Box box){
+        if (!config.COLLECT.IGNORE_CONTESTED_BOXES) return false;
+
+        double heroTime = hero.timeTo(hero.locationInfo.distance(box));
+        return ships.stream()
+                .filter(ship -> ship.shipInfo.destination.distance(box) == 0)
+                .anyMatch(ship -> heroTime > ship.timeTo(ship.locationInfo.distance(box)));
     }
 
     private Location findClosestEnemyAndAddToDangerousList() {
@@ -222,7 +231,7 @@ public class CollectorModule implements Module {
                 if (ship.isInTimer()) {
                     return ship.locationInfo.now;
                 } else if (ship.isAttacking(hero)) {
-                    ship.setTimerTo(config.GENERAL.RUNNING.REMEMBER_ENEMIES_FOR * 1000);
+                    ship.setTimerTo(config.GENERAL.RUNNING.REMEMBER_ENEMIES_FOR * 1000L);
                     return ship.locationInfo.now;
                 }
 

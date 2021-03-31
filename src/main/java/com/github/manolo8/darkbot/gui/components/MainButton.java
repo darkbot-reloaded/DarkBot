@@ -31,7 +31,6 @@ public class MainButton extends JButton implements ActionListener {
 
     protected MainButton(Icon icon, String text, String description) {
         super(text, icon);
-        putClientProperty("JButton.buttonType", "square");
 
         addActionListener(this);
         if (description != null && !description.isEmpty()) setToolTipText(description);

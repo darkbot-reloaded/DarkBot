@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
+import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
@@ -9,9 +10,11 @@ import com.github.manolo8.darkbot.core.api.DarkFlashApiAdapter;
 import com.github.manolo8.darkbot.core.api.NativeApiAdapter;
 import com.github.manolo8.darkbot.core.api.NoopApiAdapter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.utils.ApiErrors;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapterFactory;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -29,6 +32,7 @@ public class ConfigManager {
             .setLenient()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
+            .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
             .create();
 
     public static final String DEFAULT = "config",
@@ -109,16 +113,11 @@ public class ConfigManager {
             else if (config.BOT_SETTINGS.API_CONFIG.API == 3) return new NativeApiAdapter(params);
             else if (config.BOT_SETTINGS.API_CONFIG.API == 4) return new NoopApiAdapter();
             else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API_CONFIG.API);
-        } catch (Error e) {
+        } catch (Throwable e) {
             System.out.println("Error enabling API #" + config.BOT_SETTINGS.API_CONFIG.API + ", using no-op api");
             e.printStackTrace();
+            ApiErrors.displayException(config.BOT_SETTINGS.API_CONFIG.API, e);
             config.BOT_SETTINGS.API_CONFIG.API = 4;
-            Popups.showMessageAsync(
-                    "API failed to load",
-                    "The API you had selected is not able to load.\n" +
-                    "You probably do not have the required DLL in your lib folder.\n" +
-                    "The bot will start on no-operation API, change it in the settings and restart.",
-                    JOptionPane.ERROR_MESSAGE);
             return new NoopApiAdapter();
         }
     }

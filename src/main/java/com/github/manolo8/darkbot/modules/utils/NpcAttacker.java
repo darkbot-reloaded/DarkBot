@@ -6,10 +6,12 @@ import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.Npc;
+import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
-import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
+import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
+import com.github.manolo8.darkbot.core.objects.slotbars.SlotBar;
 import com.github.manolo8.darkbot.core.utils.Drive;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -22,17 +24,23 @@ public class NpcAttacker {
     protected HeroManager hero;
     protected Drive drive;
     protected final SettingsProxy keybinds;
+    protected final CategoryBar bar;
 
     public Npc target;
-    protected Long ability;
+    protected Long ability; // Time at which offensive ability can be triggered
 
-    protected long laserTime;
-    protected long fixTimes;
-    protected long clickDelay;
-    protected long useRsbUntil;
-    protected boolean attacking;
-    protected boolean sab;
-    protected boolean rsb;
+    // General delays
+    protected long clickDelay; // When can we mouse-click again? (lock)
+    protected long laserTime; // When can we cast attack again? (ctrl or attack key)
+    protected long usedRsb; // When did we last RSB?
+
+    // Attacking bug fixing
+    protected long isAttacking; // Time until we consider the attack valid (not-bugged)
+    protected int fixedTimes; // Amount of times we bugged
+
+    protected boolean firstAttack; // If the initial attack was casted
+    protected boolean sab; // If shooting SAB right now
+    protected boolean rsb; // If shooting RSB right nos
 
     public NpcAttacker(Main main) {
         this.main = main;
@@ -40,6 +48,7 @@ public class NpcAttacker {
         this.hero = main.hero;
         this.drive = hero.drive;
         this.keybinds = main.facadeManager.settings;
+        this.bar = main.facadeManager.slotBars.categoryBar;
     }
 
     public String status() {
@@ -55,7 +64,7 @@ public class NpcAttacker {
     }
 
     public boolean isBugged() {
-        return fixTimes > 5;
+        return fixedTimes > 5;
     }
 
     public void doKillTargetTick() {
@@ -77,52 +86,77 @@ public class NpcAttacker {
     }
 
     void lockAndSetTarget() {
-        if (hero.locationInfo.distance(target) > 800 || System.currentTimeMillis() - clickDelay < 400) return;
-        hero.setTarget(target);
-        setRadiusAndClick(true);
-        clickDelay = System.currentTimeMillis();
-        fixTimes = 0;
-        laserTime = clickDelay + 50;
-        attacking = false;
-        if (main.config.LOOT.SHIP_ABILITY != null) ability = clickDelay + 4000;
+        if (hero.target == target && firstAttack) {
+            // On npc death, lock goes away before the npc does, sometimes the bot would try to lock the dead npc.
+            // This adds a bit of delay when any cause makes you lose the lock, until you try to re-lock.
+            clickDelay = System.currentTimeMillis();
+        }
+
+        fixedTimes = 0;
+        laserTime = 0;
+        firstAttack = false;
+        if (hero.locationInfo.distance(target) < 800 && System.currentTimeMillis() - clickDelay > 500) {
+            hero.setTarget(target);
+            setRadiusAndClick(true);
+            clickDelay = System.currentTimeMillis();
+            if (main.config.LOOT.SHIP_ABILITY != null) ability = clickDelay + 4000;
+        }
     }
 
     protected void tryAttackOrFix() {
-        // Consider bugged if attacking every 15 seconds, if not attacking every 2 seconds
-        long buggedTime = laserTime + fixTimes * (hero.isAttacking(target) ? 2000 : 15000);
-        boolean bugged = System.currentTimeMillis() > buggedTime &&
-                (!hero.isAiming(target) || (!target.health.hpDecreasedIn(3000) && hero.locationInfo.distance(target) < 700));
-        boolean ammoChanged = shouldSab() != sab || shouldRsb() != rsb;
-        if ((ammoChanged || !hero.isAttacking(target) || bugged) && System.currentTimeMillis() > laserTime) {
-            laserTime = System.currentTimeMillis() + 750;
-            if (!attacking || !bugged || ammoChanged) {
-                API.keyboardClick(getAttackKey());
-                attacking = true;
-            } else {
-                if (API instanceof DarkBoatAdapter) API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
-                else setRadiusAndClick(false);
-                fixTimes++;
-            }
+        if (System.currentTimeMillis() < laserTime) return;
+
+        if (!firstAttack) {
+            firstAttack = true;
+            sendAttack(1500, 5000, true);
+        } else if (shouldSab() != sab || shouldRsb() != rsb) {
+            sendAttack(250, 5000, true);
+        } else if (!hero.isAttacking(target) || !hero.isAiming(target)) {
+            sendAttack(1500, 5000, false);
+        } else if (target.health.hpDecreasedIn(1500) || target.hasEffect(EffectManager.Effect.NPC_ISH)
+                || hero.locationInfo.distance(target) > 700) {
+            isAttacking = Math.max(isAttacking, System.currentTimeMillis() + 2000);
+        } else if (System.currentTimeMillis() > isAttacking) {
+            sendAttack(1500, ++fixedTimes * 3000L, false);
         }
+    }
+
+    private void sendAttack(long minWait, long bugTime, boolean normal) {
+        laserTime = System.currentTimeMillis() + minWait;
+        isAttacking = Math.max(isAttacking, laserTime + bugTime);
+        if (normal) API.keyboardClick(getAttackKey());
+        else if (API instanceof DarkBoatAdapter) API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
+        else setRadiusAndClick(false);
     }
 
     public double modifyRadius(double radius) {
         if (target.health.hpPercent() < 0.25 && target.npcInfo.extra.has(NpcExtra.AGGRESSIVE_FOLLOW)) radius *= 0.75;
-        if (target != hero.target || !hero.isAttacking(target) || castingAbility()) return Math.min(550, radius);
-        if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) return Math.min(600, radius);
-        return radius;
+        if (target != hero.target || !hero.isAttacking(target) || castingAbility()) radius = Math.min(550, radius);
+        else if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) radius = Math.min(600, radius);
+
+        return radius + bar.findItemById("ability_zephyr_mmt").map(i -> i.quantity).orElse(0d) * 5;
     }
 
     private boolean shouldSab() {
-        return main.config.LOOT.SAB.ENABLED && hero.health.shieldPercent() < main.config.LOOT.SAB.PERCENT
-                && target.health.shield > main.config.LOOT.SAB.NPC_AMOUNT;
+        if (!main.config.LOOT.SAB.ENABLED || target.npcInfo.extra.has(NpcExtra.NO_SAB)) return false;
+
+        Config.Loot.Sab SAB = main.config.LOOT.SAB;
+        return hero.health.shieldPercent() <= SAB.PERCENT
+                && target.health.shield > SAB.NPC_AMOUNT
+                && (SAB.CONDITION == null || SAB.CONDITION.get(main).toBoolean());
     }
 
     private boolean shouldRsb() {
-        if (!main.config.LOOT.RSB.ENABLED || !target.npcInfo.extra.has(NpcExtra.USE_RSB)) return false;
-        if (useRsbUntil < System.currentTimeMillis() - main.config.LOOT.RSB.AMMO_REFRESH) useRsbUntil = System.currentTimeMillis();
+        if (!main.config.LOOT.RSB.ENABLED || main.config.LOOT.RSB.KEY == null
+                || !target.npcInfo.extra.has(NpcExtra.USE_RSB)) return false;
 
-        return useRsbUntil > System.currentTimeMillis() - 50;
+        SettingsProxy.KeyBind keybind = main.facadeManager.settings.getKeyBind(main.config.LOOT.RSB.KEY);
+        SlotBar.Slot slot = main.facadeManager.slotBars.getSlot(keybind);
+        if (slot == null || slot.item == null) return false;
+        boolean isReady = bar.findItemById(slot.item.id).map(i -> i.activatable).orElse(false);
+
+        if (isReady && usedRsb < System.currentTimeMillis() - 1000) usedRsb = System.currentTimeMillis();
+        return usedRsb > System.currentTimeMillis() - 50;
     }
 
     private Character getAttackKey() {

@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.api.ApiAdapter;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
@@ -18,6 +19,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.github.manolo8.darkbot.Main.API;
 
 public class BackpageManager extends Thread {
     public  static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
@@ -99,7 +102,7 @@ public class BackpageManager extends Thread {
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
-                                .addWarning(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                                .addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
                     }
                 }
             }
@@ -143,6 +146,7 @@ public class BackpageManager extends Thread {
         conn.setConnectTimeout(30_000);
         conn.setReadTimeout(30_000);
         conn.setInstanceFollowRedirects(false);
+        conn.setRequestProperty("User-Agent", Http.getDefaultUserAgent());
         conn.setRequestProperty("Cookie", "dosid=" + this.sid);
         lastRequest = System.currentTimeMillis();
         return conn;

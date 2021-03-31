@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.gui.utils.Strings;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -128,7 +129,7 @@ public class PetManager extends Gui {
         private final Gear gear;
         public NpcPick(String npcName, NpcInfo npc) {
             this.npc = npc;
-            String fuzzyName = npcName.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
+            String fuzzyName = Strings.fuzzyMatcher(npcName);
             this.gear = locatorList.stream().filter(l -> fuzzyName.equals(l.fuzzyName)).findFirst().orElse(null);
         }
     }
@@ -155,7 +156,7 @@ public class PetManager extends Gui {
 
     public void setOverride(Integer gearId) {
         this.gearOverride = gearId;
-        this.gearOverrideTime = gearId == null ? 0 : System.currentTimeMillis() + 5000;
+        this.gearOverrideTime = gearId == null ? 0 : System.currentTimeMillis() + 6000;
     }
 
     public boolean hasGear(PetGearSupplier.Gears gear) {
@@ -197,7 +198,7 @@ public class PetManager extends Gui {
 
     private void selectModule(int moduleId, int submoduleIdx) {
         if (System.currentTimeMillis() < this.selectModuleTime) return;
-        this.selectModuleTime = System.currentTimeMillis() + 750;
+        this.selectModuleTime = System.currentTimeMillis() + 1000;
 
         switch (selection) {
             case SELECTED:
@@ -340,7 +341,7 @@ public class PetManager extends Gui {
             this.id = API.readMemoryInt(address + 172);
             this.parentId = API.readMemoryInt(address + 176); //assume, -1 if none
             this.name = API.readMemoryString(API.readMemoryLong(address + 200));
-            this.fuzzyName = name.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
+            this.fuzzyName = Strings.fuzzyMatcher(name);
             this.check = API.readMemoryLong(address, 208, 152, 0x10);
         }
     }

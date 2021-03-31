@@ -189,6 +189,10 @@ public class ByteUtils {
             return result;
         }
 
+        public void reset() {
+            stringCache.clear();
+        }
+
     }
 
 

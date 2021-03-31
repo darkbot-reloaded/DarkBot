@@ -21,6 +21,15 @@ public class SettingsProxy extends Updatable {
         return keycodes[keyBind.ordinal()];
     }
 
+    @Nullable
+    public KeyBind getKeyBind(Character ch) {
+        if (ch == null) return null;
+        for (int i = 0; i < keycodes.length; i++) {
+            if (keycodes[i] == ch) return KeyBind.values()[i];
+        }
+        return null;
+    }
+
     @Override
     public void update() {
         long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;

@@ -106,6 +106,7 @@ public class GuiManager implements Manager {
                 validTime = System.currentTimeMillis();
                 checks = LoadStatus.WAITING;
             }
+            API.resetCache();
         });
 
         botInstaller.guiManagerAddress.add(value -> {
@@ -166,7 +167,8 @@ public class GuiManager implements Manager {
 
     private void checkInvalid() {
         if (System.currentTimeMillis() - validTime > 90_000 + (main.hero.map.id == -1 ? 180_000 : 0)) {
-            System.out.println("Triggering refresh: gui manger was invalid for too long. (Make sure your hp fills up)");
+            System.out.println("Triggering refresh: gui manger was invalid for too long. " +
+                    "(Make sure your hp fills up, equip an auto-repair CPU if you're missing one)");
             API.handleRefresh();
             validTime = System.currentTimeMillis();
         }

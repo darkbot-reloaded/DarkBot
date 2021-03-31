@@ -40,7 +40,7 @@ public class LoginUtils {
     }
 
     public static LoginData performUserLogin(StartupParams params) {
-        if (params != null && params.getAutoLogin()) return LoginUtils.performAutoLogin(params);
+        if (params.getAutoLogin()) return LoginUtils.performAutoLogin(params);
 
         LoginForm panel = new LoginForm();
 
@@ -138,9 +138,6 @@ public class LoginUtils {
     public static void findPreloader(LoginData loginData) {
         Http req = Http.create("https://" + loginData.getUrl() + "/indexInternal.es?action=internalMapRevolution", false)
                 .setRawHeader("Cookie", "dosid=" + loginData.getSid());
-
-        if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.SPOOF_CLIENT)
-            req.setUserAgent("BigpointClient/1.2.0");
 
         String flashEmbed = req.consumeInputStream(inputStream ->
                 new BufferedReader(new InputStreamReader(inputStream))
