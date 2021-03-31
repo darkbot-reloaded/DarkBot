@@ -27,6 +27,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.twocaptcha.TwoCaptcha;
+import com.twocaptcha.captcha.ReCaptcha;
+import com.twocaptcha.exceptions.ApiException;
+import com.twocaptcha.exceptions.NetworkException;
+import com.twocaptcha.exceptions.TimeoutException;
+import com.twocaptcha.exceptions.ValidationException;
 
 public class LoginUtils {
     private static final Pattern LOGIN_PATTERN = Pattern.compile("\"bgcdw_login_form\" action=\"(.*)\"");
@@ -116,85 +122,34 @@ public class LoginUtils {
         String siteKey = "6LfkgUIUAAAAAETf-SZEx_exK2SEPirE8i2RZQ_U";
         String gResponse = "";
 
-        try {
-            String twocaptchaURL = Http.create("http://2captcha.com/in.php")
-                    .setParam("key",apiKey)
-                    .setParam("method", "userrecaptcha")
-                    .setParam("googlekey", siteKey)
-                    .setParam("pageurl", "https://www.darkorbit.com")
-                    .setParam("soft_id", "3012")
-                    .getContent();
-
-            String[] ID = twocaptchaURL.split("\\|");
-            System.out.println("SENDING CAPTCHA: " + twocaptchaURL);
-            switch (ID[0]){
-                case "OK":
-                    for(int i =0; i<=5; i++) {
-                        Time.sleep(20_000L);
-                        twocaptchaURL = Http.create("http://2captcha.com/res.php")
-                                .setParam("key", apiKey)
-                                .setParam("action", "get")
-                                .setParam("id", ID[1])
-                                .getContent();
-
-                        String[] responseKEY = twocaptchaURL.split("\\|");
-                        System.out.println("GETTING CAPTCHA SOLUTION: " + twocaptchaURL);
-                        switch (responseKEY[0]) {
-                            case "OK":
-                                gResponse = responseKEY[1];
-                                System.out.println("FOUND SOLUTION: " + gResponse);
-                                i=4;
-                                break;
-                            case "CAPCHA_NOT_READY":
-                                System.out.println("SOLUTION NOT READY");
-                                break;
-                            case "ERROR_CAPTCHA_UNSOLVABLE":
-                                System.out.println("NO SOLUTION FOUND - RETRY");
-                                break;
-                            case "ERROR_WRONG_USER_KEY":
-                            case "ERROR_KEY_DOES_NOT_EXIST":
-                                System.out.println("WRONG API KEY");
-                                break;
-                            case "ERROR_WRONG_ID_FORMAT":
-                            case "ERROR_WRONG_CAPTCHA_ID":
-                                System.out.println("WRONG SOLUTION ID - RETRY");
-                                break;
-                            case "ERROR_BAD_DUPLICATES":
-                                System.out.println("UNKNOWN ERROR - RETRY");
-                                break;
-                            case "REPORT_NOT_RECORDED":
-                                System.out.println("CAPTCHA REPORTED OR DELETED");
-                                break;
-                            case "ERROR_DUPLICATE_REPORT":
-                                System.out.println("REPORTED CAPTCHA ALREADY");
-                                break;
-                            case "ERROR_EMPTY_ACTION":
-                                System.out.println("EMPTY ACTION - CONTACT DEV");
-                                break;
-                        }
-                    }
-                    break;
-                case "ERROR_WRONG_USER_KEY":
-                case "ERROR_KEY_DOES_NOT_EXIST":
-                    System.out.println("WRONG API KEY"); break;
-                case "ERROR_ZERO_BALANCE":
-                    System.out.println("NO BALANCE"); break;
-                case "ERROR_NO_SLOT_AVAILABLE":
-                    //RETRY
-                    System.out.println("RETRY - NO WORKERS"); break;
-                case "ERROR_IP_NOT_ALLOWED":
-                    System.out.println("IP LOCKED - Please ADD IP or Unlock"); break;
-                case "IP_BANNED":
-                    System.out.println("IP BANNED - TRY AGAIN IN 5 MINS"); break;
-                case "ERROR_BAD_TOKEN_OR_PAGEURL":
-                case "ERROR_GOOGLEKEY":
-                case "ERROR_WRONG_GOOGLEKEY":
-                    System.out.println("CAPTCHA KEY ERROR - CONTACT DEV"); break;
-                case "":
-                    break;
+        TwoCaptcha solver = new TwoCaptcha(apiKey);
+        ReCaptcha captcha = new ReCaptcha();
+        captcha.setSiteKey(siteKey);
+        captcha.setUrl("https://www.darkorbit.com");
+        captcha.setSoftId(3012);
+        int maxTries = 3;
+        for(int count = 0; count < maxTries; count++) {
+            System.out.println("Sending Captcha");
+            try {
+                solver.solve(captcha);
+                System.out.println("Captcha solved: " + captcha.getCode());
+                gResponse = captcha.getCode();
+                break;
+            } catch (ValidationException e) {
+                // invalid parameters passed
+                System.out.println("Validation Exception: " + e.getMessage());
+            } catch (NetworkException e) {
+                // network error occurred
+                System.out.println("Network Exception: " + e.getMessage());
+            } catch (ApiException e) {
+                // api respond with error
+                System.out.println("Api Exception: " + e.getMessage());
+            } catch (TimeoutException e) {
+                // captcha is not solved so far
+                System.out.println("Timeout Exception: " + e.getMessage());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }catch (IOException e){
-            e.printStackTrace();
         }
 
         String loginUrl = Http.create("https://www.darkorbit.com/")
