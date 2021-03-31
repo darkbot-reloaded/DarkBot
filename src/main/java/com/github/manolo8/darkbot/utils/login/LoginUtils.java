@@ -143,6 +143,7 @@ public class LoginUtils {
                             case "OK":
                                 gResponse = responseKEY[1];
                                 System.out.println("FOUND SOLUTION: " + gResponse);
+                                i=4;
                                 break;
                             case "CAPCHA_NOT_READY":
                                 System.out.println("SOLUTION NOT READY");
