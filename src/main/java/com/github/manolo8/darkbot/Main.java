@@ -90,8 +90,6 @@ public class Main extends Thread implements PluginListener {
     public long lastRefresh = System.currentTimeMillis();
     public double avgTick;
     public boolean tickingModule;
-    public boolean needCaptchaSolved;
-    public String gResponse;
 
     private String moduleId;
     private List<Behaviour> behaviours = new ArrayList<>();
