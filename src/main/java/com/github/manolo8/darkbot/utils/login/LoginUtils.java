@@ -153,7 +153,12 @@ public class LoginUtils {
     }
 
     public static String getCaptchaResponse(String siteKey){
-        String apiKey = "";
+        String API_KEY = JOptionPane.showInputDialog("2Captcha API KEY:");
+        while(API_KEY.isEmpty()){
+            API_KEY = JOptionPane.showInputDialog("2Captcha API KEY:");
+        }
+        String apiKey = API_KEY;
+
         TwoCaptcha solver = new TwoCaptcha(apiKey);
         ReCaptcha captcha = new ReCaptcha();
         captcha.setSiteKey(siteKey);
@@ -161,8 +166,8 @@ public class LoginUtils {
         captcha.setSoftId(3012);
         int maxTries = 3;
         for(int count = 0; count < maxTries; count++) {
-            System.out.println("Sending Captcha");
             try {
+                System.out.println("Sending Captcha");
                 solver.solve(captcha);
                 System.out.println("Captcha solved: " + captcha.getCode());
                 return captcha.getCode();
