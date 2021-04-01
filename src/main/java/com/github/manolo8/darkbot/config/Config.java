@@ -173,6 +173,7 @@ public class Config {
         public @Option boolean HONOR_LOST_EXACT = true;
         public @Option boolean LOG_CHAT = false;
         public @Option boolean LOG_DEATHS = false;
+        public @Option String TWO_CAPTCHA_API_KEY = "";
     }
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();

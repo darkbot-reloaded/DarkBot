@@ -35,6 +35,7 @@ import com.twocaptcha.exceptions.TimeoutException;
 import com.twocaptcha.exceptions.ValidationException;
 
 public class LoginUtils {
+    private static final Pattern SITEKEY_PATTERN = Pattern.compile("sitekey=\"(.*)\"");
     private static final Pattern LOGIN_PATTERN = Pattern.compile("\"bgcdw_login_form\" action=\"(.*)\"");
     private static final Pattern DATA_PATTERN = Pattern.compile("\"src\": \"([^\"]*)\".*}, \\{(.*)}");
 
@@ -118,38 +119,12 @@ public class LoginUtils {
     }
 
     public static void usernameLogin(LoginData loginData) {
-        String apiKey = "";
-        String siteKey = "6LfkgUIUAAAAAETf-SZEx_exK2SEPirE8i2RZQ_U";
+        String siteKey = Http.create("https://www.darkorbit.com/")
+                .consumeInputStream(LoginUtils::getSiteKey);
         String gResponse = "";
 
-        TwoCaptcha solver = new TwoCaptcha(apiKey);
-        ReCaptcha captcha = new ReCaptcha();
-        captcha.setSiteKey(siteKey);
-        captcha.setUrl("https://www.darkorbit.com");
-        captcha.setSoftId(3012);
-        int maxTries = 3;
-        for(int count = 0; count < maxTries; count++) {
-            System.out.println("Sending Captcha");
-            try {
-                solver.solve(captcha);
-                System.out.println("Captcha solved: " + captcha.getCode());
-                gResponse = captcha.getCode();
-                break;
-            } catch (ValidationException e) {
-                // invalid parameters passed
-                System.out.println("Validation Exception: " + e.getMessage());
-            } catch (NetworkException e) {
-                // network error occurred
-                System.out.println("Network Exception: " + e.getMessage());
-            } catch (ApiException e) {
-                // api respond with error
-                System.out.println("Api Exception: " + e.getMessage());
-            } catch (TimeoutException e) {
-                // captcha is not solved so far
-                System.out.println("Timeout Exception: " + e.getMessage());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if(!siteKey.isEmpty()){
+            gResponse = getCaptchaResponse(siteKey);
         }
 
         String loginUrl = Http.create("https://www.darkorbit.com/")
@@ -167,7 +142,6 @@ public class LoginUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         CookieHandler.setDefault(null);
 
         HttpCookie cookie = cookieManager.getCookieStore().getCookies().stream()
@@ -176,6 +150,39 @@ public class LoginUtils {
                 .findFirst().orElseThrow(WrongCredentialsException::new);
 
         loginData.setSid(cookie.getValue(), cookie.getDomain());
+    }
+
+    public static String getCaptchaResponse(String siteKey){
+        String apiKey = "";
+        TwoCaptcha solver = new TwoCaptcha(apiKey);
+        ReCaptcha captcha = new ReCaptcha();
+        captcha.setSiteKey(siteKey);
+        captcha.setUrl("https://www.darkorbit.com");
+        captcha.setSoftId(3012);
+        int maxTries = 3;
+        for(int count = 0; count < maxTries; count++) {
+            System.out.println("Sending Captcha");
+            try {
+                solver.solve(captcha);
+                System.out.println("Captcha solved: " + captcha.getCode());
+                return captcha.getCode();
+            } catch (ValidationException e) {
+                // invalid parameters passed
+                System.out.println("Validation Exception: " + e.getMessage());
+            } catch (NetworkException e) {
+                // network error occurred
+                System.out.println("Network Exception: " + e.getMessage());
+            } catch (ApiException e) {
+                // api respond with error
+                System.out.println("Api Exception: " + e.getMessage());
+            } catch (TimeoutException e) {
+                // captcha is not solved so far
+                System.out.println("Timeout Exception: " + e.getMessage());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return "";
     }
 
     public static void findPreloader(LoginData loginData) {
@@ -201,6 +208,15 @@ public class LoginUtils {
         }
         return params;
     }
+
+    private static String getSiteKey(InputStream in) {
+        return new BufferedReader(new InputStreamReader(in)).lines()
+                .map(SITEKEY_PATTERN::matcher)
+                .filter(Matcher::find)
+                .map(matcher -> matcher.group(1))
+                .findFirst().orElse("");
+    }
+
 
     private static String getLoginUrl(InputStream in) {
         return new BufferedReader(new InputStreamReader(in)).lines()
