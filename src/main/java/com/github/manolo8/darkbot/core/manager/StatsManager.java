@@ -144,6 +144,7 @@ public class StatsManager implements Manager {
     }
 
     public void resetValues() {
+        started = System.currentTimeMillis();
         runningTime = 1;
         earnedCredits = 0;
         earnedUridium = 0;
