@@ -130,6 +130,7 @@ public class Config {
         public static class Rsb {
             public @Option boolean ENABLED = false;
             public @Option Character KEY = '3';
+            public @Deprecated int AMMO_REFRESH = 3500;
         }
         public @Option Character AMMO_KEY = '1';
         public @Option Character SHIP_ABILITY;
