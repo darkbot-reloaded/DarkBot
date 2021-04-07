@@ -110,7 +110,7 @@ public class LoginUtils {
     }
 
     public static void usernameLogin(LoginData loginData) {
-        String loginUrl = Http.create("https://www.darkorbit.com/")
+        String loginUrl = Http.create("https://lp.darkorbit.com/")
                 .consumeInputStream(LoginUtils::getLoginUrl);
 
         CookieManager cookieManager = new CookieManager();
