@@ -2,7 +2,7 @@ package eu.darkbot.impl.managers;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
-import eu.darkbot.api.entities.other.Ammo;
+import eu.darkbot.api.entities.other.SelectableItem;
 import eu.darkbot.api.entities.utils.Attackable;
 import eu.darkbot.api.managers.AttackAPI;
 import eu.darkbot.api.managers.HeroAPI;
@@ -96,18 +96,18 @@ public class AttackApiImpl implements AttackAPI {
     }
 
     @Override
-    public @Nullable Ammo.Laser getLaser() {
+    public SelectableItem.Laser getLaser() {
         return heroItems.getItems(HeroItemsAPI.Category.LASERS).stream()
                 .filter(Item::isSelected)
-                .map(item -> Ammo.Laser.of(item.getId()))
+                .map(item -> SelectableItem.Laser.of(item.getId()))
                 .findFirst().orElse(null);
     }
 
     @Override
-    public @Nullable Ammo.Rocket getRocket() {
+    public SelectableItem.Rocket getRocket() {
         return heroItems.getItems(HeroItemsAPI.Category.ROCKETS).stream()
                 .filter(Item::isSelected)
-                .map(item -> Ammo.Rocket.of(item.getId()))
+                .map(item -> SelectableItem.Rocket.of(item.getId()))
                 .findFirst().orElse(null);
     }
 }
