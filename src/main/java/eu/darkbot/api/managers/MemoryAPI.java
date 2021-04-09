@@ -85,6 +85,22 @@ public interface MemoryAPI extends API.Singleton {
     }
 
     /**
+     * Reads {@link String} from memory.
+     *
+     * @param address  to read from
+     * @param fallback to return in case of null/empty result
+     * @return string from memory if present, fallback otherwise
+     */
+    default String readString(long address, String fallback) {
+        String value = readString(address);
+        return value == null || value.isEmpty() ? fallback : value;
+    }
+
+    default String readString(long address, String fallback, int... offsets) {
+        return readString(readLong(address, offsets), fallback);
+    }
+
+    /**
      * Reads byte array from memory with given length.
      *
      * @param address to read
@@ -270,9 +286,9 @@ public interface MemoryAPI extends API.Singleton {
      * Search current process memory for given pattern
      * until it reaches maxSize array length or no more memory regions to be searched.
      *
-     * @param pattern to look for
      * @param maxSize max length of returned array
+     * @param pattern to look for
      * @return array of direct pointers to searched pattern
      */
-    long[] searchPattern(byte[] pattern, int maxSize);
+    long[] searchPattern(int maxSize, byte... pattern);
 }

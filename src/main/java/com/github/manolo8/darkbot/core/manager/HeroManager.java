@@ -14,7 +14,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Entity;
-import eu.darkbot.api.entities.other.Formation;
+import eu.darkbot.api.entities.other.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
 import org.jetbrains.annotations.Nullable;
@@ -205,7 +205,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     @Override
-    public void setFormation(Formation formation) {
+    public void setFormation(SelectableItem.Formation formation) {
         if (formation == getFormation() ||
                 System.currentTimeMillis() - formationTime <= 3500L) return;
 
@@ -219,12 +219,12 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     @Override
-    public boolean isInMode(Configuration configuration, Formation formation) {
+    public boolean isInMode(Configuration configuration, SelectableItem.Formation formation) {
         return configuration == getConfiguration() && formation == getFormation();
     }
 
     @Override
-    public boolean setMode(Configuration configuration, Formation formation) {
+    public boolean setMode(Configuration configuration, SelectableItem.Formation formation) {
         setFormation(formation);
         if (configuration != getConfiguration()) toggleConfiguration();
 

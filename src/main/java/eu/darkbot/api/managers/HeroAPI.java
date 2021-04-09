@@ -3,8 +3,7 @@ package eu.darkbot.api.managers;
 import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Npc;
 import eu.darkbot.api.entities.Ship;
-import eu.darkbot.api.entities.other.Formation;
-import org.jetbrains.annotations.Nullable;
+import eu.darkbot.api.entities.other.SelectableItem;
 
 /**
  * This {@link API} represent hero entity,
@@ -29,7 +28,7 @@ public interface HeroAPI extends Ship, API.Singleton {
      *
      * @param formation
      */
-    void setFormation(Formation formation);
+    void setFormation(SelectableItem.Formation formation);
 
     /**
      * Will check if {@link HeroAPI} is in given {@code mode}.
@@ -38,7 +37,7 @@ public interface HeroAPI extends Ship, API.Singleton {
      * @param formation to check
      * @return true if {@link HeroAPI} is in given config & formation
      */
-    boolean isInMode(Configuration configuration, Formation formation);
+    boolean isInMode(Configuration configuration, SelectableItem.Formation formation);
 
     /**
      * Will check if {@link HeroAPI} is in given {@code mode},
@@ -48,7 +47,7 @@ public interface HeroAPI extends Ship, API.Singleton {
      * @param formation to set
      * @return true if is in given mode
      */
-    boolean setMode(Configuration configuration, Formation formation);
+    boolean setMode(Configuration configuration, SelectableItem.Formation formation);
 
     /**
      * Will try to set predefined by user attack mode based on given {@code target}

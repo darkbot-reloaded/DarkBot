@@ -1,6 +1,7 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
+import eu.darkbot.api.entities.other.SelectableItem;
 import eu.darkbot.api.objects.Item;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,6 +65,12 @@ public interface HeroItemsAPI extends API.Singleton {
      */
     default Optional<Item> findItem(@NotNull HeroItemsAPI.Category category, String itemId) {
         return filterItem(category, id -> id.equals(itemId));
+    }
+
+    default Optional<Item> findItem(@NotNull SelectableItem selectableItem) {
+        Category category = selectableItem.getCategory();
+        return category == null ? filterItem(selectableItem::matches) :
+                filterItem(category, selectableItem::matches);
     }
 
     /**
