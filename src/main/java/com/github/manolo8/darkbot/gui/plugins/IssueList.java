@@ -20,13 +20,13 @@ class IssueList extends JPanel {
 
         this.issueHandlers = issues;
         setOpaque(false);
-        setupUI();
+        if (inline) setupUI();
         for (IssueHandler issue : issues) {
             issue.addListener(h -> this.setupUI());
         }
     }
 
-    private void setupUI() {
+    protected void setupUI() {
         removeAll();
         Arrays.stream(this.issueHandlers)
                 .flatMap(issue -> issue.getIssues().stream())
