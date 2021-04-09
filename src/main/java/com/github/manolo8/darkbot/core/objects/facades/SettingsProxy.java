@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -21,6 +22,14 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
     @Nullable
     public Character getCharCode(KeyBind keyBind) {
         return keycodes[keyBind.ordinal()];
+    }
+
+    public boolean toggleKeyBind(KeyBind keyBind) {
+        Character charCode = getCharCode(Objects.requireNonNull(keyBind, "KeyBind is null!"));
+        if (charCode == null) return false;
+
+        API.keyboardClick(charCode);
+        return true;
     }
 
     public Optional<Character> getCharacterOf(KeyBind keyBind) {
@@ -110,13 +119,18 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
             this.type = type;
         }
 
-        public SlotBarsProxy.Type getType() {
-            return type;
-        }
-
         public static KeyBind of(int index) {
             if (index < 0 || index >= values().length) return null;
             return values()[index];
+        }
+
+        public static KeyBind of(SlotBarsProxy.Type slotType, int slotNumber) {
+            return KeyBind.valueOf(slotType == SlotBarsProxy.Type.PREMIUM_BAR ? "PREMIUM_" : "SLOTBAR_" +
+                    (slotNumber + 9) % 10);
+        }
+
+        public SlotBarsProxy.Type getType() {
+            return type;
         }
     }
 }

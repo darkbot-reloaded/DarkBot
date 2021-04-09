@@ -20,8 +20,6 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     public final SlotBar premiumBar = new SlotBar(categoryBar, Type.PREMIUM_BAR);
     public final SlotBar proActionBar = new SlotBar(categoryBar, Type.PRO_ACTION_BAR);
 
-    public boolean categoryBarVisible, proActionBarVisible;
-
     private final SettingsProxy settings;
 
     public SlotBarsProxy(SettingsProxy settingsProxy) {
@@ -35,9 +33,14 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         this.proActionBar.update(API.readMemoryLong(address + 112));
         this.premiumBar.update(API.readMemoryLong(address + 104));
         this.standardBar.update(API.readMemoryLong(address + 96));
+    }
 
-        this.categoryBarVisible = API.readBoolean(address + 72);
-        this.proActionBarVisible = API.readBoolean(address + 76);
+    public boolean isCategoryBarVisible() {
+        return API.readBoolean(address + 72);
+    }
+
+    public boolean isProActionBarVisible() {
+        return API.readBoolean(address + 76);
     }
 
     @Nullable
@@ -61,15 +64,13 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         SlotBarsProxy.Type slotBarType = ((Item) item).getSlotBarType();
         int slotNumber = ((Item) item).getFirstSlotNumber();
 
-        if (slotBarType == null || slotNumber == -1) return false;
-        if (slotBarType == SlotBarsProxy.Type.PRO_ACTION_BAR)
-            API.keyboardClick(settings.getCharCode(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION));
+        if (slotBarType == null || slotNumber == -1 ||
+                (slotBarType == SlotBarsProxy.Type.PRO_ACTION_BAR &&
+                        !isProActionBarVisible() &&
+                        !settings.toggleKeyBind(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION)))
+            return false; //return false if slot type is pro action bar & isnt visible & keybind wasn't toggled.
 
-        API.keyboardClick(settings.getCharCode(SettingsProxy.KeyBind.valueOf(
-                (slotBarType == SlotBarsProxy.Type.PREMIUM_BAR ?
-                        "PREMIUM_" : "SLOTBAR_") + (slotNumber == 10 ? 0 : slotNumber))));
-
-        return true;
+        return settings.toggleKeyBind(SettingsProxy.KeyBind.of(slotBarType, slotNumber));
     }
 
     @Override

@@ -3,11 +3,11 @@ package com.github.manolo8.darkbot.extensions.features;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.itf.Installable;
+import com.github.manolo8.darkbot.extensions.DarkBotPluginApiImpl;
 import com.github.manolo8.darkbot.extensions.features.decorators.ConfigurableDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.FeatureDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstallableDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstructionProviderDecorator;
-import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,8 +20,11 @@ class FeatureInstanceLoader {
 
     private final List<FeatureDecorator<?>> FEATURE_DECORATORS;
     private final ConfigurableDecorator CONFIGURATION_DECORATOR;
+    private final DarkBotPluginApiImpl pluginAPI;
 
     FeatureInstanceLoader(Main main) {
+        this.pluginAPI = main.pluginAPI;
+
         FEATURE_DECORATORS = Arrays.asList(
                 new InstallableDecorator(main),
                 CONFIGURATION_DECORATOR = new ConfigurableDecorator(main),
@@ -29,7 +32,7 @@ class FeatureInstanceLoader {
     }
 
     <T> T loadFeature(FeatureDefinition<T> featureDefinition) {
-        T feature = ReflectionUtils.createInstance(featureDefinition.getClazz());
+        T feature = pluginAPI.requireInstance(featureDefinition.getClazz());
         for (FeatureDecorator<?> decorator : FEATURE_DECORATORS) {
             decorator.tryLoad(featureDefinition, feature);
         }

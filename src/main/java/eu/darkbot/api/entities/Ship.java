@@ -1,6 +1,6 @@
 package eu.darkbot.api.entities;
 
-import eu.darkbot.api.entities.other.Formation;
+import eu.darkbot.api.entities.other.SelectableItem;
 import eu.darkbot.api.entities.utils.Attacker;
 import eu.darkbot.api.entities.utils.Movable;
 import org.jetbrains.annotations.NotNull;
@@ -37,16 +37,16 @@ public interface Ship extends Attacker, Movable {
     Optional<Pet> getPet();
 
     /**
-     * @return used {@link Formation} by the {@link Ship}
+     * @return used {@link SelectableItem.Formation} by the {@link Ship}
      */
-    Formation getFormation();
+    SelectableItem.Formation getFormation();
 
     /**
      * @return true if ship has enabled given formation.
      */
     boolean isInFormation(int formationId);
 
-    default boolean isInFormation(@NotNull Formation formation) {
+    default boolean isInFormation(@NotNull SelectableItem.Formation formation) {
         return isInFormation(formation.ordinal());
     }
 }

@@ -8,7 +8,7 @@ import com.github.manolo8.darkbot.core.objects.ShipInfo;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
 import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.entities.Pet;
-import eu.darkbot.api.entities.other.Formation;
+import eu.darkbot.api.entities.other.SelectableItem;
 import eu.darkbot.api.entities.utils.Attackable;
 import eu.darkbot.api.objects.EntityInfo;
 import eu.darkbot.api.objects.Locatable;
@@ -183,8 +183,8 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
     }
 
     @Override
-    public Formation getFormation() {
-        return Formation.of(formationId);
+    public SelectableItem.Formation getFormation() {
+        return SelectableItem.Formation.of(formationId);
     }
 
     @Override

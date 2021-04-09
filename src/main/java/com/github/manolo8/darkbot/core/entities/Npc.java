@@ -7,8 +7,7 @@ import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
-import eu.darkbot.api.entities.other.Ammo;
-import eu.darkbot.api.entities.other.Formation;
+import eu.darkbot.api.entities.other.SelectableItem;
 import eu.darkbot.api.managers.HeroItemsAPI;
 
 import java.util.Objects;
@@ -87,15 +86,15 @@ public class Npc extends Ship implements eu.darkbot.api.entities.Npc {
         }
 
         @Override
-        public Optional<Ammo.Laser> getAmmo() {
+        public Optional<SelectableItem.Laser> getAmmo() {
             return findItemAssociatedWith(HeroItemsAPI.Category.LASERS, npcInfo.attackKey)
-                    .map(item -> Ammo.Laser.of(item.id));
+                    .map(item -> SelectableItem.Laser.of(item.id));
         }
 
         @Override
-        public Optional<Formation> getFormation() {
+        public Optional<SelectableItem.Formation> getFormation() {
             return findItemAssociatedWith(HeroItemsAPI.Category.DRONE_FORMATIONS, npcInfo.attackFormation)
-                    .map(item -> Formation.of(item.id));
+                    .map(item -> SelectableItem.Formation.of(item.id));
         }
 
         private Optional<Item> findItemAssociatedWith(HeroItemsAPI.Category category, Character c) {

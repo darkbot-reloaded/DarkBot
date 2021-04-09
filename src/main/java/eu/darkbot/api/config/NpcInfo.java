@@ -1,8 +1,7 @@
 package eu.darkbot.api.config;
 
 import eu.darkbot.api.entities.Npc;
-import eu.darkbot.api.entities.other.Ammo;
-import eu.darkbot.api.entities.other.Formation;
+import eu.darkbot.api.entities.other.SelectableItem;
 
 import java.util.Optional;
 
@@ -14,8 +13,8 @@ public interface NpcInfo {
     int getPriority();
     double getRadius();
 
-    Optional<Ammo.Laser> getAmmo();
-    Optional<Formation> getFormation();
+    Optional<SelectableItem.Laser> getAmmo();
+    Optional<SelectableItem.Formation> getFormation();
 
     boolean hasExtraFlag(ExtraFlag flag);
     void setExtraFlag(ExtraFlag flag, boolean active);
