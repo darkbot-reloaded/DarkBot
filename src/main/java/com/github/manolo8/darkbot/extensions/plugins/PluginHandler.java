@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.utils.AuthAPI;
 import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
@@ -216,8 +217,21 @@ public class PluginHandler {
                     I18n.get(isUpdate ? "plugins.update_issues.bot_update.desc" : "plugins.issues.bot_update.desc",
                             supportedRange, Main.VERSION));
 
-        if (!isUpdate && Main.VERSION.compareTo(pd.supportedVersion) > 0)
+        if (!isUpdate && maybeIncompatible(pd.supportedVersion))
             issues.addInfo(MAY_NEED_UPDATE, I18n.get("plugins.issues.plugin_update.desc", supportedRange, Main.VERSION));
+    }
+
+    private boolean maybeIncompatible(Version ver) {
+        if (Main.VERSION.compareTo(ver) <= 0) return false;
+
+        // For alphas, ensure always newer
+        if (Main.VERSION.isAlpha()) return true;
+
+        // Alternatively, check that the general version is the same
+
+        Version simpleMain = new Version(Main.VERSION.getMajor(), Main.VERSION.getMinor(), Main.VERSION.getPatch());
+        Version simpleVer = new Version(ver.getMajor(), ver.getMinor(), ver.getPatch());
+        return simpleMain.compareTo(simpleVer) > 0;
     }
 
     private void testSignature(Plugin plugin, JarFile jar) throws IOException {

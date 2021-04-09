@@ -6,11 +6,13 @@ import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
+import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
 import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.SystemUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -55,7 +57,7 @@ public class PluginCard extends JPanel {
 
         add(progressBar, "hidemode 2, dock south, spanx");
         add(progressLabel, "hidemode 2, dock south, spanx, gapleft 5px");
-        add(new IssueList(false, plugin.getIssues(), plugin.getUpdateIssues()), "hidemode 2, dock east");
+        add(new PluginSidePanel(plugin), "hidemode 2, dock east");
         add(new PluginName(plugin.getDefinition(), updateButton), "dock north");
 
         featureRegistry.getFeatures(plugin).forEach(fd -> this.addFeature(main, fd));
