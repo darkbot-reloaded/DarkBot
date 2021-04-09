@@ -1,7 +1,7 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.other.Ammo;
+import eu.darkbot.api.entities.other.SelectableItem;
 import eu.darkbot.api.entities.utils.Attackable;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,13 +54,13 @@ public interface AttackAPI extends API.Singleton {
     void laserAbort();
 
     /**
-     * @return currently used {@link Ammo.Laser}
+     * @return currently used {@link SelectableItem.Laser}
      //* @see #setLaser(Ammo.Laser)
      */
-    @Nullable Ammo.Laser getLaser();
+    @Nullable SelectableItem.Laser getLaser();
 
     /**
-     * Tries to set {@link Ammo.Laser} ammunition.
+     * Tries to set {@link SelectableItem.Laser} ammunition.
      *
      * @param laser to be set
      * @return true if laser is available and successfully/already set
@@ -75,13 +75,13 @@ public interface AttackAPI extends API.Singleton {
     void launchRocket();
 
     /**
-     * @return currently used {@link Ammo.Rocket}
+     * @return currently used {@link SelectableItem.Rocket}
      //* @see #setRocket(Ammo.Rocket)
      */
-    @Nullable Ammo.Rocket getRocket();
+    @Nullable SelectableItem.Rocket getRocket();
 
     /**
-     * Tries to set {@link Ammo.Rocket} ammunition.
+     * Tries to set {@link SelectableItem.Rocket} ammunition.
      *
      * @param rocket to be set
      * @return true if rocket is available and successfully/already set.
