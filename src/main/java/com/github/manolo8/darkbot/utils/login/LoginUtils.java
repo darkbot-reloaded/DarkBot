@@ -110,7 +110,15 @@ public class LoginUtils {
     }
 
     public static void usernameLogin(LoginData loginData) {
-        String loginUrl = Http.create("https://lp.darkorbit.com/")
+        try {
+            usernameLogin(loginData, "www");
+        } catch (WrongCredentialsException e) {
+            usernameLogin(loginData, "lp");
+        }
+    }
+
+    public static void usernameLogin(LoginData loginData, String domain) {
+        String loginUrl = Http.create("https://" + domain + ".darkorbit.com/")
                 .consumeInputStream(LoginUtils::getLoginUrl);
 
         CookieManager cookieManager = new CookieManager();
