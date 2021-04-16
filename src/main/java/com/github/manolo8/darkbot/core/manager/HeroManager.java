@@ -169,7 +169,7 @@ public class HeroManager extends Ship implements Manager {
                         this.formationTime = System.currentTimeMillis();
                         this.formationCheckBySlot = true;
                     });
-            //this.formationCheckBySlot = true; maybe check it just one time? per new char formation
+            //this.formationCheckBySlot = true; maybe should be checked just one time? per new char formation
         }
         return isInMode(con, form);
     }
