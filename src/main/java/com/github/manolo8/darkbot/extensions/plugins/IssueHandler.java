@@ -37,12 +37,33 @@ public class IssueHandler {
     }
 
     public static String createDescription(Throwable e) {
-        return Stream.concat(
-                Stream.of("<strong>" + e.toString() + "</strong>"),
-                Arrays.stream(e.getStackTrace())
-        ).map(Objects::toString)
-                .limit(100)
+        return createDescription(e, false)
                 .collect(Collectors.joining("<br>", "<html>", "</html>"));
+    }
+
+    private static Stream<String> createDescription(Throwable e, boolean isCause) {
+        Stream<String> stream = Stream.concat(
+                Stream.of("<strong>" + (isCause ? "Caused By: " : "") + e.toString() + "</strong>"),
+                Arrays.stream(e.getStackTrace()).map(IssueHandler::toSimpleString)
+        ).limit(100);
+        if (e.getCause() == null) return stream;
+        return Stream.concat(stream, createDescription(e.getCause(), true));
+    }
+
+    /**
+     * Converts a StackTraceElement to a simple string.
+     * If filenames are long and have no line number they're assumed to be obfuscated and are removed.
+     */
+    private static String toSimpleString(StackTraceElement ste) {
+        String code;
+        if (ste.isNativeMethod()) code = "Native Method";
+        else if (ste.getFileName() != null && ste.getLineNumber() >= 0)
+            code = ste.getFileName() + ":" + ste.getLineNumber();
+        else if (ste.getFileName() != null && ste.getFileName().length() < 100)
+            code = ste.getFileName();
+        else code = "Unknown Source";
+
+        return ste.getClassName() + "." + ste.getMethodName() + "(" + code + ")";
     }
 
     public void add(PluginIssue issue) {

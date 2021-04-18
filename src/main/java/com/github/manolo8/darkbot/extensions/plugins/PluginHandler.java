@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -52,7 +53,7 @@ public class PluginHandler {
             PLUGIN_UPDATE_PATH = PLUGIN_UPDATE_FOLDER.toPath(),
             PLUGIN_OLD_PATH    = PLUGIN_OLD_FOLDER.toPath();
 
-    public URLClassLoader PLUGIN_CLASS_LOADER;
+    public PluginClassLoader PLUGIN_CLASS_LOADER;
     public final List<Plugin> LOADED_PLUGINS = new ArrayList<>();
     public final List<Plugin> FAILED_PLUGINS = new ArrayList<>();
     public final List<PluginException> LOADING_EXCEPTIONS = new ArrayList<>();
@@ -170,7 +171,7 @@ public class PluginHandler {
                 e.printStackTrace();
             }
         }
-        PLUGIN_CLASS_LOADER = new URLClassLoader(LOADED_PLUGINS.stream().map(Plugin::getJar).toArray(URL[]::new));
+        PLUGIN_CLASS_LOADER = new PluginClassLoader(LOADED_PLUGINS.stream().map(Plugin::getJar).toArray(URL[]::new));
     }
 
     private void loadPlugin(Plugin plugin) throws IOException, PluginException {

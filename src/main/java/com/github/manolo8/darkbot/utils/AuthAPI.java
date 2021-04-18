@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.utils;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.util.jar.JarFile;
 
@@ -36,6 +38,16 @@ public interface AuthAPI {
      * @return true if the user is a donor in the official darkbot discord server, false otherwise.
      */
     boolean requireDonor();
+
+    /**
+     * Returns a unique id for the player, the only guarantee is the same player will keep the same id
+     * as long as the auth method is the same, and that no 2 players will share it.
+     * @return A unique string representing this user, null if no auth was done.
+     */
+    @Nullable
+    default String getAuthId() {
+        return null;
+    }
 
     /**
      * Checks if a jar file has been signed by an authorized key
