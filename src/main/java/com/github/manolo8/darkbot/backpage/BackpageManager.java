@@ -65,6 +65,18 @@ public class BackpageManager extends Thread {
         while (true) {
             Time.sleep(100);
 
+            for (Task task : tasks) {
+                synchronized (main.pluginHandler.getBackgroundLock()) {
+                    try {
+                        task.backgroundTick();
+                    } catch (Throwable e) {
+                        main.featureRegistry.getFeatureDefinition(task)
+                                .getIssues()
+                                .addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                    }
+                }
+            }
+
             if (isInvalid()) {
                 sidStatus = SidStatus.NO_SID;
                 continue;
