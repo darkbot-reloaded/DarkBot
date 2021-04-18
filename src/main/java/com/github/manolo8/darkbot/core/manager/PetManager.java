@@ -331,6 +331,18 @@ public class PetManager extends Gui {
         return null;
     }
 
+    public Gear getCurrentModule() {
+        return currentModule;
+    }
+
+    public Gear getCurrentSubModule() {
+        return currentSubModule;
+    }
+
+    public Integer getGearOverride() {
+        return gearOverride;
+    }
+
     public static class Gear extends UpdatableAuto {
         public int id, parentId;
         public long check;
