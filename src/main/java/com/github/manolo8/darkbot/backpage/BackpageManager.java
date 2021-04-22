@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,7 +38,7 @@ public class BackpageManager extends Thread {
 
     private final Main main;
     private String sid, instance;
-    private List<Task> tasks;
+    private volatile List<Task> tasks = new ArrayList<>();
 
     private long lastRequest;
     private long sidLastUpdate = System.currentTimeMillis();
