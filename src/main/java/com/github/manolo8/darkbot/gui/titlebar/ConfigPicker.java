@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigManager;
+import com.github.manolo8.darkbot.utils.FileUtils;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -23,6 +24,7 @@ public class ConfigPicker extends JComboBox<String> {
         this.main = null; // Ensure no updates happen
         removeAllItems();
         addItem(ConfigManager.DEFAULT);
+        FileUtils.ensureDirectoryExists(Paths.get(ConfigManager.CONFIG_FOLDER));
         try {
             Files.list(Paths.get(ConfigManager.CONFIG_FOLDER))
                     .map(Path::getFileName)
