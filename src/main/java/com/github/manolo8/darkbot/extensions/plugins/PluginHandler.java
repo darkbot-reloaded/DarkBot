@@ -33,7 +33,7 @@ public class PluginHandler {
     public static final PluginIssue LOADED_TWICE = new PluginIssue("plugins.issues.loaded_twice",
             I18n.get("plugins.issues.loaded_twice.desc"), PluginIssue.Level.ERROR);
     public static final PluginIssue UPDATE_NOT_POSSIBLE = new PluginIssue("plugins.update_issues.updates_not_possible",
-            I18n.get("plugins.update_issues.updates_not_possible.desc"), PluginIssue.Level.INFO);
+            I18n.get("plugins.update_issues.updates_not_possible.desc"), PluginIssue.Level.WARNING);
     public static final String INVALID_UPDATE_JSON = "plugins.update_issues.invalid_json";
     public static final String INVALID_JSON = "plugins.issues.invalid_json";
     public static final String BOT_UPDATE_REQUIRED = "plugins.update_issues.bot_update";

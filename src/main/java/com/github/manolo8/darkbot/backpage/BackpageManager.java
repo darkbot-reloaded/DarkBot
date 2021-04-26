@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class BackpageManager extends Thread {
-    public  static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
+    public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
     private static final String[] ACTIONS = new String[]{
             "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
 
@@ -38,7 +38,7 @@ public class BackpageManager extends Thread {
 
     private final Main main;
     private String sid, instance;
-    private volatile List<Task> tasks = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 
     private long lastRequest;
     private long sidLastUpdate = System.currentTimeMillis();
@@ -66,8 +66,8 @@ public class BackpageManager extends Thread {
         while (true) {
             Time.sleep(100);
 
-            for (Task task : tasks) {
-                synchronized (main.pluginHandler.getBackgroundLock()) {
+            synchronized (main.pluginHandler.getBackgroundLock()) {
+                for (Task task : tasks) {
                     try {
                         task.backgroundTick();
                     } catch (Throwable e) {
@@ -108,8 +108,8 @@ public class BackpageManager extends Thread {
                 }
             }
 
-            for (Task task : tasks) {
-                synchronized (main.pluginHandler.getBackgroundLock()) {
+            synchronized (main.pluginHandler.getBackgroundLock()) {
+                for (Task task : tasks) {
                     try {
                         task.tickTask();
                     } catch (Throwable e) {
@@ -196,14 +196,16 @@ public class BackpageManager extends Thread {
                     .map(m -> m.group(1))
                     .findFirst().orElse(null);
 
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
     }
 
     public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+        synchronized (main.pluginHandler.getBackgroundLock()) {
+            this.tasks = tasks;
+        }
     }
 
     public synchronized String sidStatus() {
@@ -215,11 +217,16 @@ public class BackpageManager extends Thread {
     private String sidStat() {
         switch (sidStatus) {
             case SidStatus.NO_SID:
-            case SidStatus.UNKNOWN: return "--";
-            case SidStatus.ERROR: return "ERR";
-            case 200: return "OK";
-            case 302: return "KO";
-            default: return sidStatus + "";
+            case SidStatus.UNKNOWN:
+                return "--";
+            case SidStatus.ERROR:
+                return "ERR";
+            case 200:
+                return "OK";
+            case 302:
+                return "KO";
+            default:
+                return sidStatus + "";
         }
     }
 
