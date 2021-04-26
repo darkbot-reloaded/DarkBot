@@ -203,9 +203,7 @@ public class BackpageManager extends Thread {
     }
 
     public void setTasks(List<Task> tasks) {
-        synchronized (main.pluginHandler.getBackgroundLock()) {
-            this.tasks = tasks;
-        }
+        this.tasks = tasks;
     }
 
     public synchronized String sidStatus() {
