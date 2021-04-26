@@ -56,6 +56,7 @@ public class Main extends Thread implements PluginListener {
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
             .setLenient()
+            .disableHtmlEscaping()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())

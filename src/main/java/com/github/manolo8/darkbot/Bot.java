@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 
@@ -25,6 +26,7 @@ public class Bot {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
+        LibSetup.setupLibraries();
         StartupParams params = new StartupParams(args);
         SwingUtilities.invokeLater(() -> new Main(params));
     }
