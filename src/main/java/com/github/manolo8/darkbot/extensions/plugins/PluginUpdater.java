@@ -42,7 +42,7 @@ public class PluginUpdater {
             public void run() {
                 checkUpdates();
             }
-        }, 0, Time.DAY);
+        }, Time.SECOND, Time.DAY);
     }
 
     public void setup(PluginDisplay display) {
