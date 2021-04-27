@@ -204,7 +204,7 @@ public class PluginHandler {
     }
 
     void testCompatibility(IssueHandler issues, PluginDefinition pd, boolean isUpdate) {
-        if (isUpdate && (pd.download == null || pd.update == null))
+        if (pd.update == null || (isUpdate && pd.download == null))
             issues.add(UPDATE_NOT_POSSIBLE);
 
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
