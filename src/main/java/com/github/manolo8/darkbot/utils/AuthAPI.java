@@ -45,9 +45,7 @@ public interface AuthAPI {
      * @return A unique string representing this user, null if no auth was done.
      */
     @Nullable
-    default String getAuthId() {
-        return null;
-    }
+    String getAuthId();
 
     /**
      * Checks if a jar file has been signed by an authorized key
