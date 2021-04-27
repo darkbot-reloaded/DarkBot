@@ -96,8 +96,8 @@ public class PluginDisplay extends JPanel implements PluginListener {
     }
 
     @Override
-    public void afterLoadComplete() {
-        SwingUtilities.invokeLater(this::refreshUI);
+    public void afterLoadCompleteUI() {
+        refreshUI();
     }
 
 }

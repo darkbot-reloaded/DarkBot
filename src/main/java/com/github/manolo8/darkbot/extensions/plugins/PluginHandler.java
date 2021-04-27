@@ -138,6 +138,7 @@ public class PluginHandler {
             LISTENERS.forEach(PluginListener::afterLoad);
         }
         LISTENERS.forEach(PluginListener::afterLoadComplete);
+        SwingUtilities.invokeLater(() -> LISTENERS.forEach(PluginListener::afterLoadCompleteUI));
     }
 
     public Stream<Plugin> getAvailableUpdates() {

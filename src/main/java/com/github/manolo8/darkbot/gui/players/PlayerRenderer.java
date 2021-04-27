@@ -15,10 +15,10 @@ import java.util.Map;
 
 public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInfo> {
 
-    private JLabel playername = new JLabel();
-    private JLabel id = new JLabel();
+    private final JLabel playername = new JLabel();
+    private final JLabel id = new JLabel();
 
-    private Map<PlayerTag, Tag> tagCache = new HashMap<>();
+    private final Map<PlayerTag, Tag> tagCache = new HashMap<>();
 
     public PlayerRenderer() {
         super(new MigLayout("ins 4px 0px 4px 5px, fill, h 28px!", "[50px!]8px![120px!]8px:push[]8px!", "[]"));
