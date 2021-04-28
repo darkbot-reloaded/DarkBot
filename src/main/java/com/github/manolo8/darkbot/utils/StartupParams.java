@@ -70,7 +70,10 @@ public class StartupParams {
                     forceNoOp = true;
                     break;
                 case START_CONFIGS:
-                    startConfigs = args[++i];
+                    if (i + 1 >= args.length)
+                        System.err.println("Missing arguments for config, usage: -configs nameofconfig");
+                    else
+                        startConfigs = args[++i];
                     break;
                 default:
                     System.out.println("Unknown startup argument: " + args[i]);
