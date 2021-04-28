@@ -115,6 +115,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         }
 
         tabs.revalidate();
+        tabs.repaint();
     }
 
     private class TabButton extends MainButton {

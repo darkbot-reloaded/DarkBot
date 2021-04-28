@@ -316,7 +316,7 @@ public class Main extends Thread implements PluginListener {
                 pluginHandler.updateConfig(); // Get plugins to update what features are enabled
                 featureRegistry.updateConfig(); // Update the features & configurables
                 form.updateConfiguration(); // Rebuild config gui
-                setModule(module, true);
+                setModule(null, true);
             });
         } catch (InterruptedException | InvocationTargetException e) {
             e.printStackTrace();

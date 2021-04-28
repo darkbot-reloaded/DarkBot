@@ -11,19 +11,24 @@ import com.github.manolo8.darkbot.core.api.NativeApiAdapter;
 import com.github.manolo8.darkbot.core.api.NoopApiAdapter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.ApiErrors;
+import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigManager {
 
@@ -77,6 +82,53 @@ public class ConfigManager {
         return this.config;
     }
 
+    public boolean createNewConfig(String name, @Nullable String copy) {
+        // Load config to save copy of
+        Path newFile = Paths.get(CONFIG_FOLDER, name + EXTENSION);
+        try {
+            if (copy != null) {
+                Path old = DEFAULT.equals(copy) ?
+                        Paths.get(copy + EXTENSION) : Paths.get(CONFIG_FOLDER, copy + EXTENSION);
+                Files.copy(old, newFile);
+            } else {
+                Files.write(newFile, "{}".getBytes(StandardCharsets.UTF_8));
+            }
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteConfig(String name) {
+        try {
+            Files.deleteIfExists(Paths.get(CONFIG_FOLDER, name + EXTENSION));
+            Files.deleteIfExists(Paths.get(CONFIG_FOLDER, name + BACKUP + EXTENSION));
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<String> getAvailableConfigs() {
+        List<String> configs = new ArrayList<>();
+        configs.add(ConfigManager.DEFAULT);
+
+        FileUtils.ensureDirectoryExists(Paths.get(ConfigManager.CONFIG_FOLDER));
+        try {
+            Files.list(Paths.get(ConfigManager.CONFIG_FOLDER))
+                    .map(Path::getFileName)
+                    .map(Path::toString)
+                    .filter(n -> !n.endsWith(ConfigManager.BACKUP + ConfigManager.EXTENSION))
+                    .filter(n -> n.endsWith(ConfigManager.EXTENSION))
+                    .map(n -> n.substring(0, n.length() - ConfigManager.EXTENSION.length()))
+                    .forEach(configs::add);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return configs;
+    }
 
     private Config loadConfig(Path configFile, Path backupFile) {
         boolean existsConfig = Files.exists(configFile),
