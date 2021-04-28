@@ -113,6 +113,8 @@ public class Main extends Thread implements PluginListener {
         this.pluginHandler.updatePluginsSync();
         this.pluginHandler.addListener(this);
 
+        if (params.startConfigs() != null) config = configManager.loadConfig(params.startConfigs());
+
         this.form = new MainGui(this);
         this.pluginUpdater.scheduleUpdateChecker();
 
@@ -121,7 +123,9 @@ public class Main extends Thread implements PluginListener {
 
         API.createWindow();
         if (params.getAutoStart()) setRunning(true);
+
         start();
+
     }
 
     @Override
