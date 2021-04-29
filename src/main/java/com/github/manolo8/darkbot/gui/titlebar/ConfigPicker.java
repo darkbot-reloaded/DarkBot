@@ -59,7 +59,6 @@ public class ConfigPicker extends JComboBox<String> {
         main.configManager.getAvailableConfigs().forEach(this::addItem);
         setSelectedItem(main.configManager.getConfigName());
         this.main = main;
-        setVisible(getModel().getSize() > 1);
     }
 
     public void onRemove(int idx) {
