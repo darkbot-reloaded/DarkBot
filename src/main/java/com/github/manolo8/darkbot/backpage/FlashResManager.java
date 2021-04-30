@@ -82,7 +82,7 @@ public class FlashResManager implements Task, GameResourcesAPI {
     }
 
     @Override
-    public Optional<String> findTranslation(String translationId) {
-        return Optional.ofNullable(getTranslation(translationId));
+    public Optional<String> findTranslation(String key) {
+        return Optional.ofNullable(getTranslation(key));
     }
 }

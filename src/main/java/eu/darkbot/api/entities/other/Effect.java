@@ -3,7 +3,6 @@ package eu.darkbot.api.entities.other;
 /**
  * Represents in-game {@link eu.darkbot.api.entities.Entity}'s effects.
  */
-// TODO: 01.11.2020 add more effects
 public enum Effect {
     UNDEFINED(-1),
     LOCATOR(1),

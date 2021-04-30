@@ -4,7 +4,10 @@ import eu.darkbot.api.API;
 import eu.darkbot.api.events.Event;
 
 /**
- * API for in-game log messages
+ * API for reading in-game log messages
+ * Log messages must be read via the {@link LogMessageEvent} with a Listener.
+ *
+ * @see EventBrokerAPI
  */
 public interface LogAPI extends API.Singleton {
 

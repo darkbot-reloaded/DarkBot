@@ -7,6 +7,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
+/**
+ * In-game generic ship on the map, like players, npc, pets and more.
+ */
 public interface Ship extends Attacker, Movable {
 
     /**
@@ -15,19 +18,25 @@ public interface Ship extends Attacker, Movable {
     boolean isInvisible();
 
     /**
-     * @return true if this {@link Ship} is blacklisted
+     * If this ship has been blacklisted by calling {@link #setBlacklisted}
+     *
+     * @return if this {@link Ship} is currently blacklisted, false if blacklist has expired
      */
     boolean isBlacklisted();
 
     /**
-     * Adds this {@link Ship} to blacklist for given time(ms).
+     * Adds this {@link Ship} to blacklist for given time (ms).
+     * The main use-case is remembering this enemy ship attacked you, but can be used
+     * for other purposes like NPCs that are bugged or have been attacked by others.
      *
-     * @param forTime time in milliseconds
+     * By itself, this changes nothing but the response of {@link #isBlacklisted}
+     *
+     * @param time time in milliseconds to stay in the blacklist
      */
-    void setBlacklisted(long forTime);
+    void setBlacklisted(long time);
 
     /**
-     * @return true if ship has enabled {@link Pet}.
+     * @return if this ship has a {@link Pet} enabled flying on the map.
      */
     boolean hasPet();
 
@@ -37,15 +46,19 @@ public interface Ship extends Attacker, Movable {
     Optional<Pet> getPet();
 
     /**
-     * @return used {@link SelectableItem.Formation} by the {@link Ship}
+     * @return the {@link SelectableItem.Formation} currently in use by this {@link Ship}, or
+     *          {@link SelectableItem.Formation#STANDARD} otherwise.
      */
     SelectableItem.Formation getFormation();
 
     /**
-     * @return true if ship has enabled given formation.
+     * @return if the ship is flying the given formation by id.
      */
     boolean isInFormation(int formationId);
 
+    /**
+     * @return if the ship is flying the given formation.
+     */
     default boolean isInFormation(@NotNull SelectableItem.Formation formation) {
         return isInFormation(formation.ordinal());
     }

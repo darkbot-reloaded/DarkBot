@@ -47,11 +47,7 @@ public class Zone
 
     @Override
     public Area getArea() {
-        return null;
+        return area;
     }
 
-    @Override
-    public boolean isZoneValid() {
-        return false;
-    }
 }

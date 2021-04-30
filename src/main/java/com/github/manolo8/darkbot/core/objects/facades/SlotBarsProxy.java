@@ -67,10 +67,10 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         if (slotBarType == null || slotNumber == -1 ||
                 (slotBarType == SlotBarsProxy.Type.PRO_ACTION_BAR &&
                         !isProActionBarVisible() &&
-                        !settings.toggleKeyBind(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION)))
-            return false; //return false if slot type is pro action bar & isnt visible & keybind wasn't toggled.
+                        !settings.pressKeybind(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION)))
+            return false; //return false if slot type is pro action bar & isn't visible & keybind wasn't toggled.
 
-        return settings.toggleKeyBind(SettingsProxy.KeyBind.of(slotBarType, slotNumber));
+        return settings.pressKeybind(SettingsProxy.KeyBind.of(slotBarType, slotNumber));
     }
 
     @Override

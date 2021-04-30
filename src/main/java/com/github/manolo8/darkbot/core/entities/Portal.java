@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.objects.Map;
+import eu.darkbot.api.entities.utils.GameMap;
 import eu.darkbot.api.objects.EntityInfo;
 
 import java.util.Optional;
@@ -84,7 +85,7 @@ public class Portal extends Entity implements eu.darkbot.api.entities.Portal {
     }
 
     @Override
-    public Optional<eu.darkbot.api.entities.utils.Map> getTargetMap() {
+    public Optional<GameMap> getTargetMap() {
         return Optional.ofNullable(target);
     }
 

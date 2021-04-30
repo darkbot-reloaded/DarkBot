@@ -39,37 +39,40 @@ public enum Gear implements EquippableItem {
         this.cooldown = cooldown;
     }
 
+    /**
+     * Get a gear by its ID
+     * @param gearId the in-game id of the gear
+     * @return The gear with the corresponding id, or null if not found
+     */
     public static Gear of(int gearId) {
-        if (gearId < 0 || gearId >= values().length) return UNKNOWN;
+        if (gearId < 0 || gearId >= values().length) return null;
         return values()[gearId];
     }
 
-    public static String getName(Integer id) {
-        if (id == null) return null;
-        if (Gear.values().length > id) return Gear.values()[id - 1].name;
-        return "Unknown gear " + id;
-    }
-
+    /**
+     * @return the in-game id of this pet gear
+     */
     public int getId() {
         return ordinal() + 1;
     }
 
-    public Cooldown getCooldown() {
-        return cooldown;
-    }
-
-    @Override
-    public String toString() {
-        return name;
-    }
-
+    /**
+     * @return A user-readable name for the gear
+     */
     @Override
     public String getName() {
         return name;
     }
 
     /**
-     * Represents cooldowns of {@link Gear}, {@link eu.darkbot.api.entities.Pet} buffs/debuffs etc.
+     * @return The cooldown associated with this particular gear, null if no cooldown applies
+     */
+    public Cooldown getCooldown() {
+        return cooldown;
+    }
+
+    /**
+     * Represents cooldown of a {@link Gear} in the {@link eu.darkbot.api.entities.Pet} buffs or debuffs.
      */
     public enum Cooldown {
         SINGULARITY,
@@ -85,6 +88,9 @@ public enum Gear implements EquippableItem {
         BEACON_COMBAT,
         BEACON_HP;
 
+        /**
+         * @return The in-game id of this pet cooldown
+         */
         public int getId() {
             return ordinal() + 1;
         }

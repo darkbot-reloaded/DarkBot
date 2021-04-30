@@ -1,5 +1,8 @@
 package eu.darkbot.api.entities;
 
+/**
+ * In-game pet entity flying on the map
+ */
 public interface Pet extends Ship {
 
     /**

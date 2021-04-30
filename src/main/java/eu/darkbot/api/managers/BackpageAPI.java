@@ -12,7 +12,7 @@ import java.util.Optional;
 /**
  * API to manage, connect to backpage of the game.
  * {@link BackpageAPI} should be called only from {@link Task} thread.
- * @see com.github.manolo8.darkbot.core.itf.Task
+ * @see Task
  */
 public interface BackpageAPI extends API.Singleton {
 
@@ -30,29 +30,29 @@ public interface BackpageAPI extends API.Singleton {
     Instant getLastRequestTime();
 
     /**
-     * Returns connection with current instance + params
-     * and with cookie dosid.
+     * Returns connection with current {@link #getInstanceURI()} & path, with the sessionID cookie.
      *
-     * @param params query to be added
+     * @param path URL path & query parameters to append to {@link #getInstanceURI()}
      */
-    HttpURLConnection getConnection(String params) throws Exception;
+    HttpURLConnection getConnection(String path) throws Exception;
 
     /**
-     * Returns connection with current instance + params
-     * and with cookie dosid.
-     * <p>
-     * If minWait(ms) has not passed since last action, will sleep the difference.
+     * Returns connection with current {@link #getInstanceURI()} & path, with the sessionID cookie.
+     *
+     *
+     * @param path URL path & query parameters to append to {@link #getInstanceURI()}
+     * @param minWait Minimum time to wait since the last request in milliseconds.
+     *                If the last request was over {@param minWait} ms ago, behavior
+     *                is identical to {@link #getConnection(String)}, otherwise it will
+     *                first sleep until enough time has passed.
      */
-    default HttpURLConnection getConnection(String params, int minWait) throws Exception {
+    default HttpURLConnection getConnection(String path, int minWait) throws Exception {
         Time.sleep(getLastRequestTime().toEpochMilli() + minWait - System.currentTimeMillis());
-        return getConnection(params);
+        return getConnection(path);
     }
 
     /**
-     * Use random string anyway.
-     * {@code
-     *      UUID.randomUUID().toString().replaceAll("-", "");
-     * }
+     * Random string representing the reload token of the loaded page
      *
      * @param body which will be searched for reload token
      * @return reload token or {@link Optional#empty()} if wasn't found

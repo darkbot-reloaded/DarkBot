@@ -1,9 +1,8 @@
 package eu.darkbot.api.entities;
 
 import eu.darkbot.api.entities.other.PortalType;
-import eu.darkbot.api.entities.utils.Map;
+import eu.darkbot.api.entities.utils.GameMap;
 import eu.darkbot.api.objects.EntityInfo;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -13,9 +12,9 @@ import java.util.Optional;
 public interface Portal extends Entity {
 
     /**
-     * @return destination {@link Map} of this {@link Portal}
+     * @return destination {@link GameMap} of this {@link Portal}
      */
-    Optional<Map> getTargetMap();
+    Optional<GameMap> getTargetMap();
 
     /**
      * @return portal type id

@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
-import eu.darkbot.api.managers.EventSenderAPI;
+import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.LogAPI;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -14,12 +14,12 @@ public class LogMediator extends Updatable implements LogAPI, Listener {
     @Deprecated
     public final Lazy<String> logs = new Lazy.NoCache<>(); // Can't cache the value, same log could appear twice
 
-    private final EventSenderAPI eventSender;
+    private final EventBrokerAPI eventBroker;
     private final ObjArray messageBuffer = ObjArray.ofArrStr();
 
-    public LogMediator(EventSenderAPI eventSender) {
-        this.eventSender = eventSender;
-        this.eventSender.registerListener(this);
+    public LogMediator(EventBrokerAPI eventBroker) {
+        this.eventBroker = eventBroker;
+        this.eventBroker.registerListener(this);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class LogMediator extends Updatable implements LogAPI, Listener {
     private void handleLogMessage(long pointer) {
         String val = API.readMemoryString(API.readMemoryLong(pointer + 0x28));
         if (val != null && !val.trim().isEmpty())
-            eventSender.sendEvent(new LogMessageEvent(val));
+            eventBroker.sendEvent(new LogMessageEvent(val));
     }
 
     @EventHandler

@@ -2,7 +2,10 @@ package eu.darkbot.api.entities.utils;
 
 import org.jetbrains.annotations.Nullable;
 
-public interface Map {
+/**
+ * In-game map, not to be confused with a java Map data structure
+ */
+public interface GameMap {
     /**
      * Gets id of current map.
      * <a href = http://www.darkorbit.bigpoint.com/spacemap/graphics/maps-config.xml>List of maps</a>
@@ -32,5 +35,5 @@ public interface Map {
      * @return true if map is galaxy gate type.
      * For example: Alpha, Zeta, Hades etc.
      */
-    boolean isGg();
+    boolean isGG();
 }

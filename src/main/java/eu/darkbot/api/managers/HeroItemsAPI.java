@@ -11,12 +11,17 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * API to manage {@link HeroAPI} items.
+ * API to manage in-game items, from ammo, to rockets, abilities or even fireworks.
+ *
+ * @see SelectableItem
+ *
+ * TODO: Rethink and refactor this API fully. There are too many methods and not enough flexibility.
  */
 public interface HeroItemsAPI extends API.Singleton {
 
     /**
      * This method checks if given {@link Item} can be selected in-game.
+     * If the item isn't in any of the action bars it may not be selectable.
      *
      * @param item to check
      * @return true if item can beb selected
@@ -69,8 +74,8 @@ public interface HeroItemsAPI extends API.Singleton {
 
     default Optional<Item> findItem(@NotNull SelectableItem selectableItem) {
         Category category = selectableItem.getCategory();
-        return category == null ? filterItem(selectableItem::matches) :
-                filterItem(category, selectableItem::matches);
+        return category == null ? findItem(selectableItem.getId()) :
+                findItem(category, selectableItem.getId());
     }
 
     /**

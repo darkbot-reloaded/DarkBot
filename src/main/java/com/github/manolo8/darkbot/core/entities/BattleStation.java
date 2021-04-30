@@ -84,11 +84,6 @@ public class BattleStation
     }
 
     @Override
-    public boolean isZoneValid() {
-        return use();
-    }
-
-    @Override
     public boolean isRemoved() {
         return removed;
     }

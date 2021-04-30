@@ -1,16 +1,30 @@
 package eu.darkbot.api.entities.other;
 
 import eu.darkbot.api.managers.HeroItemsAPI;
-import eu.darkbot.utils.StringUtils;
 
+import java.util.Locale;
+
+/**
+ * Represents a type of in-game item, that can be selected via the hot bar or category bar
+ *
+ * @see eu.darkbot.api.objects.Item
+ * @see HeroItemsAPI
+ */
 public interface SelectableItem {
 
-    boolean matches(String itemId);
+    /**
+     * @return The in-game id of this item
+     */
+    String getId();
 
-    default HeroItemsAPI.Category getCategory() {
-        return null;
-    }
+    /**
+     * @return The category inside category bar that this item is found in
+     */
+    HeroItemsAPI.Category getCategory();
 
+    /**
+     * In-game laser ammo items that can be shot
+     */
     enum Laser implements SelectableItem {
         LCB_10,
         MCB_25,
@@ -22,14 +36,14 @@ public interface SelectableItem {
         JOB_100,
         RB_214,
         PIB_100,
-        SPACECUP_GROUP_A,
-        SPACECUP_GROUP_B,
-        SPACECUP_GROUP_C,
-        SPACECUP_GROUP_D,
-        SPACECUP_GROUP_E,
-        SPACECUP_GROUP_F,
-        SPACECUP_GROUP_G,
-        SPACECUP_GROUP_H,
+        SPACECUP_GROUP_A("ammunition_laser_spacecup_group-a"),
+        SPACECUP_GROUP_B("ammunition_laser_spacecup_group-b"),
+        SPACECUP_GROUP_C("ammunition_laser_spacecup_group-c"),
+        SPACECUP_GROUP_D("ammunition_laser_spacecup_group-d"),
+        SPACECUP_GROUP_E("ammunition_laser_spacecup_group-e"),
+        SPACECUP_GROUP_F("ammunition_laser_spacecup_group-f"),
+        SPACECUP_GROUP_G("ammunition_laser_spacecup_group-g"),
+        SPACECUP_GROUP_H("ammunition_laser_spacecup_group-h"),
         A_BL,
         RCB_140(true),
         IDB_125,
@@ -37,6 +51,7 @@ public interface SelectableItem {
         EMAA_20,
         SBL_100;
 
+        private static final String PREFIX = "ammunition_laser_";
         private final String id;
         private final boolean cooldown;
 
@@ -45,26 +60,36 @@ public interface SelectableItem {
         }
 
         Laser(boolean cooldown) {
-            this.id = "ammunition_laser_" +
-                    StringUtils.replaceLastOccurrence(name().toLowerCase(), '_', '-');
+            this(cooldown, null);
+        }
+
+        Laser(String id) {
+            this(false, id);
+        }
+
+        Laser(boolean cooldown, String id) {
+            if (id == null) id = PREFIX + name().toLowerCase(Locale.ROOT).replace('_', '-');
+            this.id = id;
             this.cooldown = cooldown;
         }
 
         public static Laser of(String laserId) {
             for (Laser laser : values())
-                if (laser.matches(laserId))
+                if (laser.getId().equals(laserId))
                     return laser;
-
             return null;
         }
 
+        /**
+         * @return If this type of laser has a burst followed by a cooldown to its use
+         */
         public boolean hasCooldown() {
             return cooldown;
         }
 
         @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
+        public String getId() {
+            return id;
         }
 
         @Override
@@ -73,6 +98,9 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * In-game rocket items that are fired regularly
+     */
     enum Rocket implements SelectableItem {
         R_310,
         PLT_2026,
@@ -88,6 +116,8 @@ public interface SelectableItem {
         SP_100X(true),
         AGT_500;
 
+        private static final String PREFIX = "ammunition_rocket_",
+                PREFIX_SPECIAL = "ammunition_specialammo_";
         private final String id;
         private final boolean isSpecial; // cooldown of this rocket is much longer than regular one.
 
@@ -96,25 +126,28 @@ public interface SelectableItem {
         }
 
         Rocket(boolean isSpecial) {
-            this.id = name().toLowerCase().replaceAll("_", "-");
+            this.id = (isSpecial ? PREFIX_SPECIAL : PREFIX) + name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
             this.isSpecial = isSpecial;
         }
 
         public static Rocket of(String rocketId) {
             for (Rocket rocket : values())
-                if (rocket.matches(rocketId))
+                if (rocket.getId().equals(rocketId))
                     return rocket;
 
             return null;
         }
 
+        /**
+         * @return If this rocket has a longer cooldown than normal
+         */
         public boolean isSpecial() {
             return isSpecial;
         }
 
         @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
+        public String getId() {
+            return id;
         }
 
         @Override
@@ -123,8 +156,14 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * In-game rocket items that are fired using a rocket launcher
+     */
     enum RocketLauncher implements SelectableItem {
-        HST,
+        /**
+         * The actual rocket launcher item, used to launch the rockets
+         */
+        HST_LAUNCHER("equipment_weapon_rocketlauncher_hst"),
         HSTRM_01,
         UBR_100,
         ECO_10,
@@ -134,15 +173,21 @@ public interface SelectableItem {
         BDR1212,
         PIR_100;
 
+        private static final String PREFIX = "ammunition_rocketlauncher_";
         private final String id;
 
         RocketLauncher() {
-            this.id = name().toLowerCase().replaceAll("_", "-");
+            this(null);
+        }
+
+        RocketLauncher(String id) {
+            if (id == null) id = PREFIX + name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
+            this.id = id;
         }
 
         @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
+        public String getId() {
+            return id;
         }
 
         @Override
@@ -151,17 +196,69 @@ public interface SelectableItem {
         }
     }
 
-    //if someone want to can separate emotes & sprays
-    enum Special implements SelectableItem {
-        SMB_01,
-        ISH_01,
-        EMP_01,
+    /**
+     * Special in-game items subclass this interface.
+     * @see Special
+     * @see Firework
+     * @see Spray
+     * @see Emote
+     */
+    interface SpecialItem extends SelectableItem {
+
+        @Override
+        default HeroItemsAPI.Category getCategory() {
+            return HeroItemsAPI.Category.SPECIAL_ITEMS;
+        }
+    }
+
+    /**
+     * Represents special items in-game, like smart-bomb, insta-shield or EMP.
+     */
+    enum Special implements SpecialItem {
+        SMB_01("ammunition_mine_smb-01"),
+        ISH_01("equipment_extra_cpu_ish-01"),
+        EMP_01("ammunition_specialammo_emp-01");
+
+        private final String id;
+
+        Special(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+    }
+
+    /**
+     * In-game firework items, as well as the firework ignite action
+     */
+    enum Firework implements SpecialItem {
         FWX_S,
         FWX_M,
         FWX_L,
         FWX_COM,
         FWX_RZ,
-        IGNITE,
+        IGNITE;
+
+        private static final String PREFIX = "ammunition_firework_";
+        private final String id;
+
+        Firework() {
+            this.id = PREFIX + name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+    }
+
+    /**
+     * In-game user-activated emote items
+     */
+    enum Emote implements SpecialItem {
         ALIEN_ANGRY,
         ALIEN_CRY,
         ALIEN_HORROR,
@@ -181,6 +278,35 @@ public interface SelectableItem {
         ALIEN_DIZZY,
         ALIEN_SLEEPY,
         ALIEN_STARRYEYES,
+        ALIEN_CHEERS,
+        ALIEN_PARTY,
+        ALIEN_FLYINGKISS,
+        ALIEN_SMIRK,
+        ALIEN_ROGER,
+        PUMPKIN_SMILE,
+        PUMPKIN_ALIEN,
+        EAT_TURKEY,
+        SNOWMAN_BRR,
+        SNOWMAN_ROLLEYES,
+        SNOWMAN_THINKING;
+
+        private static final String PREFIX = "ammunition_specialammo_emote_";
+        private final String id;
+
+        Emote() {
+            this.id = PREFIX + name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+    }
+
+    /**
+     * In-game user-activated sprite items
+     */
+    enum Spray implements SpecialItem {
         CROSS,
         HEARTS,
         KO,
@@ -200,45 +326,32 @@ public interface SelectableItem {
         CELEBRATE,
         PEACE,
         QUESTION,
-        ALIEN_CHEERS,
-        ALIEN_PARTY,
-        ALIEN_FLYINGKISS,
-        ALIEN_SMIRK,
-        ALIEN_ROGER,
         CROWN,
         FIST_BUMP,
         HAND_SHAKE,
-        PUMPKIN_SMILE,
-        PUMPKIN_ALIEN,
         BATMAN,
         HAND,
         TURKEYDINNER,
-        EAT_TURKEY,
-        SNOWMAN_BRR,
-        SNOWMAN_ROLLEYES,
-        SNOWMAN_THINKING,
         FROZEN_HAND,
         SNOWFLAKE,
         YETI;
 
+        private static final String PREFIX = "ammunition_specialammo_spray_";
         private final String id;
 
-        Special() {
-            this.id = name().toLowerCase().replaceAll("_", "-");
+        Spray() {
+            this.id = PREFIX + name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
         }
 
         @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
+        public String getId() {
+            return id;
         }
-
-        @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.SPECIAL_ITEMS;
-        }
-
     }
 
+    /**
+     * In-game mine items that can be laid down on the map
+     */
     enum Mine implements SelectableItem {
         ACM_01,
         EMPM_01,
@@ -248,15 +361,16 @@ public interface SelectableItem {
         IM_01,
         AGL_M01;
 
+        private static final String PREFIX = "ammunition_mine_";
         private final String id;
 
         Mine() {
-            this.id = name().toLowerCase().replaceAll("_", "-");
+            this.id = PREFIX + name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
         }
 
         @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
+        public String getId() {
+            return id;
         }
 
         @Override
@@ -265,42 +379,86 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * Type of CPU item
+     * @see Cpu
+     */
+    enum CpuType {
+        CPU("equipment_extra_cpu_"),
+        ROBOT("equipment_extra_robot_"),
+        SPECIAL_AMMO("ammunition_specialammo_"),
+        PORTAL("ammunition_ggportal_");
+        String prefix;
+
+        CpuType(String prefix) {
+            this.prefix = prefix;
+        }
+    }
+
+    /**
+     * In-game CPU items that can be activated
+     */
     enum Cpu implements SelectableItem {
-        AIM,
-        AROL_X,
-        CL04K,
-        AJP_01,
-        JP,
-        REP,
-        HMD_07,
-        ALB_X,
-        RLLB_X,
-        RB_X,
-        FB_X,
-        DR,
-        ANTI_Z1,
-        GHOSTIFIER,
-        FROZEN_PORTAL,
-        CUBI_PORTAL,
-        PERMAFROST_FISSURE_CPU,
-        QUARANTINE_ZONE_CPU,
-        ETERNAL_BLACKLIGHT_CPU,
-        ALIEN_CPU_CUBIKON,
-        ALIEN_CPU_COMMON,
-        ALIEN_CPU_RARE,
-        ALIEN_CPU_LEGEND,
-        SS_CPU,
-        PA_X;
+        /** CPU increasing hit chance, costs {@link eu.darkbot.api.managers.OreAPI.Ore#XENOMIT} to run */
+        AIM(CpuType.CPU),
+        /** Automatically shoots rocket */
+        AROL_X(CpuType.CPU),
+        /** Cloack CPU to make ship invisible */
+        CL04K(CpuType.CPU),
+        /** Advanced jump to x-1 map */
+        AJP_01(CpuType.CPU),
+        /** Jump CPU to any map */
+        JP(CpuType.CPU),
+        /** Repair robot */
+        REP(CpuType.ROBOT),
+        /** Trade cpu to sell ores */
+        HMD_07(CpuType.CPU),
+        /** Automatic laser buyer */
+        ALB_X(CpuType.CPU),
+        /** Automatically shoots rocket launcher rockets */
+        RLLB_X(CpuType.CPU),
+        /** Automatic rocket buyer */
+        RB_X(CpuType.CPU),
+        /** Automatic fuel buyer for pet */
+        FB_X(CpuType.CPU),
+        /** Drone repair CPU */
+        DR(CpuType.CPU),
+        /** Antidote for infection status */
+        ANTI_Z1(CpuType.CPU),
+        /** Makes your ship less opaque for a short duration */
+        GHOSTIFIER(CpuType.SPECIAL_AMMO),
+        /** Spawns a Super Ice Meteoroid NPC */
+        FROZEN_PORTAL(CpuType.SPECIAL_AMMO),
+        /** Spawns a cube near you */
+        CUBI_PORTAL(CpuType.SPECIAL_AMMO),
+        /** Opens the Permafrost Fissure galaxy gate */
+        PERMAFROST_FISSURE_CPU(CpuType.PORTAL),
+        /** Opens the Quarantine Zone galaxy gate */
+        QUARANTINE_ZONE_CPU(CpuType.PORTAL),
+        /** Opens the Eternal Blacklight galaxy gate */
+        ETERNAL_BLACKLIGHT_CPU(CpuType.PORTAL),
+        /** Spawns a cube near you */
+        ALIEN_CPU_CUBIKON(CpuType.SPECIAL_AMMO),
+        /** Spawns a common NPC near you */
+        ALIEN_CPU_COMMON(CpuType.SPECIAL_AMMO),
+        /** Spawns a rare NPC near you */
+        ALIEN_CPU_RARE(CpuType.SPECIAL_AMMO),
+        /** Spawns a legendary NPC near you */
+        ALIEN_CPU_LEGEND(CpuType.SPECIAL_AMMO),
+        /** Saturn Ship spawner, pve exclusive */
+        SS_CPU(CpuType.SPECIAL_AMMO),
+        /** PVP immunity CPU, pve exclusive */
+        PA_X(CpuType.CPU);
 
         private final String id;
 
-        Cpu() {
-            this.id = name().toLowerCase().replaceAll("_", "-");
+        Cpu(CpuType type) {
+            this.id = type.prefix + name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
         }
 
         @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
+        public String getId() {
+            return id;
         }
 
         @Override
@@ -309,7 +467,10 @@ public interface SelectableItem {
         }
     }
 
-    enum Buy implements SelectableItem {
+    /**
+     * In-game auto-buy actions
+     */
+    enum AutoBuy implements SelectableItem {
         LCB_10,
         MCB_25,
         MCB_50,
@@ -319,20 +480,22 @@ public interface SelectableItem {
         PLT_2021(true),
         PLT_3030(true);
 
+        private static final String PREFIX_LASER = "buy_ammunition_laser_",
+                PREFIX_ROCKET = "buy_ammunition_rocket_";
         private final String id;
 
-        Buy() {
+        AutoBuy() {
             this(false);
         }
 
-        Buy(boolean isRocket) {
-            this.id = "buy_ammunition_" + (isRocket ? "rocket_" : "laser_")
-                    + name().toLowerCase().replaceAll("_", "-");
+        AutoBuy(boolean isRocket) {
+            this.id = (isRocket ? PREFIX_ROCKET : PREFIX_LASER)
+                    + name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
         }
 
         @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
+        public String getId() {
+            return id;
         }
 
         @Override
@@ -341,6 +504,9 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * In-game nano-factory tech items
+     */
     enum Tech implements SelectableItem {
         ENERGY_LEECH,
         CHAIN_IMPULSE,
@@ -357,15 +523,16 @@ public interface SelectableItem {
         ANTI_AI_EMERGENCY_RESERVES,
         FROST_FIELD;
 
+        private static final String PREFIX = "tech_";
         private final String id;
 
         Tech() {
-            this.id = name().toLowerCase().replaceAll("_", "-");
+            this.id = PREFIX + name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
         }
 
         @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
+        public String getId() {
+            return id;
         }
 
         @Override
@@ -374,57 +541,71 @@ public interface SelectableItem {
         }
     }
 
-    //probably would be better to use constant ids and custom enum names.
+    /**
+     * In-game ship abilities, what ships can use each will differ.
+     */
     enum Ability implements SelectableItem {
-        ULTIMATE_CLOAK,
-        JAM_X,
-        TARGET_MARKER,
-        DOUBLE_MINIMAP,
-        HP_REPAIR,
-        SHIELD_REPAIR,
-        REPAIR_POD,
-        DRAW_FIRE,
-        TRAVEL,
-        PROTECTION,
-        FORTIFY,
+        SPEARHEAD_ULTIMATE_CLOAK,
+        SPEARHEAD_JAM_X,
+        SPEARHEAD_TARGET_MARKER,
+        SPEARHEAD_DOUBLE_MINIMAP,
+        AEGIS_HP_REPAIR,
+        AEGIS_SHIELD_REPAIR,
+        AEGIS_REPAIR_POD,
+        CITADEL_DRAW_FIRE,
+        CITADEL_TRAVEL,
+        CITADEL_PROTECTION,
+        CITADEL_FORTIFY,
         SOLACE,
         SPECTRUM,
         VENOM,
         SENTINEL,
         DIMINISHER,
         LIGHTNING,
-        ADMIN_ULTIMATE_CLOAKING,
-        SPEED_BOOST,
-        RAPID_FIRE,
-        HOLOGRAM,
-        SCRAMBLE,
-        PHASE_OUT,
-        FROZEN_CLAW,
-        PARTICLE_BEAM,
-        REDIRECT,
-        SHIELD_DISARRAY,
-        DDOL,
-        SHL,
-        BSK,
-        RVG,
-        MMT,
-        TBR,
-        INC,
-        SPR,
-        SLE,
-        SPC,
-        CHS,
-        ASSIMILATE;
+        ADMIN_ULTIMATE_CLOAKING("ability_admin-ultimate-cloaking"),
+        TARTARUS_SPEED_BOOST,
+        TARTARUS_RAPID_FIRE,
+        MIMESIS_HOLOGRAM,
+        MIMESIS_SCRAMBLE,
+        MIMESIS_PHASE_OUT,
+        GOLIATH_X_FROZEN_CLAW("ability_goliath-x_frozen-claw"),
+        HECATE_PARTICLE_BEAM,
+        DISRUPTOR_REDIRECT,
+        DISRUPTOR_SHIELD_DISARRAY,
+        DISRUPTOR_DDOL,
+        BERSERKER_SHL,
+        BERSERKER_BSK,
+        BERSERKER_RVG,
+        ZEPHYR_MMT,
+        ZEPHYR_TBR,
+        SOLARIS_INC,
+        KERES_SPR,
+        KERES_SLE,
+        RETIARUS_SPC,
+        RETIARUS_CHS,
+        ORCUS_ASSIMILATE,
+        HOLO_SELF_REVERSAL,
+        HOLO_ENEMY_REVERSAL;
 
+
+        private static final String PREFIX = "ability_";
         private final String id;
 
         Ability() {
-            this.id = name().toLowerCase().replaceAll("_", "-");
+            if (!name().contains("_")) this.id = PREFIX + name().toLowerCase(Locale.ROOT);
+            else {
+                String[] parts = name().toLowerCase(Locale.ROOT).split("_", 2);
+                this.id = PREFIX + parts[0] + "_" + parts[1].replaceAll("_", "-");
+            }
+        }
+
+        Ability(String id) {
+            this.id = id;
         }
 
         @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
+        public String getId() {
+            return id;
         }
 
         @Override
@@ -433,6 +614,9 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * In-game drone formations
+     */
     enum Formation implements SelectableItem {
 
         /**
@@ -470,6 +654,7 @@ public interface SelectableItem {
          */
         X2(null);
 
+        private static final String PREFIX = "drone_formation_";
         private final String id;
         private final double hp, sh, sps;
 
@@ -486,7 +671,7 @@ public interface SelectableItem {
         }
 
         Formation(String id, double hp, double sh, double sps) {
-            this.id = id;
+            this.id = PREFIX + id;
             this.hp = hp;
             this.sh = sh;
             this.sps = sps;
@@ -500,22 +685,28 @@ public interface SelectableItem {
 
         public static Formation of(String id) {
             for (Formation formation : values())
-                if (formation.matches(id))
+                if (formation.getId().equals(id))
                     return formation;
 
             return null;
         }
 
+        /**
+         * @return Shield gained or lost when using the formation, in percentage.
+         */
         public double getShieldMultiplier() {
             return sh;
         }
 
+        /**
+         * @return Health gained or lost when using the formation, in percentage.
+         */
         public double getHealthMultiplier() {
             return hp;
         }
 
         /**
-         * @return shield regen % amount per second.
+         * @return Shield regeneration per second in percentage. 5% -> 0.005
          */
         public double getShieldRegen() {
             return sps;
@@ -523,8 +714,8 @@ public interface SelectableItem {
 
 
         @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
+        public String getId() {
+            return id;
         }
 
         @Override
@@ -533,30 +724,45 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * In-game hot bar selectable {@link eu.darkbot.api.entities.other.Gear}.
+     * Note that not all gears are available here to use as items.
+     */
     enum Pet implements SelectableItem {
+        /** Enables {@link Gear#MEGA_MINE} gear */
         G_MM1(Gear.MEGA_MINE),
+        /** Enables {@link Gear#KAMIKAZE} gear */
         G_KK1(Gear.KAMIKAZE),
-        G_FS1(null), //todo
+        /** Enables {@link Gear#SACRIFICIAL} gear */
+        G_FS1(Gear.SACRIFICIAL),
+        /** Enables {@link Gear#HP_LINK} gear */
         G_HPL1(Gear.HP_LINK),
-        G_RT1(null),//todo
+        /** Enables {@link Gear#PET_TARGET} gear */
+        G_RT1(Gear.PET_TARGET),
+        /** Enables {@link Gear#BEACON_HP} gear */
         G_BH1(Gear.BEACON_HP),
+        /** Enables {@link Gear#BEACON_COMBAT} gear */
         G_BC1(Gear.BEACON_COMBAT);
 
+        private static final String PREFIX = "equipment_petgear_";
         private final String id;
         private final Gear gear;
 
         Pet(Gear gear) {
-            this.id = name().toLowerCase().replaceAll("_", "-");
+            this.id = PREFIX + name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
             this.gear = gear;
         }
 
+        /**
+         * @return The pet gear this item represents
+         */
         public Gear getGear() {
             return gear;
         }
 
         @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
+        public String getId() {
+            return id;
         }
 
         @Override

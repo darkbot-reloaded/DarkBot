@@ -2,7 +2,7 @@ package eu.darkbot.logic.utils;
 
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Portal;
-import eu.darkbot.api.entities.utils.Map;
+import eu.darkbot.api.entities.utils.GameMap;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.Installable;
@@ -12,7 +12,7 @@ import eu.darkbot.api.objects.Location;
 import java.util.Collection;
 
 public class MapTraveler implements Listener, Installable {
-    protected final EventSenderAPI eventSender;
+    protected final EventBrokerAPI eventBroker;
 
     protected final PetAPI pet;
     protected final HeroAPI hero;
@@ -24,7 +24,7 @@ public class MapTraveler implements Listener, Installable {
     protected final PortalJumper jumper;
 
     public Portal current;
-    public Map target;
+    public GameMap target;
 
     protected int lastPortals;
     protected long shipTpWait = -1, mapChangeWait = -1;
@@ -35,27 +35,27 @@ public class MapTraveler implements Listener, Installable {
                        StarSystemAPI starSystem,
                        MovementAPI movement,
                        EntitiesAPI entities,
-                       EventSenderAPI eventSender) {
+                       EventBrokerAPI eventBroker) {
         this.pet = petApi;
         this.hero = heroApi;
         this.star = starSystem;
         this.movement = movement;
         this.jumper = new PortalJumper(movement);
         this.portals = entities.getPortals();
-        this.eventSender = eventSender;
+        this.eventBroker = eventBroker;
     }
 
     @Override
     public void install(PluginAPI pluginAPI) {
-        eventSender.registerListener(this);
+        eventBroker.registerListener(this);
     }
 
     @Override
     public void uninstall() {
-        eventSender.unregisterListener(this);
+        eventBroker.unregisterListener(this);
     }
 
-    public void setTarget(Map target) {
+    public void setTarget(GameMap target) {
         shipTpWait = mapChangeWait = -1;
         this.target = target;
         this.done = false;

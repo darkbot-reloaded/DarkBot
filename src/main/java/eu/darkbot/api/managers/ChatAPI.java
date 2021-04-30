@@ -8,9 +8,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * API for chat
+ * API to read & interact with in-game chat.
+ *
+ * Currently only reading chat messages is supported, via
+ * listening to the {@link MessageSentEvent} event using a {@link eu.darkbot.api.events.Listener}
  *
  * @see Message
+ * @see MessageSentEvent
  */
 public interface ChatAPI extends API.Singleton {
 
@@ -36,7 +40,7 @@ public interface ChatAPI extends API.Singleton {
         String getUsername();
 
         /**
-         * @return the clan tag, empty string if clanless
+         * @return The clan tag, empty string if clanless
          */
         String getClanTag();
 
@@ -54,13 +58,19 @@ public interface ChatAPI extends API.Singleton {
          */
         String getMessage();
 
+        /**
+         * @return The global Id of the user who sent this message
+         */
         String getGlobalId();
-
 
         DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
         AtomicInteger MAX_CLAN_LEN = new AtomicInteger(7);
         AtomicInteger MAX_NAME_LEN = new AtomicInteger(10);
 
+        /**
+         * @return A pretty-printed version of the message that can be stored in a log.
+         *         The exact format of the message isn't guaranteed and shouldn't be relied upon.
+         */
         default String formatted() {
             int clan = MAX_CLAN_LEN.updateAndGet(curr -> Math.max(curr, getClanTag().length() + 2));
             int name = MAX_NAME_LEN.updateAndGet(curr -> Math.max(curr, getUsername().length()));
@@ -75,6 +85,9 @@ public interface ChatAPI extends API.Singleton {
         }
     }
 
+    /**
+     * Event dispatched when a new chat message is sent in any of the rooms
+     */
     class MessageSentEvent implements Event {
         private final String room;
         private final Message message;

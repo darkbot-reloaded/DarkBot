@@ -6,10 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Every feature {@link Behavior}, {@link Module} ,{@link Task} need to <b>use</b> this annotation.
+ * A plugin feature provided for users.
  *
- * <li> Feature can implement all types written above({@link Behavior}, {@link Module} ,{@link Task}).
- * <li> Remember that {@link Task#onTickTask()} is called from backpage {@link Thread}.
+ * The most common types of features are {@link Behavior}s, {@link Module}s and {@link Task}s.
+ *
+ * You must use this annotation to provide basic information about the feature.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -26,7 +27,8 @@ public @interface Feature {
     String description();
 
     /**
-     * Should {@link Feature} be enabled by default.
+     * If this {@link Feature} should be enabled by default.
+     * Keep in mind this is not guaranteed to be fully respected by the bot.
      */
     boolean enabledByDefault() default false;
 

@@ -12,31 +12,68 @@ import java.util.stream.Collectors;
  */
 public interface BoosterAPI extends API.Singleton {
     /**
-     * @return {@code List} of all Boosters currently active on ship
+     * @return The {@code List} of all Boosters currently active on ship
      */
     List<? extends Booster> getBoosters();
 
     /**
-     * Booster object for {@link BoosterAPI}
+     * Booster representation of a type of boost and the amount of boost given.
+     *
+     * Keep in mind one booster may have many sub-boosters, some may last longer
+     * and some may last shorter.
+     *
+     * The sub-boosters are not exposed in the API, instead the Booster is responsible
+     * for representing the whole booster, amount will be the sum of all boosters and
+     * remaining time will be the shortest of the sub-boosters.
      */
     interface Booster {
         /**
-         * @return booster percentage
+         * @return the amount of boost in percentage, +10% = 0.1
          */
         double getAmount();
 
         /**
-         * @return booster time in seconds
+         * @return time in which the current booster will expire in seconds.
+         *         Keep in mind that the time running out doesn't necessarily mean
+         *         the amount drops down to 0.
+         *         Example: amount could be 15% (combination of 10% + 5%) and remaining time be 10s.
+         *           After the 10 seconds, it could be that amount is 10% & remaining time is hours.
          */
         double getRemainingTime();
 
-        String getCategory();
+        /**
+         * @return The in-game name of this specific booster
+         */
         String getName();
 
+        /**
+         * @return A small name (typically about 3 chars) for this type of booster.
+         */
+        default String getSmall() {
+            return getType().getSmall(getCategory());
+        }
+
+        /**
+         * @return A color usually associated by users to this type of booster
+         */
+        default Color getColor() {
+            return getType().getColor();
+        }
+
+        /**
+         * @return The type of booster this is
+         * @see Type
+         */
         default Type getType() {
             return Type.of(getCategory());
         }
 
+        /**
+         * The string version of the category, prefer using {@link #getType()} instead
+         *
+         * @return The string version of category type of this booster
+         */
+        String getCategory();
     }
 
     /**
@@ -60,7 +97,7 @@ public interface BoosterAPI extends API.Singleton {
         SPECIAL_AMOUNT          ("SP AM" , new Color(0xFFFFFF)),
         UNKNOWN                 ("?"     , new Color(0x808080)) {
             @Override
-            public String getSmall(String category) {
+            String getSmall(String category) {
                 return Arrays.stream(category.split("_"))
                         .map(str -> str.length() <= 3 ? str : str.substring(0, 3))
                         .collect(Collectors.joining(" "));
@@ -75,21 +112,15 @@ public interface BoosterAPI extends API.Singleton {
             this.color = color;
         }
 
-        public String getSmall(String category) {
+        String getSmall(String category) {
             return this.small;
         }
-        public Color getColor() {
+
+        Color getColor() {
             return this.color;
         }
 
-        /**
-         * Gets the specific {@code Type} that matches with the {@code category}
-         *
-         * @param category  the category of the booster from {@code getCategory()}
-         * @return the {@code Type} that matches with the {@code category}
-         * @see Booster#getCategory()
-         */
-        public static Type of(String category) {
+        private static Type of(String category) {
             for (Type cat : Type.values()) {
                 if (cat.name().equalsIgnoreCase(category)) return cat;
             }

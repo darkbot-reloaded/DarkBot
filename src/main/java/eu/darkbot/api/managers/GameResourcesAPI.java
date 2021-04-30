@@ -6,6 +6,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Locale;
 import java.util.Optional;
 
+/**
+ * API providing in-game resources, like translation keys
+ *
+ *
+ */
 public interface GameResourcesAPI extends API.Singleton {
 
     /**
@@ -14,10 +19,10 @@ public interface GameResourcesAPI extends API.Singleton {
     @Nullable Locale getLanguage();
 
     /**
-     * @param translationId of the translation
-     * @return translation of given parameter or {@link Optional#empty()} if doesnt exists
+     * @param key of the translation
+     * @return text in-game in the current language, or {@link Optional#empty()} if not found
      */
-    Optional<String> findTranslation(String translationId);
+    Optional<String> findTranslation(String key);
 
-    //todo get images etc...
+    // TODO: provide a way to search text-to-key
 }

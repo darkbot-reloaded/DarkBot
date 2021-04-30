@@ -49,6 +49,8 @@ public class Box extends Entity implements eu.darkbot.api.entities.Box {
         main.hero.drive.clickCenter(true, locationInfo.now);
         clickable.setRadius(0);
 
+        setCollected();
+
         return true;
     }
 

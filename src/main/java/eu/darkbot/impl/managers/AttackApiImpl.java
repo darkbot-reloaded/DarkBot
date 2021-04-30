@@ -10,6 +10,7 @@ import eu.darkbot.api.managers.HeroItemsAPI;
 import eu.darkbot.api.objects.Item;
 import org.jetbrains.annotations.Nullable;
 
+@Deprecated // This implementation is not ready for use in production
 public class AttackApiImpl implements AttackAPI {
 
     private final SettingsProxy settingsProxy;
@@ -19,7 +20,7 @@ public class AttackApiImpl implements AttackAPI {
     private Attackable target;
     private long lockTryTime, attackTryTime;
 
-    public AttackApiImpl(SettingsProxy settingsProxy,
+    private AttackApiImpl(SettingsProxy settingsProxy,
                          HeroItemsAPI heroItems,
                          HeroAPI hero) {
         this.settingsProxy = settingsProxy;
@@ -42,7 +43,7 @@ public class AttackApiImpl implements AttackAPI {
         return hasTarget() && hero.getTarget() == target;
     }
 
-    @Override
+    //@Override
     public void tryLockTarget() {
         if (!hasTarget() || isLocked() || lockTryTime > System.currentTimeMillis()) return;
 
@@ -55,6 +56,22 @@ public class AttackApiImpl implements AttackAPI {
     }
 
     @Override
+    public void tryLockAndAttack() {
+        if (isLocked()) laserAttack();
+        else tryLockTarget();
+    }
+
+    @Override
+    public void stopAttack() {
+        laserAbort();
+    }
+
+    @Override
+    public double modifyRadius(double radius) {
+        return radius;
+    }
+
+    //@Override
     public void laserAttack() {
         if (!hasTarget() || isAttacking() || attackTryTime > System.currentTimeMillis() - 150) return;
 
@@ -67,7 +84,7 @@ public class AttackApiImpl implements AttackAPI {
         }
     }
 
-    @Override
+    //@Override
     public void laserAbort() {
         if (!isAttacking() || attackTryTime > System.currentTimeMillis() - 150) return;
 
@@ -78,7 +95,7 @@ public class AttackApiImpl implements AttackAPI {
     }
 
     private long rocketTryTime;
-    @Override
+    //@Override
     public void launchRocket() {
         Character rocketLaunchChar = settingsProxy.getCharCode(SettingsProxy.KeyBind.ATTACK_ROCKET);
         if (rocketLaunchChar == null ||
@@ -95,7 +112,7 @@ public class AttackApiImpl implements AttackAPI {
         this.rocketTryTime = System.currentTimeMillis();
     }
 
-    @Override
+    //@Override
     public SelectableItem.Laser getLaser() {
         return heroItems.getItems(HeroItemsAPI.Category.LASERS).stream()
                 .filter(Item::isSelected)
@@ -103,7 +120,7 @@ public class AttackApiImpl implements AttackAPI {
                 .findFirst().orElse(null);
     }
 
-    @Override
+    //@Override
     public SelectableItem.Rocket getRocket() {
         return heroItems.getItems(HeroItemsAPI.Category.ROCKETS).stream()
                 .filter(Item::isSelected)

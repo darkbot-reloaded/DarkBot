@@ -168,7 +168,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
             Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
             this.configTime = System.currentTimeMillis();
         }
-        boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000;
+        boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000L;
 
         if ((this.formation != form || checkFormation) && System.currentTimeMillis() - formationTime > 3500L) {
             Main.API.keyboardClick(this.formation = form);
@@ -196,7 +196,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         return configuration;
     }
 
-    @Override
+
     public void toggleConfiguration() {
         if (System.currentTimeMillis() - configTime <= 5500L) return;
 
@@ -204,14 +204,13 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         this.configTime = System.currentTimeMillis();
     }
 
-    @Override
     public void setFormation(SelectableItem.Formation formation) {
         if (formation == getFormation() ||
                 System.currentTimeMillis() - formationTime <= 3500L) return;
 
         SlotBarsProxy slotBars = main.facadeManager.slotBars;
 
-        slotBars.filterItem(HeroItemsAPI.Category.DRONE_FORMATIONS, formation::matches)
+        slotBars.findItem(formation)
                 .filter(slotBars::isSelectable)
                 .ifPresent(slotBars::selectItem);
 
@@ -219,26 +218,21 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     @Override
-    public boolean isInMode(Configuration configuration, SelectableItem.Formation formation) {
-        return configuration == getConfiguration() && formation == getFormation();
+    public boolean isInMode(Mode mode) {
+        return mode.getConfiguration() == getConfiguration() && mode.getFormation() == getFormation();
     }
 
     @Override
-    public boolean setMode(Configuration configuration, SelectableItem.Formation formation) {
-        setFormation(formation);
-        if (configuration != getConfiguration()) toggleConfiguration();
+    public boolean setMode(Mode mode) {
+        if (mode.getConfiguration() != getConfiguration()) toggleConfiguration();
+        setFormation(mode.getFormation());
 
-        return isInMode(configuration, formation);
+        return isInMode(mode);
     }
 
     @Override
     public boolean setAttackMode(eu.darkbot.api.entities.Npc target) {
         return attackMode((Npc) target);
-    }
-
-    @Override
-    public boolean setAttackMode() {
-        return attackMode();
     }
 
     @Override

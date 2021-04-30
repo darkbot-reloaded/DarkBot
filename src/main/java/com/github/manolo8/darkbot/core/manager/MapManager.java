@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
@@ -16,7 +15,8 @@ import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.utils.Area;
-import eu.darkbot.api.managers.EventSenderAPI;
+import eu.darkbot.api.entities.utils.GameMap;
+import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 
 import java.util.Collection;
@@ -27,7 +27,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class MapManager implements Manager, StarSystemAPI {
 
     private final Main main;
-    private final EventSenderAPI eventSender;
+    private final EventBrokerAPI eventBroker;
     private final StarManager starManager;
 
     public final EntityList entities;
@@ -68,10 +68,10 @@ public class MapManager implements Manager, StarSystemAPI {
 
     public MapManager(Main main,
                       PluginAPI pluginAPI,
-                      EventSenderAPI eventSender,
+                      EventBrokerAPI eventBroker,
                       StarManager starManager) {
         this.main = main;
-        this.eventSender = eventSender;
+        this.eventBroker = eventBroker;
         this.starManager = starManager;
 
         this.entities = pluginAPI.requireInstance(EntityList.class);
@@ -123,7 +123,7 @@ public class MapManager implements Manager, StarSystemAPI {
             Map old = main.hero.map;
             Map next = main.hero.map = main.starManager.byId(id);
 
-            eventSender.sendEvent(new MapChangeEvent(old, next));
+            eventBroker.sendEvent(new MapChangeEvent(old, next));
 
             updateAreas(false);
         }
@@ -251,7 +251,7 @@ public class MapManager implements Manager, StarSystemAPI {
 
 
     @Override
-    public eu.darkbot.api.entities.utils.Map getCurrentMap() {
+    public GameMap getCurrentMap() {
         return main.hero.map;
     }
 
@@ -261,27 +261,27 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.utils.Map> getMaps() {
+    public Collection<? extends GameMap> getMaps() {
         return starManager.getMaps();
     }
 
     @Override
-    public eu.darkbot.api.entities.utils.Map getById(int mapId) throws MapNotFoundException {
+    public GameMap getById(int mapId) throws MapNotFoundException {
         return starManager.getById(mapId);
     }
 
     @Override
-    public eu.darkbot.api.entities.utils.Map getOrCreateMapById(int mapId) {
+    public GameMap getOrCreateMapById(int mapId) {
         return starManager.byId(mapId);
     }
 
     @Override
-    public eu.darkbot.api.entities.utils.Map getByName(String mapName) throws MapNotFoundException {
+    public GameMap getByName(String mapName) throws MapNotFoundException {
         return starManager.getByName(mapName);
     }
 
     @Override
-    public Portal findNext(eu.darkbot.api.entities.utils.Map targetMap) {
+    public Portal findNext(GameMap targetMap) {
         return starManager.next(main.hero, starManager.byId(targetMap.getId()));
     }
 }
