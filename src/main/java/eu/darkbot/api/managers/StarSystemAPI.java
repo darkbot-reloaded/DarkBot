@@ -3,7 +3,7 @@ package eu.darkbot.api.managers;
 import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.utils.Area;
-import eu.darkbot.api.entities.utils.Map;
+import eu.darkbot.api.entities.utils.GameMap;
 import eu.darkbot.api.events.Event;
 import eu.darkbot.utils.ArrayUtils;
 
@@ -20,9 +20,9 @@ public interface StarSystemAPI extends API.Singleton {
     List<String> BLACK_LIGHT_MAPS  = ArrayUtils.asImmutableList("1BL", "2BL", "3BL");
 
     /**
-     * @return current {@link Map}
+     * @return current {@link GameMap}
      */
-    Map getCurrentMap();
+    GameMap getCurrentMap();
 
     /**
      * @return bounds of the current map
@@ -32,39 +32,39 @@ public interface StarSystemAPI extends API.Singleton {
     /**
      * @return {@link Collection} of all known maps
      */
-    Collection<? extends Map> getMaps();
+    Collection<? extends GameMap> getMaps();
 
     /**
-     * Find {@link Map} by given {@code mapId}.
+     * Find {@link GameMap} by given {@code mapId}.
      *
      * @param mapId to find
-     * @return {@link Map} with given {@code mapId}
+     * @return {@link GameMap} with given {@code mapId}
      * @throws MapNotFoundException if map was not found
      */
-    Map getById(int mapId) throws MapNotFoundException;
+    GameMap getById(int mapId) throws MapNotFoundException;
 
     /**
-     * Find {@link Map} by given {@code mapId} otherwise will create a new one with given mapId.
+     * Find {@link GameMap} by given {@code mapId} otherwise will create a new one with given mapId.
      *
      * @param mapId to find
-     * @return {@link Map} with given {@code mapId}
+     * @return {@link GameMap} with given {@code mapId}
      */
-    Map getOrCreateMapById(int mapId);
+    GameMap getOrCreateMapById(int mapId);
 
     /**
-     * Find {@link Map} by given {@code mapName}.
-     * {@code mapName} must equals searched {@link Map#getName()}
+     * Find {@link GameMap} by given {@code mapName}.
+     * {@code mapName} must equals searched {@link GameMap#getName()}
      *
      * @param mapName to find
-     * @return {@link Map} with given {@code mapName}
+     * @return {@link GameMap} with given {@code mapName}
      * @throws MapNotFoundException if map was not found
      */
-    Map getByName(String mapName) throws MapNotFoundException;
+    GameMap getByName(String mapName) throws MapNotFoundException;
 
     /**
      * @return best {@link Portal} which leads to {@code targetMap}
      */
-    Portal findNext(Map targetMap);
+    Portal findNext(GameMap targetMap);
 
     class MapNotFoundException extends Exception {
         public MapNotFoundException(int mapId) {
@@ -77,18 +77,18 @@ public interface StarSystemAPI extends API.Singleton {
     }
 
     class MapChangeEvent implements Event {
-        private final Map previous, next;
+        private final GameMap previous, next;
 
-        public MapChangeEvent(Map previous, Map next) {
+        public MapChangeEvent(GameMap previous, GameMap next) {
             this.previous = previous;
             this.next = next;
         }
 
-        public Map getPrevious() {
+        public GameMap getPrevious() {
             return previous;
         }
 
-        public Map getNext() {
+        public GameMap getNext() {
             return next;
         }
     }

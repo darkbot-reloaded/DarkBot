@@ -1,5 +1,8 @@
 package eu.darkbot.api.entities;
 
+/**
+ * In-game dropped mine entity
+ */
 public interface Mine extends Entity {
 
     /**
@@ -7,6 +10,9 @@ public interface Mine extends Entity {
      */
     int getTypeId();
 
+    /**
+     * @return The mine type of this mine entity
+     */
     default Mine.Type getType() {
         return Type.of(getTypeId());
     }

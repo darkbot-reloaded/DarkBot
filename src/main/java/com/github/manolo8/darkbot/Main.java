@@ -390,9 +390,4 @@ public class Main extends Thread implements PluginListener, BotAPI {
         return module;
     }
 
-    @Override
-    public void setTheme(FlatLaf theme) {
-
-    }
-
 }

@@ -168,8 +168,8 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
     }
 
     @Override
-    public void setBlacklisted(long forTime) {
-        setTimerTo(forTime);
+    public void setBlacklisted(long time) {
+        setTimerTo(time);
     }
 
     @Override

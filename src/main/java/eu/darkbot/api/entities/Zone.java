@@ -3,7 +3,7 @@ package eu.darkbot.api.entities;
 import eu.darkbot.api.entities.utils.Area;
 
 /**
- * Default zone entity in-game.
+ * Generic in-game zone, like barriers or mist
  *
  * @see Barrier
  * @see Mist
@@ -14,8 +14,4 @@ public interface Zone extends Entity {
      */
     Area getArea();
 
-    /**
-     * Returns true if zone isn't outside map
-     */
-    boolean isZoneValid();
 }

@@ -3,7 +3,7 @@ package eu.darkbot.logic.modules;
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.API;
 import eu.darkbot.api.PluginAPI;
-import eu.darkbot.api.entities.utils.Map;
+import eu.darkbot.api.entities.utils.GameMap;
 import eu.darkbot.api.extensions.Installable;
 import eu.darkbot.logic.utils.MapTraveler;
 
@@ -26,7 +26,7 @@ public class MapModule extends TemporalModule implements Installable, API {
         traveler.uninstall();
     }
 
-    public void setTarget(Map target) {
+    public void setTarget(GameMap target) {
         this.traveler.setTarget(target);
     }
 
@@ -34,7 +34,7 @@ public class MapModule extends TemporalModule implements Installable, API {
     public String getStatus() {
         return  traveler.current != null ?
                 I18n.get("module.map_travel.status.has_next", traveler.target.getName(),
-                        traveler.current.getTargetMap().map(Map::getName).orElse("unknown?")) :
+                        traveler.current.getTargetMap().map(GameMap::getName).orElse("unknown?")) :
                 I18n.get("module.map_travel.status.no_next", traveler.target.getName());
     }
 
