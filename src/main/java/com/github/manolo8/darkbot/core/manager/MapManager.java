@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
