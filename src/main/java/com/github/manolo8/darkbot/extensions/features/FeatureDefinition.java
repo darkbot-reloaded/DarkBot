@@ -7,12 +7,13 @@ import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
 public class FeatureDefinition<T> implements FeatureInfo<T> {
 
-    private final Plugin plugin;
+    private final @Nullable Plugin plugin;
     private final Class<T> clazz;
     private final Feature feature;
     private final IssueHandler issues;
@@ -23,9 +24,9 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
 
     private final Lazy<FeatureDefinition<T>> listener = new Lazy.NoCache<>();
 
-    private T instance;
+    private @Nullable T instance;
 
-    public FeatureDefinition(Plugin plugin, Class<T> clazz) {
+    public FeatureDefinition(@Nullable Plugin plugin, Class<T> clazz) {
         this.plugin = plugin;
         this.clazz = clazz;
         this.feature = clazz.getAnnotation(Feature.class);
@@ -42,7 +43,7 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
         }
     }
 
-    public Plugin getPlugin() {
+    public @Nullable Plugin getPlugin() {
         return plugin;
     }
 
@@ -70,7 +71,7 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
         return description;
     }
 
-    public T getInstance() {
+    public @Nullable T getInstance() {
         return instance;
     }
 
@@ -91,6 +92,8 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
     }
 
     private boolean setStatusInternal(boolean enabled) {
+        if (plugin == null)
+            throw new IllegalStateException("Native features cannot be enabled or disabled");
         if (enabled) return plugin.getInfo().ENABLED_FEATURES.add(id) | plugin.getInfo().DISABLED_FEATURES.remove(id);
         else return plugin.getInfo().ENABLED_FEATURES.remove(id) | plugin.getInfo().DISABLED_FEATURES.add(id);
     }
@@ -113,7 +116,7 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
     }
 
     @Override
-    public PluginInfo getPluginInfo() {
+    public @Nullable PluginInfo getPluginInfo() {
         return plugin;
     }
 

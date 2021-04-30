@@ -19,29 +19,28 @@ public interface Entity extends Locatable {
     int getId();
 
     /**
-     * Is {@link Entity} valid and being updated, //(?out of map?).
-     * If that method returns {@code false} dont use this {@link Entity} anymore,
-     * values etc. wont be updated.
+     * Is {@link Entity} valid and being updated, or has it disappeared client-side
+     * If this method returns {@code false} the {@link Entity} should be discarded.
      *
-     * @return true if {@link Entity} is valid and being updated
+     * @return true if {@link Entity} is valid and being updated, false otherwise
      */
     boolean isValid();
 
     /**
-     * @return true if {@link Entity} can be selected.
+     * @return true if {@link Entity} can be selected (locked).
      */
     boolean isSelectable();
 
     /**
      * Selects this entity as the target in-game, can instantly attempt to attack with {@code tryAttack} param.
      *
-     * @param tryAttack instant attempt to attack this entity
+     * @param tryAttack instantly attempt to attack this entity
      * @return true on successful selection
      */
     boolean trySelect(boolean tryAttack);
 
     /**
-     * @return {@link LocationInfo}
+     * @return the location of the entity as well as other information about the location
      */
     LocationInfo getLocationInfo();
 
@@ -58,13 +57,19 @@ public interface Entity extends Locatable {
     /**
      * Checks that {@link Entity} have given effect id.
      *
-     * @param effect to check
-     * @return true if current entity have indicated effect
+     * @param effect The effect id to check
+     * @return true if current entity has the effect, false otherwise
      */
     default boolean hasEffect(int effect) {
         return getEffects().contains(effect);
     }
 
+    /**
+     * Checks that {@link Entity} have given {@link Effect}.
+     *
+     * @param effect The effect to check
+     * @return true if current entity has the effect, false otherwise
+     */
     default boolean hasEffect(@NotNull Effect effect) {
         return hasEffect(effect.getId());
     }

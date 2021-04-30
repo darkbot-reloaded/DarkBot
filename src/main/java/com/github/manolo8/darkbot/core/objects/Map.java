@@ -1,9 +1,10 @@
 package com.github.manolo8.darkbot.core.objects;
 
+import eu.darkbot.api.entities.utils.GameMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Map implements Comparable<Map>, eu.darkbot.api.entities.utils.Map {
+public class Map implements Comparable<Map>, GameMap {
 
     public int id;
     public String name, shortName;
@@ -53,7 +54,7 @@ public class Map implements Comparable<Map>, eu.darkbot.api.entities.utils.Map {
     }
 
     @Override
-    public boolean isGg() {
+    public boolean isGG() {
         return gg;
     }
 

@@ -4,7 +4,7 @@ import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.extensions.Module;
 
-abstract class TemporalModule implements Module {
+public abstract class TemporalModule implements Module {
 
     protected final BotAPI bot;
     protected final PluginAPI api;

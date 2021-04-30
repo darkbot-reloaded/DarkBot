@@ -8,6 +8,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Optional;
 
+/**
+ * API providing a way to inspect what features or plugins are loaded.
+ *
+ * Generally this API shouldn't be of much use except when requiring one
+ * feature to have a dependency on another.
+ */
 public interface ExtensionsAPI extends API.Singleton {
 
     /**
