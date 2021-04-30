@@ -74,7 +74,7 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
         }
 
         @Override
-        protected Row createRow(String name, NpcInfo data) {
+        protected Row<NpcInfo> createRow(String name, NpcInfo data) {
             return new NpcRow(name, data);
         }
 
@@ -84,15 +84,14 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
         }
 
         @Override
-        protected Object getValue(GenericTableModel.Row row, GenericTableModel.Column column) {
+        protected Object getValue(GenericTableModel.Row<NpcInfo> row, GenericTableModel.Column column) {
             if (column.field == null) return row.name;
 
-            NpcRow r = (NpcRow) row;
-            return ReflectionUtils.get(column.field, r.getInfo());
+            return ReflectionUtils.get(column.field, row.data);
         }
 
         @Override
-        protected void setValue(Row row, Column column, Object value) {
+        protected void setValue(Row<NpcInfo> row, Column column, Object value) {
             Field field = column.field;
             if (field == null) throw new UnsupportedOperationException("Can't edit default column");
 
@@ -109,32 +108,32 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
             ConfigEntity.changed();
         }
 
-        public static class NpcRow extends GenericTableModel.Row {
+        public static class NpcRow extends GenericTableModel.Row<NpcInfo> {
+
+            private Collection<NpcInfo> infos;
 
             public NpcRow(String name, NpcInfo data) {
-                super(name, Collections.singleton(data));
+                super(name, data);
+                this.infos = Collections.singleton(data);
             }
 
             @Override
-            public Row update(Object data) {
-                NpcInfo info = (NpcInfo) data;
-
-                Collection<NpcInfo> infos = getInfos();
+            public NpcRow update(NpcInfo info) {
                 if (infos.contains(info)) return this;
 
-                if (infos instanceof Set) this.data = infos = new ArrayList<>(infos);
-                info.copyOf(getInfo());
-                infos.add((NpcInfo) data);
+                if (infos instanceof Set) infos = new ArrayList<>(infos);
+
+                info.copyOf(data);
+                infos.add(info);
                 return this;
             }
 
-            @SuppressWarnings("unchecked")
             public Collection<NpcInfo> getInfos() {
-                return (Collection<NpcInfo>) this.data;
+                return this.infos;
             }
 
             public NpcInfo getInfo() {
-                return getInfos().iterator().next();
+                return this.data;
             }
         }
     }

@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public abstract class InfoTable<T extends TableModel, E> extends JTable implements OptionEditor {
-    private JComponent component;
+    private final JComponent component;
     private Map<String, E> data;
     private Lazy<String> listener;
     private Supplier<E> supplier;
@@ -78,11 +78,11 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
 
         setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
         if (model instanceof GenericTableModel) {
-            setTableHeader(new ToolTipHeader(getColumnModel(), (GenericTableModel) model));
+            setTableHeader(new ToolTipHeader(getColumnModel(), (GenericTableModel<?>) model));
         }
         getTableHeader().setReorderingAllowed(false);
 
-        TableRowSorter<T> sorter = new TableRowSorter<>((T) getModel());
+        TableRowSorter<T> sorter = new TableRowSorter<>(model);
         setRowSorter(sorter);
 
         component = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][][][]", "[][grow]"));

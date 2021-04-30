@@ -8,7 +8,7 @@ import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import javax.swing.*;
 import java.util.Arrays;
 
-public class JBoxInfoTable extends InfoTable<GenericTableModel, BoxInfo> implements OptionEditor {
+public class JBoxInfoTable extends InfoTable<GenericTableModel<BoxInfo>, BoxInfo> implements OptionEditor {
 
     public JBoxInfoTable(Config.Collect collect) {
         super(BoxInfo.class, collect.BOX_INFOS, collect.ADDED_BOX, BoxInfo::new);

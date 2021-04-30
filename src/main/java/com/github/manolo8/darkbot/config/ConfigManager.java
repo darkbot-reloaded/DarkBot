@@ -83,7 +83,6 @@ public class ConfigManager {
     }
 
     public boolean createNewConfig(String name, @Nullable String copy) {
-        // Load config to save copy of
         Path newFile = Paths.get(CONFIG_FOLDER, name + EXTENSION);
         try {
             if (copy != null) {
