@@ -13,6 +13,7 @@ import com.github.manolo8.darkbot.config.actions.conditions.HasFormationConditio
 import com.github.manolo8.darkbot.config.actions.conditions.NoneCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NumericalCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.OneCondition;
+import com.github.manolo8.darkbot.config.actions.conditions.UntilCondition;
 import com.github.manolo8.darkbot.config.actions.values.BooleanConstant;
 import com.github.manolo8.darkbot.config.actions.values.DistanceValue;
 import com.github.manolo8.darkbot.config.actions.values.HealthTypeValue;
@@ -24,6 +25,8 @@ import com.github.manolo8.darkbot.config.actions.values.MapConstant;
 import com.github.manolo8.darkbot.config.actions.values.NumberConstant;
 import com.github.manolo8.darkbot.config.actions.values.PercentConstant;
 import com.github.manolo8.darkbot.config.actions.values.ShipLocationValue;
+import com.github.manolo8.darkbot.config.actions.values.ShipName;
+import com.github.manolo8.darkbot.config.actions.values.StringConstant;
 import com.github.manolo8.darkbot.config.actions.values.TargetValue;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
@@ -38,27 +41,35 @@ import java.util.stream.Collectors;
 public class Values {
     private static final List<Class<? extends Value<?>>> AVAILABLE_VALUES =
             Arrays.asList(
+                    // Combination conditions
                     AllCondition.class,
                     AnyCondition.class,
                     OneCondition.class,
                     NoneCondition.class,
+                    // Comparison conditions
                     NumericalCondition.class,
                     EqualCondition.class,
-                    AfterCondition.class,
                     HasEffectCondition.class,
                     HasFormationCondition.class,
+                    // Stateful conditions
+                    AfterCondition.class,
+                    UntilCondition.class,
+                    // Values
                     DistanceValue.class,
                     ShipLocationValue.class,
+                    ShipName.class,
                     HeroMap.class,
                     HealthTypeValue.class,
                     HealthValue.class,
                     HeroValue.class,
                     TargetValue.class,
+                    // Constants
                     NumberConstant.class,
                     PercentConstant.class,
                     BooleanConstant.class,
                     LocationConstant.class,
-                    MapConstant.class);
+                    MapConstant.class,
+                    StringConstant.class);
 
     private static final Map<String, Meta<?>> VALUES = buildMetadata();
 

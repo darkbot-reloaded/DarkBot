@@ -3,9 +3,13 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.entities.galaxy.GalaxyGate;
 import com.github.manolo8.darkbot.backpage.entities.galaxy.GalaxyInfo;
+import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
+import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
 
 public class GalaxyManager {
 
@@ -104,21 +108,39 @@ public class GalaxyManager {
     }
 
     private Boolean handleRequest(String params, int expiryTime, int minWait) {
-        if (System.currentTimeMillis() > lastGatesUpdate + expiryTime) {
-            try {
-                galaxyInfo.update(main.backpage.getConnection(params, Method.GET, minWait)
-                        .addSupplier(() -> lastGatesUpdate = System.currentTimeMillis())
-                        .consumeInputStream(inputStream -> DocumentBuilderFactory
-                                .newInstance()
-                                .newDocumentBuilder()
-                                .parse(inputStream)
-                                .getDocumentElement()));
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
+        if (System.currentTimeMillis() <= lastGatesUpdate + expiryTime) return null;
+        try {
+            Document doc = getDocument(main.backpage.getConnection(params, Method.GET, minWait));
+
+            if (doc == null) return false;
+
+            galaxyInfo.update(doc.getDocumentElement());
+            lastGatesUpdate = System.currentTimeMillis();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return null;
     }
+
+    private static final byte[] BUFFER = new byte[1024];
+
+    private Document getDocument(Http http) throws Exception {
+        try (InputStream is = http.getInputStream();
+             BufferedInputStream bis = new BufferedInputStream(is)) {
+            bis.mark(1024);
+
+            int length = bis.read(BUFFER);
+            String start = new String(BUFFER, 0, length);
+            if (start.equals("materializer locked")) return null;
+
+            bis.reset();
+
+            return DocumentBuilderFactory
+                    .newInstance()
+                    .newDocumentBuilder()
+                    .parse(bis);
+        }
+    }
+
 }

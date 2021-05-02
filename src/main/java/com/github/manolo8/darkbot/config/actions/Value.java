@@ -12,4 +12,9 @@ public interface Value<R> {
         return val.get(main);
     }
 
+    static boolean allows(Value<Condition.Result> val, Main main) {
+        Condition.Result res = get(val, main);
+        return res != null && res.allows();
+    }
+
 }
