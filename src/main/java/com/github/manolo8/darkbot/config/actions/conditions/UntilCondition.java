@@ -11,7 +11,7 @@ public class UntilCondition implements Condition {
 
     public Value<Result> from, until;
 
-    private boolean current = false;
+    private transient boolean current = false;
 
     @Override
     public @NotNull Condition.Result get(Main main) {

@@ -31,6 +31,7 @@ import com.github.manolo8.darkbot.config.actions.values.TargetValue;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -125,6 +126,7 @@ public class Values {
             this.type = (Class<T>) t[0];
             this.params = Parser.class.isAssignableFrom(clazz) ? null :
                     Arrays.stream(clazz.getDeclaredFields())
+                            .filter(f -> !Modifier.isTransient(f.getModifiers()))
                             .map(Param::new)
                             .toArray(Param[]::new);
         }

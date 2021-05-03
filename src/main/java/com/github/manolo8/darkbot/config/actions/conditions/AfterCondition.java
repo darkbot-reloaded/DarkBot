@@ -21,7 +21,7 @@ public class AfterCondition implements Condition, Parser {
     public long time;
     public Value<Result> condition;
 
-    private Long allowTime = null;
+    private transient Long allowTime = null;
 
     @Override
     public @NotNull Condition.Result get(Main main) {
