@@ -14,20 +14,16 @@ import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
 public class ModuleSupplier extends OptionList<String> {
-    private static Set<ModuleSupplier> INSTANCES = Collections.newSetFromMap(new WeakHashMap<>());
+    private static final Set<ModuleSupplier> INSTANCES = Collections.newSetFromMap(new WeakHashMap<>());
     private static Map<String, FeatureDefinition<?>> MODULES_BY_ID;
     private static List<String> MODULE_NAMES;
 
     public static void updateModules(Map<String, FeatureDefinition<?>> modules) {
-        ModuleSupplier.MODULES_BY_ID = modules;
+        MODULES_BY_ID = modules;
         MODULE_NAMES = MODULES_BY_ID.values().stream()
                 .filter(m -> !TemporalModule.class.isAssignableFrom(m.getClazz()))
                 .map(FeatureDefinition::getName).collect(Collectors.toList());
-        INSTANCES.forEach(model -> {
-            ListDataEvent ev = new ListDataEvent(model, ListDataEvent.CONTENTS_CHANGED, 0, MODULES_BY_ID.size());
-            Arrays.stream(model.dataListeners.getListeners(ListDataListener.class))
-                    .forEach(listener -> listener.contentsChanged(ev));
-        });
+        forceUpdate(INSTANCES, MODULES_BY_ID.size());
     }
 
     public ModuleSupplier() {
