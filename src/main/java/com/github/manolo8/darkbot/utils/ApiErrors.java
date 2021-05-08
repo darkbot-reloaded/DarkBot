@@ -37,7 +37,7 @@ public class ApiErrors {
         if (!path.equals(change))
             return "Your folder has non supported characters in the path, you must remove them:<br>  " + change + "";
 
-        return null;
+        return "Unknown type of exception";
     }
 
 
