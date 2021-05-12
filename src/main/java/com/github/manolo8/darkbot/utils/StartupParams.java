@@ -45,8 +45,8 @@ public class StartupParams {
      * Command-line argument for set start-config, has no parameters
      * Used for debugging
      */
-    private static final String START_CONFIGS = COMMAND_PREFIX + "configs";
-    private String startConfigs = null;
+    private static final String START_CONFIG = COMMAND_PREFIX + "config";
+    private String startConfig = null;
 
     private final String[] args;
 
