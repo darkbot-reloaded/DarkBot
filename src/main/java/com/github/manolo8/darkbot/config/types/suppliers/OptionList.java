@@ -2,11 +2,14 @@ package com.github.manolo8.darkbot.config.types.suppliers;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
+import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public abstract class OptionList<T> implements ComboBoxModel<String> {
-    EventListenerList dataListeners = new EventListenerList();
+    protected EventListenerList dataListeners = new EventListenerList();
 
     public abstract T getValue(String text);
     public abstract String getText(T value);
@@ -43,5 +46,13 @@ public abstract class OptionList<T> implements ComboBoxModel<String> {
     }
     public void removeListDataListener(ListDataListener l) {
         dataListeners.remove(ListDataListener.class, l);
+    }
+
+    public static void forceUpdate(Collection<? extends OptionList<?>> instances, int size) {
+        SwingUtilities.invokeLater(() -> instances.forEach(model -> {
+            ListDataEvent ev = new ListDataEvent(model, ListDataEvent.CONTENTS_CHANGED, 0, size);
+            Arrays.stream(model.dataListeners.getListeners(ListDataListener.class))
+                    .forEach(listener -> listener.contentsChanged(ev));
+        }));
     }
 }

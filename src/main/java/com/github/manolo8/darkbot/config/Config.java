@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
+import com.github.manolo8.darkbot.config.types.Placeholder;
 import com.github.manolo8.darkbot.config.types.Tag;
 import com.github.manolo8.darkbot.config.types.TagDefault;
 import com.github.manolo8.darkbot.config.types.suppliers.ApiSupplier;

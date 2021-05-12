@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
@@ -14,6 +15,7 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.utils.debug.ReadObjNames;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
@@ -103,16 +105,21 @@ public class MapManager implements Manager {
         if (switched) {
             id = currMap;
             main.hero.map = main.starManager.byId(id);
-            updateAreas();
+            updateAreas(false);
         }
         entities.update(address);
         if (switched) mapChange.send(main.hero.map);
     }
 
-    public void updateAreas() {
+    public void updateAreas(boolean createSafeties) {
         preferred = ConfigEntity.INSTANCE.getOrCreatePreferred();
         avoided = ConfigEntity.INSTANCE.getOrCreateAvoided();
         safeties = ConfigEntity.INSTANCE.getOrCreateSafeties();
+        if (createSafeties) {
+            for (Collection<? extends Entity> entities : entities.allEntities) {
+                for (Entity e : entities) ConfigEntity.INSTANCE.updateSafetyFor(e);
+            }
+        }
     }
 
     private void checkMirror() {

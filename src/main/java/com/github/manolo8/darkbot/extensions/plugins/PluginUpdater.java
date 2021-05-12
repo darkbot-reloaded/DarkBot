@@ -87,8 +87,12 @@ public class PluginUpdater {
     }
 
     private void checkUpdate(Plugin plugin) throws IOException {
-        plugin.setUpdateDefinition(findUpdate(plugin.getDefinition()));
+        if (plugin.getIssues().getIssues().contains(PluginHandler.UPDATE_NOT_POSSIBLE)) {
+            plugin.setUpdateStatus(Plugin.UpdateStatus.UNKNOWN);
+            return;
+        }
 
+        plugin.setUpdateDefinition(findUpdate(plugin.getDefinition()));
         PluginDefinition updateDef = plugin.getUpdateDefinition();
 
         IssueHandler updateIssues = plugin.getUpdateIssues();

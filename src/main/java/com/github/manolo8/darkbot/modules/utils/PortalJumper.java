@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.modules.utils;
 
 import com.github.manolo8.darkbot.core.entities.Portal;
+import com.github.manolo8.darkbot.core.manager.GroupManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
@@ -31,6 +32,18 @@ public class PortalJumper {
     }
 
     public void jump(Portal target) {
+        // Low & hades, wait for group before trying to jump
+        // This prevents the J key being written while typing out player names for invites
+        int minGroupSize = target.target == null ? 0
+                : target.target.id == 200 ? 3 // LoW
+                : target.target.id == 203 ? 4 // Hades
+                : 0;
+
+        if (minGroupSize > 0) {
+            GroupManager gm = hero.main.guiManager.group;
+            if (!gm.group.isValid() || gm.group.size < minGroupSize) return;
+        }
+
         hero.jumpPortal(target);
 
         if (target != last) {

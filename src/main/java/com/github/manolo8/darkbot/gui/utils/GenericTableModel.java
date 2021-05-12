@@ -20,8 +20,8 @@ public class GenericTableModel<T> extends AbstractTableModel {
     protected Map<String, T> config;
 
     protected final Column[] columns;
-    protected final List<Row> rows = new ArrayList<>();
-    private final Map<String, Row> table = new HashMap<>();
+    protected final List<Row<T>> rows = new ArrayList<>();
+    private final Map<String, Row<T>> table = new HashMap<>();
 
     public GenericTableModel(Class<T> clazz, Map<String, T> config, Lazy<String> modified) {
         this.config = config;
@@ -44,7 +44,7 @@ public class GenericTableModel<T> extends AbstractTableModel {
 
     protected void updateEntry(String name, T data) {
         if (data == null) {
-            Row r = table.remove(name);
+            Row<T> r = table.remove(name);
             if (r != null) rows.remove(r);
         } else {
             table.compute(name, (n, row) -> {
@@ -59,8 +59,8 @@ public class GenericTableModel<T> extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    protected Row createRow(String name, T data) {
-        return new Row(name, data);
+    protected Row<T> createRow(String name, T data) {
+        return new Row<>(name, data);
     }
 
     protected void clear() {
@@ -109,16 +109,16 @@ public class GenericTableModel<T> extends AbstractTableModel {
         ConfigEntity.changed();
     }
 
-    public Row getRow(int row) {
+    public Row<T> getRow(int row) {
         return rows.get(row);
     }
 
-    protected Object getValue(Row row, Column column) {
+    protected Object getValue(Row<T> row, Column column) {
         if (column.field == null) return row.name;
         return ReflectionUtils.get(column.field, row.data);
     }
 
-    protected void setValue(Row row, Column column, Object value) {
+    protected void setValue(Row<T> row, Column column, Object value) {
         Field field = column.field;
         if (field == null) throw new UnsupportedOperationException("Can't edit default column");
         ReflectionUtils.set(field, row.data, value);
@@ -139,16 +139,16 @@ public class GenericTableModel<T> extends AbstractTableModel {
         }
     }
 
-    protected static class Row {
+    protected static class Row<T> {
         public final String name;
-        public Object data;
+        public T data;
 
-        public Row(String name, Object data) {
+        public Row(String name, T data) {
             this.name = name;
             this.data = data;
         }
 
-        public Row update(Object data) {
+        public Row<T> update(T data) {
             this.data = data;
             return this;
         }

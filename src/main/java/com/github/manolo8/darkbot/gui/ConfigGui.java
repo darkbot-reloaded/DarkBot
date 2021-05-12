@@ -95,7 +95,7 @@ public class ConfigGui extends JFrame {
     }
 
     void setCustomConfig(String name, Object config) {
-        advancedPane.setCustomConfig(name, config);
+        SwingUtilities.invokeLater(() -> advancedPane.setCustomConfig(name, config));
     }
 
     @Override

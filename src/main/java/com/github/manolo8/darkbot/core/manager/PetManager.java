@@ -71,7 +71,7 @@ public class PetManager extends Gui {
         this.ships = main.mapManager.entities.ships;
         this.pet = main.hero.pet;
 
-        PetGearSupplier.GEARS = gearList;
+        PetGearSupplier.updateGears(gearList);
     }
 
     public void tick() {
@@ -245,6 +245,7 @@ public class PetManager extends Gui {
         long gearsSprite = getSpriteChild(address, -1);
         gearsArr.update(API.readMemoryLong(gearsSprite, 176, 224));
         gearsArr.sync(gearList, Gear::new, null);
+        PetGearSupplier.updateGears(gearList);
 
         updateNpcLocatorList(gearsSprite);
 

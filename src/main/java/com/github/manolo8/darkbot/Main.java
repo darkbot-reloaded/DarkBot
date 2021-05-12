@@ -51,7 +51,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 87");
+    public static final Version VERSION      = new Version("1.13.17 beta 92");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -316,11 +316,11 @@ public class Main extends Thread implements PluginListener {
         try {
             SwingUtilities.invokeAndWait(() -> {
                 this.config = configManager.loadConfig(config);
-                mapManager.updateAreas();
+                mapManager.updateAreas(true);
                 pluginHandler.updateConfig(); // Get plugins to update what features are enabled
                 featureRegistry.updateConfig(); // Update the features & configurables
                 form.updateConfiguration(); // Rebuild config gui
-                setModule(module, true);
+                setModule(null, true);
             });
         } catch (InterruptedException | InvocationTargetException e) {
             e.printStackTrace();
