@@ -26,7 +26,9 @@ public class Strings {
     }
 
     public static String fuzzyMatcher(String string) {
-        return string.replace("x", "")
+        return string
+                .replace("x", "")
+                .replace("X", "")
                 .toLowerCase(Locale.ROOT)
                 .replaceAll("[^a-z0-9]", "")
                 .replaceAll("m[i1]m[e3][s5][i1][s5]", "mimesis");
