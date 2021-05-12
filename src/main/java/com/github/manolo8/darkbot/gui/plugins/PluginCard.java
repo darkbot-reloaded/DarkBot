@@ -44,7 +44,7 @@ public class PluginCard extends JPanel {
     PluginCard(Main main, Plugin plugin, FeatureRegistry featureRegistry) {
         super(new MigLayout("fillx, gapy 0, ins 0 0 5px 0", "5px[]0px[]10px[]10px[grow]", "[]"));
         setColor(plugin.getIssues());
-        plugin.getIssues().addListener(this::setColor);
+        plugin.getIssues().addUIListener(this::setColor);
 
         this.plugin = plugin;
         this.pluginUpdater = main.pluginUpdater;

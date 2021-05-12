@@ -22,7 +22,7 @@ class IssueList extends JPanel {
         setOpaque(false);
         if (inline) setupUI();
         for (IssueHandler issue : issues) {
-            issue.addListener(h -> this.setupUI());
+            issue.addUIListener(h -> this.setupUI());
         }
     }
 

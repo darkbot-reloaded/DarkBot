@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.extensions.plugins;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -15,6 +14,7 @@ public class IssueHandler {
 
     private final Set<PluginIssue> issues = new TreeSet<>();
     private final Lazy<IssueHandler> listener = new Lazy.NoCache<>();
+    private final Lazy<IssueHandler> uiListener = new Lazy.Swing<>();
 
     public IssueHandler() {
         this(null);
@@ -22,6 +22,7 @@ public class IssueHandler {
 
     public IssueHandler(IssueHandler parent) {
         this.parent = parent;
+        this.listener.add(uiListener::send);
     }
 
     public void addInfo(String message, String description) {
@@ -76,6 +77,10 @@ public class IssueHandler {
 
     public void addListener(Consumer<IssueHandler> listener) {
         this.listener.add(listener);
+    }
+
+    public void addUIListener(Consumer<IssueHandler> listener) {
+        this.uiListener.add(listener);
     }
 
     public Set<PluginIssue> getIssues() {

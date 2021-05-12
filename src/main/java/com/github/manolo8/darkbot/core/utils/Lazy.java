@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.utils;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -86,4 +87,12 @@ public class Lazy<C> {
             }
         }
     }
+
+    public static class Swing<C> extends NoCache<C> {
+        @Override
+        public void send(C value) {
+            SwingUtilities.invokeLater(() -> super.send(value));
+        }
+    }
+
 }

@@ -16,7 +16,7 @@ class FeatureCheckbox extends JCheckBox {
         addActionListener(a -> feature.setStatus(isSelected()));
 
         updateIssues(feature.getIssues());
-        feature.getIssues().addListener(this::updateIssues);
+        feature.getIssues().addUIListener(this::updateIssues);
     }
 
     private void updateIssues(IssueHandler issueList) {
