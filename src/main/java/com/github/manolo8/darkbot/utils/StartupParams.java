@@ -119,8 +119,8 @@ public class StartupParams {
         return forceNoOp;
     }
 
-    public String startConfigs(){
-        return startConfigs;
+    public String startConfig() {
+        return startConfig;
     }
 
     @Override
