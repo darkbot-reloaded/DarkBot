@@ -51,9 +51,9 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 92");
+    public static final Version VERSION = new Version("1.13.17 beta 92");
     public static final Object UPDATE_LOCKER = new Object();
-    public static final Gson GSON            = new GsonBuilder()
+    public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .setLenient()
             .disableHtmlEscaping()
@@ -63,25 +63,25 @@ public class Main extends Thread implements PluginListener {
             .create();
 
     public ConfigManager configManager = new ConfigManager();
-    public Config config = configManager.loadConfig(null);
+    public Config config;
     public static IDarkBotAPI API;
 
-    public final Lazy.Sync<Boolean> status       = new Lazy.Sync<>();
-    public final Lazy.Sync<String> configChange  = new Lazy.Sync<>();
-    public final StarManager starManager         = StarManager.getInstance();
-    public final MapManager mapManager           = new MapManager(this);
+    public final Lazy.Sync<Boolean> status = new Lazy.Sync<>();
+    public final Lazy.Sync<String> configChange = new Lazy.Sync<>();
+    public final StarManager starManager = StarManager.getInstance();
+    public final MapManager mapManager = new MapManager(this);
     public final SettingsManager settingsManager = new SettingsManager(this);
-    public final FacadeManager facadeManager     = new FacadeManager(this);
-    public final HeroManager hero                = new HeroManager(this);
-    public final EffectManager effectManager     = new EffectManager(this);
-    public final GuiManager guiManager           = new GuiManager(this);
-    public final StatsManager statsManager       = new StatsManager(this);
-    public final PingManager pingManager         = new PingManager();
-    public final BackpageManager backpage        = new BackpageManager(this);
-    public final PluginHandler pluginHandler     = new PluginHandler();
-    public final PluginUpdater pluginUpdater     = new PluginUpdater(this);
+    public final FacadeManager facadeManager = new FacadeManager(this);
+    public final HeroManager hero = new HeroManager(this);
+    public final EffectManager effectManager = new EffectManager(this);
+    public final GuiManager guiManager = new GuiManager(this);
+    public final StatsManager statsManager = new StatsManager(this);
+    public final PingManager pingManager = new PingManager();
+    public final BackpageManager backpage = new BackpageManager(this);
+    public final PluginHandler pluginHandler = new PluginHandler();
+    public final PluginUpdater pluginUpdater = new PluginUpdater(this);
     public final FeatureRegistry featureRegistry = new FeatureRegistry(this, pluginHandler);
-    public final RepairManager repairManager     = new RepairManager();
+    public final RepairManager repairManager = new RepairManager();
 
     private final MainGui form;
     private final BotInstaller botInstaller = new BotInstaller(
@@ -100,6 +100,12 @@ public class Main extends Thread implements PluginListener {
     public Main(StartupParams params) {
         super("Main");
         VerifierChecker.getAuthApi().setupAuth();
+
+        if (params.startConfig() == null)
+            config = configManager.loadConfig(null);
+        else
+            config = configManager.loadConfig(params.startConfig());
+
         API = configManager.getAPI(params);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
 
@@ -112,8 +118,6 @@ public class Main extends Thread implements PluginListener {
 
         this.pluginHandler.updatePluginsSync();
         this.pluginHandler.addListener(this);
-
-        if (params.startConfigs() != null) config = configManager.loadConfig(params.startConfigs());
 
         this.form = new MainGui(this);
         this.pluginUpdater.scheduleUpdateChecker();
@@ -201,7 +205,8 @@ public class Main extends Thread implements PluginListener {
                 else module.tickStopped();
             } catch (Throwable e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
-                if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                if (modDef != null)
+                    modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
             }
             for (Behaviour behaviour : behaviours) {
                 try {
@@ -292,11 +297,11 @@ public class Main extends Thread implements PluginListener {
     private void checkModule() {
         if (module == null || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE)) {
             Module module = featureRegistry.getFeature(moduleId = config.GENERAL.CURRENT_MODULE, Module.class)
-                .orElseGet(() -> {
-                    String name = moduleId.substring(moduleId.lastIndexOf(".") + 1);
-                    Popups.showMessageAsync("Error", I18n.get("bot.issue.module_load_failed", name), JOptionPane.ERROR_MESSAGE);
-                    return new DummyModule();
-                });
+                    .orElseGet(() -> {
+                        String name = moduleId.substring(moduleId.lastIndexOf(".") + 1);
+                        Popups.showMessageAsync("Error", I18n.get("bot.issue.module_load_failed", name), JOptionPane.ERROR_MESSAGE);
+                        return new DummyModule();
+                    });
             setModule(module, true);
         }
     }
