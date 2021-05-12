@@ -63,7 +63,7 @@ public class Main extends Thread implements PluginListener {
             .create();
 
     public ConfigManager configManager = new ConfigManager();
-    public Config config = configManager.loadConfig(null);
+    public Config config;
     public static IDarkBotAPI API;
 
     public final Lazy.Sync<Boolean> status       = new Lazy.Sync<>();
@@ -100,6 +100,12 @@ public class Main extends Thread implements PluginListener {
     public Main(StartupParams params) {
         super("Main");
         VerifierChecker.getAuthApi().setupAuth();
+
+        if (params.startConfig() == null)
+            config = configManager.loadConfig(null);
+        else
+            config = configManager.loadConfig(params.startConfig());
+
         API = configManager.getAPI(params);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
 
@@ -112,8 +118,6 @@ public class Main extends Thread implements PluginListener {
 
         this.pluginHandler.updatePluginsSync();
         this.pluginHandler.addListener(this);
-
-        if (params.startConfigs() != null) config = configManager.loadConfig(params.startConfigs());
 
         this.form = new MainGui(this);
         this.pluginUpdater.scheduleUpdateChecker();

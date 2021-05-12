@@ -69,11 +69,11 @@ public class StartupParams {
                 case NO_OP_COMMAND:
                     forceNoOp = true;
                     break;
-                case START_CONFIGS:
+                case START_CONFIG:
                     if (i + 1 >= args.length)
                         System.err.println("Missing arguments for config, usage: -config configname");
                     else
-                        startConfigs = args[++i];
+                        startConfig = args[++i];
                     break;
                 default:
                     System.out.println("Unknown startup argument: " + args[i]);
