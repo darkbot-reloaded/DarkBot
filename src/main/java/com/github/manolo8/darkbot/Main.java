@@ -123,7 +123,6 @@ public class Main extends Thread implements PluginListener {
 
         API.createWindow();
         if (params.getAutoStart()) setRunning(true);
-
         start();
 
     }
