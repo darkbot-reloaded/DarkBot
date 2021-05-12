@@ -71,7 +71,7 @@ public class StartupParams {
                     break;
                 case START_CONFIGS:
                     if (i + 1 >= args.length)
-                        System.err.println("Missing arguments for config, usage: -configs nameofconfig");
+                        System.err.println("Missing arguments for config, usage: -config configname");
                     else
                         startConfigs = args[++i];
                     break;
