@@ -101,10 +101,10 @@ public class Main extends Thread implements PluginListener {
         super("Main");
         VerifierChecker.getAuthApi().setupAuth();
 
-        if (params.startConfigs() == null)
+        if (params.startConfig() == null)
             configManager.loadConfig(null);
         else
-            config = configManager.loadConfig(params.startConfigs());
+            config = configManager.loadConfig(params.startConfig());
 
         API = configManager.getAPI(params);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);

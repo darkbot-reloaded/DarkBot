@@ -58,7 +58,7 @@ public class StartupParams {
             switch (args[i]) {
                 case LOGIN_COMMAND:
                     if (i + 1 >= args.length) {
-                        System.err.println("Missing arguments for config, usage: -config configname");
+                        System.err.println("Missing arguments for auto-login, usage: -login path/to/startup.properties");
                     }
                     properties = loadLoginProperties(args[++i]);
                     autoLogin = true;
@@ -71,7 +71,7 @@ public class StartupParams {
                     break;
                 case START_CONFIG:
                     if (i + 1 >= args.length)
-                        System.err.println("Missing arguments for config, usage: -configs nameofconfig");
+                        System.err.println("Missing arguments for config, usage: -config configname");
                     else
                         startConfig = args[++i];
                     break;
@@ -119,7 +119,7 @@ public class StartupParams {
         return forceNoOp;
     }
 
-    public String startConfigs(){
+    public String startConfig(){
         return startConfig;
     }
 
