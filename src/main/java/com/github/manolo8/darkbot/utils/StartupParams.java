@@ -41,6 +41,13 @@ public class StartupParams {
     private static final String NO_OP_COMMAND = COMMAND_PREFIX + "no-op";
     private boolean forceNoOp = false;
 
+    /**
+     * Command-line argument for set start-config, has no parameters
+     * Used for debugging
+     */
+    private static final String START_CONFIG = COMMAND_PREFIX + "config";
+    private String startConfig = null;
+
     private final String[] args;
 
     public StartupParams(String[] args) throws IOException {
@@ -61,6 +68,12 @@ public class StartupParams {
                     break;
                 case NO_OP_COMMAND:
                     forceNoOp = true;
+                    break;
+                case START_CONFIG:
+                    if (i + 1 >= args.length)
+                        System.err.println("Missing arguments for config, usage: -config configname");
+                    else
+                        startConfig = args[++i];
                     break;
                 default:
                     System.out.println("Unknown startup argument: " + args[i]);
@@ -104,6 +117,10 @@ public class StartupParams {
 
     public boolean useNoOp() {
         return forceNoOp;
+    }
+
+    public String startConfig() {
+        return startConfig;
     }
 
     @Override
