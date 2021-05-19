@@ -66,26 +66,25 @@ public class Main extends Thread implements PluginListener {
     public Config config;
     public static IDarkBotAPI API;
 
-    public final Lazy.Sync<Boolean> status       = new Lazy.Sync<>();
-    public final Lazy.Sync<String> configChange  = new Lazy.Sync<>();
-    public final StarManager starManager         = StarManager.getInstance();
-    public final MapManager mapManager           = new MapManager(this);
-    public final SettingsManager settingsManager = new SettingsManager(this);
-    public final FacadeManager facadeManager     = new FacadeManager(this);
-    public final HeroManager hero                = new HeroManager(this);
-    public final EffectManager effectManager     = new EffectManager(this);
-    public final GuiManager guiManager           = new GuiManager(this);
-    public final StatsManager statsManager       = new StatsManager(this);
-    public final PingManager pingManager         = new PingManager();
-    public final BackpageManager backpage        = new BackpageManager(this);
-    public final PluginHandler pluginHandler     = new PluginHandler();
-    public final PluginUpdater pluginUpdater     = new PluginUpdater(this);
-    public final FeatureRegistry featureRegistry = new FeatureRegistry(this, pluginHandler);
-    public final RepairManager repairManager     = new RepairManager();
+    public final Lazy.Sync<Boolean> status      = new Lazy.Sync<>();
+    public final Lazy.Sync<String> configChange = new Lazy.Sync<>();
+    public final StarManager starManager;
+    public final MapManager mapManager;
+    public final SettingsManager settingsManager;
+    public final FacadeManager facadeManager;
+    public final HeroManager hero;
+    public final EffectManager effectManager;
+    public final GuiManager guiManager;
+    public final StatsManager statsManager;
+    public final PingManager pingManager;
+    public final BackpageManager backpage;
+    public final PluginHandler pluginHandler;
+    public final PluginUpdater pluginUpdater;
+    public final FeatureRegistry featureRegistry;
+    public final RepairManager repairManager;
 
     private final MainGui form;
-    private final BotInstaller botInstaller = new BotInstaller(
-            settingsManager, facadeManager, effectManager, guiManager, mapManager, hero, statsManager, pingManager, repairManager);
+    private final BotInstaller botInstaller;
 
     public Module module;
     public long lastRefresh = System.currentTimeMillis();
@@ -99,9 +98,29 @@ public class Main extends Thread implements PluginListener {
 
     public Main(StartupParams params) {
         super("Main");
+        config = configManager.loadConfig(params.getStartConfig());
+
         VerifierChecker.getAuthApi().setupAuth();
 
-        config = configManager.loadConfig(params.startConfig());
+        this.starManager     = StarManager.getInstance();
+        this.mapManager      = new MapManager(this);
+        this.settingsManager = new SettingsManager(this);
+        this.facadeManager   = new FacadeManager(this);
+        this.hero            = new HeroManager(this);
+        this.effectManager   = new EffectManager(this);
+        this.guiManager      = new GuiManager(this);
+        this.statsManager    = new StatsManager(this);
+        this.pingManager     = new PingManager();
+        this.backpage        = new BackpageManager(this);
+        this.pluginHandler   = new PluginHandler();
+        this.pluginUpdater   = new PluginUpdater(this);
+        this.featureRegistry = new FeatureRegistry(this, pluginHandler);
+        this.repairManager   = new RepairManager();
+
+        this.botInstaller = new BotInstaller(
+                settingsManager, facadeManager, effectManager, guiManager, mapManager,
+                hero, statsManager, pingManager, repairManager);
+
 
         API = configManager.getAPI(params);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);

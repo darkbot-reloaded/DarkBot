@@ -119,7 +119,7 @@ public class StartupParams {
         return forceNoOp;
     }
 
-    public String startConfig() {
+    public String getStartConfig() {
         return startConfig;
     }
 
