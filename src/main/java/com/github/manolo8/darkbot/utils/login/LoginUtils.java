@@ -112,7 +112,7 @@ public class LoginUtils {
     public static void usernameLogin(LoginData loginData) {
         try {
             usernameLogin(loginData, "www");
-        } catch (WrongCredentialsException e) {
+        } catch (Exception e) {
             usernameLogin(loginData, "lp");
         }
     }
