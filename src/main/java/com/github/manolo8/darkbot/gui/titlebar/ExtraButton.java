@@ -138,7 +138,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 System.out.println("Triggering refresh: user requested");
                 Main.API.handleRefresh();
             }));
-            list.add(create("discord", e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
+            list.add(create("discord", UIUtils.getIcon("discord"), e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
             list.add(create("copy_sid", e -> SystemUtils.toClipboard(main.statsManager.sid)));
             list.add(create("reset_colorscheme", e -> {
                 main.config.BOT_SETTINGS.MAP_DISPLAY.cs = new ColorScheme();

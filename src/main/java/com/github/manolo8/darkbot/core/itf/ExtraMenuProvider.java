@@ -32,6 +32,12 @@ public interface ExtraMenuProvider {
         return item;
     }
 
+    default JMenuItem create(String key, Icon icon, ActionListener listener) {
+        JMenuItem item = new JMenuItem(I18n.getOrDefault("gui.hamburger_button." + key, key), icon);
+        if (listener != null) item.addActionListener(listener);
+        return item;
+    }
+
     default JMenu createMenu(String key, Stream<JComponent> components) {
         JMenu menu = new JMenu(key);
         components.forEach(menu::add);
