@@ -4,6 +4,9 @@ import eu.darkbot.api.entities.Entity;
 import eu.darkbot.api.objects.EntityInfo;
 import eu.darkbot.api.objects.Health;
 
+/**
+ * An entity that can be locked & attacked
+ */
 public interface Attackable extends Entity {
 
     /**
@@ -24,9 +27,9 @@ public interface Attackable extends Entity {
     EntityInfo getEntityInfo();
 
     /**
-     * Represents lock types in-game.
+     * In-game lock on the selected entity
      */
-    enum Lock { //or "Mark"
+    enum Lock {
 
         /**
          * Unknown
@@ -44,7 +47,7 @@ public interface Attackable extends Entity {
         GRAY_LIGHT,
 
         /**
-         * Citadel's draw fire ability. ?
+         * Citadel's draw fire ability.
          */
         PURPLE,
 

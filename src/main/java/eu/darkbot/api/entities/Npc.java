@@ -2,6 +2,9 @@ package eu.darkbot.api.entities;
 
 import eu.darkbot.api.config.NpcInfo;
 
+/**
+ * In-game non-player-controlled entity, aka aliens
+ */
 public interface Npc extends Ship {
 
     /**
@@ -10,7 +13,7 @@ public interface Npc extends Ship {
     int getNpcId();
 
     /**
-     * @return {@link NpcInfo} with some settings for {@link Npc}
+     * @return {@link NpcInfo} with some user settings for {@link Npc}
      */
     NpcInfo getInfo();
 

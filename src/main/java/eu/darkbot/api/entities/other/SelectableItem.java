@@ -3,14 +3,24 @@ package eu.darkbot.api.entities.other;
 import eu.darkbot.api.managers.HeroItemsAPI;
 import eu.darkbot.utils.StringUtils;
 
+/**
+ * Represents an item in-game that can be selected via the hot bar or category bar
+ */
 public interface SelectableItem {
 
+    /* TODO: revise implementation details about matches.
+         Consider renaming or keeping as internal detail  */
     boolean matches(String itemId);
 
-    default HeroItemsAPI.Category getCategory() {
-        return null;
-    }
+    /**
+     * @return The category inside category bar that this item is found in
+     */
+    HeroItemsAPI.Category getCategory();
 
+
+    /**
+     * In-game laser ammo items that can be shot
+     */
     enum Laser implements SelectableItem {
         LCB_10,
         MCB_25,
@@ -58,6 +68,9 @@ public interface SelectableItem {
             return null;
         }
 
+        /**
+         * @return If this type of laser has a burst followed by a cooldown to its use
+         */
         public boolean hasCooldown() {
             return cooldown;
         }
@@ -73,6 +86,9 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * In-game rocket items that are fired regularly
+     */
     enum Rocket implements SelectableItem {
         R_310,
         PLT_2026,
@@ -108,6 +124,9 @@ public interface SelectableItem {
             return null;
         }
 
+        /**
+         * @return If this rocket has a longer cooldown than normal
+         */
         public boolean isSpecial() {
             return isSpecial;
         }
@@ -123,8 +142,11 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * In-game rocket items that are fired using a rocket launcher
+     */
     enum RocketLauncher implements SelectableItem {
-        HST,
+        HST, // TODO: what is the HST rocket?
         HSTRM_01,
         UBR_100,
         ECO_10,
@@ -151,17 +173,64 @@ public interface SelectableItem {
         }
     }
 
-    //if someone want to can separate emotes & sprays
-    enum Special implements SelectableItem {
+    /**
+     * Special in-game items subclass this interface.
+     * @see eu.darkbot.api.entities.other.SelectableItem.Special
+     * @see eu.darkbot.api.entities.other.SelectableItem.Firework
+     * @see eu.darkbot.api.entities.other.SelectableItem.Sprite
+     * @see eu.darkbot.api.entities.other.SelectableItem.Emote
+     */
+    interface SpecialItem extends SelectableItem {
+
+        String name();
+
+        @Override
+        default boolean matches(String itemId) {
+            return itemId.endsWith(name().toLowerCase().replaceAll("_", "-"));
+        }
+
+        @Override
+        default HeroItemsAPI.Category getCategory() {
+            return HeroItemsAPI.Category.SPECIAL_ITEMS;
+        }
+    }
+
+    /**
+     * Represents special items in-game, like smart-bomb, insta-shield or EMP.
+     */
+    enum Special implements SpecialItem {
         SMB_01,
         ISH_01,
-        EMP_01,
+        EMP_01;
+
+        private final String id;
+
+        Special() {
+            this.id = name().toLowerCase().replaceAll("_", "-");
+        }
+
+        @Override
+        public boolean matches(String itemId) {
+            return itemId.endsWith(id);
+        }
+    }
+
+    /**
+     * In-game firework items, as well as the firework ignite action
+     */
+    enum Firework implements SpecialItem {
         FWX_S,
         FWX_M,
         FWX_L,
         FWX_COM,
         FWX_RZ,
-        IGNITE,
+        IGNITE
+    }
+
+    /**
+     * In-game user-activated emote items
+     */
+    enum Emote implements SpecialItem {
         ALIEN_ANGRY,
         ALIEN_CRY,
         ALIEN_HORROR,
@@ -180,7 +249,13 @@ public interface SelectableItem {
         INJECTION,
         ALIEN_DIZZY,
         ALIEN_SLEEPY,
-        ALIEN_STARRYEYES,
+        ALIEN_STARRYEYES
+    }
+
+    /**
+     * In-game user-activated sprite items
+     */
+    enum Sprite implements SpecialItem {
         CROSS,
         HEARTS,
         KO,
@@ -219,26 +294,12 @@ public interface SelectableItem {
         SNOWMAN_THINKING,
         FROZEN_HAND,
         SNOWFLAKE,
-        YETI;
-
-        private final String id;
-
-        Special() {
-            this.id = name().toLowerCase().replaceAll("_", "-");
-        }
-
-        @Override
-        public boolean matches(String itemId) {
-            return itemId.endsWith(id);
-        }
-
-        @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.SPECIAL_ITEMS;
-        }
-
+        YETI
     }
 
+    /**
+     * In-game mine items that can be laid down on the map
+     */
     enum Mine implements SelectableItem {
         ACM_01,
         EMPM_01,
@@ -265,6 +326,9 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * In-game CPU items that can be activated
+     */
     enum Cpu implements SelectableItem {
         AIM,
         AROL_X,
@@ -309,7 +373,10 @@ public interface SelectableItem {
         }
     }
 
-    enum Buy implements SelectableItem {
+    /**
+     * In-game auto-buy actions
+     */
+    enum AutoBuy implements SelectableItem {
         LCB_10,
         MCB_25,
         MCB_50,
@@ -321,11 +388,11 @@ public interface SelectableItem {
 
         private final String id;
 
-        Buy() {
+        AutoBuy() {
             this(false);
         }
 
-        Buy(boolean isRocket) {
+        AutoBuy(boolean isRocket) {
             this.id = "buy_ammunition_" + (isRocket ? "rocket_" : "laser_")
                     + name().toLowerCase().replaceAll("_", "-");
         }
@@ -341,6 +408,9 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * In-game nano-factory tech items
+     */
     enum Tech implements SelectableItem {
         ENERGY_LEECH,
         CHAIN_IMPULSE,
@@ -374,52 +444,67 @@ public interface SelectableItem {
         }
     }
 
-    //probably would be better to use constant ids and custom enum names.
+    /**
+     * In-game ship abilities, what ships can use each will differ.
+     */
     enum Ability implements SelectableItem {
-        ULTIMATE_CLOAK,
-        JAM_X,
-        TARGET_MARKER,
-        DOUBLE_MINIMAP,
-        HP_REPAIR,
-        SHIELD_REPAIR,
-        REPAIR_POD,
-        DRAW_FIRE,
-        TRAVEL,
-        PROTECTION,
-        FORTIFY,
+        SPEARHEAD_ULTIMATE_CLOAK,
+        SPEARHEAD_JAM_X,
+        SPEARHEAD_TARGET_MARKER,
+        SPEARHEAD_DOUBLE_MINIMAP,
+        AEGIS_HP_REPAIR,
+        AEGIS_SHIELD_REPAIR,
+        AEGIS_REPAIR_POD,
+        CITADEL_DRAW_FIRE,
+        CITADEL_TRAVEL,
+        CITADEL_PROTECTION,
+        CITADEL_FORTIFY,
         SOLACE,
         SPECTRUM,
         VENOM,
         SENTINEL,
         DIMINISHER,
         LIGHTNING,
-        ADMIN_ULTIMATE_CLOAKING,
-        SPEED_BOOST,
-        RAPID_FIRE,
-        HOLOGRAM,
-        SCRAMBLE,
-        PHASE_OUT,
-        FROZEN_CLAW,
-        PARTICLE_BEAM,
-        REDIRECT,
-        SHIELD_DISARRAY,
-        DDOL,
-        SHL,
-        BSK,
-        RVG,
-        MMT,
-        TBR,
-        INC,
-        SPR,
-        SLE,
-        SPC,
-        CHS,
-        ASSIMILATE;
+        ADMIN_ULTIMATE_CLOAKING("admin-ultimate-cloaking"),
+        TARTARUS_SPEED_BOOST,
+        TARTARUS_RAPID_FIRE,
+        MIMESIS_HOLOGRAM,
+        MIMESIS_SCRAMBLE,
+        MIMESIS_PHASE_OUT,
+        GOLIATH_X_FROZEN_CLAW("goliath-x_frozen-claw"),
+        HECATE_PARTICLE_BEAM,
+        DISRUPTOR_REDIRECT,
+        DISRUPTOR_SHIELD_DISARRAY,
+        DISRUPTOR_DDOL,
+        BERSERKER_SHL,
+        BERSERKER_BSK,
+        BERSERKER_RVG,
+        ZEPHYR_MMT,
+        ZEPHYR_TBR,
+        SOLARIS_INC,
+        KERES_SPR,
+        KERES_SLE,
+        RETIARUS_SPC,
+        RETIARUS_CHS,
+        ORCUS_ASSIMILATE,
+        HOLO_SELF_REVERSAL,
+        HOLO_ENEMY_REVERSAL;
 
         private final String id;
 
+        Ability(String id) {
+            this.id = id;
+        }
+
         Ability() {
-            this.id = name().toLowerCase().replaceAll("_", "-");
+            // Most abilities are ship name, underscore, and ability, using - in ship or ability names
+            // A few special cases simply specify an ID directly.
+
+            // SPEARHEAD_JAM_X -> spearhead_jam-x (correct)
+            // GOLIATH_X_FROZEN_CLAW -> goliath_x-frozen-claw (would be incorrect, so it's manually assigned)
+            this.id = name().toLowerCase()
+                    .replace("_", "-")
+                    .replaceFirst("-", "_");
         }
 
         @Override
@@ -433,6 +518,9 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * In-game drone formations
+     */
     enum Formation implements SelectableItem {
 
         /**
@@ -506,16 +594,22 @@ public interface SelectableItem {
             return null;
         }
 
+        /**
+         * @return Shield gained or lost when using the formation, in percentage.
+         */
         public double getShieldMultiplier() {
             return sh;
         }
 
+        /**
+         * @return Health gained or lost when using the formation, in percentage.
+         */
         public double getHealthMultiplier() {
             return hp;
         }
 
         /**
-         * @return shield regen % amount per second.
+         * @return Shield regeneration per second in percentage. 5% -> 0.005
          */
         public double getShieldRegen() {
             return sps;
@@ -533,12 +627,16 @@ public interface SelectableItem {
         }
     }
 
+    /**
+     * In-game hot bar selectable {@link eu.darkbot.api.entities.other.Gear}.
+     * Note that not all gears are available here to use as items.
+     */
     enum Pet implements SelectableItem {
         G_MM1(Gear.MEGA_MINE),
         G_KK1(Gear.KAMIKAZE),
-        G_FS1(null), //todo
+        G_FS1(null), // TODO: ?
         G_HPL1(Gear.HP_LINK),
-        G_RT1(null),//todo
+        G_RT1(null), // TODO: ?
         G_BH1(Gear.BEACON_HP),
         G_BC1(Gear.BEACON_COMBAT);
 
@@ -550,6 +648,9 @@ public interface SelectableItem {
             this.gear = gear;
         }
 
+        /**
+         * @return The pet gear this item represents
+         */
         public Gear getGear() {
             return gear;
         }

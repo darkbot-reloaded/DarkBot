@@ -1,5 +1,8 @@
 package eu.darkbot.api.entities.other;
 
+/**
+ * In-game type of a {@link eu.darkbot.api.entities.Portal}.
+ */
 public enum PortalType {
 
     STANDARD(1),
@@ -25,8 +28,7 @@ public enum PortalType {
     INVISIBLE(18), //4-5 center portal?
     BREACH(22),
     LOW_LEFT(77),
-    HIGH_RIGHT(78),
-    UNKNOWN(-1);
+    HIGH_RIGHT(78);
 
     private final int id;
 
@@ -34,14 +36,21 @@ public enum PortalType {
         this.id = id;
     }
 
+    /**
+     * @return the id of this portal in-game
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Get a portal type by its ID
+     * @param typeId the in-game id of the portal type
+     * @return The portal type with the corresponding id, or null if not found
+     */
     public static PortalType of(int typeId) {
         for (PortalType type : values())
             if (type.id == typeId) return type;
-
-        return UNKNOWN;
+        return null;
     }
 }

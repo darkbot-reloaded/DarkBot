@@ -2,7 +2,7 @@ package eu.darkbot.logic.utils;
 
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Portal;
-import eu.darkbot.api.entities.utils.Map;
+import eu.darkbot.api.entities.utils.GameMap;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.Installable;
@@ -24,7 +24,7 @@ public class MapTraveler implements Listener, Installable {
     protected final PortalJumper jumper;
 
     public Portal current;
-    public Map target;
+    public GameMap target;
 
     protected int lastPortals;
     protected long shipTpWait = -1, mapChangeWait = -1;
@@ -55,7 +55,7 @@ public class MapTraveler implements Listener, Installable {
         eventSender.unregisterListener(this);
     }
 
-    public void setTarget(Map target) {
+    public void setTarget(GameMap target) {
         shipTpWait = mapChangeWait = -1;
         this.target = target;
         this.done = false;

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 
 /**
- * Generic {@link Area} type
+ * A geometric area that covers some 2D space on the map.
  */
 public interface Area {
 
