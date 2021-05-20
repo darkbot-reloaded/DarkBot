@@ -16,6 +16,7 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.utils.Area;
+import eu.darkbot.api.entities.utils.GameMap;
 import eu.darkbot.api.managers.EventSenderAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 
@@ -251,7 +252,7 @@ public class MapManager implements Manager, StarSystemAPI {
 
 
     @Override
-    public eu.darkbot.api.entities.utils.Map getCurrentMap() {
+    public GameMap getCurrentMap() {
         return main.hero.map;
     }
 
@@ -261,27 +262,27 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.utils.Map> getMaps() {
+    public Collection<? extends GameMap> getMaps() {
         return starManager.getMaps();
     }
 
     @Override
-    public eu.darkbot.api.entities.utils.Map getById(int mapId) throws MapNotFoundException {
+    public GameMap getById(int mapId) throws MapNotFoundException {
         return starManager.getById(mapId);
     }
 
     @Override
-    public eu.darkbot.api.entities.utils.Map getOrCreateMapById(int mapId) {
+    public GameMap getOrCreateMapById(int mapId) {
         return starManager.byId(mapId);
     }
 
     @Override
-    public eu.darkbot.api.entities.utils.Map getByName(String mapName) throws MapNotFoundException {
+    public GameMap getByName(String mapName) throws MapNotFoundException {
         return starManager.getByName(mapName);
     }
 
     @Override
-    public Portal findNext(eu.darkbot.api.entities.utils.Map targetMap) {
+    public Portal findNext(GameMap targetMap) {
         return starManager.next(main.hero, starManager.byId(targetMap.getId()));
     }
 }

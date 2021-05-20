@@ -489,8 +489,8 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
-    public void setBlacklisted(long forTime) {
-        pet.setBlacklisted(forTime);
+    public void setBlacklisted(long time) {
+        pet.setBlacklisted(time);
     }
 
     @Override

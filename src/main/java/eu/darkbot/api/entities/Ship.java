@@ -7,6 +7,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
+/**
+ * In-game generic ship on the map, like players, npc, pets and more.
+ */
 public interface Ship extends Attacker, Movable {
 
     /**
@@ -15,19 +18,20 @@ public interface Ship extends Attacker, Movable {
     boolean isInvisible();
 
     /**
-     * @return true if this {@link Ship} is blacklisted
+     * @return true if this {@link Ship} is blacklisted, which can mean a number of things
      */
     boolean isBlacklisted();
 
     /**
-     * Adds this {@link Ship} to blacklist for given time(ms).
+     * Adds this {@link Ship} to blacklist for given time (ms).
+     * The main use-case is remembering this ship attacked you, but can be used for other purposes.
      *
-     * @param forTime time in milliseconds
+     * @param time time in milliseconds
      */
-    void setBlacklisted(long forTime);
+    void setBlacklisted(long time);
 
     /**
-     * @return true if ship has enabled {@link Pet}.
+     * @return if this ship has a {@link Pet} enabled flying on the map.
      */
     boolean hasPet();
 
@@ -37,15 +41,19 @@ public interface Ship extends Attacker, Movable {
     Optional<Pet> getPet();
 
     /**
-     * @return used {@link SelectableItem.Formation} by the {@link Ship}
+     * @return the {@link SelectableItem.Formation} currently in use by this {@link Ship}, or
+     *          {@link SelectableItem.Formation#STANDARD} otherwise.
      */
     SelectableItem.Formation getFormation();
 
     /**
-     * @return true if ship has enabled given formation.
+     * @return if the ship is flying the given formation by id.
      */
     boolean isInFormation(int formationId);
 
+    /**
+     * @return if the ship is flying the given formation.
+     */
     default boolean isInFormation(@NotNull SelectableItem.Formation formation) {
         return isInFormation(formation.ordinal());
     }

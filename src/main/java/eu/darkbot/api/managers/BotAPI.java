@@ -1,6 +1,5 @@
 package eu.darkbot.api.managers;
 
-import com.formdev.flatlaf.FlatLaf;
 import eu.darkbot.api.API;
 import eu.darkbot.api.extensions.Module;
 import eu.darkbot.utils.Version;
@@ -32,9 +31,4 @@ public interface BotAPI extends API.Singleton {
      */
     <M extends Module> M setModule(@Nullable M module);
 
-    /**
-     *
-     * @param theme
-     */
-    void setTheme(FlatLaf theme);
 }

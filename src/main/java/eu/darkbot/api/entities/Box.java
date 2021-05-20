@@ -5,6 +5,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 
+/**
+ * In-game collectable box entity
+ */
 public interface Box extends Entity {
 
     /**
@@ -26,12 +29,19 @@ public interface Box extends Entity {
     BoxInfo getInfo();
 
     /**
-     * @return true if box is collected or
-     * there was a try to collect it and currently is in timer.
-     * @see Entity#isValid()
+     * @return if box was collected or there was a recent attempt and we're waiting
+     * @see Entity#isValid() for a way to know it was fully removed
      */
     boolean isCollected();
 
+    /**
+     * Makes an attempt at collecting the box.
+     *  - The box must be selectable {@link Entity#isSelectable}.
+     *  - The hero must be close to the box
+     *  - The method will call {@link Box#setCollected} so subsequent
+     *    calls to {@link Box#isCollected()} reflect the update.
+     * @return true if the conditions are met and collection is attempted, false if conditions are not met.
+     */
     boolean tryCollect();
 
     /**
@@ -40,12 +50,14 @@ public interface Box extends Entity {
     void setCollected();
 
     /**
-     * @return amount of collect retries
+     * @return amount of times this box has been attempted to collect
      */
     int getRetries();
 
     /**
-     * @return time until box is marked as collected
+     * @return instant when {@link Box#isCollected} will start returning true again,
+     *         if the box didn't disappear {@link Entity#isValid()}.
+     *         {@code null} if no collection attempt was performed.
      */
     @Nullable
     Instant isCollectedUntil();
