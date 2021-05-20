@@ -13,11 +13,15 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
 import com.github.manolo8.darkbot.core.objects.slotbars.SlotBar;
 import com.github.manolo8.darkbot.core.utils.Drive;
+import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.entities.utils.Attackable;
+import eu.darkbot.api.managers.AttackAPI;
+import org.jetbrains.annotations.Nullable;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.*;
 
-public class NpcAttacker {
+public class NpcAttacker implements AttackAPI {
 
     protected Main main;
     protected MapManager mapManager;
@@ -164,6 +168,39 @@ public class NpcAttacker {
         if (sab = shouldSab()) return main.config.LOOT.SAB.KEY;
         return this.target == null || this.target.npcInfo.attackKey == null ?
                 main.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;
+    }
+
+    @Override
+    public @Nullable Attackable getTarget() {
+        return target;
+    }
+
+    @Override
+    public void setTarget(@Nullable Attackable attackable) {
+        if (!(attackable instanceof Npc))
+            throw new IllegalArgumentException("Only NPC attacking is supported by this implementation");
+        this.target = (Npc) attackable;
+    }
+
+    @Override
+    public boolean isLocked() {
+        return mapManager.isTarget(target);
+    }
+
+    @Override
+    public boolean isAttacking() {
+        return hero.isAttacking(target);
+    }
+
+    @Override
+    public void tryLockAndAttack() {
+        doKillTargetTick();
+    }
+
+    @Override
+    public void stopAttack() {
+        if ()
+        doKillTargetTick();
     }
 
 }

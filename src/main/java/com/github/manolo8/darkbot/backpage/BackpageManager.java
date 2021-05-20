@@ -150,9 +150,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
         return getConnection("indexInternal.es?action=" + getRandomAction(), 5000).getResponseCode();
     }
 
-    public HttpURLConnection getConnection(String params, int minWait) throws Exception {
+    public HttpURLConnection getConnection(String path, int minWait) throws Exception {
         Time.sleep(lastRequest + minWait - System.currentTimeMillis());
-        return getConnection(params);
+        return getConnection(path);
     }
 
     public HttpURLConnection getConnection(String params) throws Exception {

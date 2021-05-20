@@ -1,5 +1,8 @@
-package eu.darkbot.api.events;
+package com.github.manolo8.darkbot.core.manager;
 
+import eu.darkbot.api.events.Event;
+import eu.darkbot.api.events.EventHandler;
+import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.managers.EventSenderAPI;
 
 import java.lang.reflect.InvocationTargetException;
