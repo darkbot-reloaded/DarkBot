@@ -13,6 +13,7 @@ import eu.darkbot.api.managers.GroupAPI;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -207,7 +208,7 @@ public class GroupManager extends Gui  implements GroupAPI {
         CROWN(-1),
         REMOVE(-1);
 
-        private int notLeaderPos;
+        private final int notLeaderPos;
 
         GroupAction(int notLeaderPos) {
             this.notLeaderPos = notLeaderPos;
@@ -250,7 +251,7 @@ public class GroupManager extends Gui  implements GroupAPI {
 
     @Override
     public List<? extends eu.darkbot.api.objects.group.GroupMember> getMembers() {
-        return group.members;
+        return Collections.unmodifiableList(group.members);
     }
 
     @Override
@@ -264,17 +265,19 @@ public class GroupManager extends Gui  implements GroupAPI {
     }
 
     @Override
-    public void kickMember(int id) {
-        kick(id);
-    }
-
-    @Override
     public List<? extends eu.darkbot.api.objects.group.GroupMember.Invite> getInvites() {
         return invites;
     }
 
+    /*
+    @Override
+    public void kickMember(int id) {
+        kick(id);
+    }
+
+
     @Override
     public void acceptInvite(eu.darkbot.api.objects.group.GroupMember.Invite invite) {
         acceptInvite((Invite) invite);
-    }
+    }*/
 }

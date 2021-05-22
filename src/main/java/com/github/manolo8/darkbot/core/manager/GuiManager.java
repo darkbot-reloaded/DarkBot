@@ -294,7 +294,6 @@ public class GuiManager implements Manager, GameScreenAPI {
                 .ifPresent(API::keyboardClick);
     }
 
-    //??
     @Override
     public void focusOnChat() {
         settingsProxy.getCharacterOf(SettingsProxy.KeyBind.FOCUS_CHAT)

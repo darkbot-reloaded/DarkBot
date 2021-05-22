@@ -196,7 +196,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         return configuration;
     }
 
-    @Override
+
     public void toggleConfiguration() {
         if (System.currentTimeMillis() - configTime <= 5500L) return;
 
@@ -204,7 +204,6 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         this.configTime = System.currentTimeMillis();
     }
 
-    @Override
     public void setFormation(SelectableItem.Formation formation) {
         if (formation == getFormation() ||
                 System.currentTimeMillis() - formationTime <= 3500L) return;
@@ -219,26 +218,21 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     @Override
-    public boolean isInMode(Configuration configuration, SelectableItem.Formation formation) {
-        return configuration == getConfiguration() && formation == getFormation();
+    public boolean isInMode(Mode mode) {
+        return mode.getConfiguration() == getConfiguration() && mode.getFormation() == getFormation();
     }
 
     @Override
-    public boolean setMode(Configuration configuration, SelectableItem.Formation formation) {
-        setFormation(formation);
-        if (configuration != getConfiguration()) toggleConfiguration();
+    public boolean setMode(Mode mode) {
+        if (mode.getConfiguration() != getConfiguration()) toggleConfiguration();
+        setFormation(mode.getFormation());
 
-        return isInMode(configuration, formation);
+        return isInMode(mode);
     }
 
     @Override
     public boolean setAttackMode(eu.darkbot.api.entities.Npc target) {
         return attackMode((Npc) target);
-    }
-
-    @Override
-    public boolean setAttackMode() {
-        return attackMode();
     }
 
     @Override
