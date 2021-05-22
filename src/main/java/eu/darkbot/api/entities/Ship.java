@@ -18,15 +18,20 @@ public interface Ship extends Attacker, Movable {
     boolean isInvisible();
 
     /**
-     * @return true if this {@link Ship} is blacklisted, which can mean a number of things
+     * If this ship has been blacklisted by calling {@link #setBlacklisted}
+     *
+     * @return if this {@link Ship} is currently blacklisted, false if blacklist has expired
      */
     boolean isBlacklisted();
 
     /**
      * Adds this {@link Ship} to blacklist for given time (ms).
-     * The main use-case is remembering this ship attacked you, but can be used for other purposes.
+     * The main use-case is remembering this enemy ship attacked you, but can be used
+     * for other purposes like NPCs that are bugged or have been attacked by others.
      *
-     * @param time time in milliseconds
+     * By itself, this changes nothing but the response of {@link #isBlacklisted}
+     *
+     * @param time time in milliseconds to stay in the blacklist
      */
     void setBlacklisted(long time);
 

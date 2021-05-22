@@ -1,7 +1,15 @@
 package eu.darkbot.api.entities;
 
 /**
- * In-game station area, includes home bases like x-1 & x-8, but also things like 5-2 or questivers in x-4 & x-5 maps.
+ * In-game station area, includes home bases like x-1 & x-8, but also things like 5-2 or quest givers in x-4 & x-5 maps.
+ *
+ * @see Station.Headquarter
+ * @see Station.Hangar
+ * @see Station.Repair
+ * @see Station.Turret
+ * @see Station.Refinery
+ * @see Station.QuestGiver
+ * @see Station.HomeBase
  */
 public interface Station extends Entity {
 

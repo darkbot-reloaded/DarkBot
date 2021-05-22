@@ -5,7 +5,13 @@ import eu.darkbot.api.API;
 import java.util.List;
 
 /**
- * API for special event: Eternal Gate
+ * API providing data for the eternal gate event in-game
+ *
+ * This API is very similar to the one provided in {@link EternalBlacklightGateAPI},
+ * the main difference being the gate itself.
+ *
+ * For documentation as to what the methods mean
+ * @see EternalBlacklightGateAPI
  */
 public interface EternalGateAPI extends API.Singleton {
     int getKeys();
