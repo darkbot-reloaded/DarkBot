@@ -170,6 +170,13 @@ public class NpcAttacker implements AttackAPI {
                 main.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;
     }
 
+    private Character getPreviousAttackKey() {
+        if (rsb) return main.config.LOOT.RSB.KEY;
+        if (sab) return main.config.LOOT.SAB.KEY;
+        return this.target == null || this.target.npcInfo.attackKey == null ?
+                main.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;
+    }
+
     @Override
     public @Nullable Attackable getTarget() {
         return target;
@@ -199,8 +206,12 @@ public class NpcAttacker implements AttackAPI {
 
     @Override
     public void stopAttack() {
-        if ()
-        doKillTargetTick();
+        if (System.currentTimeMillis() < laserTime) return;
+        if (isAttacking()) {
+            laserTime = System.currentTimeMillis() + 1500;
+            if (API instanceof DarkBoatAdapter) API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
+            else API.keyboardClick(getPreviousAttackKey());
+        }
     }
 
 }
