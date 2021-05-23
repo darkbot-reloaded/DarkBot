@@ -58,7 +58,7 @@ public class LibSetup {
             } else {
                 FileUtils.ensureDirectoryExists(libPath.getParent());
             }
-            System.out.println("Library file missing or outdated: " + lib.path);
+            System.out.println("Downloading missing or outdated library file: " + lib.path);
 
             try (InputStream is = new URL(lib.download).openConnection().getInputStream()) {
                 Files.copy(is, libPath, StandardCopyOption.REPLACE_EXISTING);
