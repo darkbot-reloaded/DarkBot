@@ -1,5 +1,8 @@
 package eu.darkbot.api.objects;
 
+/**
+ * Represents an item in-game, the type of this item is a {@link eu.darkbot.api.entities.other.SelectableItem}
+ */
 public interface Item {
 
     /**
