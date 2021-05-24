@@ -24,7 +24,7 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
         return keycodes[keyBind.ordinal()];
     }
 
-    public boolean toggleKeyBind(KeyBind keyBind) {
+    public boolean pressKeybind(KeyBind keyBind) {
         Character charCode = getCharCode(Objects.requireNonNull(keyBind, "KeyBind is null!"));
         if (charCode == null) return false;
 

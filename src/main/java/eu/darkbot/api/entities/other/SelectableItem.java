@@ -4,7 +4,10 @@ import eu.darkbot.api.managers.HeroItemsAPI;
 import eu.darkbot.utils.StringUtils;
 
 /**
- * Represents an item in-game that can be selected via the hot bar or category bar
+ * Represents a type of in-game item, that can be selected via the hot bar or category bar
+ *
+ * @see eu.darkbot.api.objects.Item
+ * @see HeroItemsAPI
  */
 public interface SelectableItem {
 
@@ -16,7 +19,6 @@ public interface SelectableItem {
      * @return The category inside category bar that this item is found in
      */
     HeroItemsAPI.Category getCategory();
-
 
     /**
      * In-game laser ammo items that can be shot
