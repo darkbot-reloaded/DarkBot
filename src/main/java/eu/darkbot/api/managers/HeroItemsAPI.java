@@ -14,6 +14,8 @@ import java.util.function.Predicate;
  * API to manage in-game items, from ammo, to rockets, abilities or even fireworks.
  *
  * @see SelectableItem
+ *
+ * TODO: Rethink and refactor this API fully. There are too many methods and not enough flexibility.
  */
 public interface HeroItemsAPI extends API.Singleton {
 
@@ -72,8 +74,8 @@ public interface HeroItemsAPI extends API.Singleton {
 
     default Optional<Item> findItem(@NotNull SelectableItem selectableItem) {
         Category category = selectableItem.getCategory();
-        return category == null ? filterItem(selectableItem::matches) :
-                filterItem(category, selectableItem::matches);
+        return category == null ? findItem(selectableItem.getId()) :
+                findItem(category, selectableItem.getId());
     }
 
     /**

@@ -1,9 +1,12 @@
 package eu.darkbot.api.objects;
 
+import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.managers.HeroItemsAPI;
+
 /**
  * Represents an item in-game, the type of this item is a {@link eu.darkbot.api.entities.other.SelectableItem}
  */
-public interface Item {
+public interface Item extends SelectableItem {
 
     /**
      * @return id of the {@link Item}
@@ -49,4 +52,9 @@ public interface Item {
      * @return total cooldown time in {@code milliseconds} of {@link Item}
      */
     double totalCooldown();
+
+    @Override
+    default HeroItemsAPI.Category getCategory() {
+        return null; // Category is unknown
+    }
 }
