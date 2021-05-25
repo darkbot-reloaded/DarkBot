@@ -9,7 +9,7 @@ import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import eu.darkbot.api.PluginApiImpl;
-import com.github.manolo8.darkbot.core.manager.EventManager;
+import com.github.manolo8.darkbot.core.manager.EventBroker;
 import eu.darkbot.impl.managers.AttackApiImpl;
 
 public class DarkBotPluginApiImpl extends PluginApiImpl {
@@ -19,7 +19,7 @@ public class DarkBotPluginApiImpl extends PluginApiImpl {
         addImplementations(
                 BackpageManager.class,
                 EntityList.class,
-                EventManager.class,
+                EventBroker.class,
                 FeatureRegistry.class,
                 FlashResManager.class,
                 HeroManager.class,

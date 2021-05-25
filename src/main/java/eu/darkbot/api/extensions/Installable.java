@@ -1,6 +1,7 @@
 package eu.darkbot.api.extensions;
 
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.managers.EventBrokerAPI;
 
 /**
  * Interface that allows your {@link Feature} to setup and tear-down
@@ -20,7 +21,7 @@ public interface Installable {
     /**
      * Called right before the feature is unloaded from the bot completely, can occur when reloading plugins.
      *
-     * If using the {@link eu.darkbot.api.managers.EventSenderAPI} make sure to unregister your listener here.
+     * If using the {@link EventBrokerAPI} make sure to unregister your listener here.
      */
     void uninstall();
 }

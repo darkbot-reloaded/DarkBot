@@ -16,7 +16,7 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.utils.Area;
 import eu.darkbot.api.entities.utils.GameMap;
-import eu.darkbot.api.managers.EventSenderAPI;
+import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 
 import java.util.Collection;
@@ -27,7 +27,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class MapManager implements Manager, StarSystemAPI {
 
     private final Main main;
-    private final EventSenderAPI eventSender;
+    private final EventBrokerAPI eventBroker;
     private final StarManager starManager;
 
     public final EntityList entities;
@@ -68,10 +68,10 @@ public class MapManager implements Manager, StarSystemAPI {
 
     public MapManager(Main main,
                       PluginAPI pluginAPI,
-                      EventSenderAPI eventSender,
+                      EventBrokerAPI eventBroker,
                       StarManager starManager) {
         this.main = main;
-        this.eventSender = eventSender;
+        this.eventBroker = eventBroker;
         this.starManager = starManager;
 
         this.entities = pluginAPI.requireInstance(EntityList.class);
@@ -123,7 +123,7 @@ public class MapManager implements Manager, StarSystemAPI {
             Map old = main.hero.map;
             Map next = main.hero.map = main.starManager.byId(id);
 
-            eventSender.sendEvent(new MapChangeEvent(old, next));
+            eventBroker.sendEvent(new MapChangeEvent(old, next));
 
             updateAreas(false);
         }
