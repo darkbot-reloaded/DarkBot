@@ -168,7 +168,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
             Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
             this.configTime = System.currentTimeMillis();
         }
-        boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000;
+        boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000L;
 
         if ((this.formation != form || checkFormation) && System.currentTimeMillis() - formationTime > 3500L) {
             Main.API.keyboardClick(this.formation = form);
@@ -210,7 +210,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
 
         SlotBarsProxy slotBars = main.facadeManager.slotBars;
 
-        slotBars.filterItem(HeroItemsAPI.Category.DRONE_FORMATIONS, formation::matches)
+        slotBars.findItem(formation)
                 .filter(slotBars::isSelectable)
                 .ifPresent(slotBars::selectItem);
 
