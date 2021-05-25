@@ -3,7 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import eu.darkbot.api.events.Event;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
-import eu.darkbot.api.managers.EventSenderAPI;
+import eu.darkbot.api.managers.EventBrokerAPI;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class EventManager implements EventSenderAPI {
+public class EventBroker implements EventBrokerAPI {
 
     private final List<EventDispatcher> dispatchers = new ArrayList<>();
 

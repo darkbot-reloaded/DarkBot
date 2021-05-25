@@ -19,7 +19,7 @@ import eu.darkbot.api.events.Listener;
  * @see Event
  *
  */
-public interface EventSenderAPI extends API.Singleton {
+public interface EventBrokerAPI extends API.Singleton {
 
     /**
      * Send an event to all the currently registered events

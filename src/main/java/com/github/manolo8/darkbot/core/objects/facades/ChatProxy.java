@@ -9,7 +9,7 @@ import com.github.manolo8.darkbot.utils.LogUtils;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.managers.ChatAPI;
-import eu.darkbot.api.managers.EventSenderAPI;
+import eu.darkbot.api.managers.EventBrokerAPI;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,11 +28,11 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
 
     private final Map<String, OutputStream> fileWriters = new HashMap<>();
 
-    private final EventSenderAPI eventSender;
+    private final EventBrokerAPI eventBroker;
 
-    public ChatProxy(EventSenderAPI eventSender) {
-        this.eventSender = eventSender;
-        this.eventSender.registerListener(this);
+    public ChatProxy(EventBrokerAPI eventBroker) {
+        this.eventBroker = eventBroker;
+        this.eventBroker.registerListener(this);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
         for (ChatRoom chat : chats) {
             if (chat.messagesArr.getSize() > 150) continue;
             chat.messagesArr.forEachIncremental(ptr ->
-                    eventSender.sendEvent(new MessageSentEvent(chat.chatName, new Message(ptr))));
+                    eventBroker.sendEvent(new MessageSentEvent(chat.chatName, new Message(ptr))));
         }
     }
 

@@ -12,7 +12,7 @@ import eu.darkbot.api.objects.Location;
 import java.util.Collection;
 
 public class MapTraveler implements Listener, Installable {
-    protected final EventSenderAPI eventSender;
+    protected final EventBrokerAPI eventBroker;
 
     protected final PetAPI pet;
     protected final HeroAPI hero;
@@ -35,24 +35,24 @@ public class MapTraveler implements Listener, Installable {
                        StarSystemAPI starSystem,
                        MovementAPI movement,
                        EntitiesAPI entities,
-                       EventSenderAPI eventSender) {
+                       EventBrokerAPI eventBroker) {
         this.pet = petApi;
         this.hero = heroApi;
         this.star = starSystem;
         this.movement = movement;
         this.jumper = new PortalJumper(movement);
         this.portals = entities.getPortals();
-        this.eventSender = eventSender;
+        this.eventBroker = eventBroker;
     }
 
     @Override
     public void install(PluginAPI pluginAPI) {
-        eventSender.registerListener(this);
+        eventBroker.registerListener(this);
     }
 
     @Override
     public void uninstall() {
-        eventSender.unregisterListener(this);
+        eventBroker.unregisterListener(this);
     }
 
     public void setTarget(GameMap target) {
