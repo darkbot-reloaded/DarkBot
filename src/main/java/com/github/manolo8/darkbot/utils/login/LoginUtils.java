@@ -119,12 +119,16 @@ public class LoginUtils {
     private static void usernameLogin(LoginData loginData, String domain) throws IOException {
         String frontPage = IOUtils.read(Http.create("https://" + domain + ".darkorbit.com/").getInputStream());
 
+    Map<String, String> extraPostParams = Collections.emptyMap();
+    CaptchaAPI solver = CaptchaAPI.getInstance();
+    if (solver != null) {
         try {
-            CaptchaAPI captcha = CaptchaAPI.getInstance();
-            gResponse = captcha.solveCaptcha(frontPage);
-        }catch (Exception e){
+            extraPostParams = solver.solveCaptcha(frontPage);
+        } catch (Exception e) {
+            System.out.printLn("Captcha solver failed to resolve login captcha");
             e.printStackTrace();
         }
+    }
 
         String loginUrl = getLoginUrl(frontPage);
         CookieManager cookieManager = new CookieManager();
