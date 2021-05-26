@@ -117,13 +117,7 @@ public class LoginUtils {
     }
 
     public static void usernameLogin(LoginData loginData, String domain) {
-        String frontPage = "";
-        String gResponse = "";
-        try {
-            frontPage = IOUtils.read(Http.create("https://" + domain + ".darkorbit.com/").getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String frontPage = IOUtils.read(Http.create("https://" + domain + ".darkorbit.com/").getInputStream());
 
         try {
             CaptchaAPI captcha = CaptchaAPI.getInstance();
