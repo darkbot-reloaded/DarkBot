@@ -188,11 +188,7 @@ public class LoginUtils {
 
     private static String getLoginUrl(String in) {
         Matcher match = LOGIN_PATTERN.matcher(in);
-        if (match.find()){
-            String login_pattern = match.group(1).replace("&amp;", "&");
-            System.out.println(login_pattern);
-            return login_pattern;
-        }
+        if (match.find()) return match.group(1).replace("&amp;", "&");
         throw new WrongCredentialsException();
     }
 
