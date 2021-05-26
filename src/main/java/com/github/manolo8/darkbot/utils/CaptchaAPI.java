@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.utils;
 
 public interface CaptchaAPI {
-    String TWOCAPTCHA_PATH = "lib/twocaptcha.jar";
-    CaptchaAPI INSTANCE = ReflectionUtils.createInstance("com.pikapika.twocaptcha", TWOCAPTCHA_PATH);
+    String TWOCAPTCHA_PATH = "lib/captchasolver.jar";
+    CaptchaAPI INSTANCE = ReflectionUtils.createInstance("eu.darkbot.captcha.CaptchaSolver", TWOCAPTCHA_PATH);
     static CaptchaAPI getInstance(){
         return INSTANCE;
     }
