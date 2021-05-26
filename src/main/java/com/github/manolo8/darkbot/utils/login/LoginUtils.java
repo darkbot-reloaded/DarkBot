@@ -116,7 +116,7 @@ public class LoginUtils {
         }
     }
 
-    public static void usernameLogin(LoginData loginData, String domain) {
+    private static void usernameLogin(LoginData loginData, String domain) throws IOException {
         String frontPage = IOUtils.read(Http.create("https://" + domain + ".darkorbit.com/").getInputStream());
 
         try {
