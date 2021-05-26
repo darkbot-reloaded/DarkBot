@@ -1,9 +1,18 @@
 package com.github.manolo8.darkbot.utils;
 
 public interface CaptchaAPI {
-    String TWOCAPTCHA_PATH = "lib/captchasolver.jar";
-    CaptchaAPI INSTANCE = ReflectionUtils.createInstance("eu.darkbot.captcha.CaptchaSolver", TWOCAPTCHA_PATH);
-    static CaptchaAPI getInstance(){
+    String SOLVER_PATH = "lib/captchasolver.jar";
+    CaptchaAPI INSTANCE;
+
+    static {
+        try {
+            INSTANCE = ReflectionUtils.createInstance("eu.darkbot.captcha.CaptchaSolver", SOLVER_PATH);
+        } catch (Exception e) {
+            System.out.printLn("No captcha resolver is configured, if you're not trying to use one you can safely ignore this message");
+        }
+    }
+
+    static CaptchaAPI getInstance() {
         return INSTANCE;
     }
 
