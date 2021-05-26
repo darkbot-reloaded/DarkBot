@@ -17,9 +17,10 @@ public interface CaptchaAPI {
     }
 
     /**
-     * Pass a website page and it will parse the g-site-key and solve using external service.
-     * @param webpage a page that has been consumed into a string
-     * @return A solved g-captcha-response key from 2Captcha Solver Service
+     * Create solving captcha parameters for the provided webpage html string.
+     * @param the url this webpage was obtained from
+     * @param webpage as an HTML string
+     * @return form parameters to include as captcha response solution
      */
-    String solveCaptcha(String webpage);
+    Map<String, String> solveCaptcha(URL url, String webpage);
 }
