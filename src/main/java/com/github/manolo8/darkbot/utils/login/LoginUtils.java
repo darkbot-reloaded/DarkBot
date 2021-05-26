@@ -131,17 +131,11 @@ public class LoginUtils {
         CookieHandler.setDefault(cookieManager);
 
         try {
-            if(gResponse.isEmpty())
-                Http.create(loginUrl, Method.POST)
+            Http http = Http.create(loginUrl, Method.POST)
                         .setParam("username", loginData.getUsername())
-                        .setParam("password", loginData.getPassword())
-                        .closeInputStream();
-            else
-                Http.create(loginUrl, Method.POST)
-                        .setParam("username", loginData.getUsername())
-                        .setParam("password", loginData.getPassword())
-                        .setParam("g-recaptcha-response", gResponse)
-                        .closeInputStream();
+                        .setParam("password", loginData.getPassword());
+            extraPostParams.forEach(http::setParam);
+            http.closeInputStream();
         } catch (IOException e) {
             e.printStackTrace();
         }
