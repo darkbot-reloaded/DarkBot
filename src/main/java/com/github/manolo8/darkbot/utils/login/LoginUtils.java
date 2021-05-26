@@ -3,8 +3,7 @@ package com.github.manolo8.darkbot.utils.login;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.utils.I18n;
-import com.github.manolo8.darkbot.utils.StartupParams;
+import com.github.manolo8.darkbot.utils.*;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 
@@ -118,17 +117,37 @@ public class LoginUtils {
     }
 
     public static void usernameLogin(LoginData loginData, String domain) {
-        String loginUrl = Http.create("https://" + domain + ".darkorbit.com/")
-                .consumeInputStream(LoginUtils::getLoginUrl);
+        String frontPage = "";
+        String gResponse = "";
+        try {
+            frontPage = IOUtils.read(Http.create("https://" + domain + ".darkorbit.com/").getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        try {
+            CaptchaAPI captcha = CaptchaAPI.getInstance();
+            gResponse = captcha.solveCaptcha(frontPage);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        String loginUrl = getLoginUrl(frontPage);
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
 
         try {
-            Http.create(loginUrl, Method.POST)
-                    .setParam("username", loginData.getUsername())
-                    .setParam("password", loginData.getPassword())
-                    .closeInputStream();
+            if(gResponse.isEmpty())
+                Http.create(loginUrl, Method.POST)
+                        .setParam("username", loginData.getUsername())
+                        .setParam("password", loginData.getPassword())
+                        .closeInputStream();
+            else
+                Http.create(loginUrl, Method.POST)
+                        .setParam("username", loginData.getUsername())
+                        .setParam("password", loginData.getPassword())
+                        .setParam("g-recaptcha-response", gResponse)
+                        .closeInputStream();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -165,6 +184,16 @@ public class LoginUtils {
             params = params.replaceAll(replaces.getKey() + "=[^&]+", replaces.getKey() + "=" + replaces.getValue());
         }
         return params;
+    }
+
+    private static String getLoginUrl(String in) {
+        Matcher match = LOGIN_PATTERN.matcher(in);
+        if (match.find()){
+            String login_pattern = match.group(1).replace("&amp;", "&");
+            System.out.println(login_pattern);
+            return login_pattern;
+        }
+        throw new WrongCredentialsException();
     }
 
     private static String getLoginUrl(InputStream in) {
