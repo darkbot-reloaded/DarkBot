@@ -16,10 +16,12 @@ import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpCookie;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -111,24 +113,29 @@ public class LoginUtils {
     public static void usernameLogin(LoginData loginData) {
         try {
             usernameLogin(loginData, "www");
-        } catch (Exception e) {
-            usernameLogin(loginData, "lp");
+        }catch (Exception e) {
+            try {
+                usernameLogin(loginData, "lp");
+            } catch (Exception f) {
+                f.printStackTrace();
+            }
         }
     }
 
     private static void usernameLogin(LoginData loginData, String domain) throws IOException {
-        String frontPage = IOUtils.read(Http.create("https://" + domain + ".darkorbit.com/").getInputStream());
+        URL url = new URL("https://" + domain + ".darkorbit.com/");
+        String frontPage = IOUtils.read(Http.create(url.toString()).getInputStream());
 
-    Map<String, String> extraPostParams = Collections.emptyMap();
-    CaptchaAPI solver = CaptchaAPI.getInstance();
-    if (solver != null) {
-        try {
-            extraPostParams = solver.solveCaptcha(frontPage);
-        } catch (Exception e) {
-            System.out.printLn("Captcha solver failed to resolve login captcha");
-            e.printStackTrace();
+        Map<String, String> extraPostParams = Collections.emptyMap();
+        CaptchaAPI solver = CaptchaAPI.getInstance();
+        if (solver != null) {
+            try {
+                extraPostParams = solver.solveCaptcha(url, frontPage);
+            } catch (Exception e) {
+                System.out.println("Captcha solver failed to resolve login captcha");
+                e.printStackTrace();
+            }
         }
-    }
 
         String loginUrl = getLoginUrl(frontPage);
         CookieManager cookieManager = new CookieManager();
@@ -181,8 +188,16 @@ public class LoginUtils {
     private static String getLoginUrl(String in) {
         Matcher match = LOGIN_PATTERN.matcher(in);
         if (match.find()) return match.group(1).replace("&amp;", "&");
+        //find better exception
         throw new WrongCredentialsException();
     }
+
+    /**
+     * @Deprecated
+     * This method is no longer used to get login url
+     * @param in http connection to url
+     * @return login url parsed
+     */
 
     private static String getLoginUrl(InputStream in) {
         return new BufferedReader(new InputStreamReader(in)).lines()
