@@ -113,11 +113,11 @@ public class LoginUtils {
     public static void usernameLogin(LoginData loginData) {
         try {
             usernameLogin(loginData, "www");
-        }catch (Exception e) {
+        } catch (Exception e) {
             try {
                 usernameLogin(loginData, "lp");
-            } catch (Exception f) {
-                f.printStackTrace();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
         }
     }
