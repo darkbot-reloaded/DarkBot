@@ -18,7 +18,6 @@ public interface CaptchaAPI {
             return null;
         }
     }
- */
 
     static CaptchaAPI getInstance() {
         return INSTANCE;

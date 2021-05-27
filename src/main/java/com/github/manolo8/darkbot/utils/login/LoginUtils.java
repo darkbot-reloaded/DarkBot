@@ -138,6 +138,7 @@ public class LoginUtils {
         }
 
         String loginUrl = getLoginUrl(frontPage);
+
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
 
@@ -146,7 +147,11 @@ public class LoginUtils {
                         .setParam("username", loginData.getUsername())
                         .setParam("password", loginData.getPassword());
             extraPostParams.forEach(http::setParam);
-            http.closeInputStream();
+            if(http.getContent().contains("bgcdw_errors_all_wrapper")){
+                System.out.println("Wrong Credentials");
+                throw new WrongCredentialsException();
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -188,8 +193,8 @@ public class LoginUtils {
     private static String getLoginUrl(String in) {
         Matcher match = LOGIN_PATTERN.matcher(in);
         if (match.find()) return match.group(1).replace("&amp;", "&");
-        //find better exception
-        throw new WrongCredentialsException();
+
+        throw new LoginURLException();
     }
 
     /**
@@ -242,4 +247,13 @@ public class LoginUtils {
         }
     }
 
+    public static class LoginURLException extends  WrongCredentialsException {
+        public LoginURLException(){
+            this("Login URL error");
+        }
+
+        public LoginURLException(String s) {
+            super(s);
+        }
+    }
 }
