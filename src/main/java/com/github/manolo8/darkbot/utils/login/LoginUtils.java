@@ -147,10 +147,7 @@ public class LoginUtils {
                         .setParam("username", loginData.getUsername())
                         .setParam("password", loginData.getPassword());
             extraPostParams.forEach(http::setParam);
-            if(http.getContent().contains("bgcdw_errors_all_wrapper")){
-                System.out.println("Wrong Credentials");
-                throw new WrongCredentialsException();
-            }
+            http.closeInputStream();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -194,22 +191,7 @@ public class LoginUtils {
         Matcher match = LOGIN_PATTERN.matcher(in);
         if (match.find()) return match.group(1).replace("&amp;", "&");
 
-        throw new LoginURLException();
-    }
-
-    /**
-     * @Deprecated
-     * This method is no longer used to get login url
-     * @param in http connection to url
-     * @return login url parsed
-     */
-
-    private static String getLoginUrl(InputStream in) {
-        return new BufferedReader(new InputStreamReader(in)).lines()
-                .map(LOGIN_PATTERN::matcher)
-                .filter(Matcher::find)
-                .map(matcher -> matcher.group(1).replace("&amp;", "&"))
-                .findFirst().orElseThrow(WrongCredentialsException::new);
+        throw new LoginException();
     }
 
     public static Credentials loadCredentials() {
@@ -236,7 +218,17 @@ public class LoginUtils {
         }
     }
 
-    public static class WrongCredentialsException extends IllegalArgumentException {
+    public static class LoginException extends  IllegalArgumentException {
+        public LoginException(){
+            this("Login Exception");
+        }
+
+        public LoginException(String s) {
+            super(s);
+        }
+    }
+
+    public static class WrongCredentialsException extends  LoginException{
 
         public WrongCredentialsException() {
             this("Wrong login data");
@@ -247,13 +239,5 @@ public class LoginUtils {
         }
     }
 
-    public static class LoginURLException extends  WrongCredentialsException {
-        public LoginURLException(){
-            this("Login URL error");
-        }
 
-        public LoginURLException(String s) {
-            super(s);
-        }
-    }
 }
