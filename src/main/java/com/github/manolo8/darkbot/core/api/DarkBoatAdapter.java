@@ -1,14 +1,20 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.DarkBoat;
 
 public class DarkBoatAdapter extends ApiAdapter {
     private final DarkBoat API = new DarkBoat();
+    private final StartupParams params;
+    private boolean autoHidden = false;
+    private ConfigManager configManager;
 
-    public DarkBoatAdapter(StartupParams params) {
+    public DarkBoatAdapter(StartupParams params, ConfigManager configManager) {
         super(LoginUtils.performUserLogin(params));
+        this.params = params;
+        this.configManager = configManager;
     }
 
     @Override
@@ -43,7 +49,15 @@ public class DarkBoatAdapter extends ApiAdapter {
 
     @Override
     public boolean isValid() {
-        return API.isValid();
+        boolean isValid = API.isValid();
+        if (!autoHidden && isValid && params.getAutoHide()) {
+            if (configManager.getConfig().BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API)
+                API.setMinimized(true);
+            else
+                API.setVisible(false);
+            autoHidden = true;
+        }
+        return isValid;
     }
 
     @Override
@@ -147,5 +161,10 @@ public class DarkBoatAdapter extends ApiAdapter {
         setData();
         API.reload();
         resetCache();
+    }
+
+    @Override
+    public boolean isInitiallyShown() {
+        return !params.getAutoHide();
     }
 }

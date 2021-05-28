@@ -144,19 +144,6 @@ public class Main extends Thread implements PluginListener {
         API.createWindow();
         if (params.getAutoStart()) setRunning(true);
         start();
-        if (params.getAutoHide()) {
-            Thread hide = new Thread(() -> {
-                while (true) {
-                    Time.sleep(2000);
-                    if (API.isValid()) {
-                        API.setMinimized(true);
-                        break;
-                    }
-                }
-            });
-            hide.setPriority(1);
-            hide.start();
-        }
     }
 
     @Override
