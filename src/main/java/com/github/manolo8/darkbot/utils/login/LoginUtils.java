@@ -191,7 +191,7 @@ public class LoginUtils {
         Matcher match = LOGIN_PATTERN.matcher(in);
         if (match.find()) return match.group(1).replace("&amp;", "&");
 
-        throw new LoginException();
+        throw new LoginException("Failed to get login URL in frontpage");
     }
 
     public static Credentials loadCredentials() {
