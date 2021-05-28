@@ -218,17 +218,13 @@ public class LoginUtils {
         }
     }
 
-    public static class LoginException extends  IllegalArgumentException {
-        public LoginException(){
-            this("Login Exception");
-        }
-
+    public static class LoginException extends RuntimeException {
         public LoginException(String s) {
             super(s);
         }
     }
 
-    public static class WrongCredentialsException extends  LoginException{
+    public static class WrongCredentialsException extends LoginException {
 
         public WrongCredentialsException() {
             this("Wrong login data");
