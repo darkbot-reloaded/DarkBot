@@ -117,7 +117,7 @@ public class LoginUtils {
             try {
                 usernameLogin(loginData, "lp");
             } catch (IOException ex) {
-                throw new LoginException(ex);
+                throw new LoginException("Failed to load frontpage");
             }
         }
     }
