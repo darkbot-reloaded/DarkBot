@@ -117,7 +117,7 @@ public class LoginUtils {
             try {
                 usernameLogin(loginData, "lp");
             } catch (IOException ex) {
-                throw new RuntimeException(ex);
+                throw new LoginException(ex);
             }
         }
     }
