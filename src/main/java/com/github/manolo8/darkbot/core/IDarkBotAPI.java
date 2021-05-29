@@ -6,6 +6,7 @@ public interface IDarkBotAPI {
     void setSize(int width, int height);
 
     boolean isValid();
+    boolean isInitiallyShown();
     long getMemoryUsage();
     int getVersion();
 

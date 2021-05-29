@@ -24,7 +24,7 @@ public class VisibilityButton extends TitleBarToggleButton<JFrame> {
 
         setSelectedIcon(HIDE);
         setToolTipText(I18n.get("gui.visibility_button"));
-        setSelected(true);
+        setSelected(API.isInitiallyShown());
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

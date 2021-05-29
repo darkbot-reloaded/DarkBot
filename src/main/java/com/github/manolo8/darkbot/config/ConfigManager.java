@@ -160,7 +160,7 @@ public class ConfigManager {
         try {
             if (config.BOT_SETTINGS.API_CONFIG.API == 0) return new DarkBotApiAdapter();
             else if (config.BOT_SETTINGS.API_CONFIG.API == 1) return new DarkFlashApiAdapter(params);
-            else if (config.BOT_SETTINGS.API_CONFIG.API == 2) return new DarkBoatAdapter(params);
+            else if (config.BOT_SETTINGS.API_CONFIG.API == 2) return new DarkBoatAdapter(params, this);
             else if (config.BOT_SETTINGS.API_CONFIG.API == 3) return new NativeApiAdapter(params);
             else if (config.BOT_SETTINGS.API_CONFIG.API == 4) return new NoopApiAdapter();
             else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API_CONFIG.API);

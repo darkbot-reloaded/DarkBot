@@ -48,6 +48,12 @@ public class StartupParams {
     private static final String START_CONFIG = COMMAND_PREFIX + "config";
     private String startConfig = null;
 
+    /**
+     * Command-line argument for auto-hide API, has no parameters.
+     */
+    private static final String HIDE_COMMAND = COMMAND_PREFIX + "hide";
+    private boolean autoHide = false;
+
     private final String[] args;
 
     public StartupParams(String[] args) throws IOException {
@@ -74,6 +80,9 @@ public class StartupParams {
                         System.err.println("Missing arguments for config, usage: -config configname");
                     else
                         startConfig = args[++i];
+                    break;
+                case HIDE_COMMAND:
+                    autoHide = true;
                     break;
                 default:
                     System.out.println("Unknown startup argument: " + args[i]);
@@ -121,6 +130,10 @@ public class StartupParams {
 
     public String getStartConfig() {
         return startConfig;
+    }
+
+    public boolean getAutoHide() {
+        return autoHide;
     }
 
     @Override

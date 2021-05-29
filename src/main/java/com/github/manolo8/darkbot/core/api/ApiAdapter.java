@@ -119,4 +119,7 @@ public abstract class ApiAdapter implements IDarkBotAPI {
         USER_32.MoveWindow(window, x > minX ? x : minX - w - 100, y, w, h, true);
     }
 
+    public boolean isInitiallyShown() {
+        return true;
+    }
 }
