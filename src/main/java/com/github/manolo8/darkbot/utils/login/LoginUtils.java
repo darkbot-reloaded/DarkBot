@@ -3,8 +3,7 @@ package com.github.manolo8.darkbot.utils.login;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.utils.I18n;
-import com.github.manolo8.darkbot.utils.StartupParams;
+import com.github.manolo8.darkbot.utils.*;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 
@@ -17,10 +16,12 @@ import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpCookie;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -113,22 +114,41 @@ public class LoginUtils {
         try {
             usernameLogin(loginData, "www");
         } catch (Exception e) {
-            usernameLogin(loginData, "lp");
+            try {
+                usernameLogin(loginData, "lp");
+            } catch (IOException ex) {
+                throw new LoginException("Failed to load frontpage");
+            }
         }
     }
 
-    public static void usernameLogin(LoginData loginData, String domain) {
-        String loginUrl = Http.create("https://" + domain + ".darkorbit.com/")
-                .consumeInputStream(LoginUtils::getLoginUrl);
+    private static void usernameLogin(LoginData loginData, String domain) throws IOException {
+        URL url = new URL("https://" + domain + ".darkorbit.com/");
+        String frontPage = IOUtils.read(Http.create(url.toString()).getInputStream());
+
+        Map<String, String> extraPostParams = Collections.emptyMap();
+        CaptchaAPI solver = CaptchaAPI.getInstance();
+        if (solver != null) {
+            try {
+                extraPostParams = solver.solveCaptcha(url, frontPage);
+            } catch (Exception e) {
+                System.out.println("Captcha solver failed to resolve login captcha");
+                e.printStackTrace();
+            }
+        }
+
+        String loginUrl = getLoginUrl(frontPage);
 
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
 
         try {
-            Http.create(loginUrl, Method.POST)
-                    .setParam("username", loginData.getUsername())
-                    .setParam("password", loginData.getPassword())
-                    .closeInputStream();
+            Http http = Http.create(loginUrl, Method.POST)
+                        .setParam("username", loginData.getUsername())
+                        .setParam("password", loginData.getPassword());
+            extraPostParams.forEach(http::setParam);
+            http.closeInputStream();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -167,12 +187,11 @@ public class LoginUtils {
         return params;
     }
 
-    private static String getLoginUrl(InputStream in) {
-        return new BufferedReader(new InputStreamReader(in)).lines()
-                .map(LOGIN_PATTERN::matcher)
-                .filter(Matcher::find)
-                .map(matcher -> matcher.group(1).replace("&amp;", "&"))
-                .findFirst().orElseThrow(WrongCredentialsException::new);
+    private static String getLoginUrl(String in) {
+        Matcher match = LOGIN_PATTERN.matcher(in);
+        if (match.find()) return match.group(1).replace("&amp;", "&");
+
+        throw new LoginException("Failed to get login URL in frontpage");
     }
 
     public static Credentials loadCredentials() {
@@ -199,7 +218,13 @@ public class LoginUtils {
         }
     }
 
-    public static class WrongCredentialsException extends IllegalArgumentException {
+    public static class LoginException extends RuntimeException {
+        public LoginException(String s) {
+            super(s);
+        }
+    }
+
+    public static class WrongCredentialsException extends LoginException {
 
         public WrongCredentialsException() {
             this("Wrong login data");
@@ -209,5 +234,6 @@ public class LoginUtils {
             super(s);
         }
     }
+
 
 }
