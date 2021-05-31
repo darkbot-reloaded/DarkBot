@@ -114,6 +114,17 @@ public interface HeroItemsAPI extends API.Singleton {
     }
 
     /**
+     * {@link HeroItemsAPI#selectItem(Item)} results
+     */
+    enum UsageResult {
+        SELECTED,
+        UNSUCCESSFUL,
+        ON_COOLDOWN,
+        NOT_AVAILABLE,
+        NOT_ENOUGH_QUANTITY
+    }
+
+    /**
      * Represents all available categories of {@link HeroItemsAPI} items.
      */
     enum Category {
