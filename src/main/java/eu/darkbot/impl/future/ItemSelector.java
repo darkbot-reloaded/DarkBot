@@ -10,7 +10,7 @@ import eu.darkbot.impl.utils.AbstractFutureResult;
 
 public class ItemSelector
         extends AbstractFutureResult<HeroItemsAPI.UsageResult>
-        implements ItemFutureResult<HeroItemsAPI.UsageResult>, Runnable {
+        implements ItemFutureResult, Runnable {
 
     private final Item item;
     private final SettingsProxy settings;
@@ -26,7 +26,7 @@ public class ItemSelector
     public void run() {
         if (isPending()) setStatus(Status.COMMITTED);
 
-        if (!item.hasShortcut() || !item.isActivatable()) set(HeroItemsAPI.UsageResult.NOT_AVAILABLE);
+        if (item == null || !item.hasShortcut() || !item.isActivatable()) set(HeroItemsAPI.UsageResult.NOT_AVAILABLE);
         else if (!item.isReady()) set(HeroItemsAPI.UsageResult.ON_COOLDOWN);
         else {
             SlotBarsProxy.Type slotBarType = item.getSlotBarType();
@@ -38,7 +38,7 @@ public class ItemSelector
 
                 if ((!toggleProAction || settings.pressKeybind(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION))
                         && settings.pressKeybind(SettingsProxy.KeyBind.of(slotBarType, slotNumber)))
-                    set(HeroItemsAPI.UsageResult.SELECTED);
+                    set(HeroItemsAPI.UsageResult.SUCCESSFUL);
                 else set(HeroItemsAPI.UsageResult.UNSUCCESSFUL);
             }
         }

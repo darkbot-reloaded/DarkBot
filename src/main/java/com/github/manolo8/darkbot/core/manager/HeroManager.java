@@ -15,6 +15,7 @@ import com.github.manolo8.darkbot.core.utils.Drive;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Entity;
 import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.future.ItemFutureResult;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
 import org.jetbrains.annotations.Nullable;
@@ -52,6 +53,8 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     private Character formation = null;
     private long formationTime;
     private long portalTime;
+
+    private ItemFutureResult formationSelectResult;
 
     public HeroManager(Main main, PluginAPI pluginAPI) {
         instance = this;
@@ -210,11 +213,12 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
 
         SlotBarsProxy slotBars = main.facadeManager.slotBars;
 
-        slotBars.findItem(formation)
-                .filter(slotBars::isSelectable)
-                .ifPresent(slotBars::selectItem);
-
-        this.formationTime = System.currentTimeMillis();
+        if (formationSelectResult == null)
+            formationSelectResult = slotBars.selectItem(formation);
+        else if (formationSelectResult.isDone()) {
+            formationTime = System.currentTimeMillis();
+            formationSelectResult = null;
+        }
     }
 
     @Override

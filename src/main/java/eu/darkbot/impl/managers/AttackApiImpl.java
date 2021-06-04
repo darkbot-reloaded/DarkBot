@@ -103,7 +103,8 @@ public class AttackApiImpl implements AttackAPI {
                 hero.distanceTo(target) > 1000 ||
                 rocketTryTime > System.currentTimeMillis() - 500) return;
 
-        heroItems.getItems(HeroItemsAPI.Category.ROCKETS).stream()
+
+        heroItems.getItems().get(HeroItemsAPI.Category.ROCKETS).stream()
                 .filter(Item::isSelected)
                 .filter(Item::isReady)
                 .findAny()
@@ -114,7 +115,7 @@ public class AttackApiImpl implements AttackAPI {
 
     //@Override
     public SelectableItem.Laser getLaser() {
-        return heroItems.getItems(HeroItemsAPI.Category.LASERS).stream()
+        return heroItems.getItems().get(HeroItemsAPI.Category.LASERS).stream()
                 .filter(Item::isSelected)
                 .map(item -> SelectableItem.Laser.of(item.getId()))
                 .findFirst().orElse(null);
@@ -122,7 +123,7 @@ public class AttackApiImpl implements AttackAPI {
 
     //@Override
     public SelectableItem.Rocket getRocket() {
-        return heroItems.getItems(HeroItemsAPI.Category.ROCKETS).stream()
+        return heroItems.getItems().get(HeroItemsAPI.Category.ROCKETS).stream()
                 .filter(Item::isSelected)
                 .map(item -> SelectableItem.Rocket.of(item.getId()))
                 .findFirst().orElse(null);
