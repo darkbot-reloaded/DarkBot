@@ -8,7 +8,7 @@ import com.github.manolo8.darkbot.core.objects.ShipInfo;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
 import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.entities.Pet;
-import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.items.SelectableItem;
 import eu.darkbot.api.entities.utils.Attackable;
 import eu.darkbot.api.objects.EntityInfo;
 import eu.darkbot.api.objects.Locatable;

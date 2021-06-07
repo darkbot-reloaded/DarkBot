@@ -1,7 +1,6 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.other.SelectableItem;
 import eu.darkbot.api.entities.utils.Attackable;
 import org.jetbrains.annotations.Nullable;
 

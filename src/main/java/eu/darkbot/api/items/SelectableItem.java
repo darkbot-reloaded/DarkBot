@@ -1,5 +1,6 @@
-package eu.darkbot.api.entities.other;
+package eu.darkbot.api.items;
 
+import eu.darkbot.api.entities.other.Gear;
 import eu.darkbot.api.managers.HeroItemsAPI;
 
 import java.util.Locale;
@@ -7,7 +8,7 @@ import java.util.Locale;
 /**
  * Represents a type of in-game item, that can be selected via the hot bar or category bar
  *
- * @see eu.darkbot.api.objects.Item
+ * @see Item
  * @see HeroItemsAPI
  */
 public interface SelectableItem {
@@ -20,7 +21,7 @@ public interface SelectableItem {
     /**
      * @return The category inside category bar that this item is found in
      */
-    HeroItemsAPI.Category getCategory();
+    ItemCategory getCategory();
 
     /**
      * In-game laser ammo items that can be shot
@@ -93,8 +94,8 @@ public interface SelectableItem {
         }
 
         @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.LASERS;
+        public ItemCategory getCategory() {
+            return ItemCategory.LASERS;
         }
     }
 
@@ -151,8 +152,8 @@ public interface SelectableItem {
         }
 
         @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.ROCKETS;
+        public ItemCategory getCategory() {
+            return ItemCategory.ROCKETS;
         }
     }
 
@@ -191,8 +192,8 @@ public interface SelectableItem {
         }
 
         @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.ROCKET_LAUNCHERS;
+        public ItemCategory getCategory() {
+            return ItemCategory.ROCKET_LAUNCHERS;
         }
     }
 
@@ -206,8 +207,8 @@ public interface SelectableItem {
     interface SpecialItem extends SelectableItem {
 
         @Override
-        default HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.SPECIAL_ITEMS;
+        default ItemCategory getCategory() {
+            return ItemCategory.SPECIAL_ITEMS;
         }
     }
 
@@ -374,8 +375,8 @@ public interface SelectableItem {
         }
 
         @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.MINES;
+        public ItemCategory getCategory() {
+            return ItemCategory.MINES;
         }
     }
 
@@ -462,8 +463,8 @@ public interface SelectableItem {
         }
 
         @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.CPUS;
+        public ItemCategory getCategory() {
+            return ItemCategory.CPUS;
         }
     }
 
@@ -499,8 +500,8 @@ public interface SelectableItem {
         }
 
         @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.BUY_NOW;
+        public ItemCategory getCategory() {
+            return ItemCategory.BUY_NOW;
         }
     }
 
@@ -536,8 +537,8 @@ public interface SelectableItem {
         }
 
         @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.TECH_ITEMS;
+        public ItemCategory getCategory() {
+            return ItemCategory.TECH_ITEMS;
         }
     }
 
@@ -609,8 +610,8 @@ public interface SelectableItem {
         }
 
         @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.SHIP_ABILITIES;
+        public ItemCategory getCategory() {
+            return ItemCategory.SHIP_ABILITIES;
         }
     }
 
@@ -719,13 +720,13 @@ public interface SelectableItem {
         }
 
         @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.DRONE_FORMATIONS;
+        public ItemCategory getCategory() {
+            return ItemCategory.DRONE_FORMATIONS;
         }
     }
 
     /**
-     * In-game hot bar selectable {@link eu.darkbot.api.entities.other.Gear}.
+     * In-game hot bar selectable {@link Gear}.
      * Note that not all gears are available here to use as items.
      */
     enum Pet implements SelectableItem {
@@ -766,8 +767,8 @@ public interface SelectableItem {
         }
 
         @Override
-        public HeroItemsAPI.Category getCategory() {
-            return HeroItemsAPI.Category.PET;
+        public ItemCategory getCategory() {
+            return ItemCategory.PET;
         }
     }
 }

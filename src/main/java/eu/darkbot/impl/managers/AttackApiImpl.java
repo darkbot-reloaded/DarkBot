@@ -2,12 +2,13 @@ package eu.darkbot.impl.managers;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
-import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.items.SelectableItem;
 import eu.darkbot.api.entities.utils.Attackable;
+import eu.darkbot.api.items.ItemCategory;
 import eu.darkbot.api.managers.AttackAPI;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
-import eu.darkbot.api.objects.Item;
+import eu.darkbot.api.items.Item;
 import org.jetbrains.annotations.Nullable;
 
 @Deprecated // This implementation is not ready for use in production
@@ -103,8 +104,7 @@ public class AttackApiImpl implements AttackAPI {
                 hero.distanceTo(target) > 1000 ||
                 rocketTryTime > System.currentTimeMillis() - 500) return;
 
-
-        heroItems.getItems().get(HeroItemsAPI.Category.ROCKETS).stream()
+        heroItems.getItems(ItemCategory.ROCKETS).stream()
                 .filter(Item::isSelected)
                 .filter(Item::isReady)
                 .findAny()
@@ -115,7 +115,7 @@ public class AttackApiImpl implements AttackAPI {
 
     //@Override
     public SelectableItem.Laser getLaser() {
-        return heroItems.getItems().get(HeroItemsAPI.Category.LASERS).stream()
+        return heroItems.getItems(ItemCategory.LASERS).stream()
                 .filter(Item::isSelected)
                 .map(item -> SelectableItem.Laser.of(item.getId()))
                 .findFirst().orElse(null);
@@ -123,7 +123,7 @@ public class AttackApiImpl implements AttackAPI {
 
     //@Override
     public SelectableItem.Rocket getRocket() {
-        return heroItems.getItems().get(HeroItemsAPI.Category.ROCKETS).stream()
+        return heroItems.getItems(ItemCategory.ROCKETS).stream()
                 .filter(Item::isSelected)
                 .map(item -> SelectableItem.Rocket.of(item.getId()))
                 .findFirst().orElse(null);

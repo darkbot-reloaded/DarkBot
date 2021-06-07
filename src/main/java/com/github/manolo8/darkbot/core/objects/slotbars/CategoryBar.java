@@ -1,9 +1,8 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
-import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import eu.darkbot.api.managers.HeroItemsAPI;
+import eu.darkbot.api.items.ItemCategory;
 
 import java.util.*;
 
@@ -11,7 +10,6 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class CategoryBar extends MenuBar {
     public final List<Category> categories = new ArrayList<>();
-    public final Map<HeroItemsAPI.Category, List<? extends eu.darkbot.api.objects.Item>> items = new EnumMap<>(HeroItemsAPI.Category.class);
 
     private final ObjArray categoriesArr = ObjArray.ofVector(true);
 
@@ -20,8 +18,6 @@ public class CategoryBar extends MenuBar {
         super.update();
         this.categoriesArr.update(API.readMemoryLong(address + 56));
         this.categoriesArr.sync(this.categories, Category::new, null);
-
-        categories.forEach(category -> items.put(category.category, category.items));
     }
 
     public Category get(CategoryType type) {
@@ -32,7 +28,7 @@ public class CategoryBar extends MenuBar {
         return null;
     }
 
-    public Category get(HeroItemsAPI.Category type) {
+    public Category get(ItemCategory type) {
         String id = type.getId();
         for (Category category : categories) {
             if (id.equals(category.categoryId)) return category;
@@ -40,7 +36,7 @@ public class CategoryBar extends MenuBar {
         return null;
     }
 
-    public boolean hasCategory(HeroItemsAPI.Category type) {
+    public boolean hasCategory(ItemCategory type) {
         String id = type.getId();
         for (Category category : categories) {
             if (id.equals(category.categoryId)) return true;
@@ -61,7 +57,6 @@ public class CategoryBar extends MenuBar {
         public String categoryId;
         public List<Item> items = new ArrayList<>();
 
-        private HeroItemsAPI.Category category;
         private final ObjArray itemsArr = ObjArray.ofVector(true);
 
         @Override
@@ -69,13 +64,6 @@ public class CategoryBar extends MenuBar {
             this.categoryId = API.readMemoryString(address, 32);
             this.itemsArr.update(API.readMemoryLong(address + 40));
             this.itemsArr.sync(this.items, Item::new, null);
-
-            for (HeroItemsAPI.Category cat : HeroItemsAPI.Category.values()) {
-                if (cat.getId().equals(categoryId)) {
-                    this.category = cat;
-                    break;
-                }
-            }
         }
     }
 

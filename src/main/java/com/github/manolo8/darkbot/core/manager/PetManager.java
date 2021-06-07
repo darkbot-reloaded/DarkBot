@@ -13,7 +13,7 @@ import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import eu.darkbot.api.entities.Entity;
-import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.items.SelectableItem;
 import eu.darkbot.api.entities.utils.Attackable;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.objects.*;

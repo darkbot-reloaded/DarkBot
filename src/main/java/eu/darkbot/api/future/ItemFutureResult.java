@@ -1,12 +1,12 @@
 package eu.darkbot.api.future;
 
-import eu.darkbot.api.managers.HeroItemsAPI;
-import eu.darkbot.api.objects.Item;
+import eu.darkbot.api.items.ItemUseResult;
+import eu.darkbot.api.items.Item;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public interface ItemFutureResult extends FutureResult<HeroItemsAPI.UsageResult> {
+public interface ItemFutureResult extends FutureResult<ItemUseResult> {
 
     ItemFutureResult EMPTY = new CanceledItemFutureResult();
 
@@ -15,8 +15,8 @@ public interface ItemFutureResult extends FutureResult<HeroItemsAPI.UsageResult>
     class CanceledItemFutureResult implements ItemFutureResult {
 
         @Override
-        public Optional<HeroItemsAPI.UsageResult> getResult() {
-            return Optional.of(HeroItemsAPI.UsageResult.UNSUCCESSFUL);
+        public Optional<ItemUseResult> getResult() {
+            return Optional.of(ItemUseResult.FAILED);
         }
 
         @Override
@@ -30,7 +30,7 @@ public interface ItemFutureResult extends FutureResult<HeroItemsAPI.UsageResult>
         }
 
         @Override
-        public FutureResult<HeroItemsAPI.UsageResult> onDone(Consumer<FutureResult<HeroItemsAPI.UsageResult>> consumer) {
+        public FutureResult<ItemUseResult> onDone(Consumer<FutureResult<ItemUseResult>> consumer) {
             return this;
         }
 

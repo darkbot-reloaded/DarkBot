@@ -1,7 +1,7 @@
 package eu.darkbot.api.config;
 
 import eu.darkbot.api.entities.Npc;
-import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.items.SelectableItem;
 
 import java.util.Optional;
 

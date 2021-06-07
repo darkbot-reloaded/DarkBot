@@ -1,10 +1,7 @@
-package eu.darkbot.api.objects;
-
-import eu.darkbot.api.entities.other.SelectableItem;
-import eu.darkbot.api.managers.HeroItemsAPI;
+package eu.darkbot.api.items;
 
 /**
- * Represents an item in-game, the type of this item is a {@link eu.darkbot.api.entities.other.SelectableItem}
+ * Represents an item in-game, the type of this item is a {@link SelectableItem}
  */
 public interface Item extends SelectableItem {
 
@@ -54,7 +51,7 @@ public interface Item extends SelectableItem {
     double totalCooldown();
 
     @Override
-    default HeroItemsAPI.Category getCategory() {
+    default ItemCategory getCategory() {
         return null; // Category is unknown
     }
 }

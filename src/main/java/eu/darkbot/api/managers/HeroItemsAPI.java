@@ -1,14 +1,10 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.other.SelectableItem;
-import eu.darkbot.api.future.ItemFutureResult;
-import eu.darkbot.api.objects.Item;
+import eu.darkbot.api.items.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -17,61 +13,34 @@ import java.util.Optional;
  * @see SelectableItem
  */
 public interface HeroItemsAPI extends API.Singleton {
+    /**
+     * @param selectableItem to get {@link Item} instance
+     * @return {@link Optional<Item>} associated with given {@link SelectableItem}
+     */
+    Optional<Item> getItem(@NotNull SelectableItem selectableItem);
 
     /**
-     * This method checks if given {@link Item} can be selected in-game.
+     * Returns {@link Collection<Item>} of given {@link ItemCategory}
+     */
+    Collection<? extends Item> getItems(@NotNull ItemCategory itemCategory);
+
+    /**
+     * This method checks if given {@link Item} can be used in-game.
      * If the item isn't in any of the action bars it may not be selectable.
      *
      * @param item to check
-     * @return non empty optional if item can be selected
+     * @return non empty optional if item can be used
      */
-    Optional<Item> checkSelectable(@NotNull SelectableItem item);
+    Optional<Item> getAvailable(@NotNull SelectableItem item);
 
     /**
-     * @param item to be selected
-     * @return true on successful select
+     * Will try to use given {@link SelectableItem} with optional additional {@link ItemUseFlag}s.
+     * API should check {@link Item#isAvailable()} by default,
+     * and return {@link ItemUseResult#NOT_AVAILABLE} if isn't available.
+     *
+     * @param selectableItem to be used
+     * @param itemFlags      which this method must respect
+     * @return use result of the selectableItem
      */
-    ItemFutureResult selectItem(@NotNull SelectableItem item);
-
-    /**
-     * @param item to get of
-     * @return item associated with given {@link SelectableItem}
-     */
-    Optional<Item> getItemOf(SelectableItem item);
-
-    /**
-     * @return {@link Map} of all {@link Item}s
-     */
-    Map<Category, List<? extends Item>> getItems();
-
-    /**
-     * {@link HeroItemsAPI#selectItem(SelectableItem)} results
-     */
-    enum UsageResult {
-        SUCCESSFUL,
-        UNSUCCESSFUL,
-        ON_COOLDOWN,
-        NOT_AVAILABLE;
-    }
-
-    /**
-     * Represents all available categories of {@link HeroItemsAPI} items.
-     */
-    enum Category {
-        LASERS,
-        ROCKETS,
-        ROCKET_LAUNCHERS,
-        SPECIAL_ITEMS,
-        MINES,
-        CPUS,
-        BUY_NOW,
-        TECH_ITEMS,
-        SHIP_ABILITIES,
-        DRONE_FORMATIONS,
-        PET;
-
-        public String getId() {
-            return name().toLowerCase(Locale.ROOT);
-        }
-    }
+    ItemUseResult useItem(@NotNull SelectableItem selectableItem, ItemUseFlag... itemFlags);
 }

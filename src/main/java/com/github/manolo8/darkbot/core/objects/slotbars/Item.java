@@ -7,7 +7,7 @@ import java.util.*;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Item extends UpdatableAuto implements eu.darkbot.api.objects.Item {
+public class Item extends UpdatableAuto implements eu.darkbot.api.items.Item {
     // Only has relevant info if !isReady()
     public final ItemTimer itemTimer = new ItemTimer();
     private final Map<SlotBarsProxy.Type, Set<Integer>> associatedSlots = new EnumMap<>(SlotBarsProxy.Type.class);
