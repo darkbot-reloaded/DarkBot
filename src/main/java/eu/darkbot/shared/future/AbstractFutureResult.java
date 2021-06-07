@@ -1,4 +1,4 @@
-package eu.darkbot.impl.future;
+package eu.darkbot.shared.future;
 
 import eu.darkbot.api.future.FutureResult;
 

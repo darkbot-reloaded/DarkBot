@@ -1,4 +1,4 @@
-package eu.darkbot.logic.utils;
+package eu.darkbot.shared.modules.utils;
 
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Portal;

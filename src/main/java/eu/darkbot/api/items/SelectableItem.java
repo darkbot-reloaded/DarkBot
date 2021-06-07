@@ -1,6 +1,6 @@
 package eu.darkbot.api.items;
 
-import eu.darkbot.api.entities.other.Gear;
+import eu.darkbot.api.entities.other.PetGear;
 import eu.darkbot.api.managers.HeroItemsAPI;
 
 import java.util.Locale;
@@ -726,39 +726,39 @@ public interface SelectableItem {
     }
 
     /**
-     * In-game hot bar selectable {@link Gear}.
+     * In-game hot bar selectable {@link PetGear}.
      * Note that not all gears are available here to use as items.
      */
     enum Pet implements SelectableItem {
-        /** Enables {@link Gear#MEGA_MINE} gear */
-        G_MM1(Gear.MEGA_MINE),
-        /** Enables {@link Gear#KAMIKAZE} gear */
-        G_KK1(Gear.KAMIKAZE),
-        /** Enables {@link Gear#SACRIFICIAL} gear */
-        G_FS1(Gear.SACRIFICIAL),
-        /** Enables {@link Gear#HP_LINK} gear */
-        G_HPL1(Gear.HP_LINK),
-        /** Enables {@link Gear#PET_TARGET} gear */
-        G_RT1(Gear.PET_TARGET),
-        /** Enables {@link Gear#BEACON_HP} gear */
-        G_BH1(Gear.BEACON_HP),
-        /** Enables {@link Gear#BEACON_COMBAT} gear */
-        G_BC1(Gear.BEACON_COMBAT);
+        /** Enables {@link PetGear#MEGA_MINE} gear */
+        G_MM1(PetGear.MEGA_MINE),
+        /** Enables {@link PetGear#KAMIKAZE} gear */
+        G_KK1(PetGear.KAMIKAZE),
+        /** Enables {@link PetGear#SACRIFICIAL} gear */
+        G_FS1(PetGear.SACRIFICIAL),
+        /** Enables {@link PetGear#HP_LINK} gear */
+        G_HPL1(PetGear.HP_LINK),
+        /** Enables {@link PetGear#PET_TARGET} gear */
+        G_RT1(PetGear.PET_TARGET),
+        /** Enables {@link PetGear#BEACON_HP} gear */
+        G_BH1(PetGear.BEACON_HP),
+        /** Enables {@link PetGear#BEACON_COMBAT} gear */
+        G_BC1(PetGear.BEACON_COMBAT);
 
         private static final String PREFIX = "equipment_petgear_";
         private final String id;
-        private final Gear gear;
+        private final PetGear petGear;
 
-        Pet(Gear gear) {
+        Pet(PetGear petGear) {
             this.id = PREFIX + name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
-            this.gear = gear;
+            this.petGear = petGear;
         }
 
         /**
          * @return The pet gear this item represents
          */
-        public Gear getGear() {
-            return gear;
+        public PetGear getGear() {
+            return petGear;
         }
 
         @Override

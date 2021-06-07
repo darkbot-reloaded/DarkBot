@@ -1,10 +1,10 @@
-package eu.darkbot.logic.modules;
+package eu.darkbot.shared.modules;
 
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Box;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.Ship;
-import eu.darkbot.api.entities.other.Effect;
+import eu.darkbot.api.entities.other.EntityEffect;
 import eu.darkbot.api.items.ItemUseFlag;
 import eu.darkbot.api.items.SelectableItem;
 import eu.darkbot.api.managers.BotAPI;
@@ -19,7 +19,7 @@ import eu.darkbot.api.objects.Location;
 import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.Module;
 import eu.darkbot.config.ConfigAPI;
-import eu.darkbot.logic.SafetyFinder;
+import eu.darkbot.shared.SafetyFinder;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -166,7 +166,7 @@ public class CollectorModule implements Module {
 
         if (distance < 200) {
             //movement.stop(false);
-            if (!hero.hasEffect(Effect.BOX_COLLECTING)
+            if (!hero.hasEffect(EntityEffect.BOX_COLLECTING)
                     || hero.getLocationInfo().distanceTo(currentBox) == 0)
                 currentBox.tryCollect();
             else return;

@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.JUMP_GATE;
@@ -62,6 +63,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         this.drive = pluginAPI.requireInstance(Drive.class);
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
+        this.pet.main = main;
         this.map = main.starManager.byId(-1);
     }
 
@@ -237,5 +239,15 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     @Override
     public boolean setRunMode() {
         return runMode();
+    }
+
+    @Override
+    public boolean hasPet() {
+        return pet.isValid();
+    }
+
+    @Override
+    public Optional<eu.darkbot.api.entities.Pet> getPet() {
+        return hasPet() ? Optional.of(pet) : Optional.empty();
     }
 }

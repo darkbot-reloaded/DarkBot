@@ -1,11 +1,11 @@
-package eu.darkbot.logic.modules;
+package eu.darkbot.shared.modules;
 
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.API;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.utils.GameMap;
 import eu.darkbot.api.extensions.Installable;
-import eu.darkbot.logic.utils.MapTraveler;
+import eu.darkbot.shared.modules.utils.MapTraveler;
 
 public class MapModule extends TemporalModule implements Installable, API {
 

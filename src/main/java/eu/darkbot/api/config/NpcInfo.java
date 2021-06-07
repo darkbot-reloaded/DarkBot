@@ -46,7 +46,6 @@ public interface NpcInfo {
      */
     void setExtraFlag(ExtraFlag flag, boolean active);
 
-
     interface ExtraFlag {
         String getName();
         String getShortName();
