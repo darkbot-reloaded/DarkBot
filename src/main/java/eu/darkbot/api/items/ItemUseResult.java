@@ -5,7 +5,7 @@ import eu.darkbot.api.managers.HeroItemsAPI;
 import java.util.function.Consumer;
 
 /**
- * {@link HeroItemsAPI#useItem(SelectableItem, ItemUseFlag...)} results
+ * The result after attempting to use an in-game item, usually via {@link HeroItemsAPI#useItem(SelectableItem, ItemUseFlag...)}
  */
 public enum ItemUseResult {
     /**
@@ -13,11 +13,12 @@ public enum ItemUseResult {
      */
     SUCCESS,
     /**
-     * Failed to use an item
+     * Failed to use an item. Item was available but failed to use it.
      */
     FAILED,
     /**
-     * Item isn't ready
+     * Item isn't ready - is cooling down, so can't be used
+     * Only if {@link ItemUseFlag#READY} flag was used
      *
      * @see Item#isReady()
      * @see ItemUseFlag#READY
@@ -28,8 +29,10 @@ public enum ItemUseResult {
      */
     NOT_AVAILABLE,
     /**
-     * Item is already selected if {@link ItemUseFlag#NOT_SELECTED} flag was used
+     * Item is already selected.
+     * Only if {@link ItemUseFlag#NOT_SELECTED} flag was used
      *
+     * @see Item#isSelected()
      * @see ItemUseFlag#NOT_SELECTED
      */
     ALREADY_SELECTED,
@@ -42,9 +45,9 @@ public enum ItemUseResult {
     INSUFFICIENT_QUANTITY;
 
     /**
-     * Is executed only on {@link #SUCCESS} result
+     * It's executed on successful using of the item, like {@link #SUCCESS}
      *
-     * @param onSuccess consumer
+     * @param onSuccess consumer to be executed on success
      * @return this {@link ItemUseResult} instance
      */
     public ItemUseResult ifSuccessful(Consumer<ItemUseResult> onSuccess) {
@@ -53,9 +56,9 @@ public enum ItemUseResult {
     }
 
     /**
-     * Is executed only on <b>non</b> {@link #SUCCESS} result.
+     * It's executed if the use of the the item fails
      *
-     * @param onFail consumer
+     * @param onFail consumer to be executed on fail
      * @return this {@link ItemUseResult} instance
      */
     public ItemUseResult ifFailed(Consumer<ItemUseResult> onFail) {

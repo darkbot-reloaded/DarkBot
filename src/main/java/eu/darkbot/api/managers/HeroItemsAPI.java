@@ -14,32 +14,32 @@ import java.util.Optional;
  */
 public interface HeroItemsAPI extends API.Singleton {
     /**
-     * @param selectableItem to get {@link Item} instance
-     * @return {@link Optional<Item>} associated with given {@link SelectableItem}
+     * @return {@link Item} representation of given {@link SelectableItem} if exists, empty optional otherwise
      */
     Optional<Item> getItem(@NotNull SelectableItem selectableItem);
 
     /**
-     * Returns {@link Collection<Item>} of given {@link ItemCategory}
+     * @param itemCategory the category to get items from
+     * @return a {@link Collection<Item>} with all the items inside the given {@link ItemCategory}
      */
     Collection<? extends Item> getItems(@NotNull ItemCategory itemCategory);
 
     /**
-     * This method checks if given {@link Item} can be used in-game.
+     * This method checks if given {@link Item} is available and can be used in-game.
+     * <b>Doesn't</b> check if item is not cooling down or if the quantity is sufficient.
+     *
      * If the item isn't in any of the action bars it may not be selectable.
      *
-     * @param item to check
-     * @return non empty optional if item can be used
+     * @param selectableItem to check
+     * @return non-empty optional if item available and can be used, empty optional otherwise
      */
-    Optional<Item> getAvailable(@NotNull SelectableItem item);
+    Optional<Item> getAvailable(@NotNull SelectableItem selectableItem);
 
     /**
      * Will try to use given {@link SelectableItem} with optional additional {@link ItemUseFlag}s.
-     * API should check {@link Item#isAvailable()} by default,
-     * and return {@link ItemUseResult#NOT_AVAILABLE} if isn't available.
      *
-     * @param selectableItem to be used
-     * @param itemFlags      which this method must respect
+     * @param selectableItem item to be used
+     * @param itemFlags      flags which this method must respect
      * @return use result of the selectableItem
      */
     ItemUseResult useItem(@NotNull SelectableItem selectableItem, ItemUseFlag... itemFlags);

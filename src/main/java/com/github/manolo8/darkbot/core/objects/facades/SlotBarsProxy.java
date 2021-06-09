@@ -70,16 +70,16 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     }
 
     @Override
-    public Optional<eu.darkbot.api.items.Item> getAvailable(@NotNull SelectableItem item) {
-        return Optional.empty();
+    public Optional<eu.darkbot.api.items.Item> getAvailable(@NotNull SelectableItem selectableItem) {
+        return getItem(selectableItem)
+                .filter(eu.darkbot.api.items.Item::isAvailable)
+                .filter(i -> ((Item) i).hasShortcut());
     }
 
     @Override
     public @NotNull ItemUseResult useItem(@NotNull SelectableItem selectableItem, ItemUseFlag... itemFlags) {
-        Item item = (Item) findItem(selectableItem).orElse(null);
-
-        if (item == null || !item.hasShortcut() || !item.isAvailable())
-            return ItemUseResult.NOT_AVAILABLE;
+        Item item = (Item) getAvailable(selectableItem).orElse(null);
+        if (item == null) return ItemUseResult.NOT_AVAILABLE;
 
         for (ItemUseFlag useCase : itemFlags)
             if (!useCase.test(item))
@@ -87,9 +87,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
 
         SlotBarsProxy.Type slotBarType = item.getSlotBarType();
         int slotNumber = item.getFirstSlotNumber();
-
-        if (slotBarType == null || slotNumber == -1)
-            return (ItemUseResult.FAILED);
+        if (slotNumber < 1 || slotNumber > 10) return ItemUseResult.FAILED;
 
         boolean toggleProAction = (slotBarType == SlotBarsProxy.Type.PRO_ACTION_BAR) != isProActionBarVisible();
 
@@ -103,11 +101,12 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         if (item == null) return Optional.empty();
         if (item instanceof Item) return Optional.of((Item) item);
 
+        String itemId = item.getId();
         ItemCategory category = item.getCategory();
 
-        return category == null ? categoryBar.findItemById(item.getId())
+        return category == null ? categoryBar.findItemById(itemId)
                 : categoryBar.get(category).items.stream()
-                .filter(i -> i.getId().equals(item.getId()))
+                .filter(i -> i.getId().equals(itemId))
                 .findFirst();
     }
 

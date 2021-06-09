@@ -36,7 +36,7 @@ public interface Item extends SelectableItem {
     boolean isAvailable();
 
     /**
-     * @return true if item is ready, available and can be clicked
+     * @return true if item is ready - not cooling down
      */
     boolean isReady();
 
