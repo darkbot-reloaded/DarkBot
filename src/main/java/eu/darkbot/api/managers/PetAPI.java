@@ -11,6 +11,8 @@ import java.util.Optional;
 
 /**
  * API to manage hero's pet.
+ * Pet is automatically repaired if {@link #isEnabled()} returns true,
+ * user endable Pet in settings and bot is working.
  */
 public interface PetAPI extends Pet, API.Singleton {
 

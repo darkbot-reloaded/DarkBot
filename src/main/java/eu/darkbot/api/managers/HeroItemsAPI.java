@@ -37,6 +37,10 @@ public interface HeroItemsAPI extends API.Singleton {
 
     /**
      * Will try to use given {@link SelectableItem} with optional additional {@link ItemUseFlag}s.
+     * <p>
+     * Keep in mind that if u don't pass flags like {@link ItemUseFlag#READY} and/or won't you check it on your own,
+     * this method still will try to use given item, even will return success use result if item is available.
+     * </p>
      *
      * @param selectableItem item to be used
      * @param itemFlags      flags which this method must respect

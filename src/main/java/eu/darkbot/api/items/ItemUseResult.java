@@ -45,13 +45,22 @@ public enum ItemUseResult {
     INSUFFICIENT_QUANTITY;
 
     /**
+     * Checks if use attempt was successful
+     *
+     * @return true if item use attempt was successful, false otherwise
+     */
+    public boolean isSuccessful() {
+        return this == SUCCESS;
+    }
+
+    /**
      * It's executed on successful using of the item, like {@link #SUCCESS}
      *
      * @param onSuccess consumer to be executed on success
      * @return this {@link ItemUseResult} instance
      */
     public ItemUseResult ifSuccessful(Consumer<ItemUseResult> onSuccess) {
-        if (this == SUCCESS) onSuccess.accept(this);
+        if (isSuccessful()) onSuccess.accept(this);
         return this;
     }
 
@@ -62,7 +71,7 @@ public enum ItemUseResult {
      * @return this {@link ItemUseResult} instance
      */
     public ItemUseResult ifFailed(Consumer<ItemUseResult> onFail) {
-        if (this != SUCCESS) onFail.accept(this);
+        if (!isSuccessful()) onFail.accept(this);
         return this;
     }
 }
