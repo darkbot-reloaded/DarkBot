@@ -69,7 +69,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     public Optional<eu.darkbot.api.items.Item> getItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags) {
         Optional<eu.darkbot.api.items.Item> item = Optional.ofNullable(getItem(selectableItem));
 
-        return item.filter(i -> checkItemFlags(false, (Item) i, itemFlags) == null);
+        return item.filter(i -> checkItemFlags((Item) i, itemFlags) == null);
     }
 
     private static final ItemFlag[] DEFAULT_ITEM_FLAGS = {ItemFlag.AVAILABLE, ItemFlag.READY, ItemFlag.USABLE};
@@ -79,8 +79,12 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
 
         if (item == null) return ItemUseResult.NOT_AVAILABLE;
 
-        ItemUseResult itemUseResult = checkItemFlags(true, item, itemFlags);
-        if (itemUseResult != null) return itemUseResult;
+        ItemUseResult itemUseResult = checkItemFlags(item, itemFlags);
+        if (itemUseResult != null)
+            return itemUseResult;
+
+        if (itemFlags.length > 0 && (itemUseResult = checkItemFlags(item, itemFlags)) != null)
+            return itemUseResult;
 
         SlotBarsProxy.Type slotBarType = item.getSlotBarType();
         int slotNumber = item.getFirstSlotNumber();
@@ -94,21 +98,19 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     }
 
     //simply useItem method must check default flags.
-    private ItemUseResult checkItemFlags(boolean isUseItem, Item item, ItemFlag... flags) {
+    private ItemUseResult checkItemFlags(Item item, ItemFlag... flags) {
+        if (flags.length == 0) flags = DEFAULT_ITEM_FLAGS;
+
         for (ItemFlag flag : flags) {
             if (flag == ItemFlag.NONE) { // kinda may be not throw if none flag was passed last and test failed for another flag.
                 if (flags.length > 1)
                     throw new IllegalArgumentException("You cannot pass NONE flag with any other!");
-                else if (!isUseItem) return null;
+                return null;
             } else if (!flag.test(item))
                 return flag.getFailResult();
         }
 
-        return !isUseItem ? null : Stream.of(DEFAULT_ITEM_FLAGS)
-                .filter(f -> f != ItemFlag.NONE)
-                .filter(f -> !f.test(item))
-                .map(ItemFlag::getFailResult)
-                .findFirst().orElse(null);
+        return null;
     }
 
     private Item getItem(SelectableItem item) {

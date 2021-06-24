@@ -32,14 +32,10 @@ public enum ItemFlag {
     /**
      * If this flag is passed, cancels every item flag.
      */
-    NONE();
+    NONE(item -> true, null);
 
     private final Predicate<Item> filter;
     private final ItemUseResult failResult;
-
-    ItemFlag() {
-        this(null, null);
-    }
 
     ItemFlag(Predicate<Item> filter, ItemUseResult failResult) {
         this.filter = filter;
@@ -47,7 +43,7 @@ public enum ItemFlag {
     }
 
     public boolean test(Item item) {
-        return filter != null && filter.test(item);
+        return filter.test(item);
     }
 
     public ItemUseResult getFailResult() {
