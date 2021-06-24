@@ -13,7 +13,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Entity;
-import eu.darkbot.api.items.ItemUseFlag;
+import eu.darkbot.api.items.ItemFlag;
 import eu.darkbot.api.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
 import org.jetbrains.annotations.Nullable;
@@ -209,7 +209,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         if (formation == getFormation() ||
                 System.currentTimeMillis() - formationTime <= 3500L) return;
 
-        main.facadeManager.slotBars.useItem(formation, ItemUseFlag.READY, ItemUseFlag.NOT_SELECTED)
+        main.facadeManager.slotBars.useItem(formation, ItemFlag.NOT_SELECTED)
                 .ifSuccessful(r -> formationTime = System.currentTimeMillis());
     }
 

@@ -14,37 +14,39 @@ import java.util.Optional;
  */
 public interface HeroItemsAPI extends API.Singleton {
     /**
-     * @return {@link Item} representation of given {@link SelectableItem} if exists, empty optional otherwise
-     */
-    Optional<Item> getItem(@NotNull SelectableItem selectableItem);
-
-    /**
      * @param itemCategory the category to get items from
      * @return a {@link Collection<Item>} with all the items inside the given {@link ItemCategory}
      */
     Collection<? extends Item> getItems(@NotNull ItemCategory itemCategory);
 
     /**
-     * This method checks if given {@link Item} is available and can be used in-game.
-     * <b>Doesn't</b> check if item is not cooling down or if the quantity is sufficient.
+     * Get {@link Item} representation of given {@link SelectableItem} if exists and matches every {@link ItemFlag}.
+     * <p>
+     * By default this method uses {@link ItemFlag#AVAILABLE}, {@link ItemFlag#READY} & {@link ItemFlag#USABLE} flags.
+     * You may use no flags by passing ItemFlag.NONE flag, note that it cannot be combined with any other flag.
+     * You may also pass your own set of flags for specific behavior.
+     * </p>
      *
-     * If the item isn't in any of the action bars it may not be selectable.
-     *
-     * @param selectableItem to check
-     * @return non-empty optional if item available and can be used, empty optional otherwise
+     * @param selectableItem item to get representation of
+     * @param itemFlags      optional flags which this method must respect
+     * @return {@link Item} representation of given {@link SelectableItem} if exists & matches given flags,
+     * otherwise {@link Optional#empty()}
+     * @throws IllegalArgumentException when combining {@link ItemFlag#NONE} with any other flag
      */
-    Optional<Item> getAvailable(@NotNull SelectableItem selectableItem);
+    Optional<Item> getItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags);
 
     /**
-     * Will try to use given {@link SelectableItem} with optional additional {@link ItemUseFlag}s.
+     * Will try to use given {@link SelectableItem} with optional additional {@link ItemFlag}s.
      * <p>
-     * Keep in mind that if u don't pass flags like {@link ItemUseFlag#READY} and/or won't you check it on your own,
-     * this method still will try to use given item, even will return success use result if item is available.
+     * By default this method uses {@link ItemFlag#AVAILABLE}, {@link ItemFlag#READY} & {@link ItemFlag#USABLE} flags.
+     * You may use no flags by passing ItemFlag.NONE flag, note that it cannot be combined with any other flag.
+     * You may also pass your own set of flags for specific behavior.
      * </p>
      *
      * @param selectableItem item to be used
-     * @param itemFlags      flags which this method must respect
+     * @param itemFlags      optional flags which this method must respect
      * @return use result of the selectableItem
+     * @throws IllegalArgumentException when combining {@link ItemFlag#NONE} with any other flag
      */
-    ItemUseResult useItem(@NotNull SelectableItem selectableItem, ItemUseFlag... itemFlags);
+    ItemUseResult useItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags);
 }

@@ -5,7 +5,7 @@ import eu.darkbot.api.entities.Box;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.Ship;
 import eu.darkbot.api.entities.other.EntityEffect;
-import eu.darkbot.api.items.ItemUseFlag;
+import eu.darkbot.api.items.ItemFlag;
 import eu.darkbot.api.items.SelectableItem;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
@@ -192,7 +192,7 @@ public class CollectorModule implements Module {
                 && !hero.isInvisible()
                 && System.currentTimeMillis() - invisibleUntil > 60000) {
 
-            heroItems.useItem(SelectableItem.Cpu.CL04K, ItemUseFlag.POSITIVE_QUANTITY)
+            heroItems.useItem(SelectableItem.Cpu.CL04K, ItemFlag.POSITIVE_QUANTITY)
                     .ifSuccessful(r -> invisibleUntil = System.currentTimeMillis());
         }
     }

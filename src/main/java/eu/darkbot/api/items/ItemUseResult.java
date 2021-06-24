@@ -5,7 +5,7 @@ import eu.darkbot.api.managers.HeroItemsAPI;
 import java.util.function.Consumer;
 
 /**
- * The result after attempting to use an in-game item, usually via {@link HeroItemsAPI#useItem(SelectableItem, ItemUseFlag...)}
+ * The result after attempting to use an in-game item, usually via {@link HeroItemsAPI#useItem(SelectableItem, ItemFlag...)}
  */
 public enum ItemUseResult {
     /**
@@ -18,29 +18,33 @@ public enum ItemUseResult {
     FAILED,
     /**
      * Item isn't ready - is cooling down, so can't be used
-     * Only if {@link ItemUseFlag#READY} flag was used
+     * Only if {@link ItemFlag#READY} flag was used
      *
      * @see Item#isReady()
-     * @see ItemUseFlag#READY
+     * @see ItemFlag#READY
      */
     NOT_READY,
     /**
-     * Item isn't available to use by either implementation and/or in-game.
+     * Item isn't available in-game.
      */
     NOT_AVAILABLE,
     /**
+     * Item isn't usable in-game and/or API not able to use it.
+     */
+    NOT_USABLE,
+    /**
      * Item is already selected.
-     * Only if {@link ItemUseFlag#NOT_SELECTED} flag was used
+     * Only if {@link ItemFlag#NOT_SELECTED} flag was used
      *
      * @see Item#isSelected()
-     * @see ItemUseFlag#NOT_SELECTED
+     * @see ItemFlag#NOT_SELECTED
      */
     ALREADY_SELECTED,
     /**
      * Item have insufficient quantity, non-positive, <= 0
-     * Only if {@link ItemUseFlag#POSITIVE_QUANTITY} flag was used
+     * Only if {@link ItemFlag#POSITIVE_QUANTITY} flag was used
      *
-     * @see ItemUseFlag#POSITIVE_QUANTITY
+     * @see ItemFlag#POSITIVE_QUANTITY
      */
     INSUFFICIENT_QUANTITY;
 

@@ -16,9 +16,9 @@ public interface Item extends SelectableItem {
     double getQuantity();
 
     /**
-     * @return true if item can be activated
+     * @return true if item can be used in-game and by API
      */
-    boolean isActivatable();
+    boolean isUsable();
 
     /**
      * @return true if item is selected

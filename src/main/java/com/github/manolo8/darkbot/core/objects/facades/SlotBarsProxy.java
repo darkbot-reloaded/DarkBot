@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.core.objects.slotbars.SlotBar;
 import eu.darkbot.api.items.ItemCategory;
-import eu.darkbot.api.items.ItemUseFlag;
+import eu.darkbot.api.items.ItemFlag;
 import eu.darkbot.api.items.ItemUseResult;
 import eu.darkbot.api.items.SelectableItem;
 import eu.darkbot.api.managers.HeroItemsAPI;
@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -58,32 +59,28 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         return sb == null ? null : sb.slots.get((Integer.parseInt(keyStr.split("_")[1]) + 9) % 10);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public Optional<eu.darkbot.api.items.Item> getItem(@NotNull SelectableItem selectableItem) {
-        return (Optional<eu.darkbot.api.items.Item>) findItem(selectableItem);
-    }
-
     @Override
     public Collection<? extends eu.darkbot.api.items.Item> getItems(@NotNull ItemCategory itemCategory) {
         return categoryBar.get(itemCategory).items;
     }
 
+
     @Override
-    public Optional<eu.darkbot.api.items.Item> getAvailable(@NotNull SelectableItem selectableItem) {
-        return getItem(selectableItem)
-                .filter(eu.darkbot.api.items.Item::isAvailable)
-                .filter(i -> ((Item) i).hasShortcut());
+    public Optional<eu.darkbot.api.items.Item> getItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags) {
+        Optional<eu.darkbot.api.items.Item> item = Optional.ofNullable(getItem(selectableItem));
+
+        return item.filter(i -> checkItemFlags(false, (Item) i, itemFlags) == null);
     }
 
+    private static final ItemFlag[] DEFAULT_ITEM_FLAGS = {ItemFlag.AVAILABLE, ItemFlag.READY, ItemFlag.USABLE};
     @Override
-    public @NotNull ItemUseResult useItem(@NotNull SelectableItem selectableItem, ItemUseFlag... itemFlags) {
-        Item item = (Item) getAvailable(selectableItem).orElse(null);
+    public @NotNull ItemUseResult useItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags) {
+        Item item = getItem(selectableItem);
+
         if (item == null) return ItemUseResult.NOT_AVAILABLE;
 
-        for (ItemUseFlag useCase : itemFlags)
-            if (!useCase.test(item))
-                return useCase.getFailResult();
+        ItemUseResult itemUseResult = checkItemFlags(true, item, itemFlags);
+        if (itemUseResult != null) return itemUseResult;
 
         SlotBarsProxy.Type slotBarType = item.getSlotBarType();
         int slotNumber = item.getFirstSlotNumber();
@@ -94,20 +91,38 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         return (!toggleProAction || settings.pressKeybind(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION))
                 && settings.pressKeybind(SettingsProxy.KeyBind.of(slotBarType, slotNumber))
                 ? ItemUseResult.SUCCESS : ItemUseResult.FAILED;
-
     }
 
-    private Optional<? extends eu.darkbot.api.items.Item> findItem(SelectableItem item) {
-        if (item == null) return Optional.empty();
-        if (item instanceof Item) return Optional.of((Item) item);
+    //simply useItem method must check default flags.
+    private ItemUseResult checkItemFlags(boolean isUseItem, Item item, ItemFlag... flags) {
+        for (ItemFlag flag : flags) {
+            if (flag == ItemFlag.NONE) { // kinda may be not throw if none flag was passed last and test failed for another flag.
+                if (flags.length > 1)
+                    throw new IllegalArgumentException("You cannot pass NONE flag with any other!");
+                else if (!isUseItem) return null;
+            } else if (!flag.test(item))
+                return flag.getFailResult();
+        }
+
+        return !isUseItem ? null : Stream.of(DEFAULT_ITEM_FLAGS)
+                .filter(f -> f != ItemFlag.NONE)
+                .filter(f -> !f.test(item))
+                .map(ItemFlag::getFailResult)
+                .findFirst().orElse(null);
+    }
+
+    private Item getItem(SelectableItem item) {
+        if (item == null) return null;
+        if (item instanceof Item) return (Item) item;
 
         String itemId = item.getId();
         ItemCategory category = item.getCategory();
 
-        return category == null ? categoryBar.findItemById(itemId)
+        return category == null ? categoryBar.findItemById(itemId).orElse(null)
                 : categoryBar.get(category).items.stream()
                 .filter(i -> i.getId().equals(itemId))
-                .findFirst();
+                .findFirst()
+                .orElse(null);
     }
 
     public enum Type {

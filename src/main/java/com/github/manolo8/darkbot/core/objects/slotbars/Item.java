@@ -91,8 +91,8 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.items.Item {
     }
 
     @Override
-    public boolean isActivatable() {
-        return activatable;
+    public boolean isUsable() {
+        return activatable && hasShortcut();
     }
 
     @Override
