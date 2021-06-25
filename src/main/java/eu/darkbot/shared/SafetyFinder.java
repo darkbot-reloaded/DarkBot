@@ -1,4 +1,4 @@
-package eu.darkbot.logic;
+package eu.darkbot.shared;
 
 import com.github.manolo8.darkbot.Main;
 import eu.darkbot.api.PluginAPI;
