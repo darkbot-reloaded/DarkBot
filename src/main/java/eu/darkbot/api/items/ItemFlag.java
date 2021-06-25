@@ -13,7 +13,8 @@ public enum ItemFlag {
      */
     AVAILABLE(Item::isAvailable, ItemUseResult.NOT_AVAILABLE),
     /**
-     * Item must be usable, be ready and API can use it.
+     * Item must be usable, available, ready and API can use it.
+     * @see #AVAILABLE
      * @see #READY
      */
     USABLE(Item::isUsable, ItemUseResult.NOT_USABLE),

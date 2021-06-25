@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -64,7 +63,6 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         return categoryBar.get(itemCategory).items;
     }
 
-
     @Override
     public Optional<eu.darkbot.api.items.Item> getItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags) {
         Optional<eu.darkbot.api.items.Item> item = Optional.ofNullable(getItem(selectableItem));
@@ -80,10 +78,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         if (item == null) return ItemUseResult.NOT_AVAILABLE;
 
         ItemUseResult itemUseResult = checkItemFlags(item, itemFlags);
-        if (itemUseResult != null)
-            return itemUseResult;
-
-        if (itemFlags.length > 0 && (itemUseResult = checkItemFlags(item, itemFlags)) != null)
+        if (itemUseResult != null || (itemUseResult = checkItemFlags(item, DEFAULT_ITEM_FLAGS)) != null)
             return itemUseResult;
 
         SlotBarsProxy.Type slotBarType = item.getSlotBarType();
@@ -97,10 +92,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
                 ? ItemUseResult.SUCCESS : ItemUseResult.FAILED;
     }
 
-    //simply useItem method must check default flags.
     private ItemUseResult checkItemFlags(Item item, ItemFlag... flags) {
-        if (flags.length == 0) flags = DEFAULT_ITEM_FLAGS;
-
         for (ItemFlag flag : flags) {
             if (flag == ItemFlag.NONE) { // kinda may be not throw if none flag was passed last and test failed for another flag.
                 if (flags.length > 1)
