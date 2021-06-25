@@ -29,11 +29,7 @@ public enum ItemFlag {
     /**
      * Item need to have positive quantity, >0
      */
-    POSITIVE_QUANTITY(item -> item.getQuantity() > 0, ItemUseResult.INSUFFICIENT_QUANTITY),
-    /**
-     * If this flag is passed, cancels every item flag.
-     */
-    NONE(item -> true, null);
+    POSITIVE_QUANTITY(item -> item.getQuantity() > 0, ItemUseResult.INSUFFICIENT_QUANTITY);
 
     private final Predicate<Item> filter;
     private final ItemUseResult failResult;

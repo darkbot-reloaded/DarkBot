@@ -93,14 +93,9 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     }
 
     private ItemUseResult checkItemFlags(Item item, ItemFlag... flags) {
-        for (ItemFlag flag : flags) {
-            if (flag == ItemFlag.NONE) { // kinda may be not throw if none flag was passed last and test failed for another flag.
-                if (flags.length > 1)
-                    throw new IllegalArgumentException("You cannot pass NONE flag with any other!");
-                return null;
-            } else if (!flag.test(item))
+        for (ItemFlag flag : flags)
+            if (!flag.test(item))
                 return flag.getFailResult();
-        }
 
         return null;
     }

@@ -25,7 +25,6 @@ public interface HeroItemsAPI extends API.Singleton {
      * @param selectableItem item to get representation of
      * @param itemFlags      optional flags which this method must respect
      * @return {@link Item} representation of given {@link SelectableItem} if exists & matches given flags, otherwise {@link Optional#empty()}
-     * @throws IllegalArgumentException when combining {@link ItemFlag#NONE} with any other flag
      */
     Optional<Item> getItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags);
 
@@ -34,14 +33,13 @@ public interface HeroItemsAPI extends API.Singleton {
      * <p>
      * By default this method uses {@link ItemFlag#AVAILABLE},
      * {@link ItemFlag#READY} & {@link ItemFlag#USABLE} flags which cannot be omitted.
-     *
+     * <p>
      * You can pass own flag set which be checked with defaults together.
      * </p>
      *
      * @param selectableItem item to be used
      * @param itemFlags      optional flags which this method must respect
      * @return use result of the selectableItem
-     * @throws IllegalArgumentException when combining {@link ItemFlag#NONE} with any other flag
      */
     ItemUseResult useItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags);
 }
