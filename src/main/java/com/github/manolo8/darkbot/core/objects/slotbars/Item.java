@@ -8,7 +8,7 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Item extends UpdatableAuto implements eu.darkbot.api.objects.Item {
+public class Item extends UpdatableAuto implements eu.darkbot.api.items.Item {
     private static final int START = 36, END = 128 + 8;
 
     private static final byte[] BUFFER = new byte[END - START];
@@ -114,7 +114,7 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.objects.Item {
     }
 
     @Override
-    public boolean isActivatable() {
+    public boolean isUsable() {
         return activatable && hasShortcut();
     }
 

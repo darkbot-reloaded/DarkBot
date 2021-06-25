@@ -1,6 +1,6 @@
 package eu.darkbot.api.entities;
 
-import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.items.SelectableItem;
 import eu.darkbot.api.entities.utils.Attacker;
 import eu.darkbot.api.entities.utils.Movable;
 import org.jetbrains.annotations.NotNull;
