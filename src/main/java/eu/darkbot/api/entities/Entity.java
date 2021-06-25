@@ -1,6 +1,6 @@
 package eu.darkbot.api.entities;
 
-import eu.darkbot.api.entities.other.Effect;
+import eu.darkbot.api.entities.other.EntityEffect;
 import eu.darkbot.api.objects.Locatable;
 import eu.darkbot.api.objects.LocationInfo;
 import org.jetbrains.annotations.NotNull;
@@ -65,13 +65,13 @@ public interface Entity extends Locatable {
     }
 
     /**
-     * Checks that {@link Entity} have given {@link Effect}.
+     * Checks that {@link Entity} have given {@link EntityEffect}.
      *
-     * @param effect The effect to check
+     * @param entityEffect The effect to check
      * @return true if current entity has the effect, false otherwise
      */
-    default boolean hasEffect(@NotNull Effect effect) {
-        return hasEffect(effect.getId());
+    default boolean hasEffect(@NotNull EntityEffect entityEffect) {
+        return hasEffect(entityEffect.getId());
     }
 
     /**

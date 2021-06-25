@@ -70,15 +70,4 @@ public class PlayerInfo extends Updatable implements EntityInfo {
     public Diplomacy getClanDiplomacy() {
         return Diplomacy.of(clanDiplomacy);
     }
-
-    @Override
-    public int getRankIconId() {
-        return rank;
-    }
-
-    @Override
-    public int getGalaxyRankIconId() {
-        return gg;
-    }
-
 }

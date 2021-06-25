@@ -13,7 +13,6 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
 import com.github.manolo8.darkbot.core.objects.slotbars.SlotBar;
 import com.github.manolo8.darkbot.core.utils.Drive;
-import eu.darkbot.api.entities.other.SelectableItem;
 import eu.darkbot.api.entities.utils.Attackable;
 import eu.darkbot.api.managers.AttackAPI;
 import org.jetbrains.annotations.Nullable;

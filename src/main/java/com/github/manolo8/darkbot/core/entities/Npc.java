@@ -7,7 +7,8 @@ import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
-import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.items.SelectableItem;
+import eu.darkbot.api.items.ItemCategory;
 import eu.darkbot.api.managers.HeroItemsAPI;
 
 import java.util.Objects;
@@ -87,17 +88,17 @@ public class Npc extends Ship implements eu.darkbot.api.entities.Npc {
 
         @Override
         public Optional<SelectableItem.Laser> getAmmo() {
-            return findItemAssociatedWith(HeroItemsAPI.Category.LASERS, npcInfo.attackKey)
+            return findItemAssociatedWith(ItemCategory.LASERS, npcInfo.attackKey)
                     .map(item -> SelectableItem.Laser.of(item.id));
         }
 
         @Override
         public Optional<SelectableItem.Formation> getFormation() {
-            return findItemAssociatedWith(HeroItemsAPI.Category.DRONE_FORMATIONS, npcInfo.attackFormation)
+            return findItemAssociatedWith(ItemCategory.DRONE_FORMATIONS, npcInfo.attackFormation)
                     .map(item -> SelectableItem.Formation.of(item.id));
         }
 
-        private Optional<Item> findItemAssociatedWith(HeroItemsAPI.Category category, Character c) {
+        private Optional<Item> findItemAssociatedWith(ItemCategory category, Character c) {
             SettingsProxy.KeyBind k = settingsProxy.getAtChar(c);
             if (k == null || k.getType() == null) return Optional.empty();
 

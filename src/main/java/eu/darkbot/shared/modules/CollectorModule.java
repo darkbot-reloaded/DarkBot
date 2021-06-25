@@ -1,10 +1,12 @@
-package eu.darkbot.logic.modules;
+package eu.darkbot.shared.modules;
 
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Box;
 import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.entities.Ship;
-import eu.darkbot.api.entities.other.Effect;
+import eu.darkbot.api.entities.other.EntityEffect;
+import eu.darkbot.api.items.ItemFlag;
+import eu.darkbot.api.items.SelectableItem;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.HeroAPI;
@@ -17,7 +19,7 @@ import eu.darkbot.api.objects.Location;
 import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.Module;
 import eu.darkbot.config.ConfigAPI;
-import eu.darkbot.logic.SafetyFinder;
+import eu.darkbot.shared.SafetyFinder;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -28,7 +30,6 @@ import static java.lang.StrictMath.sin;
 @Feature(name = "Collector", description = "Resource-only collector module. Can cloak.")
 public class CollectorModule implements Module {
 
-    protected static final String CLOAK_ITEM_ID = "equipment_extra_cpu_cl04k";
     protected static final int DISTANCE_FROM_DANGEROUS = 1500;
 
     protected final BotAPI bot;
@@ -165,7 +166,7 @@ public class CollectorModule implements Module {
 
         if (distance < 200) {
             //movement.stop(false);
-            if (!hero.hasEffect(Effect.BOX_COLLECTING)
+            if (!hero.hasEffect(EntityEffect.BOX_COLLECTING)
                     || hero.getLocationInfo().distanceTo(currentBox) == 0)
                 currentBox.tryCollect();
             else return;
@@ -190,12 +191,9 @@ public class CollectorModule implements Module {
         if (config.COLLECT.AUTO_CLOACK
                 && !hero.isInvisible()
                 && System.currentTimeMillis() - invisibleUntil > 60000) {
-            invisibleUntil = System.currentTimeMillis();
 
-            heroItems.findItem(HeroItemsAPI.Category.CPUS, CLOAK_ITEM_ID)
-                    .filter(heroItems::isSelectable)
-                    .filter(cloak -> cloak.getQuantity() > 0)
-                    .ifPresent(heroItems::selectItem);
+            heroItems.useItem(SelectableItem.Cpu.CL04K, ItemFlag.POSITIVE_QUANTITY)
+                    .ifSuccessful(r -> invisibleUntil = System.currentTimeMillis());
         }
     }
 

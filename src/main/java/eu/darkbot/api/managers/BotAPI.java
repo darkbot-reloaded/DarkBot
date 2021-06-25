@@ -29,7 +29,7 @@ public interface BotAPI extends API.Singleton {
      * Sets the currently running module in the bot.
      * Keep in mind that any pause & restart will wipe this module and re-set the user defined module.
      *
-     * This is mainly useful to install {@link eu.darkbot.logic.modules.TemporalModule}s that
+     * This is mainly useful to install {@link eu.darkbot.shared.modules.TemporalModule}s that
      * will take over the control of the bot for a small amount of time before delegating back
      * to the {@link Module} set by the user.
      *
@@ -37,7 +37,7 @@ public interface BotAPI extends API.Singleton {
      *  - A normal module may set a map traveling module to go to the working map
      *  - A behavior wanting temporal control over movement can install a temporal module that does that
      *
-     * @param module The module to set, often a {@link eu.darkbot.logic.modules.TemporalModule}
+     * @param module The module to set, often a {@link eu.darkbot.shared.modules.TemporalModule}
      * @return The same module that was passed in, useful to chain methods.
      */
     <M extends Module> M setModule(@Nullable M module);

@@ -5,7 +5,7 @@ import eu.darkbot.api.utils.EquippableItem;
 /**
  * Represents pet gears which can be used by {@link eu.darkbot.api.managers.PetAPI}
  */
-public enum Gear implements EquippableItem {
+public enum PetGear implements EquippableItem {
     PASSIVE("Passive mode"),
     GUARD("Guard mode"),
     DESTROYER("Unknown id 3, Destroyer"),
@@ -30,11 +30,11 @@ public enum Gear implements EquippableItem {
     private final String name;
     private final Cooldown cooldown;
 
-    Gear(String name) {
+    PetGear(String name) {
         this(name, null);
     }
 
-    Gear(String name, Cooldown cooldown) {
+    PetGear(String name, Cooldown cooldown) {
         this.name = name;
         this.cooldown = cooldown;
     }
@@ -44,7 +44,7 @@ public enum Gear implements EquippableItem {
      * @param gearId the in-game id of the gear
      * @return The gear with the corresponding id, or null if not found
      */
-    public static Gear of(int gearId) {
+    public static PetGear of(int gearId) {
         if (gearId < 0 || gearId >= values().length) return null;
         return values()[gearId];
     }
@@ -72,7 +72,7 @@ public enum Gear implements EquippableItem {
     }
 
     /**
-     * Represents cooldown of a {@link Gear} in the {@link eu.darkbot.api.entities.Pet} buffs or debuffs.
+     * Represents cooldown of a {@link PetGear} in the {@link eu.darkbot.api.entities.Pet} buffs or debuffs.
      */
     public enum Cooldown {
         SINGULARITY,

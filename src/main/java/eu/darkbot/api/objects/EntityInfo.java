@@ -38,16 +38,6 @@ public interface EntityInfo {
     Diplomacy getClanDiplomacy();
 
     /**
-     * Probably id of rank icon.
-     */
-    int getRankIconId();
-
-    /**
-     * Probably id of gate circles icon, above rank
-     */
-    int getGalaxyRankIconId();
-
-    /**
      * Represents in-game fractions.
      */
     enum Faction {

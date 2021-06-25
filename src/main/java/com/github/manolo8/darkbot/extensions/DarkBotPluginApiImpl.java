@@ -10,7 +10,7 @@ import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import eu.darkbot.api.PluginApiImpl;
 import com.github.manolo8.darkbot.core.manager.EventBroker;
-import eu.darkbot.impl.managers.AttackApiImpl;
+import eu.darkbot.shared.managers.AttackApiImpl;
 
 public class DarkBotPluginApiImpl extends PluginApiImpl {
 

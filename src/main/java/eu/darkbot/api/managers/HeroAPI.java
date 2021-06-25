@@ -3,7 +3,8 @@ package eu.darkbot.api.managers;
 import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Npc;
 import eu.darkbot.api.entities.Ship;
-import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.items.SelectableItem;
+import eu.darkbot.shared.managers.HeroModeImpl;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -84,6 +85,11 @@ public interface HeroAPI extends Ship, API.Singleton {
      * but currently it is expected that the results are immutable and nonchanging.
      */
     interface Mode {
+
+        static Mode of(Configuration configuration, SelectableItem.Formation formation) {
+            return new HeroModeImpl(configuration, formation);
+        }
+
         Configuration getConfiguration();
         SelectableItem.Formation getFormation();
     }

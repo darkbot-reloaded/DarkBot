@@ -10,17 +10,17 @@ import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
-import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Entity;
-import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.items.ItemFlag;
+import eu.darkbot.api.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
-import eu.darkbot.api.managers.HeroItemsAPI;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.JUMP_GATE;
@@ -63,6 +63,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         this.drive = pluginAPI.requireInstance(Drive.class);
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
+        this.pet.main = main;
         this.map = main.starManager.byId(-1);
     }
 
@@ -208,13 +209,8 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         if (formation == getFormation() ||
                 System.currentTimeMillis() - formationTime <= 3500L) return;
 
-        SlotBarsProxy slotBars = main.facadeManager.slotBars;
-
-        slotBars.findItem(formation)
-                .filter(slotBars::isSelectable)
-                .ifPresent(slotBars::selectItem);
-
-        this.formationTime = System.currentTimeMillis();
+        main.facadeManager.slotBars.useItem(formation, ItemFlag.NOT_SELECTED)
+                .ifSuccessful(r -> formationTime = System.currentTimeMillis());
     }
 
     @Override
@@ -243,5 +239,15 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     @Override
     public boolean setRunMode() {
         return runMode();
+    }
+
+    @Override
+    public boolean hasPet() {
+        return pet.isValid();
+    }
+
+    @Override
+    public Optional<eu.darkbot.api.entities.Pet> getPet() {
+        return hasPet() ? Optional.of(pet) : Optional.empty();
     }
 }

@@ -1,4 +1,4 @@
-package eu.darkbot.logic.modules;
+package eu.darkbot.shared.modules;
 
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.managers.BotAPI;

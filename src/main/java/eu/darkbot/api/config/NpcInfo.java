@@ -1,7 +1,7 @@
 package eu.darkbot.api.config;
 
 import eu.darkbot.api.entities.Npc;
-import eu.darkbot.api.entities.other.SelectableItem;
+import eu.darkbot.api.items.SelectableItem;
 
 import java.util.Optional;
 
@@ -45,7 +45,6 @@ public interface NpcInfo {
      * @param active if the flag should be set to active or inactive
      */
     void setExtraFlag(ExtraFlag flag, boolean active);
-
 
     interface ExtraFlag {
         String getName();

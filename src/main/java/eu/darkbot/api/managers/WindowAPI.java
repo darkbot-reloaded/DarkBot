@@ -1,7 +1,6 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.utils.Area;
 import eu.darkbot.api.objects.Point;
 
 /**
@@ -56,7 +55,7 @@ public interface WindowAPI extends API.Singleton {
     /**
      * Moves mouse to x & y coordinates of game window
      */
-    void mouseMove(int x, int y);  //cast to int here or in implementation?
+    void mouseMove(int x, int y);
 
     default void mouseMove(Point point) {
         mouseMove((int) point.getX(), (int) point.getY());

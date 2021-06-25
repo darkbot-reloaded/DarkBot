@@ -3,7 +3,7 @@ package eu.darkbot.api.entities.other;
 /**
  * Represents in-game {@link eu.darkbot.api.entities.Entity}'s effects.
  */
-public enum Effect {
+public enum EntityEffect {
     UNDEFINED(-1),
     LOCATOR(1),
     PET_SPAWN(2),
@@ -20,7 +20,7 @@ public enum Effect {
 
     private final int id;
 
-    Effect(int id) {
+    EntityEffect(int id) {
         this.id = id;
     }
 

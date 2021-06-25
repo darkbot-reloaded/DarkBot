@@ -20,7 +20,6 @@ public interface Obstacle extends Entity {
      */
     boolean isValid();
 
-
     /**
      * If the obstacle should be used in pathfinding, or can be ignored.
      *
