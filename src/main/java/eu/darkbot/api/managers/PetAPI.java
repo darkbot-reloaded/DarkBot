@@ -2,7 +2,7 @@ package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
 import eu.darkbot.api.entities.Pet;
-import eu.darkbot.api.entities.other.Gear;
+import eu.darkbot.api.entities.other.PetGear;
 import eu.darkbot.api.objects.Location;
 import eu.darkbot.api.utils.ItemNotEquippedException;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +11,8 @@ import java.util.Optional;
 
 /**
  * API to manage hero's pet.
+ * Pet is automatically repaired if {@link #isEnabled()} returns true,
+ * user enabled Pet in settings, and the bot is running.
  */
 public interface PetAPI extends Pet, API.Singleton {
 
@@ -36,6 +38,9 @@ public interface PetAPI extends Pet, API.Singleton {
      */
     boolean isRepaired();
 
+    /**
+     * @return pet's repair count
+     */
     int getRepairCount();
 
     /**
@@ -44,8 +49,8 @@ public interface PetAPI extends Pet, API.Singleton {
      */
     boolean hasGear(int gearId);
 
-    default boolean hasGear(@NotNull Gear gear) {
-        return hasGear(gear.getId());
+    default boolean hasGear(@NotNull PetGear petGear) {
+        return hasGear(petGear.getId());
     }
 
     /**
@@ -54,8 +59,8 @@ public interface PetAPI extends Pet, API.Singleton {
      */
     void setGear(int gearId) throws ItemNotEquippedException;
 
-    default void setGear(@NotNull Gear gear) throws ItemNotEquippedException {
-        setGear(gear.getId());
+    default void setGear(@NotNull PetGear petGear) throws ItemNotEquippedException {
+        setGear(petGear.getId());
     }
 
     /**
@@ -65,26 +70,26 @@ public interface PetAPI extends Pet, API.Singleton {
     Optional<Location> getLocatorNpcLoc();
 
     /**
-     * Checks if pet has the given {@link Gear.Cooldown},
+     * Checks if pet has the given {@link PetGear.Cooldown},
      * which can make gears unavailable temporally.
      *
      * @param cooldownId to be checked
      * @return true if pet has given {@code cooldownId}
-     * @see Gear.Cooldown
+     * @see PetGear.Cooldown
      */
     boolean hasCooldown(int cooldownId);
 
-    default boolean hasCooldown(@NotNull Gear.Cooldown cooldown) {
+    default boolean hasCooldown(@NotNull PetGear.Cooldown cooldown) {
         return hasCooldown(cooldown.getId());
     }
 
     /**
-     * @param gear to be checked
+     * @param petGear to be checked
      * @return true if given gear is currently cooling down
      */
-    default boolean hasCooldown(@NotNull Gear gear) {
-        Gear.Cooldown cooldown = gear.getCooldown();
-        return cooldown != null && hasCooldown(cooldown);
+    default boolean hasCooldown(@NotNull PetGear petGear) {
+        PetGear.Cooldown cd = petGear.getCooldown();
+        return cd != null && hasCooldown(cd);
     }
 
     double getFuel();
