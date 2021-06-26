@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.backpage.dispatch;
 
 public class InProgress {
-    protected String slotID, name, collectable;
+    protected String slotID, id, name, collectable;
 
     public String getSlotID() {
         return slotID;
@@ -10,6 +10,10 @@ public class InProgress {
     public void setSlotID(String slotID) {
         this.slotID = slotID;
     }
+
+    public String getId() { return id; }
+
+    public void setId(String id){ this.id = id; }
 
     public String getName() {
         return name;
@@ -32,6 +36,7 @@ public class InProgress {
     public String toString(){
         return "Retriever{" +
                 "slotID=" + slotID +
+                "id=" + id +
                 "name=" + name +
                 "collectable=" + collectable +
                 "}"

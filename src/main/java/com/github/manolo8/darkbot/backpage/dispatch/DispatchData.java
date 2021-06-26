@@ -62,6 +62,7 @@ public class DispatchData {
                 "dispatch_item_tier\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_cost\">\\s+(.+?)\\s+<", Pattern.DOTALL);
         private final Pattern progressPattern = Pattern.compile("collectable=\"(.+?)\".*?" +
+                "dispatchId=\"(.+?)\".*?" +
                 "dispatchRewardPackage=\"(.+?)\".*?" +
                 "slotId=\"(.+?)\".*?"+
                 "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?",Pattern.DOTALL);
@@ -94,13 +95,14 @@ public class DispatchData {
             Matcher m = progressPattern.matcher(string);
             if (!m.find()) return;
 
-            String slotID = m.group(3);
+            String slotID = m.group(4);
             InProgress r = progressSlots.get(slotID);
             if (r == null) progressSlots.put(slotID, r = new InProgress());
 
             r.setCollectable(m.group(1));
+            r.setId(m.group(2));
             r.setSlotID(slotID);
-            r.setName(m.group(4));
+            r.setName(m.group(5));
 
         }
     }

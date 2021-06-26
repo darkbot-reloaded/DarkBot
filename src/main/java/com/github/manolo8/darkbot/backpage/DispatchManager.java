@@ -12,6 +12,7 @@ import org.intellij.lang.annotations.Language;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import com.github.manolo8.darkbot.backpage.dispatch.BiIntConsumer;
@@ -27,6 +28,10 @@ public class DispatchManager {
     DispatchManager(Main main){
         this.main = main;
         this.data = new DispatchData();
+    }
+
+    public DispatchData getData(){
+        return data;
     }
 
     public boolean update(int expiryTime){
@@ -106,8 +111,10 @@ public class DispatchManager {
                         .getContent();
                 if(x.contains("ERROR")){
                     System.out.println("No available dispatch slots");
+                    data.setSlots(0);
                 }else{
                     System.out.println("Dispatch sent: " + retriever.getId());
+                    data.setSlots(data.getSlots()-1);
                     return true;
                 }
             } catch (Exception e) {
@@ -118,9 +125,9 @@ public class DispatchManager {
         return false;
     }
 
-    public boolean collect(InProgress progress){
+    public String collect(InProgress progress){
         try {
-            if(progress.getCollectable().equals("0")) return false;
+            if(progress.getCollectable().equals("0")) return null;
             System.out.println("Collecting: Slot " + progress.getSlotID());
             String x = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "collectDispatch")
@@ -134,7 +141,7 @@ public class DispatchManager {
                 System.out.println("Unable to collect retriever");
             } else {
                 System.out.println("Dispatch Collected: " + progress.getSlotID() + " : " + x.substring(x.indexOf("rewardsLog")));
-                return true;
+                return progress.getName();
             }
             progress.setCollectable("0");
             //remove or do something with slot / empty?
@@ -142,24 +149,24 @@ public class DispatchManager {
             e.printStackTrace();
             System.out.println("Some error collecting dispatcher: "+ e.toString());
         }
-        return false;
+        return null;
     }
 
-    public void collectAll(){
-        data.getInProgress().values().forEach(this::collect);
+    public List<String> collectAll(){
+        return data.getInProgress().values().stream().map(this::collect).collect(Collectors.toList());
     }
 
 
-//    public static void main(String[] args) throws Exception {
-//        System.out.println("Working Directory = " + System.getProperty("user.dir"));
-//
-//        String page = Files.lines(Paths.get("dispatcher.html")).collect(Collectors.joining("\n"));
-//
-//        DispatchData data = new DispatchData();
-//
-//        boolean upd = InfoReader.updateAll(page, data);
-//        int i = 0;
-//    }
+    public static void main(String[] args) throws Exception {
+        System.out.println("Working Directory = " + System.getProperty("user.dir"));
+
+        String page = Files.lines(Paths.get("dispatcher.html")).collect(Collectors.joining("\n"));
+
+        DispatchData data = new DispatchData();
+
+        boolean upd = InfoReader.updateAll(page, data);
+        int i = 0;
+    }
 
 
 }

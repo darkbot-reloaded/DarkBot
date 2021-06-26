@@ -35,6 +35,7 @@ public class BackpageManager extends Thread {
     public final HangarManager hangarManager;
     public final LegacyHangarManager legacyHangarManager;
     public final GalaxyManager galaxyManager;
+    public final DispatchManager dispatchManager;
 
     private final Main main;
     private String sid, instance;
@@ -52,6 +53,8 @@ public class BackpageManager extends Thread {
         this.hangarManager = new HangarManager(main, this);
         this.legacyHangarManager = new LegacyHangarManager(main, this);
         this.galaxyManager = new GalaxyManager(main);
+        this.dispatchManager = new DispatchManager(main);
+
         setDaemon(true);
         start();
     }
