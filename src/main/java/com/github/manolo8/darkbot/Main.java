@@ -3,8 +3,8 @@ package com.github.manolo8.darkbot;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigManager;
-import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
+import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
@@ -51,7 +51,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 96 alpha");
+    public static final Version VERSION      = new Version("1.13.17 beta 96 alpha 6");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()

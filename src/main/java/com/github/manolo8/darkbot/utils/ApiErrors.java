@@ -1,32 +1,35 @@
 package com.github.manolo8.darkbot.utils;
 
+import com.github.manolo8.darkbot.config.types.suppliers.BrowserApi;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.sun.jna.Platform;
 
 import javax.swing.*;
 import java.nio.file.Paths;
 
 public class ApiErrors {
 
-    public static void displayException(int api, Throwable error) {
+    public static void displayException(BrowserApi api, Throwable error) {
+        String message = getMessage(api);
+        message = message == null ? "" : message + "<br><br>";
         Popups.showMessageAsync(
                 "API failed to load",
-                "<html>" + getMessage(api) + "<br><br>" +
+                "<html>" + message +
                         "The API you had selected is not able to load.<br>" +
                         "The bot will start on no-operation API, change it in the settings and restart.<br><br>" +
                         "<strong>Exception:</strong><br>" + error.getLocalizedMessage(),
                 JOptionPane.ERROR_MESSAGE);
     }
 
-    private static String getMessage(int api) {
-        if (api == 0 || api == 1)
-            return "You're using an <strong>outdated API</strong>, use the recommended API!";
-        if (api == 4)
+    private static String getMessage(BrowserApi api) {
+        if (api == null)
+            return "You're using a <strong>removed API</strong>, use the recommended API!";
+        if (api == BrowserApi.NO_OP_API)
             return "Error loading the no-op api, how did this happen?";
-        if (api != 2)
+        if (api != BrowserApi.DARK_BOAT)
             return "You're using an <strong>unsupported API</strong>, use the recommended API!";
 
-        if (!Platform.is64Bit())
+        String bits = System.getProperty("sun.arch.data.model");
+        if (bits == null || !bits.equals("64"))
             return "The selected API requires 64-bit java, and it seems like you're not running a 64-bit JVM.";
 
         if (!Paths.get("lib", "DarkBoatApi.dll").toFile().exists())
@@ -37,7 +40,7 @@ public class ApiErrors {
         if (!path.equals(change))
             return "Your folder has non supported characters in the path, you must remove them:<br>  " + change + "";
 
-        return "Unknown type of exception";
+        return null;
     }
 
 

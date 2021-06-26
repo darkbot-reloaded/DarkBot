@@ -38,7 +38,7 @@ public class LibSetup {
         try {
             libraries = Http.create(BASE_URL + "/libs.json")
                     .consumeInputStream(is -> Main.GSON.fromJson(IOUtils.read(is), LIB_LIST_TYPE));
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println("Failed to download libraries file, this is safe to ignore if your libs are up-to-date");
             e.printStackTrace();
             return;

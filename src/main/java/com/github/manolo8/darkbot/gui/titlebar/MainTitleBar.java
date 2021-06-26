@@ -10,7 +10,7 @@ import javax.swing.*;
 public class MainTitleBar extends JPanel implements SimpleMouseListener {
 
     public MainTitleBar(Main main, MainGui frame) {
-        super(new MigLayout("ins 0, gap 0, fill", "[][][][][grow, 30px::][][][][][][]", "[]"));
+        super(new MigLayout("ins 0, gap 0, fill", "[][][][][grow, 30px::][][][][][][][]", "[]"));
 
         add(new ExtraButton(main, frame), "grow");
         add(new ConfigButton(frame), "grow");
@@ -19,6 +19,7 @@ public class MainTitleBar extends JPanel implements SimpleMouseListener {
 
         add(new DragArea(frame), "grow");
 
+        add(new HookButton(frame), "grow, hidemode 2");
         add(new DiagnosticsButton(main, frame), "grow");
         add(new VisibilityButton(main, frame), "grow");
         add(new PinButton(frame), "grow");

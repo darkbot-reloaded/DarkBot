@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -305,8 +304,13 @@ public class PetManager extends Gui {
     private void updateNpcLocatorList(long gearsSprite) {
         locatorWrapper.update(API.readMemoryLong(gearsSprite + 168));
 
+        long locatorBaseAddr = locatorWrapper.get(0);
+        if (locatorBaseAddr == 0) {
+            locatorList.clear();
+            return;
+        }
         int oldSize = locatorNpcList.getSize();
-        locatorNpcList.update(API.readMemoryLong(locatorWrapper.get(0) + 224));
+        locatorNpcList.update(API.readMemoryLong(locatorBaseAddr + 224));
 
         // Sometimes the NPC list will be half-updated and there may be way less npcs than before.
         // If we have a recent update and list is smaller, we'll ignore updating for a bit

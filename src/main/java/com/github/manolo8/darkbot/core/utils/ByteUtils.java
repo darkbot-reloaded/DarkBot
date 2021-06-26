@@ -115,14 +115,24 @@ public class ByteUtils {
         }
 
         private class StrLocation {
-            private final long address, base;
-            private final int size;
-            private final boolean width8;
+            private long address, base;
+            private int size;
+            private boolean width8;
 
-            private StrLocation(long address) {
+            private StrLocation() {}
+
+            private StrLocation(StrLocation copy) {
+                this.address = copy.address;
+                this.base = copy.base;
+                this.size = copy.size;
+                this.width8 = copy.width8;
+            }
+
+            private void setAddress(long address) {
                 this.address = address;
 
-                int size = API.readMemoryInt(address + 32);
+                long sizeAndFlags = API.readMemoryLong(address + 32);
+                int size = (int) sizeAndFlags; // lower 32bits
                 if (size == 0) {
                     this.size = 0;
                     this.base = 0;
@@ -130,7 +140,7 @@ public class ByteUtils {
                     return;
                 }
 
-                int flags  = API.readMemoryInt(address + 36);
+                int flags  = (int) (sizeAndFlags >> 32); // high 32bits
                 int type   = (flags & 0b110) >> 1;
                 int width = (flags & 0b001);
 
@@ -174,17 +184,21 @@ public class ByteUtils {
             }
         }
 
+        // Reusable instance of StrLocation to avoid extra allocations
+        private final StrLocation CACHED = new StrLocation();
+
         public String readString(long address) {
-            if (address == 0) return "";
-            StrLocation loc = new StrLocation(address);
+            if (address == 0) return null;
+            CACHED.setAddress(address);
 
             // Attempt read in cache
-            String result = stringCache.get(loc);
+            String result = stringCache.get(CACHED);
             if (result != null) return result;
 
-            result = loc.read();
-            if (result != null && !result.isEmpty())
-                stringCache.put(loc, result);
+            result = CACHED.read();
+            if (result != null && !result.isEmpty()) {
+                stringCache.put(new StrLocation(CACHED), result);
+            }
 
             return result;
         }

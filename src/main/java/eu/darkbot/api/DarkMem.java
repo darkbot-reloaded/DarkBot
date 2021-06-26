@@ -1,29 +1,19 @@
 package eu.darkbot.api;
 
-public class DarkBoat {
+import java.nio.file.Paths;
+
+public class DarkMem {
 
     static {
-        System.loadLibrary("lib/DarkBoatAPI");
+        if (System.getProperty("os.name").toLowerCase().contains("win"))
+            System.loadLibrary("lib/DarkMemAPI");
+        else
+            System.load(Paths.get("lib", "DarkMemAPI.so").toAbsolutePath().toString());
     }
 
-    public native void    setData(String url, String sid, String preloader, String vars);
-    public native void    createWindow();
-    public native void    setSize(int width, int height);
-    public native void    setVisible(boolean visible);
-    // When enabled browser is further hidden, lowering CPU usage, but doesn't work on all systems
-    public native void    setMinimized(boolean visible);
-    public native void    reload();
-    public native boolean isValid();
-    public native long    getMemoryUsage();
-    public native int     getVersion();
-
-    public native void keyClick  (int keyCode);
-    public native void sendText  (String text);
-
-    public native void mouseMove (int x, int y);
-    public native void mouseDown (int x, int y);
-    public native void mouseUp   (int x, int y);
-    public native void mouseClick(int x, int y);
+    public native int    getVersion();
+    public native Proc[] getProcesses();
+    public native void   openProcess(long pid);
 
     public native int     readInt    (long address);
     public native long    readLong   (long address);
@@ -46,4 +36,22 @@ public class DarkBoat {
     public native long[] queryInt    (int    value  , int maxSize);
     public native long[] queryLong   (long   value  , int maxSize);
     public native long[] queryBytes  (byte[] pattern, int maxSize);
+
+    public static class Proc {
+        private final int pid;
+        private final String name;
+
+        public Proc(int pid, String name) {
+            this.pid = pid;
+            this.name = name;
+        }
+
+        public int getPid() {
+            return pid;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
 }

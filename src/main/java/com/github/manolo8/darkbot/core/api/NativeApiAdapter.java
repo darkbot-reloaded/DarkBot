@@ -1,8 +1,9 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.utils.StartupParams;
-import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.NativeApi;
+
+import java.util.function.BooleanSupplier;
 
 public class NativeApiAdapter extends ApiAdapter {
 
@@ -11,8 +12,8 @@ public class NativeApiAdapter extends ApiAdapter {
     private static int nextBotId = 0;
     private int botId = -1;
 
-    public NativeApiAdapter(StartupParams params) {
-        super(LoginUtils.performUserLogin(params));
+    public NativeApiAdapter(StartupParams params, BooleanSupplier fullyHide) {
+        super(params, fullyHide);
     }
 
     public void createWindow() {
@@ -22,6 +23,19 @@ public class NativeApiAdapter extends ApiAdapter {
             throw new IllegalStateException("The bot could not successfully setup the browser window");
 
         setData();
+    }
+
+    @Override
+    public void setSize(int width, int height) {
+    }
+
+    @Override
+    public int getVersion() {
+        return 1;
+    }
+
+    @Override
+    public void sendText(String string) {
     }
 
     protected void setData() {
@@ -48,7 +62,8 @@ public class NativeApiAdapter extends ApiAdapter {
         API.mouseClick(botId, 50, x, y);
     }
 
-    public void keyboardClick(char btn) {
+    @Override
+    public void rawKeyboardClick(char btn) {
         API.sendMessage(botId, Headers.KEYBOARD, KeyEvent.CLICK, btn);
     }
 
@@ -81,6 +96,11 @@ public class NativeApiAdapter extends ApiAdapter {
 
     public byte[] readMemory(long address, int length) {
         return API.readMemory(botId, address, length);
+    }
+
+    public void readMemory(long address, byte[] buffer, int length) {
+        byte[] buff = API.readMemory(botId, address, length);
+        System.arraycopy(buff, 0, buffer, 0, length);
     }
 
     public int readMemoryInt(long address) {

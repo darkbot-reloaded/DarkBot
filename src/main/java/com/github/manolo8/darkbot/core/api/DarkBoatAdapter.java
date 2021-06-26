@@ -1,20 +1,15 @@
 package com.github.manolo8.darkbot.core.api;
 
-import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.utils.StartupParams;
-import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.DarkBoat;
+
+import java.util.function.BooleanSupplier;
 
 public class DarkBoatAdapter extends ApiAdapter {
     private final DarkBoat API = new DarkBoat();
-    private final StartupParams params;
-    private boolean autoHidden = false;
-    private ConfigManager configManager;
 
-    public DarkBoatAdapter(StartupParams params, ConfigManager configManager) {
-        super(LoginUtils.performUserLogin(params));
-        this.params = params;
-        this.configManager = configManager;
+    public DarkBoatAdapter(StartupParams params, BooleanSupplier fullyHide) {
+        super(params, fullyHide);
     }
 
     @Override
@@ -49,15 +44,7 @@ public class DarkBoatAdapter extends ApiAdapter {
 
     @Override
     public boolean isValid() {
-        boolean isValid = API.isValid();
-        if (!autoHidden && isValid && params.getAutoHide()) {
-            if (configManager.getConfig().BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API)
-                API.setMinimized(true);
-            else
-                API.setVisible(false);
-            autoHidden = true;
-        }
-        return isValid;
+        return super.tryHideIfValid(API.isValid());
     }
 
     @Override
@@ -78,11 +65,6 @@ public class DarkBoatAdapter extends ApiAdapter {
     @Override
     public void mouseClick(int x, int y) {
         API.mouseClick(x, y);
-    }
-
-    @Override
-    public void keyboardClick(char btn) {
-        API.keyClick(Character.toUpperCase(btn));
     }
 
     @Override
@@ -118,6 +100,11 @@ public class DarkBoatAdapter extends ApiAdapter {
     @Override
     public byte[] readMemory(long address, int length) {
         return API.readBytes(address, length);
+    }
+
+    @Override
+    public void readMemory(long address, byte[] buffer, int length) {
+        API.readBytes(address, buffer, length);
     }
 
     @Override
@@ -163,8 +150,4 @@ public class DarkBoatAdapter extends ApiAdapter {
         resetCache();
     }
 
-    @Override
-    public boolean isInitiallyShown() {
-        return !params.getAutoHide();
-    }
 }

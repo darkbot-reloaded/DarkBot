@@ -5,10 +5,9 @@ import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
-import com.github.manolo8.darkbot.config.types.Placeholder;
 import com.github.manolo8.darkbot.config.types.Tag;
 import com.github.manolo8.darkbot.config.types.TagDefault;
-import com.github.manolo8.darkbot.config.types.suppliers.ApiSupplier;
+import com.github.manolo8.darkbot.config.types.suppliers.BrowserApi;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
@@ -36,7 +35,13 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.*;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.BOOSTER_AREA;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.GROUP_AREA;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.GROUP_NAMES;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.HERO_NAME;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.HP_SHIELD_NUM;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.STATS_AREA;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.ZONES;
 
 public class Config {
 
@@ -201,7 +206,8 @@ public class Config {
 
         public @Option APIConfig API_CONFIG = new APIConfig();
         public static class APIConfig {
-            public @Option @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
+            @Option @Editor(JListField.class) @Options(BrowserApi.Supplier.class)
+            public BrowserApi BROWSER_API = BrowserApi.DARK_BOAT;
             public @Option boolean FULLY_HIDE_API = true;
             public @Option boolean FORCE_GAME_LANGUAGE = false;
             public @Option boolean ENFORCE_HW_ACCEL = true;

@@ -11,10 +11,13 @@ public interface IDarkBotAPI {
     int getVersion();
 
     void mouseMove(int x, int y);
-
     void mouseClick(int x, int y);
 
-    void keyboardClick(char btn);
+    @Deprecated
+    default void keyboardClick(char btn) {
+        rawKeyboardClick(Character.toUpperCase(btn));
+    }
+
     void rawKeyboardClick(char btn);
 
     default void keyboardClick(Character ch) {
@@ -59,19 +62,27 @@ public interface IDarkBotAPI {
     }
 
     byte[] readMemory(long address, int length);
+    default void readMemory(long address, byte[] buffer) {
+        readMemory(address, buffer, buffer.length);
+    }
+    void readMemory(long address, byte[] buffer, int length);
 
     void writeMemoryInt(long address, int value);
     void writeMemoryLong(long address, long value);
     void writeMemoryDouble(long address, double value);
 
-    void replaceInt(long address, int oldValue, int newValue);
+    default void replaceInt(long address, int oldValue, int newValue) {
+        writeMemoryInt(address, oldValue);
+    }
 
     long[] queryMemoryInt(int value, int maxQuantity);
     long[] queryMemoryLong(long value, int maxQuantity);
     long[] queryMemory(byte[] query, int maxQuantity);
 
     void setVisible(boolean visible);
-    void setMinimized(boolean visible);
+    default void setMinimized(boolean visible) {
+        setVisible(false);
+    }
 
     void handleRefresh();
     void resetCache();
