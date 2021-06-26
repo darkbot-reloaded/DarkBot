@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import com.github.manolo8.darkbot.backpage.dispatch.BiIntConsumer;
 import java.util.regex.Matcher;
@@ -141,19 +142,19 @@ public class DispatchManager {
                 System.out.println("Unable to collect retriever");
             } else {
                 System.out.println("Dispatch Collected: " + progress.getSlotID() + " : " + x.substring(x.indexOf("rewardsLog")));
-                return progress.getName();
+                return progress.getId();
             }
             progress.setCollectable("0");
             //remove or do something with slot / empty?
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Some error collecting dispatcher: "+ e.toString());
+            System.out.println("Some error collecting dispatcher: "+ e);
         }
         return null;
     }
 
     public List<String> collectAll(){
-        return data.getInProgress().values().stream().map(this::collect).collect(Collectors.toList());
+        return data.getInProgress().values().stream().map(this::collect).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
 
