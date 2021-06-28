@@ -53,7 +53,9 @@ public class DispatchData {
         retrieverBuilder.progress(str);
     }
 
-    public Map<String, InProgress> getInProgress() { return progressSlots; }
+    public Map<String, InProgress> getInProgress() {
+        return progressSlots;
+    }
 
     public class RetrieverBuilder {
         private final Pattern PATTERN = Pattern.compile("dispatchId=\"(.+?)\".*?" +
