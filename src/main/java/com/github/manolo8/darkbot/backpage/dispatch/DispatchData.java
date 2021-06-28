@@ -93,7 +93,7 @@ public class DispatchData {
             if (string == null || string.isEmpty()) return;
             if (!string.contains("dispatchRewardPackage") ||
                     !string.contains("slotId") ||
-                    !string.contains("dispatch_item_name_col")) return;
+                    !string.contains("dispatch_item_name_col")) return false;
             Matcher m = progressPattern.matcher(string);
             if (!m.find()) return;
 
