@@ -45,9 +45,7 @@ public class DispatchManager {
     }
     public boolean update(BackpageManager manager, int expiryTime) throws Exception {
         if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
-
-        String page = manager.getConnection("indexInternal.es?action=internalDispatch", Method.GET, 10_000)
-                .consumeInputStream(IOUtils::read);
+        String page = manager.getConnection("indexInternal.es?action=internalDispatch", Method.GET, 10_000).getContent();
 
         if (page == null || page.isEmpty()) return false;
         lastDispatcherUpdate = System.currentTimeMillis();
@@ -57,8 +55,8 @@ public class DispatchManager {
     private enum InfoReader {
         PERMIT("name=\"permit\" value=\"([0-9]+)\"", DispatchData::setPermit),
         GATE_UNIT("name=\"permit\" value=\"([0-9]+)\"", DispatchData::setGateUnits),
-        SLOTS(":([0-9]+).*class=\"userCurrentMax\">([0-9]+)", DispatchData::setSlots, DispatchData::setMaxSlots),
-        ITEMS("<tr class=\"dispatchItemRow([\\S\\s]+?)</tr>", DispatchData::parseRetriever);
+        SLOTS(":([0-9]+).*class=\"userCurrentMax\">([0-9]+)", DispatchData::setAvailableSlots, DispatchData::setMaxSlots),
+        ITEMS("<tr class=\"dispatchItemRow([\\S\\s]+?)</tr>", DispatchData::parseRow);
 
         private final Pattern regex;
         private final List<BiConsumer<DispatchData, String>> consumers;
@@ -112,23 +110,23 @@ public class DispatchManager {
                         .getContent();
                 if(response.contains("\"result\":\"ERROR\"")){
                     System.out.println("Failed to dispatch " + retriever.getId() + ": " + response);
-                    data.setSlots(0);
+                    update(10_000);
                 }else{
-                    System.out.println("Successfuly dispatched " + retriever.getId() + ": " + response);
-                    data.setSlots(data.getSlots()-1);
+                    System.out.println("Successfully dispatched " + retriever.getId() + ": " + response);
+                    update(10_000);
                     return true;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("Exception hiring dispatcher: " + e.toString());
+                System.out.println("Exception hiring dispatcher: " + e);
             }
         }
         return false;
     }
 
-    public String collect(InProgress progress) {
+    public boolean collect(InProgress progress) {
         try {
-            if(progress.getCollectable().equals("0")) return null;
+            if(progress.getCollectable().equals("0")) return false;
             System.out.println("Collecting: Slot " + progress.getSlotID());
             String x = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "collectDispatch")
@@ -138,19 +136,19 @@ public class DispatchManager {
             //parse response
             //{"result":"OK","message":"Collected the following:","rewardsLog":[{"lootId":"Solidus","amount":3},{"lootId":"PLT-2026","amount":97},{"lootId":"Scrap","amount":3}]}
 
-            if (x.contains("ERROR")) {
+            if (x.contains("\"result\":\"ERROR\"")) {
                 System.out.println("Unable to collect retriever");
             } else {
                 System.out.println("Dispatch Collected: " + progress.getSlotID() + " : " + x.substring(x.indexOf("rewardsLog")));
-                return progress.getId();
+                return true;
             }
-            progress.setCollectable("0");
+            update(1000);
             //remove or do something with slot / empty?
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Exception collecting dispatcher: "+ e.toString());
         }
-        return null;
+        return false;
     }
 
     public List<String> collectAll() {

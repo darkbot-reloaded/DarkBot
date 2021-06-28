@@ -6,9 +6,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DispatchData {
-    private int permit, gateUnits, slots, maxSlots;
+    private int permit, gateUnits, availableSlots, maxSlots;
 
-    private final RetrieverBuilder retrieverBuilder = new RetrieverBuilder();
+    private final DataBuilder dataBuilder = new DataBuilder();
     private final Map<String, Retriever> retrievers = new LinkedHashMap<>();
     private final Map<String, InProgress> progressSlots = new LinkedHashMap<>();
 
@@ -28,12 +28,12 @@ public class DispatchData {
         this.gateUnits = gateUnits;
     }
 
-    public int getSlots() {
-        return slots;
+    public int getAvailableSlots() {
+        return availableSlots;
     }
 
-    public void setSlots(int slots) {
-        this.slots = slots;
+    public void setAvailableSlots(int availableSlots) {
+        this.availableSlots = availableSlots;
     }
 
     public int getMaxSlots() {
@@ -48,16 +48,16 @@ public class DispatchData {
         return retrievers;
     }
 
-    public void parseRetriever(String str) {
-        retrieverBuilder.build(str);
-        retrieverBuilder.progress(str);
+    public void parseRow(String str) {
+        if(!dataBuilder.buildRetriever(str)) return;
+        dataBuilder.buildInProgress(str);
     }
 
     public Map<String, InProgress> getInProgress() {
         return progressSlots;
     }
 
-    public class RetrieverBuilder {
+    public class DataBuilder {
         private final Pattern RETRIEVER_PATTERN = Pattern.compile("dispatchId=\"(.+?)\".*?" +
                 "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_type\">\\s+(.+?)\\s+<.*?" +
@@ -65,18 +65,17 @@ public class DispatchData {
                 "dispatch_item_cost\">\\s+(.+?)\\s+<", Pattern.DOTALL);
         private final Pattern PROGRESS_PATTERN = Pattern.compile("collectable=\"(.+?)\".*?" +
                 "dispatchId=\"(.+?)\".*?" +
-                "dispatchRewardPackage=\"(.+?)\".*?" +
                 "slotId=\"(.+?)\".*?"+
                 "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?",Pattern.DOTALL);
 
-        public void build(String string) {
-            if (string == null || string.isEmpty()) return;
+        public boolean buildRetriever(String string) {
+            if (string == null || string.isEmpty()) return false;
             if (!string.contains("dispatch_item_name_col") ||
                     !string.contains("dispatch_item_type") ||
                     !string.contains("dispatch_item_tier") ||
-                    !string.contains("dispatch_item_cost")) return;
-            Matcher m = PATTERN.matcher(string);
-            if (!m.find()) return;
+                    !string.contains("dispatch_item_cost")) return false;
+            Matcher m = RETRIEVER_PATTERN.matcher(string);
+            if (!m.find()) return false;
 
             String id = m.group(1);
             Retriever r = retrievers.get(id);
@@ -87,24 +86,26 @@ public class DispatchData {
             r.setType(m.group(3));
             r.setTier(m.group(4));
             r.setCost(m.group(5));
+            return true;
         }
 
-        public void progress(String string){
-            if (string == null || string.isEmpty()) return;
+        public boolean buildInProgress(String string){
+            if (string == null || string.isEmpty()) return false;
             if (!string.contains("dispatchRewardPackage") ||
                     !string.contains("slotId") ||
                     !string.contains("dispatch_item_name_col")) return false;
-            Matcher m = progressPattern.matcher(string);
-            if (!m.find()) return;
+            Matcher m = PROGRESS_PATTERN.matcher(string);
+            if (!m.find()) return false;
 
-            String slotID = m.group(4);
+            String slotID = m.group(3);
             InProgress r = progressSlots.get(slotID);
             if (r == null) progressSlots.put(slotID, r = new InProgress());
 
             r.setCollectable(m.group(1));
             r.setId(m.group(2));
             r.setSlotID(slotID);
-            r.setName(m.group(5));
+            r.setName(m.group(4));
+            return true;
         }
     }
 
@@ -113,9 +114,8 @@ public class DispatchData {
         return "DisptachData{" +
                 "permit=" + permit +
                 "gateUnits=" + gateUnits +
-                "slots=" + slots +
+                "availableSlots=" + availableSlots +
                 "maxSlots=" + maxSlots +
-                "cost=" + retrieverBuilder.toString() +
                 "}"
                 ;
     }
