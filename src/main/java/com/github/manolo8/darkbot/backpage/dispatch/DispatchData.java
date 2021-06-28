@@ -63,7 +63,7 @@ public class DispatchData {
                 "dispatch_item_type\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_tier\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_cost\">\\s+(.+?)\\s+<", Pattern.DOTALL);
-        private final Pattern progressPattern = Pattern.compile("collectable=\"(.+?)\".*?" +
+        private final Pattern PROGRESS_PATTERN = Pattern.compile("collectable=\"(.+?)\".*?" +
                 "dispatchId=\"(.+?)\".*?" +
                 "dispatchRewardPackage=\"(.+?)\".*?" +
                 "slotId=\"(.+?)\".*?"+
