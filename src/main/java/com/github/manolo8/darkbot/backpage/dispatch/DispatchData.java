@@ -105,7 +105,6 @@ public class DispatchData {
             r.setId(m.group(2));
             r.setSlotID(slotID);
             r.setName(m.group(5));
-
         }
     }
 
