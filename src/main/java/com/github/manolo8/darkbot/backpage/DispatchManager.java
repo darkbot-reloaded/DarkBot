@@ -30,7 +30,7 @@ public class DispatchManager {
         this.data = new DispatchData();
     }
 
-    public DispatchData getData(){
+    public DispatchData getData() {
         return data;
     }
 
