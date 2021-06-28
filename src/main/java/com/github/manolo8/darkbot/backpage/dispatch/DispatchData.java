@@ -58,7 +58,7 @@ public class DispatchData {
     }
 
     public class RetrieverBuilder {
-        private final Pattern PATTERN = Pattern.compile("dispatchId=\"(.+?)\".*?" +
+        private final Pattern RETRIEVER_PATTERN = Pattern.compile("dispatchId=\"(.+?)\".*?" +
                 "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_type\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_tier\">\\s+(.+?)\\s+<.*?" +
