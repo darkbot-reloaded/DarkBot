@@ -34,7 +34,7 @@ public class DispatchManager {
         return data;
     }
 
-    public boolean update(int expiryTime){
+    public boolean update(int expiryTime) {
         try {
             return update(main.backpage, expiryTime);
         } catch (Exception e) {
