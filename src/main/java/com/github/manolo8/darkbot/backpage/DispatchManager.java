@@ -110,7 +110,7 @@ public class DispatchManager {
                         .setRawParam("dispatchId", retriever.getId())
                         .getContent();
                 if(x.contains("ERROR")){
-                    System.out.println("No available dispatch slots");
+                    System.out.println("Failed to dispatch " + retriever.getId() + ": " + response);
                     data.setSlots(0);
                 }else{
                     System.out.println("Dispatch sent: " + retriever.getId());
