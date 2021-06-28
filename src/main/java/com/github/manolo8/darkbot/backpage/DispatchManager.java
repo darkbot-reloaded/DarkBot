@@ -153,7 +153,7 @@ public class DispatchManager {
     }
 
     public List<String> collectAll() {
-        return data.getInProgress().values().stream().map(this::collect).collect(Collectors.toList());
+        return data.getInProgress().values().stream().filter(this::collect).map(InProgress::getName).collect(Collectors.toList());
     }
 
 
