@@ -26,16 +26,16 @@ public class DispatchManager {
     private final DispatchData data;
     private long lastDispatcherUpdate;
 
-    DispatchManager(Main main){
+    DispatchManager(Main main) {
         this.main = main;
         this.data = new DispatchData();
     }
 
-    public DispatchData getData(){
+    public DispatchData getData() {
         return data;
     }
 
-    public boolean update(int expiryTime){
+    public boolean update(int expiryTime) {
         try {
             return update(main.backpage, expiryTime);
         } catch (Exception e) {
@@ -44,7 +44,7 @@ public class DispatchManager {
         return false;
     }
     public boolean update(BackpageManager manager, int expiryTime) throws Exception {
-        if (System.currentTimeMillis() <= lastDispatcherUpdate+expiryTime) return false;
+        if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
 
         String page = manager.getConnection("indexInternal.es?action=internalDispatch", Method.GET, 10_000)
                 .consumeInputStream(IOUtils::read);
@@ -103,30 +103,30 @@ public class DispatchManager {
     }
 
     public boolean hireRetriever(Retriever retriever){
-        if(data.getSlots() > 0){
-            //retriever.getCost(); check cost
+        if(data.getAvailableSlots() > 0) {
+            //retriever.getCost(); // TODO: check cost
             try {
-                String x = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
+                String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                         .setRawParam("command", "sendDispatch")
                         .setRawParam("dispatchId", retriever.getId())
                         .getContent();
-                if(x.contains("ERROR")){
-                    System.out.println("No available dispatch slots");
+                if(response.contains("\"result\":\"ERROR\"")){
+                    System.out.println("Failed to dispatch " + retriever.getId() + ": " + response);
                     data.setSlots(0);
                 }else{
-                    System.out.println("Dispatch sent: " + retriever.getId());
+                    System.out.println("Successfuly dispatched " + retriever.getId() + ": " + response);
                     data.setSlots(data.getSlots()-1);
                     return true;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("Some error hiring dispatcher: "+ e.toString());
+                System.out.println("Exception hiring dispatcher: " + e.toString());
             }
         }
         return false;
     }
 
-    public String collect(InProgress progress){
+    public String collect(InProgress progress) {
         try {
             if(progress.getCollectable().equals("0")) return null;
             System.out.println("Collecting: Slot " + progress.getSlotID());
@@ -148,16 +148,17 @@ public class DispatchManager {
             //remove or do something with slot / empty?
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Some error collecting dispatcher: "+ e);
+            System.out.println("Exception collecting dispatcher: "+ e.toString());
         }
         return null;
     }
 
-    public List<String> collectAll(){
-        return data.getInProgress().values().stream().map(this::collect).filter(Objects::nonNull).collect(Collectors.toList());
+    public List<String> collectAll() {
+        return data.getInProgress().values().stream().filter(this::collect).filter(Objects::nonNull).map(InProgress::getName).collect(Collectors.toList());
     }
 
 
+    // TODO: remove before release, just parser testing
     public static void main(String[] args) throws Exception {
         System.out.println("Working Directory = " + System.getProperty("user.dir"));
 

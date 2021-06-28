@@ -53,15 +53,17 @@ public class DispatchData {
         retrieverBuilder.progress(str);
     }
 
-    public Map<String, InProgress> getInProgress() { return progressSlots; }
+    public Map<String, InProgress> getInProgress() {
+        return progressSlots;
+    }
 
     public class RetrieverBuilder {
-        private final Pattern PATTERN = Pattern.compile("dispatchId=\"(.+?)\".*?" +
+        private final Pattern RETRIEVER_PATTERN = Pattern.compile("dispatchId=\"(.+?)\".*?" +
                 "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_type\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_tier\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_cost\">\\s+(.+?)\\s+<", Pattern.DOTALL);
-        private final Pattern progressPattern = Pattern.compile("collectable=\"(.+?)\".*?" +
+        private final Pattern PROGRESS_PATTERN = Pattern.compile("collectable=\"(.+?)\".*?" +
                 "dispatchId=\"(.+?)\".*?" +
                 "dispatchRewardPackage=\"(.+?)\".*?" +
                 "slotId=\"(.+?)\".*?"+
@@ -91,7 +93,7 @@ public class DispatchData {
             if (string == null || string.isEmpty()) return;
             if (!string.contains("dispatchRewardPackage") ||
                     !string.contains("slotId") ||
-                    !string.contains("dispatch_item_name_col")) return;
+                    !string.contains("dispatch_item_name_col")) return false;
             Matcher m = progressPattern.matcher(string);
             if (!m.find()) return;
 
@@ -103,9 +105,9 @@ public class DispatchData {
             r.setId(m.group(2));
             r.setSlotID(slotID);
             r.setName(m.group(5));
-
         }
     }
+
     @Override
     public String toString(){
         return "DisptachData{" +
