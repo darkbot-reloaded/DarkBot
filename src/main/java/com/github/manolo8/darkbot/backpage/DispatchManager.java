@@ -25,7 +25,7 @@ public class DispatchManager {
     private final DispatchData data;
     private long lastDispatcherUpdate;
 
-    DispatchManager(Main main){
+    DispatchManager(Main main) {
         this.main = main;
         this.data = new DispatchData();
     }
