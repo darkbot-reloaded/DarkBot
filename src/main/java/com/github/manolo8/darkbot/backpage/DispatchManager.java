@@ -105,7 +105,7 @@ public class DispatchManager {
         if(data.getAvailableSlots() > 0) {
             //retriever.getCost(); // TODO: check cost
             try {
-                String x = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
+                String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                         .setRawParam("command", "sendDispatch")
                         .setRawParam("dispatchId", retriever.getId())
                         .getContent();
