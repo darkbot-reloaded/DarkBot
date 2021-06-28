@@ -119,7 +119,7 @@ public class DispatchManager {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("Some error hiring dispatcher: "+ e.toString());
+                System.out.println("Exception hiring dispatcher: " + e.toString());
             }
         }
         return false;
