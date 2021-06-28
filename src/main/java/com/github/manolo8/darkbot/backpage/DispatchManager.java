@@ -157,6 +157,7 @@ public class DispatchManager {
     }
 
 
+    // TODO: remove before release, just parser testing
     public static void main(String[] args) throws Exception {
         System.out.println("Working Directory = " + System.getProperty("user.dir"));
 
