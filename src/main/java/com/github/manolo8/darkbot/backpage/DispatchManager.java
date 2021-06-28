@@ -125,7 +125,7 @@ public class DispatchManager {
         return false;
     }
 
-    public String collect(InProgress progress){
+    public String collect(InProgress progress) {
         try {
             if(progress.getCollectable().equals("0")) return null;
             System.out.println("Collecting: Slot " + progress.getSlotID());
