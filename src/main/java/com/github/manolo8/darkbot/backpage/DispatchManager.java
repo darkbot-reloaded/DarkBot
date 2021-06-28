@@ -103,7 +103,7 @@ public class DispatchManager {
 
     public boolean hireRetriever(Retriever retriever){
         if(data.getSlots() > 0){
-            //retriever.getCost(); check cost
+            //retriever.getCost(); // TODO: check cost
             try {
                 String x = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                         .setRawParam("command", "sendDispatch")
