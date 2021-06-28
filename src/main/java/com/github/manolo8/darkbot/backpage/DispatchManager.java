@@ -152,7 +152,7 @@ public class DispatchManager {
         return null;
     }
 
-    public List<String> collectAll(){
+    public List<String> collectAll() {
         return data.getInProgress().values().stream().map(this::collect).collect(Collectors.toList());
     }
 
