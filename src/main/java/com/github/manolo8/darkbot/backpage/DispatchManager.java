@@ -113,7 +113,7 @@ public class DispatchManager {
                     System.out.println("Failed to dispatch " + retriever.getId() + ": " + response);
                     data.setSlots(0);
                 }else{
-                    System.out.println("Dispatch sent: " + retriever.getId());
+                    System.out.println("Successfuly dispatched " + retriever.getId() + ": " + response);
                     data.setSlots(data.getSlots()-1);
                     return true;
                 }
