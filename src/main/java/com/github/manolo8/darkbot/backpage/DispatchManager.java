@@ -147,7 +147,7 @@ public class DispatchManager {
             //remove or do something with slot / empty?
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Some error collecting dispatcher: "+ e.toString());
+            System.out.println("Exception collecting dispatcher: "+ e.toString());
         }
         return null;
     }
