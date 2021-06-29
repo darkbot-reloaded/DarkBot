@@ -114,7 +114,7 @@ public class DispatchManager {
                     update(-1);
                 }else{
                     System.out.println("Successfully dispatched " + retriever.getId() + ": " + response);
-                    update(10_000);
+                    update(-1);
                     return true;
                 }
             } catch (Exception e) {
