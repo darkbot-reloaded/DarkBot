@@ -69,12 +69,7 @@ public class DispatchManager {
                         .setRawParam("command", "sendDispatch")
                         .setRawParam("dispatchId", retriever.getId())
                         .getContent();
-                if (response.contains("\"result\":\"ERROR\"")) {
-                    handleResponse("Failed to dispatch", retriever.getId(), response);
-                } else {
-                    handleResponse("Hired dispatcher", retriever.getId(), response);
-                    return true;
-                }
+                return handleResponse("Hired dispatcher", retriever.getId(), response);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Exception hiring dispatcher: " + e);
