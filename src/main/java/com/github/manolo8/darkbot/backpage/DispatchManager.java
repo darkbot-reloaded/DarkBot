@@ -109,7 +109,7 @@ public class DispatchManager {
                         .setRawParam("command", "sendDispatch")
                         .setRawParam("dispatchId", retriever.getId())
                         .getContent();
-                if(response.contains("\"result\":\"ERROR\"")){
+                if (response.contains("\"result\":\"ERROR\"")) {
                     System.out.println("Failed to dispatch " + retriever.getId() + ": " + response);
                     update(-1);
                 }else{
