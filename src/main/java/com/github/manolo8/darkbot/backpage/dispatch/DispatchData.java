@@ -89,7 +89,7 @@ public class DispatchData {
             return true;
         }
 
-        public boolean buildInProgress(String string){
+        public boolean buildInProgress(String string) {
             if (string == null || string.isEmpty()) return false;
             if (!string.contains("dispatchRewardPackage") ||
                     !string.contains("slotId") ||
