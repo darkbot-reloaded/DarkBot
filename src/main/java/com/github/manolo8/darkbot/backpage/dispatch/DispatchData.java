@@ -116,8 +116,7 @@ public class DispatchData {
                 "gateUnits=" + gateUnits +
                 "availableSlots=" + availableSlots +
                 "maxSlots=" + maxSlots +
-                "}"
-                ;
+                "}";
     }
 
 }
