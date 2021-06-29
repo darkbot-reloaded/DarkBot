@@ -43,7 +43,6 @@ public class InProgress {
                 "id=" + id +
                 "name=" + name +
                 "collectable=" + collectable +
-                "}"
-                ;
+                "}";
     }
 }
