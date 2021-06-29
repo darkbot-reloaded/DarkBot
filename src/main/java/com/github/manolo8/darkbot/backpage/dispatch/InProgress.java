@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.backpage.dispatch;
 
 public class InProgress {
-    protected String slotID, id, name, collectable;
+    protected String slotId, id, name, collectable;
 
     public String getSlotId() {
         return slotId;
