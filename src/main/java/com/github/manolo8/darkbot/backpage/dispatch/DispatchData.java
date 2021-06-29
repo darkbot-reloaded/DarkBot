@@ -110,7 +110,7 @@ public class DispatchData {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "DisptachData{" +
                 "permit=" + permit +
                 "gateUnits=" + gateUnits +
