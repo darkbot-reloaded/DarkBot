@@ -1,20 +1,18 @@
 package com.github.manolo8.darkbot.core.api;
 
-import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.gui.utils.PidSelector;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.StartupParams;
+import eu.darkbot.api.DarkInput;
 import eu.darkbot.api.DarkMem;
 
 import javax.swing.*;
-import java.awt.*;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.function.BooleanSupplier;
-import java.util.stream.Collectors;
 
 public class DarkMemAdapter extends NoopApiAdapter {
     private final DarkMem MEM = new DarkMem();
+    private final DarkInput INPUT = new DarkInput();
 
     private int pid;
 
@@ -24,19 +22,7 @@ public class DarkMemAdapter extends NoopApiAdapter {
 
     @Override
     public void createWindow() {
-        Map<Integer, String> procs = Arrays.stream(MEM.getProcesses())
-                .collect(Collectors.toMap(DarkMem.Proc::getPid, DarkMem.Proc::getName));
-
-        JComboBox<Integer> pidSelector = new JComboBox<>(procs.keySet().toArray(new Integer[0]));
-        pidSelector.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                String str = value == null ? null : procs.get((Integer) value);
-                Object val = str == null ? value : value + " - " + str;
-                return super.getListCellRendererComponent(list, val, index, isSelected, cellHasFocus);
-            }
-        });
-        pidSelector.setEditable(true);
+        PidSelector pidSelector = new PidSelector(MEM.getProcesses());
 
         int result = JOptionPane.showOptionDialog(HeroManager.instance.main.getGui(), pidSelector,
                 "Select flash process", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
@@ -44,17 +30,14 @@ public class DarkMemAdapter extends NoopApiAdapter {
 
         if (result != JOptionPane.OK_OPTION) return;
 
-        Object pid = pidSelector.getSelectedItem();
-        if (pid == null) return;
         try {
-            if (pid instanceof String)
-                pid = Integer.parseInt((String) pid);
+            this.pid = pidSelector.getPid();
         } catch (NumberFormatException e) {
             Popups.showMessageAsync("Error, invalid PID",
-                    "Invalid PID " + pid + ", expected a number", JOptionPane.ERROR_MESSAGE);
+                    "Invalid PID, expected a number", JOptionPane.ERROR_MESSAGE);
         }
 
-        MEM.openProcess(this.pid = (Integer) pid);
+        MEM.openProcess(this.pid);
     }
 
     @Override
@@ -63,8 +46,28 @@ public class DarkMemAdapter extends NoopApiAdapter {
     }
 
     @Override
-    public int getVersion() {
-        return MEM.getVersion();
+    public String getVersion() {
+        return MEM.getVersion() + "m " + INPUT.getVersion() + "i";
+    }
+
+    @Override
+    public void mouseMove(int x, int y) {
+        INPUT.mouseMove(x, y);
+    }
+
+    @Override
+    public void mouseClick(int x, int y) {
+        INPUT.mouseClick(x, y);
+    }
+
+    @Override
+    public void rawKeyboardClick(char btn) {
+        INPUT.keyClick(btn);
+    }
+
+    @Override
+    public void sendText(String str) {
+        INPUT.sendText(str);
     }
 
     @Override

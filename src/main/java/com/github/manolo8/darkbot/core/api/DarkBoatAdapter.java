@@ -53,8 +53,8 @@ public class DarkBoatAdapter extends ApiAdapter {
     }
 
     @Override
-    public int getVersion() {
-        return API.getVersion();
+    public String getVersion() {
+        return String.valueOf(API.getVersion());
     }
 
     @Override

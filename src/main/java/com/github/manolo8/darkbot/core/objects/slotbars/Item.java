@@ -19,6 +19,10 @@ public class Item extends UpdatableAuto {
 
     @Override
     public void update() {
+        // There are *a lot* of items in-game
+        // Doing 5 boolean-read calls is way more expensive than a single mem-read to the buffer
+        // This IS very ugly, but improves performance.
+        // We also avoid updating timer if no other flags change for the extra 3 long-read calls
         API.readMemory(address + START, BUFFER);
 
         boolean buyable     = BUFFER[0] == 1;
@@ -26,7 +30,6 @@ public class Item extends UpdatableAuto {
         boolean selected    = BUFFER[8] == 1;
         boolean available   = BUFFER[12] == 1;
         boolean visible     = BUFFER[16] == 1;
-        //boolean blocked   = API.readMemoryBoolean(address + 56); // doesnt work
         double quantity     = ByteUtils.getDouble(BUFFER, 92);
 
         if (this.buyable != buyable ||

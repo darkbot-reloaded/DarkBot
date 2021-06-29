@@ -30,8 +30,8 @@ public class NativeApiAdapter extends ApiAdapter {
     }
 
     @Override
-    public int getVersion() {
-        return 1;
+    public String getVersion() {
+        return "1";
     }
 
     @Override

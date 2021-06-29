@@ -34,8 +34,8 @@ public class DarkCefAdapter extends ApiAdapter {
     }
 
     @Override
-    public int getVersion() {
-        return MEM.getVersion(); // At some point will have to get version of both cef & mem.
+    public String getVersion() {
+        return MEM.getVersion() + "m"; // At some point will have to get version of both cef & mem.
     }
 
     @Override

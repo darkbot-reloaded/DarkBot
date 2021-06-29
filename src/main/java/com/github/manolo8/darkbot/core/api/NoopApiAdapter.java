@@ -27,8 +27,8 @@ public class NoopApiAdapter extends ApiAdapter {
     }
 
     @Override
-    public int getVersion() {
-        return 1;
+    public String getVersion() {
+        return "no-op";
     }
 
     @Override
