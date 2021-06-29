@@ -44,7 +44,7 @@ public class Retriever {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "Retriever{" +
                 "id=" + id +
                 "name=" + name +
