@@ -90,12 +90,7 @@ public class DispatchManager {
             //parse response
             //{"result":"OK","message":"Collected the following:","rewardsLog":[{"lootId":"Solidus","amount":3},{"lootId":"PLT-2026","amount":97},{"lootId":"Scrap","amount":3}]}
 
-            if (response.contains("\"result\":\"ERROR\"")) {
-                handleResponse("Unable to collect retriever", progress.getId(), response);
-            } else {
-                handleResponse("Dispatch collected", progress.getSlotId(), response);
-                return true;
-            }
+            return handleResponse("Collected retriever", progress.getId(), response);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Exception collecting dispatcher: " + e);
