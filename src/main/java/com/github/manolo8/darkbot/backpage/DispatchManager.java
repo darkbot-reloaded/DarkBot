@@ -1,22 +1,18 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.backpage.dispatch.BiIntConsumer;
 import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
-import com.github.manolo8.darkbot.backpage.entities.galaxy.GalaxyInfo;
-import com.github.manolo8.darkbot.utils.IOUtils;
 import com.github.manolo8.darkbot.utils.http.Method;
 import org.intellij.lang.annotations.Language;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BiConsumer;
-import com.github.manolo8.darkbot.backpage.dispatch.BiIntConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -29,6 +25,18 @@ public class DispatchManager {
     DispatchManager(Main main) {
         this.main = main;
         this.data = new DispatchData();
+    }
+
+    // TODO: remove before release, just parser testing
+    public static void main(String[] args) throws Exception {
+        System.out.println("Working Directory = " + System.getProperty("user.dir"));
+
+        String page = Files.lines(Paths.get("dispatcher.html")).collect(Collectors.joining("\n"));
+
+        DispatchData data = new DispatchData();
+
+        boolean upd = InfoReader.updateAll(page, data);
+        int i = 0;
     }
 
     public DispatchData getData() {
@@ -46,12 +54,75 @@ public class DispatchManager {
 
     public boolean update(BackpageManager manager, int expiryTime) throws Exception {
         if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
-        String page = manager.getConnection("indexInternal.es?action=internalDispatch", Method.GET, 10_000).getContent();
+        String page = manager.getConnection("indexInternal.es?action=internalDispatch", Method.GET).getContent();
 
         if (page == null || page.isEmpty()) return false;
         lastDispatcherUpdate = System.currentTimeMillis();
         return InfoReader.updateAll(page, data);
     }
+
+    public boolean hireRetriever(Retriever retriever) {
+        if (data.getAvailableSlots() > 0) {
+            //retriever.getCost(); // TODO: check cost
+            try {
+                String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
+                        .setRawParam("command", "sendDispatch")
+                        .setRawParam("dispatchId", retriever.getId())
+                        .getContent();
+                if (response.contains("\"result\":\"ERROR\"")) {
+                    handleResponse("Failed to dispatch", retriever.getId(), response);
+                } else {
+                    handleResponse("Hired dispatcher", retriever.getId(), response);
+                    return true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Exception hiring dispatcher: " + e);
+            }
+        }
+        return false;
+    }
+
+    public boolean collect(InProgress progress) {
+        try {
+            if (progress.getCollectable().equals("0")) return false;
+            System.out.println("Collecting: Slot " + progress.getSlotId());
+            String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
+                    .setRawParam("command", "collectDispatch")
+                    .setRawParam("slot", progress.getSlotId())
+                    .getContent();
+
+            //parse response
+            //{"result":"OK","message":"Collected the following:","rewardsLog":[{"lootId":"Solidus","amount":3},{"lootId":"PLT-2026","amount":97},{"lootId":"Scrap","amount":3}]}
+
+            if (response.contains("\"result\":\"ERROR\"")) {
+                handleResponse("Unable to collect retriever", progress.getId(), response);
+            } else {
+                handleResponse("Dispatch collected", progress.getSlotId(), response);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Exception collecting dispatcher: " + e);
+        }
+        return false;
+    }
+
+    public boolean handleResponse(String type, String id, String response) {
+        boolean failed = response.contains("\"result\":\"ERROR\"");
+        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + response);
+        update(-1);
+        return !failed;
+    }
+
+
+    public List<String> collectAll() {
+        return data.getInProgress().values().stream()
+                .filter(this::collect)
+                .map(InProgress::getName)
+                .collect(Collectors.toList());
+    }
+
 
     private enum InfoReader {
         PERMIT("name=\"permit\" value=\"([0-9]+)\"", DispatchData::setPermit),
@@ -75,8 +146,16 @@ public class DispatchManager {
         @SafeVarargs
         InfoReader(@Language("RegExp") String regex, BiIntConsumer<DispatchData>... consumers) {
             this(regex, Arrays.stream(consumers)
-                    .map(c -> (BiConsumer<DispatchData,String>) (d, s) -> c.accept(d, Integer.parseInt(s)))
+                    .map(c -> (BiConsumer<DispatchData, String>) (d, s) -> c.accept(d, Integer.parseInt(s)))
                     .collect(Collectors.toList()));
+        }
+
+        public static boolean updateAll(String page, DispatchData data) {
+            boolean updated = true;
+            for (InfoReader reader : InfoReader.values()) {
+                updated &= reader.update(page, data);
+            }
+            return updated;
         }
 
         private boolean update(String page, DispatchData data) {
@@ -91,82 +170,6 @@ public class DispatchManager {
 
             return m.groupCount() == consumers.size();
         }
-
-        public static boolean updateAll(String page, DispatchData data) {
-            boolean updated = true;
-            for (InfoReader reader : InfoReader.values()) {
-                updated &= reader.update(page, data);
-            }
-            return updated;
-        }
-    }
-
-    public boolean hireRetriever(Retriever retriever) {
-        if (data.getAvailableSlots() > 0) {
-            //retriever.getCost(); // TODO: check cost
-            try {
-                String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
-                        .setRawParam("command", "sendDispatch")
-                        .setRawParam("dispatchId", retriever.getId())
-                        .getContent();
-                if (response.contains("\"result\":\"ERROR\"")) {
-                    System.out.println("Failed to dispatch " + retriever.getId() + ": " + response);
-                    update(-1);
-                } else {
-                    System.out.println("Successfully dispatched " + retriever.getId() + ": " + response);
-                    update(-1);
-                    return true;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Exception hiring dispatcher: " + e);
-            }
-        }
-        return false;
-    }
-
-    public boolean collect(InProgress progress) {
-        try {
-            if (progress.getCollectable().equals("0")) return false;
-            System.out.println("Collecting: Slot " + progress.getSlotID());
-            String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
-                    .setRawParam("command", "collectDispatch")
-                    .setRawParam("slot", progress.getSlotID())
-                    .getContent();
-
-            //parse response
-            //{"result":"OK","message":"Collected the following:","rewardsLog":[{"lootId":"Solidus","amount":3},{"lootId":"PLT-2026","amount":97},{"lootId":"Scrap","amount":3}]}
-
-            if (x.contains("\"result\":\"ERROR\"")) {
-                System.out.println("Unable to collect retriever");
-            } else {
-                System.out.println("Dispatch Collected: " + progress.getSlotID() + " : " + x.substring(x.indexOf("rewardsLog")));
-                return true;
-            }
-            update(1000);
-            //remove or do something with slot / empty?
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Exception collecting dispatcher: " + e.toString());
-        }
-        return false;
-    }
-
-    public List<String> collectAll() {
-        return data.getInProgress().values().stream().filter(this::collect).filter(Objects::nonNull).map(InProgress::getName).collect(Collectors.toList());
-    }
-
-
-    // TODO: remove before release, just parser testing
-    public static void main(String[] args) throws Exception {
-        System.out.println("Working Directory = " + System.getProperty("user.dir"));
-
-        String page = Files.lines(Paths.get("dispatcher.html")).collect(Collectors.joining("\n"));
-
-        DispatchData data = new DispatchData();
-
-        boolean upd = InfoReader.updateAll(page, data);
-        int i = 0;
     }
 
 

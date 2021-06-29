@@ -39,7 +39,7 @@ public class InProgress {
     @Override
     public String toString() {
         return "Retriever{" +
-                "slotID=" + slotID +
+                "slotID=" + slotId +
                 "id=" + id +
                 "name=" + name +
                 "collectable=" + collectable +

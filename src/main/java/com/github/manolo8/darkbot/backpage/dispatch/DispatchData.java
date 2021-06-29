@@ -6,11 +6,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DispatchData {
-    private int permit, gateUnits, availableSlots, maxSlots;
-
     private final DataBuilder dataBuilder = new DataBuilder();
     private final Map<String, Retriever> retrievers = new LinkedHashMap<>();
     private final Map<String, InProgress> progressSlots = new LinkedHashMap<>();
+    private int permit, gateUnits, availableSlots, maxSlots;
 
     public int getPermit() {
         return permit;
@@ -54,7 +53,17 @@ public class DispatchData {
 
     public void parseRow(String str) {
         if (dataBuilder.buildRetriever(str)) return;
-        dataBuilder.buildInProgress(str);
+        if (dataBuilder.buildInProgress(str)) return;
+    }
+
+    @Override
+    public String toString() {
+        return "DisptachData{" +
+                "permit=" + permit +
+                "gateUnits=" + gateUnits +
+                "availableSlots=" + availableSlots +
+                "maxSlots=" + maxSlots +
+                "}";
     }
 
     public class DataBuilder {
@@ -65,8 +74,8 @@ public class DispatchData {
                 "dispatch_item_cost\">\\s+(.+?)\\s+<", Pattern.DOTALL);
         private final Pattern PROGRESS_PATTERN = Pattern.compile("collectable=\"(.+?)\".*?" +
                 "dispatchId=\"(.+?)\".*?" +
-                "slotId=\"(.+?)\".*?"+
-                "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?",Pattern.DOTALL);
+                "slotId=\"(.+?)\".*?" +
+                "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?", Pattern.DOTALL);
 
         public boolean buildRetriever(String string) {
             if (string == null || string.isEmpty()) return false;
@@ -103,20 +112,10 @@ public class DispatchData {
 
             r.setCollectable(m.group(1));
             r.setId(m.group(2));
-            r.setSlotID(slotID);
+            r.setSlotId(slotID);
             r.setName(m.group(4));
             return true;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "DisptachData{" +
-                "permit=" + permit +
-                "gateUnits=" + gateUnits +
-                "availableSlots=" + availableSlots +
-                "maxSlots=" + maxSlots +
-                "}";
     }
 
 }
