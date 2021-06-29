@@ -112,7 +112,7 @@ public class DispatchManager {
                 if (response.contains("\"result\":\"ERROR\"")) {
                     System.out.println("Failed to dispatch " + retriever.getId() + ": " + response);
                     update(-1);
-                }else{
+                } else {
                     System.out.println("Successfully dispatched " + retriever.getId() + ": " + response);
                     update(-1);
                     return true;
