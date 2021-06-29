@@ -62,7 +62,7 @@ public class DispatchManager {
     }
 
     public boolean hireRetriever(Retriever retriever) {
-        if (data.getAvailableSlots() > 0) {
+        if (data.getAvailableSlots() <= 0) return false;
             //retriever.getCost(); // TODO: check cost
             try {
                 String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
