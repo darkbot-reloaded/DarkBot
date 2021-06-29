@@ -127,7 +127,7 @@ public class DispatchManager {
 
     public boolean collect(InProgress progress) {
         try {
-            if(progress.getCollectable().equals("0")) return false;
+            if (progress.getCollectable().equals("0")) return false;
             System.out.println("Collecting: Slot " + progress.getSlotID());
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "collectDispatch")
