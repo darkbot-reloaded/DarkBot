@@ -51,7 +51,6 @@ public class Retriever {
                 "type=" + type +
                 "tier=" + tier +
                 "cost=" + cost +
-                "}"
-                ;
+                "}";
     }
 }
