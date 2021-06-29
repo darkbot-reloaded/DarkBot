@@ -48,13 +48,13 @@ public class DispatchData {
         return retrievers;
     }
 
-    public void parseRow(String str) {
-        if(!dataBuilder.buildRetriever(str)) return;
-        dataBuilder.buildInProgress(str);
-    }
-
     public Map<String, InProgress> getInProgress() {
         return progressSlots;
+    }
+
+    public void parseRow(String str) {
+        if (dataBuilder.buildRetriever(str)) return;
+        dataBuilder.buildInProgress(str);
     }
 
     public class DataBuilder {
