@@ -13,6 +13,7 @@ public class PluginClassLoader extends URLClassLoader {
     private static final List<Predicate<String>> PROTECTED = Stream.of(
             "java.lang.reflect.*",
             "java.lang.Thread",
+            "java.awt.TrayIcon",
             "*.ReflectionUtils")
             .map(PluginClassLoader::toMatcher)
             .collect(Collectors.toList());
