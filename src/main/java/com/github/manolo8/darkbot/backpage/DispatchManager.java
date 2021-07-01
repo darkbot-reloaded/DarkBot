@@ -27,18 +27,6 @@ public class DispatchManager {
         this.data = new DispatchData();
     }
 
-    // TODO: remove before release, just parser testing
-    public static void main(String[] args) throws Exception {
-        System.out.println("Working Directory = " + System.getProperty("user.dir"));
-
-        String page = Files.lines(Paths.get("dispatcher.html")).collect(Collectors.joining("\n"));
-
-        DispatchData data = new DispatchData();
-
-        boolean upd = InfoReader.updateAll(page, data);
-        int i = 0;
-    }
-
     public DispatchData getData() {
         return data;
     }
