@@ -51,17 +51,17 @@ public class DispatchManager {
 
     public boolean hireRetriever(Retriever retriever) {
         if (data.getAvailableSlots() <= 0) return false;
-            //retriever.getCost(); // TODO: check cost
-            try {
-                String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
-                        .setRawParam("command", "sendDispatch")
-                        .setRawParam("dispatchId", retriever.getId())
-                        .getContent();
-                return handleResponse("Hired dispatcher", retriever.getId(), response);
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Exception hiring dispatcher: " + e);
-            }
+        //retriever.getCost(); // TODO: check cost
+        try {
+            String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
+                    .setRawParam("command", "sendDispatch")
+                    .setRawParam("dispatchId", retriever.getId())
+                    .getContent();
+            return handleResponse("Hired dispatcher", retriever.getId(), response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Exception hiring dispatcher: " + e);
+        }
         return false;
     }
 
