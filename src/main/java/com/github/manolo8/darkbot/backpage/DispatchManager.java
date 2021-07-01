@@ -74,9 +74,6 @@ public class DispatchManager {
                     .setRawParam("slot", progress.getSlotId())
                     .getContent();
 
-            //parse response
-            //{"result":"OK","message":"Collected the following:","rewardsLog":[{"lootId":"Solidus","amount":3},{"lootId":"PLT-2026","amount":97},{"lootId":"Scrap","amount":3}]}
-
             return handleResponse("Collected retriever", progress.getId(), response);
         } catch (Exception e) {
             e.printStackTrace();
