@@ -62,7 +62,6 @@ public class DispatchManager {
                 e.printStackTrace();
                 System.out.println("Exception hiring dispatcher: " + e);
             }
-        }
         return false;
     }
 
