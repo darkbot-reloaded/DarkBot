@@ -138,6 +138,7 @@
                                 <option>-dontwarn</option>
                                 <option>-keepattributes Signature</option>
                                 <option>-keep class com.github.manolo8.** { *; }</option>
+                                <option>-keep class eu.darkbot.api.** { *; }</option>
                                 <option>-keep class com.formdev.** { *; }</option>
                             </options>
                             <libs>
