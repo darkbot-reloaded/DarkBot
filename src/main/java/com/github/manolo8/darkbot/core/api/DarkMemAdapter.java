@@ -1,9 +1,11 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.gui.utils.PidSelector;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.StartupParams;
+import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.DarkInput;
 import eu.darkbot.api.DarkMem;
 
@@ -15,6 +17,7 @@ public class DarkMemAdapter extends NoopApiAdapter {
     private final DarkInput INPUT = new DarkInput();
 
     private int pid;
+    private boolean windowOpen = false;
 
     public DarkMemAdapter(StartupParams params, BooleanSupplier fullyHide) {
         super(params, fullyHide);
@@ -38,6 +41,7 @@ public class DarkMemAdapter extends NoopApiAdapter {
         }
 
         MEM.openProcess(this.pid);
+        windowOpen = false;
     }
 
     @Override
@@ -50,24 +54,35 @@ public class DarkMemAdapter extends NoopApiAdapter {
         return MEM.getVersion() + "m " + INPUT.getVersion() + "i";
     }
 
+    private boolean inputReady() {
+        if (windowOpen) return true;
+        if (MapManager.clientWidth == 0 && MapManager.clientHeight == 0) return false;
+
+        return windowOpen = INPUT.openWindow(pid, MapManager.clientWidth, MapManager.clientHeight);
+    }
+
     @Override
     public void mouseMove(int x, int y) {
-        INPUT.mouseMove(x, y);
+        if (inputReady()) INPUT.mouseMove(x, y);
     }
 
     @Override
     public void mouseClick(int x, int y) {
-        INPUT.mouseClick(x, y);
+        if (inputReady()) {
+            INPUT.mouseClick(x, y);
+            // FIXME: clicks should be sync instead of sleeping, however, chrome handles events on its own.
+            Time.sleep(75);
+        }
     }
 
     @Override
     public void rawKeyboardClick(char btn) {
-        INPUT.keyClick(btn);
+        if (inputReady()) INPUT.keyClick(btn);
     }
 
     @Override
     public void sendText(String str) {
-        INPUT.sendText(str);
+        if (inputReady()) INPUT.sendText(str);
     }
 
     @Override
