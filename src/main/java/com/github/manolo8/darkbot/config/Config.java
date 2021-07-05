@@ -13,6 +13,8 @@ import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
+import com.github.manolo8.darkbot.config.utils.ItemUtils;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
@@ -25,7 +27,19 @@ import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
+import eu.darkbot.api.config.Collect;
+import eu.darkbot.api.config.General;
+import eu.darkbot.api.config.util.PercentRange;
+import eu.darkbot.api.config.util.ShipMode;
+import eu.darkbot.api.game.items.ItemCategory;
+import eu.darkbot.api.game.items.SelectableItem;
+import eu.darkbot.api.game.other.GameMap;
+import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.api.managers.HeroItemsAPI;
 
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,7 +58,7 @@ import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.STAT
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.ZONES;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.SHOW_PET;
 
-public class Config {
+public class Config implements eu.darkbot.api.config.Config {
 
     // Defined map areas
     public Map<Integer, ZoneInfo> AVOIDED = new HashMap<>();
@@ -66,7 +80,7 @@ public class Config {
     public transient boolean changed;
 
     public @Option General GENERAL = new General();
-    public static class General {
+    public static class General implements eu.darkbot.api.config.General {
         @Options(ModuleSupplier.class)
         public @Option @Editor(JListField.class) String CURRENT_MODULE = LootNCollectorModule.class.getCanonicalName();
         @Options(StarManager.MapList.class)
@@ -77,7 +91,7 @@ public class Config {
         public @Option @Num(max = 3600) int FORMATION_CHECK = 180;
 
         public @Option Safety SAFETY = new Safety();
-        public static class Safety {
+        public static class Safety implements eu.darkbot.api.config.General.Safety {
             public @Option PercentRange REPAIR_HP_RANGE = new PercentRange(0.4, 0.95);
             public @Option @Editor(JPercentField.class) double REPAIR_HP_NO_NPC = 0.5;
             public @Option @Editor(JPercentField.class) double REPAIR_TO_SHIELD = 1;
@@ -86,10 +100,30 @@ public class Config {
             public @Option @Editor(JListField.class) @Options(ReviveSpotSupplier.class) long REVIVE_LOCATION = 1L;
             public @Option @Num(min = 5, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
             public @Option @Num(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
+
+            @Override
+            public eu.darkbot.api.config.util.PercentRange getRepairHealthRange() {
+                return REPAIR_HP_RANGE;
+            }
+
+            @Override
+            public double getRepairHealthNoNpc() {
+                return REPAIR_HP_NO_NPC;
+            }
+
+            @Override
+            public double getRepairToShield() {
+                return REPAIR_TO_SHIELD;
+            }
+
+            @Override
+            public ShipMode getRepairMode() {
+                return REPAIR;
+            }
         }
 
         public @Option Running RUNNING = new Running();
-        public static class Running {
+        public static class Running implements eu.darkbot.api.config.General.Running {
             public @Option boolean RUN_FROM_ENEMIES = true;
             public @Option @Num(max = 24 * 60 * 60, step = 300) int REMEMBER_ENEMIES_FOR = 300;
             public @Option boolean RUN_FROM_ENEMIES_SIGHT = false;
@@ -98,6 +132,46 @@ public class Config {
             public @Option Character SHIP_ABILITY;
             public @Option @Num(max = 20000, step = 500) int SHIP_ABILITY_MIN = 1500;
             public @Option @Num(max = 20000, step = 500) int RUN_FURTHEST_PORT = 1500;
+
+            @Override
+            public boolean getRunFromEnemies() {
+                return RUN_FROM_ENEMIES;
+            }
+
+            @Override
+            public Duration getEnemyRemember() {
+                return Duration.ofSeconds(REMEMBER_ENEMIES_FOR);
+            }
+
+            @Override
+            public boolean getRunInSight() {
+                return RUN_FROM_ENEMIES_SIGHT;
+            }
+
+            @Override
+            public boolean getStopRunning() {
+                return STOP_RUNNING_NO_SIGHT;
+            }
+
+            @Override
+            public int getMaxSightDistance() {
+                return MAX_SIGHT_DISTANCE;
+            }
+
+            @Override
+            public int getRunClosestDistance() {
+                return RUN_FURTHEST_PORT;
+            }
+
+            @Override
+            public int getShipAbilityMinDistance() {
+                return SHIP_ABILITY_MIN;
+            }
+
+            @Override
+            public SelectableItem getShipAbility() {
+                return ItemUtils.findAssociatedItem(null, SHIP_ABILITY).orElse(null);
+            }
         }
 
         public @Option Roaming ROAMING = new Roaming();
@@ -107,10 +181,25 @@ public class Config {
             public @Option boolean ONLY_KILL_PREFERRED = false;
             public @Option boolean ENEMY_CBS_INVISIBLE = false;
         }
+
+        @Override
+        public GameMap getWorkingMap() {
+            return StarManager.getInstance().byId(WORKING_MAP);
+        }
+
+        @Override
+        public eu.darkbot.api.config.General.Safety getSafety() {
+            return SAFETY;
+        }
+
+        @Override
+        public eu.darkbot.api.config.General.Running getRunning() {
+            return RUNNING;
+        }
     }
 
     public @Option Collect COLLECT = new Collect();
-    public static class Collect {
+    public static class Collect implements eu.darkbot.api.config.Collect {
         public @Option boolean STAY_AWAY_FROM_ENEMIES;
         public @Option boolean AUTO_CLOACK;
         public @Option Character AUTO_CLOACK_KEY;
@@ -121,6 +210,21 @@ public class Config {
         @Editor(value = JBoxInfoTable.class, shared = true)
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy.NoCache<>();
+
+        @Override
+        public boolean getAutoCloak() {
+            return AUTO_CLOACK;
+        }
+
+        @Override
+        public boolean getStayAwayFromEnemies() {
+            return STAY_AWAY_FROM_ENEMIES;
+        }
+
+        @Override
+        public boolean getIgnoreContestedBoxes() {
+            return IGNORE_CONTESTED_BOXES;
+        }
     }
 
     public @Option Loot LOOT = new Loot();
@@ -249,7 +353,7 @@ public class Config {
         public transient Lazy<String> MODIFIED_ACTIONS = new Lazy.NoCache<>();
     }
 
-    public static class ShipConfig {
+    public static class ShipConfig implements ShipMode {
         public int CONFIG = 1;
         public Character FORMATION;
 
@@ -260,12 +364,24 @@ public class Config {
         }
 
         @Override
+        public HeroAPI.Configuration getConfiguration() {
+            return HeroAPI.Configuration.of(CONFIG);
+        }
+
+        @Override
+        public SelectableItem.Formation getFormation() {
+            return ItemUtils.findAssociatedItem(ItemCategory.DRONE_FORMATIONS, FORMATION)
+                    .map(it -> SelectableItem.Formation.of(it.id))
+                    .orElse(SelectableItem.Formation.STANDARD);
+        }
+
+        @Override
         public String toString() {
             return "Config: " + CONFIG + "   Formation: " + JCharField.getDisplay(FORMATION);
         }
     }
 
-    public static class PercentRange {
+    public static class PercentRange implements eu.darkbot.api.config.util.PercentRange {
         public double min, max;
 
         public PercentRange() {}
@@ -275,8 +391,39 @@ public class Config {
         }
 
         @Override
+        public double getMin() {
+            return min;
+        }
+
+        @Override
+        public double getMax() {
+            return max;
+        }
+
+        @Override
         public String toString() {
             return Math.round(min * 100) + "%-" + Math.round(max * 100) + "%";
         }
+    }
+
+
+    @Override
+    public Collection<? extends eu.darkbot.api.config.SafetyInfo> getSafeties(GameMap gameMap) {
+        return SAFETY.getOrDefault(gameMap.getId(), Collections.emptySet());
+    }
+
+    @Override
+    public Map<Integer, ? extends eu.darkbot.api.config.util.PlayerInfo> getPlayerInfos() {
+        return PLAYER_INFOS;
+    }
+
+    @Override
+    public eu.darkbot.api.config.General getGeneral() {
+        return GENERAL;
+    }
+
+    @Override
+    public eu.darkbot.api.config.Collect getCollect() {
+        return COLLECT;
     }
 }

@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.entities;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Pet extends Ship implements eu.darkbot.api.entities.Pet {
+public class Pet extends Ship implements eu.darkbot.api.game.entities.Pet {
 
     private int level, playerId;
 

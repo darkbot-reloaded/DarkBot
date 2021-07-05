@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core.entities;
 
-import eu.darkbot.api.entities.Mist;
+import eu.darkbot.api.game.entities.Mist;
 
 public class NoCloack extends Zone implements Mist {
 

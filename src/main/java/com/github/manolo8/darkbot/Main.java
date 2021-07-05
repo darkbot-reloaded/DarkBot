@@ -38,6 +38,7 @@ import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.TemporalModule;
+import com.github.manolo8.darkbot.utils.Annotations;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
@@ -297,7 +298,10 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     private <A extends Module> void updateCustomConfig(A module) {
         if (module instanceof Configurable) {
-            String name = module.getClass().getAnnotation(Feature.class).name();
+            String name = Annotations.getAnnotation(module.getClass(),
+                    Feature.class, Feature::name,
+                    eu.darkbot.api.extensions.Feature.class,
+                    eu.darkbot.api.extensions.Feature::name);
             form.setCustomConfig(name, config.CUSTOM_CONFIGS.get(module.getClass().getCanonicalName()));
         } else {
             form.setCustomConfig(null, null);
@@ -382,12 +386,17 @@ public class Main extends Thread implements PluginListener, BotAPI {
     }
 
     @Override
+    public Version getVersion() {
+        return VERSION;
+    }
+
+    @Override
     public double getTickTime() {
         return avgTick;
     }
 
     @Override
-    public eu.darkbot.api.extensions.Module getModule() {
+    public Module getModule() {
         return module;
     }
 

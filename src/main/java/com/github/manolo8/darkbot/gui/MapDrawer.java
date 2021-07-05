@@ -30,7 +30,6 @@ import com.github.manolo8.darkbot.core.manager.PetManager.PetStats;
 import com.github.manolo8.darkbot.core.manager.PetManager.PetStatsType;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
-import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
@@ -40,8 +39,8 @@ import com.github.manolo8.darkbot.gui.trail.Line;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
-import eu.darkbot.api.entities.utils.Attackable;
-import eu.darkbot.api.objects.Health;
+import eu.darkbot.api.game.other.Attackable;
+import eu.darkbot.api.game.other.Health;
 
 import javax.swing.*;
 import java.awt.*;

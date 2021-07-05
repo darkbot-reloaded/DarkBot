@@ -4,7 +4,7 @@ import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class PartialGroupMember extends UpdatableAuto implements eu.darkbot.api.objects.group.PartialGroupMember {
+public class PartialGroupMember extends UpdatableAuto implements eu.darkbot.api.game.group.PartialGroupMember {
     public int id;
     public String username;
 

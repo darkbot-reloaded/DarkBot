@@ -128,7 +128,7 @@ public class RepairManager implements Manager, RepairAPI {
     }
 
     @Override
-    public int getDeathsAmount() {
+    public int getDeathAmount() {
         return deaths;
     }
 

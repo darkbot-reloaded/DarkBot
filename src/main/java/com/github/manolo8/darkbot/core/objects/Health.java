@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Health extends Updatable implements HealthHolder, eu.darkbot.api.objects.Health {
+public class Health extends Updatable implements HealthHolder, eu.darkbot.api.game.other.Health {
 
     public int hp;
     public int maxHp;

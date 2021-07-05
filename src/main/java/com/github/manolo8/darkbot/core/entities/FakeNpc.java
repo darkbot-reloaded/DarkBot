@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.utils.Location;
-import eu.darkbot.api.objects.Locatable;
 
 public class FakeNpc extends Npc {
 
