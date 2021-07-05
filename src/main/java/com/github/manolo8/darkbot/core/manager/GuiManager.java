@@ -14,7 +14,7 @@ import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.PluginAPI;
-import eu.darkbot.api.entities.utils.Area;
+import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.managers.GameScreenAPI;
 
 import java.util.ArrayList;
@@ -284,7 +284,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.objects.Gui> getGuis() {
+    public Collection<? extends eu.darkbot.api.game.other.Gui> getGuis() {
         return registeredGuis;
     }
 

@@ -148,4 +148,9 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
     public <T> FeatureInfo<T> getFeatureInfo(Class<T> feature) {
         return getFeatureDefinition(feature);
     }
+
+    @Override
+    public ClassLoader getClassLoader(PluginInfo pluginInfo) {
+        return pluginHandler.PLUGIN_CLASS_LOADER;
+    }
 }

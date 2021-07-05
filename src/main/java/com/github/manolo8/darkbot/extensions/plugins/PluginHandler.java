@@ -7,6 +7,9 @@ import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.google.gson.Gson;
 import eu.darkbot.api.API;
+import eu.darkbot.api.managers.EventBrokerAPI;
+import eu.darkbot.api.managers.ExtensionsAPI.PluginLifetimeEvent;
+import eu.darkbot.api.managers.ExtensionsAPI.PluginStage;
 
 import javax.swing.*;
 import java.io.File;
@@ -16,14 +19,12 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -61,8 +62,14 @@ public class PluginHandler implements API.Singleton {
 
     private static final List<PluginListener> LISTENERS = new ArrayList<>();
 
+    private final EventBrokerAPI eventBroker;
+
     public void addListener(PluginListener listener) {
         if (!LISTENERS.contains(listener)) LISTENERS.add(listener);
+    }
+
+    public PluginHandler(EventBrokerAPI eventBroker) {
+        this.eventBroker = eventBroker;
     }
 
     private final Object BACKGROUND_LOCK = new Object();
@@ -110,6 +117,7 @@ public class PluginHandler implements API.Singleton {
             FAILED_PLUGINS.clear();
             LOADING_EXCEPTIONS.clear();
             LISTENERS.forEach(PluginListener::beforeLoad);
+            eventBroker.sendEvent(new PluginLifetimeEvent(PluginStage.BEFORE_LOAD));
             System.gc();
 
             if (PLUGIN_CLASS_LOADER != null) {
@@ -137,9 +145,14 @@ public class PluginHandler implements API.Singleton {
                 e.printStackTrace();
             }
             LISTENERS.forEach(PluginListener::afterLoad);
+            eventBroker.sendEvent(new PluginLifetimeEvent(PluginStage.AFTER_LOAD));
         }
         LISTENERS.forEach(PluginListener::afterLoadComplete);
-        SwingUtilities.invokeLater(() -> LISTENERS.forEach(PluginListener::afterLoadCompleteUI));
+        eventBroker.sendEvent(new PluginLifetimeEvent(PluginStage.AFTER_LOAD_COMPLETE));
+        SwingUtilities.invokeLater(() -> {
+            LISTENERS.forEach(PluginListener::afterLoadCompleteUI);
+            eventBroker.sendEvent(new PluginLifetimeEvent(PluginStage.AFTER_LOAD_COMPLETE_UI));
+        });
     }
 
     public Stream<Plugin> getAvailableUpdates() {

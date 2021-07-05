@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.core.utils.pathfinder;
 
 import com.github.manolo8.darkbot.core.utils.Location;
-import eu.darkbot.api.entities.utils.Area;
-import eu.darkbot.api.objects.Locatable;
+import eu.darkbot.api.game.other.Area;
+import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.utils.PathFinder;
 import org.jetbrains.annotations.NotNull;
 

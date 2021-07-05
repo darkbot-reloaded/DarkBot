@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.types.Placeholder;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
+import eu.darkbot.api.config.annotations.Text;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,11 +31,14 @@ public class JStringField extends JTextField implements OptionEditor {
     public void edit(ConfigField field) {
         this.field = null;
         setText(Objects.toString(field.get(), ""));
+        Text text = field.field.getAnnotation(Text.class);
+
         Length len = field.field.getAnnotation(Length.class);
-        setColumns(len == null ? 10 : len.value());
+        setColumns(len != null ? len.value() : text != null ? text.length() : 10);
 
         Placeholder ph = field.field.getAnnotation(Placeholder.class);
-        putClientProperty("JTextField.placeholderText", ph != null ? ph.value() : null);
+        putClientProperty("JTextField.placeholderText", ph != null ? ph.value() :
+                text != null && !text.placeholder().isEmpty() ? text.placeholder() : null);
 
         this.field = field;
     }

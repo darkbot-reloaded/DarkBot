@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @JsonAdapter(PlayerTag.TagAdapter.class)
-public class PlayerTag {
+public class PlayerTag implements eu.darkbot.api.config.util.PlayerTag {
     private static transient final Map<String, PlayerTag> INSTANCES = new HashMap<>();
 
     public static PlayerTag getTag(String name, Color color) {
@@ -67,6 +67,16 @@ public class PlayerTag {
         public PlayerTag read(JsonReader in) throws IOException {
             return getTag(in.nextString());
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Color getColor() {
+        return color;
     }
 
 }
