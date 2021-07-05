@@ -7,8 +7,8 @@ import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
-import eu.darkbot.api.items.SelectableItem;
-import eu.darkbot.api.items.ItemCategory;
+import eu.darkbot.api.game.items.SelectableItem;
+import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.managers.HeroItemsAPI;
 
 import java.util.Objects;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Npc extends Ship implements eu.darkbot.api.entities.Npc {
+public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
     private static final NpcInfo INITIAL_NPC_INFO = new NpcInfo(); // Prevent NPE trying to obtain npc info.
 
     public NpcInfo npcInfo = INITIAL_NPC_INFO;

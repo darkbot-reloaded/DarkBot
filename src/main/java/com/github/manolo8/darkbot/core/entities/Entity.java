@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Entity extends Updatable implements eu.darkbot.api.entities.Entity {
+public class Entity extends Updatable implements eu.darkbot.api.game.entities.Entity {
     public Main main;
     public Map<String, Object> metadata;
     public LocationInfo locationInfo = new LocationInfo();

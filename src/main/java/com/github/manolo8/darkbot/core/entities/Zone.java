@@ -3,7 +3,7 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
-import eu.darkbot.api.entities.utils.Area;
+import eu.darkbot.api.game.other.Area;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Zone
-        extends Entity implements eu.darkbot.api.entities.Zone {
+        extends Entity implements eu.darkbot.api.game.entities.Zone {
 
     private final RectangleImpl area = new RectangleImpl(0, 0, 0, 0);
     private final ObjArray pointsArr = ObjArray.ofVector(true);

@@ -19,7 +19,7 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.factory.EntityFactory;
 import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
-import eu.darkbot.api.entities.Station;
+import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.EntitiesAPI;
 
 import java.util.ArrayList;
@@ -163,37 +163,37 @@ public class EntityList extends Updatable implements EntitiesAPI {
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.Npc> getNpcs() {
+    public Collection<? extends eu.darkbot.api.game.entities.Npc> getNpcs() {
         return Collections.unmodifiableList(npcs);
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.Pet> getPets() {
+    public Collection<? extends eu.darkbot.api.game.entities.Pet> getPets() {
         return Collections.unmodifiableList(pets);
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.Ship> getPlayers() {
+    public Collection<? extends eu.darkbot.api.game.entities.Ship> getPlayers() {
         return Collections.unmodifiableList(players);
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.Ship> getShips() {
+    public Collection<? extends eu.darkbot.api.game.entities.Ship> getShips() {
         return Collections.unmodifiableList(ships);
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.Box> getBoxes() {
+    public Collection<? extends eu.darkbot.api.game.entities.Box> getBoxes() {
         return Collections.unmodifiableList(boxes);
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.Mine> getMines() {
+    public Collection<? extends eu.darkbot.api.game.entities.Mine> getMines() {
         return Collections.unmodifiableList(mines);
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.Portal> getPortals() {
+    public Collection<? extends eu.darkbot.api.game.entities.Portal> getPortals() {
         return Collections.unmodifiableList(portals);
     }
 
@@ -203,24 +203,24 @@ public class EntityList extends Updatable implements EntitiesAPI {
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.BattleStation> getBattleStations() {
+    public Collection<? extends eu.darkbot.api.game.entities.BattleStation> getBattleStations() {
         return Collections.unmodifiableList(battleStations);
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.Entity> getAll() {
+    public Collection<? extends eu.darkbot.api.game.entities.Entity> getAll() {
         return allEntities.stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.entities.Entity> getUnknown() {
+    public Collection<? extends eu.darkbot.api.game.entities.Entity> getUnknown() {
         return Collections.unmodifiableList(unknown);
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.objects.Obstacle> getObstacles() {
+    public Collection<? extends eu.darkbot.api.game.other.Obstacle> getObstacles() {
         return Collections.unmodifiableList(obstacles);
     }
 }

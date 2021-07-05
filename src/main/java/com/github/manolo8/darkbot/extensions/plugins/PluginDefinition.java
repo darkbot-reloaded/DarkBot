@@ -7,6 +7,8 @@ import java.net.URL;
 public class PluginDefinition {
     private transient final String[] NULL_ARRAY = new String[0];
 
+    // Base package of the plugin, resources should be in this package
+    public String basePackage;
     // Name of the plugin
     public String name;
     // Author of the plugin

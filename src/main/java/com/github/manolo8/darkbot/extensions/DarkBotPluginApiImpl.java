@@ -8,14 +8,16 @@ import com.github.manolo8.darkbot.core.objects.facades.*;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
-import eu.darkbot.api.PluginApiImpl;
-import com.github.manolo8.darkbot.core.manager.EventBroker;
-import eu.darkbot.shared.managers.AttackApiImpl;
+import com.github.manolo8.darkbot.modules.utils.NpcAttacker;
+import com.github.manolo8.darkbot.utils.LegacyModules;
+import eu.darkbot.impl.PluginApiImpl;
+import eu.darkbot.impl.managers.EventBroker;
+import eu.darkbot.impl.managers.GalaxySpinner;
 
 public class DarkBotPluginApiImpl extends PluginApiImpl {
 
     public DarkBotPluginApiImpl(Main main) {
-        addInstance(main, StarManager.getInstance());
+        addInstance(main, Main.API, StarManager.getInstance(), main.configManager);
         addImplementations(
                 BackpageManager.class,
                 EntityList.class,
@@ -29,7 +31,9 @@ public class DarkBotPluginApiImpl extends PluginApiImpl {
                 RepairManager.class,
                 MapManager.class,
                 StatsManager.class,
-                AttackApiImpl.class);
+                NpcAttacker.class,
+                GalaxySpinner.class,
+                LegacyModules.class);
     }
 
 }

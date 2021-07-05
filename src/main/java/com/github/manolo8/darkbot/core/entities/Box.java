@@ -8,7 +8,7 @@ import java.time.Instant;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Box extends Entity implements eu.darkbot.api.entities.Box {
+public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
 
     private long collectedUntil;
     private int retries = 0;

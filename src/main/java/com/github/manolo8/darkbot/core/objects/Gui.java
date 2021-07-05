@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Gui extends Updatable implements API, eu.darkbot.api.objects.Gui {
+public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui {
 
     protected final Point pos = new Point();
     protected final Point size = new Point();

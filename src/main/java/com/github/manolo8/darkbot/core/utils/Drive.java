@@ -3,17 +3,14 @@ package com.github.manolo8.darkbot.core.utils;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.MouseManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.utils.MathUtils;
-import eu.darkbot.api.entities.Portal;
+import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.managers.MovementAPI;
-import eu.darkbot.api.objects.Locatable;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -224,19 +221,8 @@ public class Drive implements MovementAPI {
     }
 
     @Override
-    public boolean moveToPortal(@NotNull Portal portal) {
-        double leniency = Math.min(200 + getClosestDistance(portal), 600);
-        if (/*target.locationInfo.isLoaded() &&*/ portal.distanceTo(movingTo()) > leniency) {
-            moveTo(eu.darkbot.api.objects.Location.of(portal, Math.random() * Math.PI * 2, Math.random() * 200));
-            return false;
-        }
-        return heroLoc.distanceTo(portal) <= leniency && !isMoving();
-    }
-
-    @Override
     public void jumpPortal(Portal portal) {
-        if (portal instanceof com.github.manolo8.darkbot.core.entities.Portal)
-            main.hero.jumpPortal((com.github.manolo8.darkbot.core.entities.Portal) portal);
+        main.hero.jumpPortal(portal);
     }
 
     @Override

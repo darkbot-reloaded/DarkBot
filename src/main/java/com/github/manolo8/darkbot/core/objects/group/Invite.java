@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.objects.group;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
-import eu.darkbot.api.objects.group.GroupMember;
+import eu.darkbot.api.game.group.GroupMember;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -28,12 +28,12 @@ public class Invite extends UpdatableAuto implements GroupMember.Invite {
     }
 
     @Override
-    public eu.darkbot.api.objects.group.PartialGroupMember getInviter() {
+    public eu.darkbot.api.game.group.PartialGroupMember getInviter() {
         return inviter;
     }
 
     @Override
-    public eu.darkbot.api.objects.group.PartialGroupMember getInvited() {
+    public eu.darkbot.api.game.group.PartialGroupMember getInvited() {
         return invited;
     }
 

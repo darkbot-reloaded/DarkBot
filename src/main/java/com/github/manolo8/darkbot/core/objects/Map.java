@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core.objects;
 
-import eu.darkbot.api.entities.utils.GameMap;
+import eu.darkbot.api.game.other.GameMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

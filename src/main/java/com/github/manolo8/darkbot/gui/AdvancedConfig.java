@@ -1,14 +1,11 @@
 package com.github.manolo8.darkbot.gui;
 
-import com.formdev.flatlaf.ui.FlatButtonBorder;
-import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.tree.ConfigNode;
 import com.github.manolo8.darkbot.config.tree.ConfigTree;
 import com.github.manolo8.darkbot.config.tree.TreeFilter;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.gui.components.MainButton;
-import com.github.manolo8.darkbot.gui.utils.CustomTabBorder;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.tree.EditorManager;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
@@ -80,7 +77,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     }
 
     @Override
-    public void afterLoadComplete() {
+    public void afterLoadCompleteUI() {
         setEditingConfig(config);
     }
 

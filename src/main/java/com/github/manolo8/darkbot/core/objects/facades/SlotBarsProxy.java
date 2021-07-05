@@ -4,10 +4,10 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.core.objects.slotbars.SlotBar;
-import eu.darkbot.api.items.ItemCategory;
-import eu.darkbot.api.items.ItemFlag;
-import eu.darkbot.api.items.ItemUseResult;
-import eu.darkbot.api.items.SelectableItem;
+import eu.darkbot.api.game.items.ItemCategory;
+import eu.darkbot.api.game.items.ItemFlag;
+import eu.darkbot.api.game.items.ItemUseResult;
+import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroItemsAPI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,13 +59,13 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.items.Item> getItems(@NotNull ItemCategory itemCategory) {
+    public Collection<? extends eu.darkbot.api.game.items.Item> getItems(@NotNull ItemCategory itemCategory) {
         return categoryBar.get(itemCategory).items;
     }
 
     @Override
-    public Optional<eu.darkbot.api.items.Item> getItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags) {
-        Optional<eu.darkbot.api.items.Item> item = Optional.ofNullable(getItem(selectableItem));
+    public Optional<eu.darkbot.api.game.items.Item> getItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags) {
+        Optional<eu.darkbot.api.game.items.Item> item = Optional.ofNullable(getItem(selectableItem));
 
         return item.filter(i -> checkItemFlags((Item) i, itemFlags) == null);
     }

@@ -17,9 +17,19 @@
             <id>jfrog</id>
             <url>https://oss.jfrog.org/artifactory/oss-snapshot-local/com/formdev/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
+
+        <dependency>
+            <groupId>eu.darkbot.DarkBotAPI</groupId>
+            <artifactId>darkbot-impl</artifactId>
+            <version>master-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>com.google.code.gson</groupId>

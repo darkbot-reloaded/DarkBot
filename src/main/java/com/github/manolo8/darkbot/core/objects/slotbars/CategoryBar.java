@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import eu.darkbot.api.items.ItemCategory;
+import eu.darkbot.api.game.items.ItemCategory;
 
 import java.util.*;
 

@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core.entities;
 
-import eu.darkbot.api.entities.Station;
+import eu.darkbot.api.game.entities.Station;
 
 public class BasePoint extends Entity implements Station {
 

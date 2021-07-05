@@ -2,11 +2,11 @@ package com.github.manolo8.darkbot.core.objects.group;
 
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Location;
-import eu.darkbot.api.objects.EntityInfo;
+import eu.darkbot.api.game.other.EntityInfo;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class GroupMember extends PartialGroupMember implements eu.darkbot.api.objects.group.GroupMember {
+public class GroupMember extends PartialGroupMember implements eu.darkbot.api.game.group.GroupMember {
     public Location location = new Location();
     public MemberInfo memberInfo = new MemberInfo();
     public MemberInfo targetInfo = new MemberInfo();
@@ -47,17 +47,17 @@ public class GroupMember extends PartialGroupMember implements eu.darkbot.api.ob
     }
 
     @Override
-    public eu.darkbot.api.objects.Location getLocation() {
+    public eu.darkbot.api.game.other.Location getLocation() {
         return location;
     }
 
     @Override
-    public eu.darkbot.api.objects.group.MemberInfo getMemberInfo() {
+    public eu.darkbot.api.game.group.MemberInfo getMemberInfo() {
         return memberInfo;
     }
 
     @Override
-    public eu.darkbot.api.objects.group.MemberInfo getTargetInfo() {
+    public eu.darkbot.api.game.group.MemberInfo getTargetInfo() {
         return targetInfo;
     }
 

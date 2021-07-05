@@ -15,7 +15,6 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
 
     private final @Nullable Plugin plugin;
     private final Class<T> clazz;
-    private final Feature feature;
     private final IssueHandler issues;
 
     private final String id;
@@ -29,17 +28,30 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
     public FeatureDefinition(@Nullable Plugin plugin, Class<T> clazz) {
         this.plugin = plugin;
         this.clazz = clazz;
-        this.feature = clazz.getAnnotation(Feature.class);
         this.issues = new IssueHandler(plugin == null ? null : plugin.getIssues());
 
         this.id = clazz.getCanonicalName();
-        this.name = feature.name();
-        this.description = feature.description();
+
+
+        boolean enabledByDefault;
+        if (clazz.getAnnotation(Feature.class) != null) {
+            Feature feature = clazz.getAnnotation(Feature.class);
+            this.name = feature.name();
+            this.description = feature.description();
+            enabledByDefault = feature.enabledByDefault();
+        } else {
+            eu.darkbot.api.extensions.Feature feature = clazz.getAnnotation(eu.darkbot.api.extensions.Feature.class);
+            this.name = feature.name();
+            this.description = feature.description();
+            enabledByDefault = feature.enabledByDefault();
+        }
 
         if (plugin != null
                 && !plugin.getInfo().ENABLED_FEATURES.contains(id)
                 && !plugin.getInfo().DISABLED_FEATURES.contains(id)) {
-            setStatusInternal(Module.class.isAssignableFrom(clazz) || feature.enabledByDefault());
+            // Intentionally uses old module class, newer features will
+            // always rely exclusively on if set to be enabled by default
+            setStatusInternal(Module.class.isAssignableFrom(clazz) || enabledByDefault);
         }
     }
 
@@ -49,10 +61,6 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
 
     public Class<T> getClazz() {
         return clazz;
-    }
-
-    public Feature getFeature() {
-        return feature;
     }
 
     public IssueHandler getIssues() {
