@@ -224,19 +224,8 @@ public class Drive implements MovementAPI {
     }
 
     @Override
-    public boolean moveToPortal(@NotNull Portal portal) {
-        double leniency = Math.min(200 + getClosestDistance(portal), 600);
-        if (/*target.locationInfo.isLoaded() &&*/ portal.distanceTo(movingTo()) > leniency) {
-            moveTo(eu.darkbot.api.objects.Location.of(portal, Math.random() * Math.PI * 2, Math.random() * 200));
-            return false;
-        }
-        return heroLoc.distanceTo(portal) <= leniency && !isMoving();
-    }
-
-    @Override
     public void jumpPortal(Portal portal) {
-        if (portal instanceof com.github.manolo8.darkbot.core.entities.Portal)
-            main.hero.jumpPortal((com.github.manolo8.darkbot.core.entities.Portal) portal);
+        main.hero.jumpPortal(portal);
     }
 
     @Override

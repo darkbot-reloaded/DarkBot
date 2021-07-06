@@ -37,4 +37,10 @@ public interface Portal extends Entity {
      * @return the {@link EntityInfo.Faction} of the {@link Portal}
      */
     EntityInfo.Faction getFaction();
+
+    /**
+     * If the hero is currently jumping thru this portal
+     * @return true if you're jumping, false otherwise
+     */
+    boolean isJumping();
 }

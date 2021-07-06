@@ -6,6 +6,7 @@ import eu.darkbot.api.entities.other.PetGear;
 import eu.darkbot.api.objects.Location;
 import eu.darkbot.api.utils.ItemNotEquippedException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -17,14 +18,20 @@ import java.util.Optional;
 public interface PetAPI extends Pet, API.Singleton {
 
     /**
-     * @return true if pet by module was marked to be enabled.
+     * @return true if pet was set to enabled by the current module via {@link #setEnabled}
      */
     boolean isEnabled();
 
     /**
-     * Will change enabled flag for pet.
-     * If was set to {@code true} bot will try to enable the pet,
-     * only if user configured bot to use the pet.
+     * Will set the flag for if pet is enabled or disabled to use by the current module.
+     *
+     * All modules should call this method to enable or disable pet depending on operation.
+     * A module that doesn't call this method will see inconsistent PET behavior, it will be
+     * enabled or disabled depending on what the previous module set it to.
+     *
+     * Regardless of if it's enabled, pet will not be used if the user hasn't enabled it in the settings.
+     *
+     * @param enabled true to enable pet, false to disable
      */
     void setEnabled(boolean enabled);
 
@@ -39,13 +46,13 @@ public interface PetAPI extends Pet, API.Singleton {
     boolean isRepaired();
 
     /**
-     * @return pet's repair count
+     * @return amount of times the pet has been repaired
      */
     int getRepairCount();
 
     /**
-     * @param gearId to be checked
-     * @return true if given gear is available.
+     * @param gearId gear to check if available to set
+     * @return true if the hero has this gear equipped and can be set, false otherwise.
      */
     boolean hasGear(int gearId);
 
@@ -54,20 +61,22 @@ public interface PetAPI extends Pet, API.Singleton {
     }
 
     /**
-     * @param gearId to be set
-     * @throws ItemNotEquippedException if given gear is not equipped or doesn't exists
+     * Sets the gear that the pet should be using, overriding what the user has asked for in the settings.
+     *
+     * This function must be called repeatedly for the gear to be set and maintained, if there are
+     * no calls to setGear it will fall-back to the user-configured gear after a short period of time.
+     *
+     * This is done to avoid a permanent state change being done by a module that could be short-lived.
+     * Only the module should call this function, as it's the one in control when conflicts can occur.
+     *
+     * @param gearId gear to set when possible, null to default back to user choice
+     * @throws ItemNotEquippedException if given gear is not equipped or doesn't exist
      */
-    void setGear(int gearId) throws ItemNotEquippedException;
+    void setGear(@Nullable Integer gearId) throws ItemNotEquippedException;
 
-    default void setGear(@NotNull PetGear petGear) throws ItemNotEquippedException {
-        setGear(petGear.getId());
+    default void setGear(@Nullable PetGear petGear) throws ItemNotEquippedException {
+        setGear(petGear == null ? null : petGear.getId());
     }
-
-    /**
-     * @return {@link Location} of pet locator target
-     * or else {@link Optional#empty()} if theres none.
-     */
-    Optional<Location> getLocatorNpcLoc();
 
     /**
      * Checks if pet has the given {@link PetGear.Cooldown},
@@ -92,10 +101,39 @@ public interface PetAPI extends Pet, API.Singleton {
         return cd != null && hasCooldown(cd);
     }
 
-    double getFuel();
-    double getMaxFuel();
+    /**
+     * @return {@link Location} of pet locator target ping, {@link Optional#empty()} if unavailable.
+     */
+    Optional<Location> getLocatorNpcLoc();
 
-    double getHeat();
-    double getMaxHeat();
+    /**
+     * Get fuel, xp, and other pet stats available in the window
+     *
+     * @param stat PET stat to search for
+     * @return PET stat corresponding to the asked type
+     */
+    PetStat getStat(Stat stat);
+
+    /**
+     * Represents a stat in the pet, like health, shield, fuel, etc
+     */
+    interface PetStat {
+        /**
+         * @return current value of this stat in the pet window
+         */
+        double getCurrent();
+
+        /**
+         * @return the maximum value of this stat in the pet window
+         */
+        double getTotal();
+    }
+
+    /**
+     * The available pet stats for search
+     */
+    enum Stat {
+        HP, SHIELD, FUEL, XP, HEAT;
+    }
 
 }

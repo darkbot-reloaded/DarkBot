@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
-import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
@@ -13,13 +12,13 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.entities.Entity;
+import eu.darkbot.api.entities.Portal;
 import eu.darkbot.api.items.ItemFlag;
 import eu.darkbot.api.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -32,7 +31,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     public final Main main;
     private final SettingsManager settings;
     private final SettingsProxy keybinds;
-    private final List<Portal> portals;
+    private final Collection<? extends Portal> portals;
 
     private long staticAddress;
 
@@ -59,7 +58,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         this.main = super.main = main;
         this.settings = main.settingsManager;
         this.keybinds = main.facadeManager.settings;
-        this.portals = main.mapManager.entities.portals;
+        this.portals = main.mapManager.entities.getPortals();
         this.drive = pluginAPI.requireInstance(Drive.class);
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
@@ -124,10 +123,10 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     public void jumpPortal(Portal portal) {
-        if (portal.removed) return;
+        if (!portal.isValid()) return;
         if (System.currentTimeMillis() - portalTime < 500) return; // Minimum delay
         if ((System.currentTimeMillis() - portalTime > 20000 || isNotJumping(portal)) &&
-                (portal.clickable.enabled || portals.stream().noneMatch(p -> p != portal && p.clickable.enabled))) {
+                portal.isSelectable() || portals.stream().noneMatch(p -> p != portal && p.isSelectable())) {
             API.keyboardClick(keybinds.getCharCode(JUMP_GATE));
             portalTime = System.currentTimeMillis();
         }
@@ -135,8 +134,8 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
 
     // Consider not jumping if still on current map and nextMap is either unset or not the portal target map
     private boolean isNotJumping(Portal portal) {
-        return !portal.isJumping && map.id == settings.currMap &&
-                (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id);
+        return !portal.isJumping() && map.id == settings.currMap &&
+                (settings.nextMap == -1 || portal.getTargetMap().map(m -> m.getId() != settings.nextMap).orElse(true));
     }
 
     public boolean attackMode() {

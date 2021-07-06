@@ -1,5 +1,6 @@
 package eu.darkbot.api;
 
+import eu.darkbot.api.utils.Inject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,10 +21,18 @@ public class PluginApiImpl implements PluginAPI {
         singletons.add(this);
     }
 
+    /**
+     * Adds singleton instances that will be used to fill-in api parameters
+     * @param singletons singletons to use
+     */
     public void addInstance(Singleton... singletons) {
         Collections.addAll(this.singletons, singletons);
     }
 
+    /**
+     * Adds what implementation classes should be used for different APIs
+     * @param implementations implementation classes to use
+     */
     @SafeVarargs
     public final void addImplementations(Class<? extends API>... implementations) {
         Collections.addAll(this.implClasses, implementations);
@@ -39,6 +48,28 @@ public class PluginApiImpl implements PluginAPI {
         return impl;
     }
 
+    private Constructor<?> getBestConstructor(Class<?> clazz) {
+        Constructor<?>[] constructors = clazz.getConstructors();
+        if (constructors.length == 0)
+            throw new UnsupportedOperationException("No public constructor exists for " + clazz.getName());
+        // Ideal case, just one constructor to call
+        if (constructors.length == 1) return constructors[0];
+
+        // For multiple constructors, search for the @Inject annotation
+        Constructor<?> result = null;
+        for (Constructor<?> c : constructors) {
+            if (c.getAnnotation(Inject.class) == null) continue;
+            if (result != null)
+                throw new UnsupportedOperationException("Found multiple @Inject constructors in " + clazz.getName() +
+                        ". You must only annotate one constructor with @Inject");
+            result = c;
+        }
+        if (result == null)
+            throw new UnsupportedOperationException("Multiple constructors were found in " + clazz.getName() +
+                    ". You must either annotate one with @Inject or");
+        return result;
+    }
+
     private <T> T createNewInstance(Class<T> clazz) throws UnsupportedOperationException {
         if (clazz.isInterface())
             return (T) createNewInstance(implClasses.stream()
@@ -47,16 +78,17 @@ public class PluginApiImpl implements PluginAPI {
                     .orElseThrow(() ->
                             new UnsupportedOperationException("No implementation found for " + clazz.getName())));
 
-        Constructor<?> constructor = Arrays.stream(clazz.getConstructors())
-                .filter(c ->
-                        Arrays.stream(c.getParameterTypes()).allMatch(API.class::isAssignableFrom))
-                .findFirst()
-                .orElseThrow(() -> new UnsupportedOperationException("No API-only constructor in " + clazz.getName()));
+        Constructor<?> constructor = getBestConstructor(clazz);
 
         try {
-            return (T) constructor.newInstance(Arrays.stream(constructor.getParameterTypes())
-                    .map(p -> getOrCreate((Class<API>) p))
-                    .toArray(Object[]::new));
+            // Not doing this in a stream in an attempt to keep stack traces as clear as possible
+            Object[] params = new Object[constructor.getParameterCount()];
+            Class<?>[] types = constructor.getParameterTypes();
+            for (int i = 0; i < params.length; i++) {
+                params[i] = getOrCreate(types[i]);
+            }
+
+            return (T) constructor.newInstance(params);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException("Exception calling constructor for API: " + clazz.getName(), e);
         }

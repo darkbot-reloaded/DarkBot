@@ -53,7 +53,6 @@ public class CollectorModule implements Module {
 
     private long invisibleUntil, waitingUntil;
 
-    //@Feature.Inject
     public CollectorModule(BotAPI bot,
                            PetAPI pet,
                            HeroAPI hero,

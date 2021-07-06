@@ -2,7 +2,7 @@ package eu.darkbot.api.objects.galaxy;
 
 import java.time.Instant;
 
-public interface Item {
+public interface SpinResult {
 
     Instant getDate();
 

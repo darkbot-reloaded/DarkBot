@@ -98,4 +98,9 @@ public class Portal extends Entity implements eu.darkbot.api.entities.Portal {
     public EntityInfo.Faction getFaction() {
         return EntityInfo.Faction.of(factionId);
     }
+
+    @Override
+    public boolean isJumping() {
+        return isJumping;
+    }
 }

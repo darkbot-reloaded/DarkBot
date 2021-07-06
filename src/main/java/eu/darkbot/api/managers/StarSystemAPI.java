@@ -62,7 +62,10 @@ public interface StarSystemAPI extends API.Singleton {
     GameMap getByName(String mapName) throws MapNotFoundException;
 
     /**
-     * @return best {@link Portal} which leads to {@code targetMap}
+     * Pathfinding thru maps towards a goal, this returns the portal
+     * to use to get closer to the target.
+     *
+     * @return best {@link Portal} that will get you closer to {@code targetMap}
      */
     Portal findNext(GameMap targetMap);
 

@@ -384,10 +384,15 @@ public class PetManager extends Gui implements PetAPI {
         }
     }
 
-    public class PetStats {
+    public class PetStats implements PetStat {
         private double curr, total;
 
         public double getCurr() {
+            return curr;
+        }
+
+        @Override
+        public double getCurrent() {
             return curr;
         }
 
@@ -586,9 +591,9 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
-    public void setGear(int gearId) throws ItemNotEquippedException {
-        if (!hasGear(gearId))
-            throw new ItemNotEquippedException(PetGear.of(gearId));
+    public void setGear(Integer gearId) throws ItemNotEquippedException {
+        if (gearId != null && !hasGear(gearId))
+            throw new ItemNotEquippedException(PetGear.of(gearId), "Gear #" + gearId);
 
         this.setOverride(gearId);
     }
@@ -603,22 +608,7 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
-    public double getFuel() {
-        return getPetStats(PetStatsType.FUEL).curr;
-    }
-
-    @Override
-    public double getMaxFuel() {
-        return getPetStats(PetStatsType.FUEL).total;
-    }
-
-    @Override
-    public double getHeat() {
-        return getPetStats(PetStatsType.HEAT).curr;
-    }
-
-    @Override
-    public double getMaxHeat() {
-        return getPetStats(PetStatsType.HEAT).total;
+    public PetStat getStat(Stat stat) {
+        return petStats.get(PetStatsType.valueOf(stat.name()));
     }
 }

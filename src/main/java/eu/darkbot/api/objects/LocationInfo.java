@@ -40,6 +40,13 @@ public interface LocationInfo extends Location {
      */
     Location getPast();
 
+    /**
+     * If this location info has been initialized to a memory address.
+     * If false the x & y coordinates will likely point to 0,0
+     * @return true if this location info has been initialized, false otherwise
+     */
+    boolean isInitialized();
+
     @Override
     default double getX() {
         return getCurrent().getX();

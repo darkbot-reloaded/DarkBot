@@ -34,13 +34,14 @@ public class MapTraveler implements Listener, Installable {
                        HeroAPI heroApi,
                        StarSystemAPI starSystem,
                        MovementAPI movement,
+                       PortalJumper jumper,
                        EntitiesAPI entities,
                        EventBrokerAPI eventBroker) {
         this.pet = petApi;
         this.hero = heroApi;
         this.star = starSystem;
         this.movement = movement;
-        this.jumper = new PortalJumper(movement);
+        this.jumper = jumper;
         this.portals = entities.getPortals();
         this.eventBroker = eventBroker;
     }
@@ -94,19 +95,7 @@ public class MapTraveler implements Listener, Installable {
             pet.setEnabled(false);
         hero.setRunMode();
 
-        if (!moveToCurrent()) return;
-        jumper.jump(current);
-    }
-
-    protected boolean moveToCurrent() {
-        double leniency = Math.min(200 + movement.getClosestDistance(current), 600);
-        if (current.isValid() && movement.getDestination() != null &&
-                movement.getDestination().distanceTo(current) > leniency) {
-
-            movement.moveTo(Location.of(current, Math.random() * Math.PI * 2, Math.random() * 200));
-            return false;
-        }
-        return hero.getLocationInfo().distanceTo(current) <= leniency && !movement.isMoving();
+        jumper.travelAndJump(current);
     }
 
     @EventHandler
