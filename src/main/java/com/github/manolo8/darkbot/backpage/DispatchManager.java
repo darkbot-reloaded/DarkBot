@@ -93,7 +93,7 @@ public class DispatchManager {
     public List<String> collectAll() {
         return data.getInProgress().values().stream()
                 .filter(this::collect)
-                .map(InProgress::getName)
+                .map(InProgress::getId)
                 .collect(Collectors.toList());
     }
 
