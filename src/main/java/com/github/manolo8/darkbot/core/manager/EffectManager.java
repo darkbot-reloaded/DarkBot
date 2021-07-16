@@ -62,12 +62,12 @@ public class EffectManager implements Manager {
         ENERGY_LEECH(11),
         NPC_ISH(16),
         DRAW_FIRE(36),
-        ISH(84),
         STICKY_BOMB(56),
         POLARITY_POSITIVE(65),
         POLARITY_NEGATIVE(66),
-        INFECTION(85),
-        REPAIRING(76);
+        REPAIR_BOT(76),
+        ISH(84),
+        INFECTION(85);
 
         private final int id;
 
