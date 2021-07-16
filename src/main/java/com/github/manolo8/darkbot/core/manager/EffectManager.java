@@ -67,7 +67,7 @@ public class EffectManager implements Manager {
         POLARITY_POSITIVE(65),
         POLARITY_NEGATIVE(66),
         INFECTION(85),
-        REPAIRING(76);
+        REPAIRING_ROBOT(76);
 
         private final int id;
 
