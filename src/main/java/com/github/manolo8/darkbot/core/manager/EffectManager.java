@@ -65,7 +65,7 @@ public class EffectManager implements Manager {
         STICKY_BOMB(56),
         POLARITY_POSITIVE(65),
         POLARITY_NEGATIVE(66),
-        REPAIRING_ROBOT(76),
+        REPAIR_BOT(76),
         ISH(84),
         INFECTION(85);
 
