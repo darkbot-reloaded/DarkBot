@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
+import com.github.manolo8.darkbot.core.entities.Unknown;
 import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
 import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
 import com.github.manolo8.darkbot.core.entities.bases.BaseHangar;
@@ -30,7 +31,7 @@ import java.util.regex.Pattern;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public enum EntityFactory {
+public enum EntityFactory implements EntityBuilder {
     BOX             (Box::new,           "box_.*"),
     ORE             (Box::new,           "ore_.*"),
     X2_BEACON       (Box::new,           "beacon_.*"),
@@ -72,7 +73,7 @@ public enum EntityFactory {
     PLAYER   (Ship::new),
     NPC      (Npc::new),
 
-    UNKNOWN  (Entity::new, (asset, addr) -> true);
+    UNKNOWN  (Entity::new, (asset, addr) -> false);
 
     // Constructor to create the entity of this type
     private final BiFunction<Integer, Long, ? extends Entity> constructor;
@@ -117,14 +118,14 @@ public enum EntityFactory {
         return this.constructor == null ? null : this.constructor.apply(id, address);
     }
 
-    public static EntityFactory find(long address) {
+    public static EntityBuilder find(long address) {
         String assetId = getAssetId(address);
 
         for (EntityFactory type : EntityFactory.values()) {
             if (type.typeMatcher.test(assetId, address)) return type;
         }
 
-        return UNKNOWN;
+        return (id, addr) -> new Unknown(id, addr, assetId);
     }
 
     private static String getAssetId(long address) {
