@@ -1,9 +1,9 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.*;
+import eu.darkbot.api.game.entities.*;
 import eu.darkbot.api.events.Event;
-import eu.darkbot.api.objects.Obstacle;
+import eu.darkbot.api.game.other.Obstacle;
 
 import java.util.Collection;
 

@@ -1,9 +1,9 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.Npc;
-import eu.darkbot.api.entities.Ship;
-import eu.darkbot.api.items.SelectableItem;
+import eu.darkbot.api.game.entities.Npc;
+import eu.darkbot.api.game.entities.Ship;
+import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.shared.managers.HeroModeImpl;
 import org.jetbrains.annotations.Nullable;
 

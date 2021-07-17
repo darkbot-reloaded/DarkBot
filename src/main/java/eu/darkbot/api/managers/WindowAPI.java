@@ -1,7 +1,7 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.objects.Point;
+import eu.darkbot.api.game.other.Point;
 
 /**
  * Utility to manage game window

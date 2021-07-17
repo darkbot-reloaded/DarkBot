@@ -1,7 +1,7 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.Station;
+import eu.darkbot.api.game.entities.Station;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;

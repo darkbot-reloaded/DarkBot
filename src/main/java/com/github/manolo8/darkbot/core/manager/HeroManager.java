@@ -11,10 +11,10 @@ import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import eu.darkbot.api.PluginAPI;
-import eu.darkbot.api.entities.Entity;
-import eu.darkbot.api.entities.Portal;
-import eu.darkbot.api.items.ItemFlag;
-import eu.darkbot.api.items.SelectableItem;
+import eu.darkbot.api.game.entities.Entity;
+import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.items.ItemFlag;
+import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
 import org.jetbrains.annotations.Nullable;
 
@@ -226,7 +226,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     @Override
-    public boolean setAttackMode(eu.darkbot.api.entities.Npc target) {
+    public boolean setAttackMode(eu.darkbot.api.game.entities.Npc target) {
         return attackMode((Npc) target);
     }
 
@@ -246,7 +246,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     @Override
-    public Optional<eu.darkbot.api.entities.Pet> getPet() {
+    public Optional<eu.darkbot.api.game.entities.Pet> getPet() {
         return hasPet() ? Optional.of(pet) : Optional.empty();
     }
 }

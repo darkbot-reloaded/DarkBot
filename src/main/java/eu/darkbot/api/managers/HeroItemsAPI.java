@@ -1,7 +1,7 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.items.*;
+import eu.darkbot.api.game.items.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

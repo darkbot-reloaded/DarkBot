@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.CircleImpl;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Mine extends Entity implements Obstacle, eu.darkbot.api.entities.Mine {
+public class Mine extends Entity implements Obstacle, eu.darkbot.api.game.entities.Mine {
     // A bit of a bigger avoid area on these
     private static final int FROZEN_LAB_MINE = 21;
 

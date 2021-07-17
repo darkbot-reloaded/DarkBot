@@ -3,14 +3,14 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.objects.Map;
-import eu.darkbot.api.entities.utils.GameMap;
-import eu.darkbot.api.objects.EntityInfo;
+import eu.darkbot.api.game.other.GameMap;
+import eu.darkbot.api.game.other.EntityInfo;
 
 import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Portal extends Entity implements eu.darkbot.api.entities.Portal {
+public class Portal extends Entity implements eu.darkbot.api.game.entities.Portal {
     public static final int TYPE_OFFSET = 120;
 
     public final Map target;

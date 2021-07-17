@@ -3,17 +3,14 @@ package com.github.manolo8.darkbot.core.utils;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.MouseManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.utils.MathUtils;
-import eu.darkbot.api.entities.Portal;
+import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.managers.MovementAPI;
-import eu.darkbot.api.objects.Locatable;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Comparator;

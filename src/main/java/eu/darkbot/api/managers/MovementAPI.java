@@ -1,9 +1,9 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.Portal;
-import eu.darkbot.api.objects.Locatable;
-import eu.darkbot.api.objects.Location;
+import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Location;
 import org.jetbrains.annotations.NotNull;
 
 public interface MovementAPI extends API.Singleton {

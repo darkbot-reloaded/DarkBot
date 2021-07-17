@@ -1,9 +1,9 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.Portal;
-import eu.darkbot.api.entities.utils.Area;
-import eu.darkbot.api.entities.utils.GameMap;
+import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.other.Area;
+import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.events.Event;
 import eu.darkbot.utils.ArrayUtils;
 

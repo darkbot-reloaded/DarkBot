@@ -1,12 +1,12 @@
 package eu.darkbot.shared.modules;
 
 import eu.darkbot.api.PluginAPI;
-import eu.darkbot.api.entities.Box;
-import eu.darkbot.api.entities.Portal;
-import eu.darkbot.api.entities.Ship;
-import eu.darkbot.api.entities.other.EntityEffect;
-import eu.darkbot.api.items.ItemFlag;
-import eu.darkbot.api.items.SelectableItem;
+import eu.darkbot.api.game.entities.Box;
+import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.entities.Ship;
+import eu.darkbot.api.game.enums.EntityEffect;
+import eu.darkbot.api.game.items.ItemFlag;
+import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.HeroAPI;
@@ -15,10 +15,10 @@ import eu.darkbot.api.managers.MovementAPI;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 import eu.darkbot.api.managers.StatsAPI;
-import eu.darkbot.api.objects.Location;
+import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.Module;
-import eu.darkbot.config.ConfigAPI;
+import eu.darkbot.api.config.ConfigAPI;
 import eu.darkbot.shared.SafetyFinder;
 
 import java.util.Collection;

@@ -14,9 +14,9 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import eu.darkbot.api.PluginAPI;
-import eu.darkbot.api.entities.Portal;
-import eu.darkbot.api.entities.utils.Area;
-import eu.darkbot.api.entities.utils.GameMap;
+import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.other.Area;
+import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 

@@ -1,6 +1,6 @@
 package eu.darkbot.api.config;
 
-import eu.darkbot.api.entities.Box;
+import eu.darkbot.api.game.entities.Box;
 
 /**
  * Predefined settings for {@link Box} customized by user.

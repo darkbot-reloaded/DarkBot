@@ -1,13 +1,12 @@
 package eu.darkbot.shared.modules.utils;
 
 import eu.darkbot.api.PluginAPI;
-import eu.darkbot.api.entities.Portal;
-import eu.darkbot.api.entities.utils.GameMap;
+import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.Installable;
 import eu.darkbot.api.managers.*;
-import eu.darkbot.api.objects.Location;
 
 import java.util.Collection;
 

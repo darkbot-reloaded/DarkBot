@@ -7,15 +7,13 @@ import com.github.manolo8.darkbot.core.objects.PlayerInfo;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
 import com.github.manolo8.darkbot.core.utils.pathfinder.AreaImpl;
 import com.github.manolo8.darkbot.core.utils.pathfinder.CircleImpl;
-import eu.darkbot.api.objects.EntityInfo;
-
-import java.util.Collection;
+import eu.darkbot.api.game.other.EntityInfo;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class BattleStation
         extends Entity
-        implements Obstacle, eu.darkbot.api.entities.BattleStation {
+        implements Obstacle, eu.darkbot.api.game.entities.BattleStation {
 
     public PlayerInfo info = new PlayerInfo();
     public Health health = new Health();
@@ -52,7 +50,7 @@ public class BattleStation
     }
 
     @Override
-    public eu.darkbot.api.objects.Health getHealth() {
+    public eu.darkbot.api.game.other.Health getHealth() {
         return health;
     }
 
@@ -101,7 +99,7 @@ public class BattleStation
 
     public static class Module
             extends BattleStation
-            implements eu.darkbot.api.entities.BattleStation.Module {
+            implements eu.darkbot.api.game.entities.BattleStation.Module {
 
         private String moduleId;
 

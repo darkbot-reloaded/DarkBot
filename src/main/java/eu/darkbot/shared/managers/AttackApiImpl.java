@@ -2,13 +2,13 @@ package eu.darkbot.shared.managers;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
-import eu.darkbot.api.items.SelectableItem;
-import eu.darkbot.api.entities.utils.Attackable;
-import eu.darkbot.api.items.ItemCategory;
+import eu.darkbot.api.game.items.SelectableItem;
+import eu.darkbot.api.game.other.Attackable;
+import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.managers.AttackAPI;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
-import eu.darkbot.api.items.Item;
+import eu.darkbot.api.game.items.Item;
 import org.jetbrains.annotations.Nullable;
 
 @Deprecated // This implementation is not ready for use in production

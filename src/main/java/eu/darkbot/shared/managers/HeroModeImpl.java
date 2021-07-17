@@ -1,6 +1,6 @@
 package eu.darkbot.shared.managers;
 
-import eu.darkbot.api.items.SelectableItem;
+import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
 
 public class HeroModeImpl implements HeroAPI.Mode {

@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.itf;
 
-import eu.darkbot.api.objects.Health;
+import eu.darkbot.api.game.other.Health;
 
 public interface HealthHolder extends Health {
 

@@ -7,12 +7,12 @@ import com.github.manolo8.darkbot.core.objects.PlayerInfo;
 import com.github.manolo8.darkbot.core.objects.ShipInfo;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
 import com.github.manolo8.darkbot.utils.MathUtils;
-import eu.darkbot.api.entities.Pet;
-import eu.darkbot.api.items.SelectableItem;
-import eu.darkbot.api.entities.utils.Attackable;
-import eu.darkbot.api.objects.EntityInfo;
-import eu.darkbot.api.objects.Locatable;
-import eu.darkbot.api.objects.Location;
+import eu.darkbot.api.game.entities.Pet;
+import eu.darkbot.api.game.items.SelectableItem;
+import eu.darkbot.api.game.other.Attackable;
+import eu.darkbot.api.game.other.EntityInfo;
+import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Location;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
+public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
     private static final HashMap<Integer, Long> cacheTimer = new HashMap<>();
 
@@ -198,7 +198,7 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
     }
 
     @Override
-    public eu.darkbot.api.objects.Health getHealth() {
+    public eu.darkbot.api.game.other.Health getHealth() {
         return health;
     }
 
@@ -208,7 +208,7 @@ public class Ship extends Entity implements eu.darkbot.api.entities.Ship {
     }
 
     @Override
-    public eu.darkbot.api.entities.@Nullable Entity getTarget() {
+    public eu.darkbot.api.game.entities.@Nullable Entity getTarget() {
         return attackTarget.targetedEntity;
     }
 

@@ -1,8 +1,8 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.utils.Area;
-import eu.darkbot.api.objects.Gui;
+import eu.darkbot.api.game.other.Area;
+import eu.darkbot.api.game.other.Gui;
 
 import java.util.Collection;
 

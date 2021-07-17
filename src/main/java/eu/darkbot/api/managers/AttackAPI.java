@@ -1,7 +1,7 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.utils.Attackable;
+import eu.darkbot.api.game.other.Attackable;
 import org.jetbrains.annotations.Nullable;
 
 public interface AttackAPI extends API.Singleton {

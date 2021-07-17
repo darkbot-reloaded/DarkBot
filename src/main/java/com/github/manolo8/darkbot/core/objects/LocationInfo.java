@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.core.utils.Location;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class LocationInfo extends Updatable implements eu.darkbot.api.objects.LocationInfo {
+public class LocationInfo extends Updatable implements eu.darkbot.api.game.other.LocationInfo {
 
     public Location now = new Location();
     public Location last = new Location();
@@ -116,17 +116,17 @@ public class LocationInfo extends Updatable implements eu.darkbot.api.objects.Lo
     }
 
     @Override
-    public eu.darkbot.api.objects.Location getCurrent() {
+    public eu.darkbot.api.game.other.Location getCurrent() {
         return now;
     }
 
     @Override
-    public eu.darkbot.api.objects.Location getLast() {
+    public eu.darkbot.api.game.other.Location getLast() {
         return last;
     }
 
     @Override
-    public eu.darkbot.api.objects.Location getPast() {
+    public eu.darkbot.api.game.other.Location getPast() {
         return past;
     }
 }

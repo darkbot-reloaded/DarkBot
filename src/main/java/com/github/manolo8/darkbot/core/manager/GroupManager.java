@@ -250,22 +250,22 @@ public class GroupManager extends Gui  implements GroupAPI {
     }
 
     @Override
-    public List<? extends eu.darkbot.api.objects.group.GroupMember> getMembers() {
+    public List<? extends eu.darkbot.api.game.group.GroupMember> getMembers() {
         return Collections.unmodifiableList(group.members);
     }
 
     @Override
-    public eu.darkbot.api.objects.group.@Nullable GroupMember getSelectedMember() {
+    public eu.darkbot.api.game.group.@Nullable GroupMember getSelectedMember() {
         return group.selectedMember;
     }
 
     @Override
-    public eu.darkbot.api.objects.group.@Nullable GroupMember getMember(int id) {
+    public eu.darkbot.api.game.group.@Nullable GroupMember getMember(int id) {
         return group.getMember(id);
     }
 
     @Override
-    public List<? extends eu.darkbot.api.objects.group.GroupMember.Invite> getInvites() {
+    public List<? extends eu.darkbot.api.game.group.GroupMember.Invite> getInvites() {
         return invites;
     }
 
@@ -277,7 +277,7 @@ public class GroupManager extends Gui  implements GroupAPI {
 
 
     @Override
-    public void acceptInvite(eu.darkbot.api.objects.group.GroupMember.Invite invite) {
+    public void acceptInvite(eu.darkbot.api.game.group.GroupMember.Invite invite) {
         acceptInvite((Invite) invite);
     }*/
 }

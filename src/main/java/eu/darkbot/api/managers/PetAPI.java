@@ -1,9 +1,9 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.Pet;
-import eu.darkbot.api.entities.other.PetGear;
-import eu.darkbot.api.objects.Location;
+import eu.darkbot.api.game.entities.Pet;
+import eu.darkbot.api.game.enums.PetGear;
+import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.utils.ItemNotEquippedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

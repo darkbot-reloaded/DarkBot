@@ -1,10 +1,10 @@
 package eu.darkbot.shared.modules.utils;
 
-import eu.darkbot.api.entities.Portal;
-import eu.darkbot.api.entities.utils.GameMap;
+import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.GroupAPI;
 import eu.darkbot.api.managers.MovementAPI;
-import eu.darkbot.api.objects.Location;
+import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.utils.Inject;
 
 public class PortalJumper {

@@ -4,7 +4,7 @@ import com.github.manolo8.darkbot.core.objects.Health;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class MemberInfo extends Health implements eu.darkbot.api.objects.group.MemberInfo {
+public class MemberInfo extends Health implements eu.darkbot.api.game.group.MemberInfo {
     public int shipType;
     public String username;
 

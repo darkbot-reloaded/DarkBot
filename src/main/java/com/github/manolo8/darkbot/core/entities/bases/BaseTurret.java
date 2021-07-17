@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.core.entities.bases;
 
 import com.github.manolo8.darkbot.core.entities.BasePoint;
-import eu.darkbot.api.entities.Station;
+import eu.darkbot.api.game.entities.Station;
 
 /**
  * Small turrets around x-1 and x-8 bases

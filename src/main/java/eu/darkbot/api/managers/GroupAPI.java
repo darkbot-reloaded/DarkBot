@@ -1,8 +1,8 @@
 package eu.darkbot.api.managers;
 
 import eu.darkbot.api.API;
-import eu.darkbot.api.entities.Ship;
-import eu.darkbot.api.objects.group.GroupMember;
+import eu.darkbot.api.game.entities.Ship;
+import eu.darkbot.api.game.group.GroupMember;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
