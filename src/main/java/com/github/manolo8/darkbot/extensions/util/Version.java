@@ -1,13 +1,17 @@
 package com.github.manolo8.darkbot.extensions.util;
 
+import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@JsonAdapter(eu.darkbot.utils.Version.VersionAdapter.class)
-public class Version implements Comparable<Version> {
+@JsonAdapter(Version.VersionAdapter.class)
+public class Version implements eu.darkbot.api.utils.Version {
     private static final Pattern VERSION = Pattern.compile("" +
             "([^0-9]*[0-9]+)" + // Major
             "(\\.([0-9]+))?" + // Minor
@@ -88,17 +92,6 @@ public class Version implements Comparable<Version> {
     }
 
     @Override
-    public int compareTo(Version o) {
-        if (major != o.major) return Integer.compare(major, o.major);
-        if (minor != o.minor) return Integer.compare(minor, o.minor);
-        if (patch != o.patch) return Integer.compare(patch, o.patch);
-        if (revision != o.revision) return Integer.compare(revision, o.revision);
-        if (beta != o.beta) return Integer.compare(beta, o.beta);
-        if (alpha != o.alpha) return Integer.compare(alpha, o.alpha);
-        return 0;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -121,4 +114,15 @@ public class Version implements Comparable<Version> {
         return version;
     }
 
+    public static class VersionAdapter extends TypeAdapter<Version> {
+        @Override
+        public void write(JsonWriter writer, Version value) throws IOException {
+            writer.value(value.toString());
+        }
+
+        @Override
+        public Version read(JsonReader in) throws IOException {
+            return new Version(in.nextString());
+        }
+    }
 }

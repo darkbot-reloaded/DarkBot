@@ -56,7 +56,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 99 alpha 4");
+    public static final Version VERSION      = new Version("1.13.17 beta 100");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -355,12 +355,17 @@ public class Main extends Thread implements PluginListener, BotAPI {
     }
 
     @Override
+    public Version getVersion() {
+        return VERSION;
+    }
+
+    @Override
     public double getTickTime() {
         return avgTick;
     }
 
     @Override
-    public eu.darkbot.api.extensions.Module getModule() {
+    public Module getModule() {
         return module;
     }
 

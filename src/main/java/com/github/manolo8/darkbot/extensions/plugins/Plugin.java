@@ -4,7 +4,7 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.PluginConfig;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
-import eu.darkbot.utils.Version;
+import eu.darkbot.api.utils.Version;
 
 import java.io.File;
 import java.net.URL;
@@ -90,17 +90,17 @@ public class Plugin implements PluginInfo {
 
     @Override
     public Version getVersion() {
-        return new Version(definition.minVersion.toString());
+        return definition.version;
     }
 
     @Override
     public Version getMinimumVersion() {
-        return new Version(definition.minVersion.toString());
+        return definition.minVersion;
     }
 
     @Override
     public Version getSupportedVersion() {
-        return new Version(definition.minVersion.toString());
+        return definition.supportedVersion;
     }
 
     @Override
