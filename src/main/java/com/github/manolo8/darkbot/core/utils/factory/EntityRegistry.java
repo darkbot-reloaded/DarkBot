@@ -56,6 +56,8 @@ public class EntityRegistry {
 
         if (type instanceof EntityFactory)
             listeners.getOrDefault(type, fallback).send(entity);
+        else
+            fallback.send(entity);
     }
 
 }
