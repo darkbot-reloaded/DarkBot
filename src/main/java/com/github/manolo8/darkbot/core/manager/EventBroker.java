@@ -7,46 +7,58 @@ import eu.darkbot.api.managers.EventBrokerAPI;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.WeakHashMap;
+import java.util.stream.Collectors;
 
 public class EventBroker implements EventBrokerAPI {
 
-    private final List<EventDispatcher> dispatchers = new ArrayList<>();
+    private final WeakHashMap<Listener, EventDispatcher> dispatchers = new WeakHashMap<>();
 
     @Override
     public void sendEvent(Event event) {
-        dispatchers.forEach(d -> d.handle(event));
+        dispatchers.forEach((l, d) -> d.handle(l, event));
     }
 
     @Override
     public void registerListener(Listener listener) {
-        Arrays.stream(listener.getClass().getDeclaredMethods())
-                .filter(method -> method.isAnnotationPresent(EventHandler.class))
-                .map(method -> new EventDispatcher(listener, method))
-                .forEach(dispatchers::add);
+        dispatchers.put(listener, new EventDispatcher(listener.getClass()));
     }
 
     @Override
     public void unregisterListener(Listener listener) {
-        dispatchers.removeIf(d -> d.listener == listener);
+        dispatchers.remove(listener);
     }
 
     private static class EventDispatcher {
-        private final Listener listener;
+        private final List<EventMethod> methods;
+
+        public EventDispatcher(Class<?> clazz) {
+            this.methods = Arrays.stream(clazz.getDeclaredMethods())
+                    .filter(method -> method.isAnnotationPresent(EventHandler.class))
+                    .map(EventMethod::new)
+                    .collect(Collectors.toList());
+        }
+
+        public void handle(Listener listener, Event event) {
+            methods.forEach(m -> m.handle(listener, event));
+        }
+
+    }
+
+    private static class EventMethod {
         private final Method method;
         private final Class<?> clazz;
 
-        public EventDispatcher(Listener listener, Method method) {
+        public EventMethod(Method method) {
             if (method.getParameterCount() != 1 || !Event.class.isAssignableFrom(method.getParameterTypes()[0]))
                 throw new IllegalArgumentException("@EventHandler must have a single event parameter: " + method);
-            this.listener = listener;
             this.method = method;
             this.clazz = method.getParameterTypes()[0];
         }
 
-        public void handle(Event event) {
+        public void handle(Listener listener, Event event) {
             if (!clazz.isInstance(event)) return;
             try {
                 method.invoke(listener, event);
