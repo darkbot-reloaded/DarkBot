@@ -15,7 +15,7 @@ import com.github.manolo8.darkbot.core.manager.EventBroker;
 public class DarkBotPluginApiImpl extends PluginApiImpl {
 
     public DarkBotPluginApiImpl(Main main) {
-        addInstance(main, Main.API, StarManager.getInstance());
+        addInstance(main, Main.API, StarManager.getInstance(), main.configManager);
         addImplementations(
                 BackpageManager.class,
                 EntityList.class,

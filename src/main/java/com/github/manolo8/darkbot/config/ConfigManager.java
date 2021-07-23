@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import eu.darkbot.api.managers.ConfigAPI;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -26,7 +27,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConfigManager {
+public class ConfigManager implements ConfigAPI {
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -205,4 +206,14 @@ public class ConfigManager {
         }
     }
 
+
+    @Override
+    public <T> T getConfig(String s) {
+        return null; // TODO: implement methods
+    }
+
+    @Override
+    public String[] getChildren(String s) {
+        return null; // TODO: implement methods
+    }
 }

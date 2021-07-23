@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.util.ShipMode;
 import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.items.ItemFlag;
@@ -213,12 +214,12 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     @Override
-    public boolean isInMode(Mode mode) {
+    public boolean isInMode(ShipMode mode) {
         return mode.getConfiguration() == getConfiguration() && mode.getFormation() == getFormation();
     }
 
     @Override
-    public boolean setMode(Mode mode) {
+    public boolean setMode(ShipMode mode) {
         if (mode.getConfiguration() != getConfiguration()) toggleConfiguration();
         setFormation(mode.getFormation());
 
