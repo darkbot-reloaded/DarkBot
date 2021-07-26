@@ -27,6 +27,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
+import eu.darkbot.api.config.Collect;
 import eu.darkbot.api.config.General;
 import eu.darkbot.api.config.util.PercentRange;
 import eu.darkbot.api.config.util.ShipMode;
@@ -181,6 +182,11 @@ public class Config implements eu.darkbot.api.config.Config {
         }
 
         @Override
+        public GameMap getWorkingMap() {
+            return StarManager.getInstance().byId(WORKING_MAP);
+        }
+
+        @Override
         public eu.darkbot.api.config.General.Safety getSafety() {
             return SAFETY;
         }
@@ -192,7 +198,7 @@ public class Config implements eu.darkbot.api.config.Config {
     }
 
     public @Option Collect COLLECT = new Collect();
-    public static class Collect {
+    public static class Collect implements eu.darkbot.api.config.Collect {
         public @Option boolean STAY_AWAY_FROM_ENEMIES;
         public @Option boolean AUTO_CLOACK;
         public @Option Character AUTO_CLOACK_KEY;
@@ -203,6 +209,21 @@ public class Config implements eu.darkbot.api.config.Config {
         @Editor(value = JBoxInfoTable.class, shared = true)
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy.NoCache<>();
+
+        @Override
+        public boolean getAutoCloak() {
+            return AUTO_CLOACK;
+        }
+
+        @Override
+        public boolean getStayAwayFromEnemies() {
+            return STAY_AWAY_FROM_ENEMIES;
+        }
+
+        @Override
+        public boolean getIgnoreContestedBoxes() {
+            return IGNORE_CONTESTED_BOXES;
+        }
     }
 
     public @Option Loot LOOT = new Loot();
@@ -386,12 +407,17 @@ public class Config implements eu.darkbot.api.config.Config {
 
 
     @Override
+    public Collection<? extends eu.darkbot.api.config.SafetyInfo> getSafeties(GameMap gameMap) {
+        return SAFETY.getOrDefault(gameMap.getId(), Collections.emptySet());
+    }
+
+    @Override
     public eu.darkbot.api.config.General getGeneral() {
         return GENERAL;
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.config.SafetyInfo> getSafeties(GameMap gameMap) {
-        return SAFETY.getOrDefault(gameMap.getId(), Collections.emptySet());
+    public eu.darkbot.api.config.Collect getCollect() {
+        return COLLECT;
     }
 }
