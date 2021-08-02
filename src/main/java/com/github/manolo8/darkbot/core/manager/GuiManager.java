@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Gui;
+import com.github.manolo8.darkbot.core.objects.LogoutGui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.RefinementGui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
@@ -43,7 +44,7 @@ public class GuiManager implements Manager {
     public final Gui quests = register("quests");
     public final Gui minimap = register("minimap");
     public final Gui targetedOffers = register("targetedOffers", new TargetedOfferGui());
-    public final Gui logout = register("logout");
+    public final LogoutGui logout = register("logout", new LogoutGui());
     public final Gui eventProgress =  register("eventProgress");
     public final Gui eternalGate = register("eternal_gate");
     public final Gui blacklightGate = register("eternal_blacklight");
@@ -177,7 +178,7 @@ public class GuiManager implements Manager {
     public boolean canTickModule() {
 
         if (lostConnection.visible) {
-            //Wait 15 seconds to reconnect
+            //Wait 2.5 seconds to reconnect
             if (lostConnection.lastUpdatedIn(2500)) {
                 tryReconnect(lostConnection);
                 checkInvalid();
@@ -194,13 +195,19 @@ public class GuiManager implements Manager {
             return false;
         }
 
+        // If logout is being shown without us having clicked, it's a DO bug, hide it
+        if (logout.visible && logout.getLastShown() < System.currentTimeMillis() - 30000) {
+            logout.show(false);
+            return false;
+        }
+
         if (isDead()) {
             this.needRefresh = true;
             main.hero.drive.stop(false);
 
             if (lastDeath == -1) lastDeath = System.currentTimeMillis();
 
-            if (System.currentTimeMillis() - lastDeath < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000)
+            if (System.currentTimeMillis() - lastDeath < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L)
                     || !tryRevive()) return false;
 
             lastDeath = -1;
