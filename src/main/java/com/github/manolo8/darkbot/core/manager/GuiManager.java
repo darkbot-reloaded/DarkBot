@@ -55,7 +55,7 @@ public class GuiManager implements Manager {
 
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
-        WAITING(gm -> gm.quests.lastUpdatedIn(5000) && gm.quests.visible),
+        WAITING(gm -> gm.quests.lastUpdatedOver(5000) && gm.quests.visible),
         MISSION_CLOSING(gm -> gm.quests.show(false)),
         CLICKING_AMMO(gm -> {
             API.keyboardClick(gm.main.config.LOOT.AMMO_KEY);
@@ -179,14 +179,14 @@ public class GuiManager implements Manager {
 
         if (lostConnection.visible) {
             //Wait 2.5 seconds to reconnect
-            if (lostConnection.lastUpdatedIn(2500)) {
+            if (lostConnection.lastUpdatedOver(2500)) {
                 tryReconnect(lostConnection);
                 checkInvalid();
             }
             return false;
         } else if (connecting.visible) {
 
-            if (connecting.lastUpdatedIn(30000)) {
+            if (connecting.lastUpdatedOver(30000)) {
                 System.out.println("Triggering refresh: connection window stuck for too long");
                 API.handleRefresh();
                 connecting.reset();
@@ -196,7 +196,9 @@ public class GuiManager implements Manager {
         }
 
         // If logout is being shown without us having clicked, it's a DO bug, hide it
-        if (logout.visible && logout.getLastShown() < System.currentTimeMillis() - 30000) {
+        if (logout.visible &&
+                connecting.lastUpdatedOver(2000) &&
+                logout.getLastShown() < System.currentTimeMillis() - 30000) {
             logout.show(false);
             return false;
         }
@@ -231,7 +233,7 @@ public class GuiManager implements Manager {
                 return false;
             }
         }
-        if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
+        if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000L) {
             validTime = System.currentTimeMillis();
             return false;
         } else if (hero.locationInfo.isLoaded()
