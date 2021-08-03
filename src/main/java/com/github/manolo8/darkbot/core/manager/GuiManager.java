@@ -1,8 +1,6 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Gui;
@@ -12,11 +10,9 @@ import com.github.manolo8.darkbot.core.objects.RefinementGui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
-import com.github.manolo8.darkbot.core.utils.Location;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -133,7 +129,12 @@ public class GuiManager implements Manager {
     private void tryReconnect(Gui gui) {
         if (System.currentTimeMillis() - reconnectTime > 5000) {
             reconnectTime = System.currentTimeMillis();
-            gui.click(46, 180);
+            if (logout.visible) {
+                System.out.println("Triggering refresh: reconnect while logout is visible");
+                API.handleRefresh();
+            } else {
+                gui.click(46, 180);
+            }
         }
     }
 
@@ -197,8 +198,8 @@ public class GuiManager implements Manager {
 
         // If logout is being shown without us having clicked, it's a DO bug, hide it
         if (logout.visible &&
-                connecting.lastUpdatedOver(2000) &&
-                logout.getLastShown() < System.currentTimeMillis() - 30000) {
+                logout.isAnimationDone() &&
+                logout.getLastShown() < System.currentTimeMillis() - 30000L) {
             logout.show(false);
             return false;
         }
