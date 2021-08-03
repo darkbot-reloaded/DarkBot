@@ -1,21 +1,18 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Gui;
+import com.github.manolo8.darkbot.core.objects.LogoutGui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.RefinementGui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
-import com.github.manolo8.darkbot.core.utils.Location;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -43,7 +40,7 @@ public class GuiManager implements Manager {
     public final Gui quests = register("quests");
     public final Gui minimap = register("minimap");
     public final Gui targetedOffers = register("targetedOffers", new TargetedOfferGui());
-    public final Gui logout = register("logout");
+    public final LogoutGui logout = register("logout", new LogoutGui());
     public final Gui eventProgress =  register("eventProgress");
     public final Gui eternalGate = register("eternal_gate");
     public final Gui blacklightGate = register("eternal_blacklight");
@@ -54,7 +51,7 @@ public class GuiManager implements Manager {
 
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
-        WAITING(gm -> gm.quests.lastUpdatedIn(5000) && gm.quests.visible),
+        WAITING(gm -> gm.quests.lastUpdatedOver(5000) && gm.quests.visible),
         MISSION_CLOSING(gm -> gm.quests.show(false)),
         CLICKING_AMMO(gm -> {
             API.keyboardClick(gm.main.config.LOOT.AMMO_KEY);
@@ -132,7 +129,12 @@ public class GuiManager implements Manager {
     private void tryReconnect(Gui gui) {
         if (System.currentTimeMillis() - reconnectTime > 5000) {
             reconnectTime = System.currentTimeMillis();
-            gui.click(46, 180);
+            if (logout.visible) {
+                System.out.println("Triggering refresh: reconnect while logout is visible");
+                API.handleRefresh();
+            } else {
+                gui.click(46, 180);
+            }
         }
     }
 
@@ -177,20 +179,28 @@ public class GuiManager implements Manager {
     public boolean canTickModule() {
 
         if (lostConnection.visible) {
-            //Wait 15 seconds to reconnect
-            if (lostConnection.lastUpdatedIn(2500)) {
+            //Wait 2.5 seconds to reconnect
+            if (lostConnection.lastUpdatedOver(2500)) {
                 tryReconnect(lostConnection);
                 checkInvalid();
             }
             return false;
         } else if (connecting.visible) {
 
-            if (connecting.lastUpdatedIn(30000)) {
+            if (connecting.lastUpdatedOver(30000)) {
                 System.out.println("Triggering refresh: connection window stuck for too long");
                 API.handleRefresh();
                 connecting.reset();
             }
 
+            return false;
+        }
+
+        // If logout is being shown without us having clicked, it's a DO bug, hide it
+        if (logout.visible &&
+                logout.isAnimationDone() &&
+                logout.getLastShown() < System.currentTimeMillis() - 30000L) {
+            logout.show(false);
             return false;
         }
 
@@ -200,7 +210,7 @@ public class GuiManager implements Manager {
 
             if (lastDeath == -1) lastDeath = System.currentTimeMillis();
 
-            if (System.currentTimeMillis() - lastDeath < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000)
+            if (System.currentTimeMillis() - lastDeath < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L)
                     || !tryRevive()) return false;
 
             lastDeath = -1;
@@ -224,7 +234,7 @@ public class GuiManager implements Manager {
                 return false;
             }
         }
-        if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000) {
+        if (System.currentTimeMillis() - lastRepair < main.config.GENERAL.SAFETY.WAIT_AFTER_REVIVE * 1000L) {
             validTime = System.currentTimeMillis();
             return false;
         } else if (hero.locationInfo.isLoaded()
