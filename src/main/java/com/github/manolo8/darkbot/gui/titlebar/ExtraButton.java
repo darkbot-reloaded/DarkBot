@@ -136,7 +136,12 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             }));
             list.add(create("reload", e -> {
                 System.out.println("Triggering refresh: user requested");
-                Main.API.handleRefresh();
+                try {
+                    Main.API.handleRefresh();
+                } catch (Exception ex) {
+                    System.out.println("Exception handling user requested refresh:");
+                    ex.printStackTrace();
+                }
             }));
             list.add(create("discord", UIUtils.getIcon("discord"), e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
             list.add(create("copy_sid", e -> SystemUtils.toClipboard(main.statsManager.sid)));
