@@ -412,6 +412,11 @@ public class Config implements eu.darkbot.api.config.Config {
     }
 
     @Override
+    public Map<Integer, ? extends eu.darkbot.api.config.util.PlayerInfo> getPlayerInfos() {
+        return PLAYER_INFOS;
+    }
+
+    @Override
     public eu.darkbot.api.config.General getGeneral() {
         return GENERAL;
     }
