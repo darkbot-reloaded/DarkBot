@@ -79,6 +79,11 @@ public class Plugin implements PluginInfo {
     }
 
     @Override
+    public String getBasePackage() {
+        return definition.basePackage;
+    }
+
+    @Override
     public String getName() {
         return definition != null ? definition.name : new File(jar.getFile()).getName();
     }
