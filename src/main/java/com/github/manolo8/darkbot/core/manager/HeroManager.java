@@ -5,26 +5,34 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
-import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.util.ShipMode;
+import eu.darkbot.api.game.entities.Entity;
+import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.items.ItemFlag;
+import eu.darkbot.api.game.items.SelectableItem;
+import eu.darkbot.api.managers.HeroAPI;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.JUMP_GATE;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.TOGGLE_CONFIG;
 
-public class HeroManager extends Ship implements Manager {
+public class HeroManager extends Ship implements Manager, HeroAPI {
 
     public static HeroManager instance;
     public final Main main;
     private final SettingsManager settings;
     private final SettingsProxy keybinds;
-    private final List<Portal> portals;
+    private final Collection<? extends Portal> portals;
 
     private long staticAddress;
 
@@ -35,6 +43,9 @@ public class HeroManager extends Ship implements Manager {
 
     public Ship target;
 
+    private Entity inGameTarget;
+
+    private Configuration configuration = Configuration.UNKNOWN;
     public int config;
     public int formationId;
     private long configTime;
@@ -42,16 +53,17 @@ public class HeroManager extends Ship implements Manager {
     private long formationTime;
     private long portalTime;
 
-    public HeroManager(Main main) {
+    public HeroManager(Main main, PluginAPI pluginAPI) {
         instance = this;
 
         this.main = super.main = main;
         this.settings = main.settingsManager;
         this.keybinds = main.facadeManager.settings;
-        this.portals = main.mapManager.entities.portals;
-        this.drive = new Drive(this, main.mapManager);
+        this.portals = main.mapManager.entities.getPortals();
+        this.drive = pluginAPI.requireInstance(Drive.class);
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
+        this.pet.main = main;
         this.map = main.starManager.byId(-1);
     }
 
@@ -73,11 +85,21 @@ public class HeroManager extends Ship implements Manager {
     public void update() {
         super.update();
         config = settings.config;
+        configuration = Configuration.of(config);
         formationId = super.formationId;
 
         long petAddress = API.readMemoryLong(address + 176);
         if (petAddress != pet.address) pet.update(petAddress);
         pet.update();
+
+
+        long targetPtr = API.readMemoryLong(main.mapManager.mapAddress, 120, 40);
+
+        if (targetPtr == 0) inGameTarget = null;
+        else inGameTarget =  main.mapManager.entities.allEntities.stream()
+                .flatMap(Collection::stream)
+                .filter(entity -> entity.address == targetPtr)
+                .findAny().orElse(null);
     }
 
     @Override
@@ -102,10 +124,10 @@ public class HeroManager extends Ship implements Manager {
     }
 
     public void jumpPortal(Portal portal) {
-        if (portal.removed) return;
+        if (!portal.isValid()) return;
         if (System.currentTimeMillis() - portalTime < 500) return; // Minimum delay
         if ((System.currentTimeMillis() - portalTime > 20000 || isNotJumping(portal)) &&
-                (portal.clickable.enabled || portals.stream().noneMatch(p -> p != portal && p.clickable.enabled))) {
+                portal.isSelectable() || portals.stream().noneMatch(p -> p != portal && p.isSelectable())) {
             API.keyboardClick(keybinds.getCharCode(JUMP_GATE));
             portalTime = System.currentTimeMillis();
         }
@@ -113,8 +135,8 @@ public class HeroManager extends Ship implements Manager {
 
     // Consider not jumping if still on current map and nextMap is either unset or not the portal target map
     private boolean isNotJumping(Portal portal) {
-        return !portal.isJumping && map.id == settings.currMap &&
-                (settings.nextMap == -1 || portal.target == null || settings.nextMap != portal.target.id);
+        return !portal.isJumping() && map.id == settings.currMap &&
+                (settings.nextMap == -1 || portal.getTargetMap().map(m -> m.getId() != settings.nextMap).orElse(true));
     }
 
     public boolean attackMode() {
@@ -147,7 +169,7 @@ public class HeroManager extends Ship implements Manager {
             Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
             this.configTime = System.currentTimeMillis();
         }
-        boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000;
+        boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000L;
 
         if ((this.formation != form || checkFormation) && System.currentTimeMillis() - formationTime > 3500L) {
             Main.API.keyboardClick(this.formation = form);
@@ -164,4 +186,68 @@ public class HeroManager extends Ship implements Manager {
         return this.config == config && this.formation == formation;
     }
 
+    @Nullable
+    @Override
+    public Entity getTarget() {
+        return inGameTarget;
+    }
+
+    @Override
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
+
+    public void toggleConfiguration() {
+        if (System.currentTimeMillis() - configTime <= 5500L) return;
+
+        Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
+        this.configTime = System.currentTimeMillis();
+    }
+
+    public void setFormation(SelectableItem.Formation formation) {
+        if (formation == getFormation() ||
+                System.currentTimeMillis() - formationTime <= 3500L) return;
+
+        main.facadeManager.slotBars.useItem(formation, ItemFlag.NOT_SELECTED)
+                .ifSuccessful(r -> formationTime = System.currentTimeMillis());
+    }
+
+    @Override
+    public boolean isInMode(ShipMode mode) {
+        return mode.getConfiguration() == getConfiguration() && mode.getFormation() == getFormation();
+    }
+
+    @Override
+    public boolean setMode(ShipMode mode) {
+        if (mode.getConfiguration() != getConfiguration()) toggleConfiguration();
+        setFormation(mode.getFormation());
+
+        return isInMode(mode);
+    }
+
+    @Override
+    public boolean setAttackMode(eu.darkbot.api.game.entities.Npc target) {
+        return attackMode((Npc) target);
+    }
+
+    @Override
+    public boolean setRoamMode() {
+        return roamMode();
+    }
+
+    @Override
+    public boolean setRunMode() {
+        return runMode();
+    }
+
+    @Override
+    public boolean hasPet() {
+        return pet.isValid();
+    }
+
+    @Override
+    public Optional<eu.darkbot.api.game.entities.Pet> getPet() {
+        return hasPet() ? Optional.of(pet) : Optional.empty();
+    }
 }

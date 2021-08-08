@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import eu.darkbot.api.API;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class EffectManager implements Manager {
+public class EffectManager implements Manager, API.Singleton {
     private long mapAddressStatic;
 
     private ObjArray effectsPtr = ObjArray.ofVector(true);

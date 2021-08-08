@@ -19,17 +19,22 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.factory.EntityFactory;
 import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
+import eu.darkbot.api.game.entities.Station;
+import eu.darkbot.api.managers.EntitiesAPI;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.*;
 
-public class EntityList extends Updatable {
+public class EntityList extends Updatable implements EntitiesAPI {
     public final EntityRegistry entityRegistry = new EntityRegistry();
 
     public final List<Obstacle> obstacles                 = new ArrayList<>();
@@ -42,6 +47,7 @@ public class EntityList extends Updatable {
     public final List<Npc> npcs                     = register(NPC, LOW_RELAY);
     public final List<Portal> portals               = register(PORTAL);
     public final List<Ship> ships                   = register(PLAYER, PET);
+    public final List<Ship> players                 = register(PLAYER);
     public final List<Pet> pets                     = register(PET);
     public final List<BattleStation> battleStations = register(CBS_ASTEROID, CBS_MODULE, CBS_STATION, CBS_MODULE_CON, CBS_CONSTRUCTION);
     public final List<BasePoint> basePoints         = register(BASE_HANGAR, BASE_STATION, HEADQUARTER, QUEST_GIVER, BASE_TURRET, REPAIR_STATION, REFINERY);
@@ -154,5 +160,67 @@ public class EntityList extends Updatable {
             if (value) doInEachEntity(entity -> entity.clickable.setRadius(0));
             else doInEachEntity(entity -> entity.clickable.reset());
         }
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.entities.Npc> getNpcs() {
+        return Collections.unmodifiableList(npcs);
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.entities.Pet> getPets() {
+        return Collections.unmodifiableList(pets);
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.entities.Ship> getPlayers() {
+        return Collections.unmodifiableList(players);
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.entities.Ship> getShips() {
+        return Collections.unmodifiableList(ships);
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.entities.Box> getBoxes() {
+        return Collections.unmodifiableList(boxes);
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.entities.Mine> getMines() {
+        return Collections.unmodifiableList(mines);
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.entities.Portal> getPortals() {
+        return Collections.unmodifiableList(portals);
+    }
+
+    @Override
+    public Collection<? extends Station> getStations() {
+        return Collections.unmodifiableList(basePoints);
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.entities.BattleStation> getBattleStations() {
+        return Collections.unmodifiableList(battleStations);
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.entities.Entity> getAll() {
+        return allEntities.stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.entities.Entity> getUnknown() {
+        return Collections.unmodifiableList(unknown);
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.other.Obstacle> getObstacles() {
+        return Collections.unmodifiableList(obstacles);
     }
 }

@@ -44,6 +44,14 @@ public class NoopApiAdapter extends ApiAdapter {
     }
 
     @Override
+    public void mouseDown(int x, int y) {
+    }
+
+    @Override
+    public void mouseUp(int x, int y) {
+    }
+
+    @Override
     public void mouseClick(int x, int y) {
     }
 

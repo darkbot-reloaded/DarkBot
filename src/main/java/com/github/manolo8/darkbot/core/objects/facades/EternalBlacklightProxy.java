@@ -4,13 +4,15 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import eu.darkbot.api.managers.EternalBlacklightGateAPI;
+import eu.darkbot.api.managers.EternalGateAPI;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class EternalBlacklightProxy extends Updatable {
+public class EternalBlacklightProxy extends Updatable implements EternalBlacklightGateAPI {
     public int cpuCount, currentWave, furthestWave, boosterPoints;
     public boolean isEventEnabled;
     public Leaderboard myRank = new Leaderboard();
@@ -19,9 +21,9 @@ public class EternalBlacklightProxy extends Updatable {
     public List<EternalBlacklightProxy.Booster> boostersOptions = new ArrayList<>();
     public List<EternalBlacklightProxy.Leaderboard> topRankers  = new ArrayList<>();
 
-    private ObjArray activeBoostersArr   = ObjArray.ofVector(true);
-    private ObjArray boostersOptionsArr  = ObjArray.ofVector(true);
-    private ObjArray topRankersArr       = ObjArray.ofVector(true);
+    private final ObjArray activeBoostersArr   = ObjArray.ofVector(true);
+    private final ObjArray boostersOptionsArr  = ObjArray.ofVector(true);
+    private final ObjArray topRankersArr       = ObjArray.ofVector(true);
 
     @Override
     public void update() {
@@ -45,7 +47,7 @@ public class EternalBlacklightProxy extends Updatable {
         this.topRankersArr.sync(topRankers, EternalBlacklightProxy.Leaderboard::new, null);
     }
 
-    public static class Booster extends UpdatableAuto {
+    public static class Booster extends UpdatableAuto implements EternalBlacklightGateAPI.Booster {
         public int percentage;
         public String category;
 
@@ -56,11 +58,13 @@ public class EternalBlacklightProxy extends Updatable {
         }
 
         @Override
-        public String toString() {
-            return "Booster{" +
-                    "percentage=" + percentage +
-                    ", category='" + category + '\'' +
-                    '}';
+        public int getPercentage() {
+            return percentage;
+        }
+
+        @Override
+        public String getCategory() {
+            return category;
         }
     }
 
@@ -85,5 +89,35 @@ public class EternalBlacklightProxy extends Updatable {
                     ", name=" + name + '\'' +
                     '}';
         }
+    }
+
+    @Override
+    public int getCpuCount() {
+        return cpuCount;
+    }
+
+    @Override
+    public int getBoosterPoints() {
+        return boosterPoints;
+    }
+
+    @Override
+    public int getCurrentWave() {
+        return currentWave;
+    }
+
+    @Override
+    public int getFurthestWave() {
+        return furthestWave;
+    }
+
+    @Override
+    public List<? extends EternalBlacklightGateAPI.Booster> getActiveBoosters() {
+        return activeBoosters;
+    }
+
+    @Override
+    public List<? extends EternalBlacklightGateAPI.Booster> getBoosterOptions() {
+        return boostersOptions;
     }
 }

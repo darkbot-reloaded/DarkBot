@@ -1,34 +1,34 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.api.ApiAdapter;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
-import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
+import eu.darkbot.api.managers.BackpageAPI;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.manolo8.darkbot.Main.API;
-
-public class BackpageManager extends Thread {
+public class BackpageManager extends Thread implements BackpageAPI {
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
-    private static final String[] ACTIONS = new String[]{
+    protected static final String[] ACTIONS = new String[]{
             "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
 
-    private static class SidStatus {
+    protected static class SidStatus {
         private static final int NO_SID = -1, ERROR = -2, UNKNOWN = -3;
     }
 
@@ -37,15 +37,15 @@ public class BackpageManager extends Thread {
     public final GalaxyManager galaxyManager;
     public final DispatchManager dispatchManager;
 
-    private final Main main;
-    private String sid, instance;
-    private List<Task> tasks = new ArrayList<>();
+    protected final Main main;
+    protected String sid, instance;
+    protected List<Task> tasks = new ArrayList<>();
 
-    private long lastRequest;
-    private long sidLastUpdate = System.currentTimeMillis();
-    private long sidNextUpdate = sidLastUpdate;
-    private long checkDrones = Long.MAX_VALUE;
-    private int sidStatus = -1;
+    protected long lastRequest;
+    protected long sidLastUpdate = System.currentTimeMillis();
+    protected long sidNextUpdate = sidLastUpdate;
+    protected long checkDrones = Long.MAX_VALUE;
+    protected int sidStatus = -1;
 
     public BackpageManager(Main main) {
         super("BackpageManager");
@@ -150,9 +150,9 @@ public class BackpageManager extends Thread {
         return getConnection("indexInternal.es?action=" + getRandomAction(), 5000).getResponseCode();
     }
 
-    public HttpURLConnection getConnection(String params, int minWait) throws Exception {
+    public HttpURLConnection getConnection(String path, int minWait) throws Exception {
         Time.sleep(lastRequest + minWait - System.currentTimeMillis());
-        return getConnection(params);
+        return getConnection(path);
     }
 
     public HttpURLConnection getConnection(String params) throws Exception {
@@ -192,9 +192,11 @@ public class BackpageManager extends Thread {
     }
 
     public String getReloadToken(InputStream input) {
+        Matcher matcher = RELOAD_TOKEN_PATTERN.matcher("");
+
         try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             return br.lines()
-                    .map(RELOAD_TOKEN_PATTERN::matcher)
+                    .map(matcher::reset)
                     .filter(Matcher::find)
                     .map(m -> m.group(1))
                     .findFirst().orElse(null);
@@ -203,6 +205,11 @@ public class BackpageManager extends Thread {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String getReloadToken(String body) {
+        Matcher m = RELOAD_TOKEN_PATTERN.matcher(body);
+        return m.find() ? m.group(1) : null;
     }
 
     public void setTasks(List<Task> tasks) {
@@ -231,4 +238,23 @@ public class BackpageManager extends Thread {
         }
     }
 
+    @Override
+    public String getSid() {
+        return sid;
+    }
+
+    @Override
+    public URI getInstanceURI() {
+        return URI.create(instance);
+    }
+
+    @Override
+    public Instant getLastRequestTime() {
+        return Instant.ofEpochMilli(lastRequest);
+    }
+
+    @Override
+    public Optional<String> findReloadToken(String body) {
+        return Optional.ofNullable(getReloadToken(body));
+    }
 }

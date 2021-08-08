@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.core.objects.itf;
 
-public interface HealthHolder {
+import eu.darkbot.api.game.other.Health;
+
+public interface HealthHolder extends Health {
 
     int getHp();
     int getMaxHp();

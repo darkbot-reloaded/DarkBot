@@ -6,31 +6,37 @@ import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.core.utils.Location;
-import com.github.manolo8.darkbot.utils.debug.ReadObjNames;
+import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.other.Area;
+import eu.darkbot.api.game.other.GameMap;
+import eu.darkbot.api.managers.EventBrokerAPI;
+import eu.darkbot.api.managers.StarSystemAPI;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class MapManager implements Manager {
+public class MapManager implements Manager, StarSystemAPI {
 
     private final Main main;
+    private final EventBrokerAPI eventBroker;
+    private final StarManager starManager;
 
     public final EntityList entities;
 
     private long mapAddressStatic;
     private long viewAddressStatic;
     private long minimapAddressStatic;
-    private long mapAddress;
+    public long mapAddress;
     private long viewAddress;
     private long boundsAddress;
     long eventAddress;
@@ -54,15 +60,22 @@ public class MapManager implements Manager {
     public double boundMaxY;
     public double width;
     public double height;
+    public final RectangleImpl screenBound = new RectangleImpl();
+    private final RectangleImpl mapBound = new RectangleImpl();
 
     private final ObjArray minimapLayers = ObjArray.ofVector(true);
     private final Location pingLocationCache = new Location();
     public Location pingLocation = null;
 
-    public MapManager(Main main) {
+    public MapManager(Main main,
+                      PluginAPI pluginAPI,
+                      EventBrokerAPI eventBroker,
+                      StarManager starManager) {
         this.main = main;
+        this.eventBroker = eventBroker;
+        this.starManager = starManager;
 
-        this.entities = new EntityList(main);
+        this.entities = pluginAPI.requireInstance(EntityList.class);
     }
 
 
@@ -100,11 +113,19 @@ public class MapManager implements Manager {
         internalHeight = API.readMemoryInt(address + 72);
         if (internalHeight == 13100) internalHeight = 13500;
         if (internalHeight == 26200) internalHeight = 27000;
+
+        mapBound.set(0, 0, internalWidth, internalHeight);
+
         int currMap = API.readMemoryInt(address + 76);
         boolean switched = currMap != id;
         if (switched) {
             id = currMap;
-            main.hero.map = main.starManager.byId(id);
+
+            Map old = main.hero.map;
+            Map next = main.hero.map = main.starManager.byId(id);
+
+            eventBroker.sendEvent(new MapChangeEvent(old, next));
+
             updateAreas(false);
         }
         entities.update(address);
@@ -148,6 +169,7 @@ public class MapManager implements Manager {
         boundY = API.readMemoryDouble(updated + 88);
         boundMaxX = API.readMemoryDouble(updated + 112);
         boundMaxY = API.readMemoryDouble(updated + 120);
+        screenBound.set(boundX, boundY, boundMaxX, boundMaxY);
         width = boundMaxX - boundX;
         height = boundMaxY - boundY;
     }
@@ -228,4 +250,39 @@ public class MapManager implements Manager {
         return lockStatus == 1 || lockStatus < 1 || lockStatus > 4;
     }
 
+
+    @Override
+    public GameMap getCurrentMap() {
+        return main.hero.map;
+    }
+
+    @Override
+    public Area.Rectangle getCurrentMapBounds() {
+        return mapBound;
+    }
+
+    @Override
+    public Collection<? extends GameMap> getMaps() {
+        return starManager.getMaps();
+    }
+
+    @Override
+    public GameMap getById(int mapId) throws MapNotFoundException {
+        return starManager.getById(mapId);
+    }
+
+    @Override
+    public GameMap getOrCreateMapById(int mapId) {
+        return starManager.byId(mapId);
+    }
+
+    @Override
+    public GameMap getByName(String mapName) throws MapNotFoundException {
+        return starManager.getByName(mapName);
+    }
+
+    @Override
+    public Portal findNext(GameMap targetMap) {
+        return starManager.next(main.hero, starManager.byId(targetMap.getId()));
+    }
 }

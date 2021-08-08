@@ -13,11 +13,14 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
 import com.github.manolo8.darkbot.core.objects.slotbars.SlotBar;
 import com.github.manolo8.darkbot.core.utils.Drive;
+import eu.darkbot.api.game.other.Attackable;
+import eu.darkbot.api.managers.AttackAPI;
+import org.jetbrains.annotations.Nullable;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.*;
 
-public class NpcAttacker {
+public class NpcAttacker implements AttackAPI {
 
     protected Main main;
     protected MapManager mapManager;
@@ -97,7 +100,7 @@ public class NpcAttacker {
         firstAttack = false;
         if (hero.locationInfo.distance(target) < 800 && System.currentTimeMillis() - clickDelay > 500) {
             hero.setTarget(target);
-            setRadiusAndClick(true);
+            target.trySelect(false);
             clickDelay = System.currentTimeMillis();
             if (main.config.LOOT.SHIP_ABILITY != null) ability = clickDelay + 4000;
         }
@@ -126,7 +129,7 @@ public class NpcAttacker {
         isAttacking = Math.max(isAttacking, laserTime + bugTime);
         if (normal) API.keyboardClick(getAttackKey());
         else if (API instanceof DarkBoatAdapter) API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
-        else setRadiusAndClick(false);
+        else target.trySelect(true);
     }
 
     public double modifyRadius(double radius) {
@@ -166,10 +169,48 @@ public class NpcAttacker {
                 main.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;
     }
 
-    private void setRadiusAndClick(boolean single) {
-        target.clickable.setRadius(800);
-        drive.clickCenter(single, target.locationInfo.now);
-        target.clickable.setRadius(0);
+    private Character getPreviousAttackKey() {
+        if (rsb) return main.config.LOOT.RSB.KEY;
+        if (sab) return main.config.LOOT.SAB.KEY;
+        return this.target == null || this.target.npcInfo.attackKey == null ?
+                main.config.LOOT.AMMO_KEY : this.target.npcInfo.attackKey;
+    }
+
+    @Override
+    public @Nullable Attackable getTarget() {
+        return target;
+    }
+
+    @Override
+    public void setTarget(@Nullable Attackable attackable) {
+        if (!(attackable instanceof Npc))
+            throw new IllegalArgumentException("Only NPC attacking is supported by this implementation");
+        this.target = (Npc) attackable;
+    }
+
+    @Override
+    public boolean isLocked() {
+        return mapManager.isTarget(target);
+    }
+
+    @Override
+    public boolean isAttacking() {
+        return hero.isAttacking(target);
+    }
+
+    @Override
+    public void tryLockAndAttack() {
+        doKillTargetTick();
+    }
+
+    @Override
+    public void stopAttack() {
+        if (System.currentTimeMillis() < laserTime) return;
+        if (isAttacking()) {
+            laserTime = System.currentTimeMillis() + 1500;
+            if (API instanceof DarkBoatAdapter) API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
+            else API.keyboardClick(getPreviousAttackKey());
+        }
     }
 
 }

@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @JsonAdapter(Version.VersionAdapter.class)
-public class Version implements Comparable<Version> {
+public class Version implements eu.darkbot.api.utils.Version {
     private static final Pattern VERSION = Pattern.compile("" +
             "([^0-9]*[0-9]+)" + // Major
             "(\\.([0-9]+))?" + // Minor
@@ -89,17 +89,6 @@ public class Version implements Comparable<Version> {
         if (m.group(find) == null) return -1;
         String num = m.group(find + 1);
         return num == null ? 0 : Integer.parseInt(m.group(find + 1));
-    }
-
-    @Override
-    public int compareTo(Version o) {
-        if (major != o.major) return Integer.compare(major, o.major);
-        if (minor != o.minor) return Integer.compare(minor, o.minor);
-        if (patch != o.patch) return Integer.compare(patch, o.patch);
-        if (revision != o.revision) return Integer.compare(revision, o.revision);
-        if (beta != o.beta) return Integer.compare(beta, o.beta);
-        if (alpha != o.alpha) return Integer.compare(alpha, o.alpha);
-        return 0;
     }
 
     @Override

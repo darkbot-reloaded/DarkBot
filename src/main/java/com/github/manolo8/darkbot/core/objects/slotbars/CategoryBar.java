@@ -2,16 +2,14 @@ package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import eu.darkbot.api.game.items.ItemCategory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class CategoryBar extends MenuBar {
-    public List<Category> categories = new ArrayList<>();
+    public final List<Category> categories = new ArrayList<>();
 
     private final ObjArray categoriesArr = ObjArray.ofVector(true);
 
@@ -28,6 +26,22 @@ public class CategoryBar extends MenuBar {
             if (id.equals(category.categoryId)) return category;
         }
         return null;
+    }
+
+    public Category get(ItemCategory type) {
+        String id = type.getId();
+        for (Category category : categories) {
+            if (id.equals(category.categoryId)) return category;
+        }
+        return null;
+    }
+
+    public boolean hasCategory(ItemCategory type) {
+        String id = type.getId();
+        for (Category category : categories) {
+            if (id.equals(category.categoryId)) return true;
+        }
+        return false;
     }
 
     public Optional<Item> findItemById(String itemId) {

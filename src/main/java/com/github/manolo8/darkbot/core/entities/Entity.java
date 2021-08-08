@@ -6,13 +6,18 @@ import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.core.utils.TraitPattern;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Entity extends Updatable {
+public class Entity extends Updatable implements eu.darkbot.api.game.entities.Entity {
     public Main main;
     public Map<String, Object> metadata;
     public LocationInfo locationInfo = new LocationInfo();
@@ -65,18 +70,18 @@ public class Entity extends Updatable {
         this.locationInfo.update(API.readMemoryLong(address + 64));
         this.traits.update(API.readMemoryLong(address + 48));
 
-        for (int c = 0; c < traits.getSize(); c++) {
-            long adr = traits.get(c);
+        this.clickable.update(findInTraits(TraitPattern::ofClickable));
+    }
 
-            int radius   = API.readMemoryInt(adr + 40);
-            int priority = API.readMemoryInt(adr + 44);
-            int enabled  = API.readMemoryInt(adr + 48);
+    protected long findInTraits(Predicate<Long> filter) {
+        ObjArray traits = this.traits;
 
-            if (radius >= 0 && radius < 4000 && priority > -4 && priority < 1000 && (enabled == 1 || enabled == 0)) {
-                clickable.update(adr);
-                break;
-            }
+        for (int i = 0; i < traits.getSize(); i++) {
+            long ptr = traits.getPtr(i);
+            if (filter.test(ptr)) return ptr;
         }
+
+        return ByteUtils.NULL;
     }
 
     public boolean hasEffect(EffectManager.Effect effect) {
@@ -109,5 +114,31 @@ public class Entity extends Updatable {
     @Override
     public String toString() {
         return String.valueOf(id);
+    }
+
+    @Override
+    public boolean isValid() {
+        return !removed;
+    }
+
+    @Override
+    public boolean isSelectable() {
+        return clickable.enabled;
+    }
+
+    @Override
+    public boolean trySelect(boolean tryAttack) {
+        if (!isSelectable() || distanceTo(main.hero) > 900) return false;
+
+        clickable.setRadius(800);
+        main.hero.drive.clickCenter(!tryAttack, locationInfo.now);
+        clickable.setRadius(0);
+
+        return true; // We can't know if successful...
+    }
+
+    @Override
+    public Collection<Integer> getEffects() {
+        return main == null ? Collections.emptyList() : main.effectManager.getEffects(this);
     }
 }

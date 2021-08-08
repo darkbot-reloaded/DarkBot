@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.core.itf.Module;
 public abstract class TemporalModule implements Module {
 
     private Main main;
-    private Module back;
+    private eu.darkbot.api.extensions.Module back;
 
     @Override
     public void install(Main main) {

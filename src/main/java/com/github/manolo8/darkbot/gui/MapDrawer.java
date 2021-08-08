@@ -27,16 +27,17 @@ import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
-import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
-import com.github.manolo8.darkbot.core.utils.pathfinder.Rectangle;
+import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.gui.trail.Line;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
+import eu.darkbot.api.game.other.Attackable;
+import eu.darkbot.api.game.other.Health;
 
 import javax.swing.*;
 import java.awt.*;
@@ -231,7 +232,7 @@ public class MapDrawer extends JPanel {
     protected void drawZones(Graphics2D g2) {
         for (Barrier barrier : mapManager.entities.barriers) {
             if (!barrier.use()) continue;
-            Rectangle area = barrier.getZone();
+            RectangleImpl area = barrier.getZone();
             g2.setColor(cs.BARRIER);
             g2.fillRect(
                     translateX(area.minX), translateY(area.minY),
@@ -244,7 +245,7 @@ public class MapDrawer extends JPanel {
 
         g2.setColor(cs.NO_CLOACK);
         for (NoCloack noCloack : mapManager.entities.noCloack) {
-            Rectangle area = noCloack.getZone();
+            RectangleImpl area = noCloack.getZone();
             g2.fillRect(
                     translateX(area.minX), translateY(area.minY),
                     translateX(area.maxX - area.minX), translateY(area.maxY - area.minY));
@@ -280,7 +281,7 @@ public class MapDrawer extends JPanel {
                 Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000L));
         drawString(g2, info, 5, 12, Align.LEFT);
         if (main.module != null) {
-            drawString(g2, main.tickingModule ? main.module.status() : main.module.stoppedStatus(), 5, 26, Align.LEFT);
+            drawString(g2, main.tickingModule ? main.module.getStatus() : main.module.getStoppedStatus(), 5, 26, Align.LEFT);
         }
 
         drawString(g2, String.format("%.1ftick %dms ping", main.avgTick, pingManager.ping), width - 5, 12, Align.RIGHT);
@@ -303,14 +304,16 @@ public class MapDrawer extends JPanel {
             drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40, Align.MID);
         drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20, 12);
 
-        if (hero.target != null && !hero.target.removed) {
-            if (hero.target instanceof Npc || hero.target.playerInfo.isEnemy()) g2.setColor(cs.ENEMIES);
+        Attackable target = hero.getTarget() instanceof Attackable ? (Attackable) hero.getTarget() : null;
+
+        if (target != null) {
+            if (target instanceof Npc || target.getEntityInfo().isEnemy()) g2.setColor(cs.ENEMIES);
             else g2.setColor(cs.ALLIES);
             g2.setFont(cs.FONTS.MID);
-            String name = hero.target.playerInfo.username;
+            String name = target.getEntityInfo().getUsername();
             drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40, Align.MID);
 
-            drawHealth(g2, hero.target.health, mid + 10, height - 34, mid - 20, 12);
+            drawHealth(g2, target.getHealth(), mid + 10, height - 34, mid - 20, 12);
         }
     }
 
@@ -589,7 +592,7 @@ public class MapDrawer extends JPanel {
                 translateX(safetyInfo.diameter()), translateY(safetyInfo.diameter()));
     }
 
-    private void drawHealth(Graphics2D g2, HealthHolder health, int x, int y, int width, int height) {
+    private void drawHealth(Graphics2D g2, Health health, int x, int y, int width, int height) {
         g2.setFont(cs.FONTS.SMALL);
 
         boolean displayAmount = height >= 8 && hasFlag(DisplayFlag.HP_SHIELD_NUM);

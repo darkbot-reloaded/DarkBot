@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 public class TaskHandler extends FeatureHandler<Task> {
 
-    private static final Class<?>[] NATIVE = new Class[]{UsernameUpdater.class, FlashResManager.class};
+    private static final Class<?>[] NATIVE = new Class[]{UsernameUpdater.class, FlashResManager.class}; //todo
 
     private final Main main;
     private final FeatureRegistry featureRegistry;

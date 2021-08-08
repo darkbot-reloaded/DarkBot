@@ -46,15 +46,15 @@ public class NativeApiAdapter extends ApiAdapter {
         return API.isValid(botId);
     }
 
-    public void mousePress(int x, int y) {
-        API.sendMessage(botId, Headers.MOUSE, MouseEvent.DOWN, x, y);
-    }
-
     public void mouseMove(int x, int y) {
         API.sendMessage(botId, Headers.MOUSE, MouseEvent.MOVE, x, y);
     }
 
-    public void mouseRelease(int x, int y) {
+    public void mouseDown(int x, int y) {
+        API.sendMessage(botId, Headers.MOUSE, MouseEvent.DOWN, x, y);
+    }
+
+    public void mouseUp(int x, int y) {
         API.sendMessage(botId, Headers.MOUSE, MouseEvent.UP, x, y);
     }
 
