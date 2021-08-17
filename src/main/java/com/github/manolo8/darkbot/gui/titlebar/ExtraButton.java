@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.itf.ExtraMenuProvider;
+import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
@@ -150,7 +151,10 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 ConfigEntity.changed();
                 main.getGui().updateConfiguration();
             }));
-
+            list.add(create("reset_stats", e -> {
+                main.statsManager.resetValues();
+                main.guiManager.deaths = 0;
+            }));
 
             if (main.config.BOT_SETTINGS.OTHER.DEV_STUFF) {
                 list.add(createSeparator("Dev stuff"));
