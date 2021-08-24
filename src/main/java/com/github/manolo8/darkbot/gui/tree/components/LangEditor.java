@@ -9,9 +9,10 @@ public class LangEditor extends JListField {
     @Override
     protected void updateValue() {
         super.updateValue();
-        I18n.reloadProps();
+        I18n.updateLang();
         Popups.showMessageAsync(
                 I18n.get("language.changed.title"),
-                I18n.get("language.changed.content", I18n.getLocale().getDisplayName(I18n.getLocale()), I18n.get("translation.credit")), JOptionPane.INFORMATION_MESSAGE);
+                I18n.get("language.changed.content", I18n.getLocale().getDisplayName(I18n.getLocale()),
+                        I18n.get("translation.credit")), JOptionPane.INFORMATION_MESSAGE);
     }
 }

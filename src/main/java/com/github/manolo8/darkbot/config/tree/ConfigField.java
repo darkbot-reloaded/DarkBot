@@ -14,7 +14,7 @@ public class ConfigField {
     public final Object parent;
     public final Field field;
 
-    public ConfigField(Object parent, Field field) {
+    ConfigField(Object parent, Field field) {
         this.parent = parent;
         this.field = field;
     }

@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot;
 
-import com.formdev.flatlaf.FlatLaf;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigManager;
@@ -9,7 +8,6 @@ import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
@@ -111,6 +109,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
         VerifierChecker.getAuthApi().setupAuth();
 
         this.pluginAPI       = new DarkBotPluginApiImpl(this);
+        I18n.init(pluginAPI.requireInstance(eu.darkbot.impl.managers.I18n.class));
+
         this.starManager     = pluginAPI.requireInstance(StarManager.class);
         this.mapManager      = pluginAPI.requireInstance(MapManager.class);
         this.settingsManager = pluginAPI.requireInstance(SettingsManager.class);
