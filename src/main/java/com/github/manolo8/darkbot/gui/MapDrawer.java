@@ -23,8 +23,11 @@ import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.manager.PetManager;
 import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
+import com.github.manolo8.darkbot.core.manager.PetManager.PetStats;
+import com.github.manolo8.darkbot.core.manager.PetManager.PetStatsType;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
@@ -79,6 +82,10 @@ public class MapDrawer extends JPanel {
     private GuiManager guiManager;
     private StatsManager statsManager;
     private PingManager pingManager;
+    private PetManager petManager;
+    private PetStats fuel;
+    private double currentFuel;
+    private double maxFuel;
     protected Config config;
 
     private List<Portal> portals;
@@ -143,6 +150,7 @@ public class MapDrawer extends JPanel {
         this.guiManager = main.guiManager;
         this.statsManager = main.statsManager;
         this.pingManager = main.pingManager;
+        this.petManager = main.guiManager.pet;
         this.config = main.config;
 
         this.portals = main.mapManager.entities.portals;
@@ -301,7 +309,17 @@ public class MapDrawer extends JPanel {
         g2.setFont(cs.FONTS.MID);
         if (hasFlag(DisplayFlag.HERO_NAME))
             drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40, Align.MID);
-        drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20, 12);
+        drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20, 12, 0);
+
+        if(!hero.pet.removed && (hasFlag(DisplayFlag.SHOW_PET))) {
+            drawHealth(g2, hero.pet.health, 10, height - 52, (int)((mid - 20) * 0.25), 6, 0);
+            fuel = petManager.getPetStats(PetStatsType.FUEL);
+            if (fuel != null) {
+                currentFuel = fuel.getCurr();
+                maxFuel = fuel.getTotal();
+                drawPetFuel(g2, 10, height - 40, (int)((mid - 20) * 0.25), 6);
+            }
+        }
 
         if (hero.target != null && !hero.target.removed) {
             if (hero.target instanceof Npc || hero.target.playerInfo.isEnemy()) g2.setColor(cs.ENEMIES);
@@ -310,7 +328,7 @@ public class MapDrawer extends JPanel {
             String name = hero.target.playerInfo.username;
             drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40, Align.MID);
 
-            drawHealth(g2, hero.target.health, mid + 10, height - 34, mid - 20, 12);
+            drawHealth(g2, hero.target.health, mid + 10, height - 34, mid - 20, 12, 0);
         }
     }
 
@@ -488,9 +506,9 @@ public class MapDrawer extends JPanel {
                     g2.setColor(color);
                     g2.drawString(member.getDisplayText(hideNames), x, y + 14);
 
-                    drawHealth(g2, member.memberInfo, x, y + 18, w / 2 - 3, 4);
+                    drawHealth(g2, member.memberInfo, x, y + 18, w / 2 - 3, 4, 2);
                     if (member.targetInfo.shipType != 0)
-                        drawHealth(g2, member.targetInfo, x + (w / 2) + 3, y + 18, w / 2 - 3, 4);
+                        drawHealth(g2, member.targetInfo, x + (w / 2) + 3, y + 18, w / 2 - 3, 4, 2);
                 },
                 member -> Math.min(g2.getFontMetrics().stringWidth(member.getDisplayText(hideNames)), 200),
                 group.members);
@@ -589,11 +607,10 @@ public class MapDrawer extends JPanel {
                 translateX(safetyInfo.diameter()), translateY(safetyInfo.diameter()));
     }
 
-    private void drawHealth(Graphics2D g2, HealthHolder health, int x, int y, int width, int height) {
+    private void drawHealth(Graphics2D g2, HealthHolder health, int x, int y, int width, int height, int margin) {
         g2.setFont(cs.FONTS.SMALL);
 
         boolean displayAmount = height >= 8 && hasFlag(DisplayFlag.HP_SHIELD_NUM);
-        int margin = height < 8 ? 2 : 0;
 
         int totalMaxHealth = health.getMaxHp() + health.getHull();
         int hullWidth = totalMaxHealth == 0 ? 0 : (health.getHull() * width / totalMaxHealth);
@@ -620,6 +637,15 @@ public class MapDrawer extends JPanel {
                 drawString(g2, HEALTH_FORMAT.format(health.getShield()) + "/" +
                         HEALTH_FORMAT.format(health.getMaxShield()), x + width / 2, y + height + height - 2, Align.MID);
         }
+    }
+
+    private void drawPetFuel(Graphics2D g2, int x, int y, int width, int height) {
+        g2.setFont(cs.FONTS.SMALL);
+        g2.setColor(cs.TEXT.darker());
+        g2.fillRect(x, y, width, height);
+
+        g2.setColor(cs.TEXT);
+        g2.fillRect(x, y, (int) (maxFuel == 0 ? 1 : ((double) currentFuel / (double) maxFuel) * width), height);
     }
 
     protected enum Align {
