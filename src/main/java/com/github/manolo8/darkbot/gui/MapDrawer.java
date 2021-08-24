@@ -83,9 +83,6 @@ public class MapDrawer extends JPanel {
     private StatsManager statsManager;
     private PingManager pingManager;
     private PetManager petManager;
-    private PetStats fuel;
-    private double currentFuel;
-    private double maxFuel;
     protected Config config;
 
     private List<Portal> portals;
@@ -311,13 +308,12 @@ public class MapDrawer extends JPanel {
             drawString(g2, hero.playerInfo.username, 10 + (mid - 20) / 2, height - 40, Align.MID);
         drawHealth(g2, hero.health, 10, this.getHeight() - 34, mid - 20, 12, 0);
 
-        if(!hero.pet.removed && (hasFlag(DisplayFlag.SHOW_PET))) {
+        if(!hero.pet.removed && hasFlag(DisplayFlag.SHOW_PET)) {
             drawHealth(g2, hero.pet.health, 10, height - 52, (int)((mid - 20) * 0.25), 6, 0);
-            fuel = petManager.getPetStats(PetStatsType.FUEL);
+            PetStats fuel = petManager.getPetStats(PetStatsType.FUEL);
             if (fuel != null) {
-                currentFuel = fuel.getCurr();
-                maxFuel = fuel.getTotal();
-                drawPetFuel(g2, 10, height - 40, (int)((mid - 20) * 0.25), 6);
+                double fuelPercent = fuel.getCurr() / fuel.getTotal();
+                drawPetFuel(g2, 10, height - 40, (int)((mid - 20) * 0.25), 6, fuelPercent);
             }
         }
 
@@ -639,13 +635,11 @@ public class MapDrawer extends JPanel {
         }
     }
 
-    private void drawPetFuel(Graphics2D g2, int x, int y, int width, int height) {
-        g2.setFont(cs.FONTS.SMALL);
-        g2.setColor(cs.TEXT.darker());
+    private void drawPetFuel(Graphics2D g2, int x, int y, int width, int height, double fuelPercent) {
+        g2.setColor(cs.FUEL.darker());
         g2.fillRect(x, y, width, height);
-
-        g2.setColor(cs.TEXT);
-        g2.fillRect(x, y, (int) (maxFuel == 0 ? 1 : ((double) currentFuel / (double) maxFuel) * width), height);
+        g2.setColor(cs.FUEL);
+        g2.fillRect(x, y, (int) (fuelPercent * width), height);
     }
 
     protected enum Align {
