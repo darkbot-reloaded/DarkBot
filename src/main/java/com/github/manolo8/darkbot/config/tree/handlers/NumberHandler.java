@@ -4,11 +4,12 @@ import eu.darkbot.api.config.annotations.Number;
 
 import java.lang.reflect.Field;
 
-public class NumberHandler implements ValueHandler<java.lang.Number> {
+public class NumberHandler extends DefaultHandler<java.lang.Number> {
 
     private final double min, max, step;
 
     public NumberHandler(Field field) {
+        super(field);
         Number num = field.getAnnotation(Number.class);
         if (num == null) {
             this.min = 0;
@@ -22,6 +23,12 @@ public class NumberHandler implements ValueHandler<java.lang.Number> {
     }
 
     public NumberHandler(double min, double max, double step) {
+        this(null, min, max, step);
+    }
+
+    public NumberHandler(Field field, double min, double max, double step) {
+        super(field);
+
         this.min = min;
         this.max = max;
         this.step = step;

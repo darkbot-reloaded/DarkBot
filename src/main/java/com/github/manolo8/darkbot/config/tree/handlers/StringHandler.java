@@ -6,12 +6,13 @@ import eu.darkbot.api.config.annotations.Text;
 
 import java.lang.reflect.Field;
 
-public class StringHandler implements ValueHandler<String> {
+public class StringHandler extends DefaultHandler<String> {
 
     private final int len;
     private final String placeholder;
 
     public StringHandler(Field field) {
+        super(field);
         Text text = field.getAnnotation(Text.class);
         if (text != null) {
             this.len = text.length();

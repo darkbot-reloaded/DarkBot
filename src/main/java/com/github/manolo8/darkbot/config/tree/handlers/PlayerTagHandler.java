@@ -6,11 +6,12 @@ import eu.darkbot.api.config.util.PlayerTag;
 
 import java.lang.reflect.Field;
 
-public class PlayerTagHandler implements ValueHandler<PlayerTag> {
+public class PlayerTagHandler extends DefaultHandler<PlayerTag> {
 
     private final TagDefault fallback;
 
     public PlayerTagHandler(Field field) {
+        super(field);
         Tag tag = field.getAnnotation(Tag.class);
         com.github.manolo8.darkbot.config.types.Tag legacyTag =
                 field.getAnnotation(com.github.manolo8.darkbot.config.types.Tag.class);

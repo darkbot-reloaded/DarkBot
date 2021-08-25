@@ -14,6 +14,7 @@ import java.util.function.Function;
 public class SettingHandlerFactory implements API.Singleton {
 
     private final Map<Class<?>, HandlerBuilder<?>> handlers = new HashMap<>();
+    private final HandlerBuilder<?> fallback = new HandlerBuilder<>(DefaultHandler::new);
 
 
     public SettingHandlerFactory() {
@@ -30,11 +31,10 @@ public class SettingHandlerFactory implements API.Singleton {
         return handlers.containsKey(type);
     }
 
-    public <T> ValueHandler<? extends T> getHandler(Field field) {
-        @SuppressWarnings("unchecked")
-        HandlerBuilder<? extends T> builder = (HandlerBuilder<? extends T>) handlers.get(field.getType());
-        return builder != null ? builder.getHandler(field) : null;
-
+    public <T> ValueHandler<T> getHandler(Field field) {
+        if (field == null) return new DefaultHandler<T>();
+        //noinspection unchecked
+        return (ValueHandler<T>) handlers.getOrDefault(field.getType(), fallback).getHandler(field);
     }
 
     @SafeVarargs

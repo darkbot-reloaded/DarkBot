@@ -5,11 +5,12 @@ import com.github.manolo8.darkbot.config.types.Col;
 import java.awt.*;
 import java.lang.reflect.Field;
 
-public class ColorHandler implements ValueHandler<Color> {
+public class ColorHandler extends DefaultHandler<Color> {
 
     private final boolean alpha;
 
     public ColorHandler(Field field) {
+        super(field);
         Col col = field.getAnnotation(Col.class);
         this.alpha = col == null || col.alpha();
     }

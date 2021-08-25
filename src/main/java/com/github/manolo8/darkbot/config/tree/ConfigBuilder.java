@@ -1,8 +1,7 @@
 package com.github.manolo8.darkbot.config.tree;
 
 import com.github.manolo8.darkbot.config.tree.handlers.SettingHandlerFactory;
-import com.github.manolo8.darkbot.config.types.Num;
-import com.github.manolo8.darkbot.gui.tree.EditorProvider;
+import com.github.manolo8.darkbot.config.tree.handlers.ValueHandler;
 import eu.darkbot.api.API;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Option;
@@ -12,25 +11,28 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Class responsible for building a {@link ConfigSetting} tree from a class
+ * This class does NOT fill in any details about the data present in the configuration,
+ * only creates the containers for it.
+ */
 public class ConfigBuilder implements API.Singleton {
 
     private final I18nAPI i18n;
-    private final EditorProvider editors;
     private final SettingHandlerFactory settingHandlerFactory;
 
     public ConfigBuilder(I18nAPI i18n,
-                         EditorProvider editors,
                          SettingHandlerFactory settingHandlerFactory) {
         this.i18n = i18n;
-        this.editors = editors;
         this.settingHandlerFactory = settingHandlerFactory;
     }
 
-    public <T> ConfigSetting<T> of(Class<T> type, @Nullable PluginInfo namespace) {
+    public <T> ConfigSetting<T> of(Class<T> type, String rootName, @Nullable PluginInfo namespace) {
         Configuration cfg = type.getAnnotation(Configuration.class);
         String baseKey = "config";
         boolean allOptions = false;
@@ -40,7 +42,7 @@ public class ConfigBuilder implements API.Singleton {
             allOptions = cfg.allOptions();
         }
 
-        return new Builder(namespace, baseKey, allOptions).build(type);
+        return new Builder(namespace, baseKey, allOptions).build(type, rootName);
     }
 
     private class Builder {
@@ -56,12 +58,12 @@ public class ConfigBuilder implements API.Singleton {
             this.allConfig = allConfig;
         }
 
-        public <T> ConfigSetting.Root<T> build(Class<T> type) {
+        public <T> ConfigSetting.Root<T> build(Class<T> type, String rootName) {
             return new ConfigSetting.Root<T>(
                     baseKey,
-                    i18n.getOrDefault(namespace, baseKey, "Root"),
+                    i18n.getOrDefault(namespace, baseKey, rootName),
                     i18n.getOrDefault(namespace, baseKey + ".desc", null),
-                    type,
+                    type, settingHandlerFactory.getHandler(null),
                     parent -> getChildren(parent, type));
         }
 
@@ -70,7 +72,9 @@ public class ConfigBuilder implements API.Singleton {
                     .filter(this::participates)
                     .collect(Collectors.toMap(
                             f -> f.getName().toLowerCase(Locale.ROOT),
-                            f -> createConfig(p, f)));
+                            f -> createConfig(p, f),
+                            (a, b) -> a,
+                            LinkedHashMap::new));
         }
 
         private ConfigSetting<?> createConfig(ConfigSetting.Parent<?> parent, Field field) {
@@ -101,7 +105,9 @@ public class ConfigBuilder implements API.Singleton {
             // and go back to it being a leaf node
             if (!isLeaf(field)) {
                 ConfigSetting.Intermediate<?> inter = new ConfigSetting.Intermediate<>(parent,
-                        key, name, description, type, p -> getChildren(p, type));
+                        key, name, description,
+                        type, settingHandlerFactory.getHandler(field),
+                        p -> getChildren(p, type));
                 if (!inter.getChildren().isEmpty())
                     return inter;
             }
