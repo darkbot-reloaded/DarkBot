@@ -23,7 +23,7 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
     public int npcId;
     public boolean ish;
 
-    private eu.darkbot.api.config.NpcInfo apiNpcInfo;
+    private eu.darkbot.api.config.types.NpcInfo apiNpcInfo;
 
     public Npc(int id) {
         super(id);
@@ -61,12 +61,12 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
     }
 
     @Override
-    public eu.darkbot.api.config.NpcInfo getInfo() {
+    public eu.darkbot.api.config.types.NpcInfo getInfo() {
         return apiNpcInfo;
     }
 
 
-    private class NpcInfoImpl implements eu.darkbot.api.config.NpcInfo {
+    private class NpcInfoImpl implements eu.darkbot.api.config.types.NpcInfo {
 
         private final HeroItemsAPI items;
         private final SettingsProxy settingsProxy;

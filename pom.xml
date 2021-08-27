@@ -26,9 +26,9 @@
     <dependencies>
 
         <dependency>
-            <groupId>eu.darkbot.DarkBotAPI</groupId>
+            <groupId>eu.darkbot</groupId>
             <artifactId>darkbot-impl</artifactId>
-            <version>master-SNAPSHOT</version>
+            <version>0.1</version>
         </dependency>
 
         <dependency>

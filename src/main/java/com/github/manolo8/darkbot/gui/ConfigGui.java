@@ -89,7 +89,7 @@ public class ConfigGui extends JFrame {
     }
 
     public void setComponentData() {
-        advancedPane.setEditingConfig(main.config);
+        advancedPane.setEditingConfig(main.configHandler.getConfigurationRoot());
         main.pluginHandler.addListener(advancedPane);
         zones.setup(main);
         configPicker.setup(main);

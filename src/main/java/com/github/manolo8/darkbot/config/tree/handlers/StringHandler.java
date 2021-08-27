@@ -3,10 +3,11 @@ package com.github.manolo8.darkbot.config.tree.handlers;
 import com.github.manolo8.darkbot.config.types.Length;
 import com.github.manolo8.darkbot.config.types.Placeholder;
 import eu.darkbot.api.config.annotations.Text;
+import eu.darkbot.impl.config.DefaultHandler;
 
 import java.lang.reflect.Field;
 
-public class StringHandler extends DefaultHandler<String> {
+public class StringHandler extends FieldDefaultHandler<String> {
 
     private final int len;
     private final String placeholder;

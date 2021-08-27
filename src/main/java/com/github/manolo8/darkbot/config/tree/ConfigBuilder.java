@@ -1,15 +1,17 @@
 package com.github.manolo8.darkbot.config.tree;
 
 import com.github.manolo8.darkbot.config.tree.handlers.SettingHandlerFactory;
-import com.github.manolo8.darkbot.config.tree.handlers.ValueHandler;
 import eu.darkbot.api.API;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Option;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.managers.I18nAPI;
+import eu.darkbot.impl.config.ConfigSettingImpl;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -32,7 +34,7 @@ public class ConfigBuilder implements API.Singleton {
         this.settingHandlerFactory = settingHandlerFactory;
     }
 
-    public <T> ConfigSetting<T> of(Class<T> type, String rootName, @Nullable PluginInfo namespace) {
+    public <T> ConfigSetting.Parent<T> of(Class<T> type, String rootName, @Nullable PluginInfo namespace) {
         Configuration cfg = type.getAnnotation(Configuration.class);
         String baseKey = "config";
         boolean allOptions = false;
@@ -58,8 +60,8 @@ public class ConfigBuilder implements API.Singleton {
             this.allConfig = allConfig;
         }
 
-        public <T> ConfigSetting.Root<T> build(Class<T> type, String rootName) {
-            return new ConfigSetting.Root<T>(
+        public <T> ConfigSettingImpl.Root<T> build(Class<T> type, String rootName) {
+            return new ConfigSettingImpl.Root<T>(
                     baseKey,
                     i18n.getOrDefault(namespace, baseKey, rootName),
                     i18n.getOrDefault(namespace, baseKey + ".desc", null),
@@ -90,7 +92,8 @@ public class ConfigBuilder implements API.Singleton {
                 if (!legacyOption.key().isEmpty()) key = legacyOption.key();
 
                 name = i18n.getOrDefault(namespace, key, legacyOption.value());
-                description = i18n.getOrDefault(namespace, key + ".desc", legacyOption.description());
+                description = i18n.getOrDefault(namespace, key + ".desc",
+                        legacyOption.description().isEmpty() ? null : legacyOption.description());
             } else {
                 Option option = field.getAnnotation(Option.class);
                 if (option != null && !option.value().isEmpty()) key = option.value();
@@ -104,7 +107,7 @@ public class ConfigBuilder implements API.Singleton {
             // If the intermediate turns out not to have any children, discard it
             // and go back to it being a leaf node
             if (!isLeaf(field)) {
-                ConfigSetting.Intermediate<?> inter = new ConfigSetting.Intermediate<>(parent,
+                ConfigSettingImpl.Intermediate<?> inter = new ConfigSettingImpl.Intermediate<>(parent,
                         key, name, description,
                         type, settingHandlerFactory.getHandler(field),
                         p -> getChildren(p, type));
@@ -112,7 +115,7 @@ public class ConfigBuilder implements API.Singleton {
                     return inter;
             }
 
-            return new ConfigSetting.Leaf<>(parent, key, name, description, type,
+            return new ConfigSettingImpl.Leaf<>(parent, key, name, description, type,
                     settingHandlerFactory.getHandler(field));
         }
 
@@ -121,9 +124,10 @@ public class ConfigBuilder implements API.Singleton {
          * @return true if this field participates in the configuration tree, false otherwise
          */
         private boolean participates(Field field) {
-            if (!field.isAccessible()) return false;
-            if (field.getAnnotation(Option.Ignore.class) != null) return false;
-            if (field.getAnnotation(Option.class) != null) return true;
+            if (!Modifier.isPublic(field.getModifiers())) return false;
+            if (field.isAnnotationPresent(Option.Ignore.class)) return false;
+            if (field.isAnnotationPresent(Option.class)) return true;
+            if (field.isAnnotationPresent(com.github.manolo8.darkbot.config.types.Option.class)) return true;
             return allConfig;
         }
 

@@ -1,9 +1,8 @@
 package com.github.manolo8.darkbot.gui.tree;
 
 import com.github.manolo8.darkbot.config.tree.ConfigField;
-import com.github.manolo8.darkbot.config.tree.ConfigNode;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
-import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.config.ConfigSetting;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,20 +28,20 @@ public class TreeCell extends JPanel {
         add(editor);
     }
 
-    public void setEditing(ConfigNode node) {
+    public void setEditing(ConfigSetting<?> node) {
         minHeight = getMinHeight(node);
         nameWidth = editors.getWidthFor(node, name.getFontMetrics(name.getFont()));
 
-        name.setText(I18n.getOrDefault(node.key, node.name));
+        name.setText(node.getName());
 
-        if (node instanceof ConfigNode.Leaf) {
-            ConfigNode.Leaf leaf = (ConfigNode.Leaf) node;
-            setEditor(editors.getEditor(leaf.field), leaf.field);
+        if (!(node instanceof ConfigSetting.Parent)) {
+            ConfigField cf = new ConfigField(node);
+            setEditor(editors.getEditor(cf), cf);
         } else {
             setEditor(null, null);
         }
 
-        setToolTipText(I18n.getOrDefault(node.key + ".desc", node.description));
+        setToolTipText(node.getDescription());
     }
 
     private void setEditor(OptionEditor newEditor, ConfigField field) {
@@ -60,8 +59,9 @@ public class TreeCell extends JPanel {
      * @param node The node to get height for
      * @return the minimum height the component should have
      */
-    private int getMinHeight(ConfigNode node) {
-        return node instanceof ConfigNode.Leaf || node.getDepth() > 1 ?
+    private int getMinHeight(ConfigSetting<?> node) {
+        return !(node instanceof ConfigSetting.Parent) ||
+                (node.getParent() != null && node.getParent().getParent() != null) ?
                 AdvancedConfig.ROW_HEIGHT : AdvancedConfig.HEADER_HEIGHT;
     }
 

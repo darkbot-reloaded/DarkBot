@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 /**
  * Prefer to use I18nAPI instance instead
  */
-@Deprecated
 public class I18n {
 
     // Hack for backwards compat
@@ -22,10 +21,8 @@ public class I18n {
             "bg", "cs", "de", "el", "en", "es", "fr", "hu", "it", "lt", "pl", "pt", "ro", "ru", "sv", "tr", "uk"
     ).map(Locale::new).sorted(Comparator.comparing(Locale::getDisplayName)).collect(Collectors.toList());
 
-
     public static void init(eu.darkbot.impl.managers.I18n instance) {
         INSTANCE = instance;
-        INSTANCE.reloadResources();
     }
 
     public static I18nAPI getInstance() {

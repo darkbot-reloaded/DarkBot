@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.gui.tree;
 
-import com.github.manolo8.darkbot.config.tree.ConfigNode;
+import eu.darkbot.api.config.ConfigSetting;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellEditor;
@@ -26,7 +26,7 @@ public class TreeEditor extends DefaultTreeCellEditor {
     @Override
     public Component getTreeCellEditorComponent(JTree tree, Object value, boolean isSelected,
                                                 boolean expanded, boolean leaf, int row) {
-        treeCell.setEditing((ConfigNode) value);
+        treeCell.setEditing((ConfigSetting<?>) value);
         return treeCell;
     }
 

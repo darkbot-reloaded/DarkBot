@@ -2,7 +2,9 @@ package com.github.manolo8.darkbot.config.tree.handlers;
 
 import com.github.manolo8.darkbot.config.types.Num;
 import eu.darkbot.api.API;
-import eu.darkbot.api.config.util.PlayerTag;
+import eu.darkbot.api.config.types.PlayerTag;
+import eu.darkbot.api.config.util.ValueHandler;
+import eu.darkbot.impl.config.DefaultHandler;
 
 import java.awt.*;
 import java.lang.annotation.Annotation;
@@ -14,12 +16,13 @@ import java.util.function.Function;
 public class SettingHandlerFactory implements API.Singleton {
 
     private final Map<Class<?>, HandlerBuilder<?>> handlers = new HashMap<>();
-    private final HandlerBuilder<?> fallback = new HandlerBuilder<>(DefaultHandler::new);
+    private final HandlerBuilder<?> fallback = new HandlerBuilder<>(FieldDefaultHandler::new);
 
 
     public SettingHandlerFactory() {
-        addHandlers(new HandlerBuilder<java.lang.Number>(NumberHandler::new)
-                .addHandler(Num.class, NumberLegacyHandler::new),
+        addHandlers(new HandlerBuilder<java.lang.Number>(FieldDefaultHandler::new)
+                .addHandler(eu.darkbot.api.config.annotations.Number.class, NumberHandler::new)
+                .addHandler(Num.class, NumberHandler::ofLegacyAnnotation),
                 int.class, double.class, Integer.class, Double.class);
 
         addHandlers(new HandlerBuilder<>(ColorHandler::new), Color.class);

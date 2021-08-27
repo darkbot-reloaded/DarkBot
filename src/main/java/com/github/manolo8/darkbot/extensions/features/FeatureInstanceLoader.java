@@ -27,7 +27,7 @@ class FeatureInstanceLoader {
 
         FEATURE_DECORATORS = Arrays.asList(
                 new InstallableDecorator(main),
-                CONFIGURATION_DECORATOR = new ConfigurableDecorator(main),
+                CONFIGURATION_DECORATOR = new ConfigurableDecorator(),
                 new InstructionProviderDecorator());
     }
 

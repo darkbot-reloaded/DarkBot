@@ -2,11 +2,12 @@ package com.github.manolo8.darkbot.config.tree.handlers;
 
 import com.github.manolo8.darkbot.config.types.TagDefault;
 import eu.darkbot.api.config.annotations.Tag;
-import eu.darkbot.api.config.util.PlayerTag;
+import eu.darkbot.api.config.types.PlayerTag;
+import eu.darkbot.impl.config.DefaultHandler;
 
 import java.lang.reflect.Field;
 
-public class PlayerTagHandler extends DefaultHandler<PlayerTag> {
+public class PlayerTagHandler extends FieldDefaultHandler<PlayerTag> {
 
     private final TagDefault fallback;
 

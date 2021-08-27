@@ -1,11 +1,12 @@
 package com.github.manolo8.darkbot.config.tree.handlers;
 
 import com.github.manolo8.darkbot.config.types.Col;
+import eu.darkbot.impl.config.DefaultHandler;
 
 import java.awt.*;
 import java.lang.reflect.Field;
 
-public class ColorHandler extends DefaultHandler<Color> {
+public class ColorHandler extends FieldDefaultHandler<Color> {
 
     private final boolean alpha;
 

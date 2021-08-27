@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot;
 
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.ConfigHandler;
 import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
@@ -67,6 +68,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
             .create();
 
     public ConfigManager configManager = new ConfigManager();
+    public ConfigHandler configHandler;
     public Config config;
     public static IDarkBotAPI API;
 
@@ -104,12 +106,22 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     public Main(StartupParams params) {
         super("Main");
+
+        // The order here is a bit tricky, because generating the config tree
+        // requires i18n being configured with a locale, but the locale is
+        // defined in the config
+        // 1: Load the config without generating the config tree
         config = configManager.loadConfig(params.getStartConfig());
+        // 2: Create the plugin API (uses the config manager internally)
+        this.pluginAPI = new DarkBotPluginApiImpl(this);
+        // 3: Initialize i18n with the locale from the config
+        eu.darkbot.impl.managers.I18n i18n = pluginAPI.requireInstance(eu.darkbot.impl.managers.I18n.class);
+        I18n.init(i18n);
+        i18n.setLocale(config.BOT_SETTINGS.BOT_GUI.LOCALE);
+        // 4: Generate the actual config
+        this.configHandler = pluginAPI.requireInstance(ConfigHandler.class);
 
         VerifierChecker.getAuthApi().setupAuth();
-
-        this.pluginAPI       = new DarkBotPluginApiImpl(this);
-        I18n.init(pluginAPI.requireInstance(eu.darkbot.impl.managers.I18n.class));
 
         this.starManager     = pluginAPI.requireInstance(StarManager.class);
         this.mapManager      = pluginAPI.requireInstance(MapManager.class);
@@ -346,7 +358,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         if (configManager.getConfigName().equals(config)) return;
         try {
             SwingUtilities.invokeAndWait(() -> {
-                this.config = configManager.loadConfig(config);
+                this.config = configHandler.loadConfig(config);
                 mapManager.updateAreas(true);
                 pluginHandler.updateConfig(); // Get plugins to update what features are enabled
                 featureRegistry.updateConfig(); // Update the features & configurables

@@ -14,7 +14,6 @@ import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
 import com.github.manolo8.darkbot.config.utils.ItemUtils;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
@@ -27,15 +26,11 @@ import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
-import eu.darkbot.api.config.Collect;
-import eu.darkbot.api.config.General;
-import eu.darkbot.api.config.util.PercentRange;
-import eu.darkbot.api.config.util.ShipMode;
+import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.HeroAPI;
-import eu.darkbot.api.managers.HeroItemsAPI;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -57,7 +52,7 @@ import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.HP_S
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.STATS_AREA;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.ZONES;
 
-public class Config implements eu.darkbot.api.config.Config {
+public class Config implements eu.darkbot.api.config.legacy.Config {
 
     // Defined map areas
     public Map<Integer, ZoneInfo> AVOIDED = new HashMap<>();
@@ -79,7 +74,7 @@ public class Config implements eu.darkbot.api.config.Config {
     public transient boolean changed;
 
     public @Option General GENERAL = new General();
-    public static class General implements eu.darkbot.api.config.General {
+    public static class General implements eu.darkbot.api.config.legacy.General {
         @Options(ModuleSupplier.class)
         public @Option @Editor(JListField.class) String CURRENT_MODULE = LootNCollectorModule.class.getCanonicalName();
         @Options(StarManager.MapList.class)
@@ -90,7 +85,7 @@ public class Config implements eu.darkbot.api.config.Config {
         public @Option @Num(max = 3600) int FORMATION_CHECK = 180;
 
         public @Option Safety SAFETY = new Safety();
-        public static class Safety implements eu.darkbot.api.config.General.Safety {
+        public static class Safety implements eu.darkbot.api.config.legacy.General.Safety {
             public @Option PercentRange REPAIR_HP_RANGE = new PercentRange(0.4, 0.95);
             public @Option @Editor(JPercentField.class) double REPAIR_HP_NO_NPC = 0.5;
             public @Option @Editor(JPercentField.class) double REPAIR_TO_SHIELD = 1;
@@ -101,7 +96,7 @@ public class Config implements eu.darkbot.api.config.Config {
             public @Option @Num(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
 
             @Override
-            public eu.darkbot.api.config.util.PercentRange getRepairHealthRange() {
+            public eu.darkbot.api.config.types.PercentRange getRepairHealthRange() {
                 return REPAIR_HP_RANGE;
             }
 
@@ -122,7 +117,7 @@ public class Config implements eu.darkbot.api.config.Config {
         }
 
         public @Option Running RUNNING = new Running();
-        public static class Running implements eu.darkbot.api.config.General.Running {
+        public static class Running implements eu.darkbot.api.config.legacy.General.Running {
             public @Option boolean RUN_FROM_ENEMIES = true;
             public @Option @Num(max = 24 * 60 * 60, step = 300) int REMEMBER_ENEMIES_FOR = 300;
             public @Option boolean RUN_FROM_ENEMIES_SIGHT = false;
@@ -187,18 +182,18 @@ public class Config implements eu.darkbot.api.config.Config {
         }
 
         @Override
-        public eu.darkbot.api.config.General.Safety getSafety() {
+        public eu.darkbot.api.config.legacy.General.Safety getSafety() {
             return SAFETY;
         }
 
         @Override
-        public eu.darkbot.api.config.General.Running getRunning() {
+        public eu.darkbot.api.config.legacy.General.Running getRunning() {
             return RUNNING;
         }
     }
 
     public @Option Collect COLLECT = new Collect();
-    public static class Collect implements eu.darkbot.api.config.Collect {
+    public static class Collect implements eu.darkbot.api.config.legacy.Collect {
         public @Option boolean STAY_AWAY_FROM_ENEMIES;
         public @Option boolean AUTO_CLOACK;
         public @Option Character AUTO_CLOACK_KEY;
@@ -380,7 +375,7 @@ public class Config implements eu.darkbot.api.config.Config {
         }
     }
 
-    public static class PercentRange implements eu.darkbot.api.config.util.PercentRange {
+    public static class PercentRange implements eu.darkbot.api.config.types.PercentRange {
         public double min, max;
 
         public PercentRange() {}
@@ -407,22 +402,22 @@ public class Config implements eu.darkbot.api.config.Config {
 
 
     @Override
-    public Collection<? extends eu.darkbot.api.config.SafetyInfo> getSafeties(GameMap gameMap) {
+    public Collection<? extends eu.darkbot.api.config.types.SafetyInfo> getSafeties(GameMap gameMap) {
         return SAFETY.getOrDefault(gameMap.getId(), Collections.emptySet());
     }
 
     @Override
-    public Map<Integer, ? extends eu.darkbot.api.config.util.PlayerInfo> getPlayerInfos() {
+    public Map<Integer, ? extends eu.darkbot.api.config.types.PlayerInfo> getPlayerInfos() {
         return PLAYER_INFOS;
     }
 
     @Override
-    public eu.darkbot.api.config.General getGeneral() {
+    public eu.darkbot.api.config.legacy.General getGeneral() {
         return GENERAL;
     }
 
     @Override
-    public eu.darkbot.api.config.Collect getCollect() {
+    public eu.darkbot.api.config.legacy.Collect getCollect() {
         return COLLECT;
     }
 }

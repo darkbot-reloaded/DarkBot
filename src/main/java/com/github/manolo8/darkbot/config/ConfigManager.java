@@ -12,7 +12,7 @@ import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.api.API;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -26,8 +26,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-public class ConfigManager implements ConfigAPI {
+/**
+ * Responsible for loading & saving configuration files
+ *
+ * TODO: Rename to ConfigLoader
+ */
+public class ConfigManager implements API.Singleton {
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -206,14 +212,4 @@ public class ConfigManager implements ConfigAPI {
         }
     }
 
-
-    @Override
-    public <T> T getConfig(String s) {
-        return null; // TODO: implement methods
-    }
-
-    @Override
-    public String[] getChildren(String s) {
-        return null; // TODO: implement methods
-    }
 }

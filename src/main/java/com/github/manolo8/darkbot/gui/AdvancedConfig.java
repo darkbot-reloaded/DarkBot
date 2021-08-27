@@ -1,18 +1,16 @@
 package com.github.manolo8.darkbot.gui;
 
-import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.config.tree.ConfigNode;
-import com.github.manolo8.darkbot.config.tree.ConfigTree;
+import com.github.manolo8.darkbot.config.tree.ConfigSettingTree;
 import com.github.manolo8.darkbot.config.tree.TreeFilter;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.gui.components.MainButton;
-import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.tree.EditorManager;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
+import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
-import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.config.ConfigSetting;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -24,8 +22,8 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseWheelEvent;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class AdvancedConfig extends JPanel implements PluginListener {
 
@@ -33,30 +31,29 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     public static final int ROW_HEIGHT = 18;
     public static final int HEADER_HEIGHT = 26;
 
-    private Object config;
-    private ConfigTree treeModel;
+    private ConfigSetting.Parent<?> config;
+    private final ConfigSettingTree treeModel = new ConfigSettingTree();
     private JPanel tabs;
-    private List<TabButton> buttons = new ArrayList<>();
+    private final Map<String, TabButton> buttons = new LinkedHashMap<>();
     private boolean packed = false; // If this is a packed config in a floating window
 
     public AdvancedConfig() {
         setLayout(new MigLayout("ins 0, gap 0, fill, wrap 2", "[][grow]", "[][grow]"));
     }
 
-    public AdvancedConfig(Object config) {
+    public AdvancedConfig(ConfigSetting.Parent<?> config) {
         setLayout(new BorderLayout());
-        packed = true;
+        this.packed = true;
         setEditingConfig(config);
     }
 
-    void setEditingConfig(Object config) {
+    void setEditingConfig(ConfigSetting.Parent<?> config) {
         if (config == null) return;
         removeAll();
         this.config = config;
-        this.treeModel = new ConfigTree(config);
+        treeModel.setRoot(config);
         if (!packed) {
-            if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.CONFIG_TREE_TABS)
-                treeModel.getFilter().setSelectedRoot(0);
+            treeModel.setRoot((ConfigSetting.Parent<?>) config.getChildren().values().iterator().next());
 
             tabs = new JPanel(new MigLayout("ins 0, gap 0, wrap 1", "[]"));
 
@@ -82,7 +79,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     }
 
     public void setCustomConfig(String name, Object config) {
-        treeModel.setCustom(name, config);
+        //treeModel.setCustom(name, config);
         updateTabs();
     }
 
@@ -97,15 +94,11 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     private void updateTabs() {
         if (tabs == null) return;
         tabs.removeAll();
-        if (treeModel.getFilter().isUnfiltered() &&
-                ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.CONFIG_TREE_TABS) {
-
-            int tlc = treeModel.getTopLevelChildrenCount();
-
-            while (buttons.size() < tlc) buttons.add(new TabButton(buttons.size()));
-
-            for (int i = 0; i < tlc; i++) {
-                TabButton tb = buttons.get(i);
+        if (treeModel.getFilter().isUnfiltered()) {
+            for (Map.Entry<String, ConfigSetting<?>> entry : config.getChildren().entrySet()) {
+                String key = entry.getKey();
+                TabButton tb = buttons.computeIfAbsent(key,
+                        k -> new TabButton((ConfigSetting.Parent<?>) entry.getValue()));
                 tb.update();
                 tabs.add(tb, "grow");
             }
@@ -118,24 +111,22 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     private class TabButton extends MainButton {
         private final Border HIGHLIGHT = new MatteBorder(0, 0, 0, 3, UIUtils.TAB_HIGLIGHT);
 
-        private final int i;
+        private final ConfigSetting.Parent<?> node;
 
-        public TabButton(int i) {
-            super("");
-            this.i = i;
+        public TabButton(ConfigSetting.Parent<?> node) {
+            super(node.getName());
+            this.node = node;
             update();
         }
 
         public void update() {
-            setBorder(treeModel.getFilter().getSelectedRoot() == i ? HIGHLIGHT : null);
-            ConfigNode node = treeModel.getTopLevelChild(i);
-            if (node != null) setText(I18n.getOrDefault(node.key, node.name));
+            setBorder(treeModel.getRoot() == node ? HIGHLIGHT : null);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            treeModel.getFilter().setSelectedRoot(i);
-            buttons.forEach(TabButton::update);
+            treeModel.setRoot(node);
+            buttons.values().forEach(TabButton::update);
             treeModel.updateListeners();
         }
     }
