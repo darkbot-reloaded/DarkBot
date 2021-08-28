@@ -1,11 +1,11 @@
 package eu.darkbot.api;
 
-import java.nio.file.Paths;
+import com.github.manolo8.darkbot.utils.LibUtils;
 
 public class DarkBoat {
 
     static {
-        System.load(Paths.get("lib", "DarkBoatAPI.dll").toAbsolutePath().toString());
+        LibUtils.loadLibrary("DarkBoatAPI.dll");
     }
 
     public native void    setData(String url, String sid, String preloader, String vars);

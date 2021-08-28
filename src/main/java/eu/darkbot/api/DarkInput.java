@@ -1,14 +1,14 @@
 package eu.darkbot.api;
 
-import java.nio.file.Paths;
+import com.github.manolo8.darkbot.utils.LibUtils;
 
 public class DarkInput {
 
     static {
         if (System.getProperty("os.name").toLowerCase().contains("win"))
-            System.load(Paths.get("lib", "DarkInputAPI.dll").toAbsolutePath().toString());
+            LibUtils.loadLibrary("DarkInputAPI.dll");
         else
-            System.load(Paths.get("lib", "DarkInputAPI.so").toAbsolutePath().toString());
+            LibUtils.loadLibrary("DarkInputAPI.so");
     }
 
     public native int  getVersion();
