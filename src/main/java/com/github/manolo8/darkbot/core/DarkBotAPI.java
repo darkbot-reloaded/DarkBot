@@ -1,9 +1,11 @@
 package com.github.manolo8.darkbot.core;
 
+import java.nio.file.Paths;
+
 public class DarkBotAPI {
 
     static {
-        System.loadLibrary("lib/DarkBot");
+        System.load(Paths.get("lib", "DarkBot.dll").toAbsolutePath().toString());
     }
 
     public native void createWindow0();

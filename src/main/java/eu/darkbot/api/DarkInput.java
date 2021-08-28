@@ -6,7 +6,7 @@ public class DarkInput {
 
     static {
         if (System.getProperty("os.name").toLowerCase().contains("win"))
-            System.loadLibrary("lib/DarkInputAPI");
+            System.load(Paths.get("lib", "DarkInputAPI.dll").toAbsolutePath().toString());
         else
             System.load(Paths.get("lib", "DarkInputAPI.so").toAbsolutePath().toString());
     }

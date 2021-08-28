@@ -6,7 +6,7 @@ public class DarkMem {
 
     static {
         if (System.getProperty("os.name").toLowerCase().contains("win"))
-            System.loadLibrary("lib/DarkMemAPI");
+            System.load(Paths.get("lib", "DarkMemAPI.dll").toAbsolutePath().toString());
         else
             System.load(Paths.get("lib", "DarkMemAPI.so").toAbsolutePath().toString());
     }

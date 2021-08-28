@@ -1,9 +1,11 @@
 package com.github.manolo8.darkbot.core;
 
+import java.nio.file.Paths;
+
 public class DarkFlash {
 
     static {
-        System.loadLibrary("lib/DarkFlash");
+        System.load(Paths.get("lib", "DarkFlash.dll").toAbsolutePath().toString());
     }
 
     public native void setCookie(String url, String cookie);
