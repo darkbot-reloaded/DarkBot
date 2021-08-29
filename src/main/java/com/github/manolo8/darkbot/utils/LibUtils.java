@@ -8,7 +8,7 @@ public class LibUtils {
      * @return Absolute path of library with extension based on OS
      */
     public static String getLibPath(String library) {
-        return Paths.get("lib", library).toAbsolutePath().toString() + getExtension();
+        return Paths.get("lib", library + getExtension()).toAbsolutePath().toString();
     }
 
     /**
