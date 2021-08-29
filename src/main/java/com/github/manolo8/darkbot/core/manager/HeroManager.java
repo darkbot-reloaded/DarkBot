@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
+import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.core.utils.Drive;
 
 import java.util.List;
@@ -140,6 +141,7 @@ public class HeroManager extends Ship implements Manager {
         return setMode(config.CONFIG, config.FORMATION);
     }
 
+    private boolean formationCheckBySlot = true;
     public boolean setMode(int con, Character form) {
         int formationCheck = main.config.GENERAL.FORMATION_CHECK;
 
@@ -147,11 +149,27 @@ public class HeroManager extends Ship implements Manager {
             Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
             this.configTime = System.currentTimeMillis();
         }
-        boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000;
+        boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000L;
 
         if ((this.formation != form || checkFormation) && System.currentTimeMillis() - formationTime > 3500L) {
             Main.API.keyboardClick(this.formation = form);
-            if (formation != null) this.formationTime = System.currentTimeMillis();
+            if (formation != null) {
+                this.formationTime = System.currentTimeMillis();
+                this.formationCheckBySlot = false;
+            }
+
+        } else if (!formationCheckBySlot && System.currentTimeMillis() - formationTime > 600L) {
+
+            main.facadeManager.slotBars.findItemByCharacter(form)
+                    .filter(item -> item.id.contains("formation"))
+                    .filter(Item::isReady)
+                    .filter(item -> !item.selected)
+                    .ifPresent(item -> {
+                        Main.API.keyboardClick(form);
+                        this.formationTime = System.currentTimeMillis();
+                        this.formationCheckBySlot = true;
+                    });
+            //this.formationCheckBySlot = true; maybe should be checked just one time? per new char formation
         }
         return isInMode(con, form);
     }
