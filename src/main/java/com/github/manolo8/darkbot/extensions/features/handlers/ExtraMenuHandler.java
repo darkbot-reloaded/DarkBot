@@ -1,14 +1,14 @@
 package com.github.manolo8.darkbot.extensions.features.handlers;
 
-import com.github.manolo8.darkbot.core.itf.ExtraMenuProvider;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.gui.titlebar.ExtraButton;
+import eu.darkbot.api.extensions.ExtraMenus;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class ExtraMenuHandler extends FeatureHandler<ExtraMenuProvider> {
+public class ExtraMenuHandler extends FeatureHandler<ExtraMenus> {
 
     private static final Class<?>[] NATIVE = new Class[] {
             ExtraButton.DefaultExtraMenuProvider.class,
@@ -27,7 +27,7 @@ public class ExtraMenuHandler extends FeatureHandler<ExtraMenuProvider> {
     }
 
     @Override
-    public void update(Stream<FeatureDefinition<ExtraMenuProvider>> extras) {
+    public void update(Stream<FeatureDefinition<ExtraMenus>> extras) {
         ExtraButton.setExtraDecorations(extras
                 .map(featureRegistry::getFeature)
                 .filter(Optional::isPresent)

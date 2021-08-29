@@ -36,7 +36,11 @@ public class TreeCell extends JPanel {
 
         if (!(node instanceof ConfigSetting.Parent)) {
             ConfigField cf = new ConfigField(node);
-            setEditor(editors.getEditor(cf), cf);
+            try {
+                setEditor(editors.getEditor(cf), cf);
+            } catch (Error e) {
+                setEditor(null, cf);
+            }
         } else {
             setEditor(null, null);
         }

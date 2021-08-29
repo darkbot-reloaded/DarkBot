@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 
-public class FieldDefaultHandler<T> extends DefaultHandler<T> {
+public class FieldDefaultHandler<T> extends DefaultHandler<T> implements FieldHolder {
 
     public FieldDefaultHandler(@Nullable Field field) {
         super(field);

@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.config.tree;
 
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.config.tree.handlers.FieldDefaultHandler;
+import com.github.manolo8.darkbot.config.tree.handlers.FieldHolder;
 import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import eu.darkbot.api.config.ConfigSetting;
@@ -11,6 +11,9 @@ import java.lang.reflect.Field;
 
 /**
  * Represents a java field in an object. Can act as getter/setter.
+ *
+ * Note: this class cannot be turned into a generic because old field editors rely on it,
+ * by expecting {@link ConfigField#get()} to return whatever type it is asked to return
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class ConfigField {
@@ -19,8 +22,8 @@ public class ConfigField {
 
     public ConfigField(ConfigSetting<?> config) {
         this.config = config;
-        FieldDefaultHandler<?> fdh = config.getHandler(FieldDefaultHandler.class);
-        field = fdh != null ? fdh.getField() : null;
+        FieldHolder fh = config.getHandler(FieldHolder.class);
+        field = fh != null ? fh.getField() : null;
     }
 
     public boolean isPrimitive() {

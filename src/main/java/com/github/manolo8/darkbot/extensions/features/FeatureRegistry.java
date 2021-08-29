@@ -1,29 +1,23 @@
 package com.github.manolo8.darkbot.extensions.features;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigHandler;
-import com.github.manolo8.darkbot.config.tree.ConfigBuilder;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.utils.I18n;
-import com.github.manolo8.darkbot.utils.ReflectionUtils;
-import eu.darkbot.api.config.ConfigSetting;
-import eu.darkbot.api.extensions.Configurable;
+import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.managers.ExtensionsAPI;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 public class FeatureRegistry implements PluginListener, ExtensionsAPI {
@@ -35,12 +29,13 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
 
     private final ConfigHandler configHandler;
 
-    public FeatureRegistry(Main main,
+    public FeatureRegistry(PluginAPI api,
+                           FeatureInstanceLoader featureLoader,
                            PluginHandler pluginHandler,
                            ConfigHandler configHandler) {
         this.pluginHandler = pluginHandler;
-        this.featureLoader = new FeatureInstanceLoader(main);
-        this.registryHandler = new FeatureRegisterHandler(main, this);
+        this.featureLoader = featureLoader;
+        this.registryHandler = new FeatureRegisterHandler(api, this);
         this.configHandler = configHandler;
         pluginHandler.addListener(this);
     }

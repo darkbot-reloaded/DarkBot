@@ -24,11 +24,16 @@ public class ConfigSettingTree implements TreeModel {
         updateListeners();
     }
 
-    public TreeFilter getFilter() {
-        return filter;
+    public void setSearch(String search) {
+        this.filter.setSearch(search);
+    }
+
+    public boolean isFiltered() {
+        return !this.filter.isUnfiltered();
     }
 
     public void updateListeners() {
+        this.filter.invalidate();
         TreeModelEvent event = new TreeModelEvent(this, (TreeNode[]) null, null, null);
         for (TreeModelListener listener : listeners) {
             listener.treeStructureChanged(event);

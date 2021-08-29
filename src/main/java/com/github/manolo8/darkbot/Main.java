@@ -43,6 +43,7 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Installable;
 import eu.darkbot.api.extensions.Module;
 import eu.darkbot.api.managers.BotAPI;
@@ -288,15 +289,25 @@ public class Main extends Thread implements PluginListener, BotAPI {
     }
 
     private <A extends Module> void updateCustomConfig(A module) {
+        // Fun one: add ALL configs as tabs, creates one massive config tree
+        /*
+        ConfigSetting.Parent<?>[] configs = featureRegistry.getFeatures()
+                .stream()
+                //.filter(FeatureDefinition::isEnabled)
+                .map(FeatureDefinition::getConfig)
+                .filter(Objects::nonNull)
+                .toArray(ConfigSetting.Parent<?>[]::new);
+        form.setCustomConfig(configs);
+        */
+
         if (module instanceof Configurable) {
-            String name = Annotations.getAnnotation(module.getClass(),
-                    Feature.class, Feature::name,
-                    eu.darkbot.api.extensions.Feature.class,
-                    eu.darkbot.api.extensions.Feature::name);
-            form.setCustomConfig(name, config.CUSTOM_CONFIGS.get(module.getClass().getCanonicalName()));
-        } else {
-            form.setCustomConfig(null, null);
+            FeatureDefinition<A> fd = featureRegistry.getFeatureDefinition(module);
+            if (fd != null) {
+                form.setCustomConfig(fd.getConfig());
+                return;
+            }
         }
+        form.setCustomConfig();
     }
 
     @Override

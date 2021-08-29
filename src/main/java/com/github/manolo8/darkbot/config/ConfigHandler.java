@@ -18,6 +18,7 @@ import eu.darkbot.api.managers.ExtensionsAPI;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,39 +48,21 @@ public class ConfigHandler implements ConfigAPI, Listener {
         return config;
     }
 
-    @Override
-    public Config getConfig() {
-        return configuration.getValue();
-    }
-
-    public ConfigSetting.Parent<Config> getConfigurationRoot() {
-        return configuration;
-    }
-
-    @Override
-    public @Nullable <T> ConfigSetting<T> getConfig(String s) {
-        return getConfig(configuration, s);
-    }
-
-    @Override
-    public Set<String> getChildren(String s) {
-        ConfigSetting<?> setting = getConfig(s);
-        if (setting instanceof ConfigSetting.Parent)
-            return ((ConfigSetting.Parent<?>) setting).getChildren().keySet();
-        return null;
+    @SuppressWarnings("unchecked")
+    public <T> ConfigSetting.Parent<T> getConfigRoot() {
+        return (ConfigSetting.Parent<T>) configuration;
     }
 
     public <T> ConfigSetting.Parent<T> getFeatureConfig(FeatureDefinition<?> fd) {
         Class<?> clazz = fd.getClazz();
-        Type[] configType;
-        if (Configurable.class.isAssignableFrom(clazz)) {
-            configType = ReflectionUtils.findGenericParameters(clazz, Configurable.class);
-        } else if (com.github.manolo8.darkbot.core.itf.Configurable.class.isAssignableFrom(clazz)) {
+        if (!Configurable.class.isAssignableFrom(clazz)) return null;
+
+        Type[] configType = ReflectionUtils.findGenericParameters(clazz, Configurable.class);
+
+        // Search for legacy configurable
+        if (configType == null && com.github.manolo8.darkbot.core.itf.Configurable.class.isAssignableFrom(clazz))
             configType = ReflectionUtils.findGenericParameters(clazz,
                     com.github.manolo8.darkbot.core.itf.Configurable.class);
-        } else {
-            return null;
-        }
 
         if (configType == null || configType.length != 1 || !(configType[0] instanceof Class)) {
             fd.getIssues().addWarning("Config not loaded", "Could not find config type, so it can't be loaded!");
@@ -106,21 +89,6 @@ public class ConfigHandler implements ConfigAPI, Listener {
     private <T> T toConfig(Object config, Class<T> type) {
         if (config == null) return ReflectionUtils.createInstance(type);
         return type.isInstance(config) ? type.cast(config) : Main.GSON.fromJson(toJsonElement(config), type);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> ConfigSetting<T> getConfig(ConfigSetting<?> config, String path) {
-        String[] paths = path.split("\\.");
-        for (String s : paths) {
-            if (config instanceof ConfigSetting.Parent)
-                config = ((ConfigSetting.Parent<?>) config).getChildren().get(s);
-            else
-                config = null;
-
-            if (config == null)
-                throw new IllegalArgumentException("Configuration not found: " + s + " in " + path);
-        }
-        return (ConfigSetting<T>) config;
     }
 
     @EventHandler
