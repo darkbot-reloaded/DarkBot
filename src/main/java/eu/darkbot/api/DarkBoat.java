@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.utils.LibUtils;
 public class DarkBoat {
 
     static {
-        LibUtils.loadLibrary("DarkBoatAPI.dll");
+        System.load(LibUtils.getLibPath("DarkBoatAPI"));
     }
 
     public native void    setData(String url, String sid, String preloader, String vars);

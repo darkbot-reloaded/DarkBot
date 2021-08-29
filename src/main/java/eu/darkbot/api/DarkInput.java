@@ -5,10 +5,7 @@ import com.github.manolo8.darkbot.utils.LibUtils;
 public class DarkInput {
 
     static {
-        if (System.getProperty("os.name").toLowerCase().contains("win"))
-            LibUtils.loadLibrary("DarkInputAPI.dll");
-        else
-            LibUtils.loadLibrary("DarkInputAPI.so");
+        System.load(LibUtils.getLibPath("DarkInputAPI"));
     }
 
     public native int  getVersion();

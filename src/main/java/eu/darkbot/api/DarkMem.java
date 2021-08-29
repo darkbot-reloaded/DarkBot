@@ -5,10 +5,7 @@ import com.github.manolo8.darkbot.utils.LibUtils;
 public class DarkMem {
 
     static {
-        if (System.getProperty("os.name").toLowerCase().contains("win"))
-            LibUtils.loadLibrary("DarkMemAPI.dll");
-        else
-            LibUtils.loadLibrary("DarkMemAPI.so");
+        System.load(LibUtils.getLibPath("DarkMemAPI"));
     }
 
     public native int    getVersion();

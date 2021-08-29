@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.utils.LibUtils;
 public class DarkBotAPI {
 
     static {
-        LibUtils.loadLibrary("DarkBot.dll");
+        System.load(LibUtils.getLibPath("DarkBot"));
     }
 
     public native void createWindow0();

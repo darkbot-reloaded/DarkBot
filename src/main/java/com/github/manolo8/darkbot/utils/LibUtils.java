@@ -4,10 +4,18 @@ import java.nio.file.Paths;
 
 public class LibUtils {
     /**
-     * Loads specified library with improved precision of path, goals to avoid loading from unwanted places.
-     * @param library Filename of library including extension, e.g. "DarkBoatAPI.dll"
+     * @param library Filename of library without extension, e.g. "DarkBoatAPI"
+     * @return Absolute path of library with extension based on OS
      */
-    public static void loadLibrary(String library) {
-        System.load(Paths.get("lib", library).toAbsolutePath().toString());
+    public static String getLibPath(String library) {
+        return Paths.get("lib", library).toAbsolutePath().toString() + getExtension();
+    }
+
+    /**
+     * @return Library extension based on OS
+     */
+    private static String getExtension() {
+        if (System.getProperty("os.name").toLowerCase().contains("win")) return ".dll";
+        else return ".so";
     }
 }
