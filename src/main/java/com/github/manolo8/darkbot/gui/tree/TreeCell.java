@@ -74,6 +74,7 @@ public class TreeCell extends JPanel {
 
                 return;
             } catch (Throwable e) {
+                System.out.println("Error setting up editor, editor won't show: ");
                 e.printStackTrace();
             }
         }
@@ -86,6 +87,14 @@ public class TreeCell extends JPanel {
 
     public Object getValue() {
         return editor != null ? editor.getEditorValue() : setting.getValue();
+    }
+
+    public boolean stopCellEditing() {
+        return editor == null || editor.stopCellEditing();
+    }
+
+    public void cancelCellEditing() {
+        if (editor != null) editor.cancelCellEditing();
     }
 
     /**

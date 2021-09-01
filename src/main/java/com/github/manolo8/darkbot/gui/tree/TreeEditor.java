@@ -41,4 +41,14 @@ public class TreeEditor extends AbstractCellEditor implements TreeCellEditor {
         return treeCell.getValue();
     }
 
+    @Override
+    public boolean stopCellEditing() {
+        return treeCell.stopCellEditing() && super.stopCellEditing();
+    }
+
+    @Override
+    public void cancelCellEditing() {
+        treeCell.cancelCellEditing();
+        super.cancelCellEditing();
+    }
 }

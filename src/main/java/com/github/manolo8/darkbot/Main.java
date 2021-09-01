@@ -57,7 +57,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 100");
+    public static final Version VERSION      = new Version("1.13.17 beta 100 alpha 3");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -290,7 +290,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     private <A extends Module> void updateCustomConfig(A module) {
         // Fun one: add ALL configs as tabs, creates one massive config tree
-        /*
+
         ConfigSetting.Parent<?>[] configs = featureRegistry.getFeatures()
                 .stream()
                 //.filter(FeatureDefinition::isEnabled)
@@ -298,16 +298,16 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 .filter(Objects::nonNull)
                 .toArray(ConfigSetting.Parent<?>[]::new);
         form.setCustomConfig(configs);
-        */
 
-        if (module instanceof Configurable) {
+
+        /*if (module instanceof Configurable) {
             FeatureDefinition<A> fd = featureRegistry.getFeatureDefinition(module);
             if (fd != null) {
                 form.setCustomConfig(fd.getConfig());
                 return;
             }
         }
-        form.setCustomConfig();
+        form.setCustomConfig();*/
     }
 
     @Override

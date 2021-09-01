@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -13,6 +12,7 @@ import eu.darkbot.api.config.util.ValueHandler;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import java.awt.*;
@@ -21,11 +21,12 @@ import java.awt.event.FocusEvent;
 import java.util.Comparator;
 import java.util.Objects;
 
-public class ConditionEditor extends JTextField implements OptionEditor<Condition> {
+public class ConditionEditor extends JTextField implements OptionEditor<Condition>, GeneralDocumentListener {
 
     private boolean init = false;
-    private Condition field;
+    private Condition condition;
     private Object highlight;
+    private boolean valid = true;
 
     private String lastParsed;
     private SyntaxException lastEx;
@@ -34,12 +35,7 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
 
     public ConditionEditor() {
         setMargin(new Insets(0, 5, 0, 5));
-        this.getDocument().addDocumentListener((GeneralDocumentListener) e -> {
-            if (init) {
-                Condition val = updateDisplay();
-                if (val != null || (getText() != null && getText().isEmpty())) field = val;
-            }
-        });
+        this.getDocument().addDocumentListener(this);
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -52,7 +48,7 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
     public JComponent getEditorComponent(Condition value, ValueHandler<Condition> handler) {
         this.init = false;
 
-        this.field = value;
+        this.condition = value;
         setText(Objects.toString(value, ""));
         setColumns(30);
 
@@ -61,29 +57,47 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
         return this;
     }
 
+    public void setText(String text) {
+        if (Objects.equals(text, getText())) return;
+        super.setText(text);
+    }
+
     @Override
     public Condition getEditorValue() {
-        return field;
+        return condition;
+    }
+
+    @Override
+    public boolean stopCellEditing() {
+        if (valid) popup.close();
+        return valid;
+    }
+
+    @Override
+    public void cancelCellEditing() {
+        popup.close();
+    }
+
+    public void update(DocumentEvent e) {
+        if (!init) return;
+        condition = updateDisplay();
     }
 
     public Condition updateDisplay() {
-        if (highlight != null) {
-            getHighlighter().removeHighlight(highlight);
-            highlight = null;
-        }
-        if (getText() == null) return null;
+        String text = getText();
+        if (text == null) text = "";
 
-        if (getText().equals(lastParsed)) {
+        // Don't re-parse, use cached exception
+        if (text.equals(lastParsed)) {
             handleSyntaxEx(lastEx);
-            return null;
+            return condition;
         }
 
-        lastParsed = getText();
+        lastParsed = text;
 
         try {
             Condition cond = ValueParser.parseCondition(getText());
             handleSyntaxEx(lastEx = null);
-            cond.get(HeroManager.instance.main);
             return cond;
         } catch (SyntaxException e) {
             handleSyntaxEx(lastEx = e);
@@ -93,14 +107,14 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
 
     private void handleSyntaxEx(SyntaxException e) {
         if (e == null) {
-            setHighlight(0, getText().length(), UIUtils.GREEN_HIGHLIGHT);
+            setHighlight(0, getText().length(), true);
             popup.update(null, 0, null);
             return;
         }
 
         int s = getText().lastIndexOf(e.getAt()), start = Math.max(0, s);
 
-        setHighlight(start, getText().length(), UIUtils.RED_HIGHLIGHT);
+        setHighlight(start, getText().length(), getText().isEmpty());
 
         try {
             Rectangle rect = getUI().modelToView(this, start);
@@ -110,11 +124,19 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
         }
     }
 
-    private void setHighlight(int start, int end, Color color) {
-        if (highlight != null) getHighlighter().removeHighlight(highlight);
+    private void setHighlight(int start, int end, boolean valid) {
+        if (this.valid != valid) {
+            this.valid = valid;
+            putClientProperty("JComponent.outline", valid ? null : "error");
+        }
+        if (highlight != null) {
+            getHighlighter().removeHighlight(highlight);
+            highlight = null;
+        }
+        if (start < 0 || end <= 0 || !init) return; // No highlight
         try {
-            highlight = getHighlighter().addHighlight(start, end,
-                    new DefaultHighlighter.DefaultHighlightPainter(color));
+            highlight = getHighlighter().addHighlight(start, end, new DefaultHighlighter.DefaultHighlightPainter(
+                    valid ? UIUtils.GREEN_HIGHLIGHT : UIUtils.RED_HIGHLIGHT));
         } catch (BadLocationException ble) {
             ble.printStackTrace();
         }
@@ -154,6 +176,8 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
         }
 
         public void update(SyntaxException syntax, int at, Point loc) {
+            // Do nothing on non initialized editor
+            if (!init) return;
             if (syntax == null) {
                 popup.setVisible(false);
                 return;
@@ -189,6 +213,10 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
 
             popup.setVisible(false);
             popup.show(ConditionEditor.this, loc.x, loc.y);
+        }
+
+        public void close() {
+            popup.setVisible(false);
         }
 
     }

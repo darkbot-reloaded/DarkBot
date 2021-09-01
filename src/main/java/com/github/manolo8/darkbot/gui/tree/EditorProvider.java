@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.tree;
 import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.Editor;
+import com.github.manolo8.darkbot.gui.tree.editors.ColorEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ConditionEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.NumberEditor;
 import eu.darkbot.api.PluginAPI;
@@ -10,6 +11,7 @@ import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.utils.Inject;
 
+import java.awt.*;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -40,8 +42,10 @@ public class EditorProvider {
         defaultEditors.put(Integer.class, NumberEditor.class);
         defaultEditors.put(Double.class, NumberEditor.class);
         defaultEditors.put(Condition.class, ConditionEditor.class);
+        defaultEditors.put(Color.class, ColorEditor.class);
     }
 
+    @SuppressWarnings("CopyConstructorMissesField")
     public EditorProvider(EditorProvider shared) {
         this(shared.api, new LegacyEditorManager(shared.legacy));
     }

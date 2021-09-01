@@ -20,6 +20,7 @@ public class ColorHandler extends DefaultHandler<Color> {
     }
 
     public ColorHandler(Field field, boolean alpha) {
+        super(field);
         metadata.put("alpha", this.alpha = alpha);
     }
 
