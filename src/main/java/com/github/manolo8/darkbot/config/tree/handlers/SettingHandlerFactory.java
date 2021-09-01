@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.config.tree.handlers;
 
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.types.Length;
 import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Placeholder;
@@ -7,6 +8,7 @@ import eu.darkbot.api.API;
 import eu.darkbot.api.config.annotations.Percentage;
 import eu.darkbot.api.config.annotations.Tag;
 import eu.darkbot.api.config.annotations.Text;
+import eu.darkbot.api.config.types.PercentRange;
 import eu.darkbot.api.config.types.PlayerTag;
 import eu.darkbot.api.config.util.ValueHandler;
 import eu.darkbot.impl.config.DefaultHandler;
@@ -42,6 +44,7 @@ public class SettingHandlerFactory implements API.Singleton {
                 PlayerTag.class);
 
         addHandlers(ColorHandler::of, Color.class);
+        addHandlers(RangeHandler::of, PercentRange.class, Config.PercentRange.class);
     }
 
     public boolean hasHandler(Class<?> type) {

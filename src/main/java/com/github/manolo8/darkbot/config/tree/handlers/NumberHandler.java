@@ -42,7 +42,7 @@ public class NumberHandler extends DefaultHandler<java.lang.Number> {
         metadata.put("min", this.min = min);
         metadata.put("max", this.max = max);
         metadata.put("step", step);
-        metadata.put("isPercent", percent);
+        if (percent) metadata.put("isPercent", true);
     }
 
     @Override

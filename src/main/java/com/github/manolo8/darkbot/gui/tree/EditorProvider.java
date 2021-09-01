@@ -1,12 +1,18 @@
 package com.github.manolo8.darkbot.gui.tree;
 
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.Editor;
+import com.github.manolo8.darkbot.gui.tree.editors.BooleanEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ColorEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ConditionEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.FontEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.NumberEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.PercentEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.RangeEditor;
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.types.PercentRange;
 import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.utils.Inject;
@@ -39,10 +45,17 @@ public class EditorProvider {
         this.api = api;
         this.legacy = legacy;
 
+        defaultEditors.put(Boolean.class, BooleanEditor.class);
         defaultEditors.put(Integer.class, NumberEditor.class);
         defaultEditors.put(Double.class, NumberEditor.class);
         defaultEditors.put(Condition.class, ConditionEditor.class);
         defaultEditors.put(Color.class, ColorEditor.class);
+        defaultEditors.put(Font.class, FontEditor.class);
+
+        defaultEditors.put(Config.PercentRange.class, RangeEditor.class);
+        defaultEditors.put(PercentRange.class, RangeEditor.class);
+
+        metadataEditors.put("isPercent", PercentEditor.class);
     }
 
     @SuppressWarnings("CopyConstructorMissesField")

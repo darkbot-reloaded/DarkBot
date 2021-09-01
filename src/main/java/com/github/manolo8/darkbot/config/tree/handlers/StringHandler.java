@@ -41,9 +41,4 @@ public class StringHandler extends DefaultHandler<String> {
         metadata.put("placeholder", placeholder);
     }
 
-    @Override
-    public String validate(String s) {
-        return s;
-    }
-
 }

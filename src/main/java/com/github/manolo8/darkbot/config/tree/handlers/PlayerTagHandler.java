@@ -30,9 +30,4 @@ public class PlayerTagHandler extends DefaultHandler<PlayerTag> {
         metadata.put("fallback", fallback);
     }
 
-    @Override
-    public PlayerTag validate(PlayerTag playerTag) {
-        return playerTag;
-    }
-
 }

@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 public class AdvancedConfig extends JPanel implements PluginListener {
 
     public static final int EDITOR_HEIGHT = 17;
-    public static final int ROW_HEIGHT = 18;
+    public static final int ROW_HEIGHT = 19;
     public static final int HEADER_HEIGHT = 26;
 
     private final PluginAPI api;

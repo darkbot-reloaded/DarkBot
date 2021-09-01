@@ -26,6 +26,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
+import eu.darkbot.api.config.annotations.Percentage;
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
@@ -87,8 +88,8 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option Safety SAFETY = new Safety();
         public static class Safety implements eu.darkbot.api.config.legacy.General.Safety {
             public @Option PercentRange REPAIR_HP_RANGE = new PercentRange(0.4, 0.95);
-            public @Option @Editor(JPercentField.class) double REPAIR_HP_NO_NPC = 0.5;
-            public @Option @Editor(JPercentField.class) double REPAIR_TO_SHIELD = 1;
+            public @Option @Percentage double REPAIR_HP_NO_NPC = 0.5;
+            public @Option @Percentage double REPAIR_TO_SHIELD = 1;
             public @Option ShipConfig REPAIR = new ShipConfig(1, '9');
             public @Option @Num(min = 1, max = 9999) int MAX_DEATHS = 10;
             public @Option @Editor(JListField.class) @Options(ReviveSpotSupplier.class) long REVIVE_LOCATION = 1L;
@@ -228,7 +229,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public static class Sab {
             public @Option boolean ENABLED = false;
             public @Option Character KEY = '2';
-            public @Option @Editor(JPercentField.class) double PERCENT = 0.8;
+            public @Option @Percentage double PERCENT = 0.8;
             public @Option @Num(min = 500, max = 1_000_000, step = 1000) int NPC_AMOUNT = 12000;
             public @Option() Condition CONDITION;
         }
@@ -275,7 +276,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option @Num(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
         public @Option @Num(max = 60 * 12, step = 10) int PAUSE_FOR = 0;
         public @Option boolean RESET_REFRESH = true;
-        public @Option @Editor(JPercentField.class) double DRONE_REPAIR_PERCENTAGE = 0.9;
+        public @Option @Percentage double DRONE_REPAIR_PERCENTAGE = 0.9;
         public @Option boolean HONOR_LOST_EXACT = true;
         public @Option boolean LOG_CHAT = false;
         public @Option boolean LOG_DEATHS = false;
