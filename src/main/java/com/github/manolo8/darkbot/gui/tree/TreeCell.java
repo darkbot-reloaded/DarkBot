@@ -6,56 +6,86 @@ import eu.darkbot.api.config.ConfigSetting;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.stream.Stream;
 
 public class TreeCell extends JPanel {
     private final JComponent EMPTY_EDITOR = new JLabel();
 
-    private final EditorManager editors;
+    private final EditorProvider editors;
 
     private int nameWidth;
     private int minHeight;
 
     private final JLabel name = new JLabel();
-    private JComponent editor = EMPTY_EDITOR;
+    private JComponent component = EMPTY_EDITOR;
+    private ConfigSetting<?> setting;
 
-    public TreeCell(EditorManager editors) {
+
+    private OptionEditor legacyEditor;
+    private eu.darkbot.api.config.util.OptionEditor<?> editor;
+
+    String type;
+    public TreeCell(EditorProvider editors, String type) {
         setLayout(new TreeCellLayout());
+        this.type = type;
 
         this.editors = editors;
         setOpaque(false);
 
         add(name);
-        add(editor);
+        add(component);
     }
 
-    public void setEditing(ConfigSetting<?> node) {
-        minHeight = getMinHeight(node);
-        nameWidth = editors.getWidthFor(node, name.getFontMetrics(name.getFont()));
+    public <T> void setEditing(ConfigSetting<T> setting) {
+        this.setting = setting;
+        minHeight = getMinHeight(setting);
+        nameWidth = getWidthFor(setting, name.getFontMetrics(name.getFont()));
 
-        name.setText(node.getName());
+        name.setText(setting.getName());
+        setToolTipText(setting.getDescription());
 
-        if (!(node instanceof ConfigSetting.Parent)) {
-            ConfigField cf = new ConfigField(node);
+        if (!(setting instanceof ConfigSetting.Parent)) {
+            eu.darkbot.api.config.util.OptionEditor<T> editor = editors.getEditor(setting);
+
             try {
-                setEditor(editors.getEditor(cf), cf);
-            } catch (Error e) {
-                setEditor(null, cf);
-            }
-        } else {
-            setEditor(null, null);
-        }
+                if (editor != null) {
+                    this.editor = editor;
+                    this.legacyEditor = null;
 
-        setToolTipText(node.getDescription());
+                    if (component != null) {
+                        remove(component);
+                        component = null;
+                    }
+
+                    add(component = editor.getEditorComponent(setting.getValue(), setting.getHandler()));
+                } else {
+                    ConfigField cf = new ConfigField(setting);
+                    this.editor = null;
+                    this.legacyEditor = editors.getLegacyEditor(cf);
+
+                    if (component != null) {
+                        remove(component);
+                        component = null;
+                    }
+
+                    legacyEditor.edit(cf);
+                    add(component = legacyEditor.getComponent());
+                }
+
+                return;
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+        this.editor = null;
+        this.legacyEditor = null;
+
+        if (component != null) remove(component);
+        add(component = EMPTY_EDITOR);
     }
 
-    private void setEditor(OptionEditor newEditor, ConfigField field) {
-        if (editor != null) remove(editor);
-        if (newEditor != null) {
-            newEditor.edit(field);
-            add(editor = newEditor.getComponent());
-        } else {
-            add(editor = EMPTY_EDITOR);
-        }
+    public Object getValue() {
+        return editor != null ? editor.getEditorValue() : setting.getValue();
     }
 
     /**
@@ -69,6 +99,25 @@ public class TreeCell extends JPanel {
                 AdvancedConfig.ROW_HEIGHT : AdvancedConfig.HEADER_HEIGHT;
     }
 
+    /**
+     * Minimum width based on the name of all siblings
+     * @param node config setting node to check siblings of
+     * @param font the font in which to measure size
+     * @return the width reserved for the name
+     */
+    private int getWidthFor(ConfigSetting<?> node, FontMetrics font) {
+        if (node.getName().isEmpty()) return 0;
+        if (node instanceof ConfigSetting.Parent) return font.stringWidth(node.getName()) + 5;
+
+        ConfigSetting.Parent<?> parent = node.getParent();
+        return (parent == null ? Stream.of(node) : parent.getChildren().values().stream())
+                .filter(cs -> !(cs instanceof ConfigSetting.Parent))
+                .map(ConfigSetting::getName)
+                .mapToInt(font::stringWidth)
+                .max()
+                .orElseGet(() -> font.stringWidth(node.getName())) + 10;
+    }
+
     private class TreeCellLayout implements LayoutManager {
         @Override
         public void addLayoutComponent(String name, Component comp) {}
@@ -78,11 +127,13 @@ public class TreeCell extends JPanel {
         @Override
         public Dimension preferredLayoutSize(Container parent) {
             Dimension dim = parent.getComponent(1).getPreferredSize();
-            if (parent.getComponent(1) instanceof OptionEditor) {
-                Dimension res = ((OptionEditor) parent.getComponent(1)).getReservedSize();
-                if (res != null)
-                    dim.setSize(Math.max(dim.width, res.width), Math.max(dim.height, res.height));
-            }
+            Dimension res = null;
+
+            if (editor != null) res = editor.getReservedSize();
+            else if (legacyEditor != null) res = legacyEditor.getReservedSize();
+
+            if (res != null)
+                dim.setSize(Math.max(dim.width, res.width), Math.max(dim.height, res.height));
 
 
             dim.width += nameWidth;

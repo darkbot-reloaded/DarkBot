@@ -7,29 +7,38 @@ import eu.darkbot.impl.config.DefaultHandler;
 
 import java.lang.reflect.Field;
 
-public class StringHandler extends FieldDefaultHandler<String> {
+public class StringHandler extends DefaultHandler<String> {
 
-    private final int len;
-    private final String placeholder;
-
-    public StringHandler(Field field) {
-        super(field);
+    public static StringHandler of(Field field) {
+        int length = 10;
+        String placeholder = null;
         Text text = field.getAnnotation(Text.class);
         if (text != null) {
-            this.len = text.length();
-            this.placeholder = text.placeholder().isEmpty() ? null : text.placeholder();
-        } else {
-            Length len = field.getAnnotation(Length.class);
-            this.len = len == null ? 10 : len.value();
-
-            Placeholder placeholder = field.getAnnotation(Placeholder.class);
-            this.placeholder = placeholder == null ? null : placeholder.value();
+            length = text.length();
+            placeholder = text.placeholder().isEmpty() ? null : text.placeholder();
         }
+
+        return new StringHandler(field, length, placeholder);
+    }
+
+    public static StringHandler ofLegacy(Field field) {
+        Length len = field.getAnnotation(Length.class);
+        int length = len == null ? 10 : len.value();
+
+        Placeholder ph = field.getAnnotation(Placeholder.class);
+        String placeholder = ph == null ? null : ph.value();
+
+        return new StringHandler(field, length, placeholder);
     }
 
     public StringHandler(int len, String placeholder) {
-        this.len = len;
-        this.placeholder = placeholder;
+        this(null, len, placeholder);
+    }
+
+    public StringHandler(Field field, int len, String placeholder) {
+        super(field);
+        metadata.put("length", len);
+        metadata.put("placeholder", placeholder);
     }
 
     @Override
@@ -37,11 +46,4 @@ public class StringHandler extends FieldDefaultHandler<String> {
         return s;
     }
 
-    public int getLen() {
-        return len;
-    }
-
-    public String getPlaceholder() {
-        return placeholder;
-    }
 }

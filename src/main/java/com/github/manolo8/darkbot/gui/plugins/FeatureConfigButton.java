@@ -29,7 +29,7 @@ public class FeatureConfigButton extends MainButton {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Object paneMessage = new AdvancedConfig(feature.getConfig());
+        Object paneMessage = new AdvancedConfig(main.pluginAPI, feature.getConfig());
 
         JComponent instructions = getInstructions();
         if (instructions != null) paneMessage = new Object[]{instructions, paneMessage};

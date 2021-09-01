@@ -68,7 +68,7 @@ public class ConfigGui extends JFrame {
     private void initComponents() {
         tabbedPane = new TabbedPane();
 
-        advancedPane = new AdvancedConfig();
+        advancedPane = new AdvancedConfig(main.pluginAPI);
         zones = new ZonesEditor();
         playerEditor = new PlayerEditor();
         configPicker = new ConfigPicker();

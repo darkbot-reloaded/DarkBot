@@ -7,27 +7,27 @@ import eu.darkbot.impl.config.DefaultHandler;
 
 import java.lang.reflect.Field;
 
-public class PlayerTagHandler extends FieldDefaultHandler<PlayerTag> {
+public class PlayerTagHandler extends DefaultHandler<PlayerTag> {
 
-    private final TagDefault fallback;
-
-    public PlayerTagHandler(Field field) {
-        super(field);
+    public static PlayerTagHandler of(Field field) {
         Tag tag = field.getAnnotation(Tag.class);
+        return new PlayerTagHandler(field, TagDefault.valueOf(tag.value().name()));
+    }
+
+    public static PlayerTagHandler ofLegacy(Field field) {
         com.github.manolo8.darkbot.config.types.Tag legacyTag =
                 field.getAnnotation(com.github.manolo8.darkbot.config.types.Tag.class);
 
-        if (tag != null) {
-            fallback = TagDefault.valueOf(tag.value().name());
-        } else if (legacyTag != null) {
-            fallback = legacyTag.value();
-        } else {
-            fallback = TagDefault.UNSET;
-        }
+        return new PlayerTagHandler(field, legacyTag.value());
     }
 
     public PlayerTagHandler(TagDefault fallback) {
-        this.fallback = fallback;
+        this(null, fallback);
+    }
+
+    public PlayerTagHandler(Field field, TagDefault fallback) {
+        super(field);
+        metadata.put("fallback", fallback);
     }
 
     @Override
@@ -35,7 +35,4 @@ public class PlayerTagHandler extends FieldDefaultHandler<PlayerTag> {
         return playerTag;
     }
 
-    public TagDefault getFallback() {
-        return fallback;
-    }
 }

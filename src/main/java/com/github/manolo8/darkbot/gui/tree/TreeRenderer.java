@@ -9,8 +9,8 @@ import java.awt.*;
 public class TreeRenderer implements TreeCellRenderer {
     private final TreeCell treeCell;
 
-    public TreeRenderer(EditorManager editors) {
-        this.treeCell = new TreeCell(editors);
+    public TreeRenderer(EditorProvider editors) {
+        this.treeCell = new TreeCell(editors, "renderer");
     }
 
     @Override

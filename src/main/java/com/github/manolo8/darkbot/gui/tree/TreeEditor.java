@@ -3,24 +3,20 @@ package com.github.manolo8.darkbot.gui.tree;
 import eu.darkbot.api.config.ConfigSetting;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultTreeCellEditor;
-import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeCellEditor;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
 
-public class TreeEditor extends DefaultTreeCellEditor {
+public class TreeEditor extends AbstractCellEditor implements TreeCellEditor {
 
+    private final JTree tree;
     private final TreeCell treeCell;
 
-    public TreeEditor(JTree tree, EditorManager editors) {
-        super(tree, new DefaultTreeCellRenderer());
-
-        this.treeCell = new TreeCell(editors);
-    }
-
-    public JTree getTree() {
-        return tree;
+    public TreeEditor(JTree tree, EditorProvider editors) {
+        this.tree = tree;
+        this.treeCell = new TreeCell(editors, "editor");
     }
 
     @Override
@@ -32,10 +28,17 @@ public class TreeEditor extends DefaultTreeCellEditor {
 
     @Override
     public boolean isCellEditable(EventObject e) {
-        if (e == null || e.getSource() != tree || !(e instanceof MouseEvent)) return false;
+        TreePath path = null;
+        if (e == null) path = tree.getSelectionPath();
+        else if (e.getSource() == tree && e instanceof MouseEvent)
+            path = tree.getClosestPathForLocation(((MouseEvent)e).getX(), ((MouseEvent)e).getY());
 
-        lastPath = tree.getClosestPathForLocation(((MouseEvent)e).getX(), ((MouseEvent)e).getY());
-        return lastPath != null && tree.getModel().isLeaf(lastPath.getLastPathComponent());
+        return path != null && tree.getModel().isLeaf(path.getLastPathComponent());
+    }
+
+    @Override
+    public Object getCellEditorValue() {
+        return treeCell.getValue();
     }
 
 }

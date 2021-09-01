@@ -3,12 +3,14 @@ package com.github.manolo8.darkbot.gui;
 import com.github.manolo8.darkbot.config.tree.ConfigSettingTree;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.gui.components.MainButton;
-import com.github.manolo8.darkbot.gui.tree.EditorManager;
+import com.github.manolo8.darkbot.gui.tree.EditorProvider;
+import com.github.manolo8.darkbot.gui.tree.LegacyEditorManager;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.ValueHandler;
 import net.miginfocom.swing.MigLayout;
@@ -22,6 +24,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,21 +38,29 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     public static final int ROW_HEIGHT = 18;
     public static final int HEADER_HEIGHT = 26;
 
+    private final PluginAPI api;
+
     private ConfigSetting.Parent<?> baseConfig, extendedConfig, lastSelection;
     private final ConfigSettingTree treeModel = new ConfigSettingTree();
+
     private JPanel tabs;
     private final Map<String, TabButton> buttons = new LinkedHashMap<>();
     private boolean packed = false; // If this is a packed config in a floating window
 
-    public AdvancedConfig() {
-        setLayout(new MigLayout("ins 0, gap 0, fill, wrap 2", "[][grow]", "[][grow]"));
+    public AdvancedConfig(PluginAPI api) {
+        super(new MigLayout("ins 0, gap 0, fill, wrap 2", "[][grow]", "[][grow]"));
+        this.api = api;
     }
 
     @Deprecated
-    public AdvancedConfig(Object obj) {}
+    public AdvancedConfig(Object obj) {
+        this.api = null;
+    }
 
-    public AdvancedConfig(ConfigSetting.Parent<?> config) {
-        setLayout(new BorderLayout());
+    public AdvancedConfig(PluginAPI api, ConfigSetting.Parent<?> config) {
+        super(new BorderLayout());
+
+        this.api = api;
         this.packed = true;
         setEditingConfig(config);
         rebuildUI();
@@ -171,19 +182,24 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     private JComponent setupUI() {
         JTree configTree = new JTree(treeModel);
         configTree.setEditable(true);
+        configTree.setInvokesStopCellEditing(true);
         configTree.setRootVisible(false);
         configTree.setShowsRootHandles(true);
         configTree.setToggleClickCount(1);
         configTree.setRowHeight(0);
         configTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        configTree.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNext");
+        configTree.getInputMap(JComponent.WHEN_FOCUSED)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "startEditing");
 
         ToolTipManager.sharedInstance().registerComponent(configTree);
 
-        EditorManager rendererEdManager = new EditorManager();
-        EditorManager editorEdManager = new EditorManager(rendererEdManager);
+        EditorProvider renderer = api.requireInstance(EditorProvider.class);
+        EditorProvider editor = new EditorProvider(renderer);
 
-        configTree.setCellRenderer(new TreeRenderer(rendererEdManager));
-        configTree.setCellEditor(new TreeEditor(configTree, editorEdManager));
+        configTree.setCellRenderer(new TreeRenderer(renderer));
+        configTree.setCellEditor(new TreeEditor(configTree, editor));
 
         treeModel.addTreeModelListener((SimpleTreeListener) e -> {
             unfoldTopLevelTree(configTree);

@@ -1,65 +1,78 @@
 package com.github.manolo8.darkbot.gui.tree;
 
-import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.config.actions.Condition;
-import com.github.manolo8.darkbot.gui.tree.components.JBoolField;
-import com.github.manolo8.darkbot.gui.tree.components.JCharField;
-import com.github.manolo8.darkbot.gui.tree.components.JColorField;
-import com.github.manolo8.darkbot.gui.tree.components.JConditionField;
-import com.github.manolo8.darkbot.gui.tree.components.JFontField;
-import com.github.manolo8.darkbot.gui.tree.components.JNumberField;
-import com.github.manolo8.darkbot.gui.tree.components.JPlayerTagField;
-import com.github.manolo8.darkbot.gui.tree.components.JRangeField;
-import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
-import com.github.manolo8.darkbot.gui.tree.components.JStringField;
-import eu.darkbot.api.API;
-import eu.darkbot.api.events.EventHandler;
-import eu.darkbot.api.events.Listener;
-import eu.darkbot.api.managers.ExtensionsAPI;
+import com.github.manolo8.darkbot.config.tree.ConfigField;
+import com.github.manolo8.darkbot.config.types.Editor;
+import com.github.manolo8.darkbot.gui.tree.editors.ConditionEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.NumberEditor;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.util.OptionEditor;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.utils.Inject;
 
-import java.awt.*;
+import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class EditorProvider implements API.Singleton, Listener {
+@SuppressWarnings({"unchecked", "rawtypes"})
+public class EditorProvider {
 
-    private final Map<Class<?>, Class<? extends OptionEditor>> editors = new HashMap<>();
+    private final PluginAPI api;
+    private final LegacyEditorManager legacy;
 
-    public EditorProvider() {
-        setupDefaults();
+    // object type class -> option editor class
+    private final Map<Class<?>, Class<? extends OptionEditor>> defaultEditors = new HashMap<>();
+
+    // metadata key -> option editor class
+    private final Map<String, Class<? extends OptionEditor>> metadataEditors = new LinkedHashMap<>();
+
+    // option editor class -> option editor instance
+    private final Map<Class<? extends OptionEditor>, OptionEditor<?>> instances = new HashMap<>();
+
+
+    @Inject
+    public EditorProvider(PluginAPI api,
+                          LegacyEditorManager legacy) {
+        this.api = api;
+        this.legacy = legacy;
+
+        defaultEditors.put(Integer.class, NumberEditor.class);
+        defaultEditors.put(Double.class, NumberEditor.class);
+        defaultEditors.put(Condition.class, ConditionEditor.class);
     }
 
-    private void setupDefaults() {
-        addEditor(JCharField.ExtraBorder.class, Character.class);
-        addEditor(JBoolField.class, boolean.class);
-        addEditor(JNumberField.class, double.class, int.class);
-        addEditor(JStringField.class, String.class);
-        addEditor(JShipConfigField.class, Config.ShipConfig.class);
-        addEditor(JRangeField.class, Config.PercentRange.class);
-        addEditor(JPlayerTagField.class, PlayerTag.class);
-        addEditor(JColorField.class, Color.class);
-        addEditor(JFontField.class, Font.class);
-        addEditor(JConditionField.class, Condition.class);
+    public EditorProvider(EditorProvider shared) {
+        this(shared.api, new LegacyEditorManager(shared.legacy));
     }
 
-    private void addEditor(Class<? extends OptionEditor> editor, Class<?>... types) {
-        for (Class<?> type : types)
-            this.editors.put(type, editor);
+    public <T> OptionEditor<T> getEditor(ConfigSetting<T> setting) {
+        // Legacy handler should take care of this field
+        Field field = setting.getHandler().getMetadata("field");
+        if (field != null && field.isAnnotationPresent(Editor.class)) return null;
+
+        // Specific editor class requested
+        Class<? extends OptionEditor> editor = setting.getHandler().getMetadata("editor");
+
+        // Metadata based editors
+        if (editor == null)
+            editor = metadataEditors.entrySet().stream()
+                    .filter(e -> setting.getHandler().getMetadata(e.getKey()) != null)
+                    .map(Map.Entry::getValue)
+                    .findFirst()
+                    .orElse(null);
+
+        // Default editors
+        if (editor == null) editor = defaultEditors.get(setting.getType());
+
+        if (editor == null) return null;
+        return (OptionEditor<T>) instances.computeIfAbsent(editor, api::requireInstance);
     }
 
-    public boolean hasEditor(Class<?> cls) {
-        return editors.containsKey(cls);
+    public com.github.manolo8.darkbot.gui.tree.OptionEditor getLegacyEditor(ConfigField field) {
+        return legacy.getEditor(field);
     }
 
-    @EventHandler
-    public void onPluginChange(ExtensionsAPI.PluginLifetimeEvent event) {
-        if (event.getStage() == ExtensionsAPI.PluginStage.BEFORE_LOAD) {
-            editors.clear();
-            setupDefaults();
-        } else if (event.getStage() == ExtensionsAPI.PluginStage.AFTER_LOAD_COMPLETE) {
-            // Register editors for plugins
-        }
-    }
+
 
 }

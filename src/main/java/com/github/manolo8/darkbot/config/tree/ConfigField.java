@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.config.tree;
 
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.config.tree.handlers.FieldHolder;
 import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import eu.darkbot.api.config.ConfigSetting;
@@ -22,8 +21,7 @@ public class ConfigField {
 
     public ConfigField(ConfigSetting<?> config) {
         this.config = config;
-        FieldHolder fh = config.getHandler(FieldHolder.class);
-        field = fh != null ? fh.getField() : null;
+        this.field = config.getHandler().getMetadata("field");
     }
 
     public boolean isPrimitive() {

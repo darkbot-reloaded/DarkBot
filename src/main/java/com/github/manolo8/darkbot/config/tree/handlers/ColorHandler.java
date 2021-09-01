@@ -6,18 +6,21 @@ import eu.darkbot.impl.config.DefaultHandler;
 import java.awt.*;
 import java.lang.reflect.Field;
 
-public class ColorHandler extends FieldDefaultHandler<Color> {
+public class ColorHandler extends DefaultHandler<Color> {
 
     private final boolean alpha;
 
-    public ColorHandler(Field field) {
-        super(field);
+    public static ColorHandler of(Field field) {
         Col col = field.getAnnotation(Col.class);
-        this.alpha = col == null || col.alpha();
+        return new ColorHandler(field, col == null || col.alpha());
     }
 
     public ColorHandler(boolean alpha) {
-        this.alpha = alpha;
+        this(null, alpha);
+    }
+
+    public ColorHandler(Field field, boolean alpha) {
+        metadata.put("alpha", this.alpha = alpha);
     }
 
     @Override

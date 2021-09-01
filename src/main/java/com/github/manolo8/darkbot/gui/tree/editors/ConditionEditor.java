@@ -1,18 +1,17 @@
-package com.github.manolo8.darkbot.gui.tree.components;
+package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
-import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
-import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import eu.darkbot.api.config.util.OptionEditor;
+import eu.darkbot.api.config.util.ValueHandler;
 import net.miginfocom.swing.MigLayout;
 
-import javax.swing.JLabel;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
@@ -22,9 +21,10 @@ import java.awt.event.FocusEvent;
 import java.util.Comparator;
 import java.util.Objects;
 
-public class JConditionField extends JTextField implements OptionEditor {
+public class ConditionEditor extends JTextField implements OptionEditor<Condition> {
 
-    private ConfigField field;
+    private boolean init = false;
+    private Condition field;
     private Object highlight;
 
     private String lastParsed;
@@ -32,33 +32,38 @@ public class JConditionField extends JTextField implements OptionEditor {
 
     private final SyntaxInfo popup = new SyntaxInfo();
 
-    public JConditionField() {
+    public ConditionEditor() {
         setMargin(new Insets(0, 5, 0, 5));
         this.getDocument().addDocumentListener((GeneralDocumentListener) e -> {
-            if (field != null) {
+            if (init) {
                 Condition val = updateDisplay();
-                if (val != null || (getText() != null && getText().isEmpty())) field.set(val);
+                if (val != null || (getText() != null && getText().isEmpty())) field = val;
             }
         });
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (field != null && !popup.isOpen()) updateDisplay();
+                if (!popup.isOpen()) updateDisplay();
             }
         });
     }
 
     @Override
-    public JComponent getComponent() {
+    public JComponent getEditorComponent(Condition value, ValueHandler<Condition> handler) {
+        this.init = false;
+
+        this.field = value;
+        setText(Objects.toString(value, ""));
+        setColumns(30);
+
+        this.init = true;
+
         return this;
     }
 
     @Override
-    public void edit(ConfigField field) {
-        this.field = null;
-        setText(Objects.toString(field.get(), ""));
-        setColumns(30);
-        this.field = field;
+    public Condition getEditorValue() {
+        return field;
     }
 
     public Condition updateDisplay() {
@@ -153,7 +158,7 @@ public class JConditionField extends JTextField implements OptionEditor {
                 popup.setVisible(false);
                 return;
             } else if (lastEx == syntax) {
-                popup.show(JConditionField.this, loc.x, loc.y);
+                popup.show(ConditionEditor.this, loc.x, loc.y);
                 return;
             }
             lastEx = syntax;
@@ -183,7 +188,7 @@ public class JConditionField extends JTextField implements OptionEditor {
             metadata.setVisible(!syntax.getMetadata().isEmpty());
 
             popup.setVisible(false);
-            popup.show(JConditionField.this, loc.x, loc.y);
+            popup.show(ConditionEditor.this, loc.x, loc.y);
         }
 
     }
@@ -198,7 +203,7 @@ public class JConditionField extends JTextField implements OptionEditor {
 
             setMargin(new Insets(2, 3, 2, 3));
             addActionListener(a -> {
-                String text = JConditionField.this.getText();
+                String text = ConditionEditor.this.getText();
                 text = text.substring(0, at) + insert + text.substring(at);
 
                 int lastLoc = at + insert.length();
@@ -214,9 +219,9 @@ public class JConditionField extends JTextField implements OptionEditor {
                     }
                 }
 
-                JConditionField.this.setText(text);
-                JConditionField.this.setCaretPosition(lastLoc);
-                JConditionField.this.requestFocus();
+                ConditionEditor.this.setText(text);
+                ConditionEditor.this.setCaretPosition(lastLoc);
+                ConditionEditor.this.requestFocus();
             });
         }
 

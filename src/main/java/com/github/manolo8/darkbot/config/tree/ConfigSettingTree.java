@@ -9,6 +9,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ConfigSettingTree implements TreeModel {
 
@@ -75,6 +76,9 @@ public class ConfigSettingTree implements TreeModel {
 
     @Override
     public void valueForPathChanged(TreePath path, Object newValue) {
+        ConfigSetting<Object> setting = (ConfigSetting<Object>) path.getLastPathComponent();
+        setting.setValue(newValue);
+
         TreeModelEvent event = new TreeModelEvent(this, path);
         for (TreeModelListener listener : listeners) {
             listener.treeNodesChanged(event);
