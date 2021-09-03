@@ -347,6 +347,11 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         }
 
         @Override
+        public void removeListener(Consumer<T> consumer) {
+            base.removeListener(consumer);
+        }
+
+        @Override
         public ValueHandler<T> getHandler() {
             return base.getHandler();
         }

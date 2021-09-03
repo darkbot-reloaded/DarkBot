@@ -24,10 +24,8 @@ public class TreeCell extends JPanel {
     private OptionEditor legacyEditor;
     private eu.darkbot.api.config.util.OptionEditor<?> editor;
 
-    String type;
-    public TreeCell(EditorProvider editors, String type) {
+    public TreeCell(EditorProvider editors) {
         setLayout(new TreeCellLayout());
-        this.type = type;
 
         this.editors = editors;
         setOpaque(false);
@@ -57,7 +55,7 @@ public class TreeCell extends JPanel {
                         component = null;
                     }
 
-                    add(component = editor.getEditorComponent(setting.getValue(), setting.getHandler()));
+                    add(component = editor.getEditorComponent(setting));
                 } else {
                     ConfigField cf = new ConfigField(setting);
                     this.editor = null;

@@ -6,14 +6,23 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
+import javax.swing.*;
+import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GenericTableModel<T> extends AbstractTableModel {
@@ -24,39 +33,69 @@ public class GenericTableModel<T> extends AbstractTableModel {
     private final Map<String, Row<T>> table = new HashMap<>();
 
     public GenericTableModel(Class<T> clazz, Map<String, T> config, Lazy<String> modified) {
-        this.config = config;
-
         this.columns = Stream.concat(Stream.of(clazz), Arrays.stream(clazz.getDeclaredFields()))
                 .filter(el -> el.isAnnotationPresent(Option.class))
                 .map(Column::new)
                 .toArray(Column[]::new);
 
-        if (modified != null) modified.add(n -> updateEntry(n, config.get(n)));
-        updateTable();
+        setConfig(config);
+        if (modified != null) modified.add(n -> updateEntry(n, config.get(n), true));
     }
 
-    public void updateTable() {
+    public GenericTableModel(Class<T> clazz) {
+        this(clazz, null, null);
+    }
+
+    public void setConfig(Map<String, T> config) {
+        if (config == null || this.config != config) {
+            this.config = config;
+            rebuildTable();
+        } else {
+            Set<String> tableNames = this.config.entrySet().stream()
+                    .map(e -> updateEntry(e.getKey(), e.getValue(),false))
+                    .collect(Collectors.toSet());
+            // If table is not the size of the config (after mapping), means something was removed
+            if (this.table.size() > tableNames.size()) {
+                Iterator<Map.Entry<String, Row<T>>> it = table.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<String, Row<T>> entry = it.next();
+                    if (tableNames.contains(entry.getKey())) continue;
+                    it.remove();
+                    rows.remove(entry.getValue());
+                }
+            }
+            fireTableDataChanged();
+        }
+    }
+
+    public void rebuildTable() {
         rows.clear();
         table.clear();
-        config.forEach(this::updateEntry);
+        if (config != null) config.forEach((k, v) -> updateEntry(k, v, false));
         fireTableDataChanged();
     }
 
-    protected void updateEntry(String name, T data) {
+    public String toTableName(String name) {
+        return name;
+    }
+
+    public String updateEntry(String name, T data, boolean fireUpdate) {
+        String tableName = toTableName(name);
         if (data == null) {
-            Row<T> r = table.remove(name);
+            Row<T> r = table.remove(tableName);
             if (r != null) rows.remove(r);
         } else {
-            table.compute(name, (n, row) -> {
+            table.compute(tableName, (n, row) -> {
                 if (row == null) {
-                    row = createRow(name, data);
+                    row = createRow(tableName, data);
                     rows.add(row);
                     return row;
                 }
                 return row.update(data);
             });
         }
-        fireTableDataChanged();
+        if (fireUpdate) fireTableDataChanged();
+        return tableName;
     }
 
     protected Row<T> createRow(String name, T data) {

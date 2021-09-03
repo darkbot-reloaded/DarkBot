@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Placeholder;
 import eu.darkbot.api.API;
 import eu.darkbot.api.config.annotations.Percentage;
+import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.annotations.Tag;
 import eu.darkbot.api.config.annotations.Text;
 import eu.darkbot.api.config.types.PercentRange;
@@ -38,13 +39,15 @@ public class SettingHandlerFactory implements API.Singleton {
                 .addHandler(Length.class, StringHandler::ofLegacy)
                 .addHandler(Placeholder.class, StringHandler::ofLegacy), String.class);
 
-        addHandlers(new HandlerBuilder<PlayerTag>()
+        addHandlers(new HandlerBuilder<PlayerTag>(PlayerTagHandler::fallback)
                         .addHandler(Tag.class, PlayerTagHandler::of)
                         .addHandler(com.github.manolo8.darkbot.config.types.Tag.class, PlayerTagHandler::ofLegacy),
-                PlayerTag.class);
+                PlayerTag.class, com.github.manolo8.darkbot.config.PlayerTag.class);
 
         addHandlers(ColorHandler::of, Color.class);
         addHandlers(RangeHandler::of, PercentRange.class, Config.PercentRange.class);
+        addHandlers(new HandlerBuilder<>()
+                .addHandler(Table.class, TableHandler::of), Map.class);
     }
 
     public boolean hasHandler(Class<?> type) {

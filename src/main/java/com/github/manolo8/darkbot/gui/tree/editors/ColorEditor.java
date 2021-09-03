@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.tree.editors;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.config.util.ValueHandler;
 
@@ -24,11 +25,11 @@ public class ColorEditor extends JTextField implements OptionEditor<Color>, Gene
     }
 
     @Override
-    public JComponent getEditorComponent(Color color, ValueHandler<Color> valueHandler) {
-        this.alpha = Boolean.TRUE.equals(valueHandler.getMetadata("alpha"));
-        this.color = color;
+    public JComponent getEditorComponent(ConfigSetting<Color> color) {
+        this.alpha = Boolean.TRUE.equals(color.getHandler().getMetadata("alpha"));
+        this.color = color.getValue();
 
-        int rgba = color.getRGB();
+        int rgba = this.color.getRGB();
         if (alpha) setText(String.format("#%08X", rgba));
         else setText(String.format("#%06X", rgba & 0x00FFFFFF));
 

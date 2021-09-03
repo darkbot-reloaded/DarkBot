@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.tree.editors;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.utils.SpinnerNumberMinMaxFix;
 import com.github.manolo8.darkbot.utils.MathUtils;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.config.util.ValueHandler;
 
@@ -25,20 +26,21 @@ public class NumberEditor extends JSpinner implements OptionEditor<Number> {
     }
 
     @Override
-    public JComponent getEditorComponent(Number value, ValueHandler<Number> handler) {
+    public JComponent getEditorComponent(ConfigSetting<Number> number) {
+        ValueHandler<Number> handler = number.getHandler();
         Double min = handler.getMetadata("min"),
                 max = handler.getMetadata("max"),
                 step = handler.getMetadata("step");
         if (min == null || max == null || step == null)
             throw new UnsupportedOperationException("Min, max & step metadata must not be missing");
 
-        Class<? extends Number> type = value.getClass();
+        Class<? extends Number> type = number.getType();
 
         NumberFormatEditor nfe = Boolean.TRUE.equals(handler.getMetadata("isPercent")) ? percent :
                 type == Double.class || type == Float.class ? decimal : integer;
 
         setEditor(nfe.editor);
-        setModel(model = new SpinnerNumberMinMaxFix(value,
+        setModel(model = new SpinnerNumberMinMaxFix(number.getValue(),
                 MathUtils.toComparable(min, type),
                 MathUtils.toComparable(max, type),
                 MathUtils.toNumber(step, type)));
@@ -48,7 +50,7 @@ public class NumberEditor extends JSpinner implements OptionEditor<Number> {
         try {
             length = nfe.formatter.valueToString(max).length();
         } catch (ParseException e) {
-            length = String.valueOf(value).length();
+            length = String.valueOf(number.getValue()).length();
         }
 
         setPreferredSize(new Dimension(25 + (length * 9), AdvancedConfig.EDITOR_HEIGHT));

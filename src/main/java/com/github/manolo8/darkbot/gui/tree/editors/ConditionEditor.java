@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.config.util.ValueHandler;
 import net.miginfocom.swing.MigLayout;
@@ -45,11 +46,11 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
     }
 
     @Override
-    public JComponent getEditorComponent(Condition value, ValueHandler<Condition> handler) {
+    public JComponent getEditorComponent(ConfigSetting<Condition> condition) {
         this.init = false;
 
-        this.condition = value;
-        setText(Objects.toString(value, ""));
+        this.condition = condition.getValue();
+        setText(Objects.toString(this.condition, ""));
         setColumns(30);
 
         this.init = true;

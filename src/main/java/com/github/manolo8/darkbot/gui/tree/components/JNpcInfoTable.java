@@ -77,12 +77,12 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
             super(NpcInfo.class, config.NPC_INFOS, config.MODIFIED_NPC);
             this.config = config;
             this.grouped = config.GROUP_NPCS;
-            updateTable();
-            config.MODIFIED_NPC.add(n -> updateEntry(n, config.NPC_INFOS.get(n)));
+            rebuildTable();
+            config.MODIFIED_NPC.add(n -> updateEntry(n, config.NPC_INFOS.get(n), true));
         }
 
         public void refreshTable() {
-            if (grouped != (grouped = config.GROUP_NPCS)) updateTable();
+            if (grouped != (grouped = config.GROUP_NPCS)) rebuildTable();
         }
 
         @Override
@@ -90,9 +90,9 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
             return new NpcRow(name, data);
         }
 
-        protected void updateEntry(String name, NpcInfo info) {
-            if (config == null) return; // Before setup, just ignore entries
-            super.updateEntry(config.GROUP_NPCS ? Strings.simplifyName(name) : name, info);
+        @Override
+        public String toTableName(String name) {
+            return config != null && config.GROUP_NPCS ? Strings.simplifyName(name) : name;
         }
 
         @Override

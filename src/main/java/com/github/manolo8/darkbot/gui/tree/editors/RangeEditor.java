@@ -2,9 +2,9 @@ package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.types.PercentRange;
 import eu.darkbot.api.config.util.OptionEditor;
-import eu.darkbot.api.config.util.ValueHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,9 +30,10 @@ public class RangeEditor extends JPanel implements OptionEditor<PercentRange> {
     }
 
     @Override
-    public JComponent getEditorComponent(PercentRange percentRange, ValueHandler<PercentRange> valueHandler) {
-        min.setValue(percentRange.getMin());
-        max.setValue(percentRange.getMax());
+    public JComponent getEditorComponent(ConfigSetting<PercentRange> percentRange) {
+        PercentRange range = percentRange.getValue();
+        min.setValue(range.getMin());
+        max.setValue(range.getMax());
         return this;
     }
 

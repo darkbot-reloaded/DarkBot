@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.tree.editors;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.utils.SpinnerNumberMinMaxFix;
 import com.github.manolo8.darkbot.utils.MathUtils;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.config.util.ValueHandler;
 
@@ -21,8 +22,8 @@ public class PercentEditor extends JSpinner implements OptionEditor<Double> {
     }
 
     @Override
-    public JComponent getEditorComponent(Double value, ValueHandler<Double> handler) {
-        setValue(value);
+    public JComponent getEditorComponent(ConfigSetting<Double> percent) {
+        setValue(percent.getValue());
         return this;
     }
 

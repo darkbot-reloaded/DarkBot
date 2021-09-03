@@ -10,9 +10,12 @@ import com.github.manolo8.darkbot.gui.tree.editors.ConditionEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.FontEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.NumberEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.PercentEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.PlayerTagEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.RangeEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.TableEditor;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.types.PercentRange;
+import eu.darkbot.api.config.types.PlayerTag;
 import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.utils.Inject;
@@ -55,7 +58,11 @@ public class EditorProvider {
         defaultEditors.put(Config.PercentRange.class, RangeEditor.class);
         defaultEditors.put(PercentRange.class, RangeEditor.class);
 
+        defaultEditors.put(PlayerTag.class, PlayerTagEditor.class);
+        defaultEditors.put(com.github.manolo8.darkbot.config.PlayerTag.class, PlayerTagEditor.class);
+
         metadataEditors.put("isPercent", PercentEditor.class);
+        metadataEditors.put("isTable", TableEditor.class);
     }
 
     @SuppressWarnings("CopyConstructorMissesField")

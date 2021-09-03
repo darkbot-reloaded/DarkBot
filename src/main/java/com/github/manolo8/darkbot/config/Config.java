@@ -27,6 +27,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import eu.darkbot.api.config.annotations.Percentage;
+import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
@@ -202,7 +203,8 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option boolean IGNORE_CONTESTED_BOXES = true;
 
         @Option
-        @Editor(value = JBoxInfoTable.class, shared = true)
+        //@Editor(value = JBoxInfoTable.class, shared = true)
+        @Table
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy.NoCache<>();
 

@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.config.util.ValueHandler;
 
@@ -20,9 +21,9 @@ public class FontEditor extends JTextField implements OptionEditor<Font>, Genera
     }
 
     @Override
-    public JComponent getEditorComponent(Font font, ValueHandler<Font> valueHandler) {
-        this.font = font;
-        setText(font.getFontName());
+    public JComponent getEditorComponent(ConfigSetting<Font> font) {
+        this.font = font.getValue();
+        setText(this.font.getFontName());
 
         return this;
     }

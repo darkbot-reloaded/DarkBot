@@ -1,11 +1,9 @@
 package com.github.manolo8.darkbot.gui.tree;
 
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.gui.tree.components.JCharField;
 import com.github.manolo8.darkbot.gui.tree.components.JLabelField;
-import com.github.manolo8.darkbot.gui.tree.components.JPlayerTagField;
 import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
 import com.github.manolo8.darkbot.gui.tree.components.JStringField;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
@@ -41,7 +39,6 @@ public class LegacyEditorManager {
         addEditor(new JCharField.ExtraBorder(), Character.class);
         addEditor(new JStringField(), String.class);
         addEditor(new JShipConfigField(), Config.ShipConfig.class);
-        addEditor(new JPlayerTagField(), PlayerTag.class);
     }
 
     private void addEditor(OptionEditor editor, Class<?>... types) {

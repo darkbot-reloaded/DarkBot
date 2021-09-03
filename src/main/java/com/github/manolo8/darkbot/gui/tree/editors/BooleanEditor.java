@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.config.util.ValueHandler;
 
@@ -10,8 +11,8 @@ import java.awt.*;
 public class BooleanEditor extends JCheckBox implements OptionEditor<Boolean> {
 
     @Override
-    public JComponent getEditorComponent(Boolean value, ValueHandler<Boolean> valueHandler) {
-        setSelected(value);
+    public JComponent getEditorComponent(ConfigSetting<Boolean> bool) {
+        setSelected(bool.getValue());
         return this;
     }
 

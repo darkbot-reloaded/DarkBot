@@ -21,13 +21,17 @@ public class PlayerTagHandler extends DefaultHandler<PlayerTag> {
         return new PlayerTagHandler(field, legacyTag.value());
     }
 
+    public static PlayerTagHandler fallback(Field field) {
+        return new PlayerTagHandler(field, TagDefault.UNSET);
+    }
+
     public PlayerTagHandler(TagDefault fallback) {
         this(null, fallback);
     }
 
     public PlayerTagHandler(Field field, TagDefault fallback) {
         super(field);
-        metadata.put("fallback", fallback);
+        metadata.put("tagDefault", fallback);
     }
 
 }

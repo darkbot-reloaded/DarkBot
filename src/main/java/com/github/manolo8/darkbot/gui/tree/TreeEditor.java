@@ -16,7 +16,7 @@ public class TreeEditor extends AbstractCellEditor implements TreeCellEditor {
 
     public TreeEditor(JTree tree, EditorProvider editors) {
         this.tree = tree;
-        this.treeCell = new TreeCell(editors, "editor");
+        this.treeCell = new TreeCell(editors);
     }
 
     @Override
