@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableRowSorter;
-import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -54,17 +53,7 @@ public class TableHandler extends DefaultHandler<Object> {
         metadata.put("table.searchModel", new PlainDocument());
         metadata.put("table.rowSorter", new TableRowSorter<>(tableModel));
 
-        metadata.put("table.scrollModel", new DefaultBoundedRangeModel() {
-            @Override
-            public void setRangeProperties(int newValue, int newExtent, int newMin, int newMax, boolean adjusting) {
-                // There's an odd issue where BasicScrollPaneUI#syncScrollPaneWithViewport will update
-                // the extent based on the extentSize.height, and it turns out to be 0 when reusing the
-                // model in both renderer & editor.
-                // The easiest fix is to just ignore keep the extent.
-                if (newExtent == 0) newExtent = this.getExtent();
-                super.setRangeProperties(newValue, newExtent, newMin, newMax, adjusting);
-            }
-        });
+        metadata.put("table.scrollModel", new DefaultBoundedRangeModel());
     }
 
 }

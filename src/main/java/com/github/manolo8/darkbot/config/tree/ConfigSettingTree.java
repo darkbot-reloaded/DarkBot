@@ -107,4 +107,8 @@ public class ConfigSettingTree implements TreeModel {
     public void removeTreeModelListener(TreeModelListener l) {
         listeners.remove(l);
     }
+
+    public void clearListeners() {
+        listeners.clear();
+    }
 }

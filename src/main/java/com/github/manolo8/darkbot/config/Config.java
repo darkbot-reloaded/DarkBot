@@ -247,8 +247,8 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option boolean RUN_CONFIG_IN_CIRCLE = true;
 
         public @Option boolean GROUP_NPCS = true;
-        @Editor(value = JNpcInfoTable.class, shared = true)
-        //@Table // Not *quite* ready, needs to support map filter & npc grouping
+        //@Editor(value = JNpcInfoTable.class, shared = true)
+        @Table // Not *quite* ready, needs to support map filter & npc grouping
         public @Option Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
         public transient Lazy<String> MODIFIED_NPC = new Lazy.NoCache<>();
 

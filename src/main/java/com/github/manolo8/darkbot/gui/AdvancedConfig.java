@@ -86,6 +86,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
                 (packed && this.lastSelection == null)) return;
 
         removeAll();
+        treeModel.clearListeners();
         setCorrectRoot();
         if (!packed) {
             tabs = new JPanel(new MigLayout("ins 0, gap 0, wrap 1", "[]"));

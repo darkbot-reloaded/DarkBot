@@ -12,25 +12,21 @@ import java.util.regex.PatternSyntaxException;
 
 public class JSearchField<M> extends SearchField {
 
-    private TableRowSorter<? extends M> sorter;
+    private final TableRowSorter<? extends M> sorter;
     private final RowFilter<M, Integer> extraFilter;
 
     private boolean valid;
 
-    public JSearchField() {
-        this.sorter = null;
+    public JSearchField(Document document, TableRowSorter<? extends M> sorter) {
+        this.sorter = sorter;
         this.extraFilter = null;
+        setDocument(document);
     }
 
     public JSearchField(TableRowSorter<? extends M> sorter, RowFilter<M, Integer> extraFilter) {
         this.sorter = sorter;
         this.extraFilter = extraFilter;
         update((DocumentEvent) null);
-    }
-
-    public void setSorter(Document document, TableRowSorter<? extends M> sorter) {
-        this.sorter = sorter;
-        setDocument(document);
     }
 
     public void update(DocumentEvent e) {

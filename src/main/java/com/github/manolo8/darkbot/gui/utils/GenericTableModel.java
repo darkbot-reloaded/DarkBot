@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
 import javax.swing.event.TableColumnModelListener;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -52,7 +53,7 @@ public class GenericTableModel<T> extends AbstractTableModel {
             rebuildTable();
         } else {
             Set<String> tableNames = this.config.entrySet().stream()
-                    .map(e -> updateEntry(e.getKey(), e.getValue(),false))
+                    .map(e -> updateEntry(e.getKey(), e.getValue(), false))
                     .collect(Collectors.toSet());
             // If table is not the size of the config (after mapping), means something was removed
             if (this.table.size() > tableNames.size()) {
@@ -80,6 +81,10 @@ public class GenericTableModel<T> extends AbstractTableModel {
     }
 
     public String updateEntry(String name, T data, boolean fireUpdate) {
+        // While it would be amazing to optimize this to create insert, update or delete
+        // events instead of firing whole data change event, we currently cannot do that.
+        // If we use an individual event, the row sorter will receive it two times, making it
+        // lose track of how many actual rows are in the model, throwing an exception.
         String tableName = toTableName(name);
         if (data == null) {
             Row<T> r = table.remove(tableName);
@@ -129,7 +134,7 @@ public class GenericTableModel<T> extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return table.size();
+        return rows.size();
     }
 
     @Override
