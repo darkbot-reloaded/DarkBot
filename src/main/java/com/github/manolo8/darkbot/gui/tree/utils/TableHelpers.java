@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.tree.utils;
 
+import com.github.manolo8.darkbot.config.BoxInfo;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.manager.StarManager;
@@ -7,6 +8,7 @@ import com.github.manolo8.darkbot.gui.utils.GeneralListDataListener;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
 import com.github.manolo8.darkbot.gui.utils.Strings;
+import com.github.manolo8.darkbot.gui.utils.table.ExtraNpcInfoEditor;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.annotations.Table;
@@ -14,11 +16,13 @@ import eu.darkbot.api.config.util.ValueHandler;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -27,9 +31,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class NpcTableHelpers {
+public class TableHelpers {
 
-    public static class NpcTableModel extends GenericTableModel<NpcInfo> {
+    public static class NpcTableModel extends GenericTableModel<NpcInfo> implements Consumer<Boolean> {
 
         private boolean grouped = true;
 
@@ -38,7 +42,8 @@ public class NpcTableHelpers {
             rebuildTable();
         }
 
-        public void setGrouped(boolean grouped) {
+        @Override
+        public void accept(Boolean grouped) {
             if (this.grouped == grouped) return;
             this.grouped = grouped;
             rebuildTable();
@@ -106,11 +111,9 @@ public class NpcTableHelpers {
     public static class MapPickerBuilder implements Table.ControlBuilder<NpcInfo> {
         private static final String DEFAULT_ALL = "*";
 
-        private final ConfigAPI configAPI;
         private final StarSystemAPI starSystemAPI;
 
-        public MapPickerBuilder(ConfigAPI configAPI, StarSystemAPI starSystemAPI) {
-            this.configAPI = configAPI;
+        public MapPickerBuilder(StarSystemAPI starSystemAPI) {
             this.starSystemAPI = starSystemAPI;
         }
 
@@ -118,20 +121,11 @@ public class NpcTableHelpers {
         public JComponent create(JTable table, ConfigSetting<Map<String, NpcInfo>> setting) {
             ValueHandler<Map<String, NpcInfo>> handler = setting.getHandler();
 
-            NpcTableModel tableModel = handler.getMetadata("table.tableModel");
             MultiTableRowSorter<NpcTableModel> sorter = handler.getMetadata("table.rowSorter");
-            if (tableModel == null || sorter == null)
-                throw new UnsupportedOperationException("Required metadata missing");
+            if (sorter == null) throw new UnsupportedOperationException("Required metadata missing");
 
             ComboBoxModel<String> model = handler.getOrCreateMetadata("table.mapFilter", () -> {
-                // Register the toggle to set grouped or not based on group config
-                ConfigSetting<Boolean> group = configAPI.requireConfig(setting.getParent(), "group_npcs");
-                group.addListener(tableModel::setGrouped);
-                tableModel.setGrouped(group.getValue());
-
                 DefaultComboBoxModel<String> m = new DefaultComboBoxModel<>();
-                m.addElement(DEFAULT_ALL);
-                m.setSelectedItem(DEFAULT_ALL);
 
                 // Update map list when NPCs are added or removed
                 Consumer<Map<String, NpcInfo>> listener = infos -> {
@@ -149,6 +143,7 @@ public class NpcTableHelpers {
                 };
                 setting.addListener(listener);
                 listener.accept(setting.getValue()); // Update list
+                m.setSelectedItem(DEFAULT_ALL);
 
                 // Update filter when selection changes
                 Set<Integer> selectedMaps = new HashSet<>();
@@ -182,6 +177,47 @@ public class NpcTableHelpers {
             });
 
             return new JComboBox<>(model);
+        }
+    }
+
+    public static class NpcTableDecorator implements Table.Decorator<NpcInfo> {
+
+        private final ConfigAPI configAPI;
+
+        public NpcTableDecorator(ConfigAPI configAPI) {
+            this.configAPI = configAPI;
+        }
+
+        @Override
+        public void handle(JTable jTable, JScrollPane jScrollPane,
+                           @Nullable JPanel jPanel,
+                           ConfigSetting<Map<String, NpcInfo>> setting) {
+
+            NpcTableModel tableModel = setting.getHandler().getMetadata("table.tableModel");
+            if (tableModel == null) throw new UnsupportedOperationException("Table model must not be null");
+
+            ConfigSetting<Boolean> group = configAPI.requireConfig(setting.getParent(), "group_npcs");
+            group.addListener(tableModel);
+            tableModel.accept(group.getValue());
+
+            jTable.getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(3, SortOrder.DESCENDING),
+                    new RowSorter.SortKey(2, SortOrder.ASCENDING),
+                    new RowSorter.SortKey(0, SortOrder.DESCENDING)));
+
+            jTable.setDefaultEditor(NpcInfo.ExtraNpcInfo.class, new ExtraNpcInfoEditor());
+        }
+    }
+
+    public static class BoxInfoDecorator implements Table.Decorator<BoxInfo> {
+
+        @Override
+        public void handle(JTable jTable, JScrollPane jScrollPane,
+                           @Nullable JPanel jPanel,
+                           ConfigSetting<Map<String, BoxInfo>> setting) {
+
+            jTable.getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(1, SortOrder.DESCENDING),
+                    new RowSorter.SortKey(3, SortOrder.ASCENDING),
+                    new RowSorter.SortKey(0, SortOrder.DESCENDING)));
         }
     }
 

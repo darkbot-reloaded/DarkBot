@@ -1,16 +1,12 @@
 package com.github.manolo8.darkbot.config.tree.handlers;
 
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
-import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.impl.config.DefaultHandler;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableModel;
-import javax.swing.text.PlainDocument;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -28,7 +24,11 @@ public class TableHandler extends DefaultHandler<Object> {
         TableModel model = modelType == TableModel.class ?
                 new GenericTableModel<>(type) : ReflectionUtils.createInstance(modelType);
 
-        return new TableHandler(field, table.controls(), table.customControls(), model, type);
+        return new TableHandler(field,
+                table.controls(),
+                table.customControls(),
+                table.decorator(),
+                model, type);
     }
 
     private static Class<?> getTableType(Type generic) {
@@ -47,22 +47,17 @@ public class TableHandler extends DefaultHandler<Object> {
 
     public TableHandler(@Nullable Field field,
                         Table.Control[] controls,
-                        Class<? extends Table.ControlBuilder>[] custom,
+                        Class<? extends Table.ControlBuilder<?>>[] custom,
+                        Class<? extends Table.Decorator<?>>[] decorators,
                         TableModel model,
                         Class<?> type) {
         super(field);
         metadata.put("isTable", true);
         metadata.put("table.controls", controls);
         metadata.put("table.customControls", custom);
-        metadata.put("table.type", type);
-
-        metadata.put("table.selectionModel", new DefaultListSelectionModel());
+        metadata.put("table.decorators", decorators);
         metadata.put("table.tableModel", model);
-        metadata.put("table.columnModel", new DefaultTableColumnModel());
-        metadata.put("table.searchModel", new PlainDocument());
-        metadata.put("table.rowSorter", new MultiTableRowSorter<>(model));
-
-        metadata.put("table.scrollModel", new DefaultBoundedRangeModel());
+        metadata.put("table.type", type);
     }
 
 }

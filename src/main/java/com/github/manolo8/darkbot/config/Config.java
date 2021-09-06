@@ -22,7 +22,7 @@ import com.github.manolo8.darkbot.gui.tree.components.JCharField;
 import com.github.manolo8.darkbot.gui.tree.components.JCheckboxListField;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
-import com.github.manolo8.darkbot.gui.tree.utils.NpcTableHelpers;
+import com.github.manolo8.darkbot.gui.tree.utils.TableHelpers;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import eu.darkbot.api.config.annotations.Percentage;
 import eu.darkbot.api.config.annotations.Table;
@@ -201,7 +201,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option boolean IGNORE_CONTESTED_BOXES = true;
 
         @Option
-        @Table
+        @Table(decorator = TableHelpers.BoxInfoDecorator.class)
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy.NoCache<>();
 
@@ -245,8 +245,9 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         public @Option boolean GROUP_NPCS = true;
         @Table(controls = {Table.Control.SEARCH, Table.Control.CUSTOM, Table.Control.ADD, Table.Control.REMOVE},
-                customControls = NpcTableHelpers.MapPickerBuilder.class,
-                customModel = NpcTableHelpers.NpcTableModel.class)
+                customControls = TableHelpers.MapPickerBuilder.class,
+                customModel = TableHelpers.NpcTableModel.class,
+                decorator = TableHelpers.NpcTableDecorator.class)
         public @Option Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
         public transient Lazy<String> MODIFIED_NPC = new Lazy.NoCache<>();
 
