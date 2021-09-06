@@ -73,7 +73,8 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
     private JComponent[] createTable(ConfigSetting<Map<String, Object>> setting) {
         ValueHandler<Map<String, Object>> handler = setting.getHandler();
 
-        EnumSet<Table.Controls> controls = handler.getMetadata("table.controls");
+        Table.Control[] controls = handler.getMetadata("table.controls");
+        Class<? extends Table.ControlBuilder<Object>>[] custom = handler.getMetadata("table.customControls");
         Class<?> type = handler.getMetadata("table.type");
 
         GenericTableModel<Object> tableModel = handler.getMetadata("table.tableModel");
@@ -83,8 +84,9 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
         Document searchModel = handler.getMetadata("table.searchModel");
         TableRowSorter<GenericTableModel<Object>> sorter = handler.getMetadata("table.rowSorter");
 
-        if (controls == null || type == null || tableModel == null || columnModel == null ||
-                selectionModel == null || scrollModel == null || searchModel == null || sorter == null)
+        if (controls == null || custom == null || type == null ||
+                tableModel == null || columnModel == null || selectionModel == null ||
+                scrollModel == null || searchModel == null || sorter == null)
             throw new UnsupportedOperationException("Cannot create table editor without the required models");
 
         JTable table = new JTable(tableModel, columnModel, selectionModel);
@@ -98,9 +100,10 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
         table.setDefaultEditor(Double.class, new TableDoubleEditor());
         table.setDefaultEditor(Character.class, new TableCharEditor());
 
-        // TODO: this editors should be configured via special annotation(s), not hard-hoded here
+        // TODO: this editors should be configured via special annotation(s), not hard-coded here
         table.setDefaultEditor(NpcInfo.ExtraNpcInfo.class, new ExtraNpcInfoEditor());
 
+        // TODO: allow preferred widths configured via @Table, as well as sort orders
         columnModel.getColumn(0).setPreferredWidth(200);
 
         JScrollPane scrollPane = new JScrollPane(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -108,22 +111,37 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
         scrollPane.setViewport(new JViewportFix(table));
         scrollPane.getVerticalScrollBar().setModel(scrollModel);
 
-        if (controls.isEmpty()) return new JComponent[]{scrollPane, table};
+        // Simple table, no controls, no need for extra fuzz
+        if (controls.length == 0) {
+            // TODO: customize size via @Table
+            scrollPane.setPreferredSize(new Dimension(500, 270));
+            return new JComponent[]{scrollPane, table};
+        }
 
         JPanel wrapper = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][][][]", "[][grow]"));
 
-        if (controls.contains(Table.Controls.SEARCH))
-            wrapper.add(new JSearchField<>(searchModel, sorter), "grow, cell 0 0");
-        if (controls.contains(Table.Controls.ADD))
-            wrapper.add(new AddButton(api, setting, tableModel, type), "grow, cell 2 0");
-        if (controls.contains(Table.Controls.REMOVE))
-            wrapper.add(new RemoveButton(setting, table, tableModel), "grow, cell 3 0");
+        for (int i = 0, j = 0; i < controls.length; i++) {
+            Table.Control control = controls[i];
+            JComponent component;
+            if (control == Table.Control.SEARCH)
+                component = new JSearchField<>(sorter, searchModel);
+            else if (control == Table.Control.ADD)
+                component = new AddButton(api, setting, tableModel, type);
+            else if (control == Table.Control.REMOVE)
+                component = new RemoveButton(setting, table, tableModel);
+            else if (control == Table.Control.CUSTOM) {
+                component = api.requireInstance(custom[j++]).create(table, setting);
+            } else {
+                throw new UnsupportedOperationException("Control not supported: " + control);
+            }
+
+            wrapper.add(component, "grow, cell " + i + " 0");
+        }
 
         wrapper.add(scrollPane, "grow, span, cell 0 1");
 
 
-        // TODO: allow @Table to customize height
-        //  possibly add a hard-coded height based on elements option
+        // TODO: customize size via @Table
         wrapper.setPreferredSize(new Dimension(500, 270));
 
         // Force an initial update on the model

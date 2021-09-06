@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.tree.components;
 
+import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 
@@ -13,34 +14,30 @@ import java.util.regex.PatternSyntaxException;
 public class JSearchField<M> extends SearchField {
 
     private final TableRowSorter<? extends M> sorter;
-    private final RowFilter<M, Integer> extraFilter;
 
     private boolean valid;
 
-    public JSearchField(Document document, TableRowSorter<? extends M> sorter) {
+    public JSearchField(TableRowSorter<? extends M> sorter, Document document) {
         this.sorter = sorter;
-        this.extraFilter = null;
         setDocument(document);
     }
 
-    public JSearchField(TableRowSorter<? extends M> sorter, RowFilter<M, Integer> extraFilter) {
+    public JSearchField(TableRowSorter<? extends M> sorter) {
         this.sorter = sorter;
-        this.extraFilter = extraFilter;
         update((DocumentEvent) null);
     }
 
     public void update(DocumentEvent e) {
         if (sorter == null) return;
         try {
-            sorter.setRowFilter(getFilterFor(RowFilter.regexFilter("(?i)" + getText(), 0)));
+            if (sorter instanceof MultiTableRowSorter)
+                ((MultiTableRowSorter<?>) sorter).putRowFilter("search", RowFilter.regexFilter("(?i)" + getText(), 0));
+            else
+                sorter.setRowFilter(RowFilter.regexFilter("(?i)" + getText(), 0));
             setValid(true);
         } catch (PatternSyntaxException ex) {
             setValid(false);
         }
-    }
-
-    private RowFilter<M, Integer> getFilterFor(RowFilter<M, Integer> filter) {
-        return extraFilter == null ? filter : RowFilter.andFilter(Arrays.asList(extraFilter, filter));
     }
 
     private void setValid(boolean valid) {

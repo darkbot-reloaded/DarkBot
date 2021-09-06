@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
+import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.table.TableCharEditor;
 import com.github.manolo8.darkbot.gui.utils.table.TableCharRenderer;
@@ -82,12 +83,12 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
         }
         getTableHeader().setReorderingAllowed(false);
 
-        TableRowSorter<T> sorter = new TableRowSorter<>(model);
+        MultiTableRowSorter<T> sorter = new MultiTableRowSorter<>(model);
         setRowSorter(sorter);
 
         component = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][][][]", "[][grow]"));
 
-        component.add(new JSearchField<>(sorter, extraFilters()), "grow, cell 0 0");
+        component.add(new JSearchField<>(sorter), "grow, cell 0 0");
         component.add(new JScrollPane(this), "grow, span, cell 0 1");
 
         if (data != null && listener != null) {
@@ -101,10 +102,6 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
         }
 
         component.setPreferredSize(new Dimension(500, 270));
-    }
-
-    protected RowFilter<T, Integer> extraFilters() {
-        return null;
     }
 
     protected MainButton addButton() {

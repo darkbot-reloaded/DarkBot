@@ -1,19 +1,19 @@
 package com.github.manolo8.darkbot.config.tree.handlers;
 
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
+import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
+import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.impl.config.DefaultHandler;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableRowSorter;
+import javax.swing.table.TableModel;
 import javax.swing.text.PlainDocument;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.Map;
 
 public class TableHandler extends DefaultHandler<Object> {
@@ -23,7 +23,12 @@ public class TableHandler extends DefaultHandler<Object> {
         Class<?> type = getTableType(field.getGenericType());
         if (type == null)
             throw new UnsupportedOperationException("Table configuration must be a parameterized type Map<String, YourType>");
-        return new TableHandler(field, table.controls(), type);
+
+        Class<? extends TableModel> modelType = table.customModel();
+        TableModel model = modelType == TableModel.class ?
+                new GenericTableModel<>(type) : ReflectionUtils.createInstance(modelType);
+
+        return new TableHandler(field, table.controls(), table.customControls(), model, type);
     }
 
     private static Class<?> getTableType(Type generic) {
@@ -40,18 +45,22 @@ public class TableHandler extends DefaultHandler<Object> {
         return (Class<?>) args[1];
     }
 
-    public TableHandler(@Nullable Field field, Table.Controls[] controls, Class<?> type) {
+    public TableHandler(@Nullable Field field,
+                        Table.Control[] controls,
+                        Class<? extends Table.ControlBuilder>[] custom,
+                        TableModel model,
+                        Class<?> type) {
         super(field);
         metadata.put("isTable", true);
-        metadata.put("table.controls", EnumSet.copyOf(Arrays.asList(controls)));
+        metadata.put("table.controls", controls);
+        metadata.put("table.customControls", custom);
         metadata.put("table.type", type);
 
-        GenericTableModel<?> tableModel = new GenericTableModel<>(type);
         metadata.put("table.selectionModel", new DefaultListSelectionModel());
-        metadata.put("table.tableModel", tableModel);
+        metadata.put("table.tableModel", model);
         metadata.put("table.columnModel", new DefaultTableColumnModel());
         metadata.put("table.searchModel", new PlainDocument());
-        metadata.put("table.rowSorter", new TableRowSorter<>(tableModel));
+        metadata.put("table.rowSorter", new MultiTableRowSorter<>(model));
 
         metadata.put("table.scrollModel", new DefaultBoundedRangeModel());
     }

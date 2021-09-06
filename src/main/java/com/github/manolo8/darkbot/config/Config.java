@@ -18,13 +18,11 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
-import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
 import com.github.manolo8.darkbot.gui.tree.components.JCharField;
 import com.github.manolo8.darkbot.gui.tree.components.JCheckboxListField;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
-import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
-import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
+import com.github.manolo8.darkbot.gui.tree.utils.NpcTableHelpers;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import eu.darkbot.api.config.annotations.Percentage;
 import eu.darkbot.api.config.annotations.Table;
@@ -203,7 +201,6 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option boolean IGNORE_CONTESTED_BOXES = true;
 
         @Option
-        //@Editor(value = JBoxInfoTable.class, shared = true)
         @Table
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy.NoCache<>();
@@ -247,8 +244,9 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option boolean RUN_CONFIG_IN_CIRCLE = true;
 
         public @Option boolean GROUP_NPCS = true;
-        //@Editor(value = JNpcInfoTable.class, shared = true)
-        @Table // Not *quite* ready, needs to support map filter & npc grouping
+        @Table(controls = {Table.Control.SEARCH, Table.Control.CUSTOM, Table.Control.ADD, Table.Control.REMOVE},
+                customControls = NpcTableHelpers.MapPickerBuilder.class,
+                customModel = NpcTableHelpers.NpcTableModel.class)
         public @Option Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
         public transient Lazy<String> MODIFIED_NPC = new Lazy.NoCache<>();
 

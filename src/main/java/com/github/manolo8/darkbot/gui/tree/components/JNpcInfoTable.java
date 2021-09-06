@@ -7,12 +7,14 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
+import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.table.ExtraNpcInfoEditor;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
+import javax.swing.table.TableRowSorter;
 import java.awt.event.ActionEvent;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -36,9 +38,17 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
         super(new NpcTableModel(config), config.NPC_INFOS, config.MODIFIED_NPC, NpcInfo::new);
         this.config = config;
 
+        mapPicker = new JMapPicker(maps -> getRowSorter().allRowsChanged());
+        mapFilter = new NpcMapFilter(mapPicker.getSelected());
+
+        @SuppressWarnings("unchecked")
+        MultiTableRowSorter<JNpcInfoTable.NpcTableModel> sorter =
+                (MultiTableRowSorter<JNpcInfoTable.NpcTableModel>) getRowSorter();
         getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(3, SortOrder.DESCENDING),
                 new RowSorter.SortKey(2, SortOrder.ASCENDING),
                 new RowSorter.SortKey(0, SortOrder.DESCENDING)));
+
+        sorter.putRowFilter("map", mapFilter);
 
         setDefaultEditor(NpcInfo.ExtraNpcInfo.class, new ExtraNpcInfoEditor());
 
@@ -46,15 +56,6 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
         mapPicker.update(config.NPC_INFOS.values());
 
         getComponent().add(mapPicker, "grow, cell 1 0");
-    }
-
-    @Override
-    protected RowFilter<NpcTableModel, Integer> extraFilters() {
-        if (mapPicker == null) {
-            mapPicker = new JMapPicker(maps -> getRowSorter().allRowsChanged());
-            mapFilter = new NpcMapFilter(mapPicker.getSelected());
-        }
-        return mapFilter;
     }
 
     @Override
