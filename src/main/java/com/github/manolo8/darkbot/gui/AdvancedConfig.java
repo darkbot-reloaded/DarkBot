@@ -357,10 +357,6 @@ public class AdvancedConfig extends JPanel implements PluginListener {
             return base.getHandler();
         }
 
-        @Override
-        public <H> @Nullable H getHandler(Class<H> clazz) {
-            return base.getHandler(clazz);
-        }
     }
 
 }

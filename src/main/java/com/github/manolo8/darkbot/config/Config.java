@@ -25,6 +25,7 @@ import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
 import com.github.manolo8.darkbot.gui.tree.utils.TableHelpers;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import eu.darkbot.api.config.annotations.Percentage;
+import eu.darkbot.api.config.annotations.Readonly;
 import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.game.items.ItemCategory;

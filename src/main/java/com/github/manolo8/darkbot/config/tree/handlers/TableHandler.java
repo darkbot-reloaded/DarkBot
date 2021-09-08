@@ -1,8 +1,9 @@
 package com.github.manolo8.darkbot.config.tree.handlers;
 
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
-import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.annotations.Table;
+import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.impl.config.DefaultHandler;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 
 public class TableHandler extends DefaultHandler<Object> {
 
-    public static TableHandler of(Field field) {
+    public static TableHandler of(Field field, PluginInfo namespace, PluginAPI api) {
         Table table = field.getAnnotation(Table.class);
         Class<?> type = getTableType(field.getGenericType());
         if (type == null)
@@ -22,7 +23,8 @@ public class TableHandler extends DefaultHandler<Object> {
 
         Class<? extends TableModel> modelType = table.customModel();
         TableModel model = modelType == TableModel.class ?
-                new GenericTableModel<>(type) : ReflectionUtils.createInstance(modelType);
+                new GenericTableModel<>(api, namespace, type) :
+                api.requireInstance(modelType);
 
         return new TableHandler(field,
                 table.controls(),

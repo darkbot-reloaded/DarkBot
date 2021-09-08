@@ -1,10 +1,19 @@
 package com.github.manolo8.darkbot.gui.utils;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.config.tree.ConfigBuilder;
+import com.github.manolo8.darkbot.config.types.Col;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.config.annotations.Configuration;
+import eu.darkbot.api.extensions.PluginInfo;
+import eu.darkbot.api.managers.I18nAPI;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.event.TableColumnModelListener;
@@ -31,7 +40,7 @@ public class GenericTableModel<T> extends AbstractTableModel {
 
     protected final Column[] columns;
     protected final List<Row<T>> rows = new ArrayList<>();
-    private final Map<String, Row<T>> table = new HashMap<>();
+    protected final Map<String, Row<T>> table = new HashMap<>();
 
     public GenericTableModel(Class<T> clazz, Map<String, T> config, Lazy<String> modified) {
         this.columns = Stream.concat(Stream.of(clazz), Arrays.stream(clazz.getDeclaredFields()))
@@ -43,8 +52,13 @@ public class GenericTableModel<T> extends AbstractTableModel {
         if (modified != null) modified.add(n -> updateEntry(n, config.get(n), true));
     }
 
-    public GenericTableModel(Class<T> clazz) {
-        this(clazz, null, null);
+    public GenericTableModel(PluginAPI api, @Nullable PluginInfo namespace, Class<T> clazz) {
+        ConfigBuilder builder = api.requireInstance(ConfigBuilder.class);
+        ConfigSetting.Parent<T> parent = builder.of(clazz, "Name", namespace);
+
+        this.columns = Stream.concat(Stream.of(parent), parent.getChildren().values().stream())
+                .map(Column::new)
+                .toArray(Column[]::new);
     }
 
     public void setConfig(Map<String, T> config) {
@@ -139,7 +153,7 @@ public class GenericTableModel<T> extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column > 0;
+        return columns[column].editable;
     }
 
     @Override
@@ -173,6 +187,7 @@ public class GenericTableModel<T> extends AbstractTableModel {
         public final String tooltip;
         public final Field field;
         public final Class<?> type;
+        public final boolean editable;
 
         public Column(AnnotatedElement el) {
             Option op = el.getAnnotation(Option.class);
@@ -180,6 +195,15 @@ public class GenericTableModel<T> extends AbstractTableModel {
             this.tooltip = Strings.toTooltip(I18n.getOrDefault(op.key() + ".desc", op.description()));
             this.field = el instanceof Field ? (Field) el : null;
             this.type = field == null ? String.class : ReflectionUtils.wrapped(field.getType());
+            this.editable = field != null;
+        }
+
+        public Column(ConfigSetting<?> config) {
+            this.name = config.getName();
+            this.tooltip = config.getDescription();
+            this.field = config.getHandler().getMetadata("field");
+            this.type = field == null ? String.class : config.getType();
+            this.editable = field != null && !Boolean.TRUE.equals(config.getHandler().getMetadata("readonly"));
         }
     }
 

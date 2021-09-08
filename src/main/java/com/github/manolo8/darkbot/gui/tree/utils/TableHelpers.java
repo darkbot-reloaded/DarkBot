@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.gui.utils.table.ExtraNpcInfoEditor;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.util.ValueHandler;
@@ -37,8 +38,8 @@ public class TableHelpers {
 
         private boolean grouped = true;
 
-        public NpcTableModel() {
-            super(NpcInfo.class);
+        public NpcTableModel(PluginAPI api) {
+            super(api, null, NpcInfo.class);
             rebuildTable();
         }
 

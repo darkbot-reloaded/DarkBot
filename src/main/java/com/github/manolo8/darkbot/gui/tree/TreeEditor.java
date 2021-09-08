@@ -33,7 +33,9 @@ public class TreeEditor extends AbstractCellEditor implements TreeCellEditor {
         else if (e.getSource() == tree && e instanceof MouseEvent)
             path = tree.getClosestPathForLocation(((MouseEvent)e).getX(), ((MouseEvent)e).getY());
 
-        return path != null && tree.getModel().isLeaf(path.getLastPathComponent());
+        if (path == null || !tree.getModel().isLeaf(path.getLastPathComponent())) return false;
+        ConfigSetting<?> config = (ConfigSetting<?>) path.getLastPathComponent();
+        return !Boolean.TRUE.equals(config.getHandler().getMetadata("readonly"));
     }
 
     @Override

@@ -42,6 +42,11 @@ public class ConfigBuilder implements API.Singleton {
         if (cfg != null) {
             baseKey = cfg.value();
             allOptions = cfg.allOptions();
+        } else {
+            com.github.manolo8.darkbot.config.types.Option legacyOption =
+                    type.getAnnotation(com.github.manolo8.darkbot.config.types.Option.class);
+            if (legacyOption != null && !legacyOption.key().isEmpty())
+                baseKey = legacyOption.key();
         }
 
         return new Builder(namespace, baseKey, allOptions).build(type, rootName);
@@ -62,10 +67,11 @@ public class ConfigBuilder implements API.Singleton {
 
         public <T> ConfigSettingImpl.Root<T> build(Class<T> type, String rootName) {
             return new ConfigSettingImpl.Root<T>(
+                    namespace,
                     baseKey,
                     i18n.getOrDefault(namespace, baseKey, rootName),
                     i18n.getOrDefault(namespace, baseKey + ".desc", null),
-                    type, settingHandlerFactory.getHandler(null),
+                    type, settingHandlerFactory.getHandler(null, namespace),
                     parent -> getChildren(parent, type));
         }
 
@@ -109,14 +115,14 @@ public class ConfigBuilder implements API.Singleton {
             if (!isLeaf(field)) {
                 ConfigSettingImpl.Intermediate<?> inter = new ConfigSettingImpl.Intermediate<>(parent,
                         key, name, description,
-                        type, settingHandlerFactory.getHandler(field),
+                        type, settingHandlerFactory.getHandler(field, namespace),
                         p -> getChildren(p, type));
                 if (!inter.getChildren().isEmpty())
                     return inter;
             }
 
             return new ConfigSettingImpl.Leaf<>(parent, key, name, description, type,
-                    settingHandlerFactory.getHandler(field));
+                    settingHandlerFactory.getHandler(field, namespace));
         }
 
         /**
@@ -124,7 +130,9 @@ public class ConfigBuilder implements API.Singleton {
          * @return true if this field participates in the configuration tree, false otherwise
          */
         private boolean participates(Field field) {
-            if (!Modifier.isPublic(field.getModifiers())) return false;
+            if (!Modifier.isPublic(field.getModifiers()) ||
+                    Modifier.isTransient(field.getModifiers()) ||
+                    Modifier.isStatic(field.getModifiers())) return false;
             if (field.isAnnotationPresent(Option.Ignore.class)) return false;
             if (field.isAnnotationPresent(Option.class)) return true;
             if (field.isAnnotationPresent(com.github.manolo8.darkbot.config.types.Option.class)) return true;
