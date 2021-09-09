@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.gui.tree.editors.BooleanEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ColorEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ConditionEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.FontEditor;
@@ -12,10 +13,13 @@ import com.github.manolo8.darkbot.gui.tree.editors.NumberEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.PercentEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.PlayerTagEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.RangeEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.ShipModeEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.StringEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.TableEditor;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.types.PercentRange;
 import eu.darkbot.api.config.types.PlayerTag;
+import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.utils.Inject;
@@ -51,15 +55,20 @@ public class EditorProvider {
         defaultEditors.put(Boolean.class, BooleanEditor.class);
         defaultEditors.put(Integer.class, NumberEditor.class);
         defaultEditors.put(Double.class, NumberEditor.class);
+        defaultEditors.put(Character.class, CharacterEditor.class);
         defaultEditors.put(Condition.class, ConditionEditor.class);
         defaultEditors.put(Color.class, ColorEditor.class);
         defaultEditors.put(Font.class, FontEditor.class);
+        defaultEditors.put(String.class, StringEditor.class);
 
         defaultEditors.put(Config.PercentRange.class, RangeEditor.class);
         defaultEditors.put(PercentRange.class, RangeEditor.class);
 
         defaultEditors.put(PlayerTag.class, PlayerTagEditor.class);
         defaultEditors.put(com.github.manolo8.darkbot.config.PlayerTag.class, PlayerTagEditor.class);
+
+        defaultEditors.put(ShipMode.class, ShipModeEditor.class);
+        defaultEditors.put(Config.ShipConfig.class, ShipModeEditor.class);
 
         metadataEditors.put("isPercent", PercentEditor.class);
         metadataEditors.put("isTable", TableEditor.class);

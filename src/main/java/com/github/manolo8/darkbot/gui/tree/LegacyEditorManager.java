@@ -1,16 +1,10 @@
 package com.github.manolo8.darkbot.gui.tree;
 
-import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
-import com.github.manolo8.darkbot.gui.tree.components.JCharField;
 import com.github.manolo8.darkbot.gui.tree.components.JLabelField;
-import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
-import com.github.manolo8.darkbot.gui.tree.components.JStringField;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
-import eu.darkbot.api.config.util.ValueHandler;
 import eu.darkbot.api.utils.Inject;
 
-import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,9 +18,6 @@ public class LegacyEditorManager {
     private final Map<Class<? extends OptionEditor>, OptionEditor> editorsByClass = new HashMap<>();
     private final OptionEditor defaultEditor = new JLabelField();
 
-
-    private final Map<Class<? extends ValueHandler<?>>, eu.darkbot.api.config.util.OptionEditor<?>> newEditors = new HashMap<>();
-
     @Inject
     public LegacyEditorManager() {
         this(null);
@@ -36,9 +27,7 @@ public class LegacyEditorManager {
         this.sharedEditors = shared != null ? shared.sharedEditors : new HashMap<>();
         this.defaultEditor.getComponent().setOpaque(false);
 
-        addEditor(new JCharField.ExtraBorder(), Character.class);
-        addEditor(new JStringField(), String.class);
-        addEditor(new JShipConfigField(), Config.ShipConfig.class);
+        //addEditor(new JShipConfigField(), Config.ShipConfig.class);
     }
 
     private void addEditor(OptionEditor editor, Class<?>... types) {

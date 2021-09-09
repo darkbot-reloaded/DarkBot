@@ -1,7 +1,9 @@
 package com.github.manolo8.darkbot.gui.tree;
 
 import com.github.manolo8.darkbot.config.tree.ConfigField;
+import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.config.ConfigSetting;
 
 import javax.swing.*;
@@ -9,7 +11,8 @@ import java.awt.*;
 import java.util.stream.Stream;
 
 public class TreeCell extends JPanel {
-    private final JComponent EMPTY_EDITOR = new JLabel();
+    private final JComponent EMPTY_EDITOR = new JLabel(),
+            ERROR_EDITOR = UIUtils.setRed(new JLabel("Error creating editor (hover for details)"), true);
 
     private final EditorProvider editors;
 
@@ -50,37 +53,30 @@ public class TreeCell extends JPanel {
                     this.editor = editor;
                     this.legacyEditor = null;
 
-                    if (component != null) {
-                        remove(component);
-                        component = null;
-                    }
-
-                    add(component = editor.getEditorComponent(setting));
+                    replaceComponent(editor.getEditorComponent(setting));
                 } else {
                     ConfigField cf = new ConfigField(setting);
                     this.editor = null;
                     this.legacyEditor = editors.getLegacyEditor(cf);
 
-                    if (component != null) {
-                        remove(component);
-                        component = null;
-                    }
-
                     legacyEditor.edit(cf);
-                    add(component = legacyEditor.getComponent());
+                    replaceComponent(legacyEditor.getComponent());
                 }
-
-                return;
             } catch (Throwable e) {
-                System.out.println("Error setting up editor, editor won't show: ");
-                e.printStackTrace();
+                ERROR_EDITOR.setToolTipText(IssueHandler.createDescription(e));
+                replaceComponent(ERROR_EDITOR);
             }
+            return;
         }
         this.editor = null;
         this.legacyEditor = null;
 
-        if (component != null) remove(component);
-        add(component = EMPTY_EDITOR);
+        replaceComponent(EMPTY_EDITOR);
+    }
+
+    private void replaceComponent(JComponent component) {
+        if (this.component != null) remove(this.component);
+        add(this.component = component);
     }
 
     public Object getValue() {

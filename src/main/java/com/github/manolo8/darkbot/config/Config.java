@@ -18,15 +18,14 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
-import com.github.manolo8.darkbot.gui.tree.components.JCharField;
 import com.github.manolo8.darkbot.gui.tree.components.JCheckboxListField;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.utils.NpcTableModel;
 import com.github.manolo8.darkbot.gui.tree.utils.TableHelpers;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import eu.darkbot.api.config.annotations.Percentage;
-import eu.darkbot.api.config.annotations.Readonly;
 import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.game.items.ItemCategory;
@@ -376,7 +375,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         @Override
         public String toString() {
-            return "Config: " + CONFIG + "   Formation: " + JCharField.getDisplay(FORMATION);
+            return "Config: " + CONFIG + "   Formation: " + CharacterEditor.getDisplay(FORMATION);
         }
     }
 

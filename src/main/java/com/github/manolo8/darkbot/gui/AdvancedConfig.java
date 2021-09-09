@@ -231,7 +231,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
             path = path.getParentPath();
 
-            if (path == null || path.getPathCount() == 1) configTree.expandRow(row); // Unfold root or top-level nodes
+            if (true || path == null || path.getPathCount() == 1) configTree.expandRow(row); // Unfold root or top-level nodes
             else {
                 // Unfold children with no siblings
                 int children = treeModel.getChildCount(path.getLastPathComponent());

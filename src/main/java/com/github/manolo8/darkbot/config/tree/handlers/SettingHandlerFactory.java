@@ -36,8 +36,7 @@ public class SettingHandlerFactory implements API.Singleton {
                 .addHandler(Num.class, NumberHandler::ofLegacy),
                 int.class, double.class, Integer.class, Double.class);
 
-        addHandlers(new HandlerBuilder<String>()
-                .addHandler(Text.class, StringHandler::of)
+        addHandlers(new HandlerBuilder<String>(StringHandler::of)
                 .addHandler(Length.class, StringHandler::ofLegacy)
                 .addHandler(Placeholder.class, StringHandler::ofLegacy), String.class);
 
