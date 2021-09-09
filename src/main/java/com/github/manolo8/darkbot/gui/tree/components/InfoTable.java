@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
+import com.github.manolo8.darkbot.gui.tree.utils.TableSearchField;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
@@ -17,7 +18,6 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
@@ -88,7 +88,7 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
 
         component = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][][][]", "[][grow]"));
 
-        component.add(new JSearchField<>(sorter), "grow, cell 0 0");
+        component.add(new TableSearchField<>(sorter), "grow, cell 0 0");
         component.add(new JScrollPane(this), "grow, span, cell 0 1");
 
         if (data != null && listener != null) {

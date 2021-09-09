@@ -1,10 +1,9 @@
 package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.gui.components.MainButton;
-import com.github.manolo8.darkbot.gui.tree.components.JSearchField;
+import com.github.manolo8.darkbot.gui.tree.utils.TableSearchField;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.ToolTipHeader;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.table.TableCharEditor;
@@ -30,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -118,7 +118,7 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
                 Table.Control control = controls[i];
                 JComponent component;
                 if (control == Table.Control.SEARCH)
-                    component = new JSearchField<>(sorter,
+                    component = new TableSearchField<>(sorter,
                             handler.getOrCreateMetadata("table.searchModel", PlainDocument::new));
                 else if (control == Table.Control.ADD)
                     component = new AddButton(api, setting, tableModel, type);
@@ -198,7 +198,7 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
             Map<String, Object> value = setting.getValue();
             if (value == null) return;
             if (value.containsKey(name)) {
-                Popups.showMessageAsync("Error", "Name already in use", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Name already in use", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             Object obj = api.requireInstance(type);
@@ -226,12 +226,17 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
         public void actionPerformed(ActionEvent e) {
             Map<String, Object> value = setting.getValue();
             if (value == null) return;
-            List<String> toRemove = Arrays.stream(tableComponent.getSelectedRows())
-                    .mapToObj(row -> (String) tableModel.getValueAt(row, 0))
-                    .peek(value::remove)
+            Set<String> tableNames = Arrays.stream(tableComponent.getSelectedRows())
+                    .mapToObj(row -> (String) tableComponent.getValueAt(row, 0))
+                    .collect(Collectors.toSet());
+
+            List<String> toRemove = value.keySet().stream()
+                    .filter(name -> tableNames.contains(tableModel.toTableName(name)))
                     .collect(Collectors.toList());
-            toRemove.forEach(r -> tableModel.updateEntry(r, null, false));
-            tableModel.fireTableDataChanged();
+
+            tableComponent.getSelectionModel().clearSelection();
+            toRemove.forEach(value::remove);
+            setting.setValue(value);
         }
     }
 

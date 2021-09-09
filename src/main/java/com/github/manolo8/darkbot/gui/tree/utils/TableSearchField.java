@@ -1,28 +1,26 @@
-package com.github.manolo8.darkbot.gui.tree.components;
+package com.github.manolo8.darkbot.gui.tree.utils;
 
 import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
-import com.github.manolo8.darkbot.gui.utils.UIUtils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.Document;
-import java.util.Arrays;
 import java.util.regex.PatternSyntaxException;
 
-public class JSearchField<M> extends SearchField {
+public class TableSearchField<M> extends SearchField {
 
     private final TableRowSorter<? extends M> sorter;
 
     private boolean valid;
 
-    public JSearchField(TableRowSorter<? extends M> sorter, Document document) {
+    public TableSearchField(TableRowSorter<? extends M> sorter, Document document) {
         this.sorter = sorter;
         setDocument(document);
     }
 
-    public JSearchField(TableRowSorter<? extends M> sorter) {
+    public TableSearchField(TableRowSorter<? extends M> sorter) {
         this.sorter = sorter;
         update((DocumentEvent) null);
     }

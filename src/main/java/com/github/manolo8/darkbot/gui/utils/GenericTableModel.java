@@ -62,6 +62,10 @@ public class GenericTableModel<T> extends AbstractTableModel {
     }
 
     public void setConfig(Map<String, T> config) {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> setConfig(config));
+            return;
+        }
         if (config == null || this.config != config) {
             this.config = config;
             rebuildTable();
@@ -125,6 +129,15 @@ public class GenericTableModel<T> extends AbstractTableModel {
         rows.clear();
         table.clear();
         fireTableDataChanged();
+    }
+
+    @Override
+    public void fireTableDataChanged() {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(this::fireTableDataChanged);
+            return;
+        }
+        super.fireTableDataChanged();
     }
 
     @Override
