@@ -1,14 +1,11 @@
 package eu.darkbot.api;
 
-import java.nio.file.Paths;
+import com.github.manolo8.darkbot.utils.LibUtils;
 
 public class DarkMem {
 
     static {
-        if (System.getProperty("os.name").toLowerCase().contains("win"))
-            System.loadLibrary("lib/DarkMemAPI");
-        else
-            System.load(Paths.get("lib", "DarkMemAPI.so").toAbsolutePath().toString());
+        System.load(LibUtils.getLibPath("DarkMemAPI"));
     }
 
     public native int    getVersion();
