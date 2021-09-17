@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.modules.utils.NpcAttacker;
 import com.github.manolo8.darkbot.utils.LegacyModules;
 import eu.darkbot.impl.PluginApiImpl;
 import eu.darkbot.impl.managers.EventBroker;
+import eu.darkbot.impl.managers.GalaxySpinner;
 
 public class DarkBotPluginApiImpl extends PluginApiImpl {
 
@@ -31,6 +32,7 @@ public class DarkBotPluginApiImpl extends PluginApiImpl {
                 MapManager.class,
                 StatsManager.class,
                 NpcAttacker.class,
+                GalaxySpinner.class,
                 LegacyModules.class);
     }
 
