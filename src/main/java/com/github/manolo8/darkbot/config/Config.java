@@ -25,6 +25,7 @@ import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.utils.NpcTableModel;
 import com.github.manolo8.darkbot.gui.tree.utils.TableHelpers;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
+import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.config.annotations.Percentage;
 import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.types.ShipMode;
@@ -76,8 +77,8 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
     public @Option General GENERAL = new General();
     public static class General implements eu.darkbot.api.config.legacy.General {
-        @Options(ModuleSupplier.class)
-        public @Option @Editor(JListField.class) String CURRENT_MODULE = LootNCollectorModule.class.getCanonicalName();
+        @Option @Dropdown(options = ModuleSupplier.class)
+        public String CURRENT_MODULE = LootNCollectorModule.class.getCanonicalName();
         @Options(StarManager.MapList.class)
         public @Option @Editor(JListField.class) int WORKING_MAP = 26;
         public @Option ShipConfig OFFENSIVE = new ShipConfig(1, '8');
@@ -310,8 +311,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         public @Option APIConfig API_CONFIG = new APIConfig();
         public static class APIConfig {
-            @Option @Editor(JListField.class) @Options(BrowserApi.Supplier.class)
-            public BrowserApi BROWSER_API = BrowserApi.DARK_BOAT;
+            public @Option @Dropdown BrowserApi BROWSER_API = BrowserApi.DARK_BOAT;
             public @Option boolean FULLY_HIDE_API = true;
             public @Option boolean FORCE_GAME_LANGUAGE = false;
             public @Option boolean ENFORCE_HW_ACCEL = true;
@@ -322,7 +322,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         public @Option MapDisplay MAP_DISPLAY = new MapDisplay();
         public static class MapDisplay {
-            @Option @Editor(JCheckboxListField.class) @Options(DisplayFlag.Supplier.class)
+            @Option @Dropdown(multi = true)
             public Set<DisplayFlag> TOGGLE = EnumSet.of(
                     HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA);
             public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;

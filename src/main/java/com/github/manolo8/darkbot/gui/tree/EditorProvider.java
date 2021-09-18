@@ -8,7 +8,9 @@ import com.github.manolo8.darkbot.gui.tree.editors.BooleanEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ColorEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ConditionEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.DropdownEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.FontEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.MultiDropdownEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.NumberEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.PercentEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.PlayerTagEditor;
@@ -72,6 +74,8 @@ public class EditorProvider {
 
         metadataEditors.put("isPercent", PercentEditor.class);
         metadataEditors.put("isTable", TableEditor.class);
+        metadataEditors.put("isDropdown", DropdownEditor.class);
+        metadataEditors.put("isMultiDropdown", MultiDropdownEditor.class);
     }
 
     @SuppressWarnings("CopyConstructorMissesField")

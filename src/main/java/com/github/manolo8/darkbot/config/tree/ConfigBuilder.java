@@ -145,7 +145,7 @@ public class ConfigBuilder implements API.Singleton {
          */
         private boolean isLeaf(Field field) {
             Class<?> type = field.getType();
-            return type.isPrimitive() || type.isInterface() || settingHandlerFactory.hasHandler(type);
+            return type.isPrimitive() || type.isInterface() || settingHandlerFactory.hasHandler(field);
         }
 
     }

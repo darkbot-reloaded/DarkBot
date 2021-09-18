@@ -6,10 +6,10 @@ import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Placeholder;
 import eu.darkbot.api.API;
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.config.annotations.Percentage;
 import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.annotations.Tag;
-import eu.darkbot.api.config.annotations.Text;
 import eu.darkbot.api.config.types.PercentRange;
 import eu.darkbot.api.config.types.PlayerTag;
 import eu.darkbot.api.config.util.ValueHandler;
@@ -19,58 +19,54 @@ import eu.darkbot.impl.config.DefaultHandler;
 import java.awt.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
 public class SettingHandlerFactory implements API.Singleton {
 
-    private final Map<Class<?>, Builder<?>> handlers = new HashMap<>();
-    private final Builder<?> fallback = (SimpleBuilder<?>) DefaultHandler::new;
+    private final Parent root = new Parent(null);
 
     public SettingHandlerFactory(PluginAPI api) {
-        addHandlers(new HandlerBuilder<java.lang.Number>()
-                .addHandler(Percentage.class, NumberHandler::ofPercentage)
-                .addHandler(eu.darkbot.api.config.annotations.Number.class, NumberHandler::of)
-                .addHandler(Num.class, NumberHandler::ofLegacy),
-                int.class, double.class, Integer.class, Double.class);
-
-        addHandlers(new HandlerBuilder<String>(StringHandler::of)
-                .addHandler(Length.class, StringHandler::ofLegacy)
-                .addHandler(Placeholder.class, StringHandler::ofLegacy), String.class);
-
-        addHandlers(new HandlerBuilder<PlayerTag>(PlayerTagHandler::fallback)
-                        .addHandler(Tag.class, PlayerTagHandler::of)
-                        .addHandler(com.github.manolo8.darkbot.config.types.Tag.class, PlayerTagHandler::ofLegacy),
-                PlayerTag.class, com.github.manolo8.darkbot.config.PlayerTag.class);
-
-        addHandlers(ColorHandler::of, Color.class);
-        addHandlers(RangeHandler::of, PercentRange.class, Config.PercentRange.class);
-        addHandlers(new HandlerBuilder<>()
-                .addHandler(Table.class, (f, i) -> TableHandler.of(f, i, api)), Map.class);
+        root.add(new Parent(type(int.class, double.class, Integer.class, Double.class))
+                        .add(annot(Percentage.class), NumberHandler::ofPercentage)
+                        .add(annot(eu.darkbot.api.config.annotations.Number.class), NumberHandler::of)
+                        .add(annot(Num.class), NumberHandler::ofLegacy))
+                .add(annot(Dropdown.class), (f, i) -> DropdownHandler.of(f, i, api))
+                .add(new Parent(type(String.class))
+                        .add(annot(Length.class, Placeholder.class), StringHandler::ofLegacy)
+                        .add(f -> true, StringHandler::of))
+                .add(new Parent(type(PlayerTag.class, com.github.manolo8.darkbot.config.PlayerTag.class))
+                        .add(annot(Tag.class), PlayerTagHandler::of)
+                        .add(annot(com.github.manolo8.darkbot.config.types.Tag.class), PlayerTagHandler::ofLegacy)
+                        .add(f -> true, PlayerTagHandler::fallback))
+                .add(type(Color.class), ColorHandler::of)
+                .add(type(PercentRange.class, Config.PercentRange.class), RangeHandler::of)
+                .add(annot(Table.class), (f, i) -> TableHandler.of(f, i, api));
     }
 
-    public boolean hasHandler(Class<?> type) {
-        return handlers.containsKey(type);
+    public boolean hasHandler(Field field) {
+        return field != null && findHandler(root, field) != null;
     }
 
     public <T> ValueHandler<T> getHandler(Field field, PluginInfo namespace) {
         if (field == null) return new DefaultHandler<>();
-        //noinspection unchecked
-        return (ValueHandler<T>) handlers.getOrDefault(field.getType(), fallback).apply(field, namespace);
+
+        Leaf<T> node = findHandler(root, field);
+        if (node != null) return node.builder.apply(field, namespace);
+        else return new DefaultHandler<>(field);
     }
 
-    @SafeVarargs
-    private final <B extends Builder<T>, T> void addHandlers(B builder, Class<? extends T>... classes) {
-        for (Class<?> type : classes) {
-            handlers.put(type, builder);
+    private <T> Leaf<T> findHandler(Parent parent, Field field) {
+        for (Node child : parent.children) {
+            if (!child.predicate.test(field)) continue;
+            if (child instanceof Leaf) return (Leaf<T>) child;
+            else if (child instanceof Parent) {
+                Leaf<T> found = findHandler((Parent) child, field);
+                if (found != null) return found;
+            }
         }
-    }
-
-    @SafeVarargs
-    private final <B extends SimpleBuilder<T>, T> void addHandlers(B builder, Class<? extends T>... classes) {
-        addHandlers((Builder<T>) builder, classes);
+        return null;
     }
 
     @FunctionalInterface
@@ -87,39 +83,77 @@ public class SettingHandlerFactory implements API.Singleton {
         ValueHandler<T> apply(Field field);
     }
 
-    private class HandlerBuilder<T> implements Builder<T> {
-        private final Map<Class<? extends Annotation>, Builder<T>> handlers = new HashMap<>();
-        private final Builder<T> builderFallback;
+    @SafeVarargs
+    private final Predicate<Field> type(Class<?>... classes) {
+        return f -> {
+            Class<?> type = f.getType();
+            for (Class<?> c : classes) if (c.isAssignableFrom(type)) return true;
+            return false;
+        };
+    }
 
-        @SuppressWarnings("unchecked")
-        public HandlerBuilder() {
-            this((Builder<T>) fallback);
+    @SafeVarargs
+    private final Predicate<Field> annot(Class<? extends Annotation>... classes) {
+        return f -> {
+            for (Class<? extends Annotation> c : classes) if (f.isAnnotationPresent(c)) return true;
+            return false;
+        };
+    }
+
+
+    private static abstract class Node {
+        final Predicate<Field> predicate;
+
+        public Node(Predicate<Field> predicate) {
+            this.predicate = predicate;
         }
 
-        public HandlerBuilder(Builder<T> fallback) {
-            this.builderFallback = fallback;
+    }
+
+    private static class Parent extends Node {
+        private final List<Node> children;
+
+        public Parent(Predicate<Field> predicate) {
+            this(predicate, new ArrayList<>());
         }
 
-        public HandlerBuilder(SimpleBuilder<T> fallback) {
-            this((Builder<T>) fallback);
+        public Parent(Predicate<Field> predicate, List<Node> children) {
+            super(predicate);
+            this.children = children;
         }
 
-        public <A extends Annotation> HandlerBuilder<T> addHandler(Class<A> ann, Builder<T> val) {
-            this.handlers.put(ann, val);
+        public <T> Parent add(Node node) {
+            this.children.add(node);
             return this;
         }
 
-        public <A extends Annotation> HandlerBuilder<T> addHandler(Class<A> ann, SimpleBuilder<T> val) {
-            return addHandler(ann, (Builder<T>) val);
+        public <T> Parent add(Predicate<Field> condition, Builder<T> b) {
+            children.add(new Leaf<T>(condition, b));
+            return this;
         }
 
-        public ValueHandler<T> apply(Field field, PluginInfo namespace) {
-            for (Map.Entry<Class<? extends Annotation>, Builder<T>> entry : handlers.entrySet()) {
-                if (!field.isAnnotationPresent(entry.getKey())) continue;
-                return entry.getValue().apply(field, namespace);
-            }
+        public <T> Parent add(Predicate<Field> condition, SimpleBuilder<T> b) {
+            children.add(new Leaf<T>(condition, b));
+            return this;
+        }
 
-            return builderFallback.apply(field, namespace);
+        public Parent add(Predicate<Field> condition, List<Node> children) {
+            children.add(new Parent(condition, children));
+            return this;
+        }
+    }
+
+    private static class Leaf<T> extends Node {
+        final Builder<T> builder;
+
+        public Leaf(Predicate<Field> predicate, Builder<T> builder) {
+            super(predicate);
+            this.builder = builder;
+        }
+
+        public Leaf(Predicate<Field> predicate, SimpleBuilder<T> builder) {
+            super(predicate);
+            this.builder = builder;
         }
     }
 
