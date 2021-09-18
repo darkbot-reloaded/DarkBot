@@ -21,6 +21,7 @@ import eu.darkbot.api.game.other.Health;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.game.other.LocationInfo;
+import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.utils.ItemNotEquippedException;
 import org.jetbrains.annotations.Nullable;
@@ -80,10 +81,10 @@ public class PetManager extends Gui implements PetAPI {
         SELECTED
     }
 
-    public PetManager(Main main) {
+    public PetManager(Main main, MapManager mapManager, HeroManager hero) {
         this.main = main;
-        this.ships = main.mapManager.entities.ships;
-        this.pet = main.hero.pet;
+        this.ships = mapManager.entities.ships;
+        this.pet = hero.pet;
 
         PetGearSupplier.updateGears(gearList);
     }
@@ -99,10 +100,7 @@ public class PetManager extends Gui implements PetAPI {
             return;
         }
         updatePetTarget();
-        int moduleId = main.config.PET.MODULE_ID;
-        if (main.config.PET.COMPATIBILITY_MODE && main.config.PET.MODULE < gearList.size()) {
-            moduleId = gearList.get(main.config.PET.MODULE).id;
-        }
+        int moduleId = main.config.PET.GEAR.getId();
 
         if (gearOverrideTime > System.currentTimeMillis() && gearOverride != null) {
             moduleId = gearOverride;

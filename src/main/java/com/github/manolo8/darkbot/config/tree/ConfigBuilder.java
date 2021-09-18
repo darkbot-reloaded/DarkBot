@@ -104,7 +104,7 @@ public class ConfigBuilder implements API.Singleton {
                 Option option = field.getAnnotation(Option.class);
                 if (option != null && !option.value().isEmpty()) key = option.value();
 
-                name = i18n.getOrDefault(namespace, key, field.getName());
+                name = i18n.getOrDefault(namespace, key, "");
                 description = i18n.getOrDefault(namespace, key + ".desc", null);
             }
 

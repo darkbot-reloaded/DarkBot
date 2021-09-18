@@ -116,9 +116,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         // 2: Create the plugin API (uses the config manager internally)
         this.pluginAPI = new DarkBotPluginApiImpl(this);
         // 3: Initialize i18n with the locale from the config
-        eu.darkbot.impl.managers.I18n i18n = pluginAPI.requireInstance(eu.darkbot.impl.managers.I18n.class);
-        I18n.init(i18n);
-        i18n.setLocale(config.BOT_SETTINGS.BOT_GUI.LOCALE);
+        I18n.init(pluginAPI, config.BOT_SETTINGS.BOT_GUI.LOCALE);
         // 4: Generate the actual config
         this.configHandler = pluginAPI.requireInstance(ConfigHandler.class);
 

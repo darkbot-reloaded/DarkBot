@@ -1,11 +1,17 @@
 package com.github.manolo8.darkbot.utils;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.gui.utils.Popups;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.I18nAPI;
 
+import javax.swing.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,13 +22,18 @@ public class I18n {
 
     // Hack for backwards compat
     private static eu.darkbot.impl.managers.I18n INSTANCE;
+    private static LangChangeListener onLanguageChange = new LangChangeListener();
 
     public static final List<Locale> SUPPORTED_LOCALES = Stream.of(
             "bg", "cs", "de", "el", "en", "es", "fr", "hu", "it", "lt", "pl", "pt", "ro", "ru", "sv", "tr", "uk"
     ).map(Locale::new).sorted(Comparator.comparing(Locale::getDisplayName)).collect(Collectors.toList());
 
-    public static void init(eu.darkbot.impl.managers.I18n instance) {
-        INSTANCE = instance;
+    public static void init(PluginAPI api, Locale locale) {
+        INSTANCE = api.requireInstance(eu.darkbot.impl.managers.I18n.class);
+        INSTANCE.setLocale(locale);
+
+        ConfigSetting<Locale> setting = api.requireAPI(ConfigAPI.class).requireConfig("bot_settings.bot_gui.locale");
+        setting.addListener(onLanguageChange);
     }
 
     public static I18nAPI getInstance() {
@@ -53,6 +64,17 @@ public class I18n {
 
     public static String getOrDefault(String key, String fallback, Object... arguments) {
         return INSTANCE.getOrDefault(key, fallback, arguments);
+    }
+
+    public static class LangChangeListener implements Consumer<Locale> {
+        @Override
+        public void accept(Locale loc) {
+            I18n.updateLang();
+            Popups.showMessageAsync(
+                    I18n.get("language.changed.title"),
+                    I18n.get("language.changed.content", I18n.getLocale().getDisplayName(I18n.getLocale()),
+                            I18n.get("translation.credit")), JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
 }

@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.Editor;
+import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
 import com.github.manolo8.darkbot.gui.tree.editors.BooleanEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ColorEditor;
@@ -86,7 +87,8 @@ public class EditorProvider {
     public <T> OptionEditor<T> getEditor(ConfigSetting<T> setting) {
         // Legacy handler should take care of this field
         Field field = setting.getHandler().getMetadata("field");
-        if (field != null && field.isAnnotationPresent(Editor.class)) return null;
+        if (field != null && field.isAnnotationPresent(Editor.class) &&
+                !legacy.isRemoved(field.getAnnotation(Editor.class).value())) return null;
 
         // Specific editor class requested
         Class<? extends OptionEditor> editor = setting.getHandler().getMetadata("editor");

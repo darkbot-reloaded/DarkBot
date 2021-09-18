@@ -83,8 +83,7 @@ public class SettingHandlerFactory implements API.Singleton {
         ValueHandler<T> apply(Field field);
     }
 
-    @SafeVarargs
-    private final Predicate<Field> type(Class<?>... classes) {
+    private Predicate<Field> type(Class<?>... classes) {
         return f -> {
             Class<?> type = f.getType();
             for (Class<?> c : classes) if (c.isAssignableFrom(type)) return true;

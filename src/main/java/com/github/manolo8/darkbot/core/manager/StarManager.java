@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.API;
+import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.managers.StarSystemAPI;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -272,6 +273,14 @@ public class StarManager implements API.Singleton {
                 .map(m -> m.name).sorted().collect(Collectors.toList());
     }
 
+    public List<Integer> getAccessibleMapIds() {
+        return starSystem.vertexSet().stream()
+                .filter(m -> !m.gg && m.id > 0)
+                .filter(m -> starSystem.inDegreeOf(m) > 0)
+                .sorted(Comparator.comparing(map -> map.name))
+                .map(m -> m.id).collect(Collectors.toList());
+    }
+
     public Collection<String> getGGMaps() {
         return starSystem.vertexSet().stream()
                 .filter(m -> m.gg)
@@ -306,6 +315,28 @@ public class StarManager implements API.Singleton {
         public List<String> getOptions() {
             return getInstance().getAccessibleMaps();
         }
+    }
+
+    public static class MapOptions implements Dropdown.Options<Integer> {
+
+        private final StarManager star;
+        private final List<Integer> accessibleMaps;
+
+        public MapOptions(StarManager star) {
+            this.star = star;
+            this.accessibleMaps = star.getAccessibleMapIds();
+        }
+
+        @Override
+        public List<Integer> options() {
+            return accessibleMaps;
+        }
+
+        @Override
+        public String getText(Integer option) {
+            return star.byId(option).getName();
+        }
+
     }
 
 }

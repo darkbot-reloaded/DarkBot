@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@Deprecated
 public abstract class InfoTable<T extends TableModel, E> extends JTable implements OptionEditor {
     private final JComponent component;
     private Map<String, E> data;

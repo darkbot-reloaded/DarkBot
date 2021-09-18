@@ -31,12 +31,14 @@ public class EnumDropdownOptions<E extends Enum<E>> implements Dropdown.Options<
 
     @Override
     public String getText(E option) {
+        if (option == null) return "";
         String name = option.name().toLowerCase(Locale.ROOT);
         return i18n.getOrDefault(context, baseKey + "." + name, name);
     }
 
     @Override
     public String getTooltip(E option) {
+        if (option == null) return null;
         String name = option.name().toLowerCase(Locale.ROOT);
         return i18n.getOrDefault(context, baseKey + "." + name + ".desc", null);
     }

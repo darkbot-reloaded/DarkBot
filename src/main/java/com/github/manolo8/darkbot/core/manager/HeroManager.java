@@ -17,6 +17,7 @@ import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.items.ItemFlag;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.api.managers.StarSystemAPI;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -53,18 +54,23 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     private long formationTime;
     private long portalTime;
 
-    public HeroManager(Main main, PluginAPI pluginAPI) {
+    public HeroManager(Main main,
+                       SettingsManager settingsManager,
+                       MapManager mapManager,
+                       Drive drive,
+                       FacadeManager facadeManager,
+                       StarManager star) {
         instance = this;
 
         this.main = super.main = main;
-        this.settings = main.settingsManager;
-        this.keybinds = main.facadeManager.settings;
-        this.portals = main.mapManager.entities.getPortals();
-        this.drive = pluginAPI.requireInstance(Drive.class);
+        this.settings = settingsManager;
+        this.keybinds = facadeManager.settings;
+        this.portals = mapManager.entities.getPortals();
+        this.drive = drive;
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
         this.pet.main = main;
-        this.map = main.starManager.byId(-1);
+        this.map = star.byId(-1);
     }
 
     @Override
