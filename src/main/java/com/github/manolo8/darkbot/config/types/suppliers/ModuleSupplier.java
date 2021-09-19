@@ -4,6 +4,8 @@ import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.modules.TemporalModule;
 import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.managers.ExtensionsAPI;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
@@ -33,7 +35,7 @@ public class ModuleSupplier implements Dropdown.Options<String> {
     }
 
     @Override
-    public String getText(String id) {
+    public @NotNull String getText(@Nullable String id) {
         if (id == null) return "";
         FeatureDefinition<?> feature = MODULES_BY_ID.get(id);
         return feature == null ? "" : feature.getName();

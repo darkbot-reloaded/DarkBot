@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class NpcNameSupplier extends OptionList<String> {
 
     private final static Set<NpcNameSupplier> INSTANCES = Collections.newSetFromMap(new WeakHashMap<>());

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+@Deprecated
 public abstract class OptionList<T> implements ComboBoxModel<String> {
     protected EventListenerList dataListeners = new EventListenerList();
 

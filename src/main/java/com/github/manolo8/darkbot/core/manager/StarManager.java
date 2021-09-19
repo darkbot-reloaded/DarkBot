@@ -299,6 +299,7 @@ public class StarManager implements API.Singleton {
         return INSTANCE;
     }
 
+    @Deprecated
     public static class MapList extends OptionList<Integer> {
 
         @Override
