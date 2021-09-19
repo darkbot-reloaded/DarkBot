@@ -26,6 +26,7 @@ public class PetGears implements Dropdown.Options<PetGear> {
 
     @Override
     public String getText(PetGear value) {
+        if (value == null) return null;
         return value.getName();
     }
 

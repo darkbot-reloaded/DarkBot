@@ -102,7 +102,8 @@ public class PetManager extends Gui implements PetAPI {
             return;
         }
         updatePetTarget();
-        int moduleId = main.config.PET.MODULE_ID.getId();
+        PetGear gear = main.config.PET.MODULE_ID;
+        int moduleId = gear != null ? gear.getId() : PetGear.PASSIVE.getId();
 
         if (gearOverrideTime > System.currentTimeMillis() && gearOverride != null) {
             moduleId = gearOverride;

@@ -334,6 +334,7 @@ public class StarManager implements API.Singleton {
 
         @Override
         public String getText(Integer option) {
+            if (option == null) return "";
             return star.byId(option).getName();
         }
 

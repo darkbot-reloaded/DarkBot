@@ -34,8 +34,9 @@ public class ModuleSupplier implements Dropdown.Options<String> {
 
     @Override
     public String getText(String id) {
+        if (id == null) return "";
         FeatureDefinition<?> feature = MODULES_BY_ID.get(id);
-        return feature == null ? null : feature.getName();
+        return feature == null ? "" : feature.getName();
     }
 
     @Override

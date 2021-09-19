@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,7 +43,7 @@ public class I18n {
     private I18n() {}
 
     public static boolean setLocale(Locale locale) {
-        if (getLocale() == locale) return false;
+        if (Objects.equals(I18n.getLocale(), locale)) return false;
         INSTANCE.setLocale(locale);
         return true;
     }

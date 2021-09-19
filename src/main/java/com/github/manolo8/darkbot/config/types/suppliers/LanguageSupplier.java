@@ -14,6 +14,7 @@ public class LanguageSupplier implements Dropdown.Options<Locale> {
 
     @Override
     public String getText(Locale value) {
+        if (value == null) return "";
         return Strings.capitalize(value.getDisplayName());
     }
 
