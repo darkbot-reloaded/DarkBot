@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
@@ -22,7 +21,7 @@ public class I18n {
 
     // Hack for backwards compat
     private static eu.darkbot.impl.managers.I18n INSTANCE;
-    private static LangChangeListener onLanguageChange = new LangChangeListener();
+    private static final LangChangeListener onLanguageChange = new LangChangeListener();
 
     public static final List<Locale> SUPPORTED_LOCALES = Stream.of(
             "bg", "cs", "de", "el", "en", "es", "fr", "hu", "it", "lt", "pl", "pt", "ro", "ru", "sv", "tr", "uk"
@@ -42,8 +41,10 @@ public class I18n {
 
     private I18n() {}
 
-    public static void updateLang() {
-        INSTANCE.setLocale(ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.LOCALE);
+    public static boolean setLocale(Locale locale) {
+        if (getLocale() == locale) return false;
+        INSTANCE.setLocale(locale);
+        return true;
     }
 
     public static Locale getLocale() {
@@ -69,11 +70,12 @@ public class I18n {
     public static class LangChangeListener implements Consumer<Locale> {
         @Override
         public void accept(Locale loc) {
-            I18n.updateLang();
-            Popups.showMessageAsync(
-                    I18n.get("language.changed.title"),
-                    I18n.get("language.changed.content", I18n.getLocale().getDisplayName(I18n.getLocale()),
-                            I18n.get("translation.credit")), JOptionPane.INFORMATION_MESSAGE);
+            if (I18n.setLocale(loc)) {
+                Popups.showMessageAsync(
+                        I18n.get("language.changed.title"),
+                        I18n.get("language.changed.content", loc.getDisplayName(loc),
+                                I18n.get("translation.credit")), JOptionPane.INFORMATION_MESSAGE);
+            }
         }
     }
 

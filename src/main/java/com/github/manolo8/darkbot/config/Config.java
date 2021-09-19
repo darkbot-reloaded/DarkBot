@@ -252,7 +252,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
     public @Option PetSettings PET = new PetSettings();
     public static class PetSettings {
         public @Option boolean ENABLED = false;
-        public @Option @Dropdown(options = PetGears.class) PetGear GEAR = PetGear.PASSIVE;
+        public @Option @Dropdown(options = PetGears.class) PetGear MODULE_ID = PetGear.PASSIVE;
     }
 
     public @Option GroupSettings GROUP = new GroupSettings();
