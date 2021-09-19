@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.backpage.FlashResManager;
 import com.github.manolo8.darkbot.config.ConfigHandler;
-import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.core.manager.*;
 import com.github.manolo8.darkbot.core.objects.facades.*;
 import com.github.manolo8.darkbot.core.utils.Drive;

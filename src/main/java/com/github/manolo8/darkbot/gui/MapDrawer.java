@@ -280,8 +280,8 @@ public class MapDrawer extends JPanel {
                         Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"),
                 Time.toString(config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000L));
         drawString(g2, info, 5, 12, Align.LEFT);
-        if (main.module != null) {
-            drawString(g2, main.tickingModule ? main.module.getStatus() : main.module.getStoppedStatus(), 5, 26, Align.LEFT);
+        if (main.getModule() != null) {
+            drawString(g2, main.tickingModule ? main.getModule().getStatus() : main.getModule().getStoppedStatus(), 5, 26, Align.LEFT);
         }
 
         drawString(g2, String.format("%.1ftick %dms ping", main.avgTick, pingManager.ping), width - 5, 12, Align.RIGHT);

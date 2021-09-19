@@ -23,7 +23,6 @@ import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.DarkBotPluginApiImpl;
-import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
@@ -37,13 +36,11 @@ import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.TemporalModule;
-import com.github.manolo8.darkbot.utils.Annotations;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Installable;
 import eu.darkbot.api.extensions.Module;
 import eu.darkbot.api.managers.BotAPI;
@@ -57,7 +54,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 100 alpha 6");
+    public static final Version VERSION      = new Version("1.13.17 beta 100 alpha 7");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -95,7 +92,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
     private final MainGui form;
     private final BotInstaller botInstaller;
 
-    public Module module;
+    public com.github.manolo8.darkbot.core.itf.Module module; // Legacy module, kept for old plugin compatibility
+    private Module newModule;
     public long lastRefresh = System.currentTimeMillis();
     public double avgTick;
     public boolean tickingModule;
@@ -237,10 +235,10 @@ public class Main extends Thread implements PluginListener, BotAPI {
     private void tickLogic(boolean running) {
         synchronized (pluginHandler) {
             try {
-                if (running) module.onTickModule();
-                else module.onTickStopped();
+                if (running) newModule.onTickModule();
+                else newModule.onTickStopped();
             } catch (Throwable e) {
-                FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
+                FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(newModule);
                 if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
             }
             for (Behaviour behaviour : behaviours) {
@@ -260,7 +258,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         if (config.MISCELLANEOUS.REFRESH_TIME == 0 ||
                 System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000L) return;
 
-        if (!module.canRefresh()) return;
+        if (!newModule.canRefresh()) return;
 
         lastRefresh = System.currentTimeMillis();
         if (config.MISCELLANEOUS.PAUSE_FOR > 0) {
@@ -282,7 +280,10 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 ((Installable) module).install(pluginAPI);
             if (setConfig) updateCustomConfig(module);
         }
-        this.module = module;
+        this.newModule = module;
+        // For legacy purposes, keep the old module field with the old module datatype. Use a dummy for new modules.
+        this.module = module instanceof com.github.manolo8.darkbot.core.itf.Module ?
+                (com.github.manolo8.darkbot.core.itf.Module) module : new DummyModule();
         return module;
     }
 
@@ -310,7 +311,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     @Override
     public void beforeLoad() {
-        if (module != null) setModule(new DummyModule(), true);
+        if (newModule != null) setModule(new DummyModule(), true);
     }
 
     @Override
@@ -331,7 +332,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     private void onRunningToggle(boolean running) {
         if (config.MISCELLANEOUS.RESET_REFRESH)
             lastRefresh = System.currentTimeMillis();
-        if (running && module instanceof TemporalModule) {
+        if (running && newModule instanceof TemporalModule) {
             moduleId = "(none)";
         }
 
@@ -344,7 +345,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     }
 
     private void checkModule() {
-        if (module == null || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE)) {
+        if (newModule == null || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE)) {
             Module module = featureRegistry.getFeature(moduleId = config.GENERAL.CURRENT_MODULE, Module.class)
                 .orElseGet(() -> {
                     String name = moduleId.substring(moduleId.lastIndexOf(".") + 1);
@@ -391,7 +392,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     @Override
     public Module getModule() {
-        return module;
+        return newModule;
     }
 
 }
