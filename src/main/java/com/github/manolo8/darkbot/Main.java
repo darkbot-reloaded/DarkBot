@@ -54,7 +54,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 100 alpha 10");
+    public static final Version VERSION      = new Version("1.13.17 beta 100 alpha 11");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -268,6 +268,11 @@ public class Main extends Thread implements PluginListener, BotAPI {
             System.out.println("Triggering refresh: time arrived & module allows refresh");
             API.handleRefresh();
         }
+    }
+
+    @Deprecated
+    public <A extends com.github.manolo8.darkbot.core.itf.Module> A setModule(A module) {
+        return this.setModule(module, false);
     }
 
     public <A extends Module> A setModule(A module) {
