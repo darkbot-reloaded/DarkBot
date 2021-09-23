@@ -12,6 +12,7 @@ import javax.swing.*;
 import javax.swing.plaf.basic.ComboPopup;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -20,7 +21,8 @@ import java.util.Set;
 
 public class MultiDropdownEditor extends JComboBox<Object> implements OptionEditor<Set<Object>> {
 
-    private final MultiDropdownRenderer renderer;
+    private MultiDropdownRenderer renderer;
+    private ActionListener listener;
 
     private ConfigSetting<Set<Object>> setting;
     private Set<Object> elements = new HashSet<>();
@@ -35,26 +37,31 @@ public class MultiDropdownEditor extends JComboBox<Object> implements OptionEdit
                 showPopup();
             }
         });
+    }
 
-        setRenderer(renderer = new MultiDropdownRenderer(this));
-        addActionListener(e -> {
+    @Override
+    public void updateUI() {
+        // It'd make a lot of sense to define these as final and set them on the constructor.
+        // However, the parent constructor calls this, meaning our constructor would be too late.
+        if (renderer == null) renderer = new MultiDropdownRenderer(this);
+        if (listener == null) listener =  e -> {
             if ((e.getModifiers() & AWTEvent.MOUSE_EVENT_MASK) != 0) {
-                if (!isPopupVisible()) return;
-                setSelectedIndex(-1);
-                setSelectedItem(getSelectedIndex());
+                updateItem(getSelectedIndex());
                 keepOpen = true;
             }
-        });
+        };
+
+        setRenderer(null);
+        removeActionListener(listener);
+        super.updateUI();
+
+        setRenderer(renderer);
+        addActionListener(listener);
         getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "checkbox-select");
         getActionMap().put("checkbox-select", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+            @Override public void actionPerformed(ActionEvent e) {
                 Accessible a = getAccessibleContext().getAccessibleChild(0);
-                if (a instanceof ComboPopup) {
-                    if (!isPopupVisible()) return;
-                    setSelectedIndex(-1);
-                    setSelectedItem(((ComboPopup) a).getList().getSelectedIndex());
-                }
+                if (a instanceof ComboPopup) updateItem(((ComboPopup) a).getList().getSelectedIndex());
             }
         });
     }
@@ -65,17 +72,25 @@ public class MultiDropdownEditor extends JComboBox<Object> implements OptionEdit
         if (model instanceof GenericDropdownModel)
             ((GenericDropdownModel<Object>) model).checkUpdates();
 
-        if (this.setting == dropdown) return this;
-        this.setting = dropdown;
-
-        elements = new HashSet<>();
-        elements.addAll(dropdown.getValue());
+        if (setting == dropdown && elements.equals(dropdown.getValue())) return this;
+        setting = dropdown;
+        elements = new HashSet<>(dropdown.getValue());
 
         renderer.setOptions(dropdown.getHandler().getMetadata("dropdown.options"));
         setModel(model);
         setSelectedItem(dropdown.getValue());
 
         return this;
+    }
+
+    private void updateItem(int index) {
+        if (!isPopupVisible()) return;
+        Object val = getItemAt(index);
+        if (elements.contains(val)) elements.remove(val);
+        else elements.add(val);
+
+        setSelectedIndex(-1);
+        setSelectedItem(val);
     }
 
     @Override
@@ -85,6 +100,8 @@ public class MultiDropdownEditor extends JComboBox<Object> implements OptionEdit
 
     @Override
     public void setPopupVisible(boolean v) {
+        if (v && getModel() instanceof GenericDropdownModel)
+            ((GenericDropdownModel<Object>) getModel()).checkUpdates();
         if (keepOpen) keepOpen = false;
         else super.setPopupVisible(v);
     }
