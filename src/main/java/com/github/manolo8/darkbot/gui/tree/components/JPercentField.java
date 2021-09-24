@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import javax.swing.*;
 import java.awt.*;
 
+@Deprecated
 public class JPercentField extends JSpinner implements OptionEditor {
 
     private ConfigField field;

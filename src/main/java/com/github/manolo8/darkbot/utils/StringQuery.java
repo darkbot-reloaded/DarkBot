@@ -13,6 +13,7 @@ public class StringQuery {
     public String query;
 
     public boolean matches(final String toStr) {
+        if (toStr == null) return false;
         if (query == null || query.isEmpty()) return true;
         if (words && query.contains(" "))
             return Arrays.stream(query.split(" ")).allMatch(q -> matches(toStr, q));

@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.core.api.DarkMemAdapter;
 import com.github.manolo8.darkbot.core.api.NativeApiAdapter;
 import com.github.manolo8.darkbot.core.api.NoopApiAdapter;
 import com.github.manolo8.darkbot.utils.StartupParams;
+import eu.darkbot.api.config.annotations.Configuration;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,59 +16,22 @@ import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
+@Configuration("browser_api")
 public enum BrowserApi {
-    DARK_BOAT("Darkboat API (Recommended)", "Currently API, no browser, auto login, by Punisher", DarkBoatAdapter::new),
-    NATIVE_API("Native API (unreleased)", "WIP API, never released. Several implementations by zBlock, wakatoa & Tanoshizo.", NativeApiAdapter::new),
-    NO_OP_API("No-operation API (For testing)", "API that will do nothing. Useful for testing, default if error on load. By Popcorn.", NoopApiAdapter::new),
-    DARK_MEM_API("DarkMem API (WIP)", "API that attaches to a running process. By Popcorn, based on darkboat", DarkMemAdapter::new),
-    DARK_CEF_API("DarkCef API (WIP)", "Run the client in a CEF browser & use DarkMem to interact with it. By Popcorn, based on darkmem", DarkCefAdapter::new);
+    DARK_BOAT(DarkBoatAdapter::new),
+    NATIVE_API(NativeApiAdapter::new),
+    NO_OP_API(NoopApiAdapter::new),
+    DARK_MEM_API(DarkMemAdapter::new),
+    DARK_CEF_API(DarkCefAdapter::new);
 
-    private final String name, description;
     private final BiFunction<StartupParams, BooleanSupplier, IDarkBotAPI> constructor;
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
 
     public IDarkBotAPI getInstance(StartupParams params, ConfigManager config) {
         return this.constructor.apply(params, () -> config.getConfig().BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API);
     }
 
-    BrowserApi(String name, String description, BiFunction<StartupParams, BooleanSupplier, IDarkBotAPI> constructor) {
-        this.name = name;
-        this.description = description;
+    BrowserApi(BiFunction<StartupParams, BooleanSupplier, IDarkBotAPI> constructor) {
         this.constructor = constructor;
     }
 
-    public static class Supplier extends OptionList<BrowserApi> {
-        private static final List<String> OPTIONS =
-                Arrays.stream(BrowserApi.values()).map(BrowserApi::getName).collect(Collectors.toList());
-
-        @Override
-        public BrowserApi getValue(String text) {
-            for (BrowserApi bapi : BrowserApi.values()) {
-                if (bapi.getName().equals(text)) return bapi;
-            }
-            return null;
-        }
-
-        @Override
-        public String getText(BrowserApi value) {
-            return value.getName();
-        }
-
-        @Override
-        public String getTooltipFromVal(BrowserApi value) {
-            return value.getDescription();
-        }
-
-        @Override
-        public List<String> getOptions() {
-            return OPTIONS;
-        }
-    }
 }

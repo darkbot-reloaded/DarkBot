@@ -33,7 +33,7 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
     }
 
     @Override
-    public eu.darkbot.api.config.BoxInfo getInfo() {
+    public eu.darkbot.api.config.types.BoxInfo getInfo() {
         return boxInfo;
     }
 

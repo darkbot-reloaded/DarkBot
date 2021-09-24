@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+@Deprecated
 public abstract class OptionList<T> implements ComboBoxModel<String> {
     protected EventListenerList dataListeners = new EventListenerList();
 
@@ -34,7 +35,8 @@ public abstract class OptionList<T> implements ComboBoxModel<String> {
     }
 
     public int getSize() {
-        return getOptions().size();
+        List<String> options = getOptions();
+        return options == null ? 0 : options.size();
     }
 
     public String getElementAt(int index) {

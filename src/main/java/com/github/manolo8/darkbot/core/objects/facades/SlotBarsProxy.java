@@ -92,6 +92,12 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
                 ? ItemUseResult.SUCCESS : ItemUseResult.FAILED;
     }
 
+    @Override
+    public ItemUseResult useItem(@NotNull SelectableItem selectableItem, double minWait, ItemFlag... itemFlags) {
+        // TODO: implement min wait properly
+        return useItem(selectableItem, itemFlags);
+    }
+
     private ItemUseResult checkItemFlags(Item item, ItemFlag... flags) {
         for (ItemFlag flag : flags)
             if (!flag.test(item))

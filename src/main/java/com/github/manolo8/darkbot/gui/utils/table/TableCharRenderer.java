@@ -1,13 +1,13 @@
 package com.github.manolo8.darkbot.gui.utils.table;
 
-import com.github.manolo8.darkbot.gui.tree.components.JCharField;
+import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 
 import java.awt.*;
 
-public class TableCharRenderer extends TableDelegateRenderer<JCharField> {
+public class TableCharRenderer extends TableDelegateRenderer<CharacterEditor> {
 
     public TableCharRenderer() {
-        super(new RenderCharField());
+        super(new CharacterEditor(false));
     }
 
     @Override
@@ -15,7 +15,7 @@ public class TableCharRenderer extends TableDelegateRenderer<JCharField> {
         delegate.setValue((Character) value);
     }
 
-    private static class RenderCharField extends JCharField {
+    private static class RenderCharField extends CharacterEditor {
         /**
          * No-op methods improve performance when using this as a cell renderer, and they are not needed anyways.
          */

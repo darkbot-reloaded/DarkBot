@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.gui.players;
 
 import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
-import eu.darkbot.api.config.util.PlayerTag;
+import eu.darkbot.api.config.types.PlayerTag;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;

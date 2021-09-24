@@ -1,53 +1,23 @@
 package com.github.manolo8.darkbot.extensions.features.decorators;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.utils.ReflectionUtils;
-import com.google.gson.JsonElement;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.extensions.Configurable;
 
-import java.lang.reflect.Type;
-import java.util.Map;
-
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ConfigurableDecorator extends FeatureDecorator<Configurable> {
-
-    private final Main main;
-
-    public ConfigurableDecorator(Main main) {
-        this.main = main;
-    }
 
     @Override
     protected void load(FeatureDefinition<Configurable> fd, Configurable obj) {
-        String id = obj.getClass().getCanonicalName();
-        Type[] configParams = ReflectionUtils.findGenericParameters(obj.getClass(), Configurable.class);
-        if (configParams == null || configParams.length == 0) {
-            fd.getIssues().addWarning("Config not loaded", "Could not find config type, so it can't be loaded!");
-            return;
-        }
-        Class<?> configClass = (Class) configParams[0];
-        if (configClass == null) return;
+        ConfigSetting<?> config = fd.getConfig();
+        if (config == null)
+            throw new IllegalStateException("Configurable object has no config defined");
 
-        Object config = toConfig(main.config.CUSTOM_CONFIGS.get(id), configClass);
-        main.config.CUSTOM_CONFIGS.put(id, config);
-
-        //noinspection unchecked
         obj.setConfig(config);
     }
 
     @Override
     protected void unload(Configurable obj) {
-        String id = obj.getClass().getCanonicalName();
-        main.config.CUSTOM_CONFIGS.put(id, toJsonElement(main.config.CUSTOM_CONFIGS.get(id)));
-    }
-
-    private JsonElement toJsonElement(Object config) {
-        return config instanceof JsonElement ? (JsonElement) config : Main.GSON.toJsonTree(config);
-    }
-
-    private <T> T toConfig(Object config, Class<T> type) {
-        if (config == null) return ReflectionUtils.createInstance(type);
-        return type.isInstance(config) ? type.cast(config) : Main.GSON.fromJson(toJsonElement(config), type);
     }
 
 }

@@ -1,91 +1,83 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.gui.utils.Popups;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.api.managers.I18nAPI;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
+import javax.swing.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Properties;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Prefer to use I18nAPI instance instead
+ */
 public class I18n {
 
-    private static final Object[] EMPTY = {};
+    // Hack for backwards compat
+    private static eu.darkbot.impl.managers.I18n INSTANCE;
+    private static final LangChangeListener onLanguageChange = new LangChangeListener();
+
     public static final List<Locale> SUPPORTED_LOCALES = Stream.of(
             "bg", "cs", "de", "el", "en", "es", "fr", "hu", "it", "lt", "pl", "pt", "ro", "ru", "sv", "tr", "uk"
     ).map(Locale::new).sorted(Comparator.comparing(Locale::getDisplayName)).collect(Collectors.toList());
-    private static final Properties props = new Properties();
-    private static Locale locale;
-    static {
-        reloadProps();
+
+    public static void init(PluginAPI api, Locale locale) {
+        INSTANCE = api.requireInstance(eu.darkbot.impl.managers.I18n.class);
+        INSTANCE.setLocale(locale);
+
+        ConfigSetting<Locale> setting = api.requireAPI(ConfigAPI.class).requireConfig("bot_settings.bot_gui.locale");
+        setting.addListener(onLanguageChange);
     }
 
-    public static void reloadProps() {
-        props.clear();
-        locale = ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.LOCALE;
-
-        loadResource(props, getLangFile(Locale.ENGLISH));
-        if (!locale.equals(Locale.ENGLISH)) loadResource(props, getLangFile(locale));
-    }
-
-    public static Locale getLocale() {
-        return locale;
-    }
-
-    private static URL getLangFile(Locale locale) {
-        URL res = I18n.class.getResource("/lang/strings_" + locale.toLanguageTag() + ".properties");
-        if (res == null) System.out.println("Couldn't find translation file for " + locale);
-        return res;
-    }
-
-    public static void loadResource(Properties props, URL resource) {
-        if (resource == null) return;
-        try {
-            props.load(new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            System.err.println("Failed to load translations: " + resource);
-            e.printStackTrace();
-        }
+    public static I18nAPI getInstance() {
+        return INSTANCE;
     }
 
     private I18n() {}
 
-    private static String getInternal(String key) {
-        if (key == null) throw new IllegalArgumentException("Translation key must not be null");
-        String res = (String) props.get(key);
-        return res != null ? res : "Missing " + key;
+    public static boolean setLocale(Locale locale) {
+        if (Objects.equals(I18n.getLocale(), locale)) return false;
+        INSTANCE.setLocale(locale);
+        return true;
     }
 
-    private static String getOrDefaultInternal(String key, String fallback) {
-        if (key == null) return fallback;
-        String res = (String) props.get(key);
-        return res != null ? res : fallback;
+    public static Locale getLocale() {
+        return INSTANCE.getLocale();
     }
 
     public static String get(String key) {
-        return MessageFormat.format(getInternal(key), EMPTY);
+        return INSTANCE.get(key);
     }
 
     public static String get(String key, Object... arguments) {
-        return MessageFormat.format(getInternal(key), arguments);
+        return INSTANCE.get(key, arguments);
     }
 
     public static String getOrDefault(String key, String fallback) {
-        String text = getOrDefaultInternal(key, fallback);
-        if (text == null) return null;
-        return MessageFormat.format(text, EMPTY);
+        return INSTANCE.getOrDefault(key, fallback);
     }
 
     public static String getOrDefault(String key, String fallback, Object... arguments) {
-        String text = getOrDefaultInternal(key, fallback);
-        if (text == null) return null;
-        return MessageFormat.format(text, arguments);
+        return INSTANCE.getOrDefault(key, fallback, arguments);
+    }
+
+    public static class LangChangeListener implements Consumer<Locale> {
+        @Override
+        public void accept(Locale loc) {
+            if (I18n.setLocale(loc)) {
+                Popups.showMessageAsync(
+                        I18n.get("language.changed.title"),
+                        I18n.get("language.changed.content", loc.getDisplayName(loc),
+                                I18n.get("translation.credit")), JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
     }
 
 }

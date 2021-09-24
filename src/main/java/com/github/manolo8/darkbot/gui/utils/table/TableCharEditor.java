@@ -1,20 +1,13 @@
 package com.github.manolo8.darkbot.gui.utils.table;
 
-import com.github.manolo8.darkbot.gui.tree.components.JCharField;
+import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.table.TableCellEditor;
-import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 
-public class TableCharEditor extends TableDelegateEditor<JCharField> {
+public class TableCharEditor extends TableDelegateEditor<CharacterEditor> {
 
     public TableCharEditor() {
-        super(new JCharField());
+        super(new CharacterEditor(false));
     }
 
     @Override
@@ -25,7 +18,7 @@ public class TableCharEditor extends TableDelegateEditor<JCharField> {
 
     @Override
     protected Object getValue() {
-        return delegate.getValue();
+        return delegate.getEditorValue();
     }
 
 }

@@ -5,11 +5,16 @@ import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
+import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.extensions.Configurable;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class FeatureDefinition<T> implements FeatureInfo<T> {
 
@@ -23,9 +28,12 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
 
     private final Lazy<FeatureDefinition<T>> listener = new Lazy.NoCache<>();
 
+    private final @Nullable ConfigSetting.Parent<?> config;
     private @Nullable T instance;
 
-    public FeatureDefinition(@Nullable Plugin plugin, Class<T> clazz) {
+    public FeatureDefinition(@Nullable Plugin plugin,
+                             Class<T> clazz,
+                             Function<FeatureDefinition<T>, ConfigSetting.Parent<?>> configBuilder) {
         this.plugin = plugin;
         this.clazz = clazz;
         this.issues = new IssueHandler(plugin == null ? null : plugin.getIssues());
@@ -53,6 +61,8 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
             // always rely exclusively on if set to be enabled by default
             setStatusInternal(Module.class.isAssignableFrom(clazz) || enabledByDefault);
         }
+
+        this.config = configBuilder.apply(this);
     }
 
     public @Nullable Plugin getPlugin() {
@@ -77,6 +87,10 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
 
     public String getDescription() {
         return description;
+    }
+
+    public @Nullable ConfigSetting.Parent<?> getConfig() {
+        return config;
     }
 
     public @Nullable T getInstance() {
