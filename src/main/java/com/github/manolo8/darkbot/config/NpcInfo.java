@@ -1,7 +1,8 @@
 package com.github.manolo8.darkbot.config;
 
-import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.core.itf.NpcExtraProvider;
+import eu.darkbot.api.config.annotations.Configuration;
+import eu.darkbot.api.config.annotations.Option;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -11,21 +12,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Option(key = "config.loot.npc_table.name")
+@Configuration("config.loot.npc_table")
 public class NpcInfo {
 
-    @Option(key = "config.loot.npc_table.radius")
     public double radius;
-    @Option(key = "config.loot.npc_table.priority")
     public int priority;
-    @Option(key = "config.loot.npc_table.kill")
     public boolean kill;
-    @Option(key = "config.loot.npc_table.attack_key")
+    @Option("config.loot.npc_table.attack_key")
     public Character attackKey;
-    @Option(key = "config.loot.npc_table.attack_formation")
+    @Option("config.loot.npc_table.attack_formation")
     public Character attackFormation;
+    public ExtraNpcInfo extra = new ExtraNpcInfo();
 
-    public int npcId;
+    public transient int npcId;
+    public @Option.Ignore Set<Integer> mapList = new HashSet<>();
 
     public static transient final Map<String, NpcExtraFlag> NPC_FLAGS = new LinkedHashMap<>();
 
@@ -36,8 +36,27 @@ public class NpcInfo {
                 .forEach(flag -> NPC_FLAGS.put(flag.getId(), flag));
     }
 
-    @Option(key = "config.loot.npc_table.extra")
-    public ExtraNpcInfo extra = new ExtraNpcInfo();
+    public void set(Double radius, Integer priority, Boolean kill, Character attackKey, ExtraNpcInfo extra) {
+        set(radius, priority, kill, attackKey, null, extra);
+    }
+
+    public void set(Double radius, Integer priority, Boolean kill, Character attackKey, Character attackFormation, ExtraNpcInfo extra) {
+        if (radius != null) this.radius = radius;
+        if (priority != null) this.priority = priority;
+        if (kill != null) this.kill = kill;
+        if (attackKey != null) this.attackKey = attackKey;
+        if (attackFormation != null) this.attackFormation = attackFormation;
+        if (extra != null) this.extra = extra;
+    }
+
+    public void copyOf(NpcInfo other) {
+        this.radius = other.radius;
+        this.priority = other.priority;
+        this.kill = other.kill;
+        this.attackKey = other.attackKey;
+        this.attackFormation = other.attackFormation;
+        this.extra.flags = new HashSet<>(other.extra.flags);
+    }
 
     public static class ExtraNpcInfo {
         private Set<String> flags = new HashSet<>();
@@ -82,27 +101,4 @@ public class NpcInfo {
         }
     }
 
-    public Set<Integer> mapList = new HashSet<>();
-
-    public void set(Double radius, Integer priority, Boolean kill, Character attackKey, ExtraNpcInfo extra) {
-        set(radius, priority, kill, attackKey, null, extra);
-    }
-
-    public void set(Double radius, Integer priority, Boolean kill, Character attackKey, Character attackFormation, ExtraNpcInfo extra) {
-        if (radius != null) this.radius = radius;
-        if (priority != null) this.priority = priority;
-        if (kill != null) this.kill = kill;
-        if (attackKey != null) this.attackKey = attackKey;
-        if (attackFormation != null) this.attackFormation = attackFormation;
-        if (extra != null) this.extra = extra;
-    }
-
-    public void copyOf(NpcInfo other) {
-        this.radius = other.radius;
-        this.priority = other.priority;
-        this.kill = other.kill;
-        this.attackKey = other.attackKey;
-        this.attackFormation = other.attackFormation;
-        this.extra.flags = new HashSet<>(other.extra.flags);
-    }
 }

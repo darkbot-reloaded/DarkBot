@@ -1,11 +1,12 @@
 package com.github.manolo8.darkbot.extensions.features;
 
-import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.ConfigHandler;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.managers.ExtensionsAPI;
@@ -26,10 +27,16 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
     private final FeatureInstanceLoader featureLoader;
     private final FeatureRegisterHandler registryHandler;
 
-    public FeatureRegistry(Main main, PluginHandler pluginHandler) {
+    private final ConfigHandler configHandler;
+
+    public FeatureRegistry(PluginAPI api,
+                           FeatureInstanceLoader featureLoader,
+                           PluginHandler pluginHandler,
+                           ConfigHandler configHandler) {
         this.pluginHandler = pluginHandler;
-        this.featureLoader = new FeatureInstanceLoader(main);
-        this.registryHandler = new FeatureRegisterHandler(main, this);
+        this.featureLoader = featureLoader;
+        this.registryHandler = new FeatureRegisterHandler(api, this);
+        this.configHandler = configHandler;
         pluginHandler.addListener(this);
     }
 
@@ -61,18 +68,19 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
     }
 
     private void registerNativeFeature(Class<?> clazz) {
-        FEATURES_BY_ID.put(clazz.getCanonicalName(), new FeatureDefinition<>(null, clazz));
+        FEATURES_BY_ID.put(clazz.getCanonicalName(), new FeatureDefinition<>(null, clazz, fd -> null));
     }
 
     private void registerPluginFeature(Plugin plugin, String clazzName) {
         try {
             Class<?> feature = pluginHandler.PLUGIN_CLASS_LOADER.loadClass(clazzName);
-            FeatureDefinition<?> fd = new FeatureDefinition<>(plugin, feature);
+            FeatureDefinition<?> fd = new FeatureDefinition<>(plugin, feature, configHandler::getFeatureConfig);
             fd.addStatusListener(def -> registryHandler.update());
             fd.getIssues().addListener(iss -> registryHandler.update());
             FEATURES_BY_ID.put(clazzName, fd);
         } catch (Throwable e) {
-            plugin.getIssues().addWarning("bot.issue.feature.failed_to_load", I18n.get("bot.issue.feature.failed_to_load.desc", clazzName, e.toString()));
+            plugin.getIssues().addWarning("bot.issue.feature.failed_to_load",
+                    I18n.get("bot.issue.feature.failed_to_load.desc", clazzName, e.toString()));
         }
     }
 
@@ -105,6 +113,10 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
 
     public <T> Optional<T> getFeature(FeatureDefinition<T> fd) {
         return getFeature(fd.getId());
+    }
+
+    public Collection<FeatureDefinition<?>> getFeatures() {
+        return FEATURES_BY_ID.values();
     }
 
     public <T> Stream<FeatureDefinition<T>> getFeatures(Class<T> type) {

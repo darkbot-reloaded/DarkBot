@@ -3,3 +3,4 @@
 /test
 /out
 dependency-reduced-pom.xml
+*.iml

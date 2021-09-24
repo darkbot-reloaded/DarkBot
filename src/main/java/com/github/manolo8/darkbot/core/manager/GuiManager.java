@@ -171,7 +171,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         if (System.currentTimeMillis() - lastRepairAttempt <= 10000)
             return false;
 
-        long respawnId = main.config.GENERAL.SAFETY.REVIVE_LOCATION;
+        long respawnId = main.config.GENERAL.SAFETY.REVIVE_LOCATION.getId();
 
         if (main.repairManager.canRespawn((int) respawnId))
             API.writeMemoryLong(repairAddress + 32, respawnId);

@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-public class PlayerInfo implements eu.darkbot.api.config.util.PlayerInfo {
+public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
     public String username;
     public int userId;
 
@@ -73,24 +73,24 @@ public class PlayerInfo implements eu.darkbot.api.config.util.PlayerInfo {
 
     private class PlayerTagsImpl implements PlayerTags {
         @Override
-        public boolean add(eu.darkbot.api.config.util.PlayerTag playerTag, @Nullable Instant instant) {
+        public boolean add(eu.darkbot.api.config.types.PlayerTag playerTag, @Nullable Instant instant) {
             long until = instant == null ? -1 : instant.toEpochMilli();
             return !Objects.equals(subscriptions.put((PlayerTag) playerTag, until), until);
         }
 
         @Override
-        public boolean contains(eu.darkbot.api.config.util.PlayerTag playerTag) {
+        public boolean contains(eu.darkbot.api.config.types.PlayerTag playerTag) {
             return hasTag((PlayerTag) playerTag);
         }
 
         @Override
-        public boolean remove(eu.darkbot.api.config.util.PlayerTag playerTag) {
+        public boolean remove(eu.darkbot.api.config.types.PlayerTag playerTag) {
             return subscriptions.remove((PlayerTag) playerTag) != null;
         }
 
         @NotNull
         @Override
-        public Collection<? extends eu.darkbot.api.config.util.PlayerTag> get() {
+        public Collection<? extends eu.darkbot.api.config.types.PlayerTag> get() {
             return subscriptions.keySet();
         }
     }

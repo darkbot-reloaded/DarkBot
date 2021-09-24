@@ -15,7 +15,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-public class SafetyInfo implements Serializable, Ignorable, eu.darkbot.api.config.SafetyInfo {
+public class SafetyInfo implements Serializable, Ignorable, eu.darkbot.api.config.types.SafetyInfo {
     public enum Type {
         PORTAL, CBS, BASE;
         public static Type of(Entity entity) {
@@ -133,23 +133,23 @@ public class SafetyInfo implements Serializable, Ignorable, eu.darkbot.api.confi
     }
 
     @Override
-    public eu.darkbot.api.config.SafetyInfo.Type getType() {
-        return eu.darkbot.api.config.SafetyInfo.Type.values()[type.ordinal()];
+    public eu.darkbot.api.config.types.SafetyInfo.Type getType() {
+        return eu.darkbot.api.config.types.SafetyInfo.Type.values()[type.ordinal()];
     }
 
     @Override
-    public eu.darkbot.api.config.SafetyInfo.RunMode getRunMode() {
-        return eu.darkbot.api.config.SafetyInfo.RunMode.values()[runMode.ordinal()];
+    public eu.darkbot.api.config.types.SafetyInfo.RunMode getRunMode() {
+        return eu.darkbot.api.config.types.SafetyInfo.RunMode.values()[runMode.ordinal()];
     }
 
     @Override
-    public eu.darkbot.api.config.SafetyInfo.JumpMode getJumpMode() {
-        return eu.darkbot.api.config.SafetyInfo.JumpMode.values()[jumpMode.ordinal()];
+    public eu.darkbot.api.config.types.SafetyInfo.JumpMode getJumpMode() {
+        return eu.darkbot.api.config.types.SafetyInfo.JumpMode.values()[jumpMode.ordinal()];
     }
 
     @Override
-    public eu.darkbot.api.config.SafetyInfo.CbsMode getCbsMode() {
-        return eu.darkbot.api.config.SafetyInfo.CbsMode.values()[cbsMode.ordinal()];
+    public eu.darkbot.api.config.types.SafetyInfo.CbsMode getCbsMode() {
+        return eu.darkbot.api.config.types.SafetyInfo.CbsMode.values()[cbsMode.ordinal()];
     }
 
     @Override

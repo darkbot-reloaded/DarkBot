@@ -11,6 +11,7 @@ import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.managers.HeroItemsAPI;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -23,7 +24,7 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
     public int npcId;
     public boolean ish;
 
-    private eu.darkbot.api.config.NpcInfo apiNpcInfo;
+    private eu.darkbot.api.config.types.NpcInfo apiNpcInfo;
 
     public Npc(int id) {
         super(id);
@@ -61,12 +62,12 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
     }
 
     @Override
-    public eu.darkbot.api.config.NpcInfo getInfo() {
+    public eu.darkbot.api.config.types.NpcInfo getInfo() {
         return apiNpcInfo;
     }
 
 
-    private class NpcInfoImpl implements eu.darkbot.api.config.NpcInfo {
+    private class NpcInfoImpl implements eu.darkbot.api.config.types.NpcInfo {
 
         private final HeroItemsAPI items;
         private final SettingsProxy settingsProxy;
@@ -119,13 +120,17 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
         }
 
         @Override
-        public boolean hasExtraFlag(ExtraFlag flag) {
-            return npcInfo.extra.has(flag.getId());
+        public boolean hasExtraFlag(Enum<?> flag) {
+            return npcInfo.extra.has(getId(flag));
         }
 
         @Override
-        public void setExtraFlag(ExtraFlag flag, boolean active) {
-            npcInfo.extra.set(flag.getId(), active);
+        public void setExtraFlag(Enum<?> flag, boolean active) {
+            npcInfo.extra.set(getId(flag), active);
+        }
+
+        private String getId(Enum<?> flag) {
+            return flag.getClass().getCanonicalName() + flag.name();
         }
     }
 }

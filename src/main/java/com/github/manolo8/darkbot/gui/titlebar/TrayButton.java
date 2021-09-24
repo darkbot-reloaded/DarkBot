@@ -79,7 +79,7 @@ public class TrayButton extends TitleBarButton<JFrame> {
         popupMenu.add(title);
         popupMenu.add(new JPopupMenu.Separator());
         new ExtraButton.DefaultExtraMenuProvider()
-                .getExtraMenuItems(main).forEach(popupMenu::add);
+                .getExtraMenuItems(main.pluginAPI).forEach(popupMenu::add);
         popupMenu.add(new JPopupMenu.Separator());
         popupMenu.add(quit);
     }
