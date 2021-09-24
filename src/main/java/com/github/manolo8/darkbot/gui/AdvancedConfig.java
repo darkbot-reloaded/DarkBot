@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.config.tree.ConfigSettingTree;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.tree.EditorProvider;
-import com.github.manolo8.darkbot.gui.tree.LegacyEditorManager;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
@@ -229,21 +228,20 @@ public class AdvancedConfig extends JPanel implements PluginListener {
             TreePath path = configTree.getPathForRow(row);
             if (treeModel.isLeaf(path.getLastPathComponent())) continue; // Ignore leaf nodes
 
-            path = path.getParentPath();
-
-            if (true || path == null || path.getPathCount() == 1) configTree.expandRow(row); // Unfold root or top-level nodes
-            else {
-                // Unfold children with no siblings
-                int children = treeModel.getChildCount(path.getLastPathComponent());
-                boolean hasLeaf = false;
-                for (int child = 0; child < children; child++) {
-                    if (!treeModel.isLeaf(treeModel.getChild(path.getLastPathComponent(), child))) continue;
-                    hasLeaf = true;
-                    break;
-                }
-                if (!hasLeaf) configTree.expandRow(row);
+            if (treeModel.getChildCount(path.getLastPathComponent()) <= 5 || // Has few children
+                    (path = path.getParentPath()) == null || // Is the root, no parent
+                    path.getPathCount() == 1 || // Is one-level in
+                    hasNoLeaf(path.getLastPathComponent())) { // No sibling is a leaf
+                configTree.expandRow(row);
             }
         }
+    }
+
+    private boolean hasNoLeaf(Object parent) {
+        int children = treeModel.getChildCount(parent);
+        for (int child = 0; child < children; child++)
+            if (treeModel.isLeaf(treeModel.getChild(parent, child))) return false;
+        return true;
     }
 
     public static Dimension forcePreferredHeight(Dimension preferred) {
@@ -256,12 +254,12 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         @Override
         public void installUI(JComponent c) {
             super.installUI(c);
-            if (c instanceof JLayer) ((JLayer) c).setLayerEventMask(AWTEvent.MOUSE_WHEEL_EVENT_MASK);
+            if (c instanceof JLayer) ((JLayer<?>) c).setLayerEventMask(AWTEvent.MOUSE_WHEEL_EVENT_MASK);
         }
 
         @Override
         public void uninstallUI(JComponent c) {
-            if (c instanceof JLayer) ((JLayer) c).setLayerEventMask(0);
+            if (c instanceof JLayer) ((JLayer<?>) c).setLayerEventMask(0);
             super.uninstallUI(c);
         }
 

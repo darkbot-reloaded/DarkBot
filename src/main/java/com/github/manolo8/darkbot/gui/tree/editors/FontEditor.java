@@ -55,6 +55,7 @@ public class FontEditor extends JTextField implements OptionEditor<Font>, Genera
     }
 
     public Font parseFont(String text) {
+        if (text == null || text.isEmpty()) return null;
         Font newFont = new Font(text, font.getStyle(), font.getSize());
         if (!newFont.getFontName().equalsIgnoreCase(text)) return null;
         return newFont;
