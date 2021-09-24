@@ -1,19 +1,38 @@
 package com.github.manolo8.darkbot.gui.utils;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.config.tree.ConfigBuilder;
+import com.github.manolo8.darkbot.config.types.Col;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.config.annotations.Configuration;
+import eu.darkbot.api.extensions.PluginInfo;
+import eu.darkbot.api.managers.I18nAPI;
+import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
+import javax.swing.event.TableColumnModelListener;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GenericTableModel<T> extends AbstractTableModel {
@@ -21,42 +40,85 @@ public class GenericTableModel<T> extends AbstractTableModel {
 
     protected final Column[] columns;
     protected final List<Row<T>> rows = new ArrayList<>();
-    private final Map<String, Row<T>> table = new HashMap<>();
+    protected final Map<String, Row<T>> table = new HashMap<>();
 
     public GenericTableModel(Class<T> clazz, Map<String, T> config, Lazy<String> modified) {
-        this.config = config;
-
         this.columns = Stream.concat(Stream.of(clazz), Arrays.stream(clazz.getDeclaredFields()))
                 .filter(el -> el.isAnnotationPresent(Option.class))
                 .map(Column::new)
                 .toArray(Column[]::new);
 
-        if (modified != null) modified.add(n -> updateEntry(n, config.get(n)));
-        updateTable();
+        setConfig(config);
+        if (modified != null) modified.add(n -> updateEntry(n, config.get(n), true));
     }
 
-    public void updateTable() {
+    public GenericTableModel(PluginAPI api, @Nullable PluginInfo namespace, Class<T> clazz) {
+        ConfigBuilder builder = api.requireInstance(ConfigBuilder.class);
+        ConfigSetting.Parent<T> parent = builder.of(clazz, "Name", namespace);
+
+        this.columns = Stream.concat(Stream.of(parent), parent.getChildren().values().stream())
+                .map(Column::new)
+                .toArray(Column[]::new);
+    }
+
+    public void setConfig(Map<String, T> config) {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> setConfig(config));
+            return;
+        }
+        if (config == null || this.config != config) {
+            this.config = config;
+            rebuildTable();
+        } else {
+            Set<String> tableNames = this.config.entrySet().stream()
+                    .map(e -> updateEntry(e.getKey(), e.getValue(), false))
+                    .collect(Collectors.toSet());
+            // If table is not the size of the config (after mapping), means something was removed
+            if (this.table.size() > tableNames.size()) {
+                Iterator<Map.Entry<String, Row<T>>> it = table.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<String, Row<T>> entry = it.next();
+                    if (tableNames.contains(entry.getKey())) continue;
+                    it.remove();
+                    rows.remove(entry.getValue());
+                }
+            }
+            fireTableDataChanged();
+        }
+    }
+
+    public void rebuildTable() {
         rows.clear();
         table.clear();
-        config.forEach(this::updateEntry);
+        if (config != null) config.forEach((k, v) -> updateEntry(k, v, false));
         fireTableDataChanged();
     }
 
-    protected void updateEntry(String name, T data) {
+    public String toTableName(String name) {
+        return name;
+    }
+
+    public String updateEntry(String name, T data, boolean fireUpdate) {
+        // While it would be amazing to optimize this to create insert, update or delete
+        // events instead of firing whole data change event, we currently cannot do that.
+        // If we use an individual event, the row sorter will receive it two times, making it
+        // lose track of how many actual rows are in the model, throwing an exception.
+        String tableName = toTableName(name);
         if (data == null) {
-            Row<T> r = table.remove(name);
+            Row<T> r = table.remove(tableName);
             if (r != null) rows.remove(r);
         } else {
-            table.compute(name, (n, row) -> {
+            table.compute(tableName, (n, row) -> {
                 if (row == null) {
-                    row = createRow(name, data);
+                    row = createRow(tableName, data);
                     rows.add(row);
                     return row;
                 }
                 return row.update(data);
             });
         }
-        fireTableDataChanged();
+        if (fireUpdate) fireTableDataChanged();
+        return tableName;
     }
 
     protected Row<T> createRow(String name, T data) {
@@ -67,6 +129,15 @@ public class GenericTableModel<T> extends AbstractTableModel {
         rows.clear();
         table.clear();
         fireTableDataChanged();
+    }
+
+    @Override
+    public void fireTableDataChanged() {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(this::fireTableDataChanged);
+            return;
+        }
+        super.fireTableDataChanged();
     }
 
     @Override
@@ -90,12 +161,12 @@ public class GenericTableModel<T> extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return table.size();
+        return rows.size();
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column > 0;
+        return columns[column].editable;
     }
 
     @Override
@@ -129,6 +200,7 @@ public class GenericTableModel<T> extends AbstractTableModel {
         public final String tooltip;
         public final Field field;
         public final Class<?> type;
+        public final boolean editable;
 
         public Column(AnnotatedElement el) {
             Option op = el.getAnnotation(Option.class);
@@ -136,6 +208,15 @@ public class GenericTableModel<T> extends AbstractTableModel {
             this.tooltip = Strings.toTooltip(I18n.getOrDefault(op.key() + ".desc", op.description()));
             this.field = el instanceof Field ? (Field) el : null;
             this.type = field == null ? String.class : ReflectionUtils.wrapped(field.getType());
+            this.editable = field != null;
+        }
+
+        public Column(ConfigSetting<?> config) {
+            this.name = config.getName();
+            this.tooltip = config.getDescription();
+            this.field = config.getHandler().getMetadata("field");
+            this.type = field == null ? String.class : config.getType();
+            this.editable = field != null && !Boolean.TRUE.equals(config.getHandler().getMetadata("readonly"));
         }
     }
 

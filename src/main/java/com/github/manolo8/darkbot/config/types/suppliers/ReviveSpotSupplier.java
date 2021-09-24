@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.utils.I18n;
 import java.util.Arrays;
 import java.util.List;
 
+@Deprecated
 public class ReviveSpotSupplier extends OptionList<Long> {
 
     private static final List<String> LOCATIONS = Arrays.asList(

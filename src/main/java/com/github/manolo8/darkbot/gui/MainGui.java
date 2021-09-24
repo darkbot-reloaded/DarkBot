@@ -6,12 +6,11 @@ import com.github.manolo8.darkbot.gui.components.ExitConfirmation;
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
+import eu.darkbot.api.config.ConfigSetting;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.util.function.Consumer;
 
 public class MainGui extends JFrame {
@@ -76,8 +75,8 @@ public class MainGui extends JFrame {
         }
     }
 
-    public void setCustomConfig(String name, Object config) {
-        configGui.setCustomConfig(name, config);
+    public void setCustomConfig(ConfigSetting.Parent<?>... config) {
+        configGui.setCustomConfig(config);
     }
 
     public void updateConfiguration() {

@@ -29,8 +29,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -55,6 +57,7 @@ public class PetManager extends Gui implements PetAPI {
 
     private final ObjArray gearsArr = ObjArray.ofArrObj();
     private final List<Gear> gearList = new ArrayList<>();
+    private final List<PetGear> newGears = new ArrayList<>();
 
     private final ObjArray locatorWrapper = ObjArray.ofArrObj(), locatorNpcList = ObjArray.ofArrObj();
     private final List<Gear> locatorList = new ArrayList<>();
@@ -80,10 +83,10 @@ public class PetManager extends Gui implements PetAPI {
         SELECTED
     }
 
-    public PetManager(Main main) {
+    public PetManager(Main main, MapManager mapManager, HeroManager hero) {
         this.main = main;
-        this.ships = main.mapManager.entities.ships;
-        this.pet = main.hero.pet;
+        this.ships = mapManager.entities.ships;
+        this.pet = hero.pet;
 
         PetGearSupplier.updateGears(gearList);
     }
@@ -99,10 +102,8 @@ public class PetManager extends Gui implements PetAPI {
             return;
         }
         updatePetTarget();
-        int moduleId = main.config.PET.MODULE_ID;
-        if (main.config.PET.COMPATIBILITY_MODE && main.config.PET.MODULE < gearList.size()) {
-            moduleId = gearList.get(main.config.PET.MODULE).id;
-        }
+        PetGear gear = main.config.PET.MODULE_ID;
+        int moduleId = gear != null ? gear.getId() : PetGear.PASSIVE.getId();
 
         if (gearOverrideTime > System.currentTimeMillis() && gearOverride != null) {
             moduleId = gearOverride;
@@ -182,6 +183,10 @@ public class PetManager extends Gui implements PetAPI {
     @Override
     public boolean hasGear(int id) {
         return findGearById(id) != null;
+    }
+
+    public List<PetGear> getGears() {
+        return newGears;
     }
 
     public PetStats getPetStats(PetStatsType type) {
@@ -265,6 +270,11 @@ public class PetManager extends Gui implements PetAPI {
         long gearsSprite = getSpriteChild(address, -1);
         gearsArr.update(API.readMemoryLong(gearsSprite, 176, 224));
         gearsArr.sync(gearList, Gear::new, null);
+        if (modulesChanged()) {
+            newGears.clear();
+            for (Gear gear : gearList)
+                newGears.add(PetGear.of(gear.id));
+        }
         PetGearSupplier.updateGears(gearList);
 
         updateNpcLocatorList(gearsSprite);
@@ -282,6 +292,17 @@ public class PetManager extends Gui implements PetAPI {
         if (!wasRepaired && repaired) repairCount++;
 
         updatePetStats(elementsListAddress);
+    }
+
+    private boolean modulesChanged() {
+        Iterator<Gear> it1 = gearList.iterator();
+        Iterator<PetGear> it2 = newGears.iterator();
+        while (it1.hasNext() && it2.hasNext()) {
+            Gear g1 = it1.next();
+            PetGear g2 = it2.next();
+            if (g1.id != g2.getId()) return true;
+        }
+        return it1.hasNext() || it2.hasNext();
     }
 
     @Deprecated

@@ -1,58 +1,94 @@
 package com.github.manolo8.darkbot.gui.tree;
 
 import com.github.manolo8.darkbot.config.tree.ConfigField;
-import com.github.manolo8.darkbot.config.tree.ConfigNode;
+import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
-import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import eu.darkbot.api.config.ConfigSetting;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.stream.Stream;
 
 public class TreeCell extends JPanel {
-    private final JComponent EMPTY_EDITOR = new JLabel();
+    private final JComponent EMPTY_EDITOR = new JLabel(),
+            ERROR_EDITOR = UIUtils.setRed(new JLabel("Error creating editor (hover for details)"), true);
 
-    private final EditorManager editors;
+    private final EditorProvider editors;
 
     private int nameWidth;
     private int minHeight;
 
     private final JLabel name = new JLabel();
-    private JComponent editor = EMPTY_EDITOR;
+    private JComponent component = EMPTY_EDITOR;
+    private ConfigSetting<?> setting;
 
-    public TreeCell(EditorManager editors) {
+
+    private OptionEditor legacyEditor;
+    private eu.darkbot.api.config.util.OptionEditor<?> editor;
+
+    public TreeCell(EditorProvider editors) {
         setLayout(new TreeCellLayout());
 
         this.editors = editors;
         setOpaque(false);
 
         add(name);
-        add(editor);
+        add(component);
     }
 
-    public void setEditing(ConfigNode node) {
-        minHeight = getMinHeight(node);
-        nameWidth = editors.getWidthFor(node, name.getFontMetrics(name.getFont()));
+    public <T> void setEditing(ConfigSetting<T> setting) {
+        this.setting = setting;
+        minHeight = getMinHeight(setting);
+        nameWidth = getWidthFor(setting, name.getFontMetrics(name.getFont()));
 
-        name.setText(I18n.getOrDefault(node.key, node.name));
+        name.setText(setting.getName());
+        setToolTipText(setting.getDescription());
 
-        if (node instanceof ConfigNode.Leaf) {
-            ConfigNode.Leaf leaf = (ConfigNode.Leaf) node;
-            setEditor(editors.getEditor(leaf.field), leaf.field);
-        } else {
-            setEditor(null, null);
+        if (!(setting instanceof ConfigSetting.Parent)) {
+            eu.darkbot.api.config.util.OptionEditor<T> editor = editors.getEditor(setting);
+
+            try {
+                if (editor != null) {
+                    this.editor = editor;
+                    this.legacyEditor = null;
+
+                    replaceComponent(editor.getEditorComponent(setting));
+                } else {
+                    ConfigField cf = new ConfigField(setting);
+                    this.editor = null;
+                    this.legacyEditor = editors.getLegacyEditor(cf);
+
+                    legacyEditor.edit(cf);
+                    replaceComponent(legacyEditor.getComponent());
+                }
+            } catch (Throwable e) {
+                ERROR_EDITOR.setToolTipText(IssueHandler.createDescription(e));
+                replaceComponent(ERROR_EDITOR);
+            }
+            return;
         }
+        this.editor = null;
+        this.legacyEditor = null;
 
-        setToolTipText(I18n.getOrDefault(node.key + ".desc", node.description));
+        replaceComponent(EMPTY_EDITOR);
     }
 
-    private void setEditor(OptionEditor newEditor, ConfigField field) {
-        if (editor != null) remove(editor);
-        if (newEditor != null) {
-            newEditor.edit(field);
-            add(editor = newEditor.getComponent());
-        } else {
-            add(editor = EMPTY_EDITOR);
-        }
+    private void replaceComponent(JComponent component) {
+        if (this.component != null) remove(this.component);
+        add(this.component = component);
+    }
+
+    public Object getValue() {
+        return editor != null ? editor.getEditorValue() : setting.getValue();
+    }
+
+    public boolean stopCellEditing() {
+        return editor == null || editor.stopCellEditing();
+    }
+
+    public void cancelCellEditing() {
+        if (editor != null) editor.cancelCellEditing();
     }
 
     /**
@@ -60,9 +96,29 @@ public class TreeCell extends JPanel {
      * @param node The node to get height for
      * @return the minimum height the component should have
      */
-    private int getMinHeight(ConfigNode node) {
-        return node instanceof ConfigNode.Leaf || node.getDepth() > 1 ?
+    private int getMinHeight(ConfigSetting<?> node) {
+        return !(node instanceof ConfigSetting.Parent) ||
+                (node.getParent() != null && node.getParent().getParent() != null) ?
                 AdvancedConfig.ROW_HEIGHT : AdvancedConfig.HEADER_HEIGHT;
+    }
+
+    /**
+     * Minimum width based on the name of all siblings
+     * @param node config setting node to check siblings of
+     * @param font the font in which to measure size
+     * @return the width reserved for the name
+     */
+    private int getWidthFor(ConfigSetting<?> node, FontMetrics font) {
+        if (node.getName().isEmpty()) return 0;
+        if (node instanceof ConfigSetting.Parent) return font.stringWidth(node.getName()) + 5;
+
+        ConfigSetting.Parent<?> parent = node.getParent();
+        return (parent == null ? Stream.of(node) : parent.getChildren().values().stream())
+                .filter(cs -> !(cs instanceof ConfigSetting.Parent))
+                .map(ConfigSetting::getName)
+                .mapToInt(font::stringWidth)
+                .max()
+                .orElseGet(() -> font.stringWidth(node.getName())) + 10;
     }
 
     private class TreeCellLayout implements LayoutManager {
@@ -74,11 +130,13 @@ public class TreeCell extends JPanel {
         @Override
         public Dimension preferredLayoutSize(Container parent) {
             Dimension dim = parent.getComponent(1).getPreferredSize();
-            if (parent.getComponent(1) instanceof OptionEditor) {
-                Dimension res = ((OptionEditor) parent.getComponent(1)).getReservedSize();
-                if (res != null)
-                    dim.setSize(Math.max(dim.width, res.width), Math.max(dim.height, res.height));
-            }
+            Dimension res = null;
+
+            if (editor != null) res = editor.getReservedSize();
+            else if (legacyEditor != null) res = legacyEditor.getReservedSize();
+
+            if (res != null)
+                dim.setSize(Math.max(dim.width, res.width), Math.max(dim.height, res.height));
 
 
             dim.width += nameWidth;

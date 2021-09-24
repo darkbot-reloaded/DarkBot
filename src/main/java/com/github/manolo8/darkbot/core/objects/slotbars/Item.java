@@ -148,6 +148,11 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
     }
 
     @Override
+    public double lastUseTime() {
+        return 0; // TODO: implement last use time
+    }
+
+    @Override
     public String toString() {
         return "Item{" +
                 "isReady=" + isReady() +

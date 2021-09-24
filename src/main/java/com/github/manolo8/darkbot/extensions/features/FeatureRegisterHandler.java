@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.extensions.features.handlers.FeatureHandler;
 import com.github.manolo8.darkbot.extensions.features.handlers.ModuleHandler;
 import com.github.manolo8.darkbot.extensions.features.handlers.NpcExtraHandler;
 import com.github.manolo8.darkbot.extensions.features.handlers.TaskHandler;
+import eu.darkbot.api.PluginAPI;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,14 +25,14 @@ public class FeatureRegisterHandler {
     private final FeatureRegistry featureRegistry;
     private final List<FeatureHandler<?>> FEATURE_HANDLERS;
 
-    private AtomicBoolean updating = new AtomicBoolean();
+    private final AtomicBoolean updating = new AtomicBoolean();
 
-    public FeatureRegisterHandler(Main main, FeatureRegistry featureRegistry) {
+    public FeatureRegisterHandler(PluginAPI api, FeatureRegistry featureRegistry) {
         this.featureRegistry = featureRegistry;
         this.FEATURE_HANDLERS = Arrays.asList(
                 new ModuleHandler(),
-                new BehaviourHandler(main, featureRegistry),
-                new TaskHandler(main, featureRegistry),
+                new BehaviourHandler(api.requireInstance(Main.class), featureRegistry),
+                new TaskHandler(api.requireInstance(Main.class), featureRegistry),
                 new NpcExtraHandler(featureRegistry),
                 new ExtraMenuHandler(featureRegistry)
         );

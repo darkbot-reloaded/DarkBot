@@ -1,41 +1,32 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.actions.Condition;
-import com.github.manolo8.darkbot.config.types.Editor;
-import com.github.manolo8.darkbot.config.types.Num;
-import com.github.manolo8.darkbot.config.types.Option;
-import com.github.manolo8.darkbot.config.types.Options;
-import com.github.manolo8.darkbot.config.types.Tag;
-import com.github.manolo8.darkbot.config.types.TagDefault;
 import com.github.manolo8.darkbot.config.types.suppliers.BrowserApi;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
-import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
-import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
+import com.github.manolo8.darkbot.config.types.suppliers.PetGears;
+import com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation;
 import com.github.manolo8.darkbot.config.utils.ItemUtils;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
-import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
-import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
-import com.github.manolo8.darkbot.gui.tree.components.JCharField;
-import com.github.manolo8.darkbot.gui.tree.components.JCheckboxListField;
-import com.github.manolo8.darkbot.gui.tree.components.JListField;
-import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
-import com.github.manolo8.darkbot.gui.tree.components.JPercentField;
-import com.github.manolo8.darkbot.gui.tree.components.LangEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
+import com.github.manolo8.darkbot.gui.tree.utils.NpcTableModel;
+import com.github.manolo8.darkbot.gui.tree.utils.TableHelpers;
 import com.github.manolo8.darkbot.modules.LootNCollectorModule;
-import eu.darkbot.api.config.Collect;
-import eu.darkbot.api.config.General;
-import eu.darkbot.api.config.util.PercentRange;
-import eu.darkbot.api.config.util.ShipMode;
+import eu.darkbot.api.config.annotations.Dropdown;
+import eu.darkbot.api.config.annotations.Number;
+import eu.darkbot.api.config.annotations.Option;
+import eu.darkbot.api.config.annotations.Percentage;
+import eu.darkbot.api.config.annotations.Table;
+import eu.darkbot.api.config.annotations.Tag;
+import eu.darkbot.api.config.types.ShipMode;
+import eu.darkbot.api.game.enums.PetGear;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.HeroAPI;
-import eu.darkbot.api.managers.HeroItemsAPI;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -58,7 +49,7 @@ import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.STAT
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.ZONES;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.SHOW_PET;
 
-public class Config implements eu.darkbot.api.config.Config {
+public class Config implements eu.darkbot.api.config.legacy.Config {
 
     // Defined map areas
     public Map<Integer, ZoneInfo> AVOIDED = new HashMap<>();
@@ -80,29 +71,28 @@ public class Config implements eu.darkbot.api.config.Config {
     public transient boolean changed;
 
     public @Option General GENERAL = new General();
-    public static class General implements eu.darkbot.api.config.General {
-        @Options(ModuleSupplier.class)
-        public @Option @Editor(JListField.class) String CURRENT_MODULE = LootNCollectorModule.class.getCanonicalName();
-        @Options(StarManager.MapList.class)
-        public @Option @Editor(JListField.class) int WORKING_MAP = 26;
+    public static class General implements eu.darkbot.api.config.legacy.General {
+        @Option @Dropdown(options = ModuleSupplier.class)
+        public String CURRENT_MODULE = LootNCollectorModule.class.getCanonicalName();
+        public @Option @Dropdown(options = StarManager.MapOptions.class) int WORKING_MAP = 26;
         public @Option ShipConfig OFFENSIVE = new ShipConfig(1, '8');
         public @Option ShipConfig ROAM = new ShipConfig(1, '9');
         public @Option ShipConfig RUN = new ShipConfig(2, '9');
-        public @Option @Num(max = 3600) int FORMATION_CHECK = 180;
+        public @Option @Number(max = 3600) int FORMATION_CHECK = 180;
 
         public @Option Safety SAFETY = new Safety();
-        public static class Safety implements eu.darkbot.api.config.General.Safety {
+        public static class Safety implements eu.darkbot.api.config.legacy.General.Safety {
             public @Option PercentRange REPAIR_HP_RANGE = new PercentRange(0.4, 0.95);
-            public @Option @Editor(JPercentField.class) double REPAIR_HP_NO_NPC = 0.5;
-            public @Option @Editor(JPercentField.class) double REPAIR_TO_SHIELD = 1;
+            public @Option @Percentage double REPAIR_HP_NO_NPC = 0.5;
+            public @Option @Percentage double REPAIR_TO_SHIELD = 1;
             public @Option ShipConfig REPAIR = new ShipConfig(1, '9');
-            public @Option @Num(min = 1, max = 9999) int MAX_DEATHS = 10;
-            public @Option @Editor(JListField.class) @Options(ReviveSpotSupplier.class) long REVIVE_LOCATION = 1L;
-            public @Option @Num(min = 5, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
-            public @Option @Num(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
+            public @Option @Number(min = 1, max = 9999) int MAX_DEATHS = 10;
+            public @Option @Dropdown ReviveLocation REVIVE_LOCATION = ReviveLocation.BASE;
+            public @Option @Number(min = 5, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
+            public @Option @Number(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
 
             @Override
-            public eu.darkbot.api.config.util.PercentRange getRepairHealthRange() {
+            public eu.darkbot.api.config.types.PercentRange getRepairHealthRange() {
                 return REPAIR_HP_RANGE;
             }
 
@@ -123,15 +113,15 @@ public class Config implements eu.darkbot.api.config.Config {
         }
 
         public @Option Running RUNNING = new Running();
-        public static class Running implements eu.darkbot.api.config.General.Running {
+        public static class Running implements eu.darkbot.api.config.legacy.General.Running {
             public @Option boolean RUN_FROM_ENEMIES = true;
-            public @Option @Num(max = 24 * 60 * 60, step = 300) int REMEMBER_ENEMIES_FOR = 300;
+            public @Option @Number(max = 24 * 60 * 60, step = 300) int REMEMBER_ENEMIES_FOR = 300;
             public @Option boolean RUN_FROM_ENEMIES_SIGHT = false;
             public @Option boolean STOP_RUNNING_NO_SIGHT = true;
-            public @Option @Num(min = 500, max = 20000, step = 500) int MAX_SIGHT_DISTANCE = 4000;
+            public @Option @Number(min = 500, max = 20000, step = 500) int MAX_SIGHT_DISTANCE = 4000;
             public @Option Character SHIP_ABILITY;
-            public @Option @Num(max = 20000, step = 500) int SHIP_ABILITY_MIN = 1500;
-            public @Option @Num(max = 20000, step = 500) int RUN_FURTHEST_PORT = 1500;
+            public @Option @Number(max = 20000, step = 500) int SHIP_ABILITY_MIN = 1500;
+            public @Option @Number(max = 20000, step = 500) int RUN_FURTHEST_PORT = 1500;
 
             @Override
             public boolean getRunFromEnemies() {
@@ -188,26 +178,26 @@ public class Config implements eu.darkbot.api.config.Config {
         }
 
         @Override
-        public eu.darkbot.api.config.General.Safety getSafety() {
+        public eu.darkbot.api.config.legacy.General.Safety getSafety() {
             return SAFETY;
         }
 
         @Override
-        public eu.darkbot.api.config.General.Running getRunning() {
+        public eu.darkbot.api.config.legacy.General.Running getRunning() {
             return RUNNING;
         }
     }
 
     public @Option Collect COLLECT = new Collect();
-    public static class Collect implements eu.darkbot.api.config.Collect {
+    public static class Collect implements eu.darkbot.api.config.legacy.Collect {
         public @Option boolean STAY_AWAY_FROM_ENEMIES;
         public @Option boolean AUTO_CLOACK;
         public @Option Character AUTO_CLOACK_KEY;
-        public @Option @Num(max = 10000, step = 50) int RADIUS = 400;
+        public @Option @Number(max = 10000, step = 50) int RADIUS = 400;
         public @Option boolean IGNORE_CONTESTED_BOXES = true;
 
         @Option
-        @Editor(value = JBoxInfoTable.class, shared = true)
+        @Table(decorator = TableHelpers.BoxInfoDecorator.class)
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy.NoCache<>();
 
@@ -234,8 +224,8 @@ public class Config implements eu.darkbot.api.config.Config {
         public static class Sab {
             public @Option boolean ENABLED = false;
             public @Option Character KEY = '2';
-            public @Option @Editor(JPercentField.class) double PERCENT = 0.8;
-            public @Option @Num(min = 500, max = 1_000_000, step = 1000) int NPC_AMOUNT = 12000;
+            public @Option @Percentage double PERCENT = 0.8;
+            public @Option @Number(min = 500, max = 1_000_000, step = 1000) int NPC_AMOUNT = 12000;
             public @Option() Condition CONDITION;
         }
         public static class Rsb {
@@ -245,31 +235,32 @@ public class Config implements eu.darkbot.api.config.Config {
         }
         public @Option Character AMMO_KEY = '1';
         public @Option Character SHIP_ABILITY;
-        public @Option @Num(min = 50_000, max = 5_000_000, step = 50_000) int SHIP_ABILITY_MIN = 150_000;
-        public @Option @Num(max = 10, step = 1) int MAX_CIRCLE_ITERATIONS = 5;
+        public @Option @Number(min = 50_000, max = 5_000_000, step = 50_000) int SHIP_ABILITY_MIN = 150_000;
+        public @Option @Number(max = 10, step = 1) int MAX_CIRCLE_ITERATIONS = 5;
         public @Option boolean RUN_CONFIG_IN_CIRCLE = true;
 
         public @Option boolean GROUP_NPCS = true;
-        @Editor(value = JNpcInfoTable.class, shared = true)
+        @Table(controls = {Table.Control.SEARCH, Table.Control.CUSTOM, Table.Control.ADD, Table.Control.REMOVE},
+                customControls = TableHelpers.MapPickerBuilder.class,
+                customModel = NpcTableModel.class,
+                decorator = TableHelpers.NpcTableDecorator.class)
         public @Option Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
         public transient Lazy<String> MODIFIED_NPC = new Lazy.NoCache<>();
 
-        public @Option @Num(min = 1000, max = 20000, step = 500) int NPC_DISTANCE_IGNORE = 3000;
+        public @Option @Number(min = 1000, max = 20000, step = 500) int NPC_DISTANCE_IGNORE = 3000;
     }
 
     public @Option PetSettings PET = new PetSettings();
     public static class PetSettings {
         public @Option boolean ENABLED = false;
-        public @Deprecated int MODULE = 0; // Kept so plugins using it don't just break. They'll just be unable to use pet.
-        public @Option(value = "Legacy mode (old plugin compatibility)", description = "Enable if an older plugin is managing pet. The new pet selector becomes useless.") boolean COMPATIBILITY_MODE = false;
-        public @Option @Editor(JListField.class) @Options(PetGearSupplier.class) int MODULE_ID = 1;
+        public @Option @Dropdown(options = PetGears.class) PetGear MODULE_ID = PetGear.PASSIVE;
     }
 
     public @Option GroupSettings GROUP = new GroupSettings();
     public static class GroupSettings {
         public @Option boolean ACCEPT_INVITES = false;
-        public @Option @Tag(TagDefault.ALL) PlayerTag WHITELIST_TAG = null;
-        public @Option @Tag(TagDefault.NONE) PlayerTag INVITE_TAG = null;
+        public @Option @Tag(Tag.Default.ALL) PlayerTag WHITELIST_TAG = null;
+        public @Option @Tag(Tag.Default.NONE) PlayerTag INVITE_TAG = null;
         public @Option boolean OPEN_INVITES = false;
         public @Option boolean LEAVE_NO_WHITELISTED = false;
         //public @Option @Tag(TagDefault.NONE) PlayerTag KICK_TAG = null;
@@ -278,10 +269,10 @@ public class Config implements eu.darkbot.api.config.Config {
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();
     public static class Miscellaneous {
         public @Option boolean REFRESH_AFTER_REVIVE = false;
-        public @Option @Num(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
-        public @Option @Num(max = 60 * 12, step = 10) int PAUSE_FOR = 0;
+        public @Option @Number(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
+        public @Option @Number(max = 60 * 12, step = 10) int PAUSE_FOR = 0;
         public @Option boolean RESET_REFRESH = true;
-        public @Option @Editor(JPercentField.class) double DRONE_REPAIR_PERCENTAGE = 0.9;
+        public @Option @Percentage double DRONE_REPAIR_PERCENTAGE = 0.9;
         public @Option boolean HONOR_LOST_EXACT = true;
         public @Option boolean LOG_CHAT = false;
         public @Option boolean LOG_DEATHS = false;
@@ -291,13 +282,12 @@ public class Config implements eu.darkbot.api.config.Config {
     public static class BotSettings {
         public @Option BotGui BOT_GUI = new BotGui();
         public static class BotGui {
-            @Option @Editor(LangEditor.class) @Options(LanguageSupplier.class)
+            @Option @Dropdown(options = LanguageSupplier.class)
             public Locale LOCALE = new Locale(Locale.getDefault().getLanguage());
 
             public @Option boolean CONFIRM_EXIT = true;
             public @Option boolean SAVE_GUI_POS = false;
-            public @Option boolean CONFIG_TREE_TABS = true;
-            public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
+            public @Option @Number(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
 
             public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
             public WindowPosition MAIN_GUI_WINDOW = new WindowPosition();
@@ -312,8 +302,7 @@ public class Config implements eu.darkbot.api.config.Config {
 
         public @Option APIConfig API_CONFIG = new APIConfig();
         public static class APIConfig {
-            @Option @Editor(JListField.class) @Options(BrowserApi.Supplier.class)
-            public BrowserApi BROWSER_API = BrowserApi.DARK_BOAT;
+            public @Option @Dropdown BrowserApi BROWSER_API = BrowserApi.DARK_BOAT;
             public @Option boolean FULLY_HIDE_API = true;
             public @Option boolean FORCE_GAME_LANGUAGE = false;
             public @Option boolean ENFORCE_HW_ACCEL = true;
@@ -324,19 +313,19 @@ public class Config implements eu.darkbot.api.config.Config {
 
         public @Option MapDisplay MAP_DISPLAY = new MapDisplay();
         public static class MapDisplay {
-            @Option @Editor(JCheckboxListField.class) @Options(DisplayFlag.Supplier.class)
+            @Option @Dropdown(multi = true)
             public Set<DisplayFlag> TOGGLE = EnumSet.of(
                     HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA, SHOW_PET);
-            public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
+            public @Option @Number(max = 300, step = 1) int TRAIL_LENGTH = 15;
             public @Option boolean MAP_START_STOP = false;
-            public @Option(key = "colors") ColorScheme cs = new ColorScheme();
+            public @Option("colors") ColorScheme cs = new ColorScheme();
         }
 
         public @Option Other OTHER = new Other();
         public static class Other {
             public @Option boolean DISABLE_MASTER_PASSWORD = false;
-            public @Option @Num(min = 10, max = 300) int ZONE_RESOLUTION = 30;
-            public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
+            public @Option @Number(min = 10, max = 300) int ZONE_RESOLUTION = 30;
+            public @Option @Number(min = 10, max = 250) int MIN_TICK = 15;
             public @Option boolean DEV_STUFF = false;
         }
     }
@@ -344,12 +333,9 @@ public class Config implements eu.darkbot.api.config.Config {
     public /*@Option("Extra actions")*/ ExtraActions EXTRA = new ExtraActions();
     public static class ExtraActions {
         // Dummy testing condition
-        @Option()
-        public Condition CONDITION;
+        public @Option Condition CONDITION;
 
-        @Option
-        @Editor(value = JActionTable.class, shared = true)
-        public Map<String, ActionInfo> ACTION_INFOS = new HashMap<>();
+        public @Option @Table Map<String, ActionInfo> ACTION_INFOS = new HashMap<>();
         public transient Lazy<String> MODIFIED_ACTIONS = new Lazy.NoCache<>();
     }
 
@@ -377,11 +363,11 @@ public class Config implements eu.darkbot.api.config.Config {
 
         @Override
         public String toString() {
-            return "Config: " + CONFIG + "   Formation: " + JCharField.getDisplay(FORMATION);
+            return "Config: " + CONFIG + "   Formation: " + CharacterEditor.getDisplay(FORMATION);
         }
     }
 
-    public static class PercentRange implements eu.darkbot.api.config.util.PercentRange {
+    public static class PercentRange implements eu.darkbot.api.config.types.PercentRange {
         public double min, max;
 
         public PercentRange() {}
@@ -408,22 +394,22 @@ public class Config implements eu.darkbot.api.config.Config {
 
 
     @Override
-    public Collection<? extends eu.darkbot.api.config.SafetyInfo> getSafeties(GameMap gameMap) {
+    public Collection<? extends eu.darkbot.api.config.types.SafetyInfo> getSafeties(GameMap gameMap) {
         return SAFETY.getOrDefault(gameMap.getId(), Collections.emptySet());
     }
 
     @Override
-    public Map<Integer, ? extends eu.darkbot.api.config.util.PlayerInfo> getPlayerInfos() {
+    public Map<Integer, ? extends eu.darkbot.api.config.types.PlayerInfo> getPlayerInfos() {
         return PLAYER_INFOS;
     }
 
     @Override
-    public eu.darkbot.api.config.General getGeneral() {
+    public eu.darkbot.api.config.legacy.General getGeneral() {
         return GENERAL;
     }
 
     @Override
-    public eu.darkbot.api.config.Collect getCollect() {
+    public eu.darkbot.api.config.legacy.Collect getCollect() {
         return COLLECT;
     }
 }

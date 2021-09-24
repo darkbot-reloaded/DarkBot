@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import javax.swing.*;
 import java.util.Arrays;
 
+@Deprecated
 public class JActionTable extends InfoTable<GenericTableModel, ActionInfo> implements OptionEditor {
 
     public JActionTable(Config.ExtraActions extra) {

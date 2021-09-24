@@ -28,4 +28,8 @@ public class SpinnerNumberMinMaxFix extends SpinnerNumberModel {
         return prevVal == null ? getMinimum() : prevVal;
     }
 
+    public double getDouble() {
+        return getNumber().doubleValue();
+    }
+
 }

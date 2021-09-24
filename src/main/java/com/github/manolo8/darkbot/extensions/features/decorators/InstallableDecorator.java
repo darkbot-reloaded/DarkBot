@@ -1,20 +1,20 @@
 package com.github.manolo8.darkbot.extensions.features.decorators;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.itf.Installable;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.extensions.Installable;
 
 public class InstallableDecorator extends FeatureDecorator<Installable> {
 
-    private final Main main;
+    private final PluginAPI pluginAPI;
 
-    public InstallableDecorator(Main main) {
-        this.main = main;
+    public InstallableDecorator(PluginAPI pluginAPI) {
+        this.pluginAPI = pluginAPI;
     }
 
     @Override
     protected void load(FeatureDefinition<Installable> fd, Installable obj) {
-        obj.install(main);
+        obj.install(pluginAPI);
     }
 
     @Override

@@ -4,19 +4,24 @@ package com.github.manolo8.darkbot.config.tree;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
+import eu.darkbot.api.config.ConfigSetting;
 
 import java.lang.reflect.Field;
 
 /**
  * Represents a java field in an object. Can act as getter/setter.
+ *
+ * Note: this class cannot be turned into a generic because old field editors rely on it,
+ * by expecting {@link ConfigField#get()} to return whatever type it is asked to return
  */
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class ConfigField {
-    public final Object parent;
+    private final ConfigSetting config;
     public final Field field;
 
-    public ConfigField(Object parent, Field field) {
-        this.parent = parent;
-        this.field = field;
+    public ConfigField(ConfigSetting<?> config) {
+        this.config = config;
+        this.field = config.getHandler().getMetadata("field");
     }
 
     public boolean isPrimitive() {
@@ -24,21 +29,17 @@ public class ConfigField {
     }
 
     public <T> T get() {
-        try {
-            return (T) field.get(parent);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return (T) config.getValue();
     }
 
     public void set(Object value) {
-        try {
-            field.set(parent, value);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        config.setValue(value);
         ConfigEntity.changed();
+    }
+
+    public Object getParent() {
+        ConfigSetting.Parent<?> p = config.getParent();
+        return p == null ? null : p.getValue();
     }
 
     public Class<? extends OptionEditor> getEditor() {
