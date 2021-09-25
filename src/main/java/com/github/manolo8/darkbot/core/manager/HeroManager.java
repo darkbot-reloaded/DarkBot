@@ -133,7 +133,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         if (!portal.isValid()) return;
         if (System.currentTimeMillis() - portalTime < 500) return; // Minimum delay
         if ((System.currentTimeMillis() - portalTime > 20000 || isNotJumping(portal)) &&
-                portal.isSelectable() || portals.stream().noneMatch(p -> p != portal && p.isSelectable())) {
+                (portal.isSelectable() || portals.stream().noneMatch(p -> p != portal && p.isSelectable()))) {
             API.keyboardClick(keybinds.getCharCode(JUMP_GATE));
             portalTime = System.currentTimeMillis();
         }
