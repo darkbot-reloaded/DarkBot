@@ -14,6 +14,8 @@ public class PluginClassLoader extends URLClassLoader {
             "java.lang.reflect.*",
             "java.lang.Thread",
             "java.awt.TrayIcon",
+            "java.awt.SystemTray",
+            "java.lang.Runtime",
             "*.ReflectionUtils")
             .map(PluginClassLoader::toMatcher)
             .collect(Collectors.toList());
