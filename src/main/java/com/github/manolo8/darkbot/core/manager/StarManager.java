@@ -72,9 +72,11 @@ public class StarManager {
                 .addMap(29, "4-5").addPortal(7000, 13500, "1-5").addPortal(28000, 1376, "2-5").addPortal(28000, 25624, "3-5").addPortal(12200, 13300, "5-1").addPortal(25000, 6300, "5-1").addPortal(25000, 20700, "5-1");
                 // Pirates
         mapBuild.addMap(91, "5-1").addPortal(5200, 6800, "5-2").addPortal(2900, 13500, "5-2").addPortal(5200, 20600, "5-2")
-                .addMap(92, "5-2").addPortal(2800, 3600, "5-3").addPortal(1300, 6750, "5-3").addPortal(2800, 10900, "5-3").addPortal(19300, 1400, "5-4", 1).addPortal(19300, 3400, "5-4", 2).addPortal(19300, 5400, "5-4", 3)
+                .addMap(92, "5-2").addPortal(2800, 3600, "5-3").addPortal(1300, 6750, "5-3").addPortal(2800, 10900, "5-3")
+                    .addPortal(19300, 1400, "5-4", 1).addPortal(19300, 3400, "5-4", 2).addPortal(19300, 5400, "5-4", 3)
                 .addMap(93, "5-3").addPortal(2000, 9500, "4-4", 1).addPortal(2000, 13500, "4-4", 2).addPortal(2000, 17500, "4-4", 3)
-                .addMap(94, "5-4").addPortal(3000, 2000, "4-4", 1).addPortal(3000, 3500, "4-4", 2).addPortal(3000, 5000, "4-4", 3);
+                // Workaround, make 5-4 exit in 5-2 to avoid being used as a shortcut from 5-2 to 4-4
+                .addMap(94, "5-4").addPortal(3000, 2000, "5-2", 1).addPortal(3000, 3500, "5-2", 2).addPortal(3000, 5000, "5-2", 3);
                 // BL
         mapBuild.addMap(306, "1BL").addPortal( 786, 11458, "1-8").addPortal( 7589,  1456, "2BL").addPortal(20072, 11732, "3BL")
                 .addMap(307, "2BL").addPortal(9893,   862, "1BL").addPortal(  593,  5884, "2-8").addPortal(20377,  7996, "3BL")
