@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
 import com.github.manolo8.darkbot.core.api.ApiAdapter;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
@@ -36,6 +37,7 @@ public class BackpageManager extends Thread {
     public final LegacyHangarManager legacyHangarManager;
     public final GalaxyManager galaxyManager;
     public final DispatchManager dispatchManager;
+    public final AuctionManager auctionManager;
 
     private final Main main;
     private String sid, instance;
@@ -54,6 +56,7 @@ public class BackpageManager extends Thread {
         this.legacyHangarManager = new LegacyHangarManager(main, this);
         this.galaxyManager = new GalaxyManager(main);
         this.dispatchManager = new DispatchManager(main);
+        this.auctionManager = new AuctionManager(main);
 
         setDaemon(true);
         start();
