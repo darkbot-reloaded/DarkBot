@@ -42,6 +42,7 @@ import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.HERO
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.HP_SHIELD_NUM;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.STATS_AREA;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.ZONES;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.SHOW_PET;
 
 public class Config {
 
@@ -196,6 +197,7 @@ public class Config {
 
             public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
             public WindowPosition MAIN_GUI_WINDOW = new WindowPosition();
+            public WindowPosition CONFIG_GUI_WINDOW = new WindowPosition();
 
             public static class WindowPosition {
                 // x and y refer to top left coordinates of window
@@ -220,7 +222,7 @@ public class Config {
         public static class MapDisplay {
             @Option @Editor(JCheckboxListField.class) @Options(DisplayFlag.Supplier.class)
             public Set<DisplayFlag> TOGGLE = EnumSet.of(
-                    HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA);
+                    HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA, SHOW_PET);
             public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
             public @Option boolean MAP_START_STOP = false;
             public @Option(key = "colors") ColorScheme cs = new ColorScheme();

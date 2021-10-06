@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,14 +17,14 @@ import java.awt.event.MouseEvent;
 
 public class TrayButton extends TitleBarButton<JFrame> {
 
-    private final TrayIcon icon;
+    private final Main main;
     // Default PopupMenu for TrayIcon has no look & feel, forcing us to use a JPopupMenu
     private final JPopupMenu popupMenu;
     // We use a JDialog to make JPopupMenu disappear when it loses focus, see https://stackoverflow.com/a/20079304
     private final JDialog dialog;
+    private final @Nullable TrayIcon icon;
 
     private boolean shownMsg;
-    private Main main;
 
     TrayButton(Main main, JFrame frame) {
         super(UIUtils.getIcon("tray"), frame);
@@ -31,9 +32,10 @@ public class TrayButton extends TitleBarButton<JFrame> {
         setVisible(SystemTray.isSupported());
 
         this.main = main;
-        popupMenu = createPopup();
+        popupMenu = new JPopupMenu("DarkBot");
+        rebuildPopup();
         dialog = createDialog();
-        icon = createTrayIcon();
+        icon = SystemTray.isSupported() ? createTrayIcon() : null;
     }
 
     private TrayIcon createTrayIcon() {
@@ -48,28 +50,21 @@ public class TrayButton extends TitleBarButton<JFrame> {
         icon.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    rebuild(popupMenu);
-                    popupMenu.setLocation(e.getX(), e.getY() - popupMenu.getPreferredSize().height);
-                    popupMenu.setInvoker(popupMenu);
-                    dialog.setLocation(e.getX(), e.getY());
+                if (!SwingUtilities.isRightMouseButton(e)) return;
+                rebuildPopup();
+                popupMenu.setLocation(e.getX(), e.getY() - popupMenu.getPreferredSize().height);
+                popupMenu.setInvoker(popupMenu);
+                dialog.setLocation(e.getX(), e.getY());
 
-                    dialog.setVisible(true);
-                    popupMenu.setVisible(true);
-                }
+                dialog.setVisible(true);
+                popupMenu.setVisible(true);
             }
         });
         return icon;
     }
 
-    private JPopupMenu createPopup() {
-        JPopupMenu popup = new JPopupMenu("DarkBot");
-        rebuild(popup);
-        return popup;
-    }
-
-    private void rebuild(JPopupMenu popup) {
-        popup.removeAll();
+    private void rebuildPopup() {
+        popupMenu.removeAll();
 
         JMenuItem title = new JMenuItem("DarkBot", UIUtils.getIcon("icon"));
         JMenuItem quit = new JMenuItem(I18n.get("gui.tray_menu.quit"));
@@ -81,12 +76,12 @@ public class TrayButton extends TitleBarButton<JFrame> {
             System.exit(0);
         });
 
-        popup.add(title);
-        popup.add(new JPopupMenu.Separator());
+        popupMenu.add(title);
+        popupMenu.add(new JPopupMenu.Separator());
         new ExtraButton.DefaultExtraMenuProvider()
-                .getExtraMenuItems(main).forEach(popup::add);
-        popup.add(new JPopupMenu.Separator());
-        popup.add(quit);
+                .getExtraMenuItems(main).forEach(popupMenu::add);
+        popupMenu.add(new JPopupMenu.Separator());
+        popupMenu.add(quit);
     }
 
     private JDialog createDialog() {
@@ -107,6 +102,7 @@ public class TrayButton extends TitleBarButton<JFrame> {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (icon == null) return;
         String username = HeroManager.instance.playerInfo.username;
         if (!username.isEmpty())
             icon.setToolTip("DarkBot - " + username);

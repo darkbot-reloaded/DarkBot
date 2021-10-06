@@ -4,30 +4,37 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.manager.StarManager;
+import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.Strings;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.table.ExtraNpcInfoEditor;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInfo> implements OptionEditor {
 
     private JMapPicker mapPicker;
     private NpcMapFilter mapFilter;
+    private Config.Loot config;
 
     public JNpcInfoTable(Config.Loot config) {
         super(new NpcTableModel(config), config.NPC_INFOS, config.MODIFIED_NPC, NpcInfo::new);
+        this.config = config;
 
         getRowSorter().setSortKeys(Arrays.asList(new RowSorter.SortKey(3, SortOrder.DESCENDING),
                 new RowSorter.SortKey(2, SortOrder.ASCENDING),
@@ -48,6 +55,11 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
             mapFilter = new NpcMapFilter(mapPicker.getSelected());
         }
         return mapFilter;
+    }
+
+    @Override
+    protected MainButton removeButton() {
+        return new NpcRemoveButton();
     }
 
     @Override
@@ -196,6 +208,31 @@ public class JNpcInfoTable extends InfoTable<JNpcInfoTable.NpcTableModel, NpcInf
             setSelectedItem(map);
         }
 
+    }
+
+    private class NpcRemoveButton extends MainButton {
+        NpcRemoveButton() {
+            super(UIUtils.getIcon("remove"));
+            super.actionColor = UIUtils.RED;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            List<String> toRemove = resolveNames(Arrays.stream(JNpcInfoTable.super.getSelectedRows())
+                    .mapToObj(row -> (String) getValueAt(row, 0)))
+                    .collect(Collectors.toList());
+
+            toRemove.forEach(config.NPC_INFOS::remove);
+            toRemove.forEach(config.MODIFIED_NPC::send);
+        }
+
+        private Stream<String> resolveNames(Stream<String> names) {
+            if (!config.GROUP_NPCS) return names;
+            Set<String> groupNames = names.collect(Collectors.toSet());
+
+            return config.NPC_INFOS.keySet().stream()
+                    .filter(name -> groupNames.contains(Strings.simplifyName(name)));
+        }
     }
 
 }

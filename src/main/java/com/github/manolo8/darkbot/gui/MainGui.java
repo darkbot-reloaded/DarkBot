@@ -38,17 +38,8 @@ public class MainGui extends JFrame {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        Config.BotSettings.BotGui botSettings = main.config.BOT_SETTINGS.BOT_GUI;
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> main.configManager.saveConfig()));
-
-        Config.BotSettings.BotGui.WindowPosition window = botSettings.MAIN_GUI_WINDOW;
-        if (!botSettings.SAVE_GUI_POS || isOutsideScreen(window)) {
-            setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-            setLocationRelativeTo(null);
-        } else {
-            setSize(window.width, window.height);
-            setLocation(window.x, window.y);
-        }
+        Config.BotSettings.BotGui guiConfig = main.config.BOT_SETTINGS.BOT_GUI;
+        WindowUtils.setWindowSize(this, guiConfig.SAVE_GUI_POS, guiConfig.MAIN_GUI_WINDOW);
 
         setIconImage(ICON);
 
@@ -62,19 +53,7 @@ public class MainGui extends JFrame {
         requestFocus();
         setAlwaysOnTop(main.config.BOT_SETTINGS.BOT_GUI.ALWAYS_ON_TOP);
 
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                window.width = getWidth();
-                window.height = getHeight();
-            }
-
-            @Override
-            public void componentMoved(ComponentEvent e) {
-                window.x = getX();
-                window.y = getY();
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> main.configManager.saveConfig()));
     }
 
     private void setComponentPosition() {
@@ -116,25 +95,6 @@ public class MainGui extends JFrame {
 
     public void tick() {
         mapDrawer.repaint();
-    }
-
-    // https://stackoverflow.com/a/39776624
-    private static boolean isOutsideScreen(Config.BotSettings.BotGui.WindowPosition window) {
-        Rectangle rec = new Rectangle(window.x, window.y, window.width, window.height);
-        int windowArea = rec.width * rec.height;
-
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        Rectangle bounds;
-        int boundsArea = 0;
-
-        for (GraphicsDevice gd : ge.getScreenDevices()) {
-            bounds = gd.getDefaultConfiguration().getBounds();
-            if (bounds.intersects(rec)) {
-                bounds = bounds.intersection(rec);
-                boundsArea = boundsArea + (bounds.width * bounds.height);
-            }
-        }
-        return boundsArea != windowArea;
     }
 
 }

@@ -51,7 +51,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 96");
+    public static final Version VERSION      = new Version("1.13.17 beta 100");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -111,9 +111,9 @@ public class Main extends Thread implements PluginListener {
         this.guiManager      = new GuiManager(this);
         this.statsManager    = new StatsManager(this);
         this.pingManager     = new PingManager();
-        this.backpage        = new BackpageManager(this);
         this.pluginHandler   = new PluginHandler();
         this.pluginUpdater   = new PluginUpdater(this);
+        this.backpage        = new BackpageManager(this);
         this.featureRegistry = new FeatureRegistry(this, pluginHandler);
         this.repairManager   = new RepairManager();
 

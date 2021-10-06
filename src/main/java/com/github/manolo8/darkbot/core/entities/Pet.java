@@ -6,7 +6,10 @@ public class Pet extends Ship {
 
     private int level, playerId;
 
-    public Pet() {}
+    public Pet() {
+        // Removed by default, set to true externally when actually set
+        this.removed = true;
+    }
 
     public Pet(int id, long address) {
         super(id);
