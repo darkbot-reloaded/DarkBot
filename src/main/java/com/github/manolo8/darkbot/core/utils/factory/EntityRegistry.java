@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class EntityRegistry {
-    private final Map<Long, EntityFactory> cachedTypes       = new HashMap<>();
+    private final Map<Long, EntityBuilder> cachedTypes       = new HashMap<>();
     private final Map<EntityFactory, Lazy<Entity>> listeners = new EnumMap<>(EntityFactory.class);
     private final Lazy<Entity> fallback                      = new Lazy.NoCache<>();
     private Main main;
@@ -43,7 +43,7 @@ public class EntityRegistry {
     }
 
     public void sendEntity(int id, long address) {
-        EntityFactory type = cachedTypes.computeIfAbsent(API.readMemoryLong(address + 0x10),
+        EntityBuilder type = cachedTypes.computeIfAbsent(API.readMemoryLong(address + 0x10),
                 l -> EntityFactory.find(address)).get(address);
         if (address == main.hero.address || address == main.hero.pet.address) return;
 
@@ -54,7 +54,10 @@ public class EntityRegistry {
 
         if (main.isRunning()) entity.clickable.setRadius(0);
 
-        listeners.getOrDefault(type, fallback).send(entity);
+        if (type instanceof EntityFactory)
+            listeners.getOrDefault(type, fallback).send(entity);
+        else
+            fallback.send(entity);
     }
 
 }

@@ -15,7 +15,8 @@ public enum DisplayFlag {
     STATS_AREA,
     GROUP_AREA, GROUP_NAMES,
     BOOSTER_AREA, SORT_BOOSTERS,
-    RESOURCE_NAMES;
+    RESOURCE_NAMES,
+    SHOW_PET;
 
     public String getName() {
         return I18n.getOrDefault("config.bot_settings.map_display.toggle." + name().toLowerCase(Locale.ROOT), name());

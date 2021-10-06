@@ -95,8 +95,8 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
             this.listener = listener;
             if (supplier != null) {
                 this.supplier = supplier;
-                getComponent().add(new AddButton(), "cell 2 0");
-                getComponent().add(new RemoveButton(), "cell 3 0");
+                getComponent().add(addButton(), "cell 2 0");
+                getComponent().add(removeButton(), "cell 3 0");
             }
         }
 
@@ -105,6 +105,14 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
 
     protected RowFilter<T, Integer> extraFilters() {
         return null;
+    }
+
+    protected MainButton addButton() {
+        return new AddButton();
+    }
+
+    protected MainButton removeButton() {
+        return new RemoveButton();
     }
 
     @Override

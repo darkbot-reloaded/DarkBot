@@ -1,9 +1,11 @@
 package com.github.manolo8.darkbot.core;
 
+import com.github.manolo8.darkbot.utils.LibUtils;
+
 public class DarkFlash {
 
     static {
-        System.loadLibrary("lib/DarkFlash");
+        System.load(LibUtils.getLibPath("DarkFlash"));
     }
 
     public native void setCookie(String url, String cookie);

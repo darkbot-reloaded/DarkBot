@@ -2,7 +2,9 @@ package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.types.suppliers.BrowserApi;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
+import com.github.manolo8.darkbot.config.utils.ColorAdapter;
 import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
+import com.github.manolo8.darkbot.config.utils.FontAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.utils.ApiErrors;
@@ -12,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -29,6 +32,8 @@ public class ConfigManager {
             .setPrettyPrinting()
             .setLenient()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
+            .registerTypeHierarchyAdapter(Color.class, new ColorAdapter())
+            .registerTypeHierarchyAdapter(Font.class, new FontAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
             .create();

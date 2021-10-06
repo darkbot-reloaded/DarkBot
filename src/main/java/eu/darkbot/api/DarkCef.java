@@ -2,9 +2,12 @@ package eu.darkbot.api;
 
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public interface DarkCef {
 
-    String DARK_CEF = "lib/DarkCef.jar";
+    Path DARK_CEF = Paths.get("lib", "DarkCef.jar");
 
     static DarkCef getInstance() {
         return ReflectionUtils.createInstance("eu.darkbot.browser.DarkCefImpl", DARK_CEF);
