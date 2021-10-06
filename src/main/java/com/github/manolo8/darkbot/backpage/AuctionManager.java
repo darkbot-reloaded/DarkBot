@@ -47,9 +47,9 @@ public class AuctionManager {
     }
 
     public boolean bidItem(AuctionItems auctionItem){
-        return bidItem(auctionItem, Integer.parseInt(auctionItem.getHighest())+10000);
+        return bidItem(auctionItem, Double.parseDouble(auctionItem.getHighest())+10000);
     }
-    public boolean bidItem(AuctionItems auctionItem, int amount) {
+    public boolean bidItem(AuctionItems auctionItem, double amount) {
         try {
             String token = main.backpage.getConnection("indexInternal.es", Method.GET)
                     .setRawParam("action", "internalAuction")
@@ -61,7 +61,7 @@ public class AuctionManager {
                     .setRawParam("auctionType", "hour")
                     .setRawParam("subAction", "bid")
                     .setRawParam("lootId", auctionItem.getLootID())
-                    .setRawParam("itemId", "item_hour_0")
+                    .setRawParam("itemId", auctionItem.getId())
                     .setRawParam("credits", String.valueOf(amount))
                     .setRawParam("auction_buy_button", "BID")
                     .getContent();

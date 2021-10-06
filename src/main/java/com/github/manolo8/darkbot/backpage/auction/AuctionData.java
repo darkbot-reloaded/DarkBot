@@ -29,20 +29,20 @@ public class AuctionData {
         private final Pattern AUCTION_PATTERN = Pattern.compile("itemKey=\"item_hour_(.+?)\".*?" +
                 "auction_item_name_col\">\\s+(.+?)\\s+<.*?" +
                 "auction_item_type\">\\s+(.+?)\\s+<.*?" +
-                "auction_item_current\">\\s+(.+?)\\s+<.*?" +
                 "auction_item_you\">\\s+(.+?)\\s+<.*?" +
-                "item_hour_0_buyPrice\" value=\"(.+?)\".*?" +
-                "item_hour_0_lootId\" value=\"(.+?)\".*?", Pattern.DOTALL);
+                "item_hour_\\d+_bid\" value=\"(.+?)\".*?" +
+                "item_hour_\\d+_buyPrice\" value=\"(.+?)\".*?" +
+                "item_hour_\\d+_lootId\" value=\"(.+?)\".*?", Pattern.DOTALL);
 
         public boolean buildAuctionItems(String string) {
             if (string == null || string.isEmpty()) return false;
             if (!string.contains("itemKey") ||
                     !string.contains("auction_item_name_col") ||
                     !string.contains("auction_item_type") ||
-                    !string.contains("auction_item_current") ||
                     !string.contains("auction_item_you") ||
-                    !string.contains("item_hour_0_buyPrice") ||
-                    !string.contains("item_hour_0_lootId")) return false;
+                    !string.contains("_bid") ||
+                    !string.contains("_buyPrice") ||
+                    !string.contains("_lootId")) return false;
             Matcher m = AUCTION_PATTERN.matcher(string);
             if (!m.find()) return false;
 
@@ -53,8 +53,8 @@ public class AuctionData {
             r.setId(id);
             r.setName(m.group(2));
             r.setType(m.group(3));
-            r.setCurrent(m.group(4));
-            r.setYou(m.group(5));
+            r.setYou(m.group(4));
+            r.setCurrent(m.group(5));
             r.setInstantBuy(m.group(6));
             r.setLootID(m.group(7));
             return true;
