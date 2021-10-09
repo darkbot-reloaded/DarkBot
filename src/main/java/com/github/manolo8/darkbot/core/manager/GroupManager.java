@@ -87,6 +87,10 @@ public class GroupManager extends Gui {
         }
     }
 
+    public boolean isBusy() {
+        return pending != null || isTweening;
+    }
+
     public void tryQueueAcceptInvite() {
         if (pending != null || !config.ACCEPT_INVITES || invites.isEmpty() || group.isValid()) return;
 
