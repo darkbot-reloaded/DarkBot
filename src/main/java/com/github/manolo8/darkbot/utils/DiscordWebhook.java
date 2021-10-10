@@ -48,7 +48,7 @@ public class DiscordWebhook {
             throw new IllegalArgumentException("Set content or add at least one EmbedObject");
         }
 
-        Http http = Http.create(this.url, Method.POST);
+        Http http = Http.create(url, Method.POST);
         HttpURLConnection conn = http.getConnection();
         conn.addRequestProperty("Content-Type", "application/json");
         conn.addRequestProperty("User-Agent", "Java-DiscordWebhook-BY-Gelox_");
