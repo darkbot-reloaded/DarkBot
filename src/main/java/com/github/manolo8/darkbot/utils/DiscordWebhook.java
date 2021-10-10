@@ -16,7 +16,7 @@ import java.util.List;
  * Adaptation of original source: https://gist.github.com/k3kdude/fba6f6b37594eae3d6f9475330733bdb
  */
 public class DiscordWebhook {
-    public static final Gson GSON = new Gson();
+    private static final Gson GSON = new Gson();
     private final transient String url;
     private final List<EmbedObject> embeds = new ArrayList<>();
     private String content;
