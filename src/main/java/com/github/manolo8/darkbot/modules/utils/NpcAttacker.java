@@ -194,6 +194,11 @@ public class NpcAttacker implements AttackAPI {
     }
 
     @Override
+    public void tryLockTarget() {
+        if (!mapManager.isTarget(target)) lockAndSetTarget();
+    }
+
+    @Override
     public boolean isAttacking() {
         return hero.isAttacking(target);
     }

@@ -218,11 +218,6 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     }
 
     @Override
-    public boolean isAttacking(Attackable other) {
-        return other == attackTarget.targetedEntity;
-    }
-
-    @Override
     public int getSpeed() {
         return shipInfo.speed == 0 ? (int) locationInfo.speed : shipInfo.speed;
     }

@@ -14,18 +14,19 @@ import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.items.Item;
+import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.ItemFlag;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
-import eu.darkbot.api.managers.StarSystemAPI;
+import eu.darkbot.api.managers.HeroItemsAPI;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
-import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.JUMP_GATE;
-import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.TOGGLE_CONFIG;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.*;
 
 public class HeroManager extends Ship implements Manager, HeroAPI {
 
@@ -34,6 +35,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     private final SettingsManager settings;
     private final SettingsProxy keybinds;
     private final Collection<? extends Portal> portals;
+    private final HeroItemsAPI items;
 
     private long staticAddress;
 
@@ -59,7 +61,8 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
                        MapManager mapManager,
                        Drive drive,
                        FacadeManager facadeManager,
-                       StarManager star) {
+                       StarManager star,
+                       HeroItemsAPI items) {
         instance = this;
 
         this.main = super.main = main;
@@ -71,6 +74,8 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         this.pet = new Pet();
         this.pet.main = main;
         this.map = star.byId(-1);
+
+        this.items = items;
     }
 
     @Override
@@ -245,6 +250,32 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     @Override
     public boolean setRunMode() {
         return runMode();
+    }
+
+    @Override
+    public boolean triggerLaserAttack() {
+        return keybinds.pressKeybind(ATTACK_LASER);
+    }
+
+    @Override
+    public boolean launchRocket() {
+        return keybinds.pressKeybind(ATTACK_ROCKET);
+    }
+
+    @Override
+    public SelectableItem.Laser getLaser() {
+        return items.getItems(ItemCategory.LASERS).stream()
+                .filter(Item::isSelected)
+                .map(item -> SelectableItem.Laser.of(item.getId()))
+                .findFirst().orElse(null);
+    }
+
+    @Override
+    public SelectableItem.Rocket getRocket() {
+        return items.getItems(ItemCategory.ROCKETS).stream()
+                .filter(Item::isSelected)
+                .map(item -> SelectableItem.Rocket.of(item.getId()))
+                .findFirst().orElse(null);
     }
 
     @Override

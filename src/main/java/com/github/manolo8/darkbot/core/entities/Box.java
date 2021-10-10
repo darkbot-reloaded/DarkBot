@@ -43,7 +43,8 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
 
     @Override
     public boolean tryCollect() {
-        if (!clickable.enabled || distanceTo(main.hero) > 850) return false;
+        //doesn't work on boxes?
+        if (/*!clickable.enabled ||*/ distanceTo(main.hero) > 850) return false;
 
         clickable.setRadius(800);
         main.hero.drive.clickCenter(true, locationInfo.now);

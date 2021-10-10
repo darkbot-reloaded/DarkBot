@@ -20,6 +20,8 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
     public boolean selected, buyable, activatable, available, visible;
     public String id, counterType, actionStyle, iconLootId;
 
+    private long lastUsed;
+
     void removeSlot(SlotBarsProxy.Type slotType, int slotNumber) {
         getShortcutList(slotType).remove(slotNumber);
     }
@@ -148,8 +150,12 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
     }
 
     @Override
-    public double lastUseTime() {
-        return 0; // TODO: implement last use time
+    public long lastUseTime() {
+        return lastUsed;
+    }
+
+    public void setLastUsed(long lastUsed) {
+        this.lastUsed = lastUsed;
     }
 
     @Override

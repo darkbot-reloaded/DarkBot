@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.extensions.features;
 
 import com.github.manolo8.darkbot.config.ConfigHandler;
+import com.github.manolo8.darkbot.extensions.features.handlers.AbstractPrioritizedHandler;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
@@ -149,6 +150,10 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
             //noinspection unchecked
             return (FeatureDefinition<T>) FEATURES_BY_ID.get(id);
         }
+    }
+
+    public <T extends AbstractPrioritizedHandler<?, ?, ?>> T getPrioritizedHandlerOf(Class<T> handlerType) {
+        return registryHandler.getPrioritizedHandlerOf(handlerType);
     }
 
     @Override

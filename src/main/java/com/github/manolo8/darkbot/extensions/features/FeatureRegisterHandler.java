@@ -1,12 +1,7 @@
 package com.github.manolo8.darkbot.extensions.features;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.extensions.features.handlers.BehaviourHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.ExtraMenuHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.FeatureHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.ModuleHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.NpcExtraHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.TaskHandler;
+import com.github.manolo8.darkbot.extensions.features.handlers.*;
 import eu.darkbot.api.PluginAPI;
 
 import java.util.Arrays;
@@ -34,7 +29,8 @@ public class FeatureRegisterHandler {
                 new BehaviourHandler(api.requireInstance(Main.class), featureRegistry),
                 new TaskHandler(api.requireInstance(Main.class), featureRegistry),
                 new NpcExtraHandler(featureRegistry),
-                new ExtraMenuHandler(featureRegistry)
+                new ExtraMenuHandler(featureRegistry),
+                new PrioritizedLaserHandler(featureRegistry)
         );
     }
 
@@ -47,6 +43,13 @@ public class FeatureRegisterHandler {
             FEATURE_HANDLERS.forEach(this::update);
             updating.set(false);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends AbstractPrioritizedHandler<?, ?, ?>> T getPrioritizedHandlerOf(Class<T> handlerType) {
+        return (T) FEATURE_HANDLERS.stream()
+                .filter(fh -> handlerType.isAssignableFrom(fh.getClass()))
+                .findFirst().orElse(null);
     }
 
     private <T> void update(FeatureHandler<T> registerer) {
