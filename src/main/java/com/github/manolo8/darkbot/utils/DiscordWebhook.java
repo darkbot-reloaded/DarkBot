@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.utils;
 
+import com.github.manolo8.darkbot.utils.http.Http;
+import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
@@ -7,6 +9,7 @@ import javax.net.ssl.HttpsURLConnection;
 import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,20 +60,19 @@ public class DiscordWebhook {
             throw new IllegalArgumentException("Set content or add at least one EmbedObject");
         }
 
-        URL url = new URL(this.url);
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        connection.addRequestProperty("Content-Type", "application/json");
-        connection.addRequestProperty("User-Agent", "Java-DiscordWebhook-BY-Gelox_");
-        connection.setDoOutput(true);
-        connection.setRequestMethod("POST");
+        Http http = Http.create(this.url, Method.POST);
+        HttpURLConnection conn = http.getConnection();
+        conn.addRequestProperty("Content-Type", "application/json");
+        conn.addRequestProperty("User-Agent", "Java-DiscordWebhook-BY-Gelox_");
+        conn.setDoOutput(true);
 
-        OutputStream stream = connection.getOutputStream();
+        OutputStream stream = conn.getOutputStream();
         stream.write(GSON.toJson(this).getBytes());
         stream.flush();
         stream.close();
 
-        connection.getInputStream().close();
-        connection.disconnect();
+        http.closeInputStream();
+        conn.disconnect();
     }
 
     public static class EmbedObject {
