@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Source: https://gist.github.com/k3kdude/fba6f6b37594eae3d6f9475330733bdb
+ * Adaptation of original source: https://gist.github.com/k3kdude/fba6f6b37594eae3d6f9475330733bdb
  */
 public class DiscordWebhook {
     public static final Gson GSON = new Gson();
