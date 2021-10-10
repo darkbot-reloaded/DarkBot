@@ -51,7 +51,6 @@ public class DiscordWebhook {
         Http http = Http.create(url, Method.POST);
         HttpURLConnection conn = http.getConnection();
         conn.addRequestProperty("Content-Type", "application/json");
-        conn.addRequestProperty("User-Agent", "Java-DiscordWebhook-BY-Gelox_");
         conn.setDoOutput(true);
 
         OutputStream stream = conn.getOutputStream();
