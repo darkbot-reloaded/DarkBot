@@ -23,15 +23,6 @@ public class DiscordWebhook {
     private boolean tts;
     private final List<EmbedObject> embeds = new ArrayList<>();
 
-    /**
-     * Constructs a new DiscordWebhook instance
-     *
-     * @param url The webhook URL obtained in Discord
-     */
-    public DiscordWebhook(String url) {
-        this.url = url;
-    }
-
     public void setContent(String content) {
         this.content = content;
     }
