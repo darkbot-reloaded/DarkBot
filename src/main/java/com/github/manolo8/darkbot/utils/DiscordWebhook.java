@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.awt.*;
@@ -14,13 +15,13 @@ import java.util.List;
  * Source: https://gist.github.com/k3kdude/fba6f6b37594eae3d6f9475330733bdb
  */
 public class DiscordWebhook {
-
-    private final String url;
+    public static final Gson GSON = new Gson();
+    private final transient String url;
+    private final List<EmbedObject> embeds = new ArrayList<>();
     private String content;
     private String username;
-    private String avatarUrl;
+    @SerializedName("avatar_url") private String avatarUrl;
     private boolean tts;
-    private final List<EmbedObject> embeds = new ArrayList<>();
 
     /**
      * Constructs a new DiscordWebhook instance
@@ -56,87 +57,6 @@ public class DiscordWebhook {
             throw new IllegalArgumentException("Set content or add at least one EmbedObject");
         }
 
-        JsonObject json = new JsonObject();
-
-        json.addProperty("content", this.content);
-        json.addProperty("username", this.username);
-        json.addProperty("avatar_url", this.avatarUrl);
-        json.addProperty("tts", this.tts);
-
-        if (!this.embeds.isEmpty()) {
-            List<JsonObject> embedObjects = new ArrayList<>();
-
-            for (EmbedObject embed : this.embeds) {
-                JsonObject jsonEmbed = new JsonObject();
-
-                jsonEmbed.addProperty("title", embed.getTitle());
-                jsonEmbed.addProperty("description", embed.getDescription());
-                jsonEmbed.addProperty("url", embed.getUrl());
-
-                if (embed.getColor() != null) {
-                    Color color = embed.getColor();
-                    int rgb = color.getRed();
-                    rgb = (rgb << 8) + color.getGreen();
-                    rgb = (rgb << 8) + color.getBlue();
-
-                    jsonEmbed.addProperty("color", rgb);
-                }
-
-                EmbedObject.Footer footer = embed.getFooter();
-                EmbedObject.Image image = embed.getImage();
-                EmbedObject.Thumbnail thumbnail = embed.getThumbnail();
-                EmbedObject.Author author = embed.getAuthor();
-                List<EmbedObject.Field> fields = embed.getFields();
-
-                if (footer != null) {
-                    JsonObject jsonFooter = new JsonObject();
-
-                    jsonFooter.addProperty("text", footer.getText());
-                    jsonFooter.addProperty("icon_url", footer.getIconUrl());
-                    jsonEmbed.add("footer", jsonFooter);
-                }
-
-                if (image != null) {
-                    JsonObject jsonImage = new JsonObject();
-
-                    jsonImage.addProperty("url", image.getUrl());
-                    jsonEmbed.add("image", jsonImage);
-                }
-
-                if (thumbnail != null) {
-                    JsonObject jsonThumbnail = new JsonObject();
-
-                    jsonThumbnail.addProperty("url", thumbnail.getUrl());
-                    jsonEmbed.add("thumbnail", jsonThumbnail);
-                }
-
-                if (author != null) {
-                    JsonObject jsonAuthor = new JsonObject();
-
-                    jsonAuthor.addProperty("name", author.getName());
-                    jsonAuthor.addProperty("url", author.getUrl());
-                    jsonAuthor.addProperty("icon_url", author.getIconUrl());
-                    jsonEmbed.add("author", jsonAuthor);
-                }
-
-                List<JsonObject> jsonFields = new ArrayList<>();
-                for (EmbedObject.Field field : fields) {
-                    JsonObject jsonField = new JsonObject();
-
-                    jsonField.addProperty("name", field.getName());
-                    jsonField.addProperty("value", field.getValue());
-                    jsonField.addProperty("inline", field.isInline());
-
-                    jsonFields.add(jsonField);
-                }
-//                jsonEmbed.add("fields", jsonFields.toArray());
-                jsonFields.forEach(jsonField -> jsonEmbed.add("fields", jsonField));
-                embedObjects.add(jsonEmbed);
-            }
-//            json.add("embeds", embedObjects.toArray());
-            embedObjects.forEach(embedObject -> json.add("embeds", embedObject));
-        }
-
         URL url = new URL(this.url);
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
         connection.addRequestProperty("Content-Type", "application/json");
@@ -145,25 +65,24 @@ public class DiscordWebhook {
         connection.setRequestMethod("POST");
 
         OutputStream stream = connection.getOutputStream();
-        stream.write(json.toString().getBytes());
+        stream.write(GSON.toJson(this).getBytes());
         stream.flush();
         stream.close();
 
-        connection.getInputStream().close(); //I'm not sure why but it doesn't work without getting the InputStream
+        connection.getInputStream().close();
         connection.disconnect();
     }
 
     public static class EmbedObject {
+        private final List<Field> fields = new ArrayList<>();
         private String title;
         private String description;
         private String url;
         private Color color;
-
         private Footer footer;
         private Thumbnail thumbnail;
         private Image image;
         private Author author;
-        private final List<Field> fields = new ArrayList<>();
 
         public String getTitle() {
             return title;
