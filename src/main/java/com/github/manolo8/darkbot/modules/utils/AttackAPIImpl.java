@@ -3,9 +3,10 @@ package com.github.manolo8.darkbot.modules.utils;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.NpcExtra;
-import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
-import com.github.manolo8.darkbot.extensions.features.handlers.PrioritizedLaserHandler;
+import com.github.manolo8.darkbot.extensions.features.handlers.LaserSelectorHandler;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.extensions.Feature;
+import eu.darkbot.api.extensions.selectors.LaserSelector;
 import eu.darkbot.api.extensions.selectors.PrioritizedSupplier;
 import eu.darkbot.api.game.entities.Npc;
 import eu.darkbot.api.game.items.ItemFlag;
@@ -14,20 +15,18 @@ import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
 import eu.darkbot.impl.managers.AbstractAttackImpl;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class AttackAPIImpl extends AbstractAttackImpl {
 
     private final Main main;
-    private final PrioritizedLaserHandler laserHandler;
+    private final LaserSelectorHandler laserHandler;
 
-    public AttackAPIImpl(Main main, HeroItemsAPI heroItems, HeroAPI hero,
-                         FeatureRegistry featureRegistry, ConfigAPI config) {
+    public AttackAPIImpl(Main main, HeroItemsAPI heroItems, HeroAPI hero, LaserSelectorHandler laserHandler) {
         super(heroItems, hero);
         this.main = main;
-
-        this.laserHandler = featureRegistry.getPrioritizedHandlerOf(PrioritizedLaserHandler.class);
-        this.laserHandler.setDefaultSupplier(new DefaultLaserSupplier(config));
+        this.laserHandler = laserHandler;
     }
 
     @Override
@@ -37,10 +36,11 @@ public class AttackAPIImpl extends AbstractAttackImpl {
 
     @Override
     protected SelectableItem.Laser getBestLaserAmmo() {
-        return laserHandler.getBestSupplier().get();
+        return laserHandler.getBest();
     }
 
-    private class DefaultLaserSupplier implements PrioritizedSupplier<SelectableItem.Laser> {
+    @Feature(name = "Default laser selector", description = "Default bot ammo selection manager")
+    public class DefaultLaserSupplier implements LaserSelector, PrioritizedSupplier<SelectableItem.Laser> {
 
         private final ConfigSetting<Boolean> rsbEnabled;
         private final ConfigSetting<Config.Loot.Sab> sabSettings;
@@ -51,6 +51,11 @@ public class AttackAPIImpl extends AbstractAttackImpl {
         public DefaultLaserSupplier(ConfigAPI config) {
             this.rsbEnabled = config.requireConfig("loot.rsb.enabled");
             this.sabSettings = config.requireConfig("loot.sab");
+        }
+
+        @Override
+        public @NotNull PrioritizedSupplier<SelectableItem.Laser> getLaserSupplier() {
+            return this;
         }
 
         @Override

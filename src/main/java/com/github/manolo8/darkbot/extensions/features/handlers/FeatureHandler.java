@@ -14,8 +14,8 @@ public abstract class FeatureHandler<T> {
         this(FeatureHandler.class);
     }
 
-    public FeatureHandler(Class<?> genericType) {
-        Type[] types = ReflectionUtils.findGenericParameters(getClass(), genericType);
+    public FeatureHandler(Class<?> genericSuperclass) {
+        Type[] types = ReflectionUtils.findGenericParameters(getClass(), genericSuperclass);
         if (types == null)
             throw new UnsupportedOperationException("Can't initialize feature decorator with no found type: " + getClass().getCanonicalName());
 

@@ -1,7 +1,8 @@
 package com.github.manolo8.darkbot.extensions.features;
 
 import com.github.manolo8.darkbot.config.ConfigHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.AbstractPrioritizedHandler;
+import com.github.manolo8.darkbot.extensions.DarkBotPluginApiImpl;
+import com.github.manolo8.darkbot.extensions.features.handlers.AbstractSelectorHandler;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
@@ -11,6 +12,7 @@ import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.managers.ExtensionsAPI;
+import eu.darkbot.impl.PluginApiImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -30,14 +32,16 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
 
     private final ConfigHandler configHandler;
 
-    public FeatureRegistry(PluginAPI api,
+    public FeatureRegistry(PluginApiImpl api,
                            FeatureInstanceLoader featureLoader,
                            PluginHandler pluginHandler,
                            ConfigHandler configHandler) {
         this.pluginHandler = pluginHandler;
         this.featureLoader = featureLoader;
-        this.registryHandler = new FeatureRegisterHandler(api, this);
         this.configHandler = configHandler;
+        // We need to early-add this before it's finished constructing, because feature registry handler requires it
+        api.addInstance(this);
+        this.registryHandler = api.requireInstance(FeatureRegisterHandler.class);
         pluginHandler.addListener(this);
     }
 
@@ -150,10 +154,6 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
             //noinspection unchecked
             return (FeatureDefinition<T>) FEATURES_BY_ID.get(id);
         }
-    }
-
-    public <T extends AbstractPrioritizedHandler<?, ?, ?>> T getPrioritizedHandlerOf(Class<T> handlerType) {
-        return registryHandler.getPrioritizedHandlerOf(handlerType);
     }
 
     @Override
