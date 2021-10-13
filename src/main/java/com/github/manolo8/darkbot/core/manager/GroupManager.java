@@ -92,10 +92,6 @@ public class GroupManager extends Gui {
         }
     }
 
-    private boolean isLoaded() {
-        return group.isValid() || System.currentTimeMillis() - lastValidTime > 12000;
-    }
-
     public void tryQueueAcceptInvite() {
         if (pending != null || !config.ACCEPT_INVITES || invites.isEmpty() || group.isValid()) return;
 
