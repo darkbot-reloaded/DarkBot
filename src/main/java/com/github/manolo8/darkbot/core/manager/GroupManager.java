@@ -69,10 +69,10 @@ public class GroupManager extends Gui {
     }
 
     public void tick() {
-        if (group.isValid()) lastValidTime = System.currentTimeMillis();
-        if (!isLoaded()) return;
-
         if (group.address == 0) return;
+
+        if (group.isValid()) lastValidTime = System.currentTimeMillis();
+        else if (System.currentTimeMillis() - lastValidTime < 10_000L) return; // Wait until reacting to group being invalid
         if (nextAction > System.currentTimeMillis()) return;
         nextAction = System.currentTimeMillis() + 100;
 
