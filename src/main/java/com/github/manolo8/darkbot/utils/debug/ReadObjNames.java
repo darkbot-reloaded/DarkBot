@@ -50,9 +50,9 @@ public class ReadObjNames {
     }
 
     private static void print(long address, int offset, boolean isObject) {
-        String result = API.readMemoryString(address);
+        String result = API.readMemoryStringFallback(address, null);
 
-        if (!result.trim().isEmpty() && !result.trim().equals("ERROR"))
+        if (result != null && !result.isEmpty())
             System.out.println(formatString(replacements.getOrDefault(result, result), offset, isObject));
     }
 

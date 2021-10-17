@@ -37,7 +37,7 @@ public class ConfigGui extends JFrame {
     private MainButton pluginTab;
     private PluginDisplay pluginDisplay;
 
-    private Lazy<Boolean> stateChange = new Lazy.NoCache<>();
+    private final Lazy<Boolean> stateChange = new Lazy.NoCache<>();
 
     public ConfigGui(Main main) throws HeadlessException {
         super("DarkBot Configuration");
@@ -61,6 +61,9 @@ public class ConfigGui extends JFrame {
         });
 
         WindowUtils.setupUndecorated(this, mainPanel);
+
+        Config.BotSettings.BotGui guiConfig = main.config.BOT_SETTINGS.BOT_GUI;
+        WindowUtils.setWindowSize(this, guiConfig.SAVE_GUI_POS, guiConfig.CONFIG_GUI_WINDOW);
     }
 
     private void initComponents() {
@@ -95,7 +98,7 @@ public class ConfigGui extends JFrame {
     }
 
     void setCustomConfig(String name, Object config) {
-        advancedPane.setCustomConfig(name, config);
+        SwingUtilities.invokeLater(() -> advancedPane.setCustomConfig(name, config));
     }
 
     @Override

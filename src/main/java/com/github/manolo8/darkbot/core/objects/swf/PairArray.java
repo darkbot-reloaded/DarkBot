@@ -91,20 +91,41 @@ public abstract class PairArray extends SwfPtrCollection {
     }
 
     private static class Pairs extends PairArray {
+        private static final byte[] BUFFER = new byte[2048];
+        private static long BUFF_BASE;
+        private static int BUFF_OFFSET = 0, BUFFER_SIZE = 0;
+
+        private int offset;
+
         public boolean isInvalid(long addr) {
             return addr == 0;
         }
 
         public String getKey(long addr) {
             if (isInvalid(addr)) return null;
-            String key = API.readMemoryString(addr);
-            return key == null || key.trim().isEmpty() || key.equals("ERROR") ? null : key;
+            String key = API.readMemoryStringFallback(addr, null);
+            return key == null || key.isEmpty() ? null : key;
+        }
+
+        private static long readLong(long base, int offset, int expectedOffset) {
+            if (base != BUFF_BASE || BUFF_OFFSET + BUFFER_SIZE < offset + 8) {
+                int size = expectedOffset - offset;
+                if (size <= 16) return API.readMemoryLong(base + offset); // small amount, ignore buffering
+                else API.readMemory(
+                        (BUFF_BASE = base) + (BUFF_OFFSET = offset),
+                        BUFFER,
+                        BUFFER_SIZE = Math.min(size, BUFFER.length));
+            }
+            return ByteUtils.getLong(BUFFER, offset - BUFF_OFFSET);
         }
 
         public void update() {
             if (super.lazy.isEmpty() && super.ignoreEmpty) return;
 
+            int oldSize = size;
+
             size = API.readMemoryInt(address + 0x50);
+            int expected = (size == oldSize) ? offset : size * 16;
 
             if (size < 0 || size > 1024) return;
             if (super.pairs.length != size) super.pairs = Arrays.copyOf(super.pairs, size);
@@ -112,10 +133,11 @@ public abstract class PairArray extends SwfPtrCollection {
             long table = API.readMemoryLong(address + 0x48) & ByteUtils.ATOM_MASK;
 
             String key = null;
-            for (int offset = 8, i = 0; offset < 8192 && i < size; offset += 8) {
-                if (key == null && (key = getKey(API.readMemoryLong(table + offset) & ByteUtils.ATOM_MASK)) == null) continue;
+            offset = 8;
+            for (int i = 0; offset < 8192 && i < size; offset += 8) {
+                if (key == null && (key = getKey(readLong(table, offset, expected) & ByteUtils.ATOM_MASK)) == null) continue;
 
-                long value = API.readMemoryLong(table + (offset += 8));
+                long value = readLong(table, offset += 8, expected);
                 if (isInvalid(value)) continue;
 
                 if (super.pairs[i] == null) super.pairs[i] = new Pair(key, value & ByteUtils.ATOM_MASK);

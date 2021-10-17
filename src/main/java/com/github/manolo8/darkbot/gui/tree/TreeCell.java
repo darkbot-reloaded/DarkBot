@@ -61,7 +61,8 @@ public class TreeCell extends JPanel {
      * @return the minimum height the component should have
      */
     private int getMinHeight(ConfigNode node) {
-        return node instanceof ConfigNode.Leaf || node.getDepth() > 1 ?  AdvancedConfig.ROW_HEIGHT : AdvancedConfig.HEADER_HEIGHT;
+        return node instanceof ConfigNode.Leaf || node.getDepth() > 1 ?
+                AdvancedConfig.ROW_HEIGHT : AdvancedConfig.HEADER_HEIGHT;
     }
 
     private class TreeCellLayout implements LayoutManager {
@@ -73,6 +74,13 @@ public class TreeCell extends JPanel {
         @Override
         public Dimension preferredLayoutSize(Container parent) {
             Dimension dim = parent.getComponent(1).getPreferredSize();
+            if (parent.getComponent(1) instanceof OptionEditor) {
+                Dimension res = ((OptionEditor) parent.getComponent(1)).getReservedSize();
+                if (res != null)
+                    dim.setSize(Math.max(dim.width, res.width), Math.max(dim.height, res.height));
+            }
+
+
             dim.width += nameWidth;
             dim.height = Math.max(dim.height, minHeight);
             return dim;

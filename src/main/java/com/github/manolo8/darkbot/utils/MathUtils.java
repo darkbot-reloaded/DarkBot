@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.utils;
 
 public class MathUtils {
 
-    private static final double TAU = Math.PI * 2;
+    public static final double TAU = Math.PI * 2;
 
     public static double angleDiff(double alpha, double beta) {
         double phi = Math.abs(beta - alpha) % TAU;

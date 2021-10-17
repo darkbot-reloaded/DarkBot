@@ -1,13 +1,16 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.utils.AuthAPI;
+import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.google.gson.Gson;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
@@ -19,23 +22,43 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.jar.JarFile;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
 public class PluginHandler {
     private static final Gson GSON = new Gson();
 
+    public static final PluginIssue LOADED_TWICE = new PluginIssue("plugins.issues.loaded_twice",
+            I18n.get("plugins.issues.loaded_twice.desc"), PluginIssue.Level.ERROR);
+    public static final PluginIssue UPDATE_NOT_POSSIBLE = new PluginIssue("plugins.update_issues.updates_not_possible",
+            I18n.get("plugins.update_issues.updates_not_possible.desc"), PluginIssue.Level.WARNING);
+    public static final String INVALID_UPDATE_JSON = "plugins.update_issues.invalid_json";
+    public static final String INVALID_JSON = "plugins.issues.invalid_json";
+    public static final String BOT_UPDATE_REQUIRED = "plugins.update_issues.bot_update";
+    public static final String BOT_UPDATE = "plugins.issues.bot_update";
+    public static final String MAY_NEED_UPDATE = "plugins.issues.plugin_update";
+    public static final PluginIssue PLUGIN_NOT_SIGNED = new PluginIssue("plugins.issues.signature.plugin_not_signed",
+            I18n.get("plugins.issues.signature.plugin_not_signed.desc"), PluginIssue.Level.ERROR);
+    public static final PluginIssue UNKNOWN_SIGNATURE = new PluginIssue("plugins.issues.signature.unknown_signature",
+            I18n.get( "plugins.issues.signature.unknown_signature.desc"), PluginIssue.Level.ERROR);
+    public static final PluginIssue INVALID_SIGNATURE = new PluginIssue("plugins.issues.signature.invalid_signature",
+            I18n.get("plugins.issues.signature.invalid_signature.desc"), PluginIssue.Level.ERROR);
+
     public static final File PLUGIN_FOLDER = new File("plugins"),
-            PLUGIN_UPDATE_FOLDER = new File("plugins/updates");
+            PLUGIN_UPDATE_FOLDER = new File("plugins/updates"),
+            PLUGIN_OLD_FOLDER    = new File("plugins/old");
     public static final Path PLUGIN_PATH = PLUGIN_FOLDER.toPath(),
-            PLUGIN_UPDATE_PATH = PLUGIN_UPDATE_FOLDER.toPath();
+            PLUGIN_UPDATE_PATH = PLUGIN_UPDATE_FOLDER.toPath(),
+            PLUGIN_OLD_PATH    = PLUGIN_OLD_FOLDER.toPath();
 
-    public URLClassLoader PLUGIN_CLASS_LOADER;
-    public List<Plugin> LOADED_PLUGINS = new ArrayList<>();
-    public List<Plugin> FAILED_PLUGINS = new ArrayList<>();
-    public List<PluginLoadingException> LOADING_EXCEPTIONS = new ArrayList<>();
+    public PluginClassLoader PLUGIN_CLASS_LOADER;
+    public final List<Plugin> LOADED_PLUGINS = new ArrayList<>();
+    public final List<Plugin> FAILED_PLUGINS = new ArrayList<>();
+    public final List<PluginException> LOADING_EXCEPTIONS = new ArrayList<>();
 
-    private static List<PluginListener> LISTENERS = new ArrayList<>();
+    private static final List<PluginListener> LISTENERS = new ArrayList<>();
 
     public void addListener(PluginListener listener) {
         if (!LISTENERS.contains(listener)) LISTENERS.add(listener);
@@ -46,8 +69,8 @@ public class PluginHandler {
         return BACKGROUND_LOCK;
     }
 
-    private File[] getJars(String folder) {
-        File[] jars = new File(folder).listFiles((dir, name) -> name.endsWith(".jar"));
+    private File[] getJars(File folder) {
+        File[] jars = folder.listFiles((dir, name) -> name.endsWith(".jar"));
         return jars != null ? jars : new File[0];
     }
 
@@ -72,8 +95,16 @@ public class PluginHandler {
         }
     }
 
+    public void updateConfig() {
+        for (Plugin plugin : LOADED_PLUGINS) {
+            plugin.setDefinition(plugin.getDefinition());
+        }
+    }
+
     private void updatePluginsInternal() {
         synchronized (this) {
+            List<Plugin> previousPlugins = new ArrayList<>(LOADED_PLUGINS);
+
             LOADED_PLUGINS.clear();
             FAILED_PLUGINS.clear();
             LOADING_EXCEPTIONS.clear();
@@ -88,98 +119,130 @@ public class PluginHandler {
                 }
             }
 
-            for (File plugin : getJars("plugins/updates")) {
+            FileUtils.ensureDirectoryExists(PLUGIN_PATH);
+            for (File plugin : getJars(PLUGIN_UPDATE_FOLDER)) {
                 Path plPath = plugin.toPath();
                 try {
                     Files.move(plPath, PLUGIN_PATH.resolve(plPath.getFileName()), StandardCopyOption.REPLACE_EXISTING);
                 } catch (Exception e) {
-                    LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to update plugin: " + plPath.getFileName(), e));
+                    LOADING_EXCEPTIONS.add(new PluginException("Failed to update plugin: " + plPath.getFileName(), e));
                     e.printStackTrace();
                 }
             }
             try {
-                loadPlugins(getJars("plugins"));
+                loadPlugins(getJars(PLUGIN_FOLDER), previousPlugins);
             } catch (Exception e) {
-                LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugins", e));
+                LOADING_EXCEPTIONS.add(new PluginException("Failed to load plugins", e));
                 e.printStackTrace();
             }
             LISTENERS.forEach(PluginListener::afterLoad);
         }
         LISTENERS.forEach(PluginListener::afterLoadComplete);
+        SwingUtilities.invokeLater(() -> LISTENERS.forEach(PluginListener::afterLoadCompleteUI));
     }
 
-    private void loadPlugins(File[] pluginFiles) {
+    public Stream<Plugin> getAvailableUpdates() {
+        return LOADED_PLUGINS.stream()
+                .filter(pl -> pl.getUpdateStatus() == Plugin.UpdateStatus.AVAILABLE);
+    }
+
+    private void loadPlugins(File[] pluginFiles, List<Plugin> previousPlugins) {
         for (File pluginFile : pluginFiles) {
             Plugin pl = null;
             try {
                 pl = new Plugin(pluginFile, pluginFile.toURI().toURL());
                 loadPlugin(pl);
+
+                // need to copy over previous update status and update issues or else they will be lost
+                int prevIndex = previousPlugins.indexOf(pl);
+                if (prevIndex != -1) {
+                    Plugin plugin = previousPlugins.get(prevIndex);
+                    pl.setUpdateStatus(plugin.getUpdateStatus());
+                    plugin.getUpdateIssues().getIssues().forEach(pl.getUpdateIssues()::add);
+                    pl.setUpdateDefinition(plugin.getUpdateDefinition());
+                }
+
                 if (pl.getIssues().canLoad()) LOADED_PLUGINS.add(pl);
                 else FAILED_PLUGINS.add(pl);
-            } catch (PluginLoadingException e) {
+            } catch (PluginException e) {
                 LOADING_EXCEPTIONS.add(e);
                 e.printStackTrace();
             } catch (Throwable e) {
-                LOADING_EXCEPTIONS.add(new PluginLoadingException("Failed to load plugin", e, pl));
+                LOADING_EXCEPTIONS.add(new PluginException("Failed to load plugin", e, pl));
                 e.printStackTrace();
             }
         }
-        PLUGIN_CLASS_LOADER = new URLClassLoader(LOADED_PLUGINS.stream().map(Plugin::getJar).toArray(URL[]::new));
+        PLUGIN_CLASS_LOADER = new PluginClassLoader(LOADED_PLUGINS.stream().map(Plugin::getJar).toArray(URL[]::new));
     }
 
-    private void loadPlugin(Plugin plugin) throws IOException, PluginLoadingException {
+    private void loadPlugin(Plugin plugin) throws IOException, PluginException {
         try (JarFile jar = new JarFile(plugin.getFile(), true)) {
             ZipEntry plJson = jar.getEntry("plugin.json");
             if (plJson == null) {
-                throw new PluginLoadingException("The plugin is missing a plugin.json in the jar root", plugin);
+                throw new PluginException("The plugin is missing a plugin.json in the jar root", plugin);
             }
-            try (InputStreamReader isr = new InputStreamReader(jar.getInputStream(plJson), StandardCharsets.UTF_8)) {
-                PluginDefinition plDef = GSON.fromJson(isr, (Type) PluginDefinition.class);
-                plugin.setDefinition(plDef);
-            }
+            plugin.setDefinition(readPluginDefinition(jar.getInputStream(plJson)));
             testUnique(plugin);
             testCompatibility(plugin);
             testSignature(plugin, jar);
         }
     }
 
+    public PluginDefinition readPluginDefinition(InputStream is) throws IOException {
+        try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+            return GSON.fromJson(isr, (Type) PluginDefinition.class);
+        }
+    }
+
     private void testUnique(Plugin plugin) {
         if (LOADED_PLUGINS.stream().anyMatch(other -> other.getName().equals(plugin.getName())))
-            plugin.getIssues().addFailure(I18n.get("plugins.issues.loaded_twice"),
-                    I18n.get("plugins.issues.loaded_twice.desc"));
+            plugin.getIssues().add(LOADED_TWICE);
     }
 
     private void testCompatibility(Plugin plugin) {
-        PluginDefinition pd = plugin.getDefinition();
+        testCompatibility(plugin.getIssues(), plugin.getDefinition(), false);
+    }
+
+    void testCompatibility(IssueHandler issues, PluginDefinition pd, boolean isUpdate) {
+        if (pd.update == null || (isUpdate && pd.download == null))
+            issues.add(UPDATE_NOT_POSSIBLE);
 
         if (pd.minVersion.compareTo(pd.supportedVersion) > 0)
-            plugin.getIssues().addFailure(I18n.get("plugins.issues.invalid_json"),
+            issues.addFailure((isUpdate ? INVALID_UPDATE_JSON : INVALID_JSON),
                     I18n.get("plugins.issues.invalid_json.desc", pd.minVersion, pd.supportedVersion));
 
         String supportedRange = "DarkBot v" + (pd.minVersion.compareTo(pd.supportedVersion) == 0 ?
                 pd.minVersion : pd.minVersion + "-v" + pd.supportedVersion);
 
         if (Main.VERSION.compareTo(pd.minVersion) < 0)
-            plugin.getIssues().addFailure(I18n.get("plugins.issues.bot_update"),
-                    I18n.get("plugins.issues.bot_update.desc", supportedRange, Main.VERSION));
+            issues.addFailure((isUpdate ? BOT_UPDATE_REQUIRED : BOT_UPDATE),
+                    I18n.get(isUpdate ? "plugins.update_issues.bot_update.desc" : "plugins.issues.bot_update.desc",
+                            supportedRange, Main.VERSION));
 
-        if (Main.VERSION.compareTo(pd.supportedVersion) > 0)
-            plugin.getIssues().addInfo(I18n.get("plugins.issues.plugin_update"),
-                    I18n.get("plugins.issues.plugin_update.desc", supportedRange, Main.VERSION));
+        if (!isUpdate && maybeIncompatible(pd.supportedVersion))
+            issues.addInfo(MAY_NEED_UPDATE, I18n.get("plugins.issues.plugin_update.desc", supportedRange, Main.VERSION));
+    }
+
+    private boolean maybeIncompatible(Version ver) {
+        if (Main.VERSION.compareTo(ver) <= 0) return false;
+
+        // For alphas, ensure always newer
+        if (Main.VERSION.isAlpha()) return true;
+
+        // Alternatively, check that the general version is the same
+
+        Version simpleMain = new Version(Main.VERSION.getMajor(), Main.VERSION.getMinor(), Main.VERSION.getPatch());
+        Version simpleVer = new Version(ver.getMajor(), ver.getMinor(), ver.getPatch());
+        return simpleMain.compareTo(simpleVer) > 0;
     }
 
     private void testSignature(Plugin plugin, JarFile jar) throws IOException {
         try {
             Boolean signatureValid = AuthAPI.getInstance().checkPluginJarSignature(jar);
-            if (signatureValid == null)
-                plugin.getIssues().addFailure(I18n.get("plugins.issues.signature.plugin_not_signed"),
-                        I18n.get("plugins.issues.signature.plugin_not_signed.desc"));
-            else if (!signatureValid)
-                plugin.getIssues().addFailure(I18n.get("plugins.issues.signature.unknown_signature"),
-                        I18n.get("plugins.issues.signature.unknown_signature.desc"));
+            if (signatureValid == null) plugin.getIssues().add(PLUGIN_NOT_SIGNED);
+            else if (!signatureValid) plugin.getIssues().add(UNKNOWN_SIGNATURE);
         } catch (SecurityException e) {
-            plugin.getIssues().addFailure(I18n.get("plugins.issues.signature.invalid_signature"),
-                    I18n.get("plugins.issues.signature.invalid_signature.desc"));
+            plugin.getIssues().add(INVALID_SIGNATURE);
         }
     }
 

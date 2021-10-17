@@ -10,10 +10,16 @@ import java.util.function.Consumer;
 public class SearchField extends JTextField {
 
     private static final Icon SEARCH_ICON = UIUtils.getIcon("search");
-    private static final Border MARGIN_BORDER = new EmptyBorder(0, SEARCH_ICON.getIconWidth() + 6, 0, 6);
+    private static final Border MARGIN_BORDER = new EmptyBorder(0, SEARCH_ICON.getIconWidth(), 0, 0);
+    private final Consumer<String> onChange;
 
-    public SearchField(Consumer<String> filterChange) {
-        getDocument().addDocumentListener((GeneralDocumentListener) e -> filterChange.accept(getText()));
+    public SearchField(Consumer<String> onChange) {
+        this.onChange = onChange;
+        getDocument().addDocumentListener((GeneralDocumentListener) e -> update());
+    }
+
+    protected void update() {
+        if (onChange != null) onChange.accept(getText());
     }
 
     @Override

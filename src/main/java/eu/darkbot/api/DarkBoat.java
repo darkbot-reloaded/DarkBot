@@ -1,9 +1,11 @@
 package eu.darkbot.api;
 
+import com.github.manolo8.darkbot.utils.LibUtils;
+
 public class DarkBoat {
 
     static {
-        System.loadLibrary("lib/DarkBoatAPI");
+        System.load(LibUtils.getLibPath("DarkBoatAPI"));
     }
 
     public native void    setData(String url, String sid, String preloader, String vars);
@@ -29,8 +31,8 @@ public class DarkBoat {
     public native long    readLong   (long address);
     public native double  readDouble (long address);
     public native boolean readBoolean(long address);
-    public native String  readString (long address); // bugged encoding
     public native byte[]  readBytes  (long address, int length);
+    public native void    readBytes  (long address, byte[] buff, int length);
 
     public native void replaceInt    (long address, int     oldValue, int     newValue);
     public native void replaceLong   (long address, long    oldValue, long    newValue);

@@ -1,19 +1,19 @@
 package com.github.manolo8.darkbot.core.api;
 
-import com.github.manolo8.darkbot.utils.login.LoginData;
-import com.github.manolo8.darkbot.utils.login.LoginUtils;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.NativeApi;
+
+import java.util.function.BooleanSupplier;
 
 public class NativeApiAdapter extends ApiAdapter {
 
-    private final LoginData loginData;
     private final NativeApi API = new NativeApi();
 
     private static int nextBotId = 0;
     private int botId = -1;
 
-    public NativeApiAdapter() {
-        this.loginData = LoginUtils.performUserLogin();
+    public NativeApiAdapter(StartupParams params, BooleanSupplier fullyHide) {
+        super(params, fullyHide);
     }
 
     public void createWindow() {
@@ -22,6 +22,23 @@ public class NativeApiAdapter extends ApiAdapter {
         if (!API.createBot(botId))
             throw new IllegalStateException("The bot could not successfully setup the browser window");
 
+        setData();
+    }
+
+    @Override
+    public void setSize(int width, int height) {
+    }
+
+    @Override
+    public String getVersion() {
+        return "1";
+    }
+
+    @Override
+    public void sendText(String string) {
+    }
+
+    protected void setData() {
         API.sendMessage(botId, Headers.LOGIN, loginData.getUrl().split("\\.")[0], loginData.getSid());
     }
 
@@ -45,7 +62,8 @@ public class NativeApiAdapter extends ApiAdapter {
         API.mouseClick(botId, 50, x, y);
     }
 
-    public void keyboardClick(char btn) {
+    @Override
+    public void rawKeyboardClick(char btn) {
         API.sendMessage(botId, Headers.KEYBOARD, KeyEvent.CLICK, btn);
     }
 
@@ -54,7 +72,10 @@ public class NativeApiAdapter extends ApiAdapter {
     }
 
     public void handleRefresh() {
+        relogin();
+        setData();
         API.sendMessage(botId, Headers.RELOAD);
+        resetCache();
     }
 
     public void blockUserInput(boolean block) {
@@ -75,6 +96,11 @@ public class NativeApiAdapter extends ApiAdapter {
 
     public byte[] readMemory(long address, int length) {
         return API.readMemory(botId, address, length);
+    }
+
+    public void readMemory(long address, byte[] buffer, int length) {
+        byte[] buff = API.readMemory(botId, address, length);
+        System.arraycopy(buff, 0, buffer, 0, length);
     }
 
     public int readMemoryInt(long address) {

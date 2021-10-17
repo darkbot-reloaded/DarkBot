@@ -20,8 +20,40 @@ public class Version implements Comparable<Version> {
             "( ?beta ?([0-9]+)?)?" + // Beta
             "( ?alpha ?([0-9]+)?)?"); // Alpha
 
-    private String version;
-    private int major, minor, patch, revision, beta, alpha;
+    private final String version;
+    private final int major, minor, patch, revision, beta, alpha;
+
+    public int getMajor() {
+        return major;
+    }
+
+    public int getMinor() {
+        return minor;
+    }
+
+    public int getPatch() {
+        return patch;
+    }
+
+    public int getRevision() {
+        return revision;
+    }
+
+    public boolean isBeta() {
+        return beta != Integer.MAX_VALUE;
+    }
+
+    public int getBeta() {
+        return beta;
+    }
+
+    public boolean isAlpha() {
+        return alpha != Integer.MAX_VALUE;
+    }
+
+    public int getAlpha() {
+        return alpha;
+    }
 
     public Version(String version) {
         this.version = version;
@@ -31,10 +63,26 @@ public class Version implements Comparable<Version> {
         minor = getInt(matcher, 2);
         patch = getInt(matcher, 4);
         revision = getInt(matcher, 6);
-        beta = getInt(matcher, 8);
-        alpha = getInt(matcher, 10);
-        if (beta == -1 && alpha == -1) beta = Integer.MAX_VALUE;
-        if (alpha == -1) alpha = Integer.MAX_VALUE;
+
+        int tmpBeta = getInt(matcher, 8);
+        int tmpAlpha = getInt(matcher, 10);
+        beta = tmpBeta == -1 && tmpAlpha == -1 ? Integer.MAX_VALUE : tmpBeta;
+        alpha = tmpAlpha == -1 ? Integer.MAX_VALUE : tmpAlpha;
+    }
+
+    public Version(int major, int minor, int patch) {
+        this(major, minor, patch, -1, -1, -1);
+    }
+
+    public Version(int major, int minor, int patch, int revision, int beta, int alpha) {
+        this.major = major;
+        this.minor = minor;
+        this.patch = patch;
+        this.revision = revision;
+
+        this.beta = beta == -1 && alpha == -1 ? Integer.MAX_VALUE : beta;
+        this.alpha = alpha == -1 ? Integer.MAX_VALUE : alpha;
+        this.version = major + "." + minor + "." + patch + "." + revision + " beta " + beta + " alpha " + alpha;
     }
 
     private int getInt(Matcher m, int find) {

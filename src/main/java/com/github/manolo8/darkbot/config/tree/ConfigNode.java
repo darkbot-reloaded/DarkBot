@@ -61,15 +61,11 @@ public abstract class ConfigNode {
                 (desc != null ? desc : "");
     }
 
-    boolean isVisible(StringQuery query) {
-        if (match(query)) return true;
+    boolean isVisible(TreeFilter query) {
         ConfigNode p = this;
-        while ((p = p.parent) != null) if (p.match(query)) return true;
+        do if (query.matches(p)) return true;
+        while ((p = p.parent) != null);
         return false;
-    }
-
-    protected boolean match(StringQuery query) {
-        return query.matches(convertToString());
     }
 
     static ConfigNode.Parent rootingFrom(Parent parent, String name, Object root, String baseKey) {
@@ -91,7 +87,7 @@ public abstract class ConfigNode {
                 .map(f -> ConfigNode.of(p, new ConfigField(obj, f))).toArray(ConfigNode[]::new));
 
     }
-    
+
     static class Parent extends ConfigNode {
         ConfigNode[] children;
         String longestChild;
@@ -110,7 +106,7 @@ public abstract class ConfigNode {
             return this;
         }
 
-        boolean isVisible(StringQuery filter) {
+        boolean isVisible(TreeFilter filter) {
             return super.isVisible(filter) || Arrays.stream(children).anyMatch(n -> n.isVisible(filter));
         }
 

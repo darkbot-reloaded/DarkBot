@@ -8,16 +8,15 @@ import javax.swing.*;
 class FeatureCheckbox extends JCheckBox {
 
     FeatureCheckbox(FeatureDefinition<?> feature) {
-        setSelected(feature.isEnabled());
+        super(feature.getName(), null, feature.canLoad());
 
-        setText(feature.getName());
         if (!feature.getDescription().isEmpty())
             setToolTipText(feature.getDescription());
         setOpaque(false);
         addActionListener(a -> feature.setStatus(isSelected()));
 
         updateIssues(feature.getIssues());
-        feature.getIssues().addListener(this::updateIssues);
+        feature.getIssues().addUIListener(this::updateIssues);
     }
 
     private void updateIssues(IssueHandler issueList) {

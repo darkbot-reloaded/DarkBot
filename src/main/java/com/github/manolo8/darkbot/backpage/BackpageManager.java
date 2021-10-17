@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.api.ApiAdapter;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
@@ -9,29 +10,36 @@ import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 
-import javax.xml.ws.http.HTTPBinding;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.github.manolo8.darkbot.Main.API;
+
 public class BackpageManager extends Thread {
-    public  static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
+    public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
     private static final String[] ACTIONS = new String[]{
             "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
+
+    private static class SidStatus {
+        private static final int NO_SID = -1, ERROR = -2, UNKNOWN = -3;
+    }
 
     public final HangarManager hangarManager;
     public final LegacyHangarManager legacyHangarManager;
     public final GalaxyManager galaxyManager;
+    public final DispatchManager dispatchManager;
 
     private final Main main;
     private String sid, instance;
-    private List<Task> tasks;
+    private List<Task> tasks = new ArrayList<>();
 
     private long lastRequest;
     private long sidLastUpdate = System.currentTimeMillis();
@@ -45,6 +53,8 @@ public class BackpageManager extends Thread {
         this.hangarManager = new HangarManager(main, this);
         this.legacyHangarManager = new LegacyHangarManager(main, this);
         this.galaxyManager = new GalaxyManager(main);
+        this.dispatchManager = new DispatchManager(main);
+
         setDaemon(true);
         start();
     }
@@ -59,9 +69,23 @@ public class BackpageManager extends Thread {
         while (true) {
             Time.sleep(100);
 
+            synchronized (main.pluginHandler.getBackgroundLock()) {
+                for (Task task : tasks) {
+                    try {
+                        task.backgroundTick();
+                    } catch (Throwable e) {
+                        main.featureRegistry.getFeatureDefinition(task)
+                                .getIssues()
+                                .addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                    }
+                }
+            }
+
             if (isInvalid()) {
-                sidStatus = -1;
+                sidStatus = SidStatus.NO_SID;
                 continue;
+            } else if (sidStatus == SidStatus.NO_SID) {
+                sidStatus = SidStatus.UNKNOWN;
             }
 
             this.hangarManager.tick();
@@ -87,14 +111,14 @@ public class BackpageManager extends Thread {
                 }
             }
 
-            for (Task task : tasks) {
-                synchronized (main.pluginHandler.getBackgroundLock()) {
+            synchronized (main.pluginHandler.getBackgroundLock()) {
+                for (Task task : tasks) {
                     try {
                         task.tickTask();
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
-                                .addWarning(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                                .addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
                     }
                 }
             }
@@ -115,7 +139,7 @@ public class BackpageManager extends Thread {
         try {
             sidStatus = sidKeepAlive();
         } catch (Exception e) {
-            sidStatus = -2;
+            sidStatus = SidStatus.ERROR;
             e.printStackTrace();
             return 5 * Time.MINUTE;
         }
@@ -138,6 +162,7 @@ public class BackpageManager extends Thread {
         conn.setConnectTimeout(30_000);
         conn.setReadTimeout(30_000);
         conn.setInstanceFollowRedirects(false);
+        conn.setRequestProperty("User-Agent", Http.getDefaultUserAgent());
         conn.setRequestProperty("Cookie", "dosid=" + this.sid);
         lastRequest = System.currentTimeMillis();
         return conn;
@@ -174,7 +199,7 @@ public class BackpageManager extends Thread {
                     .map(m -> m.group(1))
                     .findFirst().orElse(null);
 
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
@@ -185,18 +210,24 @@ public class BackpageManager extends Thread {
     }
 
     public synchronized String sidStatus() {
-        return sidStat() + (sidStatus != -1 && sidStatus != 302 ?
+        return sidStat() + (sidStatus != SidStatus.NO_SID && sidStatus != 302 ?
                 " " + Time.toString(System.currentTimeMillis() - sidLastUpdate) + "/" +
                         Time.toString(sidNextUpdate - sidLastUpdate) : "");
     }
 
     private String sidStat() {
         switch (sidStatus) {
-            case -1: return "--";
-            case -2: return "ERR";
-            case 200: return "OK";
-            case 302: return "KO";
-            default: return sidStatus + "";
+            case SidStatus.NO_SID:
+            case SidStatus.UNKNOWN:
+                return "--";
+            case SidStatus.ERROR:
+                return "ERR";
+            case 200:
+                return "OK";
+            case 302:
+                return "KO";
+            default:
+                return sidStatus + "";
         }
     }
 

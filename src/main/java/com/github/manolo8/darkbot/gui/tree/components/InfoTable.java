@@ -6,9 +6,12 @@ import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.gui.utils.TableCharEditor;
+import com.github.manolo8.darkbot.gui.utils.table.TableCharEditor;
+import com.github.manolo8.darkbot.gui.utils.table.TableCharRenderer;
+import com.github.manolo8.darkbot.gui.utils.table.TableDoubleEditor;
 import com.github.manolo8.darkbot.gui.utils.ToolTipHeader;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.gui.utils.table.TableDoubleRenderer;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -23,9 +26,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public abstract class InfoTable<T extends TableModel, E> extends JTable implements OptionEditor {
-    private static final TableCharEditor CHAR_EDITOR = new TableCharEditor();
-
-    private JComponent component;
+    private final JComponent component;
     private Map<String, E> data;
     private Lazy<String> listener;
     private Supplier<E> supplier;
@@ -68,15 +69,20 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
     public InfoTable(T model, Map<String, E> data, Lazy<String> listener, Supplier<E> supplier) {
         super(model);
         getColumnModel().getColumn(0).setPreferredWidth(200);
-        setDefaultEditor(Character.class, CHAR_EDITOR);
+
+        setDefaultRenderer(Double.class, new TableDoubleRenderer());
+        setDefaultRenderer(Character.class, new TableCharRenderer());
+
+        setDefaultEditor(Double.class, new TableDoubleEditor());
+        setDefaultEditor(Character.class, new TableCharEditor());
 
         setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
         if (model instanceof GenericTableModel) {
-            setTableHeader(new ToolTipHeader(getColumnModel(), (GenericTableModel) model));
+            setTableHeader(new ToolTipHeader(getColumnModel(), (GenericTableModel<?>) model));
         }
         getTableHeader().setReorderingAllowed(false);
 
-        TableRowSorter<T> sorter = new TableRowSorter<>((T) getModel());
+        TableRowSorter<T> sorter = new TableRowSorter<>(model);
         setRowSorter(sorter);
 
         component = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][][][]", "[][grow]"));
@@ -89,16 +95,24 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
             this.listener = listener;
             if (supplier != null) {
                 this.supplier = supplier;
-                getComponent().add(new AddButton(), "cell 2 0");
-                getComponent().add(new RemoveButton(), "cell 3 0");
+                getComponent().add(addButton(), "cell 2 0");
+                getComponent().add(removeButton(), "cell 3 0");
             }
         }
 
-        component.setPreferredSize(new Dimension(550, 270));
+        component.setPreferredSize(new Dimension(500, 270));
     }
 
     protected RowFilter<T, Integer> extraFilters() {
         return null;
+    }
+
+    protected MainButton addButton() {
+        return new AddButton();
+    }
+
+    protected MainButton removeButton() {
+        return new RemoveButton();
     }
 
     @Override

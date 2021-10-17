@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
@@ -14,6 +15,8 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.utils.debug.ReadObjNames;
 
+import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -96,21 +99,27 @@ public class MapManager implements Manager {
         internalWidth = API.readMemoryInt(address + 68);
         internalHeight = API.readMemoryInt(address + 72);
         if (internalHeight == 13100) internalHeight = 13500;
+        if (internalHeight == 26200) internalHeight = 27000;
         int currMap = API.readMemoryInt(address + 76);
         boolean switched = currMap != id;
         if (switched) {
             id = currMap;
             main.hero.map = main.starManager.byId(id);
-            updateAreas();
+            updateAreas(false);
         }
         entities.update(address);
         if (switched) mapChange.send(main.hero.map);
     }
 
-    public void updateAreas() {
+    public void updateAreas(boolean createSafeties) {
         preferred = ConfigEntity.INSTANCE.getOrCreatePreferred();
         avoided = ConfigEntity.INSTANCE.getOrCreateAvoided();
         safeties = ConfigEntity.INSTANCE.getOrCreateSafeties();
+        if (createSafeties) {
+            for (Collection<? extends Entity> entities : entities.allEntities) {
+                for (Entity e : entities) ConfigEntity.INSTANCE.updateSafetyFor(e);
+            }
+        }
     }
 
     private void checkMirror() {
@@ -157,36 +166,45 @@ public class MapManager implements Manager {
 
             if (layerIdx != Integer.MAX_VALUE) continue;
 
-            long sprites = API.readMemoryLong(layer, 0x48);
-            long sprite = findMarker(sprites);
-
-            if (sprite == -1) return null;
-
-            int x = API.readMemoryInt(sprite + 0x58);
-            int y = API.readMemoryInt(sprite + 0x5C);
-
             double scale = (internalWidth / minimapX) / 20;
-            return pingLocationCache.set(scale * x, scale * y);
+            long sprites = API.readMemoryLong(layer, 0x48);
+            if (findMarker(sprites, scale, pingLocationCache)) return pingLocationCache;
         }
         return null;
     }
 
-    private long findMarker(long spriteArray) {
+    private boolean findMarker(long spriteArray, double scale, Location result) {
         int size = API.readMemoryInt(spriteArray, 0x40, 0x18);
         // Always try to iterate at least once.
         // With 0 or 1 elements, it seems to be implemented as a singleton and size isn't updated.
         // With 2 or more elements, it's a linked list of elements to follow at 0x18.
-        if (size == 0) size = 1;
+        if (size == 0)
+            return isMarker(API.readMemoryLong(spriteArray, 0x20), scale, result);
 
-        long currSprite = spriteArray;
-        for (int spriteIdx = 0; spriteIdx < size; spriteIdx++) {
-            currSprite = API.readMemoryLong(currSprite, spriteIdx == 0 ? 0x20 : 0x18);
-            if (currSprite == 0) return -1; // Invalid to continue
-
-            String name = API.readMemoryString(API.readMemoryLong(currSprite, 440, 0x10, 0x28, 0x90));
-            if (name != null && name.equals("minimapmarker")) return currSprite;
+        long marker = API.readMemoryLong(spriteArray, 0x20);
+        for (int i = 0; i < size; i++, marker = API.readMemoryLong(marker, 0x18)) {
+            if (isMarker(marker, scale, result)) return true;
         }
-        return -1;
+
+        return false;
+    }
+
+    private boolean isMarker(long sprite, double scale, Location result) {
+        if (sprite == 0) return false;
+
+        int x = API.readMemoryInt(sprite + 0x58);
+        int y = API.readMemoryInt(sprite + 0x5C);
+        result.set(scale * x, scale * y);
+
+        int halfWidth = internalWidth / 2, halfHeight = internalHeight / 2;
+        // Ignore if 0,0, or further away from the center of the map than corner in manhattan distance
+        if ((x == 0 && y == 0) || result.distance(halfWidth, halfHeight) > halfWidth + halfHeight) return false;
+
+        String name = API.readMemoryString(API.readMemoryLong(sprite, 440, 0x10, 0x28, 0x90));
+        if (name != null && name.equals("minimapmarker")) return true;
+
+        String pointer = API.readMemoryString(API.readMemoryLong(sprite, 216, 0x10, 0x28, 0x90));
+        return pointer == null || !pointer.equals("minimapPointer");
     }
 
     public boolean isTarget(Entity entity) {

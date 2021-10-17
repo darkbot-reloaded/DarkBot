@@ -21,7 +21,7 @@ public class ConfigEntity {
             info.radius = 500;
             info.mapList.add(mapId);
 
-            if (!name.equals("ERROR") && !name.isEmpty()) {
+            if (!name.isEmpty()) {
                 config.LOOT.NPC_INFOS.put(name, info);
                 config.LOOT.MODIFIED_NPC.send(name);
 
@@ -38,7 +38,7 @@ public class ConfigEntity {
         BoxInfo info = config.COLLECT.BOX_INFOS.get(name);
         if (info == null) {
             info = new BoxInfo();
-            if (!name.equals("ERROR") && !name.isEmpty()) {
+            if (!name.isEmpty()) {
                 config.COLLECT.BOX_INFOS.put(name, info);
                 config.COLLECT.ADDED_BOX.send(name);
 
@@ -71,12 +71,12 @@ public class ConfigEntity {
 
     public ZoneInfo getOrCreatePreferred() {
         if (MapManager.id < 0) return new ZoneInfo(1);
-        return config.PREFERRED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.BOT_SETTINGS.ZONE_RESOLUTION));
+        return config.PREFERRED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.BOT_SETTINGS.OTHER.ZONE_RESOLUTION));
     }
 
     public ZoneInfo getOrCreateAvoided() {
         if (MapManager.id < 0) return new ZoneInfo(1);
-        return config.AVOIDED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.BOT_SETTINGS.ZONE_RESOLUTION));
+        return config.AVOIDED.computeIfAbsent(MapManager.id, id -> new ZoneInfo(config.BOT_SETTINGS.OTHER.ZONE_RESOLUTION));
     }
 
     public Set<SafetyInfo> getOrCreateSafeties() {

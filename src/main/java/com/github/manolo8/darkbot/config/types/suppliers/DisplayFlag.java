@@ -8,18 +8,26 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 public enum DisplayFlag {
-    USERNAMES, HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, GROUP_AREA, GROUP_NAMES, BOOSTER_AREA, SORT_BOOSTERS;
+    USERNAMES,
+    HERO_NAME,
+    HP_SHIELD_NUM,
+    ZONES,
+    STATS_AREA,
+    GROUP_AREA, GROUP_NAMES,
+    BOOSTER_AREA, SORT_BOOSTERS,
+    RESOURCE_NAMES,
+    SHOW_PET;
 
     public String getName() {
-        return I18n.getOrDefault("config.bot_settings.display.toggle." + name().toLowerCase(Locale.ROOT), name());
+        return I18n.getOrDefault("config.bot_settings.map_display.toggle." + name().toLowerCase(Locale.ROOT), name());
     }
 
     public String getShortName() {
-        return I18n.getOrDefault("config.bot_settings.display.toggle." + name().toLowerCase(Locale.ROOT) + ".short", name());
+        return I18n.getOrDefault("config.bot_settings.map_display.toggle." + name().toLowerCase(Locale.ROOT) + ".short", name());
     }
 
     public String getDescription() {
-        return I18n.getOrDefault("config.bot_settings.display.toggle." + name().toLowerCase(Locale.ROOT) + ".desc", null);
+        return I18n.getOrDefault("config.bot_settings.map_display.toggle." + name().toLowerCase(Locale.ROOT) + ".desc", null);
     }
 
     public static class Supplier extends OptionList<DisplayFlag> {

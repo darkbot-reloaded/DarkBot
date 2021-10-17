@@ -91,7 +91,7 @@ public class Gate {
     }
 
     private void setState(String state) {
-        if (state != null) this.state = state;
+        if (state != null && !state.isEmpty()) this.state = state;
     }
 
     private void setTotal(Integer total) {

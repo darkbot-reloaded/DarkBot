@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.objects.PlayerInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
+import com.github.manolo8.darkbot.core.utils.pathfinder.Circle;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -12,7 +13,7 @@ public class BattleStation
         implements Obstacle {
 
     public PlayerInfo info = new PlayerInfo();
-    public Area area = new Area(0, 0, 0, 0);
+    public Circle area = new Circle(0, 0, 1200);
     public int hullId;
 
     public BattleStation(int id, long address) {
@@ -26,7 +27,7 @@ public class BattleStation
 
         info.update();
         if (locationInfo.isMoving()) {
-            area.set(locationInfo.now, 1200, 1000);
+            area.set(locationInfo.now, 1200);
             ConfigEntity.INSTANCE.updateSafetyFor(this);
         }
     }
@@ -57,7 +58,8 @@ public class BattleStation
 
     @Override
     public boolean use() {
-        return hullId > 0 && hullId < 255 && info.isEnemy();
+        boolean allowEnemy = main.hero.invisible && main.config.GENERAL.ROAMING.ENEMY_CBS_INVISIBLE;
+        return hullId > 0 && hullId < 255 && (info.isEnemy() && !allowEnemy);
     }
 
     @Override

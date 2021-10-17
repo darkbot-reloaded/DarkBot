@@ -6,17 +6,22 @@ public interface IDarkBotAPI {
     void setSize(int width, int height);
 
     boolean isValid();
+    boolean isInitiallyShown();
     long getMemoryUsage();
+    String getVersion();
 
     void mouseMove(int x, int y);
-
     void mouseClick(int x, int y);
 
-    void keyboardClick(char btn);
+    @Deprecated
+    default void keyboardClick(char btn) {
+        rawKeyboardClick(Character.toUpperCase(btn));
+    }
+
     void rawKeyboardClick(char btn);
 
     default void keyboardClick(Character ch) {
-        if (ch != null) keyboardClick((char) ch);
+        if (ch != null) rawKeyboardClick(ch);
     }
 
     void sendText(String string);
@@ -46,26 +51,40 @@ public interface IDarkBotAPI {
     }
 
     String readMemoryString(long address);
+    String readMemoryStringFallback(long address, String fallback);
     default String readMemoryString(long address, int... offsets) {
         for (int offset : offsets) address = readMemoryLong(address + offset);
         return readMemoryString(address);
     }
+    default String readMemoryStringFallback(long address, String fallback, int... offsets) {
+        for (int offset : offsets) address = readMemoryLong(address + offset);
+        return readMemoryStringFallback(address, fallback);
+    }
 
     byte[] readMemory(long address, int length);
+    default void readMemory(long address, byte[] buffer) {
+        readMemory(address, buffer, buffer.length);
+    }
+    void readMemory(long address, byte[] buffer, int length);
 
     void writeMemoryInt(long address, int value);
     void writeMemoryLong(long address, long value);
     void writeMemoryDouble(long address, double value);
 
-    void replaceInt(long address, int oldValue, int newValue);
+    default void replaceInt(long address, int oldValue, int newValue) {
+        writeMemoryInt(address, oldValue);
+    }
 
     long[] queryMemoryInt(int value, int maxQuantity);
     long[] queryMemoryLong(long value, int maxQuantity);
     long[] queryMemory(byte[] query, int maxQuantity);
 
     void setVisible(boolean visible);
-    void setMinimized(boolean visible);
+    default void setMinimized(boolean visible) {
+        setVisible(false);
+    }
 
     void handleRefresh();
+    void resetCache();
 
 }

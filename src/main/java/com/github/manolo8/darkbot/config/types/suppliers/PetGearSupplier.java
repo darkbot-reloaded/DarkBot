@@ -1,18 +1,35 @@
 package com.github.manolo8.darkbot.config.types.suppliers;
 
 import com.github.manolo8.darkbot.core.manager.PetManager;
+import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
+import com.github.manolo8.darkbot.modules.TemporalModule;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class PetGearSupplier extends OptionList<Integer> {
 
-    public static List<PetManager.Gear> GEARS = Collections.emptyList();
+    private static final Set<PetGearSupplier> INSTANCES = Collections.newSetFromMap(new WeakHashMap<>());
+    private static int GEAR_SIZE = -1;
+    private static List<PetManager.Gear> GEARS;
     private static final List<String> DEFAULT_OPTIONS =
             IntStream.of(1, 2, 4, 6, 10, 12).mapToObj(Gears::getName).collect(Collectors.toList());
+
+    public static void updateGears(List<PetManager.Gear> gears) {
+        GEARS = gears;
+        if (GEAR_SIZE == gears.size()) return;
+        GEAR_SIZE = gears.size();
+        forceUpdate(INSTANCES, gears.size());
+    }
+
+    public PetGearSupplier() {
+        INSTANCES.add(this);
+    }
 
     @Override
     public Integer getValue(String text) {

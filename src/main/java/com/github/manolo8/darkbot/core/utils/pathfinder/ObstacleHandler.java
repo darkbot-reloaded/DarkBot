@@ -8,14 +8,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class ObstacleHandler implements Iterable<Area> {
 
-    private MapManager map;
+    private final MapManager map;
     private final List<Obstacle> obstacles;
+    private boolean[] used = new boolean[0];
     private ZoneInfo avoided;
-    private int obstacleCount;
     private List<Area> areas = new ArrayList<>();
 
     public ObstacleHandler(MapManager map) {
@@ -25,8 +26,7 @@ public class ObstacleHandler implements Iterable<Area> {
     }
 
     boolean changed() {
-        boolean changed = obstacles.size() != obstacleCount || map.avoided != avoided || avoided.changed ||
-                obstacles.stream().anyMatch(o -> o.use() != o.getArea().cachedUsing || o.getArea().changed);
+        boolean changed = checkChanged();
         if (changed) rebuildAreas();
         return changed;
     }
@@ -39,18 +39,40 @@ public class ObstacleHandler implements Iterable<Area> {
         return areas.stream();
     }
 
+    /**
+     * Checks for changes and updates used[*] state
+     * @return true if any change happened, false otherwise
+     */
+    private boolean checkChanged() {
+        boolean changed = obstacles.size() != used.length;
+        if (changed) used = new boolean[obstacles.size()];
+
+        changed |= map.avoided != avoided || avoided.changed;
+
+        for (int i = 0; i < obstacles.size(); i++) {
+            Obstacle ob = obstacles.get(i);
+            boolean shouldUse = ob.use();
+            changed |= (used[i] != shouldUse) || ob.getArea().changed;
+
+            used[i] = shouldUse;
+            ob.getArea().changed = false;
+        }
+        return changed;
+    }
+
     private void rebuildAreas() {
         if (obstacles == null || map.avoided == null) return;
-        obstacleCount = obstacles.size();
         avoided = map.avoided;
 
         double cellSize = 1d / avoided.resolution,
                 width = cellSize * MapManager.internalWidth,
                 height = cellSize * MapManager.internalHeight;
 
-        areas = Stream.concat(obstacles.stream().peek(o -> o.getArea().changed = false)
-                        .filter(o -> o.getArea().cachedUsing = o.use()).map(Obstacle::getArea),
-                avoided.getZones().stream().map(zi -> Area.ofSize(zi.x * width, zi.y * height, width, height)))
+        areas = Stream.concat(
+                IntStream.range(0, used.length).filter(i -> used[i])
+                        .mapToObj(obstacles::get).map(Obstacle::getArea),
+                avoided.getZones().stream()
+                        .map(zi -> Rectangle.ofSize(zi.x * width, zi.y * height, width, height)))
                 .collect(Collectors.toList());
     }
 

@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.tree.components;
 
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.Length;
+import com.github.manolo8.darkbot.config.types.Placeholder;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
@@ -31,6 +32,10 @@ public class JStringField extends JTextField implements OptionEditor {
         setText(Objects.toString(field.get(), ""));
         Length len = field.field.getAnnotation(Length.class);
         setColumns(len == null ? 10 : len.value());
+
+        Placeholder ph = field.field.getAnnotation(Placeholder.class);
+        putClientProperty("JTextField.placeholderText", ph != null ? ph.value() : null);
+
         this.field = field;
     }
 

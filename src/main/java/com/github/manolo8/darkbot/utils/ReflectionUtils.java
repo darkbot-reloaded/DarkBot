@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.utils;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -8,6 +7,8 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,9 +33,11 @@ public class ReflectionUtils {
         PRIMITIVE_TO_WRAPPER = Collections.unmodifiableMap(primitiveToWrapper);
     }
 
-    public static <T> T createInstance(String className, String jarUrl) {
+    public static <T> T createInstance(String className, Path path) {
+        if (!Files.exists(path))
+            throw new RuntimeException("Required library file " + path + " not present");
         try {
-            URLClassLoader loader = new URLClassLoader(new URL[]{new File(jarUrl).toURI().toURL()});
+            URLClassLoader loader = new URLClassLoader(new URL[]{path.toUri().toURL()});
             return createInstance((Class<T>) loader.loadClass(className));
         } catch (MalformedURLException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -46,7 +49,7 @@ public class ReflectionUtils {
         return createInstance(clazz, null, null);
     }
 
-    public static <T, P> T createInstance(Class<T> clazz, Class<P> paramTyp, P param) {
+    public static <T> T createInstance(Class<T> clazz, Class<?> paramTyp, Object param) {
         try {
             if (paramTyp != null) {
                 try {
@@ -93,15 +96,19 @@ public class ReflectionUtils {
         Type[] params;
         for (Type itf : clazz.getGenericInterfaces()) {
             if ((params = getTypes(itf, generic)) != null) return params;
+            if (itf instanceof Class) {
+                params = findGenericParameters((Class) itf, generic);
+                if (params != null) return params;
+            }
         }
         if ((params = getTypes(clazz.getGenericSuperclass(), generic)) != null) return params;
 
         Class parent = clazz.getSuperclass();
-        if (parent != null) return findGenericParameters(generic, parent);
+        if (parent != null) return findGenericParameters(parent, generic);
         return null;
     }
 
-    private static Type[] getTypes(Type type, Class expected) {
+    public static Type[] getTypes(Type type, Class expected) {
         if (!(type instanceof ParameterizedType)) return null;
         ParameterizedType paramType = (ParameterizedType) type;
         if (paramType.getRawType() == expected) return paramType.getActualTypeArguments();

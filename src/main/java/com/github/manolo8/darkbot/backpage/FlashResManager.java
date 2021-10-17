@@ -28,7 +28,7 @@ public class FlashResManager implements Task {
 
     private String lang = null;
 
-    private Map<String, String> ALL_TRANSLATIONS = Collections.emptyMap();
+    private volatile Map<String, String> ALL_TRANSLATIONS = Collections.emptyMap();
 
 
     @Override
@@ -40,7 +40,9 @@ public class FlashResManager implements Task {
     public void tick() {
         if (main == null) return;
         String currLang = main.settingsManager.lang;
-        if (currLang == null || currLang.isEmpty() || currLang.equals("ERROR") || currLang.equals(lang)) return;
+        if (currLang == null
+                || currLang.isEmpty()
+                || currLang.equals(lang)) return;
 
         try {
             Element root = Http.create(URL.replace("{lang}", currLang))
@@ -59,5 +61,9 @@ public class FlashResManager implements Task {
             e.printStackTrace();
             lang = null;
         }
+    }
+
+    public String getTranslation(String key) {
+        return ALL_TRANSLATIONS.get(key);
     }
 }

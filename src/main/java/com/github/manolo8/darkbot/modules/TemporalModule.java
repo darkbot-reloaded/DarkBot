@@ -12,10 +12,12 @@ public abstract class TemporalModule implements Module {
     public void install(Main main) {
         this.main = main;
         this.back = main.module;
+        if (this.back instanceof TemporalModule)
+            this.back = ((TemporalModule) this.back).back;
     }
 
     protected void goBack() {
-        if (back != null) main.setModule(this.back);
+        main.setModule(this.back);
         back = null;
     }
 

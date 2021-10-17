@@ -4,4 +4,6 @@ public interface Task extends Installable, Tickable {
     default void tickTask() {
         tick();
     }
+
+    default void backgroundTick() {}
 }

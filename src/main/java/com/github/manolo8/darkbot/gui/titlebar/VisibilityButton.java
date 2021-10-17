@@ -1,12 +1,11 @@
 package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.gui.components.ApiSettings;
+import com.github.manolo8.darkbot.gui.components.ApiSettingsPanel;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -25,30 +24,24 @@ public class VisibilityButton extends TitleBarToggleButton<JFrame> {
 
         setSelectedIcon(HIDE);
         setToolTipText(I18n.get("gui.visibility_button"));
-        setSelected(true);
+        setSelected(API.isInitiallyShown());
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!SwingUtilities.isRightMouseButton(e)) return;
-                onRightClick();
+                new ApiSettingsPanel(main.config.BOT_SETTINGS.API_CONFIG, VisibilityButton.this);
             }
         });
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        toggleVisibility(main.config.BOT_SETTINGS.FULLY_HIDE_API, isSelected());
+        toggleVisibility(main.config.BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API, isSelected());
     }
 
     private void toggleVisibility(boolean minimizing, boolean visible) {
         if (minimizing) API.setMinimized(!visible);
         else API.setVisible(visible);
-    }
-
-    private void onRightClick() {
-        Point p = getLocationOnScreen();
-        p.translate(0, getHeight());
-        new ApiSettings(main, p);
     }
 
 }

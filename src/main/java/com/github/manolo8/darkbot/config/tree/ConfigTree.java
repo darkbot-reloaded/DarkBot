@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.config.tree;
 
-import com.github.manolo8.darkbot.utils.StringQuery;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 
 import javax.swing.*;
 import javax.swing.event.TreeModelEvent;
@@ -14,11 +14,11 @@ import java.util.List;
 
 public class ConfigTree implements TreeModel {
 
-    private ConfigNode.Parent root;
-    private ConfigNode[] originalChildren;
-    private List<TreeModelListener> listeners = new ArrayList<>();
+    private final ConfigNode.Parent root;
+    private final ConfigNode[] originalChildren;
+    private final List<TreeModelListener> listeners = new ArrayList<>();
 
-    private StringQuery filter = new StringQuery();
+    private final TreeFilter filter = new TreeFilter();
 
     public ConfigTree(Object config) {
         this.root = ConfigNode.rootingFrom(null, "Root", config, "config");
@@ -38,16 +38,19 @@ public class ConfigTree implements TreeModel {
         SwingUtilities.invokeLater(this::updateListeners);
     }
 
-    public void setFilter(String filter) {
-        this.filter.query = filter;
-        updateListeners();
+    public int getTopLevelChildrenCount() {
+        return root.children.length;
     }
 
-    public boolean isUnfiltered()  {
-        return filter.query == null || filter.query.isEmpty();
+    public ConfigNode getTopLevelChild(int idx) {
+        return idx < 0 || idx >= root.children.length ? null : root.children[idx];
     }
 
-    private void updateListeners() {
+    public TreeFilter getFilter() {
+        return filter;
+    }
+
+    public void updateListeners() {
         TreeModelEvent event = new TreeModelEvent(this, (TreeNode[]) null, null, null);
         for (TreeModelListener listener : listeners) {
             listener.treeStructureChanged(event);
@@ -56,12 +59,16 @@ public class ConfigTree implements TreeModel {
 
     @Override
     public Object getRoot() {
+        if (filter.isUnfiltered() && ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.CONFIG_TREE_TABS) {
+            int i = filter.getSelectedRoot();
+            if (i >= 0 && i < root.children.length) return root.children[i];
+        }
         return root;
     }
 
     @Override
     public Object getChild(Object parent, int index) {
-        if (isUnfiltered()) return ((ConfigNode.Parent) parent).children[index];
+        if (filter.isUnfiltered()) return ((ConfigNode.Parent) parent).children[index];
         return Arrays.stream(((ConfigNode.Parent) parent).children)
                 .filter(n -> n.isVisible(filter))
                 .skip(index)
@@ -72,7 +79,7 @@ public class ConfigTree implements TreeModel {
     @Override
     public int getChildCount(Object parent) {
         return isLeaf(parent) ? 0 :
-                isUnfiltered() ? ((ConfigNode.Parent) parent).children.length :
+                filter.isUnfiltered() ? ((ConfigNode.Parent) parent).children.length :
                         (int) Arrays.stream(((ConfigNode.Parent) parent).children)
                                 .filter(n -> n.isVisible(filter))
                                 .count();
@@ -96,7 +103,7 @@ public class ConfigTree implements TreeModel {
         ConfigNode.Parent parent = (ConfigNode.Parent) parentObj;
         int idx = -1;
         for (ConfigNode ch : parent.children) {
-            if (isUnfiltered() || ch.isVisible(filter)) {
+            if (filter.isUnfiltered() || ch.isVisible(filter)) {
                 idx++;
                 if (ch == child) return idx;
             }

@@ -4,6 +4,8 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 
+import java.util.Objects;
+
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Npc extends Ship {
@@ -30,7 +32,7 @@ public class Npc extends Ship {
         npcId = API.readMemoryInt(API.readMemoryLong(address + 192) + 80);
         ish = hasEffect(EffectManager.Effect.NPC_ISH);
 
-        if (!oldName.equals(playerInfo.username)) {
+        if (!Objects.equals(oldName, playerInfo.username)) {
             npcInfo = ConfigEntity.INSTANCE.getOrCreateNpcInfo(playerInfo.username);
             npcInfo.npcId = npcId;
         }

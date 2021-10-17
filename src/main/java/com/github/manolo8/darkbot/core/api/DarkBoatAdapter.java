@@ -1,26 +1,30 @@
 package com.github.manolo8.darkbot.core.api;
 
-import com.github.manolo8.darkbot.utils.login.LoginData;
-import com.github.manolo8.darkbot.utils.login.LoginUtils;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.DarkBoat;
 
+import java.util.function.BooleanSupplier;
+
 public class DarkBoatAdapter extends ApiAdapter {
-    private final LoginData loginData;
     private final DarkBoat API = new DarkBoat();
 
-    public DarkBoatAdapter() {
-        this.loginData = LoginUtils.performUserLogin();
+    public DarkBoatAdapter(StartupParams params, BooleanSupplier fullyHide) {
+        super(params, fullyHide);
     }
 
     @Override
     public void createWindow() {
+        setData();
+        Thread apiThread = new Thread(API::createWindow);
+        apiThread.setDaemon(true);
+        apiThread.start();
+    }
+
+    protected void setData() {
         String url = "https://" + loginData.getUrl() + "/",
                 sid = "dosid=" + loginData.getSid();
 
         API.setData(url, sid, loginData.getPreloaderUrl(), loginData.getParams());
-        Thread apiThread = new Thread(API::createWindow);
-        apiThread.setDaemon(true);
-        apiThread.start();
     }
 
     @Override
@@ -40,7 +44,7 @@ public class DarkBoatAdapter extends ApiAdapter {
 
     @Override
     public boolean isValid() {
-        return API.isValid();
+        return super.tryHideIfValid(API.isValid());
     }
 
     @Override
@@ -49,8 +53,8 @@ public class DarkBoatAdapter extends ApiAdapter {
     }
 
     @Override
-    public int getVersion() {
-        return API.getVersion();
+    public String getVersion() {
+        return String.valueOf(API.getVersion());
     }
 
     @Override
@@ -61,11 +65,6 @@ public class DarkBoatAdapter extends ApiAdapter {
     @Override
     public void mouseClick(int x, int y) {
         API.mouseClick(x, y);
-    }
-
-    @Override
-    public void keyboardClick(char btn) {
-        API.keyClick(Character.toUpperCase(btn));
     }
 
     @Override
@@ -101,6 +100,11 @@ public class DarkBoatAdapter extends ApiAdapter {
     @Override
     public byte[] readMemory(long address, int length) {
         return API.readBytes(address, length);
+    }
+
+    @Override
+    public void readMemory(long address, byte[] buffer, int length) {
+        API.readBytes(address, buffer, length);
     }
 
     @Override
@@ -140,6 +144,10 @@ public class DarkBoatAdapter extends ApiAdapter {
 
     @Override
     public void handleRefresh() {
+        relogin();
+        setData();
         API.reload();
+        resetCache();
     }
+
 }

@@ -29,9 +29,12 @@ public class JNumberField extends JSpinner implements OptionEditor {
         this.field = null;
         Num number = field.field.getAnnotation(Num.class);
         Number value = field.get();
-        if (value == null) {
-            System.err.println("Null value in number config, using min as default: " + field.field);
-            value = number.min();
+        if (value == null || value.intValue() < number.min()) {
+            System.err.println("Value invalid or under min, using min as default: " + field.field);
+            field.set(value = number.min());
+        } else if (value.intValue() > number.max()) {
+            System.err.println("Value in config is over max, using max: " + field.field);
+            field.set(value = number.max());
         }
 
         SpinnerNumberModel model;

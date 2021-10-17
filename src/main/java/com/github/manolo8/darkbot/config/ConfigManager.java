@@ -1,36 +1,41 @@
 package com.github.manolo8.darkbot.config;
 
+import com.github.manolo8.darkbot.config.types.suppliers.BrowserApi;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
+import com.github.manolo8.darkbot.config.utils.ColorAdapter;
+import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
+import com.github.manolo8.darkbot.config.utils.FontAdapter;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
-import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
-import com.github.manolo8.darkbot.core.api.DarkBotApiAdapter;
-import com.github.manolo8.darkbot.core.api.DarkFlashApiAdapter;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.core.api.NativeApiAdapter;
-import com.github.manolo8.darkbot.core.api.NoopApiAdapter;
-import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.utils.login.LoginUtils;
+import com.github.manolo8.darkbot.utils.ApiErrors;
+import com.github.manolo8.darkbot.utils.FileUtils;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigManager {
-    // Used for debug mode
-    public static boolean FORCE_NO_OP = false;
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .setLenient()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
+            .registerTypeHierarchyAdapter(Color.class, new ColorAdapter())
+            .registerTypeHierarchyAdapter(Font.class, new FontAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
+            .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
             .create();
 
     public static final String DEFAULT = "config",
@@ -75,6 +80,52 @@ public class ConfigManager {
         return this.config;
     }
 
+    public boolean createNewConfig(String name, @Nullable String copy) {
+        Path newFile = Paths.get(CONFIG_FOLDER, name + EXTENSION);
+        try {
+            if (copy != null) {
+                Path old = DEFAULT.equals(copy) ?
+                        Paths.get(copy + EXTENSION) : Paths.get(CONFIG_FOLDER, copy + EXTENSION);
+                Files.copy(old, newFile);
+            } else {
+                Files.write(newFile, "{}".getBytes(StandardCharsets.UTF_8));
+            }
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteConfig(String name) {
+        try {
+            Files.deleteIfExists(Paths.get(CONFIG_FOLDER, name + EXTENSION));
+            Files.deleteIfExists(Paths.get(CONFIG_FOLDER, name + BACKUP + EXTENSION));
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<String> getAvailableConfigs() {
+        List<String> configs = new ArrayList<>();
+        configs.add(ConfigManager.DEFAULT);
+
+        FileUtils.ensureDirectoryExists(Paths.get(ConfigManager.CONFIG_FOLDER));
+        try {
+            Files.list(Paths.get(ConfigManager.CONFIG_FOLDER))
+                    .map(Path::getFileName)
+                    .map(Path::toString)
+                    .filter(n -> !n.endsWith(ConfigManager.BACKUP + ConfigManager.EXTENSION))
+                    .filter(n -> n.endsWith(ConfigManager.EXTENSION))
+                    .map(n -> n.substring(0, n.length() - ConfigManager.EXTENSION.length()))
+                    .forEach(configs::add);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return configs;
+    }
 
     private Config loadConfig(Path configFile, Path backupFile) {
         boolean existsConfig = Files.exists(configFile),
@@ -102,26 +153,17 @@ public class ConfigManager {
         return config;
     }
 
-    public IDarkBotAPI getAPI() {
-        if (FORCE_NO_OP) return new NoopApiAdapter();
+    public IDarkBotAPI getAPI(StartupParams params) {
+        BrowserApi api = params.useNoOp() ? BrowserApi.NO_OP_API : config.BOT_SETTINGS.API_CONFIG.BROWSER_API;
         try {
-            if (config.BOT_SETTINGS.API == 0) return new DarkBotApiAdapter();
-            else if (config.BOT_SETTINGS.API == 1) return new DarkFlashApiAdapter();
-            else if (config.BOT_SETTINGS.API == 2) return new DarkBoatAdapter();
-            else if (config.BOT_SETTINGS.API == 3) return new NativeApiAdapter();
-            else if (config.BOT_SETTINGS.API == 4) return new NoopApiAdapter();
-            else throw new IllegalArgumentException("API not found: " + config.BOT_SETTINGS.API);
-        } catch (Error e) {
-            System.out.println("Error enabling API #" + config.BOT_SETTINGS.API + ", using no-op api");
+            if (api == null) throw new IllegalArgumentException("No API has been set!");
+            return api.getInstance(params, this);
+        } catch (Throwable e) {
+            System.out.println("Error enabling " + api + ", using no-op api");
             e.printStackTrace();
-            config.BOT_SETTINGS.API = 4;
-            Popups.showMessageAsync(
-                    "API failed to load",
-                    "The API you had selected is not able to load.\n" +
-                    "You probably do not have the required DLL in your lib folder.\n" +
-                    "The bot will start on no-operation API, change it in the settings and restart.",
-                    JOptionPane.ERROR_MESSAGE);
-            return new NoopApiAdapter();
+            ApiErrors.displayException(api, e);
+            config.BOT_SETTINGS.API_CONFIG.BROWSER_API = BrowserApi.NO_OP_API;
+            return BrowserApi.NO_OP_API.getInstance(params, this);
         }
     }
 

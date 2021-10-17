@@ -2,7 +2,9 @@ package com.github.manolo8.darkbot.modules;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.entities.Box;
+import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.PetManager;
@@ -57,8 +59,12 @@ public class LootNCollectorModule implements Module {
                 collectorModule.findBox();
 
                 Box box = collectorModule.current;
+                Npc npc = lootModule.attack.target;
 
-                if (box == null || box.locationInfo.distance(hero) > config.COLLECT.RADIUS
+                if (box == null || box.removed
+                        || box.locationInfo.distance(hero) > config.COLLECT.RADIUS
+                        || (npc.npcInfo.extra.has(NpcExtra.IGNORE_BOXES)
+                                && npc.locationInfo.distance(box) > Math.min(800, npc.npcInfo.radius * 2))
                         || lootModule.attack.target.health.hpPercent() < 0.25) {
                     lootModule.moveToAnSafePosition();
                 } else {

@@ -41,7 +41,6 @@ public class RepairManager implements Manager {
             writtenToLog = true;
             return;
         }
-
         if (repairAddress == 0) updateRepairAddr();
 
         killerName = API.readMemoryString(API.readMemoryLong(repairAddress + 0x68));
@@ -58,7 +57,12 @@ public class RepairManager implements Manager {
     }
 
     public boolean isDead() {
-        return API.readMemoryBoolean(userDataAddress + 0x4C);
+        if (userDataAddress != 0)
+            return API.readMemoryBoolean(userDataAddress + 0x4C);
+        else if (repairAddress != 0)
+            return API.readMemoryBoolean(repairAddress + 40);
+        else updateRepairAddr();
+        return false;
     }
 
     public boolean canRespawn(int option) {

@@ -17,6 +17,7 @@ public class Ship extends Entity {
     public PlayerInfo playerInfo = new PlayerInfo();
     public ShipInfo shipInfo     = new ShipInfo();
 
+    public int formationId;
     public boolean invisible;
     public long timer;
 
@@ -55,6 +56,7 @@ public class Ship extends Entity {
         playerInfo.update();
 
         invisible = API.readMemoryBoolean(API.readMemoryLong(address + 160) + 32);
+        formationId = API.readMemoryInt(address, 280, 40, 40);
     }
 
     @Override
@@ -73,6 +75,10 @@ public class Ship extends Entity {
         if (isInTimer()) {
             cacheTimer.put(id, timer);
         }
+    }
+
+    public long timeTo(double distance) {
+        return (long) (distance * 1000 / shipInfo.speed);
     }
 
     public void setTimerTo(long time) {

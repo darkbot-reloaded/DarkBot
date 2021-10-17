@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.manolo8.darkbot</groupId>
-    <artifactId>DarkBOT</artifactId>
-    <version>1.13-SNAPSHOT</version>
+    <groupId>eu.darkbot</groupId>
+    <artifactId>DarkBot</artifactId>
+    <version>master-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -64,18 +64,6 @@
         </dependency>
 
         <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna</artifactId>
-            <version>5.2.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna-platform</artifactId>
-            <version>5.2.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>17.0.0</version>
@@ -120,20 +108,6 @@
                                         <exclude>META-INF/NOTICE.txt</exclude>
                                     </excludes>
                                 </filter>
-                                <filter>
-                                    <artifact>net.java.dev.jna:*</artifact>
-                                    <includes>
-                                        <include>com/sun/jna/*</include>
-                                        <include>com/sun/jna/ptr/*</include>
-                                        <include>com/sun/jna/platform/win32/**</include>
-                                        <include>com/sun/jna/win32/**</include>
-                                        <include>com/sun/jna/win32-x86-64/**</include>
-                                    </includes>
-                                    <excludes>
-                                        <exclude>**/*.html</exclude>
-                                        <exclude>**/*.template</exclude>
-                                    </excludes>
-                                </filter>
                             </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -164,9 +138,8 @@
                                 <option>-dontwarn</option>
                                 <option>-keepattributes Signature</option>
                                 <option>-keep class com.github.manolo8.** { *; }</option>
-                                <option>-keep class a{}</option>
+                                <option>-keep class eu.darkbot.api.** { *; }</option>
                                 <option>-keep class com.formdev.** { *; }</option>
-                                <option>-keep class com.sun.jna.* { *; }</option>
                             </options>
                             <libs>
                                 <lib>${java.home}/lib/rt.jar</lib>

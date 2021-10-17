@@ -4,13 +4,23 @@ import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
+import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.itf.Module;
-import com.github.manolo8.darkbot.core.manager.*;
+import com.github.manolo8.darkbot.core.manager.EffectManager;
+import com.github.manolo8.darkbot.core.manager.FacadeManager;
+import com.github.manolo8.darkbot.core.manager.GuiManager;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.manager.PingManager;
+import com.github.manolo8.darkbot.core.manager.RepairManager;
+import com.github.manolo8.darkbot.core.manager.SettingsManager;
+import com.github.manolo8.darkbot.core.manager.StarManager;
+import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
@@ -18,6 +28,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
+import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
 import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
@@ -26,11 +37,13 @@ import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.TemporalModule;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,38 +51,40 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 39");
+    public static final Version VERSION      = new Version("1.13.17 beta 100");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
             .setLenient()
+            .disableHtmlEscaping()
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
+            .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
             .create();
 
     public ConfigManager configManager = new ConfigManager();
-    public Config config = configManager.loadConfig(null);
+    public Config config;
     public static IDarkBotAPI API;
 
-    public final Lazy.Sync<Boolean> status       = new Lazy.Sync<>();
-    public final Lazy.Sync<String> configChange  = new Lazy.Sync<>();
-    public final StarManager starManager         = new StarManager();
-    public final MapManager mapManager           = new MapManager(this);
-    public final SettingsManager settingsManager = new SettingsManager(this);
-    public final HeroManager hero                = new HeroManager(this);
-    public final FacadeManager facadeManager     = new FacadeManager(this);
-    public final EffectManager effectManager     = new EffectManager(this);
-    public final GuiManager guiManager           = new GuiManager(this);
-    public final StatsManager statsManager       = new StatsManager(this);
-    public final PingManager pingManager         = new PingManager();
-    public final BackpageManager backpage        = new BackpageManager(this);
-    public final PluginHandler pluginHandler     = new PluginHandler();
-    public final FeatureRegistry featureRegistry = new FeatureRegistry(this, pluginHandler);
-    public final RepairManager repairManager     = new RepairManager();
+    public final Lazy.Sync<Boolean> status      = new Lazy.Sync<>();
+    public final Lazy.Sync<String> configChange = new Lazy.Sync<>();
+    public final StarManager starManager;
+    public final MapManager mapManager;
+    public final SettingsManager settingsManager;
+    public final FacadeManager facadeManager;
+    public final HeroManager hero;
+    public final EffectManager effectManager;
+    public final GuiManager guiManager;
+    public final StatsManager statsManager;
+    public final PingManager pingManager;
+    public final BackpageManager backpage;
+    public final PluginHandler pluginHandler;
+    public final PluginUpdater pluginUpdater;
+    public final FeatureRegistry featureRegistry;
+    public final RepairManager repairManager;
 
     private final MainGui form;
-    private final BotInstaller botInstaller = new BotInstaller(
-            settingsManager, facadeManager, effectManager, guiManager, mapManager, hero, statsManager, pingManager, repairManager);
+    private final BotInstaller botInstaller;
 
     public Module module;
     public long lastRefresh = System.currentTimeMillis();
@@ -81,28 +96,53 @@ public class Main extends Thread implements PluginListener {
 
     private volatile boolean running;
 
-    public Main() {
+    public Main(StartupParams params) {
         super("Main");
+        config = configManager.loadConfig(params.getStartConfig());
+
         VerifierChecker.getAuthApi().setupAuth();
-        API = configManager.getAPI();
-        API.setSize(config.BOT_SETTINGS.DISPLAY.width, config.BOT_SETTINGS.DISPLAY.height);
+
+        this.starManager     = StarManager.getInstance();
+        this.mapManager      = new MapManager(this);
+        this.settingsManager = new SettingsManager(this);
+        this.facadeManager   = new FacadeManager(this);
+        this.hero            = new HeroManager(this);
+        this.effectManager   = new EffectManager(this);
+        this.guiManager      = new GuiManager(this);
+        this.statsManager    = new StatsManager(this);
+        this.pingManager     = new PingManager();
+        this.pluginHandler   = new PluginHandler();
+        this.pluginUpdater   = new PluginUpdater(this);
+        this.backpage        = new BackpageManager(this);
+        this.featureRegistry = new FeatureRegistry(this, pluginHandler);
+        this.repairManager   = new RepairManager();
+
+        this.botInstaller = new BotInstaller(
+                settingsManager, facadeManager, effectManager, guiManager, mapManager,
+                hero, statsManager, pingManager, repairManager);
+
+
+        API = configManager.getAPI(params);
+        API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();
         });
 
         this.status.add(this::onRunningToggle);
-        this.configChange.add(this::setConfig);
+        this.configChange.add(this::setConfigInternal);
 
         this.pluginHandler.updatePluginsSync();
         this.pluginHandler.addListener(this);
 
         this.form = new MainGui(this);
+        this.pluginUpdater.scheduleUpdateChecker();
 
         if (configManager.getConfigFailed())
             Popups.showMessageAsync("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
 
         API.createWindow();
+        if (params.getAutoStart()) setRunning(true);
         start();
     }
 
@@ -124,7 +164,7 @@ public class Main extends Thread implements PluginListener {
             avgTick = ((avgTick * 9) + (System.currentTimeMillis() - time)) / 10;
 
             Time.sleepMax(time, botInstaller.invalid.get() ? 1000 :
-                    Math.max(config.BOT_SETTINGS.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
+                    Math.max(config.BOT_SETTINGS.OTHER.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
         }
     }
 
@@ -181,7 +221,7 @@ public class Main extends Thread implements PluginListener {
                 else module.tickStopped();
             } catch (Throwable e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
-                if (modDef != null) modDef.getIssues().addWarning(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
             }
             for (Behaviour behaviour : behaviours) {
                 try {
@@ -190,7 +230,7 @@ public class Main extends Thread implements PluginListener {
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
-                            .addFailure(I18n.get("bot.issue.feature.failed_to_tick"), IssueHandler.createDescription(e));
+                            .addFailure("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
                 }
             }
         }
@@ -201,6 +241,7 @@ public class Main extends Thread implements PluginListener {
                 System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
 
         if (!module.canRefresh()) return;
+
         lastRefresh = System.currentTimeMillis();
         if (config.MISCELLANEOUS.PAUSE_FOR > 0) {
             System.out.println("Pausing (logging off): time arrived & module allows refresh");
@@ -216,8 +257,10 @@ public class Main extends Thread implements PluginListener {
     }
 
     private <A extends Module> A setModule(A module, boolean setConfig) {
-        module.install(this);
-        if (setConfig) updateCustomConfig(module);
+        if (module != null) {
+            module.install(this);
+            if (setConfig) updateCustomConfig(module);
+        }
         this.module = module;
         return module;
     }
@@ -279,12 +322,27 @@ public class Main extends Thread implements PluginListener {
     }
 
     public void setConfig(String config) {
+        this.configChange.send(config);
+    }
+
+    public MainGui getGui() {
+        return form;
+    }
+
+    private void setConfigInternal(String config) {
         if (configManager.getConfigName().equals(config)) return;
-        this.config = configManager.loadConfig(config);
-        mapManager.updateAreas();
-        featureRegistry.updateConfig();
-        form.updateConfiguration();
-        setModule(module, true);
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                this.config = configManager.loadConfig(config);
+                mapManager.updateAreas(true);
+                pluginHandler.updateConfig(); // Get plugins to update what features are enabled
+                featureRegistry.updateConfig(); // Update the features & configurables
+                form.updateConfiguration(); // Rebuild config gui
+                setModule(null, true);
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
 }

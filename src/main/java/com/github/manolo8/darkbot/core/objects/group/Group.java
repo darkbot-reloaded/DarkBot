@@ -39,7 +39,10 @@ public class Group extends UpdatableAuto {
         maxSize = API.readMemoryInt(address + 0x27);
         isOpen  = API.readMemoryBoolean(address + 0x2B);
 
-        if (!isValid()) return;
+        if (!isValid()) {
+            if (!members.isEmpty()) reset();
+            return;
+        }
 
         long selectedAddr = API.readMemoryLong(address + 0x3F);
 
@@ -51,6 +54,12 @@ public class Group extends UpdatableAuto {
         }
         isLeader = filtered.stream().map(h -> h.isLeader).findFirst().orElse(false);
         selectedMember = members.stream().filter(m -> selectedAddr == m.address).findFirst().orElse(null);
+    }
+
+    private void reset() {
+        members.clear();
+        isLeader = false;
+        selectedMember = null;
     }
 
     public GroupMember getMember(int id) {

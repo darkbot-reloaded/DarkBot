@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.extensions.features.handlers.TaskHandler;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 /**
@@ -23,6 +24,7 @@ public class FeatureRegisterHandler {
     private final FeatureRegistry featureRegistry;
     private final List<FeatureHandler<?>> FEATURE_HANDLERS;
 
+    private AtomicBoolean updating = new AtomicBoolean();
 
     public FeatureRegisterHandler(Main main, FeatureRegistry featureRegistry) {
         this.featureRegistry = featureRegistry;
@@ -40,7 +42,10 @@ public class FeatureRegisterHandler {
     }
 
     void update() {
-        FEATURE_HANDLERS.forEach(this::update);
+        if (updating.compareAndSet(false, true)) {
+            FEATURE_HANDLERS.forEach(this::update);
+            updating.set(false);
+        }
     }
 
     private <T> void update(FeatureHandler<T> registerer) {

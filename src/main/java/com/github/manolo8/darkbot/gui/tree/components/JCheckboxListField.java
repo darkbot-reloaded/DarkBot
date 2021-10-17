@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.types.Options;
 import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import javax.accessibility.Accessible;
@@ -32,7 +33,6 @@ public class JCheckboxListField extends JComboBox<String> implements OptionEdito
     private transient ActionListener listener;
 
     public JCheckboxListField() {
-        putClientProperty("JComboBox.isTableCellEditor", true);
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -58,7 +58,8 @@ public class JCheckboxListField extends JComboBox<String> implements OptionEdito
         check.setOpaque(true);
         setRenderer((JList<? extends String> list, String text, int index, boolean isSelected, boolean cellHasFocus) -> {
             if (index < 0) {
-                label.setText(elements.size() + "/" + options.getOptions().size() + " selected");
+                label.setText(I18n.get("misc.editor.checkbox_list.selected",
+                        elements.size() + "/" + options.getOptions().size()));
                 return label;
             }
             check.setText(text);

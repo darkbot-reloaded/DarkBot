@@ -72,7 +72,12 @@ public class Gui extends Updatable {
         this.update = 0;
     }
 
+    @Deprecated
     public boolean lastUpdatedIn(long time) {
+        return lastUpdatedOver(time);
+    }
+
+    public boolean lastUpdatedOver(long time) {
         return update != 0 && System.currentTimeMillis() - update > time;
     }
 

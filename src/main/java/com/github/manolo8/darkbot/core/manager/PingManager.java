@@ -38,7 +38,7 @@ public class PingManager implements Manager {
             reset();
             if (System.currentTimeMillis() > searchTime) {
                 searchTime = -1;
-                searchPingManager();
+                new Thread(this::searchPingManager).start();
             }
         }
     }

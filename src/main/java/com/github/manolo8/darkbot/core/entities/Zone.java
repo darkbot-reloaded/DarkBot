@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import com.github.manolo8.darkbot.core.utils.pathfinder.Area;
+import com.github.manolo8.darkbot.core.utils.pathfinder.Rectangle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class Zone
         extends Entity {
 
-    private final Area area = new Area(0, 0, 0, 0);
+    private final Rectangle area = new Rectangle(0, 0, 0, 0);
     private final ObjArray pointsArr = ObjArray.ofVector(true);
     private final List<Point> points = new ArrayList<>();
 
@@ -40,7 +40,7 @@ public class Zone
         area.set(minX, minY, maxX, maxY);
     }
 
-    public Area getZone() {
+    public Rectangle getZone() {
         return area;
     }
 }

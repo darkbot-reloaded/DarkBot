@@ -19,7 +19,7 @@ public class MapTraveler {
     private final Drive drive;
     private final StarManager star;
     private final Consumer<Map> listener = this::onMapChange;
-    private final PortalJumper jumper;
+    protected PortalJumper jumper;
 
     public Portal current;
     public Map target;
@@ -79,17 +79,7 @@ public class MapTraveler {
             main.guiManager.pet.setEnabled(false);
         hero.runMode();
 
-        if (!moveToCurrent()) return;
-        jumper.jump(current);
-    }
-
-    private boolean moveToCurrent() {
-        double leniency = Math.min(200 + drive.closestDistance(current.locationInfo.now), 600);
-        if (current.locationInfo.isLoaded() && drive.movingTo().distance(current.locationInfo.now) > leniency) {
-            drive.move(Location.of(current.locationInfo.now, Math.random() * Math.PI * 2, Math.random() * 200));
-            return false;
-        }
-        return hero.locationInfo.distance(current) <= leniency && !drive.isMoving();
+        jumper.travelAndJump(current);
     }
 
     private void onMapChange(Map map) {

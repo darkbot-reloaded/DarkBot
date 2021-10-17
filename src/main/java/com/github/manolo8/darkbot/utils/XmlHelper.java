@@ -26,6 +26,7 @@ public class XmlHelper {
     }
 
     public static Integer valueToInt(Element e) {
+        if (e == null) return null;
         String value = e.getTextContent();
         return value == null || value.isEmpty() ? null : Integer.parseInt(value);
     }

@@ -1,12 +1,13 @@
 package com.github.manolo8.darkbot.config;
 
+import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.config.types.Num;
 import com.github.manolo8.darkbot.config.types.Option;
 import com.github.manolo8.darkbot.config.types.Options;
 import com.github.manolo8.darkbot.config.types.Tag;
 import com.github.manolo8.darkbot.config.types.TagDefault;
-import com.github.manolo8.darkbot.config.types.suppliers.ApiSupplier;
+import com.github.manolo8.darkbot.config.types.suppliers.BrowserApi;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
@@ -14,8 +15,10 @@ import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveSpotSupplier;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.tree.components.JActionTable;
 import com.github.manolo8.darkbot.gui.tree.components.JBoxInfoTable;
+import com.github.manolo8.darkbot.gui.tree.components.JCharField;
 import com.github.manolo8.darkbot.gui.tree.components.JCheckboxListField;
 import com.github.manolo8.darkbot.gui.tree.components.JListField;
 import com.github.manolo8.darkbot.gui.tree.components.JNpcInfoTable;
@@ -29,11 +32,17 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
-import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.*;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.BOOSTER_AREA;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.GROUP_AREA;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.GROUP_NAMES;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.HERO_NAME;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.HP_SHIELD_NUM;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.STATS_AREA;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.ZONES;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.SHOW_PET;
 
 public class Config {
 
@@ -75,7 +84,7 @@ public class Config {
             public @Option ShipConfig REPAIR = new ShipConfig(1, '9');
             public @Option @Num(min = 1, max = 9999) int MAX_DEATHS = 10;
             public @Option @Editor(JListField.class) @Options(ReviveSpotSupplier.class) long REVIVE_LOCATION = 1L;
-            public @Option @Num(min = 2, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 3;
+            public @Option @Num(min = 5, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
             public @Option @Num(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
         }
 
@@ -96,6 +105,7 @@ public class Config {
             public @Option boolean KEEP = true;
             public @Option boolean SEQUENTIAL = false;
             public @Option boolean ONLY_KILL_PREFERRED = false;
+            public @Option boolean ENEMY_CBS_INVISIBLE = false;
         }
     }
 
@@ -105,6 +115,7 @@ public class Config {
         public @Option boolean AUTO_CLOACK;
         public @Option Character AUTO_CLOACK_KEY;
         public @Option @Num(max = 10000, step = 50) int RADIUS = 400;
+        public @Option boolean IGNORE_CONTESTED_BOXES = true;
 
         @Option
         @Editor(value = JBoxInfoTable.class, shared = true)
@@ -121,11 +132,12 @@ public class Config {
             public @Option Character KEY = '2';
             public @Option @Editor(JPercentField.class) double PERCENT = 0.8;
             public @Option @Num(min = 500, max = 1_000_000, step = 1000) int NPC_AMOUNT = 12000;
+            public @Option() Condition CONDITION;
         }
         public static class Rsb {
             public @Option boolean ENABLED = false;
             public @Option Character KEY = '3';
-            public @Option @Num(min = 500, max = 60_000, step = 500) int AMMO_REFRESH = 3500;
+            public @Deprecated int AMMO_REFRESH = 3500;
         }
         public @Option Character AMMO_KEY = '1';
         public @Option Character SHIP_ABILITY;
@@ -155,13 +167,15 @@ public class Config {
         public @Option @Tag(TagDefault.ALL) PlayerTag WHITELIST_TAG = null;
         public @Option @Tag(TagDefault.NONE) PlayerTag INVITE_TAG = null;
         public @Option boolean OPEN_INVITES = false;
+        public @Option boolean LEAVE_NO_WHITELISTED = false;
         //public @Option @Tag(TagDefault.NONE) PlayerTag KICK_TAG = null;
     }
 
     public @Option Miscellaneous MISCELLANEOUS = new Miscellaneous();
     public static class Miscellaneous {
+        public @Option boolean REFRESH_AFTER_REVIVE = false;
         public @Option @Num(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
-        public @Option @Num(max = 60 * 12, step = 10) int PAUSE_FOR = 5;
+        public @Option @Num(max = 60 * 12, step = 10) int PAUSE_FOR = 0;
         public @Option boolean RESET_REFRESH = true;
         public @Option @Editor(JPercentField.class) double DRONE_REPAIR_PERCENTAGE = 0.9;
         public @Option boolean HONOR_LOST_EXACT = true;
@@ -171,36 +185,64 @@ public class Config {
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
     public static class BotSettings {
-        public @Option @Editor(LangEditor.class) @Options(LanguageSupplier.class)
-                Locale LOCALE = new Locale(Locale.getDefault().getLanguage());
-        public @Option boolean FORCE_GAME_LANGUAGE = false;
-        public @Option boolean SPOOF_CLIENT = false;
-        public @Option @Num(min = 10, max = 300) int ZONE_RESOLUTION = 30;
-        public @Option boolean MAP_START_STOP = false;
-        public @Option boolean CONFIRM_EXIT = true;
-        public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
-        public @Option boolean DEV_STUFF = false;
-        public @Option @Editor(JListField.class) @Options(ApiSupplier.class) int API = 2;
-        public @Option boolean FULLY_HIDE_API = true;
-        public @Option boolean ENFORCE_HW_ACCEL = true;
-        public @Option boolean DISABLE_MASTER_PASSWORD = false;
+        public @Option BotGui BOT_GUI = new BotGui();
+        public static class BotGui {
+            @Option @Editor(LangEditor.class) @Options(LanguageSupplier.class)
+            public Locale LOCALE = new Locale(Locale.getDefault().getLanguage());
 
-        public @Option Display DISPLAY = new Display();
-        public static class Display {
-            public @Option @Editor(JCheckboxListField.class) @Options(DisplayFlag.Supplier.class)
-                    Set<DisplayFlag> TOGGLE = EnumSet.of(
-                            HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA);
-            public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
+            public @Option boolean CONFIRM_EXIT = true;
+            public @Option boolean SAVE_GUI_POS = false;
+            public @Option boolean CONFIG_TREE_TABS = true;
             public @Option @Num(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
+
+            public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
+            public WindowPosition MAIN_GUI_WINDOW = new WindowPosition();
+            public WindowPosition CONFIG_GUI_WINDOW = new WindowPosition();
+
+            public static class WindowPosition {
+                // x and y refer to top left coordinates of window
+                public int x = Integer.MIN_VALUE, y = Integer.MIN_VALUE;
+                public int width = MainGui.DEFAULT_WIDTH, height = MainGui.DEFAULT_HEIGHT;
+            }
+        }
+
+        public @Option APIConfig API_CONFIG = new APIConfig();
+        public static class APIConfig {
+            @Option @Editor(JListField.class) @Options(BrowserApi.Supplier.class)
+            public BrowserApi BROWSER_API = BrowserApi.DARK_BOAT;
+            public @Option boolean FULLY_HIDE_API = true;
+            public @Option boolean FORCE_GAME_LANGUAGE = false;
+            public @Option boolean ENFORCE_HW_ACCEL = true;
 
             public int width = 1280;
             public int height = 800;
-            public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
+        }
+
+        public @Option MapDisplay MAP_DISPLAY = new MapDisplay();
+        public static class MapDisplay {
+            @Option @Editor(JCheckboxListField.class) @Options(DisplayFlag.Supplier.class)
+            public Set<DisplayFlag> TOGGLE = EnumSet.of(
+                    HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA, SHOW_PET);
+            public @Option @Num(max = 300, step = 1) int TRAIL_LENGTH = 15;
+            public @Option boolean MAP_START_STOP = false;
+            public @Option(key = "colors") ColorScheme cs = new ColorScheme();
+        }
+
+        public @Option Other OTHER = new Other();
+        public static class Other {
+            public @Option boolean DISABLE_MASTER_PASSWORD = false;
+            public @Option @Num(min = 10, max = 300) int ZONE_RESOLUTION = 30;
+            public @Option @Num(min = 10, max = 250) int MIN_TICK = 15;
+            public @Option boolean DEV_STUFF = false;
         }
     }
 
     public /*@Option("Extra actions")*/ ExtraActions EXTRA = new ExtraActions();
     public static class ExtraActions {
+        // Dummy testing condition
+        @Option()
+        public Condition CONDITION;
+
         @Option
         @Editor(value = JActionTable.class, shared = true)
         public Map<String, ActionInfo> ACTION_INFOS = new HashMap<>();
@@ -219,7 +261,7 @@ public class Config {
 
         @Override
         public String toString() {
-            return "Config: " + CONFIG + "   Formation: " + Objects.toString(FORMATION, "(unset)");
+            return "Config: " + CONFIG + "   Formation: " + JCharField.getDisplay(FORMATION);
         }
     }
 

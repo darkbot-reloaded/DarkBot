@@ -13,13 +13,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Utility for HTTP connections.
  * Use it like builder, just one time for instance
  */
 public class Http {
-    private static String DEFAULT_USER_AGENT = "Mozilla/5.0";
+    private static String DEFAULT_USER_AGENT = "BigpointClient/1.5.2";
 
     public static String getDefaultUserAgent() {
         return DEFAULT_USER_AGENT;
@@ -167,7 +168,6 @@ public class Http {
 
     /**
      * Sets user agent used in connection.
-     * Default is "Mozilla/5.0".
      *
      * @param userAgent to use.
      * @return current instance of Http
@@ -230,8 +230,8 @@ public class Http {
     public <R, X extends Throwable> R consumeInputStream(ThrowFunction<InputStream, R, X> function) throws X {
         try (InputStream is = getInputStream()) {
             return function.apply(is);
-        } catch (IOException e) {
-            throw (X) e;
+        } catch (Throwable t) {
+            throw (X) t;
         }
     }
 

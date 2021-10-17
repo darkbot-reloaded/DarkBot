@@ -43,34 +43,27 @@ public class StatsManager implements Manager {
 
     @Override
     public void install(BotInstaller botInstaller) {
-        botInstaller.heroInfoAddress.add(value -> {
-            address = value;
-            sid = API.readMemoryString(API.readMemoryLong(address + 168));
-        });
-        botInstaller.settingsAddress.add(value -> {
-            settingsAddress = value;
-            instance = null;
-        });
+        botInstaller.heroInfoAddress.add(value -> address = value);
+        botInstaller.settingsAddress.add(value -> settingsAddress = value);
     }
 
 
     public void tick() {
         if (address == 0) return;
-        updateCredits(API.readMemoryDouble(address + 288));
-        updateUridium(API.readMemoryDouble(address + 296));
-        //API.readMemoryDouble(address + 304); // Jackpot
-        updateExperience(API.readMemoryDouble(address + 312));
-        updateHonor(API.readMemoryDouble(address + 320));
+        updateCredits(API.readMemoryDouble(address + 296));
+        updateUridium(API.readMemoryDouble(address + 304));
+        //API.readMemoryDouble(address + 312); // Jackpot
+        updateExperience(API.readMemoryDouble(address + 320));
+        updateHonor(API.readMemoryDouble(address + 328));
 
-        deposit = API.readMemoryInt(API.readMemoryLong(address + 240) + 40);
-        depositTotal = API.readMemoryInt(API.readMemoryLong(address + 248) + 40);
+        deposit = API.readMemoryInt(API.readMemoryLong(address + 248) + 40);
+        depositTotal = API.readMemoryInt(API.readMemoryLong(address + 256) + 40);
 
         currentBox = API.readMemoryLong(address + 0xE8);
 
+        sid = API.readMemoryStringFallback(API.readMemoryLong(address + 176), null);
         if (settingsAddress == 0) return;
-        if (instance == null || instance.isEmpty() || !instance.startsWith("http")) {
-            instance = API.readMemoryString(API.readMemoryLong(settingsAddress + 616));
-        }
+        instance = API.readMemoryStringFallback(API.readMemoryLong(settingsAddress + 616), null);
     }
 
     public int getLevel() {
@@ -148,5 +141,14 @@ public class StatsManager implements Manager {
 
     public double earnedHonor() {
         return earnedHonor / ((double) runningTime() / 3600000);
+    }
+
+    public void resetValues() {
+        started = System.currentTimeMillis();
+        runningTime = 1;
+        earnedCredits = 0;
+        earnedUridium = 0;
+        earnedHonor = 0;
+        earnedExperience = 0;
     }
 }

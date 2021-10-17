@@ -49,7 +49,10 @@ public class FeatureRegistry implements PluginListener {
     }
 
     public void updateConfig() {
-        FEATURES_BY_ID.values().forEach(featureLoader::updateConfig);
+        for (FeatureDefinition<?> feature : FEATURES_BY_ID.values()) {
+            feature.sendUpdate();
+            featureLoader.updateConfig(feature);
+        }
     }
 
     private void registerNativeFeature(Class<?> clazz) {
@@ -64,7 +67,7 @@ public class FeatureRegistry implements PluginListener {
             fd.getIssues().addListener(iss -> registryHandler.update());
             FEATURES_BY_ID.put(clazzName, fd);
         } catch (Throwable e) {
-            plugin.getIssues().addWarning(I18n.get("bot.issue.feature.failed_to_load"), I18n.get("bot.issue.feature.failed_to_load.desc", clazzName, e.toString()));
+            plugin.getIssues().addWarning("bot.issue.feature.failed_to_load", I18n.get("bot.issue.feature.failed_to_load.desc", clazzName, e.toString()));
         }
     }
 
@@ -80,7 +83,7 @@ public class FeatureRegistry implements PluginListener {
                 feature.setInstance(instance = featureLoader.loadFeature(feature));
                 return Optional.of(instance);
             } catch (Throwable e) {
-                feature.getIssues().addFailure(I18n.get("bot.issue.feature.failed_to_load"), IssueHandler.createDescription(e));
+                feature.getIssues().addFailure("bot.issue.feature.failed_to_load", IssueHandler.createDescription(e));
                 e.printStackTrace();
                 return Optional.empty();
             }

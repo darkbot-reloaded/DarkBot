@@ -23,7 +23,6 @@ public class MainToggleButton extends JToggleButton implements ActionListener {
 
     protected MainToggleButton(Icon icon, String text, String description) {
         super(text, icon);
-        putClientProperty("JButton.buttonType", "square");
 
         addActionListener(this);
         if (description != null && !description.isEmpty()) setToolTipText(description);
