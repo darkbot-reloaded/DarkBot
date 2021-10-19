@@ -13,7 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Utility for HTTP connections.
@@ -37,6 +36,7 @@ public class Http {
     //Discord doesn't handle java's user agent...
     protected String userAgent = DEFAULT_USER_AGENT;
     protected ParamBuilder params;
+    protected byte[] body;
     protected List<Runnable> suppliers;
     protected Map<String, String> headers = new LinkedHashMap<>();
 
@@ -144,6 +144,8 @@ public class Http {
      * @return current instance of Http
      */
     public Http setParam(Object key, Object value) {
+        if (this.body != null)
+            throw new UnsupportedOperationException("Cannot mix body & params");
         if (this.params == null)
             this.params = ParamBuilder.create(ParamBuilder.encode(key), ParamBuilder.encode(value));
         else this.params.set(key, value);
@@ -160,9 +162,24 @@ public class Http {
      * @return current instance of Http
      */
     public Http setRawParam(Object key, Object value) {
+        if (this.body != null)
+            throw new UnsupportedOperationException("Cannot mix body & params");
         if (this.params == null)
             this.params = ParamBuilder.create(key, value);
         else this.params.setRaw(key, value);
+        return this;
+    }
+
+    /**
+     * Set the body for POST requests
+     * 
+     * @param body bytes to send as body
+     * @return current instance of http
+     */
+    public Http setBody(byte[] body) {
+        if (this.params != null)
+            throw new UnsupportedOperationException("Cannot mix body & params");
+        this.body = body;
         return this;
     }
 
@@ -270,11 +287,10 @@ public class Http {
         conn.setRequestProperty("User-Agent", userAgent);
         if (!headers.isEmpty()) headers.forEach(conn::setRequestProperty);
 
-        if (method == Method.POST && params != null) {
-            byte[] data = params.getBytes();
+        if (method == Method.POST && (body != null || params != null)) {
             conn.setDoOutput(true);
+            byte[] data = body != null ? body : params.getBytes();
             conn.setRequestProperty("Content-Length", String.valueOf(data.length));
-
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(data);
             }
