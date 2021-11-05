@@ -52,7 +52,7 @@ public class DiscordWebhook {
         Http.create(url, Method.POST)
                 .setUserAgent("Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2")
                 .setBody(GSON.toJson(this).getBytes(StandardCharsets.UTF_8))
-                .getConnection(h -> h.setRequestProperty("Content-Type", "application/json; charset=UTF-8"))
+                .setRawHeader("Content-Type", "application/json; charset=UTF-8")
                 .getInputStream().close();
     }
 
