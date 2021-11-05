@@ -7,8 +7,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.awt.*;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,16 +42,15 @@ public class DiscordWebhook {
         this.embeds.add(embed);
     }
 
-    public void execute(String url) throws IOException {
+    public int execute(String url) throws IOException {
         if (this.content == null && this.embeds.isEmpty()) {
             throw new IllegalArgumentException("Set content or add at least one EmbedObject");
         }
 
-        Http.create(url, Method.POST)
-                .setUserAgent("Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2")
+        return Http.create(url, Method.POST)
                 .setRawHeader("Content-Type", "application/json; charset=UTF-8")
                 .setBody(GSON.toJson(this).getBytes(StandardCharsets.UTF_8))
-                .getInputStream().close();
+                .getConnection().getResponseCode();
     }
 
     public static class EmbedObject {
