@@ -49,16 +49,11 @@ public class DiscordWebhook {
             throw new IllegalArgumentException("Set content or add at least one EmbedObject");
         }
 
-        Http http = Http.create(url, Method.POST)
+        Http.create(url, Method.POST)
+                .setUserAgent("Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2")
                 .setBody(GSON.toJson(this).getBytes(StandardCharsets.UTF_8))
-                .setUserAgent("Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
-        HttpURLConnection conn = http.getConnection();
-
-        try (OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream())) {
-            GSON.toJson(this, writer);
-        }
-
-        conn.disconnect();
+                .getConnection(h -> h.setRequestProperty("Content-Type", "application/json; charset=UTF-8"))
+                .getInputStream().close();
     }
 
     public static class EmbedObject {
