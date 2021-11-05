@@ -42,6 +42,8 @@ public class NpcAttacker {
     protected boolean sab; // If shooting SAB right now
     protected boolean rsb; // If shooting RSB right nos
 
+    protected boolean closeRange; // Ignore radius before first shot
+
     public NpcAttacker(Main main) {
         this.main = main;
         this.mapManager = main.mapManager;
@@ -95,6 +97,7 @@ public class NpcAttacker {
         fixedTimes = 0;
         laserTime = 0;
         firstAttack = false;
+        closeRange = false;
         if (hero.locationInfo.distance(target) < 800 && System.currentTimeMillis() - clickDelay > 500) {
             hero.setTarget(target);
             setRadiusAndClick(true);
@@ -133,10 +136,12 @@ public class NpcAttacker {
         if (target.health.hpPercent() < 0.25 && target.npcInfo.extra.has(NpcExtra.AGGRESSIVE_FOLLOW)) radius *= 0.75;
         if (target != hero.target || !hero.isAttacking(target) || castingAbility()) radius = Math.min(550, radius);
         else if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) radius = Math.min(600, radius);
+        if (target.npcInfo.extra.has((NpcExtra.FIRST_ATTACK)) && !closeRange) radius = Math.min(300, radius);
+        radius += bar.findItemById("ability_zephyr_mmt").map(i -> i.quantity).orElse(0d) * 5;
 
-        return radius + bar.findItemById("ability_zephyr_mmt").map(i -> i.quantity).orElse(0d) * 5;
+        if (main.hero.locationInfo.distance(target) < radius + 100d) closeRange = true;
+        return radius;
     }
-
     private boolean shouldSab() {
         if (!main.config.LOOT.SAB.ENABLED || target.npcInfo.extra.has(NpcExtra.NO_SAB)) return false;
 
