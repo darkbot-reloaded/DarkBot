@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.itf.ExtraMenuProvider;
+import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
@@ -136,7 +137,12 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             }));
             list.add(create("reload", e -> {
                 System.out.println("Triggering refresh: user requested");
-                Main.API.handleRefresh();
+                try {
+                    Main.API.handleRefresh();
+                } catch (Exception ex) {
+                    System.out.println("Exception handling user requested refresh:");
+                    ex.printStackTrace();
+                }
             }));
             list.add(create("discord", UIUtils.getIcon("discord"), e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
             list.add(create("copy_sid", e -> SystemUtils.toClipboard(main.statsManager.sid)));
@@ -145,7 +151,10 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 ConfigEntity.changed();
                 main.getGui().updateConfiguration();
             }));
-
+            list.add(create("reset_stats", e -> {
+                main.statsManager.resetValues();
+                main.guiManager.deaths = 0;
+            }));
 
             if (main.config.BOT_SETTINGS.OTHER.DEV_STUFF) {
                 list.add(createSeparator("Dev stuff"));

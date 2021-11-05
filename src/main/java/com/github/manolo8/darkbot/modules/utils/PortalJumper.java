@@ -6,12 +6,16 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
 
+import static com.github.manolo8.darkbot.Main.API;
+
 public class PortalJumper {
 
     private final HeroManager hero;
     private final Drive drive;
     private Portal last;
     private long nextMoveClick;
+    private long tryingToJumpSince;
+    private long lastJumpTick;
 
     public PortalJumper(HeroManager hero) {
         this.hero = hero;
@@ -44,14 +48,22 @@ public class PortalJumper {
             if (!gm.group.isValid() || gm.group.size < minGroupSize) return;
         }
 
+        if (System.currentTimeMillis() - lastJumpTick > 2500) tryingToJumpSince = System.currentTimeMillis();
+        lastJumpTick = System.currentTimeMillis();
+
         hero.jumpPortal(target);
 
         if (target != last) {
             last = target;
+            tryingToJumpSince = System.currentTimeMillis();
             nextMoveClick = System.currentTimeMillis() + 5000;
         } else if (System.currentTimeMillis() > nextMoveClick && !target.clickable.enabled) {
             hero.drive.clickCenter(true, target.locationInfo.now);
             nextMoveClick = System.currentTimeMillis() + 10000;
+        } else if (tryingToJumpSince != 0 && System.currentTimeMillis() > tryingToJumpSince + 120000) {
+            System.out.println("Triggering refresh: jumping portal took too long");
+            tryingToJumpSince = 0;
+            API.handleRefresh();
         }
     }
 

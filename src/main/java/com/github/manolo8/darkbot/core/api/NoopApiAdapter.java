@@ -1,16 +1,25 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.utils.StartupParams;
+
+import java.util.function.BooleanSupplier;
+
 /**
  * No-operation API adapter. Will do nothing. Useful for testing purposes, and as fallback if no API is loaded.
  */
 public class NoopApiAdapter extends ApiAdapter {
 
-    public NoopApiAdapter() {
-        super(null);
+    public NoopApiAdapter(StartupParams params, BooleanSupplier fullyHide) {
+        super(params, fullyHide);
     }
 
     @Override
-    public void createWindow() {}
+    public void createWindow() {
+    }
+
+    @Override
+    public void setSize(int width, int height) {
+    }
 
     @Override
     public boolean isValid() {
@@ -18,18 +27,28 @@ public class NoopApiAdapter extends ApiAdapter {
     }
 
     @Override
-    public void mouseMove(int x, int y) {
+    public String getVersion() {
+        return "no-op";
+    }
 
+    @Override
+    public void sendText(String string) {
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+    }
+
+    @Override
+    public void mouseMove(int x, int y) {
     }
 
     @Override
     public void mouseClick(int x, int y) {
-
     }
 
     @Override
-    public void keyboardClick(char btn) {
-
+    public void rawKeyboardClick(char btn) {
     }
 
     @Override
@@ -58,18 +77,19 @@ public class NoopApiAdapter extends ApiAdapter {
     }
 
     @Override
-    public void writeMemoryDouble(long address, double value) {
+    public void readMemory(long address, byte[] buffer, int length) {
+    }
 
+    @Override
+    public void writeMemoryDouble(long address, double value) {
     }
 
     @Override
     public void writeMemoryLong(long address, long value) {
-
     }
 
     @Override
     public void writeMemoryInt(long address, int value) {
-
     }
 
     @Override

@@ -22,10 +22,15 @@ public class Entity extends Updatable {
     public int id;
     public boolean removed;
 
-    public Entity() {}
-    public Entity(int id) { this.id = id; }
-    public Entity(int id, long address) {
+    public Entity() {
+    }
+
+    public Entity(int id) {
         this.id = id;
+    }
+
+    public Entity(int id, long address) {
+        this(id);
         this.update(address);
     }
 

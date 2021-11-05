@@ -62,7 +62,7 @@ public class RefinementGui extends Gui {
 
         @Override
         public void update(long address) {
-            if (address != this.address || !name.contains("ore")) {
+            if (address != this.address || name == null || !name.contains("ore")) {
                 name = API.readMemoryString(address, 184);
 
                 if (name != null && !name.isEmpty()) {

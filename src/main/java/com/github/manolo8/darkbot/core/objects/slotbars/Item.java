@@ -1,10 +1,15 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Item extends UpdatableAuto {
+    private static final int START = 36, END = 128 + 8;
+
+    private static final byte[] BUFFER = new byte[END - START];
+
     // Only has relevant info if !isReady()
     public final ItemTimer itemTimer = new ItemTimer();
 
@@ -14,17 +19,36 @@ public class Item extends UpdatableAuto {
 
     @Override
     public void update() {
-        this.buyable     = API.readMemoryBoolean(address + 36);
-        this.activatable = API.readMemoryBoolean(address + 40);
-        this.selected    = API.readMemoryBoolean(address + 44);
-        this.available   = API.readMemoryBoolean(address + 48);
-        this.visible     = API.readMemoryBoolean(address + 52);
-        //this.blocked   = API.readMemoryBoolean(address + 56); // doesnt work
-        this.quantity    = API.readMemoryDouble(address + 128);
+        // There are *a lot* of items in-game
+        // Doing 5 boolean-read calls is way more expensive than a single mem-read to the buffer
+        // This IS very ugly, but improves performance.
+        // We also avoid updating timer if no other flags change for the extra 3 long-read calls
+        API.readMemory(address + START, BUFFER);
 
-        long tempAddr = API.readMemoryLong(address, 88, 40);
-        if (itemTimer.address != tempAddr) this.itemTimer.update(tempAddr);
-        this.itemTimer.update();
+        boolean buyable     = BUFFER[0] == 1;
+        boolean activatable = BUFFER[4] == 1;
+        boolean selected    = BUFFER[8] == 1;
+        boolean available   = BUFFER[12] == 1;
+        boolean visible     = BUFFER[16] == 1;
+        double quantity     = ByteUtils.getDouble(BUFFER, 92);
+
+        if (this.buyable != buyable ||
+                this.activatable != activatable ||
+                this.selected != selected ||
+                this.available != available ||
+                this.visible != visible ||
+                this.quantity != quantity) {
+            this.buyable = buyable;
+            this.activatable = activatable;
+            this.selected = selected;
+            this.available = available;
+            this.visible = visible;
+            this.quantity = quantity;
+
+            long timerAddr = API.readMemoryLong(address, 88, 40);
+            if (itemTimer.address != timerAddr) this.itemTimer.update(timerAddr);
+            this.itemTimer.update();
+        }
     }
 
     @Override

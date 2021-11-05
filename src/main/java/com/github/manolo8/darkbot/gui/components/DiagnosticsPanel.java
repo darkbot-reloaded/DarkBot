@@ -69,7 +69,7 @@ public class DiagnosticsPanel extends JPanel {
     }
 
     private enum Sections implements DiagnosticSection {
-        BOT("Bot", main -> String.format("%.1f ms tick\n%d API Version", main.avgTick, Main.API.getVersion())),
+        BOT("Bot", main -> String.format("%.1f ms tick\n%s API Version", main.avgTick, Main.API.getVersion())),
         INGAME("In-game", main -> String.format("%d MB\n%d FPS\n%d ping",
                 Main.API.getMemoryUsage(), main.facadeManager.stats.getFps(), main.pingManager.ping));
 
