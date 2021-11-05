@@ -7,8 +7,9 @@ import com.google.gson.annotations.SerializedName;
 
 import java.awt.*;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +18,11 @@ import java.util.List;
  */
 public class DiscordWebhook {
     private static final Gson GSON = new Gson();
+    private final List<EmbedObject> embeds = new ArrayList<>();
     private String content;
     private String username;
     @SerializedName("avatar_url") private String avatarUrl;
     private boolean tts;
-    private final List<EmbedObject> embeds = new ArrayList<>();
 
     public void setContent(String content) {
         this.content = content;
@@ -48,17 +49,15 @@ public class DiscordWebhook {
             throw new IllegalArgumentException("Set content or add at least one EmbedObject");
         }
 
-        Http http = Http.create(url, Method.POST);
+        Http http = Http.create(url, Method.POST)
+                .setBody(GSON.toJson(this).getBytes(StandardCharsets.UTF_8))
+                .setUserAgent("Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
         HttpURLConnection conn = http.getConnection();
-        conn.addRequestProperty("Content-Type", "application/json");
-        conn.setDoOutput(true);
 
-        OutputStream stream = conn.getOutputStream();
-        stream.write(GSON.toJson(this).getBytes());
-        stream.flush();
-        stream.close();
+        try (OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream())) {
+            GSON.toJson(this, writer);
+        }
 
-        http.closeInputStream();
         conn.disconnect();
     }
 
