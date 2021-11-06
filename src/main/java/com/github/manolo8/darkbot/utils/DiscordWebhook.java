@@ -106,6 +106,11 @@ public class DiscordWebhook {
             return footer;
         }
 
+        public EmbedObject setFooter(String text, String icon) {
+            this.footer = new Footer(text, icon);
+            return this;
+        }
+
         public Thumbnail getThumbnail() {
             return thumbnail;
         }
@@ -128,18 +133,13 @@ public class DiscordWebhook {
             return author;
         }
 
-        public List<Field> getFields() {
-            return fields;
-        }
-
-        public EmbedObject setFooter(String text, String icon) {
-            this.footer = new Footer(text, icon);
-            return this;
-        }
-
         public EmbedObject setAuthor(String name, String url, String icon) {
             this.author = new Author(name, url, icon);
             return this;
+        }
+
+        public List<Field> getFields() {
+            return fields;
         }
 
         public EmbedObject addField(String name, String value, boolean inline) {
