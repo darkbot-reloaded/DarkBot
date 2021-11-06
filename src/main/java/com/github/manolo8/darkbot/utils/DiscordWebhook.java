@@ -10,43 +10,42 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Adaptation of original source: https://gist.github.com/k3kdude/fba6f6b37594eae3d6f9475330733bdb
  */
 public class DiscordWebhook {
     private static final Gson GSON = new Gson();
-    
+
     private String content;
     private String username;
     @SerializedName("avatar_url") private String avatarUrl;
     private boolean tts;
     private final List<EmbedObject> embeds = new ArrayList<>();
 
-    public void setContent(String content) {
+    public DiscordWebhook setContent(String content) {
         this.content = content;
+        return this;
     }
 
-    public void setUsername(String username) {
+    public DiscordWebhook setUsername(String username) {
         this.username = username;
+        return this;
     }
 
-    public void setAvatarUrl(String avatarUrl) {
+    public DiscordWebhook setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+        return this;
     }
 
-    public void setTts(boolean tts) {
+    public DiscordWebhook setTts(boolean tts) {
         this.tts = tts;
+        return this;
     }
 
-    public void addEmbed(EmbedObject embed) {
+    public DiscordWebhook addEmbed(EmbedObject embed) {
         this.embeds.add(embed);
-    }
-
-    public void addEmbed(Function<EmbedObject, EmbedObject> function) {
-        addEmbed(function.apply(new EmbedObject()));
+        return this;
     }
 
     public int execute(String url) throws IOException {
