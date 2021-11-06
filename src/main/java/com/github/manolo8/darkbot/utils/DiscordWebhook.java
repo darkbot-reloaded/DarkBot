@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Adaptation of original source: https://gist.github.com/k3kdude/fba6f6b37594eae3d6f9475330733bdb
@@ -41,6 +43,10 @@ public class DiscordWebhook {
 
     public void addEmbed(EmbedObject embed) {
         this.embeds.add(embed);
+    }
+
+    public void addEmbed(Function<EmbedObject, EmbedObject> function) {
+        addEmbed(function.apply(new EmbedObject()));
     }
 
     public int execute(String url) throws IOException {
