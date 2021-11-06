@@ -138,9 +138,13 @@ public class DiscordWebhook {
             return author;
         }
 
-        public EmbedObject setAuthor(String name, String url, String icon) {
-            this.author = new Author(name, url, icon);
+        public EmbedObject setAuthor(Author author) {
+            this.author = author;
             return this;
+        }
+
+        public EmbedObject setAuthor(String name, String url, String icon) {
+            return setAuthor(new Author(name, url, icon));
         }
 
         public List<Field> getFields() {
