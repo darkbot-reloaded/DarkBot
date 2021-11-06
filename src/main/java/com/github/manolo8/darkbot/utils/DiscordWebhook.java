@@ -16,11 +16,12 @@ import java.util.List;
  */
 public class DiscordWebhook {
     private static final Gson GSON = new Gson();
-    private final List<EmbedObject> embeds = new ArrayList<>();
+    
     private String content;
     private String username;
     @SerializedName("avatar_url") private String avatarUrl;
     private boolean tts;
+    private final List<EmbedObject> embeds = new ArrayList<>();
 
     public void setContent(String content) {
         this.content = content;
