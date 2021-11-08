@@ -47,6 +47,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
@@ -93,6 +94,7 @@ public class Main extends Thread implements PluginListener {
 
     private String moduleId;
     private List<Behaviour> behaviours = new ArrayList<>();
+    private final List<Runnable> tasks = new ArrayList<>();
 
     private volatile boolean running;
 
@@ -178,6 +180,25 @@ public class Main extends Thread implements PluginListener {
         this.form.tick();
         this.configManager.saveChangedConfig();
         this.configChange.tick();
+
+        processTasks();
+    }
+
+    private void processTasks() {
+        Runnable[] tasks = new Runnable[0];
+        synchronized (Main.UPDATE_LOCKER) {
+            if (this.tasks.isEmpty()) return;
+
+            tasks = this.tasks.toArray(tasks);
+            this.tasks.clear();
+        }
+        for (Runnable task : tasks) {
+            try {
+                task.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private boolean isInvalid() {
@@ -342,6 +363,12 @@ public class Main extends Thread implements PluginListener {
             });
         } catch (InterruptedException | InvocationTargetException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void addTask(Runnable task) {
+        synchronized (Main.UPDATE_LOCKER) {
+            this.tasks.add(task);
         }
     }
 

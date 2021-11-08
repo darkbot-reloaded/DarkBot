@@ -158,7 +158,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
 
             if (main.config.BOT_SETTINGS.OTHER.DEV_STUFF) {
                 list.add(createSeparator("Dev stuff"));
-                list.add(create("Save SWF", e -> SWFUtils.dumpMainSWF()));
+                list.add(create("Save SWF", e -> main.addTask(SWFUtils::dumpMainSWF)));
             }
 
             return list;
