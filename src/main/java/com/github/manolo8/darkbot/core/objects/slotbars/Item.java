@@ -71,7 +71,7 @@ public class Item extends UpdatableAuto {
         @Override
         public void update() {
             if (address == 0) {
-                resetTimer();
+                reset();
                 return;
             }
 
@@ -83,7 +83,7 @@ public class Item extends UpdatableAuto {
         public void update(long address) {
             this.address = address;
             if (address == 0) {
-                resetTimer();
+                reset();
                 return;
             }
 
