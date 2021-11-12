@@ -91,7 +91,7 @@ public class Item extends UpdatableAuto {
             this.itemDelay = API.readMemoryDouble(address + 88);
         }
 
-        public void resetTimer() {
+        public void reset() {
             this.elapsed = 0;
             this.startTime = 0;
             this.itemDelay = 0;
