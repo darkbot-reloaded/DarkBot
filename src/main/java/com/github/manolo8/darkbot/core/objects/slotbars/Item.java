@@ -44,11 +44,10 @@ public class Item extends UpdatableAuto {
             this.available = available;
             this.visible = visible;
             this.quantity = quantity;
-
-            long timerAddr = API.readMemoryLong(address, 88, 40);
-            if (itemTimer.address != timerAddr) this.itemTimer.update(timerAddr);
-            this.itemTimer.update();
         }
+        long timerAddr = API.readMemoryLong(address, 88, 40);
+        if (itemTimer.address != timerAddr) this.itemTimer.update(timerAddr);
+        this.itemTimer.update();
     }
 
     @Override
@@ -71,7 +70,10 @@ public class Item extends UpdatableAuto {
 
         @Override
         public void update() {
-            if (address == 0) return;
+            if (address == 0) {
+                resetTimer();
+                return;
+            }
 
             this.elapsed = API.readMemoryDouble(address + 72);
             this.availableIn = API.readMemoryDouble(address + 96);
@@ -80,10 +82,20 @@ public class Item extends UpdatableAuto {
         @Override
         public void update(long address) {
             this.address = address;
-            if (address == 0) return;
+            if (address == 0) {
+                resetTimer();
+                return;
+            }
 
             this.startTime = API.readMemoryDouble(address + 80);
             this.itemDelay = API.readMemoryDouble(address + 88);
+        }
+
+        public void resetTimer() {
+            this.elapsed = 0;
+            this.startTime = 0;
+            this.itemDelay = 0;
+            this.availableIn = 0;
         }
     }
 }
