@@ -20,6 +20,7 @@ import eu.darkbot.api.extensions.ExtraMenus;
 import eu.darkbot.api.managers.BackpageAPI;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.I18nAPI;
+import eu.darkbot.api.managers.StatsAPI;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -117,6 +118,8 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             I18nAPI i18n = api.requireAPI(I18nAPI.class);
             BackpageAPI backpage = api.requireAPI(BackpageAPI.class);
             ConfigAPI config = api.requireAPI(ConfigAPI.class);
+            Main main = api.requireInstance(Main.class);
+
             String p = "gui.hamburger_button.";
 
             list.add(create(i18n.get(p + "home"), e -> {
