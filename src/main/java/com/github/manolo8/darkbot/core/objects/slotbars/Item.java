@@ -24,7 +24,7 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
     private long lastUsed;
 
     private final ItemCategory itemCategory;
-    private SelectableItem selectableItem;
+    public SelectableItem selectableItem;
 
     public Item() {
         this(null);
@@ -192,6 +192,8 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
                 ", actionStyle='" + actionStyle + '\'' +
                 ", iconLootId='" + iconLootId + '\'' +
                 ", lastUsed=" + lastUsed +
+                ", itemCategory=" + itemCategory +
+                ", selectableItem=" + selectableItem +
                 '}';
     }
 

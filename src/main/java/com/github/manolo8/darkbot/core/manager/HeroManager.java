@@ -118,6 +118,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         long targetPtr = API.readMemoryLong(main.mapManager.mapAddress, 120, 40);
 
         if (targetPtr == 0) inGameTarget = null;
+        else if (targetPtr == petAddress) inGameTarget = pet;
         else inGameTarget = main.mapManager.entities.allEntities.stream()
                 .flatMap(Collection::stream)
                 .filter(entity -> entity.address == targetPtr)

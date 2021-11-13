@@ -388,7 +388,7 @@ public class MapDrawer extends JPanel {
         g2.setColor(cs.MINES);
         for (Mine mine : mines) drawEntity(g2, mine.locationInfo.now, true);
 
-        if (config.BOT_SETTINGS.OTHER.DEV_STUFF) {
+        if (hasFlag(DisplayFlag.SHOW_DESTINATION)) {
             g2.setColor(cs.GOING);
             for (Npc npc : npcs) drawLine(g2, npc.locationInfo, npc.shipInfo.destination);
             for (Ship ship : ships) drawLine(g2, ship.locationInfo, ship.shipInfo.destination);
@@ -446,6 +446,9 @@ public class MapDrawer extends JPanel {
             g2.drawLine(translateX(begin.x), translateY(begin.y),
                     translateX(path.x), translateY((begin = path).y));
         }
+
+        if (hasFlag(DisplayFlag.SHOW_DESTINATION) && drive.paths.isEmpty())
+            drawLine(g2, hero.locationInfo, hero.shipInfo.destination);
 
         g2.setColor(cs.HERO);
 

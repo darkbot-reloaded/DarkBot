@@ -113,19 +113,12 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         if (item == null) return null;
         if (item instanceof Item) return (Item) item;
 
-        String itemId = item.getId();
-        ItemCategory category = item.getCategory();
-
-        return category == null ? categoryBar.findItemById(itemId).orElse(null)
-                : categoryBar.get(category).items.stream()
-                .filter(i -> i.getId().equals(itemId))
-                .findFirst()
-                .orElse(null);
+        return categoryBar.findItem(item).orElse(null);
     }
 
     public enum Type {
         DEFAULT_BAR,
         PREMIUM_BAR,
-        PRO_ACTION_BAR;
+        PRO_ACTION_BAR
     }
 }

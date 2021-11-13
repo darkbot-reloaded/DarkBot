@@ -3,8 +3,12 @@ package com.github.manolo8.darkbot.core.objects.slotbars;
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import eu.darkbot.api.game.items.ItemCategory;
+import eu.darkbot.api.game.items.SelectableItem;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -51,6 +55,14 @@ public class CategoryBar extends MenuBar {
             }
         }
         return Optional.empty();
+    }
+
+    public Optional<Item> findItem(SelectableItem item) {
+        return (item.getCategory() == null
+                ? categories.stream().flatMap(c -> c.items.stream())
+                : get(item.getCategory()).items.stream())
+                .filter(i -> i.selectableItem != null ? i.selectableItem == item : i.id.equals(item.getId()))
+                .findFirst();
     }
 
     public static class Category extends UpdatableAuto {
