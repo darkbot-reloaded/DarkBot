@@ -15,12 +15,7 @@ import com.github.manolo8.darkbot.gui.utils.Strings;
 import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.enums.PetGear;
 import eu.darkbot.api.game.items.SelectableItem;
-import eu.darkbot.api.game.other.Attackable;
-import eu.darkbot.api.game.other.EntityInfo;
-import eu.darkbot.api.game.other.Health;
-import eu.darkbot.api.game.other.Locatable;
-import eu.darkbot.api.game.other.Location;
-import eu.darkbot.api.game.other.LocationInfo;
+import eu.darkbot.api.game.other.*;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.utils.ItemNotEquippedException;
 import org.jetbrains.annotations.Nullable;
@@ -581,7 +576,7 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
-    public boolean isAttacking(Attackable other) {
+    public boolean isAttacking(Lockable other) {
         return pet.isAttacking(other);
     }
 

@@ -30,7 +30,8 @@ public class FeatureRegisterHandler {
                 TaskHandler.class,
                 NpcExtraHandler.class,
                 ExtraMenuHandler.class,
-                LaserSelectorHandler.class
+                LaserSelectorHandler.class,
+                ShipModeSelectorHandler.class
         ).map(api::requireInstance).collect(Collectors.toList());
     }
 

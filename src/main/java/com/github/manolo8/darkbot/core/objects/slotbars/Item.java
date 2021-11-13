@@ -2,17 +2,18 @@ package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import eu.darkbot.api.game.items.ItemCategory;
+import eu.darkbot.api.game.items.SelectableItem;
 
 import java.util.*;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Item {
     private static final int START = 36, END = 128 + 8;
-
     private static final byte[] BUFFER = new byte[END - START];
-    // Only has relevant info if !isReady()
+
     public final ItemTimer itemTimer = new ItemTimer();
     private final Map<SlotBarsProxy.Type, Set<Integer>> associatedSlots = new EnumMap<>(SlotBarsProxy.Type.class);
 
@@ -22,15 +23,26 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
 
     private long lastUsed;
 
+    private final ItemCategory itemCategory;
+    private SelectableItem selectableItem;
+
+    public Item() {
+        this(null);
+    }
+
+    public Item(ItemCategory itemCategory) {
+        this.itemCategory = itemCategory;
+    }
+
     void removeSlot(SlotBarsProxy.Type slotType, int slotNumber) {
-        getShortcutList(slotType).remove(slotNumber);
+        getShortcutSet(slotType).remove(slotNumber);
     }
 
     void addSlot(SlotBarsProxy.Type slotType, int slotNumber) {
-        getShortcutList(slotType).add(slotNumber);
+        getShortcutSet(slotType).add(slotNumber);
     }
 
-    private Set<Integer> getShortcutList(SlotBarsProxy.Type type) {
+    private Set<Integer> getShortcutSet(SlotBarsProxy.Type type) {
         return this.associatedSlots.computeIfAbsent(type, l -> new HashSet<>());
     }
 
@@ -42,7 +54,7 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
         // We also avoid updating timer if no other flags change for the extra 3 long-read calls
         API.readMemory(address + START, BUFFER);
 
-        boolean buyable     = BUFFER[0] == 1;
+        boolean buyable = BUFFER[0] == 1;
         boolean activatable = BUFFER[4] == 1;
         boolean selected = BUFFER[8] == 1;
         boolean available = BUFFER[12] == 1;
@@ -70,10 +82,16 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
     @Override
     public void update(long address) {
         if (this.address != address) {
-            this.id          = API.readMemoryString(address, 64);
+            this.id = API.readMemoryString(address, 64);
             this.counterType = API.readMemoryString(address, 72);
             this.actionStyle = API.readMemoryString(address, 80);
-            this.iconLootId  = API.readMemoryString(address, 96);
+            this.iconLootId = API.readMemoryString(address, 96);
+
+            if (itemCategory != null)
+                this.selectableItem = SelectableItem.ALL_ITEMS.get(itemCategory).stream()
+                        .filter(i -> i.getId().equals(id))
+                        .findFirst()
+                        .orElse(null);
         }
         super.update(address);
     }
@@ -93,7 +111,7 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
         SlotBarsProxy.Type slotBarType = getSlotBarType();
         if (slotBarType == null) return -1;
 
-        return getShortcutList(slotBarType).stream()
+        return getShortcutSet(slotBarType).stream()
                 .findFirst().orElse(-1);
     }
 
@@ -101,12 +119,22 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
         SlotBarsProxy.Type slotBarType = getSlotBarType();
         if (slotBarType == null) return false;
 
-        return getShortcutList(slotBarType).contains(slotNumber == 0 ? 10 : slotNumber);
+        return getShortcutSet(slotBarType).contains(slotNumber == 0 ? 10 : slotNumber);
     }
 
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public ItemCategory getCategory() {
+        return itemCategory;
+    }
+
+    @Override
+    public <T extends Enum<T> & SelectableItem> Optional<T> getAs(Class<T> type) {
+        return type.isInstance(selectableItem) ? Optional.of(type.cast(selectableItem)) : Optional.empty();
     }
 
     @Override
@@ -135,18 +163,8 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
     }
 
     @Override
-    public boolean isReady() {
-        return itemTimer.address == 0;
-    }
-
-    @Override
-    public double readyIn() {
-        return itemTimer.availableIn;
-    }
-
-    @Override
-    public double totalCooldown() {
-        return itemTimer.itemDelay;
+    public Optional<eu.darkbot.api.game.items.ItemTimer> getItemTimer() {
+        return itemTimer.address == ByteUtils.NULL ? Optional.empty() : Optional.of(itemTimer);
     }
 
     @Override
@@ -161,7 +179,7 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
     @Override
     public String toString() {
         return "Item{" +
-                "isReady=" + isReady() +
+                "itemTimer=" + itemTimer +
                 ", associatedSlots=" + associatedSlots +
                 ", quantity=" + quantity +
                 ", selected=" + selected +
@@ -170,11 +188,19 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
                 ", available=" + available +
                 ", visible=" + visible +
                 ", id='" + id + '\'' +
+                ", counterType='" + counterType + '\'' +
+                ", actionStyle='" + actionStyle + '\'' +
+                ", iconLootId='" + iconLootId + '\'' +
+                ", lastUsed=" + lastUsed +
                 '}';
     }
 
-    public static class ItemTimer extends UpdatableAuto {
+    public class ItemTimer extends UpdatableAuto implements eu.darkbot.api.game.items.ItemTimer {
+        private final static String ACTIVE_ITEM_STATE = "active";
+
         public double elapsed, startTime, itemDelay, availableIn;
+
+        private Type timerType = Type.COOLING_DOWN;
 
         @Override
         public void update() {
@@ -195,6 +221,9 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
                 return;
             }
 
+            this.timerType = API.readString(Item.this.address, 88, 32).equals(ACTIVE_ITEM_STATE)
+                    ? Type.ACTIVATED : Type.COOLING_DOWN;
+
             this.startTime = API.readMemoryDouble(address + 80);
             this.itemDelay = API.readMemoryDouble(address + 88);
         }
@@ -207,12 +236,33 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
         }
 
         @Override
+        public Type getTimerType() {
+            return timerType;
+        }
+
+        @Override
+        public double getTotalCoolingTime() {
+            return itemDelay;
+        }
+
+        @Override
+        public double getTimeElapsed() {
+            return elapsed;
+        }
+
+        @Override
+        public double getAvailableIn() {
+            return availableIn;
+        }
+
+        @Override
         public String toString() {
             return "ItemTimer{" +
                     "elapsed=" + elapsed +
                     ", startTime=" + startTime +
                     ", itemDelay=" + itemDelay +
                     ", availableIn=" + availableIn +
+                    ", timerType=" + timerType +
                     '}';
         }
 

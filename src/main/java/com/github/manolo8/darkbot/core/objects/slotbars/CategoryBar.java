@@ -59,11 +59,21 @@ public class CategoryBar extends MenuBar {
 
         private final ObjArray itemsArr = ObjArray.ofVector(true);
 
+        private ItemCategory itemCategory;
+
         @Override
         public void update() {
-            this.categoryId = API.readMemoryString(address, 32);
             this.itemsArr.update(API.readMemoryLong(address + 40));
-            this.itemsArr.sync(this.items, Item::new, null);
+            this.itemsArr.sync(this.items, () -> new Item(itemCategory), null);
+        }
+
+        @Override
+        public void update(long address) {
+            if (this.address != address || categoryId == null || categoryId.isEmpty()) {
+                this.categoryId = API.readMemoryString(address, 32);
+                this.itemCategory = ItemCategory.of(categoryId);
+            }
+            super.update(address);
         }
     }
 

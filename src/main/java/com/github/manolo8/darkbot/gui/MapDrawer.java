@@ -6,17 +6,8 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
-import com.github.manolo8.darkbot.core.entities.Barrier;
-import com.github.manolo8.darkbot.core.entities.BasePoint;
-import com.github.manolo8.darkbot.core.entities.BattleStation;
 import com.github.manolo8.darkbot.core.entities.Box;
-import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.entities.FakeNpc;
-import com.github.manolo8.darkbot.core.entities.Mine;
-import com.github.manolo8.darkbot.core.entities.NoCloack;
-import com.github.manolo8.darkbot.core.entities.Npc;
-import com.github.manolo8.darkbot.core.entities.Portal;
-import com.github.manolo8.darkbot.core.entities.Ship;
+import com.github.manolo8.darkbot.core.entities.*;
 import com.github.manolo8.darkbot.core.entities.bases.BaseHeadquarters;
 import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
 import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
@@ -28,19 +19,19 @@ import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.manager.PetManager.PetStats;
 import com.github.manolo8.darkbot.core.manager.PetManager.PetStatsType;
-import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
-import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
+import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import com.github.manolo8.darkbot.gui.trail.Line;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
-import eu.darkbot.api.game.other.Attackable;
 import eu.darkbot.api.game.other.Health;
+import eu.darkbot.api.game.other.LocationInfo;
+import eu.darkbot.api.game.other.Lockable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,13 +41,8 @@ import java.awt.font.TextAttribute;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -318,9 +304,7 @@ public class MapDrawer extends JPanel {
             }
         }
 
-        Attackable target = hero.getTarget() instanceof Attackable ? (Attackable) hero.getTarget() : null;
-
-        if (target != null) {
+        hero.getTargetAs(Lockable.class).ifPresent(target -> {
             if (target instanceof Npc || target.getEntityInfo().isEnemy()) g2.setColor(cs.ENEMIES);
             else g2.setColor(cs.ALLIES);
             g2.setFont(cs.FONTS.MID);
@@ -328,7 +312,7 @@ public class MapDrawer extends JPanel {
             drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40, Align.MID);
 
             drawHealth(g2, target.getHealth(), mid + 10, height - 34, mid - 20, 12, 0);
-        }
+        });
     }
 
     private void drawTrail(Graphics2D g2) {
@@ -428,12 +412,14 @@ public class MapDrawer extends JPanel {
                 drawString(g2, ship.playerInfo.username, translateX(loc.x), translateY(loc.y) - 5, Align.MID);
         }
 
-        if (hero.target != null && !hero.target.removed) {
-            g2.setColor(cs.GOING);
-            drawLine(g2, hero.target.locationInfo, hero.target.shipInfo.destination);
-            g2.setColor(cs.TARGET);
-            drawEntity(g2, hero.target.locationInfo.now, true);
-        }
+        hero.getTargetAs(Lockable.class)
+                .filter(eu.darkbot.api.game.entities.Entity::isValid)
+                .ifPresent(target -> {
+                    g2.setColor(cs.GOING);
+                    drawLine(g2, target.getLocationInfo(), hero.getLocationInfo());
+                    g2.setColor(cs.TARGET);
+                    drawEntity(g2, hero.target.locationInfo.now, true);
+                });
 
         if (!config.BOT_SETTINGS.OTHER.DEV_STUFF) return;
 
@@ -659,8 +645,8 @@ public class MapDrawer extends JPanel {
     }
 
     private void drawLine(Graphics2D g2, LocationInfo a, LocationInfo b) {
-        if (!a.isLoaded() || !b.isLoaded()) return;
-        drawLine(g2, a.now, b.now);
+        if (!a.isInitialized() || !b.isInitialized()) return;
+        drawLine(g2, a, b);
     }
 
     private void drawLine(Graphics2D g2, Location a, Location b) {
@@ -673,7 +659,7 @@ public class MapDrawer extends JPanel {
         if (fill) g2.fillRect(x, y, 4, 4);
         else g2.drawRect(x, y, 3, 3);
     }
-    
+
     private boolean hasFlag(DisplayFlag df) {
         return config.BOT_SETTINGS.MAP_DISPLAY.TOGGLE.contains(df);
     }

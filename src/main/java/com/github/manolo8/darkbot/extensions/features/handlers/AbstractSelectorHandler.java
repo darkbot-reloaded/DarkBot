@@ -25,7 +25,7 @@ public abstract class AbstractSelectorHandler<T, P, PS extends PrioritizedSuppli
                     Comparator.nullsLast(Comparator.comparingInt(PrioritizedSupplier.Priority::ordinal)))
             .thenComparing(ps -> ps == last);
 
-    protected AbstractSelectorHandler(FeatureRegistry featureRegistry, Function<T, PS> extractor) {
+    public AbstractSelectorHandler(FeatureRegistry featureRegistry, Function<T, PS> extractor) {
         super(AbstractSelectorHandler.class);
 
         this.featureRegistry = featureRegistry;
