@@ -139,7 +139,7 @@ public class NpcAttacker {
         else if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) radius = Math.min(600, radius);
         radius += bar.findItemById("ability_zephyr_mmt").map(i -> i.quantity).orElse(0d) * 5;
 
-        if (main.hero.locationInfo.distance(target) < radius + 0.45) closeRange = true;
+        if (main.hero.locationInfo.distance(target) < radius) closeRange = true;
         return radius;
     }
     private boolean shouldSab() {
