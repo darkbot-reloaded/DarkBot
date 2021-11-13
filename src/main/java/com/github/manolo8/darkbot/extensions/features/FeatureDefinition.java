@@ -49,6 +49,8 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
             enabledByDefault = feature.enabledByDefault();
         } else {
             eu.darkbot.api.extensions.Feature feature = clazz.getAnnotation(eu.darkbot.api.extensions.Feature.class);
+            if (feature == null)
+                throw new IllegalStateException("Feature class must be annotated with @Feature: " + clazz.getCanonicalName());
             this.name = feature.name();
             this.description = feature.description();
             enabledByDefault = feature.enabledByDefault();

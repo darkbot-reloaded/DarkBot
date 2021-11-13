@@ -10,6 +10,8 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
+import com.github.manolo8.darkbot.extensions.features.Feature;
+import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.features.handlers.ShipModeSelectorHandler;
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.extensions.selectors.PrioritizedSupplier;
@@ -22,6 +24,7 @@ import eu.darkbot.api.game.items.ItemFlag;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
+import eu.darkbot.impl.PluginApiImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,6 +67,9 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
                        FacadeManager facadeManager,
                        StarManager star,
                        HeroItemsAPI items,
+                       // This is NOT a redundant parameter. feature registry must be instanced
+                       // first for shipModeHandler to be available.
+                       FeatureRegistry fr,
                        ShipModeSelectorHandler shipModeHandler) {
         instance = this;
 
@@ -202,7 +208,6 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         this.target = entity;
     }
 
-    //<editor-fold desc="New implementation">
     private void toggleConfiguration() {
         if (System.currentTimeMillis() - configTime <= 5500L) return;
 
@@ -317,6 +322,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         }
     }
 
+    @Feature(name = "Default Ship Mode Supplier", description = "Sets the fallback ship mode")
     public class DefaultShipModeSupplier implements ShipModeSelector, PrioritizedSupplier<ShipMode> {
 
         @Override
@@ -329,5 +335,5 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
             return shipMode;
         }
     }
-    //</editor-fold>
+
 }
