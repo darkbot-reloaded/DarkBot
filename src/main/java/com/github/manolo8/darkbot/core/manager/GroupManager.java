@@ -44,6 +44,8 @@ public class GroupManager extends Gui {
     private final Map<String, Long> pastInvites = new HashMap<>();
     private int shouldLeave = 0;
 
+    private long lastValidTime; // Last time group had members for isLoaded check
+
     public GroupManager(Main main) {
         this.main = main;
 
@@ -68,6 +70,9 @@ public class GroupManager extends Gui {
 
     public void tick() {
         if (group.address == 0) return;
+
+        if (group.isValid()) lastValidTime = System.currentTimeMillis();
+        else if (System.currentTimeMillis() - lastValidTime < 10_000L) return; // Wait until reacting to group being invalid
         if (nextAction > System.currentTimeMillis()) return;
         nextAction = System.currentTimeMillis() + 100;
 
