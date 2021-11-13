@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.gui.trail;
 
-import com.github.manolo8.darkbot.core.utils.Location;
+import eu.darkbot.api.game.other.Location;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,11 +25,11 @@ public class Line {
     }
 
     private Location getFrom() {
-        return fromCopy == null ? fromCopy = from.copy() : fromCopy.set(from.x, from.y);
+        return fromCopy == null ? fromCopy = from.copy() : fromCopy.setTo(from.getX(), from.getY());
     }
 
     private Location getTo() {
-        return toCopy == null ? toCopy = to.copy() : toCopy.set(to.x, to.y);
+        return toCopy == null ? toCopy = to.copy() : toCopy.setTo(to.getX(), to.getY());
     }
 
     public static List<List<Location>> getSmoothedPaths(Collection<Line> lines) {
@@ -65,12 +65,12 @@ public class Line {
         if (size < 4) return path;
 
         Location[] points = new Location[5];
-        for (int i = 0; i < 5; i++) points[i] = new Location();
+        for (int i = 0; i < 5; i++) points[i] = Location.of(0, 0);
 
         for (int i = 0; i <= size; i++) {
             if (i < size) {
                 Location loc = path.get(i);
-                points[i % points.length].set(loc.x, loc.y);
+                points[i % points.length].setTo(loc.getX(), loc.getY());
             } else {
                 points[i % points.length] = null;
                 points[(i + 1) % points.length] = null;
@@ -87,16 +87,15 @@ public class Line {
      * @param points The n points around the smoothed point
      */
     private static void smoothPoint(Location[] points, Location oldPoint) {
-        int sumX = 0, sumY = 0, total = 0;
+        double sumX = 0, sumY = 0, total = 0;
         for(Location point : points) {
             if (point == null) continue;
-            sumX += point.x;
-            sumY += point.y;
+            sumX += point.getX();
+            sumY += point.getY();
             total++;
         }
 
-        oldPoint.x = ((sumX / total) + oldPoint.x) / 2;
-        oldPoint.y = ((sumY / total) + oldPoint.y) / 2;
+        oldPoint.setTo(((sumX / total) + oldPoint.getX()) / 2,
+                ((sumY / total) + oldPoint.getY()) / 2);
     }
-
 }

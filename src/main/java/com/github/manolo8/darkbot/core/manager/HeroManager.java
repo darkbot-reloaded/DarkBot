@@ -217,7 +217,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     private void setFormation(SelectableItem.Formation formation) {
-        if (formation == getFormation() ||
+        if (formation == null || formation == getFormation() ||
                 System.currentTimeMillis() - formationTime <= 2500L) return;
 
         main.facadeManager.slotBars.useItem(formation, ItemFlag.NOT_SELECTED)
@@ -247,7 +247,8 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     private void setConfigAndFormation(ShipMode mode) {
-        if (mode.getConfiguration() != getConfiguration()) toggleConfiguration();
+        if (mode.getConfiguration() != null &&
+                mode.getConfiguration() != getConfiguration()) toggleConfiguration();
         setFormation(mode.getFormation());
     }
 
