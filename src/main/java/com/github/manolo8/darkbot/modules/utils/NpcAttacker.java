@@ -42,7 +42,7 @@ public class NpcAttacker {
     protected boolean sab; // If shooting SAB right now
     protected boolean rsb; // If shooting RSB right nos
 
-    protected boolean closeRange; // Ignore radius before first shot
+    protected boolean closeRange; // If we've been close enough to shoot this npc yet
 
     public NpcAttacker(Main main) {
         this.main = main;
