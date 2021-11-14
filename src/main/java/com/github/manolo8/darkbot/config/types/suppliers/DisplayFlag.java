@@ -12,5 +12,6 @@ public enum DisplayFlag {
     GROUP_AREA, GROUP_NAMES,
     BOOSTER_AREA, SORT_BOOSTERS,
     RESOURCE_NAMES,
-    SHOW_PET;
+    SHOW_PET,
+    SHOW_DESTINATION
 }

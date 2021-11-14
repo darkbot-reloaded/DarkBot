@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MovementAPI;
 
 import java.util.Collections;
@@ -259,5 +260,10 @@ public class Drive implements MovementAPI {
         for (PathPoint curr : pathFinder.createRote(begin, new PathPoint(ox, oy)))
             sum += Math.sqrt(Math.pow(begin.x - curr.x, 2) + Math.pow(begin.y - curr.y, 2));
         return sum;
+    }
+
+    @Override
+    public boolean isInPreferredZone(Locatable locatable) {
+        return map.preferred.contains(locatable);
     }
 }

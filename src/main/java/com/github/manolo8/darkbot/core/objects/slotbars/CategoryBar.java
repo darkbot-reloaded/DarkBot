@@ -3,8 +3,12 @@ package com.github.manolo8.darkbot.core.objects.slotbars;
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import eu.darkbot.api.game.items.ItemCategory;
+import eu.darkbot.api.game.items.SelectableItem;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -53,17 +57,35 @@ public class CategoryBar extends MenuBar {
         return Optional.empty();
     }
 
+    public Optional<Item> findItem(SelectableItem item) {
+        return (item.getCategory() == null
+                ? categories.stream().flatMap(c -> c.items.stream())
+                : get(item.getCategory()).items.stream())
+                .filter(i -> i.selectableItem != null ? i.selectableItem == item : i.id.equals(item.getId()))
+                .findFirst();
+    }
+
     public static class Category extends UpdatableAuto {
         public String categoryId;
         public List<Item> items = new ArrayList<>();
 
         private final ObjArray itemsArr = ObjArray.ofVector(true);
 
+        private ItemCategory itemCategory;
+
         @Override
         public void update() {
-            this.categoryId = API.readMemoryString(address, 32);
             this.itemsArr.update(API.readMemoryLong(address + 40));
-            this.itemsArr.sync(this.items, Item::new, null);
+            this.itemsArr.sync(this.items, () -> new Item(itemCategory), null);
+        }
+
+        @Override
+        public void update(long address) {
+            if (this.address != address || categoryId == null || categoryId.isEmpty()) {
+                this.categoryId = API.readMemoryString(address, 32);
+                this.itemCategory = ItemCategory.of(categoryId);
+            }
+            super.update(address);
         }
     }
 

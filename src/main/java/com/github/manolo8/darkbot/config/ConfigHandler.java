@@ -15,6 +15,7 @@ import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.Configurable;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.ExtensionsAPI;
+import eu.darkbot.impl.PluginApiImpl;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -31,13 +32,16 @@ public class ConfigHandler implements ConfigAPI, Listener {
 
     private final ConfigSetting.Parent<Config> configuration;
 
-    public ConfigHandler(PluginAPI pluginAPI,
+    public ConfigHandler(PluginApiImpl pluginAPI,
                          ConfigManager loader,
                          ConfigBuilder builder) {
         this.pluginAPI = pluginAPI;
         this.loader = loader;
         this.builder = builder;
 
+        // Early-add config handler to plugin api to avoid dependency loop:
+        // builder -> pet gears -> hero -> mode selector -> feature registry -> config handler
+        pluginAPI.addInstance(this);
         this.configuration = builder.of(Config.class, "Configuration", null);
         this.configuration.setValue(loader.getConfig());
     }
@@ -54,6 +58,9 @@ public class ConfigHandler implements ConfigAPI, Listener {
     }
 
     public <T> ConfigSetting.Parent<T> getFeatureConfig(FeatureDefinition<?> fd) {
+        if (this.configuration == null)
+            throw new IllegalStateException("Tried to get feature configs before config has fully initialized");
+
         Class<?> clazz = fd.getClazz();
         if (!Configurable.class.isAssignableFrom(clazz)) return null;
 

@@ -13,7 +13,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
 import com.github.manolo8.darkbot.core.objects.slotbars.SlotBar;
 import com.github.manolo8.darkbot.core.utils.Drive;
-import eu.darkbot.api.game.other.Attackable;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.AttackAPI;
 import org.jetbrains.annotations.Nullable;
 
@@ -177,20 +177,25 @@ public class NpcAttacker implements AttackAPI {
     }
 
     @Override
-    public @Nullable Attackable getTarget() {
+    public @Nullable Lockable getTarget() {
         return target;
     }
 
     @Override
-    public void setTarget(@Nullable Attackable attackable) {
-        if (!(attackable instanceof Npc))
+    public void setTarget(@Nullable Lockable target) {
+        if (!(target instanceof Npc))
             throw new IllegalArgumentException("Only NPC attacking is supported by this implementation");
-        this.target = (Npc) attackable;
+        this.target = (Npc) target;
     }
 
     @Override
     public boolean isLocked() {
         return mapManager.isTarget(target);
+    }
+
+    @Override
+    public void tryLockTarget() {
+        if (!mapManager.isTarget(target)) lockAndSetTarget();
     }
 
     @Override

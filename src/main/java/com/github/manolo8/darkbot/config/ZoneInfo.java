@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.utils.Ignorable;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.FixedTwoOptHeuristicTSP;
+import eu.darkbot.api.game.other.Locatable;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.HamiltonianCycleAlgorithm;
 import org.jgrapht.alg.tour.HeldKarpTSP;
@@ -112,7 +113,11 @@ public class ZoneInfo implements Serializable, Ignorable {
     }
 
     public boolean contains(Location loc) {
-        return contains(loc.x / MapManager.internalWidth, loc.y / MapManager.internalHeight);
+        return contains((Locatable) loc);
+    }
+
+    public boolean contains(Locatable loc) {
+        return contains(loc.getX() / MapManager.internalWidth, loc.getY() / MapManager.internalHeight);
     }
 
     public List<Zone> getZones() {

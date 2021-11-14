@@ -9,10 +9,10 @@ import com.github.manolo8.darkbot.core.utils.TraitPattern;
 import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.game.entities.Pet;
 import eu.darkbot.api.game.items.SelectableItem;
-import eu.darkbot.api.game.other.Attackable;
 import eu.darkbot.api.game.other.EntityInfo;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -141,7 +141,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
             long entityPtr = API.readMemoryLong(address, 64, 32);
 
             if (entityPtr == 0 && targetedEntity != null) targetedEntity = null;
-            else if (entityPtr != 0 && (targetedEntity == null || entityPtr != targetedEntity.address))
+            else if (entityPtr != 0 && (targetedEntity == null || entityPtr != targetedEntity.address)) {
                 if (entityPtr == main.hero.address) {
                     targetedEntity = main.hero;
                     return;
@@ -154,6 +154,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
                         .flatMap(Collection::stream)
                         .filter(entity -> entity.address == entityPtr)
                         .findAny().orElse(null);
+            }
         }
     }
 
@@ -218,11 +219,6 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     }
 
     @Override
-    public boolean isAttacking(Attackable other) {
-        return other == attackTarget.targetedEntity;
-    }
-
-    @Override
     public int getSpeed() {
         return shipInfo.speed == 0 ? (int) locationInfo.speed : shipInfo.speed;
     }
@@ -233,7 +229,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     }
 
     @Override
-    public boolean isAiming(Locatable other) {
+    public boolean isAiming(@NotNull Locatable other) {
         return MathUtils.angleDiff(getAngle(), getLocationInfo().angleTo(other)) < 0.2;
     }
 

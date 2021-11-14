@@ -1,17 +1,12 @@
 package com.github.manolo8.darkbot.extensions.features;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.extensions.features.handlers.BehaviourHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.ExtraMenuHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.FeatureHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.ModuleHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.NpcExtraHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.TaskHandler;
+import com.github.manolo8.darkbot.extensions.features.handlers.*;
 import eu.darkbot.api.PluginAPI;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -29,13 +24,15 @@ public class FeatureRegisterHandler {
 
     public FeatureRegisterHandler(PluginAPI api, FeatureRegistry featureRegistry) {
         this.featureRegistry = featureRegistry;
-        this.FEATURE_HANDLERS = Arrays.asList(
-                new ModuleHandler(),
-                new BehaviourHandler(api.requireInstance(Main.class), featureRegistry),
-                new TaskHandler(api.requireInstance(Main.class), featureRegistry),
-                new NpcExtraHandler(featureRegistry),
-                new ExtraMenuHandler(featureRegistry)
-        );
+        this.FEATURE_HANDLERS = Stream.of(
+                ModuleHandler.class,
+                BehaviourHandler.class,
+                TaskHandler.class,
+                NpcExtraHandler.class,
+                ExtraMenuHandler.class,
+                LaserSelectorHandler.class,
+                ShipModeSelectorHandler.class
+        ).map(api::requireInstance).collect(Collectors.toList());
     }
 
     Stream<Class<?>> getNativeFeatures() {

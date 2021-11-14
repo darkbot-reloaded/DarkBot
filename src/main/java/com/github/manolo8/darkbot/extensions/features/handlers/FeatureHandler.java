@@ -8,10 +8,14 @@ import java.util.stream.Stream;
 
 public abstract class FeatureHandler<T> {
 
-    private final Class<T> handledType;
+    protected final Class<T> handledType;
 
     public FeatureHandler() {
-        Type[] types = ReflectionUtils.findGenericParameters(getClass(), FeatureHandler.class);
+        this(FeatureHandler.class);
+    }
+
+    public FeatureHandler(Class<?> genericSuperclass) {
+        Type[] types = ReflectionUtils.findGenericParameters(getClass(), genericSuperclass);
         if (types == null)
             throw new UnsupportedOperationException("Can't initialize feature decorator with no found type: " + getClass().getCanonicalName());
 
