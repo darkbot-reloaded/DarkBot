@@ -87,15 +87,18 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
 
         boolean toggleProAction = (slotBarType == SlotBarsProxy.Type.PRO_ACTION_BAR) != isProActionBarVisible();
 
-        return (!toggleProAction || settings.pressKeybind(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION))
+        return ((!toggleProAction || settings.pressKeybind(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION))
                 && settings.pressKeybind(SettingsProxy.KeyBind.of(slotBarType, slotNumber))
-                ? ItemUseResult.SUCCESS : ItemUseResult.FAILED;
+                ? ItemUseResult.SUCCESS : ItemUseResult.FAILED).ifSuccessful(r -> item.setLastUsed(System.currentTimeMillis()));
     }
 
     @Override
     public ItemUseResult useItem(@NotNull SelectableItem selectableItem, double minWait, ItemFlag... itemFlags) {
-        // TODO: implement min wait properly
-        return useItem(selectableItem, itemFlags);
+        Item item = getItem(selectableItem);
+        if (item == null) return ItemUseResult.NOT_AVAILABLE;
+        if (item.lastUseTime() + minWait > System.currentTimeMillis()) return ItemUseResult.RECENTLY_USED;
+
+        return useItem(item, itemFlags);
     }
 
     private ItemUseResult checkItemFlags(Item item, ItemFlag... flags) {
@@ -110,19 +113,12 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         if (item == null) return null;
         if (item instanceof Item) return (Item) item;
 
-        String itemId = item.getId();
-        ItemCategory category = item.getCategory();
-
-        return category == null ? categoryBar.findItemById(itemId).orElse(null)
-                : categoryBar.get(category).items.stream()
-                .filter(i -> i.getId().equals(itemId))
-                .findFirst()
-                .orElse(null);
+        return categoryBar.findItem(item).orElse(null);
     }
 
     public enum Type {
         DEFAULT_BAR,
         PREMIUM_BAR,
-        PRO_ACTION_BAR;
+        PRO_ACTION_BAR
     }
 }

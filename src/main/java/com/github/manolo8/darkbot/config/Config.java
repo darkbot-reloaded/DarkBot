@@ -27,6 +27,7 @@ import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.shared.modules.LootCollectorModule;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -73,7 +74,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
     public @Option General GENERAL = new General();
     public static class General implements eu.darkbot.api.config.legacy.General {
         @Option @Dropdown(options = ModuleSupplier.class)
-        public String CURRENT_MODULE = LootNCollectorModule.class.getCanonicalName();
+        public String CURRENT_MODULE = LootCollectorModule.class.getCanonicalName();
         public @Option @Dropdown(options = StarManager.MapOptions.class) int WORKING_MAP = 26;
         public @Option ShipConfig OFFENSIVE = new ShipConfig(1, '8');
         public @Option ShipConfig ROAM = new ShipConfig(1, '9');

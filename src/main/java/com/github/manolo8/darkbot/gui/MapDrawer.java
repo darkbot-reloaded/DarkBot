@@ -6,17 +6,8 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
-import com.github.manolo8.darkbot.core.entities.Barrier;
-import com.github.manolo8.darkbot.core.entities.BasePoint;
-import com.github.manolo8.darkbot.core.entities.BattleStation;
 import com.github.manolo8.darkbot.core.entities.Box;
-import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.entities.FakeNpc;
-import com.github.manolo8.darkbot.core.entities.Mine;
-import com.github.manolo8.darkbot.core.entities.NoCloack;
-import com.github.manolo8.darkbot.core.entities.Npc;
-import com.github.manolo8.darkbot.core.entities.Portal;
-import com.github.manolo8.darkbot.core.entities.Ship;
+import com.github.manolo8.darkbot.core.entities.*;
 import com.github.manolo8.darkbot.core.entities.bases.BaseHeadquarters;
 import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
 import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
@@ -28,19 +19,19 @@ import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.manager.PetManager.PetStats;
 import com.github.manolo8.darkbot.core.manager.PetManager.PetStatsType;
-import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.utils.Drive;
-import com.github.manolo8.darkbot.core.utils.Location;
-import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
+import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import com.github.manolo8.darkbot.gui.trail.Line;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
-import eu.darkbot.api.game.other.Attackable;
 import eu.darkbot.api.game.other.Health;
+import eu.darkbot.api.game.other.Location;
+import eu.darkbot.api.game.other.LocationInfo;
+import eu.darkbot.api.game.other.Lockable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,13 +41,8 @@ import java.awt.font.TextAttribute;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -97,7 +83,7 @@ public class MapDrawer extends JPanel {
 
     private final RenderingHints hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-    private Location last = new Location(0, 0);
+    private Location last = Location.of(0, 0);
 
     protected boolean hovering;
     protected int width, height, mid;
@@ -191,13 +177,13 @@ public class MapDrawer extends JPanel {
                 for (Entity e : entities) {
                     Location loc = e.locationInfo.now;
                     int strWidth = g2.getFontMetrics().stringWidth(e.toString());
-                    g2.fillRect(translateX(loc.x) - (strWidth >> 1), translateY(loc.y) - 7, strWidth, 8);
+                    g2.fillRect(translateX(loc.getX()) - (strWidth >> 1), translateY(loc.getY()) - 7, strWidth, 8);
                 }
                 g2.setColor(cs.TEXT);
                 g2.setFont(cs.FONTS.TINY);
                 for (Entity e : entities) {
                     Location loc = e.locationInfo.now;
-                    drawString(g2, e.toString(), translateX(loc.x), translateY(loc.y), Align.MID);
+                    drawString(g2, e.toString(), translateX(loc.getX()), translateY(loc.getY()), Align.MID);
                 }
             }
         }
@@ -318,9 +304,7 @@ public class MapDrawer extends JPanel {
             }
         }
 
-        Attackable target = hero.getTarget() instanceof Attackable ? (Attackable) hero.getTarget() : null;
-
-        if (target != null) {
+        hero.getTargetAs(Lockable.class).ifPresent(target -> {
             if (target instanceof Npc || target.getEntityInfo().isEnemy()) g2.setColor(cs.ENEMIES);
             else g2.setColor(cs.ALLIES);
             g2.setFont(cs.FONTS.MID);
@@ -328,13 +312,13 @@ public class MapDrawer extends JPanel {
             drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40, Align.MID);
 
             drawHealth(g2, target.getHealth(), mid + 10, height - 34, mid - 20, 12, 0);
-        }
+        });
     }
 
     private void drawTrail(Graphics2D g2) {
         Location heroLocation = hero.locationInfo.now;
 
-        double distance = last.distance(heroLocation);
+        double distance = last.distanceTo(heroLocation);
 
         if (distance > 500) {
             last = hero.locationInfo.now.copy();
@@ -363,7 +347,7 @@ public class MapDrawer extends JPanel {
         g2.setColor(cs.PORTALS);
         for (Portal portal : portals) {
             Location loc = portal.locationInfo.now;
-            g2.drawOval(translateX(loc.x) - 6, translateY(loc.y) - 6, 12, 12);
+            g2.drawOval(translateX(loc.getX()) - 6, translateY(loc.getY()) - 6, 12, 12);
         }
 
         for (BattleStation station : this.battleStations) {
@@ -373,7 +357,7 @@ public class MapDrawer extends JPanel {
 
             Location loc = station.locationInfo.now;
             if (station.hullId >= 0 && station.hullId < 255)
-                g2.fillOval(translateX(loc.x) - 5, translateY(loc.y) - 4, 11, 9);
+                g2.fillOval(translateX(loc.getX()) - 5, translateY(loc.getY()) - 4, 11, 9);
             else drawEntity(g2, loc, false);
         }
 
@@ -381,12 +365,12 @@ public class MapDrawer extends JPanel {
             Location loc = base.locationInfo.now;
             if (base instanceof BaseTurret) {
                 g2.setColor(cs.BASES);
-                g2.fillOval(this.translateX(loc.x) - 1, this.translateY(loc.y) - 1, 2, 2);
+                g2.fillOval(this.translateX(loc.getX()) - 1, this.translateY(loc.getY()) - 1, 2, 2);
             } else {
                 g2.setColor(cs.BASE_SPOTS);
                 int radius = base instanceof BaseHeadquarters ? 3500 :
                         base instanceof BaseStation ? 3000 : 1000, half = radius / 2;
-                g2.fillOval(translateX(loc.x - half), translateY(loc.y - half), translateX(radius), translateY(radius));
+                g2.fillOval(translateX(loc.getX() - half), translateY(loc.getY() - half), translateX(radius), translateY(radius));
             }
         }
     }
@@ -398,13 +382,13 @@ public class MapDrawer extends JPanel {
             drawEntity(g2, loc, box.boxInfo.collect);
 
             if (hasFlag(DisplayFlag.RESOURCE_NAMES))
-                drawString(g2, box.type, translateX(loc.x), translateY(loc.y) - 5, Align.MID);
+                drawString(g2, box.type, translateX(loc.getX()), translateY(loc.getY()) - 5, Align.MID);
         }
 
         g2.setColor(cs.MINES);
         for (Mine mine : mines) drawEntity(g2, mine.locationInfo.now, true);
 
-        if (config.BOT_SETTINGS.OTHER.DEV_STUFF) {
+        if (hasFlag(DisplayFlag.SHOW_DESTINATION)) {
             g2.setColor(cs.GOING);
             for (Npc npc : npcs) drawLine(g2, npc.locationInfo, npc.shipInfo.destination);
             for (Ship ship : ships) drawLine(g2, ship.locationInfo, ship.shipInfo.destination);
@@ -415,9 +399,9 @@ public class MapDrawer extends JPanel {
         if (fakeNpc.isPingAlive()) {
             Location loc = fakeNpc.locationInfo.now;
             g2.setColor(cs.PING);
-            g2.fillOval(translateX(loc.x) - 7, translateY(loc.y) - 7, 15, 15);
+            g2.fillOval(translateX(loc.getX()) - 7, translateY(loc.getY()) - 7, 15, 15);
             g2.setColor(cs.PING_BORDER);
-            g2.drawOval(translateX(loc.x) - 7, translateY(loc.y) - 7, 15, 15);
+            g2.drawOval(translateX(loc.getX()) - 7, translateY(loc.getY()) - 7, 15, 15);
         }
 
         for (Ship ship : ships) {
@@ -425,15 +409,17 @@ public class MapDrawer extends JPanel {
             g2.setColor(ship.playerInfo.isEnemy() ? cs.ENEMIES : cs.ALLIES);
             drawEntity(g2, ship.locationInfo.now, false);
             if (hasFlag(DisplayFlag.USERNAMES))
-                drawString(g2, ship.playerInfo.username, translateX(loc.x), translateY(loc.y) - 5, Align.MID);
+                drawString(g2, ship.playerInfo.username, translateX(loc.getX()), translateY(loc.getY()) - 5, Align.MID);
         }
 
-        if (hero.target != null && !hero.target.removed) {
-            g2.setColor(cs.GOING);
-            drawLine(g2, hero.target.locationInfo, hero.target.shipInfo.destination);
-            g2.setColor(cs.TARGET);
-            drawEntity(g2, hero.target.locationInfo.now, true);
-        }
+        hero.getTargetAs(Lockable.class)
+                .filter(eu.darkbot.api.game.entities.Entity::isValid)
+                .ifPresent(target -> {
+                    g2.setColor(cs.GOING);
+                    drawLine(g2, target.getLocationInfo(), hero.getLocationInfo());
+                    g2.setColor(cs.TARGET);
+                    drawEntity(g2, target.getLocationInfo(), true);
+                });
 
         if (!config.BOT_SETTINGS.OTHER.DEV_STUFF) return;
 
@@ -461,10 +447,13 @@ public class MapDrawer extends JPanel {
                     translateX(path.x), translateY((begin = path).y));
         }
 
+        if (hasFlag(DisplayFlag.SHOW_DESTINATION) && drive.paths.isEmpty())
+            drawLine(g2, hero.locationInfo, hero.shipInfo.destination);
+
         g2.setColor(cs.HERO);
 
         Location loc = hero.locationInfo.now;
-        g2.fillOval(translateX(loc.x) - 3, translateY(loc.y) - 3, 7, 7);
+        g2.fillOval(translateX(loc.getX()) - 3, translateY(loc.getY()) - 3, 7, 7);
 
         g2.setColor(cs.BARRIER_BORDER);
         g2.drawRect(translateX(mapManager.boundX), translateY(mapManager.boundY),
@@ -474,8 +463,8 @@ public class MapDrawer extends JPanel {
         if (hero.pet.removed || !hero.pet.locationInfo.isLoaded()) return;
         loc = hero.pet.locationInfo.now;
 
-        int x = translateX(loc.x),
-                y = translateY(loc.y);
+        int x = translateX(loc.getX()),
+                y = translateY(loc.getY());
 
         g2.setColor(cs.PET);
         g2.fillRect(x - 3, y - 3, 6, 6);
@@ -659,21 +648,21 @@ public class MapDrawer extends JPanel {
     }
 
     private void drawLine(Graphics2D g2, LocationInfo a, LocationInfo b) {
-        if (!a.isLoaded() || !b.isLoaded()) return;
-        drawLine(g2, a.now, b.now);
+        if (!a.isInitialized() || !b.isInitialized()) return;
+        drawLine(g2, a.getCurrent(), b.getCurrent()); // to prevent recursive call
     }
 
     private void drawLine(Graphics2D g2, Location a, Location b) {
-        g2.drawLine(translateX(a.x), translateY(a.y), translateX(b.x), translateY(b.y));
+        g2.drawLine(translateX(a.getX()), translateY(a.getY()), translateX(b.getX()), translateY(b.getY()));
     }
 
     private void drawEntity(Graphics2D g2, Location loc, boolean fill) {
-        int x = this.translateX(loc.x) - 1;
-        int y = this.translateY(loc.y) - 1;
+        int x = this.translateX(loc.getX()) - 1;
+        int y = this.translateY(loc.getY()) - 1;
         if (fill) g2.fillRect(x, y, 4, 4);
         else g2.drawRect(x, y, 3, 3);
     }
-    
+
     private boolean hasFlag(DisplayFlag df) {
         return config.BOT_SETTINGS.MAP_DISPLAY.TOGGLE.contains(df);
     }
