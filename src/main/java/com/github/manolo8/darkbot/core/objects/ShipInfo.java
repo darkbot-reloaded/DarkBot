@@ -52,7 +52,8 @@ public class ShipInfo extends Updatable {
         if (newSpeed < 100) return;
         if (newSpeed > 1000) newSpeed = 1000;
 
-        averageSpeed = averageSpeed * 0.75 + newSpeed * 0.25;
+        if (averageSpeed == 0) averageSpeed = newSpeed;
+        else averageSpeed = averageSpeed * 0.75 + newSpeed * 0.25;
     }
 
     public double getSpeed() {
