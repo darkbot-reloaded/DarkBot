@@ -27,7 +27,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
     public Health health         = new Health();
     public PlayerInfo playerInfo = new PlayerInfo();
-    public ShipInfo shipInfo     = new ShipInfo();
+    public ShipInfo shipInfo     = new ShipInfo(this.locationInfo);
 
     private com.github.manolo8.darkbot.core.entities.Pet pet;
 
@@ -220,7 +220,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
     @Override
     public int getSpeed() {
-        return shipInfo.speed == 0 ? (int) locationInfo.speed : shipInfo.speed;
+        return (int) shipInfo.getSpeed();
     }
 
     @Override

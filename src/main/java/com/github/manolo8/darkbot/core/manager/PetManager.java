@@ -516,6 +516,11 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
+    public Optional<eu.darkbot.api.game.entities.Ship> getOwner() {
+        return pet.getOwner();
+    }
+
+    @Override
     public boolean isInvisible() {
         return pet.isInvisible();
     }

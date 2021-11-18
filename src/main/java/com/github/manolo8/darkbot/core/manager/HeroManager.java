@@ -138,10 +138,6 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         return this.target != null && !target.removed;
     }
 
-    public long timeTo(double distance) {
-        return (long) (distance * 1000 / shipInfo.speed);
-    }
-
     public void jumpPortal(Portal portal) {
         if (!portal.isValid()) return;
         if (System.currentTimeMillis() - portalTime < 500) return; // Minimum delay

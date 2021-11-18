@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.objects;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.utils.Location;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -11,6 +12,11 @@ public class ShipInfo extends Updatable {
     public long target;
     private long keepTargetTime;
     public LocationInfo destination = new LocationInfo();
+    private final LocationInfo currentLoc;
+
+    public ShipInfo(LocationInfo currentLoc) {
+        this.currentLoc = currentLoc;
+    }
 
     @Override
     public void update() {
@@ -24,6 +30,32 @@ public class ShipInfo extends Updatable {
 
         destination.update(API.readMemoryLong(address + 96));
         destination.update();
+
+        calcSpeed();
     }
 
+    private double averageSpeed, pastTimeNeeded;
+    private Location pastDestination;
+
+    private void calcSpeed() {
+        if (speed > 50) return;
+
+        double timeNeeded = API.readDouble(address, 104, 152);
+        if (destination.now.equals(pastDestination) && pastTimeNeeded == timeNeeded) return;
+
+        this.pastDestination = destination.now.copy();
+        this.pastTimeNeeded = timeNeeded;
+
+        double elapsed = API.readDouble(address, 104, 136);
+
+        double newSpeed = currentLoc.distance(destination) / (timeNeeded - elapsed);
+        if (newSpeed < 100) return;
+        if (newSpeed > 1000) newSpeed = 1000;
+
+        averageSpeed = averageSpeed * 0.75 + newSpeed * 0.25;
+    }
+
+    public double getSpeed() {
+        return speed > 50 ? speed : averageSpeed;
+    }
 }

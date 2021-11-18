@@ -143,7 +143,7 @@ public enum EntityFactory implements EntityBuilder {
     }
 
     private static boolean isPet(String asset, long address) {
-        return API.readMemoryString(address, 192, 136).trim().equals("pet");
+        return API.readMemoryString(address, 192, 144).trim().equals("pet");
     }
 
     private static boolean isShip(String asset, long address) {
