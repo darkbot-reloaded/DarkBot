@@ -10,12 +10,21 @@ public class ShipInfo extends Updatable {
     public int speed;
     public double angle;
     public long target;
-    private long keepTargetTime;
-    public LocationInfo destination = new LocationInfo();
-    private final LocationInfo currentLoc;
 
-    public ShipInfo(LocationInfo currentLoc) {
-        this.currentLoc = currentLoc;
+    public LocationInfo destination = new LocationInfo();
+
+    private long keepTargetTime;
+    private double predictedSpeed, pastTimeNeeded;
+
+    private Location pastDestination;
+    private final LocationInfo entityLocation;
+
+    public ShipInfo(LocationInfo entityLocation) {
+        this.entityLocation = entityLocation;
+    }
+
+    public double getSpeed() {
+        return speed == 1 ? predictedSpeed : speed;
     }
 
     @Override
@@ -31,32 +40,26 @@ public class ShipInfo extends Updatable {
         destination.update(API.readMemoryLong(address + 96));
         destination.update();
 
-        calcSpeed();
+        updateSpeed();
     }
 
-    private double averageSpeed, pastTimeNeeded;
-    private Location pastDestination;
+    private void updateSpeed() {
+        if (speed != 1) return; // Entities with a valid real speed do not need to have this speed prediction done
 
-    private void calcSpeed() {
-        if (speed > 50) return;
+        long tweenLiteAddress = API.readLong(address, 104);
 
-        double timeNeeded = API.readDouble(address, 104, 152);
+        double timeNeeded = API.readDouble(tweenLiteAddress, 152);
         if (destination.now.equals(pastDestination) && pastTimeNeeded == timeNeeded) return;
 
         this.pastDestination = destination.now.copy();
         this.pastTimeNeeded = timeNeeded;
 
-        double elapsed = API.readDouble(address, 104, 136);
+        double elapsed = API.readDouble(tweenLiteAddress, 136); // Offset `144` works too
+        double newSpeed = Math.min(1000, entityLocation.distance(destination) / (timeNeeded - elapsed));
 
-        double newSpeed = currentLoc.distance(destination) / (timeNeeded - elapsed);
-        if (newSpeed < 100) return;
-        if (newSpeed > 1000) newSpeed = 1000;
+        if (newSpeed < 100) return; // Probably an invalid speed, ignore it
 
-        if (averageSpeed == 0) averageSpeed = newSpeed;
-        else averageSpeed = averageSpeed * 0.75 + newSpeed * 0.25;
-    }
-
-    public double getSpeed() {
-        return speed > 50 ? speed : averageSpeed;
+        if (predictedSpeed == 0) predictedSpeed = newSpeed;
+        else predictedSpeed = predictedSpeed * 0.75 + newSpeed * 0.25;
     }
 }

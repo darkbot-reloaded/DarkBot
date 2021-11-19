@@ -108,7 +108,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     }
 
     public long timeTo(double distance) {
-        return (long) (distance * 1000 / shipInfo.speed);
+        return eu.darkbot.api.game.entities.Ship.super.timeTo(distance);
     }
 
     public void setTimerTo(long time) {

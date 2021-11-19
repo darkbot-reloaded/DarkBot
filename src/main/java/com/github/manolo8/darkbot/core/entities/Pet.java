@@ -25,12 +25,15 @@ public class Pet extends Ship implements eu.darkbot.api.game.entities.Pet {
         super.update();
         id = API.readMemoryInt(address + 56);
         level = API.readMemoryInt(address, 0x130, 0x28, 0x28);
-        playerId = API.readMemoryInt(address, 0x130, 0x30, 0x28);
 
-        if (owner == null)
+        int newPlayerId = API.readMemoryInt(address, 0x130, 0x30, 0x28);
+
+        if (playerId != newPlayerId || owner == null) {
+            playerId = newPlayerId;
             owner = main.mapManager.entities.ships.stream()
-                    .filter(ship -> ship.getPet().map(p -> p == this).orElse(false))
+                    .filter(ship -> ship.getId() == playerId)
                     .findFirst().orElse(null);
+        }
     }
 
     @Override
