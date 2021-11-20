@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.extensions.features.handlers;
 
-import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.modules.utils.AttackAPIImpl;
 import eu.darkbot.api.extensions.selectors.LaserSelector;
 import eu.darkbot.api.extensions.selectors.PrioritizedSupplier;
@@ -11,8 +10,8 @@ public class LaserSelectorHandler extends AbstractSelectorHandler<LaserSelector,
 
     private static final Class<?>[] NATIVE = new Class[]{AttackAPIImpl.DefaultLaserSupplier.class};
 
-    public LaserSelectorHandler(FeatureRegistry featureRegistry) {
-        super(featureRegistry, LaserSelector::getLaserSupplier);
+    public LaserSelectorHandler() {
+        super(LaserSelector::getLaserSupplier);
     }
 
     @Override

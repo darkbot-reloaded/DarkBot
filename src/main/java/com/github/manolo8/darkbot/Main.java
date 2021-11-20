@@ -9,8 +9,6 @@ import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.core.itf.Behaviour;
-import com.github.manolo8.darkbot.core.itf.Configurable;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.FacadeManager;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
@@ -41,6 +39,8 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import eu.darkbot.api.extensions.Behavior;
+import eu.darkbot.api.extensions.Configurable;
 import eu.darkbot.api.extensions.Installable;
 import eu.darkbot.api.extensions.Module;
 import eu.darkbot.api.managers.BotAPI;
@@ -99,7 +99,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     public boolean tickingModule;
 
     private String moduleId;
-    private List<Behaviour> behaviours = new ArrayList<>();
+    private List<Behavior> behaviours = new ArrayList<>();
     private final List<Runnable> tasks = new ArrayList<>();
 
     private volatile boolean running;
@@ -261,10 +261,10 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(newModule);
                 if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
             }
-            for (Behaviour behaviour : behaviours) {
+            for (Behavior behaviour : behaviours) {
                 try {
-                    if (running) behaviour.tickBehaviour();
-                    else behaviour.tickStopped();
+                    if (running) behaviour.onTickBehavior();
+                    else behaviour.onStoppedBehavior();
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
@@ -365,7 +365,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         else hero.pet.clickable.reset();
     }
 
-    public void setBehaviours(List<Behaviour> behaviours) {
+    public void setBehaviours(List<Behavior> behaviours) {
         this.behaviours = behaviours;
     }
 

@@ -4,8 +4,6 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.tree.ConfigBuilder;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
-import com.github.manolo8.darkbot.extensions.plugins.Plugin;
-import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.google.gson.JsonElement;
 import eu.darkbot.api.PluginAPI;
@@ -15,13 +13,10 @@ import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.Configurable;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.ExtensionsAPI;
-import eu.darkbot.impl.PluginApiImpl;
-import org.jetbrains.annotations.Nullable;
+import eu.darkbot.api.utils.Inject;
 
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 public class ConfigHandler implements ConfigAPI, Listener {
 
@@ -30,18 +25,18 @@ public class ConfigHandler implements ConfigAPI, Listener {
     private final ConfigManager loader;
     private final ConfigBuilder builder;
 
-    private final ConfigSetting.Parent<Config> configuration;
+    private ConfigSetting.Parent<Config> configuration;
 
-    public ConfigHandler(PluginApiImpl pluginAPI,
+    public ConfigHandler(PluginAPI api,
                          ConfigManager loader,
                          ConfigBuilder builder) {
-        this.pluginAPI = pluginAPI;
+        this.pluginAPI = api;
         this.loader = loader;
         this.builder = builder;
+    }
 
-        // Early-add config handler to plugin api to avoid dependency loop:
-        // builder -> pet gears -> hero -> mode selector -> feature registry -> config handler
-        pluginAPI.addInstance(this);
+    @Inject
+    public void init() {
         this.configuration = builder.of(Config.class, "Configuration", null);
         this.configuration.setValue(loader.getConfig());
     }

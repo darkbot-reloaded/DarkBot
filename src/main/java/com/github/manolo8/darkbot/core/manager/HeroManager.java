@@ -22,8 +22,10 @@ import eu.darkbot.api.game.items.Item;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.ItemFlag;
 import eu.darkbot.api.game.items.SelectableItem;
+import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
+import eu.darkbot.api.utils.Inject;
 import eu.darkbot.impl.PluginApiImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +47,8 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     private final SettingsProxy keybinds;
     private final Collection<? extends Portal> portals;
     private final HeroItemsAPI items;
-    private final ShipModeSelectorHandler shipModeHandler;
+
+    private ShipModeSelectorHandler shipModeHandler;
     private final MutableShipMode shipMode = new MutableShipMode();
 
     public Map map;
@@ -67,9 +70,6 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
                        FacadeManager facadeManager,
                        StarManager star,
                        HeroItemsAPI items,
-                       // This is NOT a redundant parameter. feature registry must be instanced
-                       // first for shipModeHandler to be available.
-                       FeatureRegistry fr,
                        ShipModeSelectorHandler shipModeHandler) {
         instance = this;
 
@@ -229,6 +229,11 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     @Override
     public Entity getTarget() {
         return inGameTarget;
+    }
+
+    @Override
+    public GameMap getMap() {
+        return map;
     }
 
     @Override

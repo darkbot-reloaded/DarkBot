@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import eu.darkbot.api.API;
 import eu.darkbot.api.extensions.selectors.PrioritizedSupplier;
+import eu.darkbot.api.utils.Inject;
 
 import java.util.Comparator;
 import java.util.List;
@@ -12,10 +13,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class AbstractSelectorHandler<T, P, PS extends PrioritizedSupplier<P>> extends FeatureHandler<T>
-        implements API.Singleton {
+public abstract class AbstractSelectorHandler<T, P, PS extends PrioritizedSupplier<P>> extends FeatureHandler<T> {
 
-    private final FeatureRegistry featureRegistry;
     private final Function<T, PS> extractor;
 
     private PS last;
@@ -25,10 +24,8 @@ public abstract class AbstractSelectorHandler<T, P, PS extends PrioritizedSuppli
                     Comparator.nullsLast(Comparator.comparingInt(PrioritizedSupplier.Priority::ordinal)))
             .thenComparing(ps -> ps == last);
 
-    public AbstractSelectorHandler(FeatureRegistry featureRegistry, Function<T, PS> extractor) {
+    public AbstractSelectorHandler(Function<T, PS> extractor) {
         super(AbstractSelectorHandler.class);
-
-        this.featureRegistry = featureRegistry;
         this.extractor = extractor;
     }
 

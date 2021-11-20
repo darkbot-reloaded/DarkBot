@@ -1,16 +1,13 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.core.itf.Configurable;
-import com.github.manolo8.darkbot.core.itf.InstructionProvider;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.components.MainButton;
-import com.github.manolo8.darkbot.gui.components.MainToggleButton;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
-import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.extensions.Configurable;
+import eu.darkbot.api.extensions.InstructionProvider;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

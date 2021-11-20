@@ -4,21 +4,14 @@ import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.itf.NpcExtraProvider;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
-import com.github.manolo8.darkbot.gui.titlebar.ExtraButton;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
+// TODO: implement a separate handler for the new NpcExtra, as the logic is pretty different
 public class NpcExtraHandler extends FeatureHandler<NpcExtraProvider> {
 
     private static final Class<?>[] NATIVE = new Class[]{NpcExtra.DefaultNpcExtraProvider.class};
-
-    private final FeatureRegistry featureRegistry;
-
-    public NpcExtraHandler(FeatureRegistry featureRegistry) {
-        this.featureRegistry = featureRegistry;
-    }
 
     @Override
     public Class<?>[] getNativeFeatures() {

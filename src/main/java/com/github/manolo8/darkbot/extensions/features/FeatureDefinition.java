@@ -5,14 +5,11 @@ import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
-import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import eu.darkbot.api.config.ConfigSetting;
-import eu.darkbot.api.extensions.Configurable;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Type;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
