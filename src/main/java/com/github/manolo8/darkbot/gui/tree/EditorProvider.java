@@ -1,10 +1,8 @@
 package com.github.manolo8.darkbot.gui.tree;
 
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.Editor;
-import com.github.manolo8.darkbot.gui.tree.components.JShipConfigField;
 import com.github.manolo8.darkbot.gui.tree.editors.BooleanEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ColorEditor;
@@ -20,6 +18,7 @@ import com.github.manolo8.darkbot.gui.tree.editors.ShipModeEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.StringEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.TableEditor;
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.types.Condition;
 import eu.darkbot.api.config.types.PercentRange;
 import eu.darkbot.api.config.types.PlayerTag;
 import eu.darkbot.api.config.types.ShipMode;
@@ -59,10 +58,12 @@ public class EditorProvider {
         defaultEditors.put(Integer.class, NumberEditor.class);
         defaultEditors.put(Double.class, NumberEditor.class);
         defaultEditors.put(Character.class, CharacterEditor.class);
-        defaultEditors.put(Condition.class, ConditionEditor.class);
         defaultEditors.put(Color.class, ColorEditor.class);
         defaultEditors.put(Font.class, FontEditor.class);
         defaultEditors.put(String.class, StringEditor.class);
+
+        defaultEditors.put(Condition.class, ConditionEditor.class);
+        defaultEditors.put(com.github.manolo8.darkbot.config.actions.Condition.class, ConditionEditor.class);
 
         defaultEditors.put(Config.PercentRange.class, RangeEditor.class);
         defaultEditors.put(PercentRange.class, RangeEditor.class);

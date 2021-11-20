@@ -1,10 +1,22 @@
 package com.github.manolo8.darkbot.config.actions;
 
 import com.github.manolo8.darkbot.Main;
+import eu.darkbot.api.PluginAPI;
 import org.jetbrains.annotations.NotNull;
 
-public interface Condition extends Value<Condition.Result> {
+public interface Condition extends Value<Condition.Result>, eu.darkbot.api.config.types.Condition {
 
+    @Override
+    default @NotNull eu.darkbot.api.config.types.Condition.Result get(PluginAPI pluginAPI) {
+        Result result = get(pluginAPI.requireInstance(Main.class));
+
+        return eu.darkbot.api.config.types.Condition.Result.values()[result.ordinal()];
+    }
+
+    /**
+     * @deprecated Use {@link #get(PluginAPI)} instead
+     */
+    @Deprecated
     @NotNull Result get(Main main);
 
     enum Result {

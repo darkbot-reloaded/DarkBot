@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.tree.editors;
 
-import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
@@ -8,8 +7,8 @@ import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.config.types.Condition;
 import eu.darkbot.api.config.util.OptionEditor;
-import eu.darkbot.api.config.util.ValueHandler;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
