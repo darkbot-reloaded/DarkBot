@@ -14,7 +14,6 @@ import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.utils.NpcTableModel;
 import com.github.manolo8.darkbot.gui.tree.utils.TableHelpers;
-import com.github.manolo8.darkbot.modules.LootNCollectorModule;
 import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.config.annotations.Number;
 import eu.darkbot.api.config.annotations.Option;
