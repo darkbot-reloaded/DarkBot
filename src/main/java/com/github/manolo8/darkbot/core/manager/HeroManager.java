@@ -139,7 +139,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     public long timeTo(double distance) {
-        return (long) (distance * 1000 / shipInfo.speed);
+        return super.timeTo(distance);
     }
 
     public void jumpPortal(Portal portal) {
