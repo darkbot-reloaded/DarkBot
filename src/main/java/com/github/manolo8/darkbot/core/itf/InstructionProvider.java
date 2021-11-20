@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.utils.I18n;
 
 import javax.swing.*;
 
-public interface InstructionProvider {
+public interface InstructionProvider extends eu.darkbot.api.extensions.InstructionProvider {
 
     /**
      * Basic instructions, just a string. Will display when the module is set or by user request.
@@ -25,7 +25,7 @@ public interface InstructionProvider {
 
     /**
      * Called when the user presses to display instructions or the module is loaded.
-     * You usually would customize via {@link #instructions} or {@link #instructionsComponent} instead.
+     * You would usually customize via {@link #instructions} or {@link #instructionsComponent} instead.
      * @param featureName The name of the feature to display to show instructions for
      */
     default void showInstructions(String featureName) {

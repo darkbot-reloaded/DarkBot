@@ -11,8 +11,8 @@ public class ShipModeSelectorHandler extends AbstractSelectorHandler<ShipModeSel
 
     private static final Class<?>[] NATIVE = new Class[]{HeroManager.DefaultShipModeSupplier.class};
 
-    public ShipModeSelectorHandler(FeatureRegistry featureRegistry) {
-        super(featureRegistry, ShipModeSelector::getShipModeSupplier);
+    public ShipModeSelectorHandler() {
+        super(ShipModeSelector::getShipModeSupplier);
     }
 
     @Override

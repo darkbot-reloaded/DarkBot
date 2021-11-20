@@ -1,11 +1,12 @@
 package com.github.manolo8.darkbot.gui.plugins;
 
-import com.github.manolo8.darkbot.core.itf.Behaviour;
-import com.github.manolo8.darkbot.core.itf.InstructionProvider;
-import com.github.manolo8.darkbot.core.itf.Module;
-import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
+import com.github.manolo8.darkbot.extensions.features.decorators.InstructionProviderDecorator;
 import com.github.manolo8.darkbot.gui.components.MainButton;
+import eu.darkbot.api.extensions.Behavior;
+import eu.darkbot.api.extensions.InstructionProvider;
+import eu.darkbot.api.extensions.Module;
+import eu.darkbot.api.extensions.Task;
 
 import java.awt.event.ActionEvent;
 import java.util.LinkedHashMap;
@@ -17,15 +18,15 @@ public class FeatureTypeButton extends MainButton {
     private static final Map<Class<?>, String> FEATURE_TYPES = new LinkedHashMap<>();
     static {
         FEATURE_TYPES.put(Module.class, "Module");
-        FEATURE_TYPES.put(Behaviour.class, "Behaviour");
+        FEATURE_TYPES.put(Behavior.class, "Behaviour");
         FEATURE_TYPES.put(Task.class, "Task");
     }
     private enum InstructionStatus {
         NONE, UNSURE, YES
     }
 
-    private FeatureDefinition<?> feature;
-    private String description;
+    private final FeatureDefinition<?> feature;
+    private final String description;
     private InstructionStatus instr;
 
     FeatureTypeButton(FeatureDefinition<?> feature) {
@@ -58,7 +59,7 @@ public class FeatureTypeButton extends MainButton {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (!isEnabled() || instr != InstructionStatus.YES) return;
-        ((InstructionProvider) feature.getInstance()).showInstructions(feature.getName());
+        InstructionProviderDecorator.showInstructions(feature.getInstance(), feature.getName());
     }
 
 }

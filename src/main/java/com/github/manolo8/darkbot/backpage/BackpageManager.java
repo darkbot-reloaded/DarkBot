@@ -1,13 +1,14 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
+import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.BackpageAPI;
+import eu.darkbot.impl.PluginApiImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -72,7 +73,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
             synchronized (main.pluginHandler.getBackgroundLock()) {
                 for (Task task : tasks) {
                     try {
-                        task.backgroundTick();
+                        task.onBackgroundTick();
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
@@ -114,7 +115,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
             synchronized (main.pluginHandler.getBackgroundLock()) {
                 for (Task task : tasks) {
                     try {
-                        task.tickTask();
+                        task.onTickTask();
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()

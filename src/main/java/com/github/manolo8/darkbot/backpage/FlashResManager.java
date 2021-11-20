@@ -1,11 +1,13 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.itf.Task;
-import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.utils.XmlHelper;
 import com.github.manolo8.darkbot.utils.http.Http;
+import eu.darkbot.api.API;
+import eu.darkbot.api.extensions.Feature;
+import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.GameResourcesAPI;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -24,21 +26,19 @@ public class FlashResManager implements Task, GameResourcesAPI {
 
     private static final String URL = "https://darkorbit-22.bpsecure.com/spacemap/templates/{lang}/flashres.xml";
 
-    private Main main;
+    private final Main main;
 
     private String lang = null;
     private Locale inGameLocale;
 
     private volatile Map<String, String> ALL_TRANSLATIONS = Collections.emptyMap();
 
-
-    @Override
-    public void install(Main main) {
+    public FlashResManager(Main main) {
         this.main = main;
     }
 
     @Override
-    public void tick() {
+    public void onTickTask() {
         if (main == null) return;
         String currLang = main.settingsManager.lang;
         if (currLang == null
@@ -82,7 +82,7 @@ public class FlashResManager implements Task, GameResourcesAPI {
     }
 
     @Override
-    public Optional<String> findTranslation(String key) {
+    public Optional<String> findTranslation(@NotNull String key) {
         return Optional.ofNullable(getTranslation(key));
     }
 }

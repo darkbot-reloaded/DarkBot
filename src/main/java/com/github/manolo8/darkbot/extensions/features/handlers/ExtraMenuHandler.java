@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.extensions.features.handlers;
 
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.gui.titlebar.ExtraButton;
 import eu.darkbot.api.extensions.ExtraMenus;
 
@@ -14,12 +13,6 @@ public class ExtraMenuHandler extends FeatureHandler<ExtraMenus> {
             ExtraButton.DefaultExtraMenuProvider.class,
             ExtraButton.PluginExtraMenuProvider.class
     };
-
-    private final FeatureRegistry featureRegistry;
-
-    public ExtraMenuHandler(FeatureRegistry featureRegistry) {
-        this.featureRegistry = featureRegistry;
-    }
 
     @Override
     public Class<?>[] getNativeFeatures() {

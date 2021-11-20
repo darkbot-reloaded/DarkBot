@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.extensions.features;
 
 import com.github.manolo8.darkbot.extensions.features.handlers.*;
+import eu.darkbot.api.API;
 import eu.darkbot.api.PluginAPI;
 
 import java.util.Arrays;
@@ -15,7 +16,7 @@ import java.util.stream.Stream;
  * apply actions when the features are going to be reloaded or after they have been loaded.
  * e.g. Updating the list of available modules in the dropdown selector in the config.
  */
-public class FeatureRegisterHandler {
+public class FeatureRegisterHandler implements API.Singleton {
 
     private final FeatureRegistry featureRegistry;
     private final List<FeatureHandler<?>> FEATURE_HANDLERS;

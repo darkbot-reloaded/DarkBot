@@ -4,13 +4,13 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.UnresolvedPlayer;
-import com.github.manolo8.darkbot.core.itf.Task;
-import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.Base62;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.IOUtils;
 import com.github.manolo8.darkbot.utils.http.Method;
+import eu.darkbot.api.extensions.Feature;
+import eu.darkbot.api.extensions.Task;
 
 import javax.swing.*;
 import java.io.UnsupportedEncodingException;
@@ -24,20 +24,20 @@ public class UsernameUpdater implements Task {
 
     private static final Pattern PROFILE_ID = Pattern.compile("/p/([A-Za-z0-9]+)-");
 
-    private Main main;
+    private final Main main;
+    private final BackpageManager backpageManager;
+
     private Config config;
-    private BackpageManager backpageManager;
 
-
-    @Override
-    public void install(Main main) {
+    public UsernameUpdater(Main main, BackpageManager backpageManager) {
         this.main = main;
+        this.backpageManager = backpageManager;
+
         this.config = main.config;
-        this.backpageManager = main.backpage;
     }
 
     @Override
-    public void tick() {
+    public void onTickTask() {
         this.config = main.config;
 
         UnresolvedPlayer user = config.UNRESOLVED.poll();
