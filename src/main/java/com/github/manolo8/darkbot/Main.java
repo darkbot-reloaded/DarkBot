@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.ConfigHandler;
 import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
+import com.github.manolo8.darkbot.config.utils.PlayerTagTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
@@ -54,7 +55,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 101 alpha 1");
+    public static final Version VERSION      = new Version("1.13.17 beta 101");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -63,6 +64,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
+            .registerTypeAdapterFactory(new PlayerTagTypeAdapterFactory())
             .create();
 
     public ConfigManager configManager = new ConfigManager();

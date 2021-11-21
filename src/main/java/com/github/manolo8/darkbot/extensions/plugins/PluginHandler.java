@@ -144,14 +144,14 @@ public class PluginHandler implements API.Singleton {
                 LOADING_EXCEPTIONS.add(new PluginException("Failed to load plugins", e));
                 e.printStackTrace();
             }
-            LISTENERS.forEach(PluginListener::afterLoad);
             eventBroker.sendEvent(new PluginLifetimeEvent(PluginStage.AFTER_LOAD));
+            LISTENERS.forEach(PluginListener::afterLoad);
         }
-        LISTENERS.forEach(PluginListener::afterLoadComplete);
         eventBroker.sendEvent(new PluginLifetimeEvent(PluginStage.AFTER_LOAD_COMPLETE));
+        LISTENERS.forEach(PluginListener::afterLoadComplete);
         SwingUtilities.invokeLater(() -> {
-            LISTENERS.forEach(PluginListener::afterLoadCompleteUI);
             eventBroker.sendEvent(new PluginLifetimeEvent(PluginStage.AFTER_LOAD_COMPLETE_UI));
+            LISTENERS.forEach(PluginListener::afterLoadCompleteUI);
         });
     }
 
