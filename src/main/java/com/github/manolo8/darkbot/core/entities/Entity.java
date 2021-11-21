@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -18,6 +19,9 @@ import java.util.function.Predicate;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Entity extends Updatable implements eu.darkbot.api.game.entities.Entity {
+    // was 800 before but added possibility that user has increased attack range by zephyr's momentum ability
+    public static final int DEFAULT_CLICK_RADIUS = 900;
+
     public Main main;
     public Map<String, Object> metadata;
     public LocationInfo locationInfo = new LocationInfo();
@@ -61,6 +65,7 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     @Override
     public void update() {
         locationInfo.update();
+        clickable.update();
     }
 
     @Override
@@ -101,12 +106,12 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
         removed = true;
     }
 
-    public void setMetadata(String key, Object value) {
+    public void setMetadata(@NotNull String key, Object value) {
         if (metadata == null) metadata = new HashMap<>();
         this.metadata.put(key, value);
     }
 
-    public Object getMetadata(String key) {
+    public Object getMetadata(@NotNull String key) {
         if (metadata == null) return null;
         return this.metadata.get(key);
     }
@@ -128,9 +133,9 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
 
     @Override
     public boolean trySelect(boolean tryAttack) {
-        if (!isSelectable() || distanceTo(main.hero) > 900) return false;
+        if (!isSelectable() || distanceTo(main.hero) > DEFAULT_CLICK_RADIUS) return false;
 
-        clickable.setRadius(800);
+        clickable.setRadius(DEFAULT_CLICK_RADIUS);
         main.hero.drive.clickCenter(!tryAttack, locationInfo.now);
         clickable.setRadius(0);
 
