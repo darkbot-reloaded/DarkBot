@@ -304,7 +304,8 @@ public class MapDrawer extends JPanel {
             }
         }
 
-        hero.getTargetAs(Lockable.class).ifPresent(target -> {
+        Lockable target = hero.getLocalTarget();
+        if (target != null && target.isValid()) {
             if (target instanceof Npc || target.getEntityInfo().isEnemy()) g2.setColor(cs.ENEMIES);
             else g2.setColor(cs.ALLIES);
             g2.setFont(cs.FONTS.MID);
@@ -312,7 +313,7 @@ public class MapDrawer extends JPanel {
             drawString(g2, name, mid + 10 + (mid - 20) / 2, height - 40, Align.MID);
 
             drawHealth(g2, target.getHealth(), mid + 10, height - 34, mid - 20, 12, 0);
-        });
+        }
     }
 
     private void drawTrail(Graphics2D g2) {
@@ -412,14 +413,13 @@ public class MapDrawer extends JPanel {
                 drawString(g2, ship.playerInfo.username, translateX(loc.getX()), translateY(loc.getY()) - 5, Align.MID);
         }
 
-        hero.getTargetAs(Lockable.class)
-                .filter(eu.darkbot.api.game.entities.Entity::isValid)
-                .ifPresent(target -> {
-                    g2.setColor(cs.GOING);
-                    drawLine(g2, target.getLocationInfo(), hero.getLocationInfo());
-                    g2.setColor(cs.TARGET);
-                    drawEntity(g2, target.getLocationInfo(), true);
-                });
+        Lockable target = hero.getLocalTarget();
+        if (target != null && target.isValid()) {
+            g2.setColor(cs.GOING);
+            drawLine(g2, target.getLocationInfo(), hero.getLocationInfo());
+            g2.setColor(cs.TARGET);
+            drawEntity(g2, target.getLocationInfo(), true);
+        }
 
         if (!config.BOT_SETTINGS.OTHER.DEV_STUFF) return;
 

@@ -76,20 +76,23 @@ public class ConfigBuilder implements API.Singleton {
         }
 
         private Map<String, ConfigSetting<?>> getChildren(ConfigSetting.Parent<?> p, Class<?> type) {
+            Configuration cfg = type.getAnnotation(Configuration.class);
+            String parentKey = cfg != null ? cfg.value() : p.getKey();
+
             return Arrays.stream(type.getDeclaredFields())
                     .filter(this::participates)
                     .collect(Collectors.toMap(
                             f -> f.getName().toLowerCase(Locale.ROOT),
-                            f -> createConfig(p, f),
+                            f -> createConfig(p, parentKey, f),
                             (a, b) -> a,
                             LinkedHashMap::new));
         }
 
-        private ConfigSetting<?> createConfig(ConfigSetting.Parent<?> parent, Field field) {
+        private ConfigSetting<?> createConfig(ConfigSetting.Parent<?> parent, String parentKey, Field field) {
             Class<?> type = field.getType();
 
-            String key = parent.getKey() + "." + field.getName().toLowerCase(Locale.ROOT),
-                    name, description;
+            String key = parentKey + "." + field.getName().toLowerCase(Locale.ROOT);
+            String name, description;
 
             com.github.manolo8.darkbot.config.types.Option legacyOption
                     = field.getAnnotation(com.github.manolo8.darkbot.config.types.Option.class);
