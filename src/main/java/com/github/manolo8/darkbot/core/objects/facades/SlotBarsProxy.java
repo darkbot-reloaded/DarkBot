@@ -101,6 +101,25 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         return useItem(item, itemFlags);
     }
 
+    @Override
+    public @Nullable Item getItem(Character character) {
+        SlotBar.Slot slot = getSlot(settings.getAtChar(character));
+        if (slot == null || slot.item == null) return null;
+
+        return categoryBar.findItem(slot.item).orElse(slot.item);
+    }
+
+    @Override
+    public @Nullable Character getKeyBind(SelectableItem selectableItem) {
+        Item item = getItem(selectableItem);
+        if (item == null) return null;
+        SlotBarsProxy.Type slotBarType = item.getSlotBarType();
+        int slotNumber = item.getFirstSlotNumber();
+        if (slotNumber < 1 || slotNumber > 10 || slotBarType == Type.PRO_ACTION_BAR) return null;
+
+        return settings.getCharCode(SettingsProxy.KeyBind.of(slotBarType, slotNumber));
+    }
+
     private ItemUseResult checkItemFlags(Item item, ItemFlag... flags) {
         for (ItemFlag flag : flags)
             if (!flag.test(item))
