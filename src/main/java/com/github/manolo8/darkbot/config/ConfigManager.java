@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.ColorAdapter;
 import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.FontAdapter;
+import com.github.manolo8.darkbot.config.utils.PlayerTagTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.utils.ApiErrors;
@@ -43,6 +44,7 @@ public class ConfigManager implements API.Singleton {
             .registerTypeHierarchyAdapter(Font.class, new FontAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
+            .registerTypeAdapterFactory(new PlayerTagTypeAdapterFactory())
             .create();
 
     public static final String DEFAULT = "config",

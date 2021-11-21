@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -74,13 +75,21 @@ public class MultiDropdownEditor extends JComboBox<Object> implements OptionEdit
 
         if (setting == dropdown && elements.equals(dropdown.getValue())) return this;
         setting = dropdown;
-        elements = new HashSet<>(dropdown.getValue());
+        elements = copyOf(dropdown);
 
         renderer.setOptions(dropdown.getHandler().getMetadata("dropdown.options"));
         setModel(model);
         setSelectedItem(dropdown.getValue());
 
         return this;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private Set<Object> copyOf(ConfigSetting<Set<Object>> setting) {
+        if (EnumSet.class.isAssignableFrom(setting.getType()))
+            return EnumSet.copyOf((EnumSet) setting.getValue());
+
+        return new HashSet<>(setting.getValue());
     }
 
     private void updateItem(int index) {
