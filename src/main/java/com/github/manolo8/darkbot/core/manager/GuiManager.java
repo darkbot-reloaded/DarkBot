@@ -16,10 +16,13 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.managers.GameScreenAPI;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -45,7 +48,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     private long guiAddress;
     private long mainAddress;
 
-    private final List<Gui> registeredGuis = new ArrayList<>();
+    private final Map<String, Gui> registeredGuis = new HashMap<>();
 
     public final Gui lostConnection;
     public final Gui connecting;
@@ -115,7 +118,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     public <T extends Gui> T register(String key, Class<T> gui) {
         Gui guiFix = pluginAPI.requireInstance(gui); // Workaround for a java compiler assertion bug having issues with types
         this.guis.addLazy(key, guiFix::update);
-        this.registeredGuis.add(guiFix);
+        this.registeredGuis.put(key, guiFix);
 
         return (T) guiFix;
     }
@@ -138,7 +141,7 @@ public class GuiManager implements Manager, GameScreenAPI {
             guis.update(API.readMemoryLong(guiAddress + 112));
 
             repairAddress = 0;
-            registeredGuis.forEach(Gui::reset);
+            registeredGuis.values().forEach(Gui::reset);
             checks = LoadStatus.WAITING;
         });
     }
@@ -146,7 +149,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     public void tick() {
         guis.update();
 
-        registeredGuis.forEach(Gui::update);
+        registeredGuis.values().forEach(Gui::update);
 
         if (checks != LoadStatus.DONE && checks.canAdvance.test(this))
             checks = LoadStatus.values()[checks.ordinal() + 1];
@@ -285,7 +288,12 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     @Override
     public Collection<? extends eu.darkbot.api.game.other.Gui> getGuis() {
-        return registeredGuis;
+        return registeredGuis.values();
+    }
+
+    @Override
+    public @Nullable Gui getGui(String key) {
+        return registeredGuis.get(key);
     }
 
     @Override

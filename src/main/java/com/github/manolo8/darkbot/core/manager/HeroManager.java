@@ -23,6 +23,7 @@ import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.ItemFlag;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.game.other.GameMap;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
 import eu.darkbot.api.utils.Inject;
@@ -52,7 +53,10 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     private final MutableShipMode shipMode = new MutableShipMode();
 
     public Map map;
+
+    @Deprecated
     public Ship target;
+    private Lockable localTarget;
     public int config;
 
     private long staticAddress;
@@ -223,6 +227,17 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
 
         main.facadeManager.slotBars.useItem(formation, ItemFlag.NOT_SELECTED)
                 .ifSuccessful(r -> formationTime = System.currentTimeMillis());
+    }
+
+    @Override
+    public @Nullable Lockable getLocalTarget() {
+        return localTarget;
+    }
+
+    @Override
+    public void setLocalTarget(@Nullable Lockable lockable) {
+        if (lockable instanceof Ship) this.target = (Ship) lockable;
+        this.localTarget = lockable;
     }
 
     @Nullable

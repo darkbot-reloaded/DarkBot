@@ -68,13 +68,13 @@ public class AttackAPIImpl extends AbstractAttackImpl {
 
         @Override
         public @Nullable Priority getPriority() {
-            return (useRsb = shouldRsb()) ? Priority.MODERATE
-                    : (useSab = shouldSab()) ? Priority.LOW
-                    : Priority.LOWEST;
+            useRsb = shouldRsb();
+            useSab = shouldSab();
+            return useRsb ? Priority.MODERATE : useSab ? Priority.LOW : Priority.LOWEST;
         }
 
         private boolean shouldSab() {
-            Npc target = getTargetAs(Npc.class).orElse(null);
+            Npc target = getTargetAs(Npc.class);
 
             if (target == null || !sabSettings.getValue().ENABLED
                     || target.getInfo().hasExtraFlag(NpcExtra.NO_SAB)) return false;
@@ -86,7 +86,7 @@ public class AttackAPIImpl extends AbstractAttackImpl {
         }
 
         private boolean shouldRsb() {
-            Npc target = getTargetAs(Npc.class).orElse(null);
+            Npc target = getTargetAs(Npc.class);
 
             if (target == null || !rsbEnabled.getValue()
                     || !target.getInfo().hasExtraFlag(NpcExtra.USE_RSB)) return false;

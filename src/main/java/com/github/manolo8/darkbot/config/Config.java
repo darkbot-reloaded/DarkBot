@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGears;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation;
 import com.github.manolo8.darkbot.config.utils.ItemUtils;
+import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
@@ -400,8 +401,28 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
     }
 
     @Override
+    public eu.darkbot.api.config.types.ZoneInfo getPreferredZone(GameMap gameMap) {
+        return PREFERRED.computeIfAbsent(gameMap.getId(), id -> new ZoneInfo(BOT_SETTINGS.OTHER.ZONE_RESOLUTION));
+    }
+
+    @Override
+    public eu.darkbot.api.config.types.ZoneInfo getAvoidedZone(GameMap gameMap) {
+        return AVOIDED.computeIfAbsent(gameMap.getId(), id -> new ZoneInfo(BOT_SETTINGS.OTHER.ZONE_RESOLUTION));
+    }
+
+    @Override
     public Map<Integer, ? extends eu.darkbot.api.config.types.PlayerInfo> getPlayerInfos() {
         return PLAYER_INFOS;
+    }
+
+    @Override
+    public eu.darkbot.api.config.types.PlayerInfo getPlayerInfo(int id) {
+        return PLAYER_INFOS.computeIfAbsent(id, i -> new PlayerInfo(null, i));
+    }
+
+    @Override
+    public void refreshPlayerList() {
+        PLAYER_UPDATED.send(null);
     }
 
     @Override
