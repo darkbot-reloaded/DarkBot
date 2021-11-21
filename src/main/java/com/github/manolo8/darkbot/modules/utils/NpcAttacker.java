@@ -141,6 +141,7 @@ public class NpcAttacker {
         radius += bar.findItemById("ability_zephyr_mmt").map(i -> i.quantity).orElse(0d) * 5;
         return radius;
     }
+    
     private boolean shouldSab() {
         if (!main.config.LOOT.SAB.ENABLED || target.npcInfo.extra.has(NpcExtra.NO_SAB)) return false;
 
