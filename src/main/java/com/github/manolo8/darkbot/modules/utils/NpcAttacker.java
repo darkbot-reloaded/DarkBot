@@ -133,13 +133,12 @@ public class NpcAttacker {
     }
 
     public double modifyRadius(double radius) {
+        if (main.hero.locationInfo.distance(target) < radius) closeRange = true;
         if (target.npcInfo.extra.has((NpcExtra.AGGRESSIVE_APPROACH)) && !closeRange) radius *= 0.55;
         else if (target.health.hpPercent() < 0.25 && target.npcInfo.extra.has(NpcExtra.AGGRESSIVE_FOLLOW)) radius *= 0.75;
         if (target != hero.target || !hero.isAttacking(target) || castingAbility()) radius = Math.min(550, radius);
         else if (!target.locationInfo.isMoving() || target.health.hpPercent() < 0.25) radius = Math.min(600, radius);
         radius += bar.findItemById("ability_zephyr_mmt").map(i -> i.quantity).orElse(0d) * 5;
-
-        if (main.hero.locationInfo.distance(target) < radius) closeRange = true;
         return radius;
     }
     private boolean shouldSab() {
