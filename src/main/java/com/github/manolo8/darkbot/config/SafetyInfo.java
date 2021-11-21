@@ -143,6 +143,11 @@ public class SafetyInfo implements Serializable, Ignorable, eu.darkbot.api.confi
     }
 
     @Override
+    public void setRunMode(eu.darkbot.api.config.types.SafetyInfo.RunMode runMode) {
+        this.runMode = RunMode.values()[runMode.ordinal()];
+    }
+
+    @Override
     public eu.darkbot.api.config.types.SafetyInfo.JumpMode getJumpMode() {
         return eu.darkbot.api.config.types.SafetyInfo.JumpMode.values()[jumpMode.ordinal()];
     }

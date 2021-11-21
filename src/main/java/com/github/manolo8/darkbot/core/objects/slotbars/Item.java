@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -133,8 +134,8 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
     }
 
     @Override
-    public <T extends Enum<T> & SelectableItem> Optional<T> getAs(Class<T> type) {
-        return type.isInstance(selectableItem) ? Optional.of(type.cast(selectableItem)) : Optional.empty();
+    public <T extends Enum<T> & SelectableItem> @Nullable T getAs(Class<T> type) {
+        return type.isInstance(selectableItem) ? type.cast(selectableItem) : null;
     }
 
     @Override

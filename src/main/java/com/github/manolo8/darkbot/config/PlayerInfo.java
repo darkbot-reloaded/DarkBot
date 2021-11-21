@@ -61,6 +61,11 @@ public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
     }
 
     @Override
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @Override
     public int getUserId() {
         return userId;
     }
