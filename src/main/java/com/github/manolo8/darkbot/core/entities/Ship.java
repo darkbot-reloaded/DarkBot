@@ -66,7 +66,6 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     @Override
     public void update() {
         super.update();
-        clickable.update();
 
         health.update();
         shipInfo.update();

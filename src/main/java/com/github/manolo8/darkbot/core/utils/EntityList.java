@@ -21,6 +21,7 @@ import com.github.manolo8.darkbot.core.utils.factory.EntityFactory;
 import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
 import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.EntitiesAPI;
+import eu.darkbot.api.managers.EventBrokerAPI;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,18 +56,24 @@ public class EntityList extends Updatable implements EntitiesAPI {
     public final FakeNpc fakeNpc;
 
     private final Main main;
+    private final EventBrokerAPI eventBroker;
     private final Set<Integer> ids = new HashSet<>();
     private final ObjArray entitiesArr = ObjArray.ofVector();
 
-    public EntityList(Main main) {
+    public EntityList(Main main, EventBrokerAPI eventBroker) {
         this.main    = main;
         this.fakeNpc = new FakeNpc(main);
+        this.eventBroker = eventBroker;
         this.entityRegistry.setMain(main);
 
         this.entityRegistry.addToAll(entity -> {
             if (entity instanceof Obstacle) obstacles.add((Obstacle) entity);
+            eventBroker.sendEvent(new EntityCreateEvent(entity));
         });
-        this.entityRegistry.addDefault(unknown::add);
+        this.entityRegistry.addDefault(e -> {
+            unknown.add(e);
+            eventBroker.sendEvent(new EntityCreateEvent(e));
+        });
 
         this.main.status.add(this::refreshRadius);
     }
@@ -104,7 +111,8 @@ public class EntityList extends Updatable implements EntitiesAPI {
             long entityPtr = entitiesArr.get(i);
 
             int id = API.readMemoryInt(entityPtr + 56);
-            if (ids.add(id)) entityRegistry.sendEntity(id, entityPtr);
+            if (ids.add(id))
+                entityRegistry.sendEntity(id, entityPtr);
         }
     }
 
@@ -117,6 +125,9 @@ public class EntityList extends Updatable implements EntitiesAPI {
                 if (entity.isInvalid(address) || entity.address == main.hero.address || entity.address == main.hero.pet.address) {
                     ids.remove(entity.id);
                     entity.removed();
+
+                    if (entities != ships)
+                        eventBroker.sendEvent(new EntityRemoveEvent(entity));
                     return true;
                 } 
                 entity.update();
@@ -150,6 +161,9 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
             allEntities.forEach(entities -> {
                 entities.forEach(Entity::removed);
+
+                if (entities != ships)
+                    entities.forEach(e -> eventBroker.sendEvent(new EntityRemoveEvent(e)));
                 entities.clear();
             });
         }
