@@ -190,7 +190,7 @@ public class SafetyFinder {
         if ((escape == Escaping.SIGHT && !RUNNING.STOP_RUNNING_NO_SIGHT) || hasEnemy()) return Escaping.SIGHT;
         if (escape == Escaping.REPAIR || hero.health.hpPercent() < SAFETY.REPAIR_HP_RANGE.min ||
                 (hero.health.hpPercent() < this.SAFETY.REPAIR_HP_NO_NPC &&
-                        (!hero.hasTarget() || hero.target.health.hpPercent() > 0.9))) return Escaping.REPAIR;
+                        (!hero.hasTarget() || hero.getLocalTarget().getHealth().hpPercent() > 0.9))) return Escaping.REPAIR;
         return refreshing ? Escaping.REFRESH : Escaping.NONE;
     }
 

@@ -18,7 +18,7 @@ import eu.darkbot.impl.managers.AbstractAttackImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class AttackAPIImpl extends AbstractAttackImpl {
+public abstract class AttackAPIImpl extends AbstractAttackImpl {
 
     private final Main main;
     private final LaserSelectorHandler laserHandler;

@@ -30,6 +30,7 @@ import eu.darkbot.api.utils.Inject;
 import eu.darkbot.impl.PluginApiImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -56,6 +57,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
 
     @Deprecated
     public Ship target;
+    private Ship lastTarget; // Copy of target, to detect when it has been modified
     private Lockable localTarget;
     public int config;
 
@@ -127,6 +129,8 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
                 .flatMap(Collection::stream)
                 .filter(entity -> entity.address == targetPtr)
                 .findAny().orElse(null);
+
+        if (lastTarget != target) setLocalTarget(target);
     }
 
     @Override
@@ -139,7 +143,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     public boolean hasTarget() {
-        return this.target != null && !target.removed;
+        return this.localTarget != null && localTarget.isValid();
     }
 
     public long timeTo(double distance) {
@@ -209,8 +213,13 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
         return this.config == config && this.formation == formation;
     }
 
+    /**
+     * @param entity the target entity to set
+     * @deprecated use {@link #setLocalTarget(Lockable)} instead
+     */
+    @Deprecated
     public void setTarget(Ship entity) {
-        this.target = entity;
+        this.localTarget = this.target = this.lastTarget = entity;
     }
 
     private void toggleConfiguration() {
@@ -230,13 +239,15 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     }
 
     @Override
-    public @Nullable Lockable getLocalTarget() {
+    public @UnknownNullability Lockable getLocalTarget() {
         return localTarget;
     }
 
     @Override
     public void setLocalTarget(@Nullable Lockable lockable) {
-        if (lockable instanceof Ship) this.target = (Ship) lockable;
+        if (lockable instanceof Ship) target = lastTarget = (Ship) lockable;
+        else target = lastTarget = null;
+
         this.localTarget = lockable;
     }
 
