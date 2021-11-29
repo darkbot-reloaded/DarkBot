@@ -12,7 +12,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInfo> {
 
@@ -84,8 +83,8 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
     @Override
     protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
         // Strings get interned...
-        if (Objects.equals(propertyName, "text")
-                || ((Objects.equals(propertyName, "font") || Objects.equals(propertyName, "foreground"))
+        if (propertyName == "text"
+                || ((propertyName == "font" || propertyName == "foreground")
                 && oldValue != newValue
                 && getClientProperty(javax.swing.plaf.basic.BasicHTML.propertyKey) != null)) {
 
