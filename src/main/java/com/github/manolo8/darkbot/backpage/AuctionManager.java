@@ -16,11 +16,13 @@ import java.util.stream.Collectors;
 
 public class AuctionManager {
     private final Main main;
+    private final BackpageManager backpage;
     private final AuctionData data;
     private long lasAuctionUpdate;
 
-    AuctionManager(Main main) {
+    AuctionManager(Main main, BackpageManager backpage) {
         this.main = main;
+        this.backpage = backpage;
         this.data = new AuctionData();
     }
 
@@ -28,18 +30,9 @@ public class AuctionManager {
         return data;
     }
 
-    public boolean update(int expiryTime) {
-        try {
-            return update(main.backpage, expiryTime);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     public boolean update(int expiryTime) throws Exception {
         if (System.currentTimeMillis() <= lasAuctionUpdate + expiryTime) return false;
-        String page = manager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
+        String page = backpage.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
 
         if (page == null || page.isEmpty()) return false;
         lasAuctionUpdate = System.currentTimeMillis();
@@ -47,7 +40,7 @@ public class AuctionManager {
     }
 
     public boolean bidItem(AuctionItems auctionItem){
-        return bidItem(auctionItem, Double.parseDouble(auctionItem.getHighest())+10000);
+        return bidItem(auctionItem, auctionItem.getCurrentBid()+10000);
     }
     public boolean bidItem(AuctionItems auctionItem, double amount) {
         try {
@@ -73,7 +66,7 @@ public class AuctionManager {
         return false;
     }
 
-    public boolean handleResponse(String type, String id, String response) {
+    private boolean handleResponse(String type, String id, String response) throws Exception {
         boolean failed = response.contains("question icon_error");
         System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + response);
         update(-1);

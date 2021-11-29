@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.backpage.auction;
 
 public class AuctionItems {
-    protected String id, lootID, name, type, highest, current, you, instantBuy;
-
+    protected String id, lootID, name, type, highestBidder;
+    protected double currentBid, ownBid, instantBuy;
     public String getId() {
         return id;
     }
@@ -35,27 +35,27 @@ public class AuctionItems {
         this.type = type;
     }
 
-    public String getHighest(){return highest;}
+    public String getHighestBidder(){return highestBidder;}
 
-    public void setHighest(String highest) {
-        this.highest = highest;
+    public void setHighestBidder(String highest) {
+        this.highestBidder = highest;
     }
 
-    public String getCurrent(){return current;}
+    public double getCurrentBid(){return currentBid;}
 
-    public void setCurrent(String current) {
-        this.current = current;
+    public void setCurrentBid(double currentBid) {
+        this.currentBid = currentBid;
     }
 
-    public String getYou(){return you;}
+    public double getOwnBid(){return ownBid;}
 
-    public void setYou(String you) {
-        this.you = you;
+    public void setOwnBid(double ownBid) {
+        this.ownBid = ownBid;
     }
 
-    public String getInstantBuy(){return instantBuy;}
+    public double getInstantBuy(){return instantBuy;}
 
-    public void setInstantBuy(String instant) {
+    public void setInstantBuy(double instant) {
         this.instantBuy = instantBuy;
     }
 
@@ -66,9 +66,9 @@ public class AuctionItems {
                 "lootID=" + lootID +
                 "name=" + name +
                 "type=" + type +
-                "highest=" + highest +
-                "current=" + current +
-                "you=" + you +
+                "highestBidder=" + highestBidder +
+                "currentBid=" + currentBid +
+                "ownBid=" + ownBid +
                 "instant=" + instantBuy +
                 "}";
     }

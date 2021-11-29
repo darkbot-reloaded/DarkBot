@@ -1,12 +1,9 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
-import com.github.manolo8.darkbot.core.api.ApiAdapter;
 import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
-import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
@@ -21,8 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.github.manolo8.darkbot.Main.API;
 
 public class BackpageManager extends Thread {
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
@@ -56,7 +51,7 @@ public class BackpageManager extends Thread {
         this.legacyHangarManager = new LegacyHangarManager(main, this);
         this.galaxyManager = new GalaxyManager(main);
         this.dispatchManager = new DispatchManager(main);
-        this.auctionManager = new AuctionManager(main);
+        this.auctionManager = new AuctionManager(main,this);
 
         setDaemon(true);
         start();

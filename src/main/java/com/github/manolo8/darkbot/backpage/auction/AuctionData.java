@@ -29,8 +29,9 @@ public class AuctionData {
         private final Pattern AUCTION_PATTERN = Pattern.compile("itemKey=\"item_hour_(.+?)\".*?" +
                 "auction_item_name_col\">\\s+(.+?)\\s+<.*?" +
                 "auction_item_type\">\\s+(.+?)\\s+<.*?" +
+                "auction_item_highest\">\\s+(.+?)\\s+<.*?" +
+                "auction_item_current\">\\s+(.+?)\\s+<.*?" +
                 "auction_item_you\">\\s+(.+?)\\s+<.*?" +
-                "item_hour_\\d+_bid\" value=\"(.+?)\".*?" +
                 "item_hour_\\d+_buyPrice\" value=\"(.+?)\".*?" +
                 "item_hour_\\d+_lootId\" value=\"(.+?)\".*?", Pattern.DOTALL);
 
@@ -53,9 +54,10 @@ public class AuctionData {
             r.setId(id);
             r.setName(m.group(2));
             r.setType(m.group(3));
-            r.setYou(m.group(4));
-            r.setCurrent(m.group(5));
-            r.setInstantBuy(m.group(6));
+            r.setHighestBidder(m.group(4));
+            r.setCurrentBid(Double.parseDouble(m.group(5)));
+            r.setOwnBid(Double.parseDouble(m.group(6)));
+            r.setInstantBuy(Double.parseDouble(m.group(7)));
             r.setLootID(m.group(7));
             return true;
         }
