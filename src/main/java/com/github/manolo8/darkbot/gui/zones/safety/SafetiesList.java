@@ -46,7 +46,7 @@ class SafetiesList extends JTable {
         }
     }
 
-    private class SafetyTableModel extends DefaultTableModel {
+    private static class SafetyTableModel extends DefaultTableModel {
         SafetyTableModel() {
             super(0, 1);
         }
