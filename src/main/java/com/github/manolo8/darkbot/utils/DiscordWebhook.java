@@ -156,7 +156,7 @@ public class DiscordWebhook {
             return this;
         }
 
-        private class Footer {
+        private static class Footer {
             private final String text;
             private final String iconUrl;
 
@@ -174,7 +174,7 @@ public class DiscordWebhook {
             }
         }
 
-        private class Thumbnail {
+        private static class Thumbnail {
             private final String url;
 
             private Thumbnail(String url) {
@@ -186,7 +186,7 @@ public class DiscordWebhook {
             }
         }
 
-        private class Image {
+        private static class Image {
             private final String url;
 
             private Image(String url) {
@@ -198,7 +198,7 @@ public class DiscordWebhook {
             }
         }
 
-        private class Author {
+        private static class Author {
             private final String name;
             private final String url;
             private final String iconUrl;
@@ -222,7 +222,7 @@ public class DiscordWebhook {
             }
         }
 
-        private class Field {
+        private static class Field {
             private final String name;
             private final String value;
             private final boolean inline;

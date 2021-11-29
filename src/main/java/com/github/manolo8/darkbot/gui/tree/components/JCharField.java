@@ -115,7 +115,7 @@ public class JCharField extends JButton implements OptionEditor {
 
     }
 
-    private class StaticButtonModel extends DefaultButtonModel {
+    private static class StaticButtonModel extends DefaultButtonModel {
         @Override
         public void setArmed(boolean b) {}
 
