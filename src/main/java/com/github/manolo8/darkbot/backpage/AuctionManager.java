@@ -37,7 +37,7 @@ public class AuctionManager {
         return false;
     }
 
-    public boolean update(BackpageManager manager, int expiryTime) throws Exception {
+    public boolean update(int expiryTime) throws Exception {
         if (System.currentTimeMillis() <= lasAuctionUpdate + expiryTime) return false;
         String page = manager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
 
