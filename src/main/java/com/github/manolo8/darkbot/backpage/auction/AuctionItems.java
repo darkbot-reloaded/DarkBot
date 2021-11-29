@@ -1,8 +1,18 @@
 package com.github.manolo8.darkbot.backpage.auction;
 
 public class AuctionItems {
-    protected String id, lootID, name, type;
+    protected int auctionType; //0=hour, 1=day, 2=hour
+    protected String id, lootID, name, itemType;
     protected long highestBidderID, currentBid, ownBid, instantBuy;
+
+    public int getAuctionType(){
+        return auctionType;
+    }
+
+    public void setAuctionType(int type){
+        auctionType = type;
+    }
+
     public String getId() {
         return id;
     }
@@ -27,12 +37,12 @@ public class AuctionItems {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public String getItemType() {
+        return itemType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setItemType(String itemType) {
+        this.itemType = itemType;
     }
 
     public long getHighestBidder(){return highestBidderID;}
@@ -62,10 +72,11 @@ public class AuctionItems {
     @Override
     public String toString() {
         return "Auction Item{" +
+                "auctionType=" + auctionType +
                 "id=" + id +
                 "lootID=" + lootID +
                 "name=" + name +
-                "type=" + type +
+                "itemType=" + itemType +
                 "highestBidder=" + highestBidderID +
                 "currentBid=" + currentBid +
                 "ownBid=" + ownBid +
