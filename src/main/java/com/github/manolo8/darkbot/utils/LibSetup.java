@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 public class LibSetup {
 
-    private static final String BASE_URL = "https://gist.github.com/Pablete1234/90e0e38dd7cdd72be220188fd08c8e4a/raw/";
+    private static final String BASE_URL = "https://gist.github.com/Pablete1234/25e057781868db1397f1b3a8414203e1/raw/";
     private static final String LIBS_FILE = "libs.json";
 
     private static final Type LIB_LIST_TYPE = new TypeToken<List<Lib>>(){}.getType();
