@@ -222,6 +222,13 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean ENFORCE_HW_ACCEL = true;
             public @Option @Number(min = 1, max = 60) @Number.Disabled(value = 0, def = 30) int MAX_FPS = 0;
 
+            public @Option DarkHookConfig DARK_HOOK = new DarkHookConfig();
+            public static class DarkHookConfig {
+                public @Option boolean ENABLED = false;
+                public @Option boolean TRAVEL = true;
+                public @Option boolean COLLECT = true;
+            }
+
             public int width = 1280;
             public int height = 800;
         }

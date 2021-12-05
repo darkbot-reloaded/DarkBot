@@ -16,6 +16,7 @@ import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.FacadeManager;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.manager.HookManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.RepairManager;
@@ -94,6 +95,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     public final PluginUpdater pluginUpdater;
     public final FeatureRegistry featureRegistry;
     public final RepairManager repairManager;
+    public final HookManager hookManager;
 
     private final MainGui form;
     private final BotInstaller botInstaller;
@@ -144,14 +146,14 @@ public class Main extends Thread implements PluginListener, BotAPI {
         this.backpage        = pluginAPI.requireInstance(BackpageManager.class);
         this.featureRegistry = pluginAPI.requireInstance(FeatureRegistry.class);
         this.repairManager   = pluginAPI.requireInstance(RepairManager.class);
-
-        this.botInstaller = new BotInstaller(
-                settingsManager, facadeManager, effectManager, guiManager, mapManager,
-                hero, statsManager, pingManager, repairManager);
-
+        this.hookManager     = pluginAPI.requireInstance(HookManager.class);
         API = configManager.getAPI(pluginAPI);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
         pluginAPI.addInstance(API);
+
+        this.botInstaller = new BotInstaller(
+                settingsManager, facadeManager, effectManager, guiManager, mapManager,
+                hero, statsManager, pingManager, repairManager, hookManager);
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();
