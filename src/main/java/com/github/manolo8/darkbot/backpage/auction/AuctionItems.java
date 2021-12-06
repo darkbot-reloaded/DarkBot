@@ -2,14 +2,14 @@ package com.github.manolo8.darkbot.backpage.auction;
 
 public class AuctionItems {
     protected int auctionType; //0=hour, 1=day, 2=hour
-    protected String id, lootID, name, itemType;
-    protected long highestBidderID, currentBid, ownBid, instantBuy;
+    protected String id, lootId, name, itemType;
+    protected long highestBidderId, currentBid, ownBid, instantBuy;
 
-    public int getAuctionType(){
+    public int getAuctionType() {
         return auctionType;
     }
 
-    public void setAuctionType(int type){
+    public void setAuctionType(int type) {
         auctionType = type;
     }
 
@@ -45,25 +45,33 @@ public class AuctionItems {
         this.itemType = itemType;
     }
 
-    public long getHighestBidder(){return highestBidderID;}
-
-    public void setHighestBidderID(long highestBidderID) {
-        this.highestBidderID = highestBidderID;
+    public long getHighestBidder() {
+        return highestBidderID;
     }
 
-    public long getCurrentBid(){return currentBid;}
+    public void setHighestBidderId(long highestBidderId) {
+        this.highestBidderId = highestBidderId;
+    }
+
+    public long getCurrentBid() {
+        return currentBid;
+    }
 
     public void setCurrentBid(long currentBid) {
         this.currentBid = currentBid;
     }
 
-    public long getOwnBid(){return ownBid;}
+    public long getOwnBid() {
+        return ownBid;
+    }
 
     public void setOwnBid(long ownBid) {
         this.ownBid = ownBid;
     }
 
-    public long getInstantBuy(){return instantBuy;}
+    public long getInstantBuy() {
+        return instantBuy;
+    }
 
     public void setInstantBuy(long instantBuy) {
         this.instantBuy = instantBuy;

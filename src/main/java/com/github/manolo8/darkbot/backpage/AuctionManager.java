@@ -31,8 +31,9 @@ public class AuctionManager {
     }
 
     public boolean bidItem(AuctionItems auctionItem){
-        return bidItem(auctionItem, auctionItem.getCurrentBid()+10000);
+        return bidItem(auctionItem, auctionItem.getCurrentBid() + 10000);
     }
+
     public boolean bidItem(AuctionItems auctionItem, double amount) {
         try {
             String token = main.backpage.getConnection("indexInternal.es", Method.GET)

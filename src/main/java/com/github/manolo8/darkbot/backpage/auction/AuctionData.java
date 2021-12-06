@@ -16,19 +16,21 @@ public class AuctionData {
     private final Pattern AUCTION_PATTERN_HOUR = Pattern.compile("itemKey=\"item_hour_(.+?)\".*?" + AUCTION_PATTERN, Pattern.DOTALL);
     private final Pattern AUCTION_PATTERN_DAY = Pattern.compile("itemKey=\"item_day_(.+?)\".*?" + AUCTION_PATTERN, Pattern.DOTALL);
     private final Pattern AUCTION_PATTERN_WEEK = Pattern.compile("itemKey=\"item_week_(.+?)\".*?" + AUCTION_PATTERN, Pattern.DOTALL);
+
     public Map<String, AuctionItems> getAuctionItems() {
         return auctionItems;
     }
-    public boolean parse(String page){
+
+    public boolean parse(String page) {
         Matcher m = AUCTION_TABLE.matcher(page);
         if (!m.find()) return false;
-        do{
+        do {
             int max = m.groupCount();
-            if(m.group(max).contains("item_hour")) buildAuctionItems(m.group(max),AUCTION_PATTERN_HOUR);
-            if(m.group(max).contains("item_day")) buildAuctionItems(m.group(max),AUCTION_PATTERN_DAY);
-            if(m.group(max).contains("item_week")) buildAuctionItems(m.group(max),AUCTION_PATTERN_WEEK);
+            if (m.group(max).contains("item_hour")) buildAuctionItems(m.group(max), AUCTION_PATTERN_HOUR);
+            if (m.group(max).contains("item_day")) buildAuctionItems(m.group(max), AUCTION_PATTERN_DAY);
+            if (m.group(max).contains("item_week")) buildAuctionItems(m.group(max), AUCTION_PATTERN_WEEK);
 
-        }while(m.find());
+        } while(m.find());
         return true;
     }
 
@@ -58,19 +60,19 @@ public class AuctionData {
         r.setName(m.group(2));
         r.setItemType(m.group(3));
         Matcher x = Pattern.compile("showUser=\"(.+?)\"").matcher(m.group(4));
-        if(x.find()){
-            long user_id = Base62toBase10(x.group(1));;
+        if (x.find()) {
+            long user_id = Base62toBase10(x.group(1));
             r.setHighestBidderID(user_id);
-        }else{
+        } else {
             r.setHighestBidderID(1L);
         }
         r.setCurrentBid(Long.parseLong(m.group(5).replace(",","")));
         r.setOwnBid(Long.parseLong(m.group(6).replace(",","")));
         r.setInstantBuy(Long.parseLong(m.group(7)));
         r.setLootID(m.group(8));
-        if(string.contains("hour")) r.setAuctionType(0);
-        if(string.contains("day")) r.setAuctionType(1);
-        if(string.contains("week")) r.setAuctionType(2);
+        if (string.contains("hour")) r.setAuctionType(0);
+        if (string.contains("day")) r.setAuctionType(1);
+        if (string.contains("week")) r.setAuctionType(2);
 
         return true;
     }
