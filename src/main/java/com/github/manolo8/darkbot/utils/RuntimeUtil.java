@@ -6,12 +6,28 @@ import javax.swing.*;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 public class RuntimeUtil {
 
     private static final Set<String> allowed = new HashSet<>();
 
+    public static boolean execute(String command) throws IOException {
+        if (command.length() == 0)
+            throw new IllegalArgumentException("Empty command");
+
+        StringTokenizer st = new StringTokenizer(command);
+        String[] cmdarray = new String[st.countTokens()];
+        for (int i = 0; st.hasMoreTokens(); i++)
+            cmdarray[i] = st.nextToken();
+
+        return execute(cmdarray);
+    }
+
     public static boolean execute(String... command) throws IOException {
+        if (command == null || command.length == 0)
+            throw new IllegalArgumentException("Empty command");
+
         if (!allowed.contains(command[0])) {
             JCheckBox alwaysAllow = new JCheckBox("Always allow this command");
 
