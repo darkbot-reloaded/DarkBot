@@ -83,7 +83,7 @@ public class PetGearSupplier extends OptionList<Integer> {
 
         public static String getName(Integer id) {
             if (id == null) return null;
-            if (values().length > id) return values()[id - 1].name;
+            if (values().length > id || id < 1) return values()[id - 1].name;
             return "Unknown gear " + id;
         }
 
