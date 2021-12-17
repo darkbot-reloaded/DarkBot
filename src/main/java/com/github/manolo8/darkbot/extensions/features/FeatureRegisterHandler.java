@@ -29,6 +29,7 @@ public class FeatureRegisterHandler implements API.Singleton {
                 ModuleHandler.class,
                 BehaviourHandler.class,
                 TaskHandler.class,
+                LegacyNpcExtraHandler.class,
                 NpcExtraHandler.class,
                 ExtraMenuHandler.class,
                 LaserSelectorHandler.class,

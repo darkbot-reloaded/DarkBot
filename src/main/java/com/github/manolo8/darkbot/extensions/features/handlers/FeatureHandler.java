@@ -9,7 +9,7 @@ import eu.darkbot.api.utils.Inject;
 import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
-public abstract class FeatureHandler<T> implements API.Singleton{
+public abstract class FeatureHandler<T> implements API.Singleton {
 
     protected final Class<T> handledType;
     protected FeatureRegistry featureRegistry;

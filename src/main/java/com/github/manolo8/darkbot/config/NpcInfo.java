@@ -31,13 +31,19 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     public transient int npcId;
     public @Option.Ignore Set<Integer> mapList = new HashSet<>();
 
+    private static transient final Map<String, NpcExtraFlag> LEGACY_FLAGS = new LinkedHashMap<>();
+    private static transient final Map<String, NpcExtraFlag> NEW_FLAGS = new LinkedHashMap<>();
+
     public static transient final Map<String, NpcExtraFlag> NPC_FLAGS = new LinkedHashMap<>();
 
-    public static void setNpcFlags(Stream<NpcExtraProvider> flags) {
+    public static void setNpcFlags(Stream<NpcExtraFlag> flags, boolean legacy) {
+        Map<String, NpcExtraFlag> map = legacy ? LEGACY_FLAGS : NEW_FLAGS;
+        map.clear();
+        flags.forEach(flag -> map.put(flag.getId(), flag));
+
         NPC_FLAGS.clear();
-        flags.map(NpcExtraProvider::values)
-                .flatMap(Arrays::stream)
-                .forEach(flag -> NPC_FLAGS.put(flag.getId(), flag));
+        NPC_FLAGS.putAll(LEGACY_FLAGS);
+        NPC_FLAGS.putAll(NEW_FLAGS);
     }
 
     public void set(Double radius, Integer priority, Boolean kill, Character attackKey, ExtraNpcInfo extra) {
