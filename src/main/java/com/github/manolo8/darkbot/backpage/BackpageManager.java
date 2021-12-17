@@ -51,7 +51,7 @@ public class BackpageManager extends Thread {
         this.legacyHangarManager = new LegacyHangarManager(main, this);
         this.galaxyManager = new GalaxyManager(main);
         this.dispatchManager = new DispatchManager(main);
-        this.auctionManager = new AuctionManager(main,this);
+        this.auctionManager = new AuctionManager(main, this);
 
         setDaemon(true);
         start();

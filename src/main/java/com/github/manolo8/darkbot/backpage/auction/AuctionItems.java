@@ -53,25 +53,33 @@ public class AuctionItems {
         this.itemType = itemType;
     }
 
-    public long getHighestBidder(){return highestBidderID;}
-
-    public void setHighestBidderID(long highestBidderID) {
-        this.highestBidderID = highestBidderID;
+    public long getHighestBidder() {
+        return highestBidderID;
     }
 
-    public long getCurrentBid(){return currentBid;}
+    public void setHighestBidderId(long highestBidderId) {
+        this.highestBidderId = highestBidderId;
+    }
+
+    public long getCurrentBid() {
+        return currentBid;
+    }
 
     public void setCurrentBid(long currentBid) {
         this.currentBid = currentBid;
     }
 
-    public long getOwnBid(){return ownBid;}
+    public long getOwnBid() {
+        return ownBid;
+    }
 
     public void setOwnBid(long ownBid) {
         this.ownBid = ownBid;
     }
 
-    public long getInstantBuy(){return instantBuy;}
+    public long getInstantBuy() {
+        return instantBuy;
+    }
 
     public void setInstantBuy(long instantBuy) {
         this.instantBuy = instantBuy;

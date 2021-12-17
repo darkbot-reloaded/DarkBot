@@ -17,19 +17,21 @@ public class AuctionData {
     private final Pattern AUCTION_PATTERN_HOUR = Pattern.compile("itemKey=\"item_hour_(.+?)\".*?" + AUCTION_PATTERN, Pattern.DOTALL);
     private final Pattern AUCTION_PATTERN_DAY = Pattern.compile("itemKey=\"item_day_(.+?)\".*?" + AUCTION_PATTERN, Pattern.DOTALL);
     private final Pattern AUCTION_PATTERN_WEEK = Pattern.compile("itemKey=\"item_week_(.+?)\".*?" + AUCTION_PATTERN, Pattern.DOTALL);
+
     public Map<String, AuctionItems> getAuctionItems() {
         return auctionItems;
     }
-    public boolean parse(String page){
+
+    public boolean parse(String page) {
         Matcher m = AUCTION_TABLE.matcher(page);
         if (!m.find()) return false;
-        do{
+        do {
             int max = m.groupCount();
-            if(m.group(max).contains("item_hour")) buildAuctionItems(m.group(max),AUCTION_PATTERN_HOUR);
-            if(m.group(max).contains("item_day")) buildAuctionItems(m.group(max),AUCTION_PATTERN_DAY);
-            if(m.group(max).contains("item_week")) buildAuctionItems(m.group(max),AUCTION_PATTERN_WEEK);
+            if (m.group(max).contains("item_hour")) buildAuctionItems(m.group(max), AUCTION_PATTERN_HOUR);
+            if (m.group(max).contains("item_day")) buildAuctionItems(m.group(max), AUCTION_PATTERN_DAY);
+            if (m.group(max).contains("item_week")) buildAuctionItems(m.group(max), AUCTION_PATTERN_WEEK);
 
-        }while(m.find());
+        } while(m.find());
         return true;
     }
 
@@ -63,7 +65,7 @@ public class AuctionData {
         if(x.find()){
             long user_id = Base62.decode(x.group(1));;
             r.setHighestBidderID(user_id);
-        }else{
+        } else {
             r.setHighestBidderID(1L);
         }
         r.setCurrentBid(Long.parseLong(m.group(5).replace(",","")));
