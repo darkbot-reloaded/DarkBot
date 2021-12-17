@@ -1,12 +1,8 @@
 package com.github.manolo8.darkbot.backpage.auction;
 
-import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
-import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
 import com.github.manolo8.darkbot.utils.Base62;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
