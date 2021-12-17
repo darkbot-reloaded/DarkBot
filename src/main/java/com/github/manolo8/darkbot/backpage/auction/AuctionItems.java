@@ -33,7 +33,7 @@ public class AuctionItems {
         return lootID;
     }
 
-    public void setLootID(String id) {
+    public void setLootID(String lootID) {
         this.lootID = lootID;
     }
 
@@ -58,7 +58,7 @@ public class AuctionItems {
     }
 
     public void setHighestBidderId(long highestBidderId) {
-        this.highestBidderId = highestBidderId;
+        this.highestBidderID = highestBidderId;
     }
 
     public long getCurrentBid() {

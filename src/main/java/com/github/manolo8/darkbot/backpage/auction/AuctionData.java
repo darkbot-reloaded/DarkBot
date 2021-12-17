@@ -4,14 +4,16 @@ import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
 import com.github.manolo8.darkbot.utils.Base62;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AuctionData {
     private final Map<String, AuctionItems> auctionItems = new LinkedHashMap<>();
-    private final Pattern AUCTION_TABLE = Pattern.compile("<tr class=\"auctionItemRow .+? itemKey=([\\S\\s]+?)</tr>", Pattern.DOTALL);
+    private final Pattern AUCTION_TABLE = Pattern.compile("<tr class=\"auctionItemRow .+? (itemKey=\"item_hour[\\S\\s]+?)</tr>", Pattern.DOTALL);
 
     private final String AUCTION_PATTERN = "auction_item_name_col\">\\s+(.+?)\\s+<.*?" + "auction_item_type\">\\s+(.+?)\\s+<.*?" +"auction_item_highest\" (.+?)>.*?" + "auction_item_current\">\\s+(.+?)\\s+<.*?" + "auction_item_you\">\\s+(.+?)\\s+<.*?" + "item_hour_\\d+_buyPrice\" value=\"(.+?)\".*?" + "item_hour_\\d+_lootId\" value=\"(.+?)\".*?";
     private final Pattern AUCTION_PATTERN_HOUR = Pattern.compile("itemKey=\"item_hour_(.+?)\".*?" + AUCTION_PATTERN, Pattern.DOTALL);
@@ -24,14 +26,11 @@ public class AuctionData {
 
     public boolean parse(String page) {
         Matcher m = AUCTION_TABLE.matcher(page);
-        if (!m.find()) return false;
-        do {
-            int max = m.groupCount();
-            if (m.group(max).contains("item_hour")) buildAuctionItems(m.group(max), AUCTION_PATTERN_HOUR);
-            if (m.group(max).contains("item_day")) buildAuctionItems(m.group(max), AUCTION_PATTERN_DAY);
-            if (m.group(max).contains("item_week")) buildAuctionItems(m.group(max), AUCTION_PATTERN_WEEK);
-
-        } while(m.find());
+        while (m.find()) {
+            if (m.group().contains("item_hour")) buildAuctionItems(m.group(), AUCTION_PATTERN_HOUR);
+            //if (m.group(max).contains("item_day")) buildAuctionItems(m.group(max), AUCTION_PATTERN_DAY);
+            //if (m.group(max).contains("item_week")) buildAuctionItems(m.group(max), AUCTION_PATTERN_WEEK);
+        }
         return true;
     }
 
@@ -64,9 +63,9 @@ public class AuctionData {
         Matcher x = Pattern.compile("showUser=\"(.+?)\"").matcher(m.group(4));
         if(x.find()){
             long user_id = Base62.decode(x.group(1));;
-            r.setHighestBidderID(user_id);
+            r.setHighestBidderId(user_id);
         } else {
-            r.setHighestBidderID(1L);
+            r.setHighestBidderId(1L);
         }
         r.setCurrentBid(Long.parseLong(m.group(5).replace(",","")));
         r.setOwnBid(Long.parseLong(m.group(6).replace(",","")));
