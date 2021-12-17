@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.backpage.auction;
 
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
+import com.github.manolo8.darkbot.utils.Base62;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class AuctionData {
     private final Map<String, AuctionItems> auctionItems = new LinkedHashMap<>();
-    private final Pattern AUCTION_TABLE = Pattern.compile("<tr class=\"auctionItemRow ([\\S\\s]+?)</tr>", Pattern.DOTALL);
+    private final Pattern AUCTION_TABLE = Pattern.compile("<tr class=\"auctionItemRow .+? itemKey=([\\S\\s]+?)</tr>", Pattern.DOTALL);
 
     private final String AUCTION_PATTERN = "auction_item_name_col\">\\s+(.+?)\\s+<.*?" + "auction_item_type\">\\s+(.+?)\\s+<.*?" +"auction_item_highest\" (.+?)>.*?" + "auction_item_current\">\\s+(.+?)\\s+<.*?" + "auction_item_you\">\\s+(.+?)\\s+<.*?" + "item_hour_\\d+_buyPrice\" value=\"(.+?)\".*?" + "item_hour_\\d+_lootId\" value=\"(.+?)\".*?";
     private final Pattern AUCTION_PATTERN_HOUR = Pattern.compile("itemKey=\"item_hour_(.+?)\".*?" + AUCTION_PATTERN, Pattern.DOTALL);
@@ -39,6 +40,7 @@ public class AuctionData {
 
     private boolean buildAuctionItems(String string, Pattern type) {
         if (string == null || string.isEmpty()) return false;
+        string = "itemKey=" + string;
         if (!string.contains("itemKey") ||
                 !string.contains("auction_item_name_col") ||
                 !string.contains("auction_item_type") ||
@@ -59,7 +61,7 @@ public class AuctionData {
         r.setItemType(m.group(3));
         Matcher x = Pattern.compile("showUser=\"(.+?)\"").matcher(m.group(4));
         if(x.find()){
-            long user_id = Base62toBase10(x.group(1));;
+            long user_id = Base62.decode(x.group(1));;
             r.setHighestBidderID(user_id);
         }else{
             r.setHighestBidderID(1L);
@@ -68,29 +70,11 @@ public class AuctionData {
         r.setOwnBid(Long.parseLong(m.group(6).replace(",","")));
         r.setInstantBuy(Long.parseLong(m.group(7)));
         r.setLootID(m.group(8));
-        if(string.contains("hour")) r.setAuctionType(0);
-        if(string.contains("day")) r.setAuctionType(1);
-        if(string.contains("week")) r.setAuctionType(2);
+        if(string.contains("hour")) r.setAuctionType(AuctionItems.auctionTypes.HOUR);
+        if(string.contains("day")) r.setAuctionType(AuctionItems.auctionTypes.DAY);
+        if(string.contains("week")) r.setAuctionType(AuctionItems.auctionTypes.WEEK);
 
         return true;
-    }
-    private static final String BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    private static final int BASE62_BASE = BASE62_ALPHABET.length();
-
-    private static Long Base62toBase10(final String base62) {
-        return Base62toBase10(new StringBuilder(base62).reverse().toString().toCharArray());
-    }
-
-    private static Long Base62toBase10(final char[] chars) {
-        long base10 = 0L;
-        for (int i = chars.length - 1; i >= 0; i--) {
-            base10 += Base62toBase10(BASE62_ALPHABET.indexOf(chars[i]), i);
-        }
-        return base10;
-    }
-
-    private static int Base62toBase10(final int n, final int pow) {
-        return n * (int) Math.pow(BASE62_BASE, pow);
     }
 
 }

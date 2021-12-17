@@ -1,15 +1,23 @@
 package com.github.manolo8.darkbot.backpage.auction;
 
+import com.github.manolo8.darkbot.config.actions.conditions.HasEffectCondition;
+
 public class AuctionItems {
-    protected int auctionType; //0=hour, 1=day, 2=hour
+
+    protected enum auctionTypes{
+        HOUR,
+        DAY,
+        WEEK;
+    }; //0=hour, 1=day, 2=hour
+    public auctionTypes auctionType;
     protected String id, lootID, name, itemType;
     protected long highestBidderID, currentBid, ownBid, instantBuy;
 
-    public int getAuctionType(){
+    public auctionTypes getAuctionType(){
         return auctionType;
     }
 
-    public void setAuctionType(int type){
+    public void setAuctionType(auctionTypes type){
         auctionType = type;
     }
 
