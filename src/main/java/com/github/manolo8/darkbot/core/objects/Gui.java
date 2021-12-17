@@ -162,7 +162,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
      * @param childIndex set -1 to get last.
      */
     public long getSpriteChild(long spriteAddress, int childIndex) {
-        return API.readMemoryLong(getSpriteChildWrapper(spriteAddress, childIndex), 216);
+        return API.readMemoryLong(getSpriteChildWrapper(spriteAddress, childIndex), 0xe0);
     }
 
     /**

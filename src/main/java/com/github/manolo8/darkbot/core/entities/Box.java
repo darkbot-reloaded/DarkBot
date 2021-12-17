@@ -96,7 +96,7 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
         data = API.readMemoryLong(data + 64);
         data = API.readMemoryLong(data + 32);
         data = API.readMemoryLong(data + 24);
-        data = API.readMemoryLong(data + 8);
+        data = API.readMemoryLong(data + 16);
         data = API.readMemoryLong(data + 16);
         data = API.readMemoryLong(data + 24);
 

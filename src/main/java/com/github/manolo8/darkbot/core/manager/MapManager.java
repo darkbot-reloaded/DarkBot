@@ -341,8 +341,8 @@ public class MapManager implements Manager, StarSystemAPI {
             boundsAddress = API.readMemoryLong(viewAddress + (is3DView ? 216 : 208));
         }
 
-        clientWidth = API.readMemoryInt(boundsAddress + 168);
-        clientHeight = API.readMemoryInt(boundsAddress + 172);
+        clientWidth = API.readMemoryInt(boundsAddress + 0xa8);
+        clientHeight = API.readMemoryInt(boundsAddress + 0xac);
 
         long updated = API.readMemoryLong(boundsAddress + (is3DView ? 320 : 280));
         updated = API.readMemoryLong(updated + 112);
@@ -421,7 +421,7 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     private boolean findMarker(long spriteArray, double scale, Location result) {
-        int size = API.readMemoryInt(spriteArray, 0x40, 0x18);
+        int size = API.readMemoryInt(spriteArray, 0x40, 0x20);
         // Always try to iterate at least once.
         // With 0 or 1 elements, it seems to be implemented as a singleton and size isn't updated.
         // With 2 or more elements, it's a linked list of elements to follow at 0x18.
@@ -447,10 +447,10 @@ public class MapManager implements Manager, StarSystemAPI {
         // Ignore if 0,0, or further away from the center of the map than corner in manhattan distance
         if ((x == 0 && y == 0) || result.distance(halfWidth, halfHeight) > halfWidth + halfHeight) return false;
 
-        String name = API.readMemoryString(API.readMemoryLong(sprite, 440, 0x10, 0x28, 0x90));
+        String name = API.readMemoryString(API.readMemoryLong(sprite, 0x1d0, 0x10, 0x28, 0x90));
         if (name != null && name.equals("minimapmarker")) return true;
 
-        String pointer = API.readMemoryString(API.readMemoryLong(sprite, 216, 0x10, 0x28, 0x90));
+        String pointer = API.readMemoryString(API.readMemoryLong(sprite, 0xe0, 0x10, 0x28, 0x90));
         return pointer == null || !pointer.equals("minimapPointer");
     }
 

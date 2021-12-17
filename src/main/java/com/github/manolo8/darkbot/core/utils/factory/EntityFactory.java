@@ -132,8 +132,8 @@ public enum EntityFactory implements EntityBuilder {
     }
 
     private static String getAssetId(long address) {
-        long temp = API.readMemoryLong(address, 48, 48, 16) & ByteUtils.ATOM_MASK;
-        return API.readMemoryString(temp, 64, 32, 24, 8, 16, 24).trim();
+        long trait = API.readMemoryLong(address, 0x30, 0x30, 0x10) & ByteUtils.ATOM_MASK;
+        return API.readMemoryString(trait, 0x40, 0x20, 0x18, 0x10, 0x10, 0x18).trim();
     }
 
     private static String getZoneKey(long address) {
