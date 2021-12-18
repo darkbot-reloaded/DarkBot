@@ -7,9 +7,10 @@ public class AuctionItems {
         DAY,
         WEEK;
     }
+
     public AuctionType auctionType;
-    protected String id, lootID, name, itemType;
-    protected long highestBidderID, currentBid, ownBid, instantBuy;
+    protected String id, lootId, name, itemType;
+    protected long highestBidderId, currentBid, ownBid, instantBuy;
 
     public AuctionType getAuctionType() {
         return auctionType;
@@ -27,12 +28,12 @@ public class AuctionItems {
         this.id = id;
     }
 
-    public String getLootID() {
-        return lootID;
+    public String getLootId() {
+        return lootId;
     }
 
-    public void setLootID(String lootID) {
-        this.lootID = lootID;
+    public void setLootId(String lootId) {
+        this.lootId = lootId;
     }
 
     public String getName() {
@@ -52,11 +53,11 @@ public class AuctionItems {
     }
 
     public long getHighestBidder() {
-        return highestBidderID;
+        return highestBidderId;
     }
 
     public void setHighestBidderId(long highestBidderId) {
-        this.highestBidderID = highestBidderId;
+        this.highestBidderId = highestBidderId;
     }
 
     public long getCurrentBid() {
@@ -88,10 +89,10 @@ public class AuctionItems {
         return "Auction Item{" +
                 "auctionType=" + auctionType +
                 "id=" + id +
-                "lootID=" + lootID +
+                "lootId=" + lootId +
                 "name=" + name +
                 "itemType=" + itemType +
-                "highestBidder=" + highestBidderID +
+                "highestBidderId=" + highestBidderId +
                 "currentBid=" + currentBid +
                 "ownBid=" + ownBid +
                 "instant=" + instantBuy +

@@ -30,7 +30,7 @@ public class AuctionManager {
         return data.parse(page);
     }
 
-    public boolean bidItem(AuctionItems auctionItem){
+    public boolean bidItem(AuctionItems auctionItem) {
         return bidItem(auctionItem, auctionItem.getCurrentBid() + 10000);
     }
 
@@ -45,12 +45,12 @@ public class AuctionManager {
                     .setRawParam("reloadToken", token)
                     .setRawParam("auctionType", "hour")
                     .setRawParam("subAction", "bid")
-                    .setRawParam("lootId", auctionItem.getLootID())
+                    .setRawParam("lootId", auctionItem.getLootId())
                     .setRawParam("itemId", auctionItem.getId())
                     .setRawParam("credits", String.valueOf(amount))
                     .setRawParam("auction_buy_button", "BID")
                     .getContent();
-            return handleResponse("Bid on Item", auctionItem.getLootID(), response);
+            return handleResponse("Bid on Item", auctionItem.getLootId(), response);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Exception Bidding on Item: " + e);

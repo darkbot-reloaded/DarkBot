@@ -11,7 +11,13 @@ public class AuctionData {
     private final Map<String, AuctionItems> auctionItems = new LinkedHashMap<>();
     private final Pattern AUCTION_TABLE = Pattern.compile("<tr class=\"auctionItemRow .+? (itemKey=\"item_hour[\\S\\s]+?)</tr>", Pattern.DOTALL);
 
-    private final String AUCTION_PATTERN = "auction_item_name_col\">\\s+(.+?)\\s+<.*?" + "auction_item_type\">\\s+(.+?)\\s+<.*?" +"auction_item_highest\" (.+?)>.*?" + "auction_item_current\">\\s+(.+?)\\s+<.*?" + "auction_item_you\">\\s+(.+?)\\s+<.*?" + "item_hour_\\d+_buyPrice\" value=\"(.+?)\".*?" + "item_hour_\\d+_lootId\" value=\"(.+?)\".*?";
+    private final String AUCTION_PATTERN = "auction_item_name_col\">\\s+(.+?)\\s+<.*?" +
+            "auction_item_type\">\\s+(.+?)\\s+<.*?" +
+            "auction_item_highest\" (.+?)>.*?" +
+            "auction_item_current\">\\s+(.+?)\\s+<.*?" +
+            "auction_item_you\">\\s+(.+?)\\s+<.*?" +
+            "item_hour_\\d+_buyPrice\" value=\"(.+?)\".*?" +
+            "item_hour_\\d+_lootId\" value=\"(.+?)\".*?";
     private final Pattern AUCTION_PATTERN_HOUR = Pattern.compile("itemKey=\"item_hour_(.+?)\".*?" + AUCTION_PATTERN, Pattern.DOTALL);
     private final Pattern AUCTION_PATTERN_DAY = Pattern.compile("itemKey=\"item_day_(.+?)\".*?" + AUCTION_PATTERN, Pattern.DOTALL);
     private final Pattern AUCTION_PATTERN_WEEK = Pattern.compile("itemKey=\"item_week_(.+?)\".*?" + AUCTION_PATTERN, Pattern.DOTALL);
@@ -57,19 +63,20 @@ public class AuctionData {
         r.setName(m.group(2));
         r.setItemType(m.group(3));
         Matcher x = Pattern.compile("showUser=\"(.+?)\"").matcher(m.group(4));
-        if(x.find()){
-            long user_id = Base62.decode(x.group(1));;
+        if (x.find()) {
+            long user_id = Base62.decode(x.group(1));
+            ;
             r.setHighestBidderId(user_id);
         } else {
             r.setHighestBidderId(1L);
         }
-        r.setCurrentBid(Long.parseLong(m.group(5).replace(",","")));
-        r.setOwnBid(Long.parseLong(m.group(6).replace(",","")));
+        r.setCurrentBid(Long.parseLong(m.group(5).replace(",", "")));
+        r.setOwnBid(Long.parseLong(m.group(6).replace(",", "")));
         r.setInstantBuy(Long.parseLong(m.group(7)));
-        r.setLootID(m.group(8));
-        if(string.contains("hour")) r.setAuctionType(AuctionItems.AuctionType.HOUR);
-        if(string.contains("day")) r.setAuctionType(AuctionItems.AuctionType.DAY);
-        if(string.contains("week")) r.setAuctionType(AuctionItems.AuctionType.WEEK);
+        r.setLootId(m.group(8));
+        if (string.contains("hour")) r.setAuctionType(AuctionItems.AuctionType.HOUR);
+        if (string.contains("day")) r.setAuctionType(AuctionItems.AuctionType.DAY);
+        if (string.contains("week")) r.setAuctionType(AuctionItems.AuctionType.WEEK);
 
         return true;
     }
