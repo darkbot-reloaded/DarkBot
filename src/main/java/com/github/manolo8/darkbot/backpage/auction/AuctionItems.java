@@ -2,20 +2,20 @@ package com.github.manolo8.darkbot.backpage.auction;
 
 public class AuctionItems {
 
-    protected enum auctionTypes{
+    protected enum AuctionType {
         HOUR,
         DAY,
         WEEK;
     }
-    public auctionTypes auctionType;
+    public AuctionType auctionType;
     protected String id, lootID, name, itemType;
     protected long highestBidderID, currentBid, ownBid, instantBuy;
 
-    public auctionTypes getAuctionType(){
+    public AuctionType getAuctionType() {
         return auctionType;
     }
 
-    public void setAuctionType(auctionTypes type){
+    public void setAuctionType(AuctionType type) {
         auctionType = type;
     }
 

@@ -67,9 +67,9 @@ public class AuctionData {
         r.setOwnBid(Long.parseLong(m.group(6).replace(",","")));
         r.setInstantBuy(Long.parseLong(m.group(7)));
         r.setLootID(m.group(8));
-        if(string.contains("hour")) r.setAuctionType(AuctionItems.auctionTypes.HOUR);
-        if(string.contains("day")) r.setAuctionType(AuctionItems.auctionTypes.DAY);
-        if(string.contains("week")) r.setAuctionType(AuctionItems.auctionTypes.WEEK);
+        if(string.contains("hour")) r.setAuctionType(AuctionItems.AuctionType.HOUR);
+        if(string.contains("day")) r.setAuctionType(AuctionItems.AuctionType.DAY);
+        if(string.contains("week")) r.setAuctionType(AuctionItems.AuctionType.WEEK);
 
         return true;
     }
