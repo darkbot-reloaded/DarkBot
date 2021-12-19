@@ -37,14 +37,12 @@ import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.TemporalModule;
 import com.github.manolo8.darkbot.utils.I18n;
-import com.github.manolo8.darkbot.utils.RuntimeUtil;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +51,7 @@ import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 100");
+    public static final Version VERSION      = new Version("1.13.17 beta 101 alpha 1");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
