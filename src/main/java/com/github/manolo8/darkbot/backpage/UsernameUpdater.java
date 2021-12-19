@@ -15,6 +15,7 @@ import com.github.manolo8.darkbot.utils.http.Method;
 import javax.swing.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,10 +52,8 @@ public class UsernameUpdater implements Task {
             boolean byId = user.userId != -1;
 
             UserResponse response = backpageManager.getConnection("ajax/" + (byId ? "user" : "pilotprofil") + ".php", Method.POST)
-                    .setRawParam("command", "loadUserInfo")
-                    .setRawParam("userId", Base62.encode(user.userId))
-                    .setRawParam("command", "searchProfileFromExternalPPP")
-                    .setParam("profileUsername", user.username)
+                    .setParam("command", (byId ? "loadUserInfo" : "searchProfileFromExternalPPP"))
+                    .setParam(byId ? "userId" : "profileUsername", byId ? Base62.encode(user.userId) : user.username)
                     .consumeInputStream(inputStream -> Main.GSON.fromJson(IOUtils.read(inputStream), UserResponse.class));
 
             if (response == null || !Objects.equals(response.result, "OK")) {
