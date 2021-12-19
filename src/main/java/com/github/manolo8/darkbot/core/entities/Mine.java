@@ -46,7 +46,7 @@ public class Mine extends Entity implements Obstacle {
 
     @Override
     public boolean use() {
-        return true;
+        return main.config.MISCELLANEOUS.AVOID_MINES;
     }
 
     @Override

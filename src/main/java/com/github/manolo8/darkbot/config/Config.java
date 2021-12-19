@@ -181,6 +181,7 @@ public class Config {
         public @Option boolean HONOR_LOST_EXACT = true;
         public @Option boolean LOG_CHAT = false;
         public @Option boolean LOG_DEATHS = false;
+        public @Option boolean AVOID_MINES = true;
     }
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
