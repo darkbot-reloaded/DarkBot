@@ -212,7 +212,7 @@ public class MapDrawer extends JPanel {
                     "exp/h " + STAT_FORMAT.format(statsManager.earnedExperience()),
                     "hon/h " + STAT_FORMAT.format(statsManager.earnedHonor()),
                     "cargo " + statsManager.deposit + "/" + statsManager.depositTotal,
-                    "death " + guiManager.deaths + '/' + config.GENERAL.SAFETY.MAX_DEATHS);
+                    "death " + guiManager.deaths + '/' + (config.GENERAL.SAFETY.MAX_DEATHS > 0 ? config.GENERAL.SAFETY.MAX_DEATHS : "∞"));
 
         if (hovering && main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP) drawActionButton(g2);
     }

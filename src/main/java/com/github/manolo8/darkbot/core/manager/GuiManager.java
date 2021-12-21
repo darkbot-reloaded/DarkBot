@@ -217,7 +217,7 @@ public class GuiManager implements Manager {
 
             if (!tryRevive()) return false;
 
-            if (deaths >= main.config.GENERAL.SAFETY.MAX_DEATHS) main.setRunning(false);
+            if (main.config.GENERAL.SAFETY.MAX_DEATHS > 0 && deaths >= main.config.GENERAL.SAFETY.MAX_DEATHS) main.setRunning(false);
             else checkInvalid();
 
             return false;
