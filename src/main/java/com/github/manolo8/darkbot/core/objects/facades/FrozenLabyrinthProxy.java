@@ -20,6 +20,8 @@ public class FrozenLabyrinthProxy extends Updatable {
         this.labStatus = API.readMemoryString(API.readMemoryLong(data+0x60));
 
         this.synkMap = API.readMemoryString(API.readMemoryLong(labVoAddr + 0x28));
-        this.synkZone = API.readMemoryInt(API.readMemoryLong(labVoAddr + 0x30) + 0x28);
+        this.synkZone = API.readMemoryInt(labVoAddr + 0x20);;
+
+
     }
 }
