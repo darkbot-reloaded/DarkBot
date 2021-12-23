@@ -12,6 +12,7 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -109,15 +110,24 @@ public class SavedLogins extends JPanel implements LoginScreen {
 
     private char[] createMasterPassword() {
         if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.OTHER.DISABLE_MASTER_PASSWORD) return new char[]{};
-        JPanel panel = new JPanel(new MigLayout(""));
+        JPanel panel = new JPanel(new MigLayout());
         JPasswordField pass = new JPasswordField(25);
-        JCheckBox check = new JCheckBox("Disable Password");
-        JButton button = new JButton("Confirm");
+        JCheckBox check = new JCheckBox("Disable Master Password");
+        JButton button = new JButton("OK");
         panel.add(pass, "wrap");
         panel.add(check, "split 3");
-        panel.add(button, "gapleft 103");
+        panel.add(button, "gapleft 60");
 
+        check.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                pass.setEditable(false);
+                pass.setText("");
+            } else {
+                pass.setEditable(true);
+            }
+        });
         button.addActionListener(e -> SwingUtilities.getWindowAncestor(button).setVisible(false));
+        
         JOptionPane.showOptionDialog(this, "Master password for darkbot to encrypt your credentials.\n" +
                         "You can use a blank (empty) password:", "Darkbot Master password",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{panel}, null);
