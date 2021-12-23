@@ -11,10 +11,7 @@ import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
 public class SavedLogins extends JPanel implements LoginScreen {
     public LoginForm loginForm;
@@ -117,25 +114,32 @@ public class SavedLogins extends JPanel implements LoginScreen {
         panel.add(pass, "wrap");
         panel.add(check, "split 3");
         panel.add(button, "gapleft 60");
+        button.setEnabled(false);
 
         check.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 pass.setEditable(false);
-                pass.setText("");
+                button.setEnabled(true);
             } else {
                 pass.setEditable(true);
+                if (new String(pass.getPassword()).isEmpty())
+                    button.setEnabled(false);
+            }
+        });
+        pass.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                button.setEnabled(!new String(pass.getPassword()).isEmpty() || check.isSelected());
             }
         });
         button.addActionListener(e -> SwingUtilities.getWindowAncestor(button).setVisible(false));
-        
-        JOptionPane.showOptionDialog(this, "Master password for darkbot to encrypt your credentials.\n" +
-                        "You can use a blank (empty) password:", "Darkbot Master password",
+
+        JOptionPane.showOptionDialog(this, "Master password for darkbot to encrypt your credentials.", "Darkbot Master password",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{panel}, null);
         if (check.isSelected()) {
             ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.OTHER.DISABLE_MASTER_PASSWORD = true;
         }
 
-        return pass.getPassword();
+        return check.isSelected() ? new char[]{} : pass.getPassword();
     }
 
     @Override
