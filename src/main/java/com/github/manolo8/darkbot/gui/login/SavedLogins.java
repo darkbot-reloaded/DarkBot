@@ -109,12 +109,21 @@ public class SavedLogins extends JPanel implements LoginScreen {
 
     private char[] createMasterPassword() {
         if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.OTHER.DISABLE_MASTER_PASSWORD) return new char[]{};
-        JPasswordField pass = new JPasswordField(10);
+        JPanel panel = new JPanel(new MigLayout(""));
+        JPasswordField pass = new JPasswordField(25);
+        JCheckBox check = new JCheckBox("Disable Password");
+        JButton button = new JButton("Confirm");
+        panel.add(pass, "wrap");
+        panel.add(check, "split 3");
+        panel.add(button, "gapleft 103");
 
-        JOptionPane.showMessageDialog(this, new Object[]{
-                        "Master password for darkbot to encrypt your credentials.\n" +
-                                "You can use a blank (empty) password:", pass},
-                "Darkbot Master password", JOptionPane.PLAIN_MESSAGE);
+        button.addActionListener(e -> SwingUtilities.getWindowAncestor(button).setVisible(false));
+        JOptionPane.showOptionDialog(this, "Master password for darkbot to encrypt your credentials.\n" +
+                        "You can use a blank (empty) password:", "Darkbot Master password",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{panel}, null);
+        if (check.isSelected()) {
+            ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.OTHER.DISABLE_MASTER_PASSWORD = true;
+        }
 
         return pass.getPassword();
     }
