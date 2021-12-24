@@ -116,7 +116,6 @@ public class SavedLogins extends JPanel implements LoginScreen {
         panel.add(pass, "cell 0 1 2 1");
         panel.add(check, "cell 0 2 1 1");
         panel.add(button, "cell 1 2 1 1, gapleft push");
-
         button.setEnabled(false);
 
         check.addItemListener(e -> {
