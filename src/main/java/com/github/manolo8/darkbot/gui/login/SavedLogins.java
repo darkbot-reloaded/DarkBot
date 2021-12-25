@@ -123,14 +123,8 @@ public class SavedLogins extends JPanel implements LoginScreen {
         button.setEnabled(false);
 
         check.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                pass.setEditable(false);
-                button.setEnabled(true);
-            } else {
-                pass.setEditable(true);
-                if (new String(pass.getPassword()).isEmpty())
-                    button.setEnabled(false);
-            }
+            pass.setEditable(e.getStateChange() != ItemEvent.SELECTED);
+            button.setEnabled(pass.getPassword().length > 0 || e.getStateChange() == ItemEvent.SELECTED);
         });
         pass.getDocument().addDocumentListener((GeneralDocumentListener) e -> button.setEnabled(!new String(pass.getPassword()).isEmpty() || check.isSelected()));
         button.addActionListener(e -> SwingUtilities.getWindowAncestor(button).setVisible(false));
