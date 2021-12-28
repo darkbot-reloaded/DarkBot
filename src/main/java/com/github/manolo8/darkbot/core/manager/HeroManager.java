@@ -5,13 +5,13 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
+import com.github.manolo8.darkbot.core.entities.Player;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.extensions.features.Feature;
-import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.features.handlers.ShipModeSelectorHandler;
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.extensions.selectors.PrioritizedSupplier;
@@ -26,8 +26,6 @@ import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
-import eu.darkbot.api.utils.Inject;
-import eu.darkbot.impl.PluginApiImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -38,7 +36,7 @@ import java.util.Optional;
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.*;
 
-public class HeroManager extends Ship implements Manager, HeroAPI {
+public class HeroManager extends Player implements Manager, HeroAPI {
 
     public static HeroManager instance;
     public final Main main;
@@ -50,7 +48,7 @@ public class HeroManager extends Ship implements Manager, HeroAPI {
     private final Collection<? extends Portal> portals;
     private final HeroItemsAPI items;
 
-    private ShipModeSelectorHandler shipModeHandler;
+    private final ShipModeSelectorHandler shipModeHandler;
     private final MutableShipMode shipMode = new MutableShipMode();
 
     public Map map;

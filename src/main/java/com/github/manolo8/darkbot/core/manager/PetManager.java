@@ -14,7 +14,6 @@ import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.enums.PetGear;
-import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.game.other.*;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.utils.ItemNotEquippedException;
@@ -27,7 +26,6 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -536,26 +534,6 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
-    public boolean hasPet() {
-        return pet.hasPet();
-    }
-
-    @Override
-    public Optional<eu.darkbot.api.game.entities.Pet> getPet() {
-        return pet.getPet();
-    }
-
-    @Override
-    public SelectableItem.Formation getFormation() {
-        return pet.getFormation();
-    }
-
-    @Override
-    public boolean isInFormation(int formationId) {
-        return pet.isInFormation(formationId);
-    }
-
-    @Override
     public Lock getLockType() {
         return pet.getLockType();
     }
@@ -593,6 +571,11 @@ public class PetManager extends Gui implements PetAPI {
     @Override
     public double getAngle() {
         return pet.getAngle();
+    }
+
+    @Override
+    public double getDestinationAngle() {
+        return pet.getDestinationAngle();
     }
 
     @Override

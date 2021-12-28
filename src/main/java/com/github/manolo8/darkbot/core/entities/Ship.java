@@ -1,14 +1,11 @@
 package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.Health;
 import com.github.manolo8.darkbot.core.objects.PlayerInfo;
 import com.github.manolo8.darkbot.core.objects.ShipInfo;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
 import com.github.manolo8.darkbot.utils.MathUtils;
-import eu.darkbot.api.game.entities.Pet;
-import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.game.other.EntityInfo;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
@@ -29,9 +26,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     public PlayerInfo playerInfo = new PlayerInfo();
     public ShipInfo shipInfo     = new ShipInfo(this.locationInfo);
 
-    private com.github.manolo8.darkbot.core.entities.Pet pet;
-
-    public int formationId;
+    public int formationId; // later move it up to Player.class
     public boolean invisible;
     public long timer;
 
@@ -74,14 +69,6 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
         formationId = API.readMemoryInt(address, 280, 40, 40);
         invisible = API.readMemoryBoolean(API.readMemoryLong(address + 160) + 32);
-
-        if (this instanceof HeroManager) return;
-
-        long petAddress = API.readMemoryLong(address + 176);
-        if (petAddress != 0 && (pet == null || petAddress != pet.address))
-            pet = main.mapManager.entities.pets.stream()
-                    .filter(p -> p.address == petAddress)
-                    .findAny().orElse(null);
     }
 
     @Override
@@ -173,26 +160,6 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     }
 
     @Override
-    public boolean hasPet() {
-        return pet != null;
-    }
-
-    @Override
-    public Optional<Pet> getPet() {
-        return Optional.ofNullable(pet);
-    }
-
-    @Override
-    public SelectableItem.Formation getFormation() {
-        return SelectableItem.Formation.of(formationId);
-    }
-
-    @Override
-    public boolean isInFormation(int formationId) {
-        return formationId == this.formationId;
-    }
-
-    @Override
     public Lock getLockType() {
         return Lock.of(API.readMemoryInt(lockPtr, 48, 40));
     }
@@ -225,6 +192,11 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     @Override
     public double getAngle() {
         return shipInfo.angle;
+    }
+
+    @Override
+    public double getDestinationAngle() {
+        return shipInfo.destinationAngle;
     }
 
     @Override

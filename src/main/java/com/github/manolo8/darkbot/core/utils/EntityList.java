@@ -2,18 +2,7 @@ package com.github.manolo8.darkbot.core.utils;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.NpcInfo;
-import com.github.manolo8.darkbot.core.entities.Barrier;
-import com.github.manolo8.darkbot.core.entities.BasePoint;
-import com.github.manolo8.darkbot.core.entities.BattleStation;
-import com.github.manolo8.darkbot.core.entities.Box;
-import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.entities.FakeNpc;
-import com.github.manolo8.darkbot.core.entities.Mine;
-import com.github.manolo8.darkbot.core.entities.NoCloack;
-import com.github.manolo8.darkbot.core.entities.Npc;
-import com.github.manolo8.darkbot.core.entities.Pet;
-import com.github.manolo8.darkbot.core.entities.Portal;
-import com.github.manolo8.darkbot.core.entities.Ship;
+import com.github.manolo8.darkbot.core.entities.*;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
@@ -48,7 +37,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
     public final List<Npc> npcs                     = register(NPC, LOW_RELAY);
     public final List<Portal> portals               = register(PORTAL);
     public final List<Ship> ships                   = register(PLAYER, PET);
-    public final List<Ship> players                 = register(PLAYER);
+    public final List<Player> players               = register(PLAYER);
     public final List<Pet> pets                     = register(PET);
     public final List<BattleStation> battleStations = register(CBS_ASTEROID, CBS_MODULE, CBS_STATION, CBS_MODULE_CON, CBS_CONSTRUCTION);
     public final List<BasePoint> basePoints         = register(BASE_HANGAR, BASE_STATION, HEADQUARTER, QUEST_GIVER, BASE_TURRET, REPAIR_STATION, REFINERY);
@@ -187,7 +176,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.game.entities.Ship> getPlayers() {
+    public Collection<? extends eu.darkbot.api.game.entities.Player> getPlayers() {
         return Collections.unmodifiableList(players);
     }
 

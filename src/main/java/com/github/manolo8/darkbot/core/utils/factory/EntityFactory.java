@@ -1,18 +1,6 @@
 package com.github.manolo8.darkbot.core.utils.factory;
 
-import com.github.manolo8.darkbot.core.entities.Barrier;
-import com.github.manolo8.darkbot.core.entities.BasePoint;
-import com.github.manolo8.darkbot.core.entities.BattleStation;
-import com.github.manolo8.darkbot.core.entities.Box;
-import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.entities.MapNpc;
-import com.github.manolo8.darkbot.core.entities.Mine;
-import com.github.manolo8.darkbot.core.entities.NoCloack;
-import com.github.manolo8.darkbot.core.entities.Npc;
-import com.github.manolo8.darkbot.core.entities.Pet;
-import com.github.manolo8.darkbot.core.entities.Portal;
-import com.github.manolo8.darkbot.core.entities.Ship;
-import com.github.manolo8.darkbot.core.entities.Unknown;
+import com.github.manolo8.darkbot.core.entities.*;
 import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
 import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
 import com.github.manolo8.darkbot.core.entities.bases.BaseHangar;
@@ -70,7 +58,7 @@ public enum EntityFactory implements EntityBuilder {
 
     PET      (Pet::new, EntityFactory::isPet),
     SHIP     (EntityFactory::isShip, EntityFactory::defineShipType), // Generic ship, redirects to PLAYER or NPC
-    PLAYER   (Ship::new),
+    PLAYER   (Player::new),
     NPC      (Npc::new),
 
     UNKNOWN  (Entity::new, (asset, addr) -> false);
