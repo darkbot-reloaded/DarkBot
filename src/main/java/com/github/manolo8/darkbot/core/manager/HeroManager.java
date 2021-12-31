@@ -26,6 +26,7 @@ import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
+import eu.darkbot.api.utils.Inject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -137,7 +138,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
         pet.update(API.readMemoryLong(address + 176));
         clickable.setRadius(0);
-        id = API.readMemoryInt(address + 56);
+        id = API.readMemoryInt(address + 56); // why id is read here?
     }
 
     public boolean hasTarget() {
@@ -188,19 +189,29 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     }
 
     public boolean setMode(int con, Character form) {
-        int formationCheck = main.config.GENERAL.FORMATION_CHECK;
+//        int formationCheck = main.config.GENERAL.FORMATION_CHECK;
+//
+//        if (this.config != con && System.currentTimeMillis() - configTime > 5500L) {
+//            Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
+//            this.configTime = System.currentTimeMillis();
+//        }
+//        boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000L;
+//
+//        if ((this.formation != form || checkFormation) && System.currentTimeMillis() - formationTime > 3500L) {
+//            Main.API.keyboardClick(this.formation = form);
+//            if (formation != null) this.formationTime = System.currentTimeMillis();
+//        }
 
-        if (this.config != con && System.currentTimeMillis() - configTime > 5500L) {
-            Main.API.keyboardClick(keybinds.getCharCode(TOGGLE_CONFIG));
-            this.configTime = System.currentTimeMillis();
-        }
-        boolean checkFormation = formationCheck > 0 && (System.currentTimeMillis() - formationTime) > formationCheck * 1000L;
+        Configuration conf = Configuration.of(con);
+        if (conf == Configuration.UNKNOWN) return false; // unknown config? return, as we can't select unknown configuration.
 
-        if ((this.formation != form || checkFormation) && System.currentTimeMillis() - formationTime > 3500L) {
-            Main.API.keyboardClick(this.formation = form);
-            if (formation != null) this.formationTime = System.currentTimeMillis();
-        }
-        return isInMode(con, form);
+        Item item = items.getItem(form, ItemCategory.DRONE_FORMATIONS);
+        if (item == null) return false; // item not found & probably not possible to click, return
+
+        this.formation = form;
+        shipMode.set(conf, item.getAs(SelectableItem.Formation.class));
+
+        return isInMode(shipMode);
     }
 
     public boolean isInMode(Config.ShipConfig config) {
@@ -351,10 +362,22 @@ public class HeroManager extends Player implements Manager, HeroAPI {
             this.configuration = other.getConfiguration();
             this.formation = other.getFormation();
         }
+
+        public void set(Configuration configuration, SelectableItem.Formation formation) {
+            this.configuration = configuration;
+            this.formation = formation;
+        }
     }
 
     @Feature(name = "Default Ship Mode Supplier", description = "Sets the fallback ship mode")
-    public class DefaultShipModeSupplier implements ShipModeSelector, PrioritizedSupplier<ShipMode> {
+    public static class DefaultShipModeSupplier implements ShipModeSelector, PrioritizedSupplier<ShipMode> {
+
+        private  HeroManager hero;
+
+        @Inject
+        public void setHero(HeroManager hero) {
+            this.hero = hero;
+        }
 
         @Override
         public @NotNull PrioritizedSupplier<ShipMode> getShipModeSupplier() {
@@ -363,8 +386,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
         @Override
         public ShipMode get() {
-            return shipMode;
+            return hero.shipMode; //default ship mode
         }
     }
-
 }

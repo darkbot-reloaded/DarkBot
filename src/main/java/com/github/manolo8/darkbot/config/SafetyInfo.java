@@ -149,11 +149,13 @@ public class SafetyInfo implements Serializable, Ignorable, eu.darkbot.api.confi
 
     @Override
     public eu.darkbot.api.config.types.SafetyInfo.JumpMode getJumpMode() {
+        if (jumpMode == null) return null;
         return eu.darkbot.api.config.types.SafetyInfo.JumpMode.values()[jumpMode.ordinal()];
     }
 
     @Override
     public eu.darkbot.api.config.types.SafetyInfo.CbsMode getCbsMode() {
+        if (cbsMode == null) return null;
         return eu.darkbot.api.config.types.SafetyInfo.CbsMode.values()[cbsMode.ordinal()];
     }
 

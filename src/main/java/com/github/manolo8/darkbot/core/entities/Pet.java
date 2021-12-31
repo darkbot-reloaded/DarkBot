@@ -40,7 +40,7 @@ public class Pet extends Ship implements eu.darkbot.api.game.entities.Pet {
     public void update(long address) {
         super.update(address);
 
-        clickable.setRadius(0);
+        if (main != null && main.isRunning()) clickable.setRadius(0);
     }
 
     public int getLevel() {

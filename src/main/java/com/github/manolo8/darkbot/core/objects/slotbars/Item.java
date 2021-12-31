@@ -7,7 +7,11 @@ import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -55,28 +59,15 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
         // We also avoid updating timer if no other flags change for the extra 3 long-read calls
         API.readMemory(address + START, BUFFER);
 
-        boolean buyable = BUFFER[0] == 1;
-        boolean activatable = BUFFER[4] == 1;
-        boolean selected = BUFFER[8] == 1;
-        boolean available = BUFFER[12] == 1;
-        boolean visible = BUFFER[16] == 1;
-        double quantity = ByteUtils.getDouble(BUFFER, 92);
+        buyable = BUFFER[0] == 1;
+        activatable = BUFFER[4] == 1;
+        selected = BUFFER[8] == 1;
+        available = BUFFER[12] == 1;
+        visible = BUFFER[16] == 1;
+        quantity = ByteUtils.getDouble(BUFFER, 92);
 
-        if (this.buyable != buyable ||
-                this.activatable != activatable ||
-                this.selected != selected ||
-                this.available != available ||
-                this.visible != visible ||
-                this.quantity != quantity) {
-            this.buyable = buyable;
-            this.activatable = activatable;
-            this.selected = selected;
-            this.available = available;
-            this.visible = visible;
-            this.quantity = quantity;
-        }
-        long timerAddr = API.readMemoryLong(address, 88, 40);
-        if (itemTimer.address != timerAddr) this.itemTimer.update(timerAddr);
+        long timerAdr = API.readMemoryLong(ByteUtils.getLong(BUFFER, 52), 40);
+        if (itemTimer.address != timerAdr) this.itemTimer.update(timerAdr);
         this.itemTimer.update();
     }
 
@@ -208,8 +199,7 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
         @Override
         public void update() {
             if (address == 0) {
-                reset();
-                return;
+                return; // reset was done on update(long), don't need to reset here
             }
 
             this.elapsed = API.readMemoryDouble(address + 72);
@@ -268,6 +258,20 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
                     ", timerType=" + timerType +
                     '}';
         }
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SelectableItem)) return false;
+
+        if (o instanceof Item) {
+            Item item = (Item) o;
+
+            if (selectableItem != null && item.selectableItem != null)
+                return selectableItem == item.selectableItem;
+        }
+
+        return ((SelectableItem)o).getId().equals(getId());
     }
 }
