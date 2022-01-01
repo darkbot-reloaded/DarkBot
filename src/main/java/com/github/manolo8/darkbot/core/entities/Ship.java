@@ -114,10 +114,9 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     }
 
 
-    public class Target extends Updatable {
-        public Entity targetedEntity;
-
-        public boolean laserAttacking;
+    private class Target extends Updatable {
+        private Entity targetedEntity;
+        private boolean laserAttacking;
 
         @Override
         public void update() {
@@ -126,12 +125,13 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
             long entityPtr = API.readMemoryLong(address, 64, 32);
 
-            if (entityPtr == 0 && targetedEntity != null) targetedEntity = null;
-            else if (entityPtr != 0 && (targetedEntity == null || entityPtr != targetedEntity.address)) {
+            if (entityPtr == 0) targetedEntity = null;
+            else if (targetedEntity == null || entityPtr != targetedEntity.address) {
                 if (entityPtr == main.hero.address) {
                     targetedEntity = main.hero;
                     return;
-                } else if (main.hero.pet.address != 0 && entityPtr == main.hero.pet.address) {
+                           //entity ptr can't be assigned to 0 here so don't need that check
+                } else if (/*main.hero.pet.address != 0 && */entityPtr == main.hero.pet.address) {
                     targetedEntity = main.hero.pet;
                     return;
                 }
@@ -206,7 +206,6 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
     @Override
     public Optional<Location> getDestination() {
-        return shipInfo.destination.address == 0 ?
-                Optional.empty() : Optional.of(shipInfo.destination);
+        return shipInfo.getDestination();
     }
 }

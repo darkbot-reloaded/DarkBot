@@ -586,11 +586,6 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
-    public boolean isAttacking(Lockable other) {
-        return pet.isAttacking(other);
-    }
-
-    @Override
     public int getSpeed() {
         return pet.getSpeed();
     }

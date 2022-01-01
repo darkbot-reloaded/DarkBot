@@ -3,6 +3,8 @@ package com.github.manolo8.darkbot.core.objects;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.utils.Location;
 
+import java.util.Optional;
+
 import static com.github.manolo8.darkbot.Main.API;
 
 public class ShipInfo extends Updatable {
@@ -25,6 +27,10 @@ public class ShipInfo extends Updatable {
 
     public double getSpeed() {
         return speed == 1 ? predictedSpeed : speed;
+    }
+
+    public Optional<eu.darkbot.api.game.other.Location> getDestination() {
+        return destination.address == 0 ? Optional.empty() : Optional.of(destination);
     }
 
     @Override

@@ -25,10 +25,13 @@ public class Player extends Ship implements eu.darkbot.api.game.entities.Player 
         if (this instanceof HeroManager) return;
 
         long petAddress = API.readMemoryLong(address + 176);
-        if (petAddress != 0 && (pet == null || petAddress != pet.address))
+
+        if (petAddress == 0) pet = null;
+        else if (pet == null || petAddress != pet.address)
             pet = main.mapManager.entities.pets.stream()
                     .filter(p -> p.address == petAddress)
-                    .findAny().orElse(null);
+                    .findAny()
+                    .orElse(null);
     }
 
     @Override
