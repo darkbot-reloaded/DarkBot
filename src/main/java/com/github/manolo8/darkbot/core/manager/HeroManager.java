@@ -138,7 +138,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
         pet.update(API.readMemoryLong(address + 176));
         clickable.setRadius(0);
-        id = API.readMemoryInt(address + 56); // why id is read here?
+        id = API.readMemoryInt(address + 56);
     }
 
     public boolean hasTarget() {

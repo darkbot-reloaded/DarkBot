@@ -44,7 +44,7 @@ public class ShipInfo extends Updatable {
     }
 
     private void updateSpeedAndAngle() {
-        if (destination.now.equals(pastDestination) || !destination.isInitialized()) return;
+        if (!destination.isInitialized() || destination.now.equals(pastDestination)) return;
         this.pastDestination = destination.now.copy();
 
         this.destinationAngle = entityLocation.angleTo(destination);
