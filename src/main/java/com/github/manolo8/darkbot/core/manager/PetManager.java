@@ -112,6 +112,12 @@ public class PetManager extends Gui implements PetAPI {
 
     public void tick() {
         if (!main.isRunning() || !main.config.PET.ENABLED) return;
+
+        eu.darkbot.api.extensions.selectors.PetGearSupplier gearSupplier = gearSelectorHandler.getBestSupplier();
+
+        Boolean enablePet = gearSupplier.enablePet();
+        boolean enabled = enablePet != null ? enablePet : isEnabled();
+
         if (active() != enabled) {
             if (show(true)) clickToggleStatus();
             return;
@@ -121,7 +127,7 @@ public class PetManager extends Gui implements PetAPI {
             return;
         }
         updatePetTarget();
-        int moduleId = gearSelectorHandler.getBest().getId();
+        int moduleId = gearSupplier.get().getId();
 
         if (target != null && !(target instanceof Npc) && target.playerInfo.isEnemy()) {
             moduleId = PetGear.PASSIVE.getId();
@@ -664,6 +670,11 @@ public class PetManager extends Gui implements PetAPI {
         @Override
         public PetGear get() {
             return pet.getPetGearToUse();
+        }
+
+        @Override
+        public @Nullable Boolean enablePet() {
+            return pet.isEnabled();
         }
     }
 }
