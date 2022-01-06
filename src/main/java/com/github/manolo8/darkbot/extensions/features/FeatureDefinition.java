@@ -10,6 +10,7 @@ import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -145,4 +146,23 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
         return issues.canLoad() && isEnabled();
     }
 
+    @Override
+    public Set<? extends Issue> getIssueSet() {
+        return issues.getIssues();
+    }
+
+    @Override
+    public void addInfo(String message, String description) {
+        issues.addInfo(message, description);
+    }
+
+    @Override
+    public void addWarning(String message, String description) {
+        issues.addWarning(message, description);
+    }
+
+    @Override
+    public void addFailure(String message, String description) {
+        issues.addFailure(message, description);
+    }
 }

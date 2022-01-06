@@ -2,15 +2,13 @@ package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.PluginConfig;
-import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.utils.Version;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
 
 public class Plugin implements PluginInfo {
 
@@ -68,6 +66,26 @@ public class Plugin implements PluginInfo {
 
     public IssueHandler getIssues() {
         return issues;
+    }
+
+    @Override
+    public Set<? extends Issue> getIssueSet() {
+        return issues.getIssues();
+    }
+
+    @Override
+    public void addInfo(String message, String description) {
+        issues.addInfo(message, description);
+    }
+
+    @Override
+    public void addWarning(String message, String description) {
+        issues.addWarning(message, description);
+    }
+
+    @Override
+    public void addFailure(String message, String description) {
+        issues.addFailure(message, description);
     }
 
     public IssueHandler getUpdateIssues() {

@@ -1,19 +1,27 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.core.itf.NpcExtraProvider;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Option;
+import eu.darkbot.api.game.items.ItemCategory;
+import eu.darkbot.api.game.items.SelectableItem;
+import eu.darkbot.api.managers.HeroItemsAPI;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Configuration("config.loot.npc_table")
-public class NpcInfo {
+public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
+
+    private final HeroItemsAPI items;
 
     public double radius;
     public int priority;
@@ -28,6 +36,10 @@ public class NpcInfo {
     public @Option.Ignore Set<Integer> mapList = new HashSet<>();
 
     public static transient final Map<String, NpcExtraFlag> NPC_FLAGS = new LinkedHashMap<>();
+
+    public NpcInfo() { //should be reworked when ConfigEntity will rework
+        this.items = HeroManager.instance.main.pluginAPI.requireAPI(HeroItemsAPI.class);
+    }
 
     public static void setNpcFlags(Stream<NpcExtraProvider> flags) {
         NPC_FLAGS.clear();
@@ -56,6 +68,52 @@ public class NpcInfo {
         this.attackKey = other.attackKey;
         this.attackFormation = other.attackFormation;
         this.extra.flags = new HashSet<>(other.extra.flags);
+    }
+
+    @Override
+    public boolean shouldKill() {
+        return kill;
+    }
+
+    @Override
+    public int getPriority() {
+        return priority;
+    }
+
+    @Override
+    public double getRadius() {
+        return radius;
+    }
+
+    @Override
+    public Optional<SelectableItem.Laser> getAmmo() {
+        return findItemAssociatedWith(ItemCategory.LASERS, attackKey, SelectableItem.Laser.class);
+    }
+
+    @Override
+    public Optional<SelectableItem.Formation> getFormation() {
+        return findItemAssociatedWith(ItemCategory.DRONE_FORMATIONS, attackFormation, SelectableItem.Formation.class);
+    }
+
+    private <T extends Enum<T> & SelectableItem> Optional<T> findItemAssociatedWith(ItemCategory category, Character c, Class<T> type) {
+        if (c == null) return Optional.empty();
+
+        return Optional.ofNullable(items.getItem(c, category))
+                .map(i -> i.getAs(type));
+    }
+
+    @Override
+    public boolean hasExtraFlag(Enum<?> flag) {
+        return extra.has(getId(flag));
+    }
+
+    @Override
+    public void setExtraFlag(Enum<?> flag, boolean active) {
+        extra.set(getId(flag), active);
+    }
+
+    private String getId(Enum<?> flag) {
+        return flag.getClass().getCanonicalName() + flag.name();
     }
 
     public static class ExtraNpcInfo {
