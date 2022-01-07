@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.PluginConfig;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.utils.Version;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.net.URL;
@@ -69,23 +70,13 @@ public class Plugin implements PluginInfo {
     }
 
     @Override
-    public Set<? extends Issue> getIssueSet() {
+    public @NotNull Set<? extends Issue> getIssueSet() {
         return issues.getIssues();
     }
 
     @Override
-    public void addInfo(String message, String description) {
-        issues.addInfo(message, description);
-    }
-
-    @Override
-    public void addWarning(String message, String description) {
-        issues.addWarning(message, description);
-    }
-
-    @Override
-    public void addFailure(String message, String description) {
-        issues.addFailure(message, description);
+    public void addIssue(@NotNull String message, @NotNull String description, @NotNull Level level) {
+        issues.add(message, description, PluginIssue.Level.values()[level.ordinal()]);
     }
 
     public IssueHandler getUpdateIssues() {
