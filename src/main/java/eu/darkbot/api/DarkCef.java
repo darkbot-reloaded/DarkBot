@@ -1,11 +1,12 @@
 package eu.darkbot.api;
 
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public interface DarkCef {
+public interface DarkCef extends GameAPI.Window, GameAPI.Handler, GameAPI.Interaction {
 
     Path DARK_CEF = Paths.get("lib", "DarkCef.jar");
 
@@ -13,8 +14,9 @@ public interface DarkCef {
         return ReflectionUtils.createInstance("eu.darkbot.browser.DarkCefImpl", DARK_CEF);
     }
 
-    void    setData(String url, String sid, String preloader, String vars);
     void    createWindow();
+    void    setData(String url, String sid, String preloader, String vars);
+
     void    setSize(int width, int height);
     void    setVisible(boolean visible);
 

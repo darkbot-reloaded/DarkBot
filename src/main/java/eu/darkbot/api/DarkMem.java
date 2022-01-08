@@ -1,8 +1,9 @@
 package eu.darkbot.api;
 
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.LibUtils;
 
-public class DarkMem {
+public class DarkMem implements GameAPI.Memory, GameAPI.Window {
 
     static {
         System.load(LibUtils.getLibPath("DarkMemAPI"));
@@ -34,7 +35,7 @@ public class DarkMem {
     public native long[] queryLong   (long   value  , int maxSize);
     public native long[] queryBytes  (byte[] pattern, int maxSize);
 
-    public static class Proc {
+    public static class Proc implements GameAPI.Window.Proc {
         private final int pid;
         private final String name;
 
