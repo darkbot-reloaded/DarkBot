@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,11 +59,16 @@ public class CategoryBar extends MenuBar {
     }
 
     public Optional<Item> findItem(SelectableItem item) {
-        return (item.getCategory() == null
-                ? categories.stream().flatMap(c -> c.items.stream())
-                : get(item.getCategory()).items.stream())
-                .filter(i -> i.selectableItem != null ? i.selectableItem == item : i.id.equals(item.getId()))
-                .findFirst();
+        if (item.getCategory() == null)
+            return categories.stream()
+                    .map(c -> c.findItem(item))
+                    .findFirst();
+
+        Category category = get(item.getCategory());
+        if (category == null)
+            return Optional.empty();
+
+        return Optional.ofNullable(category.findItem(item));
     }
 
     public static class Category extends UpdatableAuto {
@@ -72,6 +78,13 @@ public class CategoryBar extends MenuBar {
         private final ObjArray itemsArr = ObjArray.ofVector(true);
 
         private ItemCategory itemCategory;
+
+        public @Nullable Item findItem(SelectableItem item) {
+            return items.stream()
+                    .filter(i -> i.equals(item))
+                    .findFirst()
+                    .orElse(null);
+        }
 
         @Override
         public void update() {

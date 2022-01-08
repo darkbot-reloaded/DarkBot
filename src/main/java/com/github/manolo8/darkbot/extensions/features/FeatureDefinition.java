@@ -5,11 +5,14 @@ import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
+import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -145,4 +148,13 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
         return issues.canLoad() && isEnabled();
     }
 
+    @Override
+    public @NotNull Set<? extends Issue> getIssueSet() {
+        return issues.getIssues();
+    }
+
+    @Override
+    public void addIssue(@NotNull String message, @NotNull String description, @NotNull Level level) {
+        issues.add(message, description, PluginIssue.Level.values()[level.ordinal()]);
+    }
 }

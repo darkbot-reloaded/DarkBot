@@ -180,7 +180,7 @@ public class NpcAttacker implements AttackAPI {
 
     @Override
     public void setTarget(@Nullable Lockable target) {
-        if (!(target instanceof Npc))
+        if (target != null && !(target instanceof Npc))
             throw new IllegalArgumentException("Only NPC attacking is supported by this implementation");
         this.target = (Npc) target;
     }

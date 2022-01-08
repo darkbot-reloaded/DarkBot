@@ -14,7 +14,11 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -46,8 +50,11 @@ public class RepairManager implements Manager, RepairAPI {
     public void tick() {
         if (isDead()) writtenToLog = false;
         else {
-            if (!writtenToLog) writeKiller();
-            writtenToLog = true;
+            if (!writtenToLog) {
+                writeKiller();
+                writtenToLog = true;
+            }
+
             return;
         }
         if (repairAddress == 0) updateRepairAddr();
@@ -70,19 +77,11 @@ public class RepairManager implements Manager, RepairAPI {
     }
 
     public boolean isDead() {
-        if (userDataAddress != 0)
-            return API.readMemoryBoolean(userDataAddress + 0x4C);
-        else if (repairAddress != 0)
-            return API.readMemoryBoolean(repairAddress + 40);
-        else updateRepairAddr();
-        return false;
+        return userDataAddress != 0 && API.readMemoryBoolean(userDataAddress + 0x4C);
     }
 
     public boolean canRespawn(int option) {
-        for (int i = 0; i < repairOptions.getSize(); i++) {
-            if (repairOptions.get(i) == option) return true;
-        }
-        return false;
+        return repairOptionsList.contains(option);
     }
 
     public int[] getRespawnOptionsIds() {

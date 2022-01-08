@@ -110,6 +110,18 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     }
 
     @Override
+    public @Nullable Item getItem(Character keyBind, @NotNull ItemCategory itemCategory) {
+        SlotBar.Slot slot = getSlot(settings.getAtChar(keyBind));
+        if (slot == null || slot.item == null) return null;
+
+        CategoryBar.Category category = categoryBar.get(itemCategory);
+        if (category == null) return null;
+
+        Item result = category.findItem(slot.item);
+        return result == null ? slot.item : result;
+    }
+
+    @Override
     public @Nullable Character getKeyBind(SelectableItem selectableItem) {
         Item item = getItem(selectableItem);
         if (item == null) return null;

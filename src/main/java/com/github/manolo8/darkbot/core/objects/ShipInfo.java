@@ -3,12 +3,14 @@ package com.github.manolo8.darkbot.core.objects;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.utils.Location;
 
+import java.util.Optional;
+
 import static com.github.manolo8.darkbot.Main.API;
 
 public class ShipInfo extends Updatable {
 
     public int speed;
-    public double angle;
+    public double angle, destinationAngle = Double.MIN_VALUE;
     public long target;
 
     public LocationInfo destination = new LocationInfo();
@@ -27,6 +29,10 @@ public class ShipInfo extends Updatable {
         return speed == 1 ? predictedSpeed : speed;
     }
 
+    public Optional<eu.darkbot.api.game.other.Location> getDestination() {
+        return destination.address == 0 ? Optional.empty() : Optional.of(destination);
+    }
+
     @Override
     public void update() {
         long newTarget = API.readMemoryLong(address + 112);
@@ -40,18 +46,22 @@ public class ShipInfo extends Updatable {
         destination.update(API.readMemoryLong(address + 96));
         destination.update();
 
-        updateSpeed();
+        updateSpeedAndAngle();
     }
 
-    private void updateSpeed() {
+    private void updateSpeedAndAngle() {
+        if (!destination.isInitialized() || destination.now.equals(pastDestination)) return;
+        this.pastDestination = destination.now.copy();
+
+        this.destinationAngle = entityLocation.angleTo(destination);
+
         if (speed != 1) return; // Entities with a valid real speed do not need to have this speed prediction done
 
         long tweenLiteAddress = API.readLong(address, 104);
 
         double timeNeeded = API.readDouble(tweenLiteAddress, 152);
-        if (destination.now.equals(pastDestination) && pastTimeNeeded == timeNeeded) return;
+        if (pastTimeNeeded == timeNeeded) return;
 
-        this.pastDestination = destination.now.copy();
         this.pastTimeNeeded = timeNeeded;
 
         double elapsed = API.readDouble(tweenLiteAddress, 136); // Offset `144` works too

@@ -1,14 +1,11 @@
 package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.Health;
 import com.github.manolo8.darkbot.core.objects.PlayerInfo;
 import com.github.manolo8.darkbot.core.objects.ShipInfo;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
 import com.github.manolo8.darkbot.utils.MathUtils;
-import eu.darkbot.api.game.entities.Pet;
-import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.game.other.EntityInfo;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
@@ -29,9 +26,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     public PlayerInfo playerInfo = new PlayerInfo();
     public ShipInfo shipInfo     = new ShipInfo(this.locationInfo);
 
-    private com.github.manolo8.darkbot.core.entities.Pet pet;
-
-    public int formationId;
+    public int formationId; // later move it up to Player.class
     public boolean invisible;
     public long timer;
 
@@ -74,14 +69,6 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
         formationId = API.readMemoryInt(address, 280, 40, 40);
         invisible = API.readMemoryBoolean(API.readMemoryLong(address + 160) + 32);
-
-        if (this instanceof HeroManager) return;
-
-        long petAddress = API.readMemoryLong(address + 176);
-        if (petAddress != 0 && (pet == null || petAddress != pet.address))
-            pet = main.mapManager.entities.pets.stream()
-                    .filter(p -> p.address == petAddress)
-                    .findAny().orElse(null);
     }
 
     @Override
@@ -127,10 +114,9 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     }
 
 
-    public class Target extends Updatable {
-        public Entity targetedEntity;
-
-        public boolean laserAttacking;
+    private class Target extends Updatable {
+        private Entity targetedEntity;
+        private boolean laserAttacking;
 
         @Override
         public void update() {
@@ -139,12 +125,13 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
             long entityPtr = API.readMemoryLong(address, 64, 32);
 
-            if (entityPtr == 0 && targetedEntity != null) targetedEntity = null;
-            else if (entityPtr != 0 && (targetedEntity == null || entityPtr != targetedEntity.address)) {
+            if (entityPtr == 0) targetedEntity = null;
+            else if (targetedEntity == null || entityPtr != targetedEntity.address) {
                 if (entityPtr == main.hero.address) {
                     targetedEntity = main.hero;
                     return;
-                } else if (main.hero.pet.address != 0 && entityPtr == main.hero.pet.address) {
+                           //entity ptr can't be assigned to 0 here so don't need that check
+                } else if (/*main.hero.pet.address != 0 && */entityPtr == main.hero.pet.address) {
                     targetedEntity = main.hero.pet;
                     return;
                 }
@@ -170,26 +157,6 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     @Override
     public void setBlacklisted(long time) {
         setTimerTo(time);
-    }
-
-    @Override
-    public boolean hasPet() {
-        return pet != null;
-    }
-
-    @Override
-    public Optional<Pet> getPet() {
-        return Optional.ofNullable(pet);
-    }
-
-    @Override
-    public SelectableItem.Formation getFormation() {
-        return SelectableItem.Formation.of(formationId);
-    }
-
-    @Override
-    public boolean isInFormation(int formationId) {
-        return formationId == this.formationId;
     }
 
     @Override
@@ -228,13 +195,17 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     }
 
     @Override
+    public double getDestinationAngle() {
+        return shipInfo.destinationAngle;
+    }
+
+    @Override
     public boolean isAiming(@NotNull Locatable other) {
         return MathUtils.angleDiff(getAngle(), getLocationInfo().angleTo(other)) < 0.2;
     }
 
     @Override
     public Optional<Location> getDestination() {
-        return shipInfo.destination.address == 0 ?
-                Optional.empty() : Optional.of(shipInfo.destination);
+        return shipInfo.getDestination();
     }
 }
