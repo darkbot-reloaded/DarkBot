@@ -11,6 +11,7 @@ public class FrozenLabyrinthProxy extends Updatable {
     public String labStatus;
     public String synkMap;
     public int synkZone;
+
     public void update() {
         long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
         long labVoAddr = API.readMemoryLong(data + 0x70) & ByteUtils.ATOM_MASK;
