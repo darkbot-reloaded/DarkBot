@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.login;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.components.MainButton;
+import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.login.Credentials;
@@ -12,6 +13,7 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -109,14 +111,36 @@ public class SavedLogins extends JPanel implements LoginScreen {
 
     private char[] createMasterPassword() {
         if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.OTHER.DISABLE_MASTER_PASSWORD) return new char[]{};
-        JPasswordField pass = new JPasswordField(10);
+        JPanel panel = new JPanel(new MigLayout("ins 0", "[]push[]"));
+        JLabel label = new JLabel("Master password for darkbot to encrypt your credentials.");
+        JPasswordField pass = new JPasswordField(26);
+        JCheckBox check = new JCheckBox("Disable Master Password");
+        JButton button = new JButton("OK");
+        panel.add(label, "span");
+        panel.add(pass, "span");
+        panel.add(check);
+        panel.add(button);
+        button.setEnabled(false);
 
-        JOptionPane.showMessageDialog(this, new Object[]{
-                        "Master password for darkbot to encrypt your credentials.\n" +
-                                "You can use a blank (empty) password:", pass},
-                "Darkbot Master password", JOptionPane.PLAIN_MESSAGE);
+        check.addItemListener(e -> {
+            pass.setEditable(e.getStateChange() != ItemEvent.SELECTED);
+            button.setEnabled(pass.getPassword().length > 0 || e.getStateChange() == ItemEvent.SELECTED);
+        });
+        pass.getDocument().addDocumentListener((GeneralDocumentListener) e -> 
+                button.setEnabled(pass.getPassword().length > 0 || check.isSelected()));
+        button.addActionListener(e -> SwingUtilities.getWindowAncestor(button).setVisible(false));
 
-        return pass.getPassword();
+        JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
+        JDialog dialog = pane.createDialog(this, "Darkbot Master password");
+        dialog.getRootPane().setDefaultButton(button);
+        dialog.setVisible(true);
+
+        if (check.isSelected() || pass.getPassword().length == 0) {
+            ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.OTHER.DISABLE_MASTER_PASSWORD = true;
+            return new char[]{};
+        } else {
+            return pass.getPassword();
+        }
     }
 
     @Override
