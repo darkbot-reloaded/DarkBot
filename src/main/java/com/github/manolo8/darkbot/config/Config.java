@@ -182,6 +182,7 @@ public class Config {
         public @Option boolean LOG_CHAT = false;
         public @Option boolean LOG_DEATHS = false;
         public @Option boolean AVOID_MINES = true;
+        public @Option boolean USERNAME_AS_TITLE = false;
     }
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
