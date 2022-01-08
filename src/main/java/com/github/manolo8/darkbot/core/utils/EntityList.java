@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.core.entities.Mine;
 import com.github.manolo8.darkbot.core.entities.NoCloack;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
+import com.github.manolo8.darkbot.core.entities.Player;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
@@ -48,7 +49,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
     public final List<Npc> npcs                     = register(NPC, LOW_RELAY);
     public final List<Portal> portals               = register(PORTAL);
     public final List<Ship> ships                   = register(PLAYER, PET);
-    public final List<Ship> players                 = register(PLAYER);
+    public final List<Player> players               = register(PLAYER);
     public final List<Pet> pets                     = register(PET);
     public final List<BattleStation> battleStations = register(CBS_ASTEROID, CBS_MODULE, CBS_STATION, CBS_MODULE_CON, CBS_CONSTRUCTION);
     public final List<BasePoint> basePoints         = register(BASE_HANGAR, BASE_STATION, HEADQUARTER, QUEST_GIVER, BASE_TURRET, REPAIR_STATION, REFINERY);
@@ -187,7 +188,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
     }
 
     @Override
-    public Collection<? extends eu.darkbot.api.game.entities.Ship> getPlayers() {
+    public Collection<? extends eu.darkbot.api.game.entities.Player> getPlayers() {
         return Collections.unmodifiableList(players);
     }
 
