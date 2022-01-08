@@ -79,7 +79,7 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
         
         @Override
         public void setShouldKill(boolean shouldKill) {
-            return npcInfo.kill = shouldKill;
+            npcInfo.kill = shouldKill;
         }
 
         @Override
