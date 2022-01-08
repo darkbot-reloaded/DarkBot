@@ -372,7 +372,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     @Feature(name = "Default Ship Mode Supplier", description = "Sets the fallback ship mode")
     public static class DefaultShipModeSupplier implements ShipModeSelector, PrioritizedSupplier<ShipMode> {
 
-        private  HeroManager hero;
+        private HeroManager hero;
 
         @Inject
         public void setHero(HeroManager hero) {

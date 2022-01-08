@@ -115,4 +115,10 @@ public class ReflectionUtils {
         return null;
     }
 
+    public static <T> Class<T> getClass(Type type) {
+        if (type instanceof ParameterizedType) return getClass(((ParameterizedType) type).getRawType());
+        //noinspection unchecked
+        return (Class<T>) type;
+    }
+
 }

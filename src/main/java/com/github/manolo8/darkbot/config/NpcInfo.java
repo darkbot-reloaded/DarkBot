@@ -1,13 +1,13 @@
 package com.github.manolo8.darkbot.config;
 
-import com.github.manolo8.darkbot.core.itf.NpcExtraProvider;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Option;
+import eu.darkbot.api.config.types.NpcFlag;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
+import eu.darkbot.api.managers.HeroItemsAPI;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,13 +31,19 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     public transient int npcId;
     public @Option.Ignore Set<Integer> mapList = new HashSet<>();
 
+    private static transient final Map<String, NpcExtraFlag> LEGACY_FLAGS = new LinkedHashMap<>();
+    private static transient final Map<String, NpcExtraFlag> NEW_FLAGS = new LinkedHashMap<>();
+
     public static transient final Map<String, NpcExtraFlag> NPC_FLAGS = new LinkedHashMap<>();
 
-    public static void setNpcFlags(Stream<NpcExtraProvider> flags) {
+    public static void setNpcFlags(Stream<NpcExtraFlag> flags, boolean legacy) {
+        Map<String, NpcExtraFlag> map = legacy ? LEGACY_FLAGS : NEW_FLAGS;
+        map.clear();
+        flags.forEach(flag -> map.put(flag.getId(), flag));
+
         NPC_FLAGS.clear();
-        flags.map(NpcExtraProvider::values)
-                .flatMap(Arrays::stream)
-                .forEach(flag -> NPC_FLAGS.put(flag.getId(), flag));
+        NPC_FLAGS.putAll(LEGACY_FLAGS);
+        NPC_FLAGS.putAll(NEW_FLAGS);
     }
 
     public void set(Double radius, Integer priority, Boolean kill, Character attackKey, ExtraNpcInfo extra) {
@@ -79,20 +85,16 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
 
     @Override
     public Optional<SelectableItem.Laser> getAmmo() {
-        return findItemAssociatedWith(ItemCategory.LASERS, attackKey, SelectableItem.Laser.class);
+        return getHeroItems().getItem(attackKey, ItemCategory.LASERS, SelectableItem.Laser.class);
     }
 
     @Override
     public Optional<SelectableItem.Formation> getFormation() {
-        return findItemAssociatedWith(ItemCategory.DRONE_FORMATIONS, attackFormation, SelectableItem.Formation.class);
+        return getHeroItems().getItem(attackFormation, ItemCategory.DRONE_FORMATIONS, SelectableItem.Formation.class);
     }
 
-    private <T extends Enum<T> & SelectableItem> Optional<T> findItemAssociatedWith(ItemCategory category, Character c, Class<T> type) {
-        if (c == null) return Optional.empty();
-
-        //should be reworked on ConfigEntity rework
-        return Optional.ofNullable(HeroManager.instance.main.facadeManager.slotBars.getItem(c, category))
-                .map(i -> i.getAs(type));
+    private static HeroItemsAPI getHeroItems() {
+        return HeroManager.instance.main.facadeManager.slotBars;
     }
 
     @Override
@@ -105,7 +107,11 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
         extra.set(getId(flag), active);
     }
 
-    private String getId(Enum<?> flag) {
+    public static String getId(Enum<?> flag) {
+        // Legacy backwards compat. When using the new NpcFlag, check for old NpcExtra id
+        if (flag instanceof NpcFlag)
+            return NpcExtra.class.getCanonicalName() + flag.name();
+
         return flag.getClass().getCanonicalName() + flag.name();
     }
 
