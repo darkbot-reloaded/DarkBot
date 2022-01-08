@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.core;
 
+import com.github.manolo8.darkbot.core.api.GameAPI;
+
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.WindowAPI;
 
@@ -90,12 +92,19 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     long[] queryMemory(byte[] query, int maxQuantity);
 
     void setVisible(boolean visible);
-    default void setMinimized(boolean visible) {
-        setVisible(false);
+    default void setMinimized(boolean minimized) {
+        setVisible(!minimized);
+    }
+
+    default void setVisible(boolean visible, boolean fullyHideEnabled) {
+        if (fullyHideEnabled) setMinimized(!visible);
+        else setVisible(visible);
     }
 
     void handleRefresh();
     void resetCache();
+
+    boolean hasCapability(GameAPI.Capability capability);
 
     //MemoryAPI
     @Override

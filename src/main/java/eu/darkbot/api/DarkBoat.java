@@ -1,8 +1,9 @@
 package eu.darkbot.api;
 
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.LibUtils;
 
-public class DarkBoat {
+public class DarkBoat implements GameAPI.Memory, GameAPI.Window, GameAPI.Handler, GameAPI.Interaction {
 
     static {
         System.load(LibUtils.getLibPath("DarkBoatAPI"));
@@ -13,7 +14,7 @@ public class DarkBoat {
     public native void    setSize(int width, int height);
     public native void    setVisible(boolean visible);
     // When enabled browser is further hidden, lowering CPU usage, but doesn't work on all systems
-    public native void    setMinimized(boolean visible);
+    public native void    setMinimized(boolean minimized);
     public native void    reload();
     public native boolean isValid();
     public native long    getMemoryUsage();

@@ -171,13 +171,13 @@ public class ConfigManager implements API.Singleton {
         BrowserApi api = params.useNoOp() ? BrowserApi.NO_OP_API : config.BOT_SETTINGS.API_CONFIG.BROWSER_API;
         try {
             if (api == null) throw new IllegalArgumentException("No API has been set!");
-            return api.getInstance(params, this);
+            return api.getInstance(params);
         } catch (Throwable e) {
             System.out.println("Error enabling " + api + ", using no-op api");
             e.printStackTrace();
             ApiErrors.displayException(api, e);
             config.BOT_SETTINGS.API_CONFIG.BROWSER_API = BrowserApi.NO_OP_API;
-            return BrowserApi.NO_OP_API.getInstance(params, this);
+            return BrowserApi.NO_OP_API.getInstance(params);
         }
     }
 

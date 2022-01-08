@@ -36,12 +36,7 @@ public class VisibilityButton extends TitleBarToggleButton<JFrame> {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        toggleVisibility(main.config.BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API, isSelected());
-    }
-
-    private void toggleVisibility(boolean minimizing, boolean visible) {
-        if (minimizing) API.setMinimized(!visible);
-        else API.setVisible(visible);
+        API.setVisible(isSelected(), main.config.BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API);
     }
 
 }

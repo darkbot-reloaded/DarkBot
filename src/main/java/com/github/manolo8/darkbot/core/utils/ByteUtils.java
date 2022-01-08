@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core.utils;
 
-import com.github.manolo8.darkbot.core.IDarkBotAPI;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 
 import java.nio.charset.StandardCharsets;
 
@@ -109,15 +109,15 @@ public class ByteUtils {
         return b;
     }
 
-    public static class StringReader {
+    public static class StringReader implements GameAPI.StringReader {
         private static final int TYPE_DYNAMIC = 0, TYPE_STATIC = 1, TYPE_DEPENDENT = 2;
         private static final int WIDTH_AUTO = -1, WIDTH_8 = 0, WIDTH_16 = 1;
 
-        private final IDarkBotAPI API;
+        private final GameAPI.Memory reader;
         private final WeakValueHashMap<StrLocation, String> stringCache = new WeakValueHashMap<>();
 
-        public StringReader(IDarkBotAPI API) {
-            this.API = API;
+        public StringReader(GameAPI.Memory reader) {
+            this.reader = reader;
         }
 
         private class StrLocation {
@@ -137,7 +137,7 @@ public class ByteUtils {
             private void setAddress(long address) {
                 this.address = address;
 
-                long sizeAndFlags = API.readMemoryLong(address + 32);
+                long sizeAndFlags = reader.readLong(address + 32);
                 int size = (int) sizeAndFlags; // lower 32bits
                 if (size == 0) {
                     this.size = 0;
@@ -153,9 +153,9 @@ public class ByteUtils {
                 this.size  = (size << width);
                 this.width8 = width == WIDTH_8;
                 if (type == TYPE_DEPENDENT)
-                    this.base = API.readMemoryLong(address, 24, 16) + API.readMemoryInt(address + 16);
+                    this.base = reader.readLong(address, 24, 16) + reader.readInt(address + 16);
                 else
-                    this.base = API.readMemoryLong(address + 16);
+                    this.base = reader.readLong(address + 16);
             }
 
             private String read() {
@@ -163,7 +163,7 @@ public class ByteUtils {
                 // assume that string sizes over 1024 or below 0 are invalid
                 if (size > 1024 || size < 0) return null;
 
-                return new String(API.readMemory(base, size),
+                return new String(reader.readBytes(base, size),
                         width8 ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_16LE);
             }
 
@@ -209,11 +209,13 @@ public class ByteUtils {
             return result;
         }
 
-        public void reset() {
+        public void resetCache() {
             stringCache.clear();
         }
 
+        @Override
+        public int getVersion() {
+            return 1;
+        }
     }
-
-
 }

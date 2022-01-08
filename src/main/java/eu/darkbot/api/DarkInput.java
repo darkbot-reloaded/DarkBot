@@ -1,8 +1,9 @@
 package eu.darkbot.api;
 
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.LibUtils;
 
-public class DarkInput {
+public class DarkInput implements GameAPI.Interaction {
 
     static {
         System.load(LibUtils.getLibPath("DarkInputAPI"));

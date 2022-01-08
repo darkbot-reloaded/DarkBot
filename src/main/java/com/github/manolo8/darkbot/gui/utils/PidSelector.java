@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.gui.utils;
 
-import eu.darkbot.api.DarkMem;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 
 public class PidSelector extends JComboBox<Integer> {
 
-    public PidSelector(DarkMem.Proc[] procs) {
-        super(Arrays.stream(procs).map(DarkMem.Proc::getPid).toArray(Integer[]::new));
+    public PidSelector(GameAPI.Window.Proc[] procs) {
+        super(Arrays.stream(procs).map(GameAPI.Window.Proc::getPid).toArray(Integer[]::new));
 
         setRenderer(new PidRenderer(Arrays.stream(procs)
-                .collect(Collectors.toMap(DarkMem.Proc::getPid, DarkMem.Proc::getName))));
+                .collect(Collectors.toMap(GameAPI.Window.Proc::getPid, GameAPI.Window.Proc::getName))));
 
         setEditable(true);
     }
