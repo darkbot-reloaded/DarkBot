@@ -1,13 +1,13 @@
 package com.github.manolo8.darkbot.config;
 
-import com.github.manolo8.darkbot.core.itf.NpcExtraProvider;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Option;
+import eu.darkbot.api.config.types.NpcFlag;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
+import eu.darkbot.api.managers.HeroItemsAPI;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -85,20 +85,16 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
 
     @Override
     public Optional<SelectableItem.Laser> getAmmo() {
-        return findItemAssociatedWith(ItemCategory.LASERS, attackKey, SelectableItem.Laser.class);
+        return getHeroItems().getItem(attackKey, ItemCategory.LASERS, SelectableItem.Laser.class);
     }
 
     @Override
     public Optional<SelectableItem.Formation> getFormation() {
-        return findItemAssociatedWith(ItemCategory.DRONE_FORMATIONS, attackFormation, SelectableItem.Formation.class);
+        return getHeroItems().getItem(attackFormation, ItemCategory.DRONE_FORMATIONS, SelectableItem.Formation.class);
     }
 
-    private <T extends Enum<T> & SelectableItem> Optional<T> findItemAssociatedWith(ItemCategory category, Character c, Class<T> type) {
-        if (c == null) return Optional.empty();
-
-        //should be reworked on ConfigEntity rework
-        return Optional.ofNullable(HeroManager.instance.main.facadeManager.slotBars.getItem(c, category))
-                .map(i -> i.getAs(type));
+    private static HeroItemsAPI getHeroItems() {
+        return HeroManager.instance.main.facadeManager.slotBars;
     }
 
     @Override
@@ -111,7 +107,11 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
         extra.set(getId(flag), active);
     }
 
-    private String getId(Enum<?> flag) {
+    public static String getId(Enum<?> flag) {
+        // Legacy backwards compat. When using the new NpcFlag, check for old NpcExtra id
+        if (flag instanceof NpcFlag)
+            return NpcExtra.class.getCanonicalName() + flag.name();
+
         return flag.getClass().getCanonicalName() + flag.name();
     }
 

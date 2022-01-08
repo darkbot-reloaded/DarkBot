@@ -6,6 +6,8 @@ import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import eu.darkbot.api.config.annotations.Configuration;
+import eu.darkbot.api.config.types.NpcFlag;
+import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.NpcFlags;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.managers.I18nAPI;
@@ -18,7 +20,7 @@ import java.util.stream.Stream;
 
 public class NpcExtraHandler extends FeatureHandler<NpcFlags<?>> {
 
-    private static final Class<?>[] NATIVE = new Class[]{NpcExtra.DefaultNpcExtraProvider.class};
+    private static final Class<?>[] NATIVE = new Class[]{DefaultNpcFlag.class};
 
     @Override
     public Class<?>[] getNativeFeatures() {
@@ -28,7 +30,7 @@ public class NpcExtraHandler extends FeatureHandler<NpcFlags<?>> {
     private I18nAPI i18n;
 
     @Inject
-    private void setI18n(I18nAPI i18n) {
+    public void setI18n(I18nAPI i18n) {
         this.i18n = i18n;
     }
 
@@ -63,7 +65,7 @@ public class NpcExtraHandler extends FeatureHandler<NpcFlags<?>> {
     public <T extends Enum<T>> NpcExtraFlag createFlag(I18nAPI i18n, PluginInfo namespace,
                                                        String base, T npcFlag) {
         String name = npcFlag.name().toLowerCase(Locale.ROOT);
-        String id = npcFlag.getClass().getCanonicalName() + "." + name;
+        String id = NpcInfo.getId(npcFlag);
         return new NpcExtraFlagImpl(
                 id,
                 i18n.getOrDefault(namespace, base + "." + name + ".short", name),
@@ -102,5 +104,8 @@ public class NpcExtraHandler extends FeatureHandler<NpcFlags<?>> {
             return desc;
         }
     }
+
+    @Feature(name = "Default npc flags", description = "Provides default npc extra flags")
+    public static class DefaultNpcFlag implements NpcFlags<NpcFlag> {}
 
 }

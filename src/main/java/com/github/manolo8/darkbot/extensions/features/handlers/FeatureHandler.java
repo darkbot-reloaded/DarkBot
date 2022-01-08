@@ -23,8 +23,7 @@ public abstract class FeatureHandler<T> implements API.Singleton {
         if (types == null)
             throw new UnsupportedOperationException("Can't initialize feature decorator with no found type: " + getClass().getCanonicalName());
 
-        //noinspection unchecked
-        handledType = (Class<T>) types[0];
+        handledType = ReflectionUtils.getClass(types[0]);
     }
 
     @Inject
