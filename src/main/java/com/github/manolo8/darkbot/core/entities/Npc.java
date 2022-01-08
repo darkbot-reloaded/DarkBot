@@ -88,8 +88,8 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
         }
         
         @Override
-        public int setPriority(int priority) {
-            return npcInfo.priority = priority;
+        public void setPriority(int priority) {
+            npcInfo.priority = priority;
         }
 
         @Override
@@ -98,8 +98,8 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
         }
         
         @Override
-        public double setRadius(double radius) {
-            return npcInfo.radius = radius;
+        public void setRadius(double radius) {
+            npcInfo.radius = radius;
         }
 
         @Override
