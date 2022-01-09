@@ -14,7 +14,12 @@ import java.util.stream.Stream;
 
 public class ModuleHandler extends FeatureHandler<eu.darkbot.api.extensions.Module> {
 
-    private static final Class<?>[] NATIVE = new Class[]{CollectorModule.class, LootModule.class, LootCollectorModule.class};
+    private static final Class<?>[] NATIVE = new Class[]{
+            CollectorModule.class, LootModule.class, LootCollectorModule.class,
+            // Legacy
+            com.github.manolo8.darkbot.modules.CollectorModule.class,
+            com.github.manolo8.darkbot.modules.LootModule.class,
+            com.github.manolo8.darkbot.modules.LootNCollectorModule.class};
 
     @Override
     public Class<?>[] getNativeFeatures() {

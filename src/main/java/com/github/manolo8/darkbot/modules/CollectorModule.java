@@ -19,7 +19,7 @@ import static com.github.manolo8.darkbot.Main.API;
 import static java.lang.Math.cos;
 import static java.lang.StrictMath.sin;
 
-@Feature(name = "Collector", description = "Resource-only collector module. Can cloack.")
+@Feature(name = "Collector (Legacy)", description = "Resource-only collector module. Can cloack.")
 public class CollectorModule implements Module {
 
     private Main main;

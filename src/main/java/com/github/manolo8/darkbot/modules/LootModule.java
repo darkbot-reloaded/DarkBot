@@ -20,7 +20,7 @@ import java.util.List;
 import static java.lang.Double.min;
 import static java.lang.Math.random;
 
-@Feature(name = "Npc Killer", description = "Npc-only module. Will never pick up resources.")
+@Feature(name = "Npc Killer (Legacy)", description = "Npc-only module. Will never pick up resources.")
 public class LootModule implements Module {
 
     private Main main;
