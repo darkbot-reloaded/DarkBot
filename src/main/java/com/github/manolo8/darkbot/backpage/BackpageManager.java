@@ -8,7 +8,7 @@ import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.BackpageAPI;
-import eu.darkbot.impl.PluginApiImpl;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -174,7 +174,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public HttpURLConnection getConnection(String params) throws Exception {
-        if (isInvalid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        // basically there's no need for that check, if sid is updates once before any task tick anyway,
+        // until this method is called from another thread
+        if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         HttpURLConnection conn = (HttpURLConnection) new URL(this.instance + params)
                 .openConnection();
         conn.setConnectTimeout(30_000);
@@ -192,7 +194,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public Http getConnection(String params, Method method) {
-        if (isInvalid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         return Http.create(this.instance + params, method)
                 .setRawHeader("Cookie", "dosid=" + this.sid)
                 .addSupplier(() -> lastRequest = System.currentTimeMillis());
@@ -257,6 +259,15 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     @Override
+    public boolean isInstanceValid() {
+        // in isInvalid() method, checking sid & instance from stats manager are not synchronised
+        // so even if #isInvalid() returns false the connection can throw exception anyway
+        // instead local sid & instance will be updated once before any task tick
+        // or even better, keep old vales if new are empty, where old ones can still be valid
+        return sid != null && instance != null && !sid.isEmpty() && !instance.isEmpty();
+    }
+
+    @Override
     public String getSid() {
         return sid;
     }
@@ -272,7 +283,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     @Override
-    public Optional<String> findReloadToken(String body) {
+    public Optional<String> findReloadToken(@NotNull String body) {
         return Optional.ofNullable(getReloadToken(body));
     }
 }
