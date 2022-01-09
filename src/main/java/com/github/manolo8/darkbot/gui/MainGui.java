@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class MainGui extends JFrame {
@@ -93,11 +94,16 @@ public class MainGui extends JFrame {
         }
     }
 
+    @Override
+    public void setTitle(String title) {
+        if (!Objects.equals(getTitle(), title)) super.setTitle(title);
+    }
+
     public void tick() {
         if (main.config.MISCELLANEOUS.USERNAME_AS_TITLE) {
-            if (main.hero.playerInfo.username != null) super.setTitle("DarkBot - " + main.hero.playerInfo.username);
+            if (main.hero.playerInfo.username != null) this.setTitle("DarkBot - " + main.hero.playerInfo.username);
         }
-        else super.setTitle("DarkBot");
+        else this.setTitle("DarkBot");
 
         mapDrawer.repaint();
     }
