@@ -16,10 +16,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,6 +43,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     protected final Main main;
     protected String sid, instance;
+    protected URI instanceURI;
     protected List<Task> tasks = new ArrayList<>();
 
     protected long lastRequest;
@@ -134,8 +137,20 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     private boolean isInvalid() {
         this.sid = main.statsManager.sid;
-        this.instance = main.statsManager.instance;
+        if (!Objects.equals(this.instance, main.statsManager.instance)) {
+            this.instance = main.statsManager.instance;
+            this.instanceURI = tryParse(this.instance);
+        }
         return sid == null || instance == null || sid.isEmpty() || instance.isEmpty();
+    }
+
+    private URI tryParse(String uri) {
+        if (uri == null || uri.isEmpty()) return null;
+        try {
+            return new URI(uri);
+        } catch (URISyntaxException e) {
+            return null;
+        }
     }
 
     private int sidCheck() {
@@ -248,7 +263,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     @Override
     public URI getInstanceURI() {
-        return URI.create(instance);
+        return instanceURI;
     }
 
     @Override
