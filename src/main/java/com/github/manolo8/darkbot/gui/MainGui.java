@@ -94,7 +94,7 @@ public class MainGui extends JFrame {
 
     public void tick() {
         if (main.config.MISCELLANEOUS.USERNAME_AS_TITLE) {
-            if (main.hero.playerInfo.username != null) super.setTitle(main.hero.playerInfo.username);
+            if (main.hero.playerInfo.username != null) super.setTitle("DarkBot - " + main.hero.playerInfo.username);
         }
         else super.setTitle("DarkBot");
 
