@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.core.objects.facades.ChrominProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalBlacklightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalGateProxy;
+import com.github.manolo8.darkbot.core.objects.facades.FrozenLabyrinthProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
@@ -36,7 +37,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final BoosterProxy booster;
     public final SettingsProxy settings;
     public final SlotBarsProxy slotBars;
-    public final FrozenLabyrinthProxy labyrinthProxy   = registerProxy("frozen_labyrinth", new FrozenLabyrinthProxy());
+    public final FrozenLabyrinthProxy labyrinth;
     public final EternalGateProxy eternalGate;
     public final EternalBlacklightProxy blacklightGate;
     public final ChrominProxy chrominEvent;
@@ -51,6 +52,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.booster        = registerProxy("BoosterProxy",           BoosterProxy.class);
         this.settings       = registerProxy("SettingsWindowFUIProxy", SettingsProxy.class);
         this.slotBars       = registerProxy("ItemsControlMenuProxy",  SlotBarsProxy.class);
+        this.labyrinth      = registerProxy("frozen_labyrinth",       FrozenLabyrinthProxy.class);
         this.eternalGate    = registerProxy("eternal_gate",           EternalGateProxy.class);
         this.blacklightGate = registerProxy("eternal_blacklight",     EternalBlacklightProxy.class);
         this.chrominEvent   = registerProxy("chrominEvent",           ChrominProxy.class);
