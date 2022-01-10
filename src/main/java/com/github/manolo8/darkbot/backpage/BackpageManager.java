@@ -8,7 +8,7 @@ import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.BackpageAPI;
-import eu.darkbot.impl.PluginApiImpl;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -174,7 +174,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public HttpURLConnection getConnection(String params) throws Exception {
-        if (isInvalid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         HttpURLConnection conn = (HttpURLConnection) new URL(this.instance + params)
                 .openConnection();
         conn.setConnectTimeout(30_000);
@@ -192,7 +192,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public Http getConnection(String params, Method method) {
-        if (isInvalid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         return Http.create(this.instance + params, method)
                 .setRawHeader("Cookie", "dosid=" + this.sid)
                 .addSupplier(() -> lastRequest = System.currentTimeMillis());
@@ -257,6 +257,14 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     @Override
+    public boolean isInstanceValid() {
+        // Only check against local sid & instance variables, since stats manager ones are
+        // updated in the main thread, while the variables here are updated on the background
+        // thread every tick
+        return sid != null && instance != null && !sid.isEmpty() && !instance.isEmpty();
+    }
+
+    @Override
     public String getSid() {
         return sid;
     }
@@ -272,7 +280,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     @Override
-    public Optional<String> findReloadToken(String body) {
+    public Optional<String> findReloadToken(@NotNull String body) {
         return Optional.ofNullable(getReloadToken(body));
     }
 }

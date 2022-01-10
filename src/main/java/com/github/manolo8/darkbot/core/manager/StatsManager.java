@@ -7,11 +7,13 @@ import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.managers.StatsAPI;
 
+import java.time.Duration;
+
 import static com.github.manolo8.darkbot.Main.API;
 
 public class StatsManager implements Manager, StatsAPI {
 
-    private Main main;
+    private final Main main;
 
     private long address;
     private long settingsAddress;
@@ -159,8 +161,8 @@ public class StatsManager implements Manager, StatsAPI {
     }
 
     @Override
-    public long getRunningTime() {
-        return runningTime();
+    public Duration getRunningTime() {
+        return Duration.ofMillis(runningTime());
     }
 
     @Override
@@ -171,6 +173,11 @@ public class StatsManager implements Manager, StatsAPI {
     @Override
     public int getMaxCargo() {
         return depositTotal;
+    }
+
+    @Override
+    public void resetStats() {
+        resetValues();
     }
 
     @Override
