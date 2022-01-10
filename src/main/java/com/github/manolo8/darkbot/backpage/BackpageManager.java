@@ -174,8 +174,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public HttpURLConnection getConnection(String params) throws Exception {
-        // basically there's no need for that check, if sid is updates once before any task tick anyway,
-        // until this method is called from another thread
         if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         HttpURLConnection conn = (HttpURLConnection) new URL(this.instance + params)
                 .openConnection();
@@ -260,10 +258,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     @Override
     public boolean isInstanceValid() {
-        // in isInvalid() method, checking sid & instance from stats manager are not synchronised
-        // so even if #isInvalid() returns false the connection can throw exception anyway
-        // instead local sid & instance will be updated once before any task tick
-        // or even better, keep old vales if new are empty, where old ones can still be valid
+        // Only check against local sid & instance variables, since stats manager ones are
+        // updated in the main thread, while the variables here are updated on the background
+        // thread every tick
         return sid != null && instance != null && !sid.isEmpty() && !instance.isEmpty();
     }
 
