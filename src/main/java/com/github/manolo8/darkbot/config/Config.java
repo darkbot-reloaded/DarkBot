@@ -8,7 +8,6 @@ import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGears;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation;
 import com.github.manolo8.darkbot.config.utils.ItemUtils;
-import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
@@ -29,7 +28,6 @@ import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.shared.modules.LootCollectorModule;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -72,17 +70,16 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
     public transient boolean changed;
 
     public @Option General GENERAL = new General();
-    public static class General implements eu.darkbot.api.config.legacy.General {
+    public static class General {
         @Option @Dropdown(options = ModuleSupplier.class)
         public String CURRENT_MODULE = LootCollectorModule.class.getCanonicalName();
         public @Option @Dropdown(options = StarManager.MapOptions.class) int WORKING_MAP = 26;
         public @Option ShipConfig OFFENSIVE = new ShipConfig(1, '8');
         public @Option ShipConfig ROAM = new ShipConfig(1, '9');
         public @Option ShipConfig RUN = new ShipConfig(2, '9');
-        public @Option @Number(max = 3600) int FORMATION_CHECK = 180;
 
         public @Option Safety SAFETY = new Safety();
-        public static class Safety implements eu.darkbot.api.config.legacy.General.Safety {
+        public static class Safety {
             public @Option PercentRange REPAIR_HP_RANGE = new PercentRange(0.4, 0.95);
             public @Option @Percentage double REPAIR_HP_NO_NPC = 0.5;
             public @Option @Percentage double REPAIR_TO_SHIELD = 1;
@@ -91,30 +88,10 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option @Dropdown ReviveLocation REVIVE_LOCATION = ReviveLocation.BASE;
             public @Option @Number(min = 5, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
             public @Option @Number(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
-
-            @Override
-            public eu.darkbot.api.config.types.PercentRange getRepairHealthRange() {
-                return REPAIR_HP_RANGE;
-            }
-
-            @Override
-            public double getRepairHealthNoNpc() {
-                return REPAIR_HP_NO_NPC;
-            }
-
-            @Override
-            public double getRepairToShield() {
-                return REPAIR_TO_SHIELD;
-            }
-
-            @Override
-            public ShipMode getRepairMode() {
-                return REPAIR;
-            }
         }
 
         public @Option Running RUNNING = new Running();
-        public static class Running implements eu.darkbot.api.config.legacy.General.Running {
+        public static class Running {
             public @Option boolean RUN_FROM_ENEMIES = true;
             public @Option @Number(max = 24 * 60 * 60, step = 300) int REMEMBER_ENEMIES_FOR = 300;
             public @Option boolean RUN_FROM_ENEMIES_SIGHT = false;
@@ -123,46 +100,6 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option Character SHIP_ABILITY;
             public @Option @Number(max = 20000, step = 500) int SHIP_ABILITY_MIN = 1500;
             public @Option @Number(max = 20000, step = 500) int RUN_FURTHEST_PORT = 1500;
-
-            @Override
-            public boolean getRunFromEnemies() {
-                return RUN_FROM_ENEMIES;
-            }
-
-            @Override
-            public Duration getEnemyRemember() {
-                return Duration.ofSeconds(REMEMBER_ENEMIES_FOR);
-            }
-
-            @Override
-            public boolean getRunInSight() {
-                return RUN_FROM_ENEMIES_SIGHT;
-            }
-
-            @Override
-            public boolean getStopRunning() {
-                return STOP_RUNNING_NO_SIGHT;
-            }
-
-            @Override
-            public int getMaxSightDistance() {
-                return MAX_SIGHT_DISTANCE;
-            }
-
-            @Override
-            public int getRunClosestDistance() {
-                return RUN_FURTHEST_PORT;
-            }
-
-            @Override
-            public int getShipAbilityMinDistance() {
-                return SHIP_ABILITY_MIN;
-            }
-
-            @Override
-            public SelectableItem getShipAbility() {
-                return ItemUtils.findAssociatedItem(null, SHIP_ABILITY).orElse(null);
-            }
         }
 
         public @Option Roaming ROAMING = new Roaming();
@@ -172,25 +109,10 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean ONLY_KILL_PREFERRED = false;
             public @Option boolean ENEMY_CBS_INVISIBLE = false;
         }
-
-        @Override
-        public GameMap getWorkingMap() {
-            return StarManager.getInstance().byId(WORKING_MAP);
-        }
-
-        @Override
-        public eu.darkbot.api.config.legacy.General.Safety getSafety() {
-            return SAFETY;
-        }
-
-        @Override
-        public eu.darkbot.api.config.legacy.General.Running getRunning() {
-            return RUNNING;
-        }
     }
 
     public @Option Collect COLLECT = new Collect();
-    public static class Collect implements eu.darkbot.api.config.legacy.Collect {
+    public static class Collect {
         public @Option boolean STAY_AWAY_FROM_ENEMIES;
         public @Option boolean AUTO_CLOACK;
         public @Option Character AUTO_CLOACK_KEY;
@@ -201,21 +123,6 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         @Table(decorator = TableHelpers.BoxInfoDecorator.class)
         public Map<String, BoxInfo> BOX_INFOS = new HashMap<>();
         public transient Lazy<String> ADDED_BOX = new Lazy.NoCache<>();
-
-        @Override
-        public boolean getAutoCloak() {
-            return AUTO_CLOACK;
-        }
-
-        @Override
-        public boolean getStayAwayFromEnemies() {
-            return STAY_AWAY_FROM_ENEMIES;
-        }
-
-        @Override
-        public boolean getIgnoreContestedBoxes() {
-            return IGNORE_CONTESTED_BOXES;
-        }
     }
 
     public @Option Loot LOOT = new Loot();
@@ -425,13 +332,4 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         PLAYER_UPDATED.send(null);
     }
 
-    @Override
-    public eu.darkbot.api.config.legacy.General getGeneral() {
-        return GENERAL;
-    }
-
-    @Override
-    public eu.darkbot.api.config.legacy.Collect getCollect() {
-        return COLLECT;
-    }
 }
