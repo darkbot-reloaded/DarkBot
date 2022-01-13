@@ -117,6 +117,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     public void setCustomConfig(ConfigSetting.Parent<?>... configs) {
         this.extendedConfig = new CompoundConfigSetting<>(this.baseConfig, configs);
         setCorrectRoot();
+        buttons.clear();
         updateTabs();
     }
 
