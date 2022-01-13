@@ -6,11 +6,11 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.managers.EventBrokerAPI;
-import eu.darkbot.api.managers.LogAPI;
+import eu.darkbot.api.managers.GameLogAPI;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class LogMediator extends Updatable implements LogAPI, Listener {
+public class LogMediator extends Updatable implements GameLogAPI, Listener {
     @Deprecated
     public final Lazy<String> logs = new Lazy.NoCache<>(); // Can't cache the value, same log could appear twice
 
