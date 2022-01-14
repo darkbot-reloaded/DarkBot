@@ -24,6 +24,7 @@ public class FontEditor extends JTextField implements OptionEditor<Font>, Genera
     public JComponent getEditorComponent(ConfigSetting<Font> font) {
         this.font = font.getValue();
         setText(this.font.getFontName());
+        setEditable(!Boolean.TRUE.equals(font.getMetadata("readonly")));
 
         return this;
     }

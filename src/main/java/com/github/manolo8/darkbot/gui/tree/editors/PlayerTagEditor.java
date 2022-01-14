@@ -51,7 +51,7 @@ public class PlayerTagEditor extends JButton implements OptionEditor<PlayerTag> 
 
     @Override
     public JComponent getEditorComponent(ConfigSetting<PlayerTag> playerTag) {
-        this.unset = playerTag.getHandler().getMetadata("tagDefault");
+        this.unset = playerTag.getMetadata("tagDefault");
         shown = false;
         setEditing(playerTag.getValue());
         return this;

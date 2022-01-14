@@ -53,7 +53,7 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
         if (this.setting != null) setting.removeListener(update);
 
         this.setting = table;
-        this.tableModel = table.getHandler().getMetadata("table.tableModel");
+        this.tableModel = table.getMetadata("table.tableModel");
         if (tableModel == null)
             throw new UnsupportedOperationException("Missing table model");
 
@@ -71,22 +71,21 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
     }
 
     private JComponent[] createTable(ConfigSetting<Map<String, Object>> setting) {
-        ValueHandler<Map<String, Object>> handler = setting.getHandler();
 
-        Table.Control[] controls = handler.getMetadata("table.controls");
-        Class<? extends Table.ControlBuilder<Object>>[] custom = handler.getMetadata("table.customControls");
-        Class<? extends Table.Decorator<Object>>[] decorators = handler.getMetadata("table.decorators");
-        Class<?> type = handler.getMetadata("table.type");
+        Table.Control[] controls = setting.getMetadata("table.controls");
+        Class<? extends Table.ControlBuilder<Object>>[] custom = setting.getMetadata("table.customControls");
+        Class<? extends Table.Decorator<Object>>[] decorators = setting.getMetadata("table.decorators");
+        Class<?> type = setting.getMetadata("table.type");
 
-        GenericTableModel<Object> tableModel = handler.getMetadata("table.tableModel");
+        GenericTableModel<Object> tableModel = setting.getMetadata("table.tableModel");
         if (controls == null || custom == null || decorators == null || tableModel == null || type == null)
             throw new UnsupportedOperationException("Cannot create table editor without the required metadata");
 
 
-        TableColumnModel columnModel = handler.getOrCreateMetadata("table.columnModel", DefaultTableColumnModel::new);
-        ListSelectionModel selectionModel = handler.getOrCreateMetadata("table.selectionModel", DefaultListSelectionModel::new);
-        BoundedRangeModel scrollModel = handler.getOrCreateMetadata("table.scrollModel", DefaultBoundedRangeModel::new);
-        TableRowSorter<TableModel> sorter = handler.getOrCreateMetadata("table.rowSorter", () -> new MultiTableRowSorter<>(tableModel));
+        TableColumnModel columnModel = setting.getOrCreateMetadata("table.columnModel", DefaultTableColumnModel::new);
+        ListSelectionModel selectionModel = setting.getOrCreateMetadata("table.selectionModel", DefaultListSelectionModel::new);
+        BoundedRangeModel scrollModel = setting.getOrCreateMetadata("table.scrollModel", DefaultBoundedRangeModel::new);
+        TableRowSorter<TableModel> sorter = setting.getOrCreateMetadata("table.rowSorter", () -> new MultiTableRowSorter<>(tableModel));
 
         JTable table = new JTable(tableModel, columnModel, selectionModel);
         table.setAutoCreateColumnsFromModel(true);
@@ -119,13 +118,13 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
                 JComponent component;
                 if (control == Table.Control.SEARCH)
                     component = new TableSearchField<>(sorter,
-                            handler.getOrCreateMetadata("table.searchModel", PlainDocument::new));
+                            setting.getOrCreateMetadata("table.searchModel", PlainDocument::new));
                 else if (control == Table.Control.ADD)
-                    component = new AddButton(api, setting, tableModel, type);
+                    component = new AddButton(api, this.setting, tableModel, type);
                 else if (control == Table.Control.REMOVE)
-                    component = new RemoveButton(setting, table, tableModel);
+                    component = new RemoveButton(this.setting, table, tableModel);
                 else if (control == Table.Control.CUSTOM) {
-                    component = api.requireInstance(custom[j++]).create(table, setting);
+                    component = api.requireInstance(custom[j++]).create(table, this.setting);
                 } else
                     throw new UnsupportedOperationException("Control not supported: " + control);
 
@@ -139,10 +138,10 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
         // Set a default table size, implementers may override using a decorator
         outer.setPreferredSize(new Dimension(500, 270));
         // Force an initial update on the model
-        tableModel.setConfig(setting.getValue());
+        tableModel.setConfig(this.setting.getValue());
 
         for (Class<? extends Table.Decorator<Object>> decorator : decorators)
-                api.requireInstance(decorator).handle(table, scrollPane, wrapper, setting);
+                api.requireInstance(decorator).handle(table, scrollPane, wrapper, this.setting);
 
         return new JComponent[]{outer, table};
     }

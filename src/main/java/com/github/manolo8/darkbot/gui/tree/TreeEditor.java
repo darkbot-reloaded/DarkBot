@@ -35,7 +35,7 @@ public class TreeEditor extends AbstractCellEditor implements TreeCellEditor {
 
         if (path == null || !tree.getModel().isLeaf(path.getLastPathComponent())) return false;
         ConfigSetting<?> config = (ConfigSetting<?>) path.getLastPathComponent();
-        return !Boolean.TRUE.equals(config.getHandler().getMetadata("readonly"));
+        return !Boolean.TRUE.equals(config.getMetadata("readonly"));
     }
 
     @Override

@@ -24,6 +24,7 @@ public class PercentEditor extends JSpinner implements OptionEditor<Double> {
     @Override
     public JComponent getEditorComponent(ConfigSetting<Double> percent) {
         setValue(percent.getValue());
+        setEnabled(!Boolean.TRUE.equals(percent.getMetadata("readonly")));
         return this;
     }
 

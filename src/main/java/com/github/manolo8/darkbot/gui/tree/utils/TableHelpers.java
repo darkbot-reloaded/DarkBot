@@ -27,12 +27,10 @@ public class TableHelpers {
 
         @Override
         public JComponent create(JTable table, ConfigSetting<Map<String, NpcInfo>> setting) {
-            ValueHandler<Map<String, NpcInfo>> handler = setting.getHandler();
-
-            MultiTableRowSorter<NpcTableModel> sorter = handler.getMetadata("table.rowSorter");
+            MultiTableRowSorter<NpcTableModel> sorter = setting.getMetadata("table.rowSorter");
             if (sorter == null) throw new UnsupportedOperationException("Required metadata missing");
 
-            ComboBoxModel<String> model = handler.getOrCreateMetadata("table.mapFilter", () -> {
+            ComboBoxModel<String> model = setting.getOrCreateMetadata("table.mapFilter", () -> {
                 NpcMapComboBoxModel m = new NpcMapComboBoxModel(starSystemAPI, maps -> sorter.allRowsChanged());
                 setting.addListener(m);
                 m.accept(setting.getValue());
@@ -68,7 +66,7 @@ public class TableHelpers {
                            @Nullable JPanel jPanel,
                            ConfigSetting<Map<String, NpcInfo>> setting) {
 
-            NpcTableModel tableModel = setting.getHandler().getMetadata("table.tableModel");
+            NpcTableModel tableModel = setting.getMetadata("table.tableModel");
             if (tableModel == null) throw new UnsupportedOperationException("Table model must not be null");
 
             ConfigSetting<Boolean> group = configAPI.requireConfig(setting.getParent(), "group_npcs");

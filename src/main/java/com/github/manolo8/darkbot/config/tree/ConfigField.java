@@ -21,7 +21,7 @@ public class ConfigField {
 
     public ConfigField(ConfigSetting<?> config) {
         this.config = config;
-        this.field = config.getHandler().getMetadata("field");
+        this.field = config.getMetadata("field");
     }
 
     public boolean isPrimitive() {

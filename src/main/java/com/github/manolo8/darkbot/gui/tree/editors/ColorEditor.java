@@ -26,12 +26,14 @@ public class ColorEditor extends JTextField implements OptionEditor<Color>, Gene
 
     @Override
     public JComponent getEditorComponent(ConfigSetting<Color> color) {
-        this.alpha = Boolean.TRUE.equals(color.getHandler().getMetadata("alpha"));
+        this.alpha = Boolean.TRUE.equals(color.getMetadata("alpha"));
         this.color = color.getValue();
 
         int rgba = this.color.getRGB();
         if (alpha) setText(String.format("#%08X", rgba));
         else setText(String.format("#%06X", rgba & 0x00FFFFFF));
+
+        setEnabled(!Boolean.TRUE.equals(color.getMetadata("readonly")));
 
         return this;
     }

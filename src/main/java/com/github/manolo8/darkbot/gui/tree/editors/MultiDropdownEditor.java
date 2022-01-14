@@ -69,7 +69,7 @@ public class MultiDropdownEditor extends JComboBox<Object> implements OptionEdit
 
     @Override
     public JComponent getEditorComponent(ConfigSetting<Set<Object>> dropdown) {
-        ComboBoxModel<Object> model = dropdown.getHandler().getMetadata("dropdown.model");
+        ComboBoxModel<Object> model = dropdown.getMetadata("dropdown.model");
         if (model instanceof GenericDropdownModel)
             ((GenericDropdownModel<Object>) model).checkUpdates();
 
@@ -77,7 +77,7 @@ public class MultiDropdownEditor extends JComboBox<Object> implements OptionEdit
         setting = dropdown;
         elements = copyOf(dropdown);
 
-        renderer.setOptions(dropdown.getHandler().getMetadata("dropdown.options"));
+        renderer.setOptions(dropdown.getMetadata("dropdown.options"));
         setModel(model);
         setSelectedItem(dropdown.getValue());
 

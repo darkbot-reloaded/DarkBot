@@ -12,16 +12,15 @@ public class StringEditor extends JTextField implements OptionEditor<String> {
 
     @Override
     public JComponent getEditorComponent(ConfigSetting<String> string) {
-        ValueHandler<String> handler = string.getHandler();
-
-        Integer columns = handler.getMetadata("length");
+        Integer columns = string.getMetadata("length");
         if (columns == null)
             throw new UnsupportedOperationException("Length must be present in string handler");
         setColumns(columns);
 
-        putClientProperty("JTextField.placeholderText", handler.getMetadata("placeholder"));
+        putClientProperty("JTextField.placeholderText", string.getMetadata("placeholder"));
 
         setText(string.getValue());
+        setEditable(!Boolean.TRUE.equals(string.getMetadata("readonly")));
 
         return this;
     }

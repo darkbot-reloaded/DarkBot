@@ -27,16 +27,15 @@ public class NumberEditor extends JSpinner implements OptionEditor<Number> {
 
     @Override
     public JComponent getEditorComponent(ConfigSetting<Number> number) {
-        ValueHandler<Number> handler = number.getHandler();
-        Double min = handler.getMetadata("min"),
-                max = handler.getMetadata("max"),
-                step = handler.getMetadata("step");
+        Double min = number.getMetadata("min"),
+                max = number.getMetadata("max"),
+                step = number.getMetadata("step");
         if (min == null || max == null || step == null)
             throw new UnsupportedOperationException("Min, max & step metadata must not be missing");
 
         Class<? extends Number> type = number.getType();
 
-        NumberFormatEditor nfe = Boolean.TRUE.equals(handler.getMetadata("isPercent")) ? percent :
+        NumberFormatEditor nfe = Boolean.TRUE.equals(number.getMetadata("isPercent")) ? percent :
                 type == Double.class || type == Float.class ? decimal : integer;
 
         setEditor(nfe.editor);
@@ -54,6 +53,7 @@ public class NumberEditor extends JSpinner implements OptionEditor<Number> {
         }
 
         setPreferredSize(new Dimension(25 + (length * 9), AdvancedConfig.EDITOR_HEIGHT));
+        setEnabled(!Boolean.TRUE.equals(number.getMetadata("readonly")));
 
         return this;
     }

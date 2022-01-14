@@ -13,6 +13,7 @@ public class BooleanEditor extends JCheckBox implements OptionEditor<Boolean> {
     @Override
     public JComponent getEditorComponent(ConfigSetting<Boolean> bool) {
         setSelected(bool.getValue());
+        setEnabled(!Boolean.TRUE.equals(bool.getMetadata("readonly")));
         return this;
     }
 

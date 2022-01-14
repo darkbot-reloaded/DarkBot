@@ -51,6 +51,7 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
         this.condition = condition.getValue();
         setText(Objects.toString(this.condition, ""));
         setColumns(30);
+        setEditable(!Boolean.TRUE.equals(condition.getMetadata("readonly")));
 
         this.init = true;
 

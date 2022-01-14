@@ -27,12 +27,12 @@ public class DropdownEditor extends JComboBox<Object> implements OptionEditor<Ob
 
     @Override
     public JComponent getEditorComponent(ConfigSetting<Object> dropdown) {
-        ComboBoxModel<Object> model = dropdown.getHandler().getMetadata("dropdown.model");
+        ComboBoxModel<Object> model = dropdown.getMetadata("dropdown.model");
         if (model instanceof GenericDropdownModel)
             ((GenericDropdownModel<Object>) model).checkUpdates();
 
-        renderer.setOptions(dropdown.getHandler().getMetadata("dropdown.options"));
-        setModel(dropdown.getHandler().getMetadata("dropdown.model"));
+        renderer.setOptions(dropdown.getMetadata("dropdown.options"));
+        setModel(dropdown.getMetadata("dropdown.model"));
         setSelectedItem(dropdown.getValue());
 
         return this;

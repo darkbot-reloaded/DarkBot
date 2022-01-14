@@ -87,17 +87,17 @@ public class EditorProvider {
 
     public <T> OptionEditor<T> getEditor(ConfigSetting<T> setting) {
         // Legacy handler should take care of this field
-        Field field = setting.getHandler().getMetadata("field");
+        Field field = setting.getMetadata("field");
         if (field != null && field.isAnnotationPresent(Editor.class) &&
                 !legacy.isRemoved(field.getAnnotation(Editor.class).value())) return null;
 
         // Specific editor class requested
-        Class<? extends OptionEditor> editor = setting.getHandler().getMetadata("editor");
+        Class<? extends OptionEditor> editor = setting.getMetadata("editor");
 
         // Metadata based editors
         if (editor == null)
             editor = metadataEditors.entrySet().stream()
-                    .filter(e -> setting.getHandler().getMetadata(e.getKey()) != null)
+                    .filter(e -> setting.getMetadata(e.getKey()) != null)
                     .map(Map.Entry::getValue)
                     .findFirst()
                     .orElse(null);

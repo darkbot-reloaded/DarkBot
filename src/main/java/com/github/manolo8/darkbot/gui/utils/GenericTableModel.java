@@ -214,9 +214,9 @@ public class GenericTableModel<T> extends AbstractTableModel {
         public Column(ConfigSetting<?> config) {
             this.name = config.getName();
             this.tooltip = config.getDescription();
-            this.field = config.getHandler().getMetadata("field");
+            this.field = config.getMetadata("field");
             this.type = field == null ? String.class : config.getType();
-            this.editable = field != null && !Boolean.TRUE.equals(config.getHandler().getMetadata("readonly"));
+            this.editable = field != null && !Boolean.TRUE.equals(config.getMetadata("readonly"));
         }
     }
 
