@@ -247,7 +247,8 @@ public class GuiManager implements Manager, GameScreenAPI {
 
             if (!tryRevive()) return false;
 
-            if (deaths >= main.config.GENERAL.SAFETY.MAX_DEATHS) main.setRunning(false);
+            if (main.config.GENERAL.SAFETY.MAX_DEATHS != -1 &&
+                    deaths >= main.config.GENERAL.SAFETY.MAX_DEATHS) main.setRunning(false);
             else checkInvalid();
 
             return false;

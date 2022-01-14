@@ -10,6 +10,7 @@ public class MathUtils {
     }
 
     public static <T extends Number> T toNumber(Number number, Class<T> type) {
+        if (number == null) return null;
         if (number.getClass() == type) return type.cast(number);
         if (type == Byte.class) return type.cast(number.byteValue());
         if (type == Double.class) return type.cast(number.doubleValue());

@@ -85,7 +85,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option @Percentage double REPAIR_HP_NO_NPC = 0.5;
             public @Option @Percentage double REPAIR_TO_SHIELD = 1;
             public @Option ShipConfig REPAIR = new ShipConfig(1, '9');
-            public @Option @Number(min = 1, max = 9999) int MAX_DEATHS = 10;
+            public @Option @Number(min = 1, max = 9999) @Number.Disabled(value = -1, def = 10) int MAX_DEATHS = 10;
             public @Option @Dropdown ReviveLocation REVIVE_LOCATION = ReviveLocation.BASE;
             public @Option @Number(min = 5, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
             public @Option @Number(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
