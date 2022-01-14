@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.config.tree;
 
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import eu.darkbot.api.config.ConfigSetting;
 
 import javax.swing.event.TreeModelEvent;
@@ -83,6 +84,7 @@ public class ConfigSettingTree implements TreeModel {
         for (TreeModelListener listener : listeners) {
             listener.treeNodesChanged(event);
         }
+        ConfigEntity.changed();
     }
 
     @Override

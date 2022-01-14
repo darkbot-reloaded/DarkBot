@@ -68,6 +68,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
     public Map<String, PluginConfig> PLUGIN_INFOS = new HashMap<>();
 
     public transient boolean changed;
+    public transient long changedAt;
 
     public @Option General GENERAL = new General();
     public static class General {

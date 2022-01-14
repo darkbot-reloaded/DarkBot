@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.UnresolvedPlayer;
 import com.github.manolo8.darkbot.gui.utils.Popups;
@@ -91,7 +92,7 @@ public class UsernameUpdater implements Task {
             }
 
             config.PLAYER_UPDATED.send(user.userId);
-            config.changed = true;
+            ConfigEntity.changed();
         } else reQueue(user);
     }
 

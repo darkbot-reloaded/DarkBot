@@ -19,14 +19,13 @@ import java.util.function.Consumer;
  * Use it like builder, just one time for instance
  */
 public class Http {
-    private static String DEFAULT_USER_AGENT = "BigpointClient/1.5.2";
 
     public static String getDefaultUserAgent() {
-        return DEFAULT_USER_AGENT;
+        return eu.darkbot.util.http.Http.getDefaultUserAgent();
     }
 
     public static void setDefaultUserAgent(String defaultUserAgent) {
-        DEFAULT_USER_AGENT = defaultUserAgent;
+        eu.darkbot.util.http.Http.setDefaultUserAgent(defaultUserAgent);
     }
 
     protected String url;
@@ -34,7 +33,7 @@ public class Http {
     protected final boolean followRedirects;
 
     //Discord doesn't handle java's user agent...
-    protected String userAgent = DEFAULT_USER_AGENT;
+    protected String userAgent = eu.darkbot.util.http.Http.getDefaultUserAgent();
     protected ParamBuilder params;
     protected byte[] body;
     protected List<Runnable> suppliers;

@@ -177,7 +177,8 @@ public class ConfigManager implements API.Singleton {
     }
 
     public void saveChangedConfig() {
-        if (!config.changed) return;
+        // Safe config 5s after last change, to batch-up changes
+        if (!config.changed || config.changedAt + 5000 > System.currentTimeMillis()) return;
         config.changed = false;
         saveConfig();
     }

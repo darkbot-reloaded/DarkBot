@@ -395,6 +395,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     private void setConfigInternal(String config) {
         if (configManager.getConfigName().equals(config)) return;
         try {
+            configManager.saveConfig();
             SwingUtilities.invokeAndWait(() -> {
                 this.config = configHandler.loadConfig(config);
                 mapManager.updateAreas(true);

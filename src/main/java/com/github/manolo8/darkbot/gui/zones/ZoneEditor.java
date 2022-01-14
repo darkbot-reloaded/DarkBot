@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.zones;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.gui.MapDrawer;
@@ -150,7 +151,7 @@ public class ZoneEditor extends MapDrawer {
 
         if (toggle) {
             zoneInfo.toggle(startX, startY, endX, endY);
-            config.changed = true;
+            ConfigEntity.changed();
             return;
         }
 
@@ -164,7 +165,7 @@ public class ZoneEditor extends MapDrawer {
         }
 
         zoneInfo.set(startX, startY, endX, endY, !differ ? !sel : def);
-        config.changed = true;
+        ConfigEntity.changed();
     }
 
 

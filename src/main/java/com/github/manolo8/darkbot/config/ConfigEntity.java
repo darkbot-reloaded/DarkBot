@@ -25,10 +25,10 @@ public class ConfigEntity {
                 config.LOOT.NPC_INFOS.put(name, info);
                 config.LOOT.MODIFIED_NPC.send(name);
 
-                config.changed = true;
+                changed();
             }
         } else if (info.mapList.add(mapId)) {
-            config.changed = true;
+            changed();
             config.LOOT.MODIFIED_NPC.send(name);
         }
         return info;
@@ -42,7 +42,7 @@ public class ConfigEntity {
                 config.COLLECT.BOX_INFOS.put(name, info);
                 config.COLLECT.ADDED_BOX.send(name);
 
-                config.changed = true;
+                changed();
             }
         }
         return info;
@@ -64,7 +64,7 @@ public class ConfigEntity {
                 .orElseGet(() -> {
                     SafetyInfo s = new SafetyInfo(type, (int) entity.locationInfo.now.x, (int) entity.locationInfo.now.y, entity);
                     safetyInfos.add(s);
-                    config.changed = true;
+                    changed();
                     return s;
                 }));
     }
@@ -88,6 +88,7 @@ public class ConfigEntity {
     }
 
     public static void changed() {
+        INSTANCE.config.changedAt = System.currentTimeMillis();
         INSTANCE.config.changed = true;
     }
 

@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.components.TabbedPane;
@@ -54,7 +55,7 @@ public class ConfigGui extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                main.config.changed = true;
+                ConfigEntity.changed();
                 stateChange.send(false);
             }
         });

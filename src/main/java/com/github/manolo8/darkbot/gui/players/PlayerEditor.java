@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.players;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.config.UnresolvedPlayer;
@@ -78,7 +79,7 @@ public class PlayerEditor extends JPanel {
         }
 
         for (PlayerInfo p : players) p.setTag(tag, null);
-        main.config.changed = true;
+        ConfigEntity.changed();
         playerInfoList.updateUI();
     }
 
@@ -91,7 +92,7 @@ public class PlayerEditor extends JPanel {
             return;
         }
         for (PlayerInfo p : players) p.removeTag(tag);
-        main.config.changed = true;
+        ConfigEntity.changed();
         playerInfoList.updateUI();
     }
 
@@ -107,7 +108,7 @@ public class PlayerEditor extends JPanel {
         for (PlayerInfo p : main.config.PLAYER_INFOS.values()) {
             p.removeTag(tag);
         }
-        main.config.changed = true;
+        ConfigEntity.changed();
         playerInfoList.updateUI();
     }
 
@@ -128,7 +129,7 @@ public class PlayerEditor extends JPanel {
             main.config.PLAYER_INFOS.remove(player.userId);
             playersModel.removeElement(player);
         }
-        main.config.changed = true;
+        ConfigEntity.changed();
     }
 
     public class AddPlayer extends MainButton {
