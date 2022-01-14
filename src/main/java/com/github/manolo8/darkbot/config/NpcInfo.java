@@ -69,8 +69,13 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     }
 
     @Override
-    public boolean shouldKill() {
+    public boolean getShouldKill() {
         return kill;
+    }
+
+    @Override
+    public void setShouldKill(boolean kill) {
+        this.kill = kill;
     }
 
     @Override
@@ -79,8 +84,18 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     }
 
     @Override
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    @Override
     public double getRadius() {
         return radius;
+    }
+
+    @Override
+    public void setRadius(double radius) {
+        this.radius = radius;
     }
 
     @Override
