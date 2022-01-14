@@ -19,7 +19,7 @@ public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
 
     public Map<PlayerTag, Long> subscriptions = new HashMap<>();
 
-    private PlayerTags tags = null;
+    private transient PlayerTags tags = null;
 
     public PlayerInfo() {}
 
