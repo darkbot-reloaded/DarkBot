@@ -1,9 +1,6 @@
 package com.github.manolo8.darkbot.config.utils;
 
 import com.github.manolo8.darkbot.config.PlayerTag;
-import com.github.manolo8.darkbot.config.actions.Condition;
-import com.github.manolo8.darkbot.config.actions.SyntaxException;
-import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;

@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class NumberEditor extends JPanel implements OptionEditor<Number> {
 
-    private final JCheckBox checkBox;
-    private final NumberSpinner spinner;
+    private final JCheckBox checkBox = new BooleanEditor();
+    private final NumberSpinner spinner = new NumberSpinner();
 
     private Number disabledValue;
 
@@ -28,9 +28,7 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
 
         setOpaque(false);
 
-        add(checkBox = new BooleanEditor());
-        add(spinner = new NumberSpinner());
-
+        add(checkBox);
         checkBox.addChangeListener(e -> spinner.setEnabled(checkBox.isSelected()));
     }
 
@@ -38,16 +36,11 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
     public JComponent getEditorComponent(ConfigSetting<Number> number) {
         disabledValue = MathUtils.toNumber(number.getMetadata("disabled"), number.getType());
 
-        if (disabledValue != null) {
-            checkBox.setVisible(true);
-            checkBox.setSelected(!Objects.equals(number.getValue(), disabledValue));
-        } else {
-            checkBox.setVisible(false);
-            checkBox.setSelected(true);
-        }
-
+        checkBox.setSelected(disabledValue == null || !disabledValue.equals(number.getValue()));
         spinner.setEditing(number);
+        if (disabledValue == null) return spinner;
 
+        add(spinner); // Need to re-add because it's auto-removed if displayed alone
         return this;
     }
 
@@ -61,7 +54,6 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
     public Dimension getPreferredSize() {
         return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
-
 
     private class NumberSpinner extends JSpinner {
         private final NumberFormatEditor integer, decimal;

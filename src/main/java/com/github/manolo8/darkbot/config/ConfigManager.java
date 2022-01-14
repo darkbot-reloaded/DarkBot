@@ -13,7 +13,10 @@ import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
 import eu.darkbot.api.API;
+import eu.darkbot.api.config.types.PercentRange;
+import eu.darkbot.api.config.types.ShipMode;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -42,6 +45,8 @@ public class ConfigManager implements API.Singleton {
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeHierarchyAdapter(Color.class, new ColorAdapter())
             .registerTypeHierarchyAdapter(Font.class, new FontAdapter())
+            .registerTypeAdapter(ShipMode.class, (InstanceCreator<ShipMode>) type -> new Config.ShipConfig())
+            .registerTypeAdapter(PercentRange.class, (InstanceCreator<PercentRange>) type -> new Config.PercentRange())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
             .registerTypeAdapterFactory(new PlayerTagTypeAdapterFactory())

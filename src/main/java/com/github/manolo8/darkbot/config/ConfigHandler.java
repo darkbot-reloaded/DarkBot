@@ -97,12 +97,12 @@ public class ConfigHandler implements ConfigAPI, Listener {
     }
 
     private JsonElement toJsonElement(Object config) {
-        return config instanceof JsonElement ? (JsonElement) config : Main.GSON.toJsonTree(config);
+        return config instanceof JsonElement ? (JsonElement) config : ConfigManager.GSON.toJsonTree(config);
     }
 
     private <T> T toConfig(Object config, Class<T> type) {
         if (config == null) return ReflectionUtils.createInstance(type);
-        return type.isInstance(config) ? type.cast(config) : Main.GSON.fromJson(toJsonElement(config), type);
+        return type.isInstance(config) ? type.cast(config) : ConfigManager.GSON.fromJson(toJsonElement(config), type);
     }
 
     @EventHandler
