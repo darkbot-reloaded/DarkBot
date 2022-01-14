@@ -122,6 +122,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         this.configHandler = pluginAPI.requireInstance(ConfigHandler.class);
 
         VerifierChecker.getAuthApi().setupAuth();
+        this.pluginAPI.addInstance(VerifierChecker.getAuthApi());
 
         this.starManager     = pluginAPI.requireInstance(StarManager.class);
         this.mapManager      = pluginAPI.requireInstance(MapManager.class);

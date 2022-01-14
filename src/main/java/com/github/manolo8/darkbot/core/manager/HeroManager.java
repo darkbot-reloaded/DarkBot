@@ -149,6 +149,11 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         return super.timeTo(distance);
     }
 
+    @Deprecated
+    public void jumpPortal(com.github.manolo8.darkbot.core.entities.Portal portal) {
+        jumpPortal((Portal) portal);
+    }
+
     public void jumpPortal(Portal portal) {
         if (!portal.isValid()) return;
         if (System.currentTimeMillis() - portalTime < 500) return; // Minimum delay
