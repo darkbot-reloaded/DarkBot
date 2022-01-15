@@ -26,7 +26,7 @@ public class Bot {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-        //LibSetup.setupLibraries();
+        LibSetup.setupLibraries();
         StartupParams params = new StartupParams(args);
         SwingUtilities.invokeLater(() -> new Main(params));
     }
