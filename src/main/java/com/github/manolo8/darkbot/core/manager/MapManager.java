@@ -39,7 +39,7 @@ public class MapManager implements Manager, StarSystemAPI {
     public long mapAddress;
     private long viewAddress;
     private long boundsAddress;
-    long eventAddress;
+    public long eventAddress;
 
     public static int id = -1;
     public Lazy<Map> mapChange = new Lazy.NoCache<>();

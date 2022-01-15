@@ -384,4 +384,5 @@ public class GameAPIImpl<
     public long callMethod(int index, long... arguments) {
         return direct.callMethod(index, arguments);
     }
+
 }

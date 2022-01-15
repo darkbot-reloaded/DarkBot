@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.core.api;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
-import org.jetbrains.annotations.Nullable;
 
 public interface GameAPI {
 

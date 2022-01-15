@@ -3,9 +3,12 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.utils.Location;
+import eu.darkbot.api.API;
 import eu.darkbot.api.DarkHook;
+import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.hook.HookFlag;
 import eu.darkbot.api.hook.JNIUtil;
 import eu.darkbot.api.hook.NativeCallback;
@@ -16,7 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class HookManager implements Manager {
+/**
+ * Manager used as DirectInteraction api in darkboat with darkhook api.
+ * The instance will always exist, but tick() will only be called if it's in use, therefore, any initialization
+ * will be done on tick.
+ */
+public class HookManager implements Manager, GameAPI.DirectInteraction, API.Singleton {
 
     private final Main main;
     private final HeroManager hero;
@@ -31,18 +39,15 @@ public class HookManager implements Manager {
     public HookManager(Main main) {
         this.main = main;
         this.hero = main.hero;
-        setup();
     }
 
     @Override
     public void install(BotInstaller botInstaller) {
-        setup();
         botInstaller.invalid.add(state -> clear());
         botInstaller.guiManagerAddress.add(value -> guiAddress = value);
         botInstaller.screenManagerAddress.add(value -> staticEventAddress = value + 200);
     }
 
-    private boolean added;
     public void tick() {
         setup();
         if (hook == null) return; // Hook is disabled
@@ -50,34 +55,9 @@ public class HookManager implements Manager {
         if (callbacks != null)
             callbacks.forEach(CallbackHolder::checkCallback);
 
-        //example
-//        if (!added) {
-//            added = addMethodCallback(this, () -> staticEventAddress - 200, 1);
-//            added = addMethodCallback(this, () -> Main.API.readMemoryLong(staticEventAddress));
-//        }
-        //example
-
         tryHook();
-        setFps(main.config.BOT_SETTINGS.API_CONFIG.MAX_FPS);
+        setMaxFps(main.config.BOT_SETTINGS.API_CONFIG.MAX_FPS);
     }
-
-    //example
-    //Method[P:4, OP:2, Idx:10, GIdx:17422] _-72L::EventManager/_-938 (int, int, _-Q1I::_-k24?, Boolean?) ---> com.bigpoint.utils::_-J5a
-    @NativeCallback(methodIdx = 10)
-    private int gotoCallback(long methodEnv, int argc, int methodId) {
-        System.out.println("goto method called! -> methodEnv = " + methodEnv + ", argc = " + argc + ", methodId = " + methodId);
-
-        return -1; //deny any movement
-    }
-
-    //Method[P:1, OP:0, Idx:31, GIdx:9573] _-72L::_-55q/handleEnterFrame (flash.events::Event) ---> void
-    @NativeCallback(methodIdx = 31, hookFlag = HookFlag.INVOKER, callbackId = 1)
-    private int frameCallback(long methodEnv, int argc, int methodId) {
-        System.out.println("frame method called! -> methodEnv = " + methodEnv + ", argc = " + argc + ", methodId = " + methodId);
-
-        return 0; //call original
-    }
-    //example
 
     private void setup() {
         boolean isEnabled = canLoad && Main.API instanceof DarkBoatAdapter &&
@@ -111,17 +91,38 @@ public class HookManager implements Manager {
         return isHookEnabled() && main.config.BOT_SETTINGS.API_CONFIG.DARK_HOOK.COLLECT;
     }
 
-    public long moveToSync(Location dest, @Nullable Long collectableAddress) {
-        return collectableAddress == null
-                ? callMethodSync(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.x, (long) dest.y)
-                : callMethodSync(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.x, (long) dest.y, collectableAddress);
+    @Override
+    public int getVersion() {
+        return 0;
     }
 
-    public boolean moveToAsync(Location dest, @Nullable Long collectableAddress) {
-        return collectableAddress == null
-                ? callMethodAsync(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.x, (long) dest.y)
-                : callMethodAsync(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.x, (long) dest.y, collectableAddress);
+    @Override
+    public void setMaxFps(int maxFps) {
+        if (hook == null) throw new IllegalStateException("Tried to setFps while hook isn't initialized");
+        if (lastFps == maxFps) return;
+        hook.setMaxCps(lastFps = maxFps);
     }
+
+    @Override
+    public void lockEntity(int id) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void moveShip(Locatable dest) {
+        callMethodAsync(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.getX(), (long) dest.getY());
+    }
+
+    @Override
+    public void collectBox(Locatable dest, long boxAddr) {
+        callMethodSync(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.getX(), (long) dest.getY(), boxAddr);
+    }
+
+    @Override
+    public long callMethod(int index, long... arguments) {
+        return callMethodSync(index, arguments);
+    }
+
 
     public long callMethodSync(int methodIdx, long... args) {
         if (hook == null) throw new IllegalStateException("Tried to callMethodSync while hook isn't initialized");
@@ -131,12 +132,6 @@ public class HookManager implements Manager {
     public boolean callMethodAsync(int methodIdx, long... args) {
         if (hook == null) throw new IllegalStateException("Tried to callMethodASync while hook isn't initialized");
         return hook.callMethodAsync(methodIdx, args);
-    }
-
-    private void setFps(int fps) {
-        if (hook == null) throw new IllegalStateException("Tried to setFps while hook isn't initialized");
-        if (lastFps == fps) return;
-        hook.setMaxCps(lastFps = fps);
     }
 
     private void tryHook() {

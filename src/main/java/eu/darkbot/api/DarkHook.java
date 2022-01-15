@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.LongBuffer;
 
-public class DarkHook implements NativeTaskRunner, NativeCallbackManager {
+public class DarkHook implements NativeTaskRunner, NativeCallbackManager, API.Singleton {
     private final @Native LongBuffer buffer = ByteBuffer
             .allocateDirect(32 * Long.BYTES)
             .order(ByteOrder.nativeOrder())
