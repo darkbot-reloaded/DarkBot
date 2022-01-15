@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.modules;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Module;
@@ -125,11 +126,17 @@ public class CollectorModule implements Module {
     private void collectBox() {
         double distance = hero.locationInfo.distance(current);
 
-        if (distance < 200) {
+
+        boolean direct = API.hasCapability(GameAPI.Capability.DIRECT_COLLECT_BOX);
+        if (distance < (direct ? 800 : 200)) {
             drive.stop(false);
-            current.clickable.setRadius(800);
-            drive.clickCenter(true, current.locationInfo.now);
-            current.clickable.setRadius(0);
+            if (direct) {
+                API.collectBox(current, current.address);
+            } else {
+                current.clickable.setRadius(800);
+                drive.clickCenter(true, current.locationInfo.now);
+                current.clickable.setRadius(0);
+            }
 
             current.setCollected();
 

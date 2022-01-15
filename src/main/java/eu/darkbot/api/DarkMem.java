@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.utils.LibUtils;
 public class DarkMem implements GameAPI.Memory, GameAPI.Window {
 
     static {
-        System.load(LibUtils.getLibPath("DarkMemAPI"));
+        LibUtils.loadLibrary("DarkMemAPI");
     }
 
     public native int    getVersion();

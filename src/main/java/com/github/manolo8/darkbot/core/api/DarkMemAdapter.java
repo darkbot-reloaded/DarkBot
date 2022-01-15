@@ -8,12 +8,18 @@ import eu.darkbot.api.DarkInput;
 import eu.darkbot.api.DarkMem;
 
 public class DarkMemAdapter extends GameAPIImpl<DarkMem, DarkMemAdapter.DarkMemHandler, DarkMem,
-        ByteUtils.StringReader, DarkMemAdapter.DarkMemInput> {
+        ByteUtils.StringReader, DarkMemAdapter.DarkMemInput, GameAPI.NoOpDirectInteraction> {
     private final DarkMem MEM = new DarkMem();
     private final DarkInput INPUT = new DarkInput();
 
     public DarkMemAdapter(StartupParams params, DarkMem mem) {
-        super(params, mem, new DarkMemHandler(), mem, new ByteUtils.StringReader(mem), new DarkMemInput(),
+        super(params,
+                mem,
+                new DarkMemHandler(),
+                mem,
+                new ByteUtils.StringReader(mem),
+                new DarkMemInput(),
+                new GameAPI.NoOpDirectInteraction(),
                 GameAPI.Capability.ATTACH);
     }
 

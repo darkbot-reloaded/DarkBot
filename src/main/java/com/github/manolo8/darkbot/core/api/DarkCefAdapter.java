@@ -5,10 +5,16 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.DarkCef;
 import eu.darkbot.api.DarkMem;
 
-public class DarkCefAdapter extends GameAPIImpl<DarkCef, DarkCef, DarkMem, ByteUtils.StringReader, DarkCef> {
+public class DarkCefAdapter extends GameAPIImpl<
+        DarkCef,
+        DarkCef,
+        DarkMem,
+        ByteUtils.StringReader,
+        DarkCef,
+        GameAPI.NoOpDirectInteraction> {
 
     public DarkCefAdapter(StartupParams params, DarkCef CEF, DarkMem MEM) {
-        super(params, CEF, CEF, MEM, new ByteUtils.StringReader(MEM), CEF,
+        super(params, CEF, CEF, MEM, new ByteUtils.StringReader(MEM), CEF, new GameAPI.NoOpDirectInteraction(),
                 GameAPI.Capability.LOGIN, GameAPI.Capability.INITIALLY_SHOWN, GameAPI.Capability.CREATE_WINDOW_THREAD);
     }
 

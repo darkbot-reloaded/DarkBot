@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.utils.LibUtils;
 public class DarkBoat implements GameAPI.Memory, GameAPI.Window, GameAPI.Handler, GameAPI.Interaction {
 
     static {
-        System.load(LibUtils.getLibPath("DarkBoatAPI"));
+        LibUtils.loadLibrary("DarkBoatAPI");
     }
 
     public native void    setData(String url, String sid, String preloader, String vars);

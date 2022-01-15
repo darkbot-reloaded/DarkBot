@@ -3,6 +3,11 @@ package com.github.manolo8.darkbot.utils;
 import java.nio.file.Paths;
 
 public class LibUtils {
+
+    public static void loadLibrary(String library) {
+        System.load(getLibPath(library));
+    }
+
     /**
      * @param library Filename of library without extension, e.g. "DarkBoatAPI"
      * @return Absolute path of library with extension based on OS

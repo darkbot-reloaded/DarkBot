@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core.utils;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ZoneInfo;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.MouseManager;
@@ -115,7 +116,9 @@ public class Drive implements MovementAPI {
     private void click(Location loc) {
         if (System.currentTimeMillis() - lastClick > 200) {
             lastClick = System.currentTimeMillis();
-            mouse.clickLoc(loc);
+
+            if (Main.API.hasCapability(GameAPI.Capability.DIRECT_MOVE_SHIP)) Main.API.moveShip(loc);
+            else mouse.clickLoc(loc);
         }
     }
 

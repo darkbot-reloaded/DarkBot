@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.objects.Clickable;
@@ -135,9 +136,13 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     public boolean trySelect(boolean tryAttack) {
         if (!isSelectable() || distanceTo(main.hero) > DEFAULT_CLICK_RADIUS) return false;
 
-        clickable.setRadius(DEFAULT_CLICK_RADIUS);
-        main.hero.drive.clickCenter(!tryAttack, locationInfo.now);
-        clickable.setRadius(0);
+        if (API.hasCapability(GameAPI.Capability.DIRECT_ENTITY_LOCK)) {
+            API.lockEntity(id);
+        } else {
+            clickable.setRadius(DEFAULT_CLICK_RADIUS);
+            main.hero.drive.clickCenter(!tryAttack, locationInfo.now);
+            clickable.setRadius(0);
+        }
 
         return true; // We can't know if successful...
     }

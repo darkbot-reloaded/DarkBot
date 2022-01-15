@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.utils.LibUtils;
 public class DarkInput implements GameAPI.Interaction {
 
     static {
-        System.load(LibUtils.getLibPath("DarkInputAPI"));
+        LibUtils.loadLibrary("DarkInputAPI");
     }
 
     public native int  getVersion();

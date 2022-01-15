@@ -7,6 +7,9 @@ import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
+import eu.darkbot.api.game.other.Locatable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.Arrays;
@@ -17,7 +20,8 @@ public class GameAPIImpl<
         H extends GameAPI.Handler,
         M extends GameAPI.Memory,
         S extends GameAPI.StringReader,
-        I extends GameAPI.Interaction> implements IDarkBotAPI {
+        I extends GameAPI.Interaction,
+        D extends GameAPI.DirectInteraction> implements IDarkBotAPI {
 
     private static final String FALLBACK_STRING = "ERROR";
 
@@ -28,6 +32,7 @@ public class GameAPIImpl<
     protected final M memory;
     protected final S stringReader;
     protected final I interaction;
+    protected final D direct;
 
     protected final EnumSet<GameAPI.Capability> capabilities;
 
@@ -39,7 +44,7 @@ public class GameAPIImpl<
     protected boolean autoHidden = false;
 
     public GameAPIImpl(StartupParams params,
-                       W window, H handler, M memory, S stringReader, I interaction,
+                       W window, H handler, M memory, S stringReader, I interaction, D direct,
                        GameAPI.Capability... capabilityArr) {
         this.params = params;
 
@@ -48,6 +53,7 @@ public class GameAPIImpl<
         this.memory = memory;
         this.stringReader = stringReader;
         this.interaction = interaction;
+        this.direct = direct;
 
         this.capabilities = EnumSet.noneOf(GameAPI.Capability.class);
         this.capabilities.addAll(Arrays.asList(capabilityArr));
@@ -86,6 +92,16 @@ public class GameAPIImpl<
     @Override
     public String getVersion() {
         return version;
+    }
+
+    @Override
+    public void tick() {
+        window.tick();
+        handler.tick();
+        memory.tick();
+        stringReader.tick();
+        interaction.tick();
+        direct.tick();
     }
 
     @Override
@@ -276,4 +292,28 @@ public class GameAPIImpl<
         stringReader.resetCache();
     }
 
+    @Override
+    public void setMaxFps(int maxFps) {
+        direct.setMaxFps(maxFps);
+    }
+
+    @Override
+    public void lockEntity(int id) {
+        direct.lockEntity(id);
+    }
+
+    @Override
+    public void moveShip(Locatable destination) {
+        direct.moveShip(destination);
+    }
+
+    @Override
+    public void collectBox(Locatable destination, @NotNull Long collectableAddress) {
+        direct.collectBox(destination, collectableAddress);
+    }
+
+    @Override
+    public long callMethod(long object, int index, long[] arguments) {
+        return direct.callMethod(object, index, arguments);
+    }
 }

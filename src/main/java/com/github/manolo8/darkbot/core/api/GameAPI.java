@@ -1,12 +1,17 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.manager.HeroManager;
+import eu.darkbot.api.game.other.Locatable;
+import org.jetbrains.annotations.Nullable;
 
 public interface GameAPI {
 
-    int getVersion();
+    interface Base {
+        int getVersion();
+        default void tick() {}
+    }
 
-    interface Window extends GameAPI {
+    interface Window extends Base {
 
         default void createWindow() {
             throw new UnsupportedOperationException();
@@ -28,7 +33,7 @@ public interface GameAPI {
         }
     }
 
-    interface Handler extends GameAPI {
+    interface Handler extends Base {
         boolean isValid();
         long getMemoryUsage();
 
@@ -39,7 +44,7 @@ public interface GameAPI {
         void setMinimized(boolean minimized);
     }
 
-    interface Memory extends GameAPI {
+    interface Memory extends Base {
         int     readInt    (long address);
         long    readLong   (long address);
         double  readDouble (long address);
@@ -83,12 +88,12 @@ public interface GameAPI {
         long[] queryBytes  (byte[] pattern, int maxSize);
     }
 
-    interface StringReader extends GameAPI {
+    interface StringReader extends Base {
         String readString(long address);
         void resetCache();
     }
 
-    interface Interaction extends GameAPI {
+    interface Interaction extends Base {
         void keyClick  (int keyCode);
         void sendText  (String text);
 
@@ -98,11 +103,30 @@ public interface GameAPI {
         void mouseClick(int x, int y);
     }
 
+    interface DirectInteraction extends Base {
+        void setMaxFps(int maxFps);
+
+        void lockEntity(int id);
+
+        default void moveShip(Locatable destination) {
+            collectBox(destination, null);
+        }
+
+        void collectBox(Locatable destination, @Nullable Long collectableAddress);
+
+        long callMethod(long object, int index, long[] arguments);
+    }
+
     enum Capability {
         LOGIN,
         ATTACH,
         INITIALLY_SHOWN,
-        CREATE_WINDOW_THREAD;
+        CREATE_WINDOW_THREAD,
+
+        DIRECT_ENTITY_LOCK,
+        DIRECT_MOVE_SHIP,
+        DIRECT_COLLECT_BOX,
+        CALL_METHOD;
     }
 
     class NoOpWindow implements Window {
@@ -259,6 +283,33 @@ public interface GameAPI {
 
         @Override
         public void mouseClick(int x, int y) {}
+    }
+    
+    class NoOpDirectInteraction implements DirectInteraction {
+        @Override
+        public int getVersion() {
+            return 0;
+        }
+
+        @Override
+        public void setMaxFps(int maxFps) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void lockEntity(int id) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void collectBox(Locatable destination, @Nullable Long collectableAddress) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public long callMethod(long object, int index, long[] arguments) {
+            throw new UnsupportedOperationException();
+        }
     }
 
 }

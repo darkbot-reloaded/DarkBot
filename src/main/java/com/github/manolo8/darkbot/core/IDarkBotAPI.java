@@ -2,10 +2,15 @@ package com.github.manolo8.darkbot.core;
 
 import com.github.manolo8.darkbot.core.api.GameAPI;
 
+import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.WindowAPI;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
+
+    void tick();
 
     void createWindow();
     void setSize(int width, int height);
@@ -105,6 +110,13 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     void resetCache();
 
     boolean hasCapability(GameAPI.Capability capability);
+
+    // Direct game access
+    void setMaxFps(int maxCps);
+    void lockEntity(int id);
+    void moveShip(Locatable destination);
+    void collectBox(Locatable destination, @NotNull Long collectableAddress);
+    long callMethod(long object, int index, long[] arguments);
 
     //MemoryAPI
     @Override
