@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.components.TabbedPane;
@@ -9,11 +10,10 @@ import com.github.manolo8.darkbot.gui.players.PlayerEditor;
 import com.github.manolo8.darkbot.gui.plugins.PluginDisplay;
 import com.github.manolo8.darkbot.gui.titlebar.ConfigPicker;
 import com.github.manolo8.darkbot.gui.zones.ZonesEditor;
-import com.github.manolo8.darkbot.gui.zones.safety.SafetiesEditor;
 import com.github.manolo8.darkbot.gui.titlebar.ConfigTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
-import com.github.manolo8.darkbot.gui.zones.ZoneEditor;
+import eu.darkbot.api.config.ConfigSetting;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -55,7 +55,7 @@ public class ConfigGui extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                main.config.changed = true;
+                ConfigEntity.changed();
                 stateChange.send(false);
             }
         });
@@ -69,7 +69,7 @@ public class ConfigGui extends JFrame {
     private void initComponents() {
         tabbedPane = new TabbedPane();
 
-        advancedPane = new AdvancedConfig();
+        advancedPane = new AdvancedConfig(main.pluginAPI);
         zones = new ZonesEditor();
         playerEditor = new PlayerEditor();
         configPicker = new ConfigPicker();
@@ -89,7 +89,8 @@ public class ConfigGui extends JFrame {
     }
 
     public void setComponentData() {
-        advancedPane.setEditingConfig(main.config);
+        advancedPane.setEditingConfig(main.configHandler.getConfigRoot());
+        advancedPane.rebuildUI();
         main.pluginHandler.addListener(advancedPane);
         zones.setup(main);
         configPicker.setup(main);
@@ -97,8 +98,8 @@ public class ConfigGui extends JFrame {
         pluginDisplay.setup(main, pluginTab);
     }
 
-    void setCustomConfig(String name, Object config) {
-        SwingUtilities.invokeLater(() -> advancedPane.setCustomConfig(name, config));
+    void setCustomConfig(ConfigSetting.Parent<?>... configs) {
+        SwingUtilities.invokeLater(() -> advancedPane.setCustomConfig(configs));
     }
 
     @Override

@@ -1,22 +1,19 @@
 package com.github.manolo8.darkbot.gui;
 
-import com.formdev.flatlaf.ui.FlatButtonBorder;
-import com.formdev.flatlaf.ui.FlatLineBorder;
-import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.config.tree.ConfigNode;
-import com.github.manolo8.darkbot.config.tree.ConfigTree;
-import com.github.manolo8.darkbot.config.tree.TreeFilter;
+import com.github.manolo8.darkbot.config.tree.ConfigSettingTree;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.gui.components.MainButton;
-import com.github.manolo8.darkbot.gui.utils.CustomTabBorder;
-import com.github.manolo8.darkbot.gui.utils.SearchField;
-import com.github.manolo8.darkbot.gui.tree.EditorManager;
+import com.github.manolo8.darkbot.gui.tree.EditorProvider;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
+import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
-import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.config.util.ValueHandler;
 import net.miginfocom.swing.MigLayout;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -26,41 +23,71 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class AdvancedConfig extends JPanel implements PluginListener {
 
     public static final int EDITOR_HEIGHT = 17;
-    public static final int ROW_HEIGHT = 18;
+    public static final int ROW_HEIGHT = 19;
     public static final int HEADER_HEIGHT = 26;
 
-    private Object config;
-    private ConfigTree treeModel;
+    private final PluginAPI api;
+
+    private ConfigSetting.Parent<?> baseConfig, extendedConfig, lastSelection;
+    private final ConfigSettingTree treeModel = new ConfigSettingTree();
+
     private JPanel tabs;
-    private List<TabButton> buttons = new ArrayList<>();
+    private final Map<String, TabButton> buttons = new LinkedHashMap<>();
     private boolean packed = false; // If this is a packed config in a floating window
 
-    public AdvancedConfig() {
-        setLayout(new MigLayout("ins 0, gap 0, fill, wrap 2", "[][grow]", "[][grow]"));
+    public AdvancedConfig(PluginAPI api) {
+        super(new MigLayout("ins 0, gap 0, fill, wrap 2", "[][grow]", "[][grow]"));
+        this.api = api;
     }
 
-    public AdvancedConfig(Object config) {
-        setLayout(new BorderLayout());
-        packed = true;
+    @Deprecated
+    public AdvancedConfig(Object obj) {
+        this.api = null;
+    }
+
+    public AdvancedConfig(PluginAPI api, ConfigSetting.Parent<?> config) {
+        super(new BorderLayout());
+
+        this.api = api;
+        this.packed = true;
         setEditingConfig(config);
+        rebuildUI();
     }
 
-    void setEditingConfig(Object config) {
-        if (config == null) return;
-        removeAll();
-        this.config = config;
-        this.treeModel = new ConfigTree(config);
+    public void setEditingConfig(ConfigSetting.Parent<?> config) {
+        this.baseConfig = config;
+        this.extendedConfig = config;
+        this.lastSelection = config;
         if (!packed) {
-            if (ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.CONFIG_TREE_TABS)
-                treeModel.getFilter().setSelectedRoot(0);
+            Iterator<ConfigSetting<?>> children = config.getChildren().values().iterator();
+            if (children.hasNext()) {
+                ConfigSetting<?> child = children.next();
+                if (child instanceof ConfigSetting.Parent)
+                    lastSelection = (ConfigSetting.Parent<?>) child;
+            }
+        }
+    }
 
+    void rebuildUI() {
+        if (this.baseConfig == null ||
+                this.extendedConfig == null ||
+                (packed && this.lastSelection == null)) return;
+
+        removeAll();
+        treeModel.clearListeners();
+        setCorrectRoot();
+        if (!packed) {
             tabs = new JPanel(new MigLayout("ins 0, gap 0, wrap 1", "[]"));
 
             add(new SearchField(this::setSearch), "span 2, grow");
@@ -77,38 +104,50 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     @Override
     public void beforeLoad() {
         removeAll();
+        this.extendedConfig = null;
+        this.lastSelection = null;
     }
 
     @Override
-    public void afterLoadComplete() {
-        setEditingConfig(config);
+    public void afterLoadCompleteUI() {
+        setEditingConfig(this.baseConfig);
+        rebuildUI();
     }
 
-    public void setCustomConfig(String name, Object config) {
-        treeModel.setCustom(name, config);
+    public void setCustomConfig(ConfigSetting.Parent<?>... configs) {
+        this.extendedConfig = new CompoundConfigSetting<>(this.baseConfig, configs);
+        setCorrectRoot();
+        buttons.clear();
         updateTabs();
     }
 
     private void setSearch(String search) {
-        TreeFilter filter = treeModel.getFilter();
-        boolean prevUnfiltered = filter.isUnfiltered();
-        treeModel.getFilter().setSearch(search);
-        treeModel.updateListeners();
-        if (prevUnfiltered != filter.isUnfiltered()) updateTabs();
+        boolean wasFiltered = treeModel.isFiltered();
+        treeModel.setSearch(search);
+
+        if (wasFiltered != treeModel.isFiltered()) {
+            setCorrectRoot();
+            updateTabs();
+        } else {
+            treeModel.updateListeners();
+        }
+    }
+
+    private void setCorrectRoot() {
+        treeModel.setRoot(packed ? baseConfig :
+                treeModel.isFiltered() ?
+                        extendedConfig != null ? extendedConfig : baseConfig :
+                        lastSelection != null ? lastSelection : baseConfig);
     }
 
     private void updateTabs() {
         if (tabs == null) return;
         tabs.removeAll();
-        if (treeModel.getFilter().isUnfiltered() &&
-                ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.BOT_GUI.CONFIG_TREE_TABS) {
-
-            int tlc = treeModel.getTopLevelChildrenCount();
-
-            while (buttons.size() < tlc) buttons.add(new TabButton(buttons.size()));
-
-            for (int i = 0; i < tlc; i++) {
-                TabButton tb = buttons.get(i);
+        if (!treeModel.isFiltered()) {
+            for (Map.Entry<String, ConfigSetting<?>> entry : extendedConfig.getChildren().entrySet()) {
+                String key = entry.getKey();
+                TabButton tb = buttons.computeIfAbsent(key,
+                        k -> new TabButton((ConfigSetting.Parent<?>) entry.getValue()));
                 tb.update();
                 tabs.add(tb, "grow");
             }
@@ -121,24 +160,22 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     private class TabButton extends MainButton {
         private final Border HIGHLIGHT = new MatteBorder(0, 0, 0, 3, UIUtils.TAB_HIGLIGHT);
 
-        private final int i;
+        private final ConfigSetting.Parent<?> node;
 
-        public TabButton(int i) {
-            super("");
-            this.i = i;
+        public TabButton(ConfigSetting.Parent<?> node) {
+            super(node.getName());
+            this.node = node;
             update();
         }
 
         public void update() {
-            setBorder(treeModel.getFilter().getSelectedRoot() == i ? HIGHLIGHT : null);
-            ConfigNode node = treeModel.getTopLevelChild(i);
-            if (node != null) setText(I18n.getOrDefault(node.key, node.name));
+            setBorder(treeModel.getRoot() == node ? HIGHLIGHT : null);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            treeModel.getFilter().setSelectedRoot(i);
-            buttons.forEach(TabButton::update);
+            treeModel.setRoot(lastSelection = node);
+            buttons.values().forEach(TabButton::update);
             treeModel.updateListeners();
         }
     }
@@ -146,19 +183,24 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     private JComponent setupUI() {
         JTree configTree = new JTree(treeModel);
         configTree.setEditable(true);
+        configTree.setInvokesStopCellEditing(true);
         configTree.setRootVisible(false);
         configTree.setShowsRootHandles(true);
         configTree.setToggleClickCount(1);
         configTree.setRowHeight(0);
         configTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        configTree.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNext");
+        configTree.getInputMap(JComponent.WHEN_FOCUSED)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "startEditing");
 
         ToolTipManager.sharedInstance().registerComponent(configTree);
 
-        EditorManager rendererEdManager = new EditorManager();
-        EditorManager editorEdManager = new EditorManager(rendererEdManager);
+        EditorProvider renderer = api.requireInstance(EditorProvider.class);
+        EditorProvider editor = new EditorProvider(renderer);
 
-        configTree.setCellRenderer(new TreeRenderer(rendererEdManager));
-        configTree.setCellEditor(new TreeEditor(configTree, editorEdManager));
+        configTree.setCellRenderer(new TreeRenderer(renderer));
+        configTree.setCellEditor(new TreeEditor(configTree, editor));
 
         treeModel.addTreeModelListener((SimpleTreeListener) e -> {
             unfoldTopLevelTree(configTree);
@@ -187,21 +229,20 @@ public class AdvancedConfig extends JPanel implements PluginListener {
             TreePath path = configTree.getPathForRow(row);
             if (treeModel.isLeaf(path.getLastPathComponent())) continue; // Ignore leaf nodes
 
-            path = path.getParentPath();
-
-            if (path == null || path.getPathCount() == 1) configTree.expandRow(row); // Unfold root or top-level nodes
-            else {
-                // Unfold children with no siblings
-                int children = treeModel.getChildCount(path.getLastPathComponent());
-                boolean hasLeaf = false;
-                for (int child = 0; child < children; child++) {
-                    if (!treeModel.isLeaf(treeModel.getChild(path.getLastPathComponent(), child))) continue;
-                    hasLeaf = true;
-                    break;
-                }
-                if (!hasLeaf) configTree.expandRow(row);
+            if (treeModel.getChildCount(path.getLastPathComponent()) <= 5 || // Has few children
+                    (path = path.getParentPath()) == null || // Is the root, no parent
+                    path.getPathCount() == 1 || // Is one-level in
+                    hasNoLeaf(path.getLastPathComponent())) { // No sibling is a leaf
+                configTree.expandRow(row);
             }
         }
+    }
+
+    private boolean hasNoLeaf(Object parent) {
+        int children = treeModel.getChildCount(parent);
+        for (int child = 0; child < children; child++)
+            if (treeModel.isLeaf(treeModel.getChild(parent, child))) return false;
+        return true;
     }
 
     public static Dimension forcePreferredHeight(Dimension preferred) {
@@ -214,12 +255,12 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         @Override
         public void installUI(JComponent c) {
             super.installUI(c);
-            if (c instanceof JLayer) ((JLayer) c).setLayerEventMask(AWTEvent.MOUSE_WHEEL_EVENT_MASK);
+            if (c instanceof JLayer) ((JLayer<?>) c).setLayerEventMask(AWTEvent.MOUSE_WHEEL_EVENT_MASK);
         }
 
         @Override
         public void uninstallUI(JComponent c) {
-            if (c instanceof JLayer) ((JLayer) c).setLayerEventMask(0);
+            if (c instanceof JLayer) ((JLayer<?>) c).setLayerEventMask(0);
             super.uninstallUI(c);
         }
 
@@ -234,6 +275,87 @@ public class AdvancedConfig extends JPanel implements PluginListener {
             if (value + extent >= maximum && dir > 0 || value <= minimum && dir < 0)
                 parent.dispatchEvent(SwingUtilities.convertMouseEvent(child, e, parent));
         }
+    }
+
+    private static class CompoundConfigSetting<T> implements ConfigSetting.Parent<T> {
+
+        private final ConfigSetting.Parent<T> base;
+        private final Map<String, ConfigSetting<?>> remapped;
+
+        public CompoundConfigSetting(ConfigSetting.Parent<T> base,
+                                     ConfigSetting<?>... appended) {
+            this.base = base;
+            this.remapped = new LinkedHashMap<>();
+            remapped.putAll(base.getChildren());
+
+            if (appended == null) return;
+            for (ConfigSetting<?> child : appended) {
+                if (child == null) continue;
+                String baseKey = child.getKey();
+                // If key isn't configured for this root, generate one from name
+                if (baseKey.isEmpty() || baseKey.equals("config"))
+                    baseKey = child.getName().toLowerCase(Locale.ROOT).replace(" ", "_");
+                // If the key isn't unique, append _ at the end until it is
+                while (remapped.containsKey(baseKey)) baseKey += "_";
+                remapped.put(baseKey, child);
+            }
+        }
+
+        @Override
+        public Map<String, ConfigSetting<?>> getChildren() {
+            return remapped;
+        }
+
+        @Override
+        public @Nullable Parent<?> getParent() {
+            return base.getParent();
+        }
+
+        @Override
+        public String getKey() {
+            return base.getKey();
+        }
+
+        @Override
+        public String getName() {
+            return base.getName();
+        }
+
+        @Override
+        public @Nullable String getDescription() {
+            return base.getDescription();
+        }
+
+        @Override
+        public Class<T> getType() {
+            return base.getType();
+        }
+
+        @Override
+        public T getValue() {
+            return base.getValue();
+        }
+
+        @Override
+        public void setValue(T t) {
+            base.setValue(t);
+        }
+
+        @Override
+        public void addListener(Consumer<T> consumer) {
+            base.addListener(consumer);
+        }
+
+        @Override
+        public void removeListener(Consumer<T> consumer) {
+            base.removeListener(consumer);
+        }
+
+        @Override
+        public ValueHandler<T> getHandler() {
+            return base.getHandler();
+        }
+
     }
 
 }

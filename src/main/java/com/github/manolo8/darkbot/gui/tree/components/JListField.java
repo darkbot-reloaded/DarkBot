@@ -15,6 +15,7 @@ import java.awt.event.FocusEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class JListField extends JComboBox<String> implements OptionEditor {
 
     private Map<Class<? extends OptionList<?>>, OptionList<?>> optionInstances = new HashMap<>();

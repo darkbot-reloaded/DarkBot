@@ -3,10 +3,14 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.objects.Map;
+import eu.darkbot.api.game.other.GameMap;
+import eu.darkbot.api.game.other.EntityInfo;
+
+import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Portal extends Entity {
+public class Portal extends Entity implements eu.darkbot.api.game.entities.Portal {
     public static final int TYPE_OFFSET = 120;
 
     public final Map target;
@@ -39,7 +43,6 @@ public class Portal extends Entity {
     @Override
     public void update() {
         super.update();
-        clickable.update();
 
         isJumping = API.readMemoryBoolean(address + 112) || API.readMemoryBoolean(address + 116);
         type = API.readMemoryInt(address + TYPE_OFFSET);
@@ -78,5 +81,25 @@ public class Portal extends Entity {
                     (searchX == -1 || searchX == x) && (searchY == -1 || searchY == y) && // By pos
                     (!noCenter || x != 10500 && y != 6500); // Avoid centered
         }
+    }
+
+    @Override
+    public Optional<GameMap> getTargetMap() {
+        return Optional.ofNullable(target);
+    }
+
+    @Override
+    public int getTypeId() {
+        return type;
+    }
+
+    @Override
+    public EntityInfo.Faction getFaction() {
+        return EntityInfo.Faction.of(factionId);
+    }
+
+    @Override
+    public boolean isJumping() {
+        return isJumping;
     }
 }

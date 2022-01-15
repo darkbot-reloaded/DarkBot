@@ -2,6 +2,9 @@ package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import eu.darkbot.api.game.items.ItemCategory;
+import eu.darkbot.api.game.items.SelectableItem;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +14,7 @@ import java.util.Optional;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class CategoryBar extends MenuBar {
-    public List<Category> categories = new ArrayList<>();
+    public final List<Category> categories = new ArrayList<>();
 
     private final ObjArray categoriesArr = ObjArray.ofVector(true);
 
@@ -30,6 +33,22 @@ public class CategoryBar extends MenuBar {
         return null;
     }
 
+    public Category get(ItemCategory type) {
+        String id = type.getId();
+        for (Category category : categories) {
+            if (id.equals(category.categoryId)) return category;
+        }
+        return null;
+    }
+
+    public boolean hasCategory(ItemCategory type) {
+        String id = type.getId();
+        for (Category category : categories) {
+            if (id.equals(category.categoryId)) return true;
+        }
+        return false;
+    }
+
     public Optional<Item> findItemById(String itemId) {
         for (Category cat : categories) {
             for (Item item : cat.items) {
@@ -39,17 +58,47 @@ public class CategoryBar extends MenuBar {
         return Optional.empty();
     }
 
+    public Optional<Item> findItem(SelectableItem item) {
+        if (item.getCategory() == null)
+            return categories.stream()
+                    .map(c -> c.findItem(item))
+                    .findFirst();
+
+        Category category = get(item.getCategory());
+        if (category == null)
+            return Optional.empty();
+
+        return Optional.ofNullable(category.findItem(item));
+    }
+
     public static class Category extends UpdatableAuto {
         public String categoryId;
         public List<Item> items = new ArrayList<>();
 
         private final ObjArray itemsArr = ObjArray.ofVector(true);
 
+        private ItemCategory itemCategory;
+
+        public @Nullable Item findItem(SelectableItem item) {
+            return items.stream()
+                    .filter(i -> i.equals(item))
+                    .findFirst()
+                    .orElse(null);
+        }
+
         @Override
         public void update() {
-            this.categoryId = API.readMemoryString(address, 32);
             this.itemsArr.update(API.readMemoryLong(address + 40));
-            this.itemsArr.sync(this.items, Item::new, null);
+            this.itemsArr.sync(this.items, () -> new Item(itemCategory), null);
+        }
+
+        @Override
+        public void update(long address) {
+            if (this.address != address || categoryId == null || categoryId.isEmpty()) {
+                this.categoryId = API.readMemoryString(address, 32);
+                this.itemCategory = ItemCategory.of(categoryId);
+            }
+            super.update(address);
         }
     }
 

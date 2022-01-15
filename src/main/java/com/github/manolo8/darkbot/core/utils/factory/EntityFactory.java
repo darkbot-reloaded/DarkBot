@@ -10,16 +10,16 @@ import com.github.manolo8.darkbot.core.entities.Mine;
 import com.github.manolo8.darkbot.core.entities.NoCloack;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
+import com.github.manolo8.darkbot.core.entities.Player;
 import com.github.manolo8.darkbot.core.entities.Portal;
-import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.entities.Unknown;
-import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
-import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
 import com.github.manolo8.darkbot.core.entities.bases.BaseHangar;
 import com.github.manolo8.darkbot.core.entities.bases.BaseHeadquarters;
-import com.github.manolo8.darkbot.core.entities.bases.QuestGiver;
 import com.github.manolo8.darkbot.core.entities.bases.BaseRefinery;
 import com.github.manolo8.darkbot.core.entities.bases.BaseRepairStation;
+import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
+import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
+import com.github.manolo8.darkbot.core.entities.bases.QuestGiver;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import org.intellij.lang.annotations.Language;
@@ -44,7 +44,7 @@ public enum EntityFactory implements EntityBuilder {
 
     CBS_ASTEROID    (BattleStation::new, "asteroid"),
     CBS_CONSTRUCTION(BattleStation::new, "cbs-construction"),
-    CBS_MODULE      (BattleStation::new, "wreck|module_.*"), // addr+112 moduleType string
+    CBS_MODULE      (BattleStation.Module::new, "wreck|module_.*"), // addr+112 moduleType string
     CBS_MODULE_CON  (BattleStation::new, "module-construction"),
     CBS_STATION     (BattleStation::new, "battleStation"),
 
@@ -70,7 +70,7 @@ public enum EntityFactory implements EntityBuilder {
 
     PET      (Pet::new, EntityFactory::isPet),
     SHIP     (EntityFactory::isShip, EntityFactory::defineShipType), // Generic ship, redirects to PLAYER or NPC
-    PLAYER   (Ship::new),
+    PLAYER   (Player::new),
     NPC      (Npc::new),
 
     UNKNOWN  (Entity::new, (asset, addr) -> false);
@@ -143,7 +143,7 @@ public enum EntityFactory implements EntityBuilder {
     }
 
     private static boolean isPet(String asset, long address) {
-        return API.readMemoryString(address, 192, 136).trim().equals("pet");
+        return API.readMemoryString(address, 192, 144).trim().equals("pet");
     }
 
     private static boolean isShip(String asset, long address) {

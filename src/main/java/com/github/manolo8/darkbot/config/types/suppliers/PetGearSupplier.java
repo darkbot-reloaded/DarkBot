@@ -12,6 +12,7 @@ import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Deprecated
 public class PetGearSupplier extends OptionList<Integer> {
 
     private static final Set<PetGearSupplier> INSTANCES = Collections.newSetFromMap(new WeakHashMap<>());

@@ -14,7 +14,7 @@ public class PetNpcAttacker extends NpcAttacker {
     }
 
     public String status() {
-        return target != null ? "Killing npc" + (hero.isAttacking(target) ? " S" : "") + (ability != null ? " A" : "") + (sab ? " SAB" : "") : "Idle";
+        return target != null ? "Killing npc" + (hero.isAttacking(target) ? " S" : "") + (ability != null ? " A" : "") : "Idle";
     }
 
     public boolean castingAbility() {
@@ -50,7 +50,7 @@ public class PetNpcAttacker extends NpcAttacker {
 
     @Override
     public double modifyRadius(double radius) {
-        if (hero.target == target && !hero.pet.isAttacking(target) && System.currentTimeMillis() > laserTime) return 850;
+        if (hero.getLocalTarget() == target && !hero.pet.isAttacking(target) && System.currentTimeMillis() > laserTime) return 850;
         return radius;
     }
 }

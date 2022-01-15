@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.utils.Ignorable;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.FixedTwoOptHeuristicTSP;
+import eu.darkbot.api.game.other.Locatable;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.HamiltonianCycleAlgorithm;
 import org.jgrapht.alg.tour.HeldKarpTSP;
@@ -14,7 +15,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ZoneInfo implements Serializable, Ignorable {
+public class ZoneInfo implements Serializable, Ignorable, eu.darkbot.api.config.types.ZoneInfo {
     private static final byte[] MASKS = new byte[8];
     static {
         for (int i = 0; i < MASKS.length; i++) MASKS[i] = (byte) (1 << i);
@@ -47,6 +48,11 @@ public class ZoneInfo implements Serializable, Ignorable {
         return true;
     }
 
+    @Override
+    public int getResolution() {
+        return resolution;
+    }
+
     public void setResolution(int resolution) {
         if (resolution == this.resolution) return;
         ZoneInfo newZone = new ZoneInfo(resolution);
@@ -65,32 +71,32 @@ public class ZoneInfo implements Serializable, Ignorable {
         return (data[pos / 8] & MASKS[pos % 8]) != 0;
     }
 
-    private void set(int x, int y) {
+    public void set(int x, int y) {
         if (outside(x, y)) return;
         int pos = x + (y * resolution);
         data[pos / 8] |= MASKS[pos % 8];
         changed = true;
     }
 
-    private void remove(int x, int y) {
+    public void remove(int x, int y) {
         if (outside(x, y)) return;
         int pos = x + (y * resolution);
         data[pos / 8] &= ~MASKS[pos % 8];
         changed = true;
     }
 
-    private void toggle(int x, int y) {
+    public void toggle(int x, int y) {
         if (outside(x, y)) return;
         int pos = x + (y * resolution);
         data[pos / 8] ^= MASKS[pos % 8];
         changed = true;
     }
 
-    private void set(int x, int y, int x2, int y2) {
+    public void set(int x, int y, int x2, int y2) {
         for (; x < x2; x++) for (int currY = y; currY < y2; currY++) set(x, currY);
     }
 
-    private void remove(int x, int y, int x2, int y2) {
+    public void remove(int x, int y, int x2, int y2) {
         for (; x < x2; x++) for (int currY = y; currY < y2; currY++) remove(x, currY);
     }
 
@@ -103,7 +109,7 @@ public class ZoneInfo implements Serializable, Ignorable {
         else remove(x, y, x2, y2);
     }
 
-    private boolean outside(int x, int y) {
+    public boolean outside(int x, int y) {
         return x < 0 || y < 0 || x >= resolution || y >= resolution;
     }
 
@@ -112,7 +118,11 @@ public class ZoneInfo implements Serializable, Ignorable {
     }
 
     public boolean contains(Location loc) {
-        return contains(loc.x / MapManager.internalWidth, loc.y / MapManager.internalHeight);
+        return contains((Locatable) loc);
+    }
+
+    public boolean contains(Locatable loc) {
+        return contains(loc.getX() / MapManager.internalWidth, loc.getY() / MapManager.internalHeight);
     }
 
     public List<Zone> getZones() {

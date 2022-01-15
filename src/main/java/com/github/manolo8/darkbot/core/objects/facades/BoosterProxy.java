@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.Time;
+import eu.darkbot.api.managers.BoosterAPI;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.Main.UPDATE_LOCKER;
 
-public class BoosterProxy extends Updatable {
+public class BoosterProxy extends Updatable implements BoosterAPI {
     public List<Booster> boosters = new ArrayList<>();
 
     private final ObjArray boostersArr = ObjArray.ofVector(true);
@@ -30,7 +31,7 @@ public class BoosterProxy extends Updatable {
         }
     }
 
-    public static class Booster extends UpdatableAuto {
+    public static class Booster extends UpdatableAuto implements BoosterAPI.Booster {
         public double amount, cd;
         public String category, name;
         public BoosterCategory cat;
@@ -57,6 +58,26 @@ public class BoosterProxy extends Updatable {
 
         public Color getColor() {
             return cat.getColor();
+        }
+
+        @Override
+        public double getAmount() {
+            return amount;
+        }
+
+        @Override
+        public double getRemainingTime() {
+            return cd;
+        }
+
+        @Override
+        public String getCategory() {
+            return category;
+        }
+
+        @Override
+        public String getName() {
+            return name;
         }
     }
 
@@ -107,5 +128,10 @@ public class BoosterProxy extends Updatable {
             return UNKNOWN;
         }
 
+    }
+
+    @Override
+    public List<Booster> getBoosters() {
+        return boosters;
     }
 }

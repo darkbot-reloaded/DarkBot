@@ -5,9 +5,12 @@ import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import static com.github.manolo8.darkbot.Main.API;
 
-public class SettingsProxy extends Updatable {
+public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singleton {
 
     private final Character[] keycodes = new Character[KeyBind.values().length];
     private final PairArray keycodesDictionary = PairArray.ofDictionary().setAutoUpdatable(true);
@@ -21,13 +24,32 @@ public class SettingsProxy extends Updatable {
         return keycodes[keyBind.ordinal()];
     }
 
-    @Nullable
-    public KeyBind getKeyBind(Character ch) {
-        if (ch == null) return null;
-        for (int i = 0; i < keycodes.length; i++) {
-            if (keycodes[i] == ch) return KeyBind.values()[i];
-        }
+    public boolean pressKeybind(KeyBind keyBind) {
+        Character charCode = getCharCode(Objects.requireNonNull(keyBind, "KeyBind is null!"));
+        if (charCode == null) return false;
+
+        API.keyboardClick(charCode);
+        return true;
+    }
+
+    public Optional<Character> getCharacterOf(KeyBind keyBind) {
+        return Optional.ofNullable(getCharCode(keyBind));
+    }
+
+    public KeyBind getAtChar(Character c) {
+        if (c == null) return null;
+
+        for (int i = 0; i < keycodes.length; i++)
+            if (c == keycodes[i])
+                return KeyBind.of(i);
+
         return null;
+    }
+
+    @Nullable
+    @Deprecated
+    public KeyBind getKeyBind(Character ch) {
+        return getAtChar(ch);
     }
 
     @Override
@@ -51,25 +73,25 @@ public class SettingsProxy extends Updatable {
     }
 
     public enum KeyBind {
-        SLOTBAR_1,
-        SLOTBAR_2,
-        SLOTBAR_3,
-        SLOTBAR_4,
-        SLOTBAR_5,
-        SLOTBAR_6,
-        SLOTBAR_7,
-        SLOTBAR_8,
-        SLOTBAR_9,
-        SLOTBAR_0,
-        PREMIUM_1,
-        PREMIUM_2,
-        PREMIUM_3,
-        PREMIUM_4,
-        PREMIUM_5,
-        PREMIUM_6,
-        PREMIUM_7,
-        PREMIUM_8,
-        PREMIUM_9,
+        SLOTBAR_1(SlotBarsProxy.Type.DEFAULT_BAR),
+        SLOTBAR_2(SlotBarsProxy.Type.DEFAULT_BAR),
+        SLOTBAR_3(SlotBarsProxy.Type.DEFAULT_BAR),
+        SLOTBAR_4(SlotBarsProxy.Type.DEFAULT_BAR),
+        SLOTBAR_5(SlotBarsProxy.Type.DEFAULT_BAR),
+        SLOTBAR_6(SlotBarsProxy.Type.DEFAULT_BAR),
+        SLOTBAR_7(SlotBarsProxy.Type.DEFAULT_BAR),
+        SLOTBAR_8(SlotBarsProxy.Type.DEFAULT_BAR),
+        SLOTBAR_9(SlotBarsProxy.Type.DEFAULT_BAR),
+        SLOTBAR_0(SlotBarsProxy.Type.DEFAULT_BAR),
+        PREMIUM_1(SlotBarsProxy.Type.PREMIUM_BAR),
+        PREMIUM_2(SlotBarsProxy.Type.PREMIUM_BAR),
+        PREMIUM_3(SlotBarsProxy.Type.PREMIUM_BAR),
+        PREMIUM_4(SlotBarsProxy.Type.PREMIUM_BAR),
+        PREMIUM_5(SlotBarsProxy.Type.PREMIUM_BAR),
+        PREMIUM_6(SlotBarsProxy.Type.PREMIUM_BAR),
+        PREMIUM_7(SlotBarsProxy.Type.PREMIUM_BAR),
+        PREMIUM_8(SlotBarsProxy.Type.PREMIUM_BAR),
+        PREMIUM_9(SlotBarsProxy.Type.PREMIUM_BAR),
         JUMP_GATE,
         TOGGLE_CONFIG,
         ATTACK_LASER,
@@ -84,7 +106,30 @@ public class SettingsProxy extends Updatable {
         ZOOM_OUT,
         FOCUS_CHAT,
         TOGGLE_CATEGORYBAR,
-        PREMIUM_0,
-        TOGGLE_PRO_ACTION
+        PREMIUM_0(SlotBarsProxy.Type.PREMIUM_BAR),
+        TOGGLE_PRO_ACTION;
+
+        private final SlotBarsProxy.Type type;
+
+        KeyBind() {
+            this(null);
+        }
+
+        KeyBind(SlotBarsProxy.Type type) {
+            this.type = type;
+        }
+
+        public static KeyBind of(int index) {
+            if (index < 0 || index >= values().length) return null;
+            return values()[index];
+        }
+
+        public static KeyBind of(SlotBarsProxy.Type slotType, int slotNumber) {
+            return KeyBind.valueOf(slotType == SlotBarsProxy.Type.PREMIUM_BAR ? "PREMIUM_" : "SLOTBAR_" + slotNumber % 10);
+        }
+
+        public SlotBarsProxy.Type getType() {
+            return type;
+        }
     }
 }

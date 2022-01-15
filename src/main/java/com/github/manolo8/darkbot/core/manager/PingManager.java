@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class PingManager implements Manager {
+public class PingManager implements Manager, eu.darkbot.api.API.Singleton {
 
     private volatile IntArray lastPings = null;
 

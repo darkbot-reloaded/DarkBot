@@ -19,7 +19,7 @@ import static com.github.manolo8.darkbot.Main.API;
 import static java.lang.Math.cos;
 import static java.lang.StrictMath.sin;
 
-@Feature(name = "Collector", description = "Resource-only collector module. Can cloack.")
+@Feature(name = "Collector (Legacy)", description = "Resource-only collector module. Can cloack.")
 public class CollectorModule implements Module {
 
     private Main main;
@@ -207,10 +207,11 @@ public class CollectorModule implements Module {
     private boolean isContested(Box box){
         if (!config.COLLECT.IGNORE_CONTESTED_BOXES) return false;
 
-        double heroTime = hero.timeTo(hero.locationInfo.distance(box));
+        // FIXME: properly get own speed and other's speed. For now, assume others twice as fast.
+        double heroDistance = hero.locationInfo.distance(box) * 2;
         return ships.stream()
                 .filter(ship -> ship.shipInfo.destination.distance(box) == 0)
-                .anyMatch(ship -> heroTime > ship.timeTo(ship.locationInfo.distance(box)));
+                .anyMatch(ship -> heroDistance > ship.locationInfo.distance(box));
     }
 
     private Location findClosestEnemyAndAddToDangerousList() {

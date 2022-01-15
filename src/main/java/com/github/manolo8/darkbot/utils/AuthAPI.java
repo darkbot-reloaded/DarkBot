@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.jar.JarFile;
 
-public interface AuthAPI {
+public interface AuthAPI extends eu.darkbot.api.managers.AuthAPI {
 
     Path VERIFIER_PATH = Paths.get("lib", "verifier.jar");
     AuthAPI INSTANCE = ReflectionUtils.createInstance("eu.darkbot.verifier.AuthAPIImpl", VERIFIER_PATH);

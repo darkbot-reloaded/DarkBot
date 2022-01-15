@@ -4,11 +4,12 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Tickable;
+import eu.darkbot.api.API;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 
-public class SettingsManager implements Manager, Tickable {
+public class SettingsManager implements Manager, Tickable, API.Singleton {
 
     private final Main main;
 

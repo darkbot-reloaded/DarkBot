@@ -1,35 +1,41 @@
 package com.github.manolo8.darkbot.extensions.features;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.itf.Configurable;
-import com.github.manolo8.darkbot.core.itf.Installable;
 import com.github.manolo8.darkbot.extensions.features.decorators.ConfigurableDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.FeatureDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstallableDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstructionProviderDecorator;
-import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.extensions.Configurable;
+import eu.darkbot.api.extensions.Installable;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * Takes care of creating instances of features, and calling relevant setup or tear down methods.
- * e.g. calling {@link Installable#install(Main main)} or {@link Configurable#setConfig(Object config)}
+ * e.g. calling {@link Installable#install(PluginAPI main)} or {@link Configurable#setConfig(ConfigSetting config)}
  */
-class FeatureInstanceLoader {
+public class FeatureInstanceLoader {
 
     private final List<FeatureDecorator<?>> FEATURE_DECORATORS;
     private final ConfigurableDecorator CONFIGURATION_DECORATOR;
+    private final PluginAPI api;
 
-    FeatureInstanceLoader(Main main) {
+    public FeatureInstanceLoader(PluginAPI api,
+                                 InstallableDecorator installableDecorator,
+                                 ConfigurableDecorator configurableDecorator,
+                                 InstructionProviderDecorator instructionProviderDecorator) {
+        this.api = api;
+
         FEATURE_DECORATORS = Arrays.asList(
-                new InstallableDecorator(main),
-                CONFIGURATION_DECORATOR = new ConfigurableDecorator(main),
-                new InstructionProviderDecorator());
+                installableDecorator,
+                CONFIGURATION_DECORATOR = configurableDecorator,
+                instructionProviderDecorator);
     }
 
     <T> T loadFeature(FeatureDefinition<T> featureDefinition) {
-        T feature = ReflectionUtils.createInstance(featureDefinition.getClazz());
+        T feature = api.requireInstance(featureDefinition.getClazz());
         for (FeatureDecorator<?> decorator : FEATURE_DECORATORS) {
             decorator.tryLoad(featureDefinition, feature);
         }

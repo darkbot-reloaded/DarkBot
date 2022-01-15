@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.ColorAdapter;
 import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.FontAdapter;
+import com.github.manolo8.darkbot.config.utils.PlayerTagTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.utils.ApiErrors;
@@ -12,6 +13,10 @@ import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
+import eu.darkbot.api.API;
+import eu.darkbot.api.config.types.PercentRange;
+import eu.darkbot.api.config.types.ShipMode;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -25,8 +30,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-public class ConfigManager {
+/**
+ * Responsible for loading & saving configuration files
+ *
+ * TODO: Rename to ConfigLoader
+ */
+public class ConfigManager implements API.Singleton {
 
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -34,8 +45,11 @@ public class ConfigManager {
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeHierarchyAdapter(Color.class, new ColorAdapter())
             .registerTypeHierarchyAdapter(Font.class, new FontAdapter())
+            .registerTypeAdapter(ShipMode.class, (InstanceCreator<ShipMode>) type -> new Config.ShipConfig())
+            .registerTypeAdapter(PercentRange.class, (InstanceCreator<PercentRange>) type -> new Config.PercentRange())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
+            .registerTypeAdapterFactory(new PlayerTagTypeAdapterFactory())
             .create();
 
     public static final String DEFAULT = "config",
@@ -168,7 +182,8 @@ public class ConfigManager {
     }
 
     public void saveChangedConfig() {
-        if (!config.changed) return;
+        // Safe config 5s after last change, to batch-up changes
+        if (!config.changed || config.changedAt + 5000 > System.currentTimeMillis()) return;
         config.changed = false;
         saveConfig();
     }

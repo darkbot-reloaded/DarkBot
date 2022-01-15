@@ -1,31 +1,47 @@
 package com.github.manolo8.darkbot.extensions.features;
 
-import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.ConfigHandler;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.extensions.FeatureInfo;
+import eu.darkbot.api.extensions.PluginInfo;
+import eu.darkbot.api.managers.ExtensionsAPI;
+import eu.darkbot.api.utils.Inject;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class FeatureRegistry implements PluginListener {
+public class FeatureRegistry implements PluginListener, ExtensionsAPI {
 
     private final PluginHandler pluginHandler;
     private final Map<String, FeatureDefinition<?>> FEATURES_BY_ID = new LinkedHashMap<>();
     private final FeatureInstanceLoader featureLoader;
-    private final FeatureRegisterHandler registryHandler;
+    private final ConfigHandler configHandler;
 
-    public FeatureRegistry(Main main, PluginHandler pluginHandler) {
+    private FeatureRegisterHandler registryHandler;
+
+    public FeatureRegistry(FeatureInstanceLoader featureLoader,
+                           PluginHandler pluginHandler,
+                           ConfigHandler configHandler) {
         this.pluginHandler = pluginHandler;
-        this.featureLoader = new FeatureInstanceLoader(main);
-        this.registryHandler = new FeatureRegisterHandler(main, this);
+        this.featureLoader = featureLoader;
+        this.configHandler = configHandler;
+
         pluginHandler.addListener(this);
+    }
+
+    @Inject
+    public void setFeatureRegisterHandler(FeatureRegisterHandler registryHandler) {
+        this.registryHandler = registryHandler;
     }
 
     @Override
@@ -56,18 +72,19 @@ public class FeatureRegistry implements PluginListener {
     }
 
     private void registerNativeFeature(Class<?> clazz) {
-        FEATURES_BY_ID.put(clazz.getCanonicalName(), new FeatureDefinition<>(null, clazz));
+        FEATURES_BY_ID.put(clazz.getCanonicalName(), new FeatureDefinition<>(null, clazz, fd -> null));
     }
 
     private void registerPluginFeature(Plugin plugin, String clazzName) {
         try {
             Class<?> feature = pluginHandler.PLUGIN_CLASS_LOADER.loadClass(clazzName);
-            FeatureDefinition<?> fd = new FeatureDefinition<>(plugin, feature);
+            FeatureDefinition<?> fd = new FeatureDefinition<>(plugin, feature, configHandler::getFeatureConfig);
             fd.addStatusListener(def -> registryHandler.update());
             fd.getIssues().addListener(iss -> registryHandler.update());
             FEATURES_BY_ID.put(clazzName, fd);
         } catch (Throwable e) {
-            plugin.getIssues().addWarning("bot.issue.feature.failed_to_load", I18n.get("bot.issue.feature.failed_to_load.desc", clazzName, e.toString()));
+            plugin.getIssues().addWarning("bot.issue.feature.failed_to_load",
+                    I18n.get("bot.issue.feature.failed_to_load.desc", clazzName, e.toString()));
         }
     }
 
@@ -102,6 +119,10 @@ public class FeatureRegistry implements PluginListener {
         return getFeature(fd.getId());
     }
 
+    public Collection<FeatureDefinition<?>> getFeatures() {
+        return FEATURES_BY_ID.values();
+    }
+
     public <T> Stream<FeatureDefinition<T>> getFeatures(Class<T> type) {
         //noinspection unchecked
         return FEATURES_BY_ID
@@ -123,6 +144,10 @@ public class FeatureRegistry implements PluginListener {
         return getFeatureDefinition(feature.getClass().getCanonicalName());
     }
 
+    public <T> FeatureDefinition<T> getFeatureDefinition(Class<T> feature) {
+        return getFeatureDefinition(feature.getCanonicalName());
+    }
+
     public <T> FeatureDefinition<T> getFeatureDefinition(String id) {
         synchronized (pluginHandler) {
             //noinspection unchecked
@@ -130,4 +155,18 @@ public class FeatureRegistry implements PluginListener {
         }
     }
 
+    @Override
+    public @NotNull Collection<? extends PluginInfo> getPluginInfos() {
+        return pluginHandler.LOADED_PLUGINS;
+    }
+
+    @Override
+    public <T> FeatureInfo<T> getFeatureInfo(Class<T> feature) {
+        return getFeatureDefinition(feature);
+    }
+
+    @Override
+    public ClassLoader getClassLoader(PluginInfo pluginInfo) {
+        return pluginHandler.PLUGIN_CLASS_LOADER;
+    }
 }

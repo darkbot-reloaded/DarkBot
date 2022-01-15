@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class JCheckboxListField extends JComboBox<String> implements OptionEditor {
     private final Map<Class<? extends OptionList<?>>, OptionList<?>> optionInstances = new HashMap<>();
     private OptionList<?> options;

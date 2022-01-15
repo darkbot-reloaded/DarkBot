@@ -38,7 +38,7 @@ public class HangarManager implements Tickable {
         this.main = main;
         this.backpage = backpage;
 
-        this.legacyHangarManager = new LegacyHangarManager(main, backpage);
+        this.legacyHangarManager = backpage.legacyHangarManager;
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.SystemUtils;
 
 import java.awt.event.ActionEvent;
-import java.net.URI;
+import java.net.URL;
 
 public class PluginSidePanel extends IssueList {
 
@@ -31,17 +31,17 @@ public class PluginSidePanel extends IssueList {
 
     public static class DonationButton extends MainButton {
 
-        private final URI donationURI;
+        private final URL donationURL;
 
         public DonationButton(PluginDefinition plDef) {
             super(UIUtils.getIcon("heart"), "Donate " + plDef.author);
-            this.donationURI = plDef.donation;
+            this.donationURL = plDef.donation;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (donationURI != null)
-                SystemUtils.openUrl(donationURI);
+            if (donationURL != null)
+                SystemUtils.openUrl(donationURL.toString());
         }
     }
 }

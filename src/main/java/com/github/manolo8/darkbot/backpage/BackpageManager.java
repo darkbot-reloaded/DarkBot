@@ -1,30 +1,37 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.itf.Task;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
+import eu.darkbot.api.extensions.Task;
+import eu.darkbot.api.managers.BackpageAPI;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BackpageManager extends Thread {
+public class BackpageManager extends Thread implements BackpageAPI {
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
-    private static final String[] ACTIONS = new String[]{
+    protected static final String[] ACTIONS = new String[]{
             "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
 
-    private static class SidStatus {
+    protected static class SidStatus {
         private static final int NO_SID = -1, ERROR = -2, UNKNOWN = -3;
     }
 
@@ -34,15 +41,16 @@ public class BackpageManager extends Thread {
     public final DispatchManager dispatchManager;
     public final AuctionManager auctionManager;
 
-    private final Main main;
-    private String sid, instance;
-    private List<Task> tasks = new ArrayList<>();
+    protected final Main main;
+    protected String sid, instance;
+    protected URI instanceURI;
+    protected List<Task> tasks = new ArrayList<>();
 
-    private long lastRequest;
-    private long sidLastUpdate = System.currentTimeMillis();
-    private long sidNextUpdate = sidLastUpdate;
-    private long checkDrones = Long.MAX_VALUE;
-    private int sidStatus = -1;
+    protected long lastRequest;
+    protected long sidLastUpdate = System.currentTimeMillis();
+    protected long sidNextUpdate = sidLastUpdate;
+    protected long checkDrones = Long.MAX_VALUE;
+    protected int sidStatus = -1;
 
     public BackpageManager(Main main) {
         super("BackpageManager");
@@ -70,7 +78,7 @@ public class BackpageManager extends Thread {
             synchronized (main.pluginHandler.getBackgroundLock()) {
                 for (Task task : tasks) {
                     try {
-                        task.backgroundTick();
+                        task.onBackgroundTick();
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
@@ -112,7 +120,7 @@ public class BackpageManager extends Thread {
             synchronized (main.pluginHandler.getBackgroundLock()) {
                 for (Task task : tasks) {
                     try {
-                        task.tickTask();
+                        task.onTickTask();
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
@@ -129,8 +137,20 @@ public class BackpageManager extends Thread {
 
     private boolean isInvalid() {
         this.sid = main.statsManager.sid;
-        this.instance = main.statsManager.instance;
+        if (!Objects.equals(this.instance, main.statsManager.instance)) {
+            this.instance = main.statsManager.instance;
+            this.instanceURI = tryParse(this.instance);
+        }
         return sid == null || instance == null || sid.isEmpty() || instance.isEmpty();
+    }
+
+    private URI tryParse(String uri) {
+        if (uri == null || uri.isEmpty()) return null;
+        try {
+            return new URI(uri);
+        } catch (URISyntaxException e) {
+            return null;
+        }
     }
 
     private int sidCheck() {
@@ -148,13 +168,13 @@ public class BackpageManager extends Thread {
         return getConnection("indexInternal.es?action=" + getRandomAction(), 5000).getResponseCode();
     }
 
-    public HttpURLConnection getConnection(String params, int minWait) throws Exception {
+    public HttpURLConnection getConnection(String path, int minWait) throws Exception {
         Time.sleep(lastRequest + minWait - System.currentTimeMillis());
-        return getConnection(params);
+        return getConnection(path);
     }
 
     public HttpURLConnection getConnection(String params) throws Exception {
-        if (isInvalid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         HttpURLConnection conn = (HttpURLConnection) new URL(this.instance + params)
                 .openConnection();
         conn.setConnectTimeout(30_000);
@@ -172,7 +192,7 @@ public class BackpageManager extends Thread {
     }
 
     public Http getConnection(String params, Method method) {
-        if (isInvalid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         return Http.create(this.instance + params, method)
                 .setRawHeader("Cookie", "dosid=" + this.sid)
                 .addSupplier(() -> lastRequest = System.currentTimeMillis());
@@ -190,9 +210,11 @@ public class BackpageManager extends Thread {
     }
 
     public String getReloadToken(InputStream input) {
+        Matcher matcher = RELOAD_TOKEN_PATTERN.matcher("");
+
         try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             return br.lines()
-                    .map(RELOAD_TOKEN_PATTERN::matcher)
+                    .map(matcher::reset)
                     .filter(Matcher::find)
                     .map(m -> m.group(1))
                     .findFirst().orElse(null);
@@ -201,6 +223,11 @@ public class BackpageManager extends Thread {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String getReloadToken(String body) {
+        Matcher m = RELOAD_TOKEN_PATTERN.matcher(body);
+        return m.find() ? m.group(1) : null;
     }
 
     public void setTasks(List<Task> tasks) {
@@ -229,4 +256,31 @@ public class BackpageManager extends Thread {
         }
     }
 
+    @Override
+    public boolean isInstanceValid() {
+        // Only check against local sid & instance variables, since stats manager ones are
+        // updated in the main thread, while the variables here are updated on the background
+        // thread every tick
+        return sid != null && instance != null && !sid.isEmpty() && !instance.isEmpty();
+    }
+
+    @Override
+    public String getSid() {
+        return sid;
+    }
+
+    @Override
+    public URI getInstanceURI() {
+        return instanceURI;
+    }
+
+    @Override
+    public Instant getLastRequestTime() {
+        return Instant.ofEpochMilli(lastRequest);
+    }
+
+    @Override
+    public Optional<String> findReloadToken(@NotNull String body) {
+        return Optional.ofNullable(getReloadToken(body));
+    }
 }

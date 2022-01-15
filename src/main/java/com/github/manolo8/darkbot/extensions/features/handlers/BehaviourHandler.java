@@ -1,16 +1,16 @@
 package com.github.manolo8.darkbot.extensions.features.handlers;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.itf.Behaviour;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
+import eu.darkbot.api.extensions.Behavior;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class BehaviourHandler extends FeatureHandler<Behaviour> {
+public class BehaviourHandler extends FeatureHandler<Behavior> {
 
     private static final Class<?>[] NATIVE = new Class[]{};
 
@@ -28,7 +28,7 @@ public class BehaviourHandler extends FeatureHandler<Behaviour> {
     }
 
     @Override
-    public void update(Stream<FeatureDefinition<Behaviour>> behaviours) {
+    public void update(Stream<FeatureDefinition<Behavior>> behaviours) {
         main.setBehaviours(behaviours
                 .map(featureRegistry::getFeature)
                 .filter(Optional::isPresent)

@@ -24,7 +24,7 @@ public enum NpcExtra implements NpcExtraFlag {
         return I18n.getOrDefault("config.loot.npc_table.extra." + name().toLowerCase(Locale.ROOT) + ".desc", name());
     }
 
-    @Feature(name = "Npc extra flag provider", description = "Provides default npc extra flags")
+    @Feature(name = "Legacy NpcExtra flag provider", description = "Provides default npc extra flags")
     public static class DefaultNpcExtraProvider implements NpcExtraProvider {
         @Override
         public NpcExtraFlag[] values() {

@@ -1,18 +1,11 @@
 package com.github.manolo8.darkbot.config;
 
-import com.google.gson.TypeAdapter;
-import com.google.gson.annotations.JsonAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-
 import java.awt.*;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-@JsonAdapter(PlayerTag.TagAdapter.class)
-public class PlayerTag {
+public class PlayerTag implements eu.darkbot.api.config.types.PlayerTag {
     private static transient final Map<String, PlayerTag> INSTANCES = new HashMap<>();
 
     public static PlayerTag getTag(String name, Color color) {
@@ -57,16 +50,14 @@ public class PlayerTag {
         return String.format("#%02x%02x%02x,%s", color.getRed(), color.getGreen(), color.getBlue(), name);
     }
 
-    public static class TagAdapter extends TypeAdapter<PlayerTag> {
-        @Override
-        public void write(JsonWriter writer, PlayerTag tag) throws IOException {
-            writer.value(tag.toString());
-        }
+    @Override
+    public String getName() {
+        return name;
+    }
 
-        @Override
-        public PlayerTag read(JsonReader in) throws IOException {
-            return getTag(in.nextString());
-        }
+    @Override
+    public Color getColor() {
+        return color;
     }
 
 }

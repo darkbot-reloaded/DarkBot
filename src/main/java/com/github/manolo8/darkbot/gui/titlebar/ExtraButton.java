@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ColorScheme;
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.itf.ExtraMenuProvider;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
@@ -13,11 +14,19 @@ import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.SystemUtils;
 import com.github.manolo8.darkbot.utils.debug.SWFUtils;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.extensions.ExtraMenus;
+import eu.darkbot.api.managers.BackpageAPI;
+import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.api.managers.I18nAPI;
+import eu.darkbot.api.managers.StatsAPI;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,14 +44,14 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
     private final Main main;
     private final JPopupMenu extraOptions = new JPopupMenu("Extra Options");
 
-    private static final Set<ExtraMenuProvider> EXTRA_DECORATIONS = new LinkedHashSet<>();
+    private static final Set<ExtraMenus> EXTRA_DECORATIONS = new LinkedHashSet<>();
     private static final Lazy<Void> clean = new Lazy.NoCache<>();
 
-    public static void setExtraDecorations(Stream<ExtraMenuProvider> provider, FeatureRegistry featureRegistry) {
+    public static void setExtraDecorations(Stream<ExtraMenus> provider, FeatureRegistry featureRegistry) {
         EXTRA_DECORATIONS.clear();
         PluginExtraMenuProvider.PLUGINS.clear();
 
-        AtomicReference<ExtraMenuProvider> pluginProvider = new AtomicReference<>();
+        AtomicReference<ExtraMenus> pluginProvider = new AtomicReference<>();
         provider.forEach(extra -> {
             Plugin pl = featureRegistry.getFeatureDefinition(extra).getPlugin();
             if (pl != null && extra.autoSubmenu())
@@ -53,34 +62,12 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             else EXTRA_DECORATIONS.add(extra);
         });
 
-        // Add PluginExtraMenuProvider outside of forEach so it is always placed at end
+        // Add PluginExtraMenuProvider outside forEach, so it is always placed at end
         if (pluginProvider.get() != null) {
             EXTRA_DECORATIONS.add(pluginProvider.get());
         }
 
         clean.send(null);
-    }
-
-    @Feature(name = "Plugin menu provider", description = "Provides plugin extra menus")
-    public static class PluginExtraMenuProvider implements ExtraMenuProvider {
-        private static final Map<Plugin, Set<ExtraMenuProvider>> PLUGINS = new LinkedHashMap<>();
-
-        @Override
-        public Collection<JComponent> getExtraMenuItems(Main main) {
-            if (PLUGINS.isEmpty()) return Collections.emptyList();
-            List<JComponent> list = new ArrayList<>();
-
-            PLUGINS.forEach((plugin, features) -> {
-                List<JComponent> menus = features.stream()
-                        .flatMap(f -> f.getExtraMenuItems(main).stream()).collect(Collectors.toList());
-                if (!menus.isEmpty())
-                    list.add(createMenu(plugin.getName(), menus.stream()));
-            });
-
-            if (!list.isEmpty()) list.add(0, createSeparator("plugins"));
-
-            return list;
-        }
     }
 
     protected boolean empty = true;
@@ -107,8 +94,8 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
 
     private void rebuild(Main main) {
         if (!empty) return;
-        for (ExtraMenuProvider extraDecoration : EXTRA_DECORATIONS) {
-            for (JComponent component : extraDecoration.getExtraMenuItems(main)) {
+        for (ExtraMenus extraDecoration : EXTRA_DECORATIONS) {
+            for (JComponent component : extraDecoration.getExtraMenuItems(main.pluginAPI)) {
                 extraOptions.add(component);
             }
         }
@@ -122,20 +109,27 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
     }
 
     @Feature(name = "Extra menu default provider", description = "Provides default extra buttons")
-    public static class DefaultExtraMenuProvider implements ExtraMenuProvider {
+    public static class DefaultExtraMenuProvider implements ExtraMenus {
 
         @Override
-        public Collection<JComponent> getExtraMenuItems(Main main) {
+        public Collection<JComponent> getExtraMenuItems(PluginAPI api) {
             List<JComponent> list = new ArrayList<>();
 
-            list.add(create("home", e -> {
-                String sid = main.statsManager.sid, instance = main.statsManager.instance;
+            I18nAPI i18n = api.requireAPI(I18nAPI.class);
+            BackpageAPI backpage = api.requireAPI(BackpageAPI.class);
+            ConfigAPI config = api.requireAPI(ConfigAPI.class);
+            Main main = api.requireInstance(Main.class);
+
+            String p = "gui.hamburger_button.";
+
+            list.add(create(i18n.get(p + "home"), e -> {
+                String sid = backpage.getSid(), instance = backpage.getInstanceURI().toString();
                 if (sid == null || sid.isEmpty() || instance == null || instance.isEmpty()) return;
                 String url = instance + "?dosid=" + sid;
                 if ((e.getModifiers() & InputEvent.BUTTON3_MASK) != 0) SystemUtils.toClipboard(url);
                 else SystemUtils.openUrl(url);
             }));
-            list.add(create("reload", e -> {
+            list.add(create(i18n.get(p + "reload"), e -> {
                 System.out.println("Triggering refresh: user requested");
                 try {
                     Main.API.handleRefresh();
@@ -144,19 +138,21 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                     ex.printStackTrace();
                 }
             }));
-            list.add(create("discord", UIUtils.getIcon("discord"), e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
-            list.add(create("copy_sid", e -> SystemUtils.toClipboard(main.statsManager.sid)));
-            list.add(create("reset_colorscheme", e -> {
-                main.config.BOT_SETTINGS.MAP_DISPLAY.cs = new ColorScheme();
+            list.add(create(i18n.get(p + "discord"), UIUtils.getIcon("discord"),
+                    e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
+            list.add(create(i18n.get(p + "copy_sid"), e -> SystemUtils.toClipboard(backpage.getSid())));
+            list.add(create(i18n.get(p + "reset_colorscheme"), e -> {
+                ConfigSetting<ColorScheme> cs = config.getConfig("bot_settings.map_display.cs");
+                if (cs == null) return;
+                cs.setValue(new ColorScheme());
                 ConfigEntity.changed();
-                main.getGui().updateConfiguration();
             }));
             list.add(create("reset_stats", e -> {
                 main.statsManager.resetValues();
                 main.guiManager.deaths = 0;
             }));
-
-            if (main.config.BOT_SETTINGS.OTHER.DEV_STUFF) {
+            ConfigSetting<Config> root = config.getConfigRoot();
+            if (root.getValue().BOT_SETTINGS.OTHER.DEV_STUFF) {
                 list.add(createSeparator("Dev stuff"));
                 list.add(create("Save SWF", e -> main.addTask(SWFUtils::dumpMainSWF)));
             }
@@ -164,6 +160,31 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             return list;
         }
 
+    }
+
+    @Feature(name = "Plugin menu provider", description = "Provides plugin extra menus")
+    public static class PluginExtraMenuProvider implements ExtraMenus {
+        private static final Map<Plugin, Set<ExtraMenus>> PLUGINS = new LinkedHashMap<>();
+
+        @Override
+        public Collection<JComponent> getExtraMenuItems(PluginAPI api) {
+            if (PLUGINS.isEmpty()) return Collections.emptyList();
+            List<JComponent> list = new ArrayList<>();
+
+            PLUGINS.forEach((plugin, features) -> {
+                List<JComponent> menus = features.stream()
+                        .flatMap(f -> f.getExtraMenuItems(api).stream()).collect(Collectors.toList());
+                if (!menus.isEmpty())
+                    list.add(createMenu(plugin.getName(), menus.stream()));
+            });
+
+            if (!list.isEmpty()) {
+                I18nAPI i18n = api.requireAPI(I18nAPI.class);
+                list.add(0, createSeparator(i18n.get("gui.hamburger_button.plugins")));
+            }
+
+            return list;
+        }
     }
 
 }

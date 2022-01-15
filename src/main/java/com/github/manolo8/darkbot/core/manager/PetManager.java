@@ -4,23 +4,43 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
+import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.extensions.features.Feature;
+import com.github.manolo8.darkbot.extensions.features.handlers.PetGearSelectorHandler;
 import com.github.manolo8.darkbot.gui.utils.Strings;
+import eu.darkbot.api.extensions.selectors.GearSelector;
+import eu.darkbot.api.game.entities.Entity;
+import eu.darkbot.api.game.enums.PetGear;
+import eu.darkbot.api.game.other.EntityInfo;
+import eu.darkbot.api.game.other.Health;
+import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Location;
+import eu.darkbot.api.game.other.LocationInfo;
+import eu.darkbot.api.game.other.Lockable;
+import eu.darkbot.api.managers.PetAPI;
+import eu.darkbot.api.utils.Inject;
+import eu.darkbot.api.utils.ItemNotEquippedException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class PetManager extends Gui {
+public class PetManager extends Gui implements PetAPI {
 
     private static final int MAIN_BUTTON_X = 30,
             MODULES_X_MAX = 260,
@@ -32,6 +52,7 @@ public class PetManager extends Gui {
     private final Main main;
     private final List<Ship> ships;
     private final Pet pet;
+    private final PetGearSelectorHandler gearSelectorHandler;
 
     private long togglePetTime, selectModuleTime;
     private long activeUntil;
@@ -40,6 +61,7 @@ public class PetManager extends Gui {
 
     private final ObjArray gearsArr = ObjArray.ofArrObj();
     private final List<Gear> gearList = new ArrayList<>();
+    private final List<PetGear> newGears = new ArrayList<>();
 
     private final ObjArray locatorWrapper = ObjArray.ofArrObj(), locatorNpcList = ObjArray.ofArrObj();
     private final List<Gear> locatorList = new ArrayList<>();
@@ -54,7 +76,7 @@ public class PetManager extends Gui {
 
     private Integer gearOverride = null;
     private long gearOverrideTime = 0;
-    private boolean repaired;
+    private boolean repaired = true;
 
     private final Map<PetStatsType, PetStats> petStats = new EnumMap<>(PetStatsType.class);
 
@@ -65,16 +87,37 @@ public class PetManager extends Gui {
         SELECTED
     }
 
-    PetManager(Main main) {
+    public PetManager(Main main, MapManager mapManager, HeroManager hero,
+                      PetGearSelectorHandler gearSelectorHandler) {
         this.main = main;
-        this.ships = main.mapManager.entities.ships;
-        this.pet = main.hero.pet;
+        this.ships = mapManager.entities.ships;
+        this.pet = hero.pet;
+        this.gearSelectorHandler = gearSelectorHandler;
 
         PetGearSupplier.updateGears(gearList);
+
+    }
+
+    private PetGear getPetGearToUse() {
+        PetGear gear = null;
+        if (gearOverrideTime > System.currentTimeMillis() && gearOverride != null)
+            gear = PetGear.of(gearOverride);
+
+        if (gear != null)
+            return gear;
+        gear = main.config.PET.MODULE_ID;
+
+        return gear == null ? PetGear.PASSIVE : gear;
     }
 
     public void tick() {
         if (!main.isRunning() || !main.config.PET.ENABLED) return;
+
+        eu.darkbot.api.extensions.selectors.PetGearSupplier gearSupplier = gearSelectorHandler.getBestSupplier();
+
+        Boolean enablePet = gearSupplier.enablePet();
+        boolean enabled = enablePet != null ? enablePet : isEnabled();
+
         if (active() != enabled) {
             if (show(true)) clickToggleStatus();
             return;
@@ -84,21 +127,14 @@ public class PetManager extends Gui {
             return;
         }
         updatePetTarget();
-        int moduleId = main.config.PET.MODULE_ID;
-        if (main.config.PET.COMPATIBILITY_MODE && main.config.PET.MODULE < gearList.size()) {
-            moduleId = gearList.get(main.config.PET.MODULE).id;
-        }
-
-        if (gearOverrideTime > System.currentTimeMillis() && gearOverride != null) {
-            moduleId = gearOverride;
-        }
+        int moduleId = gearSupplier.get().getId();
 
         if (target != null && !(target instanceof Npc) && target.playerInfo.isEnemy()) {
-            moduleId = PetGearSupplier.Gears.PASSIVE.getId();
+            moduleId = PetGear.PASSIVE.getId();
         }
 
         int submoduleId = -1, submoduleIdx = -1;
-        if (moduleId == PetGearSupplier.Gears.ENEMY_LOCATOR.getId()) {
+        if (moduleId == PetGear.ENEMY_LOCATOR.getId()) {
             NpcPick submodule = main.config.LOOT.NPC_INFOS.entrySet()
                     .stream()
                     .filter(e -> e.getValue().extra.has(NpcExtra.PET_LOCATOR))
@@ -141,10 +177,12 @@ public class PetManager extends Gui {
             target = ships.stream().filter(pet::isAttacking).findFirst().orElse(null);
     }
 
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
@@ -162,8 +200,13 @@ public class PetManager extends Gui {
         return hasGear(gear.getId());
     }
 
+    @Override
     public boolean hasGear(int id) {
         return findGearById(id) != null;
+    }
+
+    public List<PetGear> getGears() {
+        return newGears;
     }
 
     public PetStats getPetStats(PetStatsType type) {
@@ -174,10 +217,12 @@ public class PetManager extends Gui {
         return hasCooldown(buff.getId());
     }
 
+    @Override
     public boolean hasCooldown(int buffId) {
         return petBuffsIds.contains(buffId);
     }
 
+    @Override
     public boolean isRepaired() {
         return repaired;
     }
@@ -236,6 +281,7 @@ public class PetManager extends Gui {
         return 0;
     }
 
+    private int repairCount;
     @Override
     public void update() {
         super.update();
@@ -244,6 +290,11 @@ public class PetManager extends Gui {
         long gearsSprite = getSpriteChild(address, -1);
         gearsArr.update(API.readMemoryLong(gearsSprite, 176, 224));
         gearsArr.sync(gearList, Gear::new, null);
+        if (modulesChanged()) {
+            newGears.clear();
+            for (Gear gear : gearList)
+                newGears.add(PetGear.of(gear.id));
+        }
         PetGearSupplier.updateGears(gearList);
 
         updateNpcLocatorList(gearsSprite);
@@ -254,9 +305,24 @@ public class PetManager extends Gui {
         updatePetBuffs(elementsListAddress);
 
         long element = getSpriteElement(elementsListAddress, 67);
+
+        boolean wasRepaired = repaired;
         repaired = API.readMemoryLong(getSpriteChildWrapper(element, 0), 0x148) == 0;
 
+        if (!wasRepaired && repaired) repairCount++;
+
         updatePetStats(elementsListAddress);
+    }
+
+    private boolean modulesChanged() {
+        Iterator<Gear> it1 = gearList.iterator();
+        Iterator<PetGear> it2 = newGears.iterator();
+        while (it1.hasNext() && it2.hasNext()) {
+            Gear g1 = it1.next();
+            PetGear g2 = it2.next();
+            if (g1.id != g2.getId()) return true;
+        }
+        return it1.hasNext() || it2.hasNext();
     }
 
     @Deprecated
@@ -363,10 +429,15 @@ public class PetManager extends Gui {
         }
     }
 
-    public class PetStats {
+    public class PetStats implements PetStat {
         private double curr, total;
 
         public double getCurr() {
+            return curr;
+        }
+
+        @Override
+        public double getCurrent() {
             return curr;
         }
 
@@ -416,6 +487,189 @@ public class PetManager extends Gui {
 
         public int getId() {
             return ordinal() + 1;
+        }
+    }
+
+    @Override
+    public int getId() {
+        return pet.getId();
+    }
+
+    @Override
+    public boolean isValid() {
+        return pet.isValid();
+    }
+
+    @Override
+    public boolean isSelectable() {
+        return pet.isSelectable();
+    }
+
+    @Override
+    public boolean trySelect(boolean tryAttack) {
+        return pet.trySelect(tryAttack);
+    }
+
+    @Override
+    public LocationInfo getLocationInfo() {
+        return pet.getLocationInfo();
+    }
+
+    @Override
+    public Collection<Integer> getEffects() {
+        return pet.getEffects();
+    }
+
+    @Override
+    public void setMetadata(String key, Object value) {
+        pet.setMetadata(key, value);
+    }
+
+    @Override
+    public @Nullable Object getMetadata(String key) {
+        return pet.getMetadata(key);
+    }
+
+    @Override
+    public int getLevel() {
+        return pet.getLevel();
+    }
+
+    @Override
+    public int getOwnerId() {
+        return pet.getOwnerId();
+    }
+
+    @Override
+    public Optional<eu.darkbot.api.game.entities.Ship> getOwner() {
+        return pet.getOwner();
+    }
+
+    @Override
+    public boolean isInvisible() {
+        return pet.isInvisible();
+    }
+
+    @Override
+    public boolean isBlacklisted() {
+        return pet.isBlacklisted();
+    }
+
+    @Override
+    public void setBlacklisted(long time) {
+        pet.setBlacklisted(time);
+    }
+
+    @Override
+    public Lock getLockType() {
+        return pet.getLockType();
+    }
+
+    @Override
+    public Health getHealth() {
+        return pet.getHealth();
+    }
+
+    @Override
+    public EntityInfo getEntityInfo() {
+        return pet.getEntityInfo();
+    }
+
+    @Override
+    public @Nullable Entity getTarget() {
+        return pet.getTarget();
+    }
+
+    @Override
+    public boolean isAttacking() {
+        return pet.isAttacking();
+    }
+
+    @Override
+    public int getSpeed() {
+        return pet.getSpeed();
+    }
+
+    @Override
+    public double getAngle() {
+        return pet.getAngle();
+    }
+
+    @Override
+    public double getDestinationAngle() {
+        return pet.getDestinationAngle();
+    }
+
+    @Override
+    public boolean isAiming(Locatable other) {
+        return pet.isAiming(other);
+    }
+
+    @Override
+    public Optional<Location> getDestination() {
+        return pet.getDestination();
+    }
+
+    @Override
+    public boolean isActive() {
+        return pet.address != 0;
+    }
+
+    @Override
+    public int getRepairCount() {
+        return repairCount;
+    }
+
+    @Override
+    public void setGear(Integer gearId) throws ItemNotEquippedException {
+        if (gearId != null && !hasGear(gearId))
+            throw new ItemNotEquippedException(PetGear.of(gearId), "Gear #" + gearId);
+
+        this.setOverride(gearId);
+    }
+
+    @Override
+    public void setGear(@Nullable PetGear petGear) throws ItemNotEquippedException {
+        PetAPI.super.setGear(petGear);
+    }
+
+    @Override
+    public Optional<Location> getLocatorNpcLoc() {
+        FakeNpc petPing = main.mapManager.entities.fakeNpc;
+
+        if (petPing.isValid())
+            return Optional.of(petPing.locationInfo);
+        return Optional.empty();
+    }
+
+    @Override
+    public PetStat getStat(Stat stat) {
+        return petStats.get(PetStatsType.valueOf(stat.name()));
+    }
+
+    @Feature(name = "Default Gear Supplier", description = "Sets the fallback pet gear")
+    public static class DefaultGearSupplier implements GearSelector, eu.darkbot.api.extensions.selectors.PetGearSupplier {
+
+        private PetManager pet;
+
+        @Inject
+        public void setPetManager(PetManager pet) {
+            this.pet = pet;
+        }
+
+        @Override
+        public eu.darkbot.api.extensions.selectors.@NotNull PetGearSupplier getGearSupplier() {
+            return this;
+        }
+
+        @Override
+        public PetGear get() {
+            return pet.getPetGearToUse();
+        }
+
+        @Override
+        public @Nullable Boolean enablePet() {
+            return pet.isEnabled();
         }
     }
 }

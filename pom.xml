@@ -17,9 +17,19 @@
             <id>jfrog</id>
             <url>https://oss.jfrog.org/artifactory/oss-snapshot-local/com/formdev/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
+
+        <dependency>
+            <groupId>eu.darkbot</groupId>
+            <artifactId>darkbot-impl</artifactId>
+            <version>0.1</version>
+        </dependency>
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -66,7 +76,7 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>17.0.0</version>
+            <version>23.0.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
@@ -138,7 +148,7 @@
                                 <option>-dontwarn</option>
                                 <option>-keepattributes Signature</option>
                                 <option>-keep class com.github.manolo8.** { *; }</option>
-                                <option>-keep class eu.darkbot.api.** { *; }</option>
+                                <option>-keep class eu.darkbot.** { *; }</option>
                                 <option>-keep class com.formdev.** { *; }</option>
                             </options>
                             <libs>

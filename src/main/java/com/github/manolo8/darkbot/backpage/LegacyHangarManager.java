@@ -44,7 +44,7 @@ public class LegacyHangarManager {
     private List<String> lootIds;
     private long lastHangarDataUpdate = 0;
 
-    LegacyHangarManager(Main main, BackpageManager backpageManager) {
+    public LegacyHangarManager(Main main, BackpageManager backpageManager) {
         this.main = main;
         this.backpageManager = backpageManager;
         this.hangars = new ArrayList<>();

@@ -47,6 +47,12 @@ public class ByteUtils {
     @Deprecated // Use ATOM_MASK instead.
     public static final long FIX = ~0b111L;
 
+    /**
+     * Constant value which means that reference to the object,
+     * is invalid/doesn't exists and shouldn't be updated.
+     */
+    public static final long NULL = 0;
+
     public static int getInt(byte[] data, int offset) {
         return data.length < offset + 4 ? 0 :
                 ((data[offset + 3]) << 24) |

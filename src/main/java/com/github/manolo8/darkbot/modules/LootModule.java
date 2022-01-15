@@ -20,7 +20,7 @@ import java.util.List;
 import static java.lang.Double.min;
 import static java.lang.Math.random;
 
-@Feature(name = "Npc Killer", description = "Npc-only module. Will never pick up resources.")
+@Feature(name = "Npc Killer (Legacy)", description = "Npc-only module. Will never pick up resources.")
 public class LootModule implements Module {
 
     private Main main;
@@ -118,7 +118,7 @@ public class LootModule implements Module {
             attack.target.setTimerTo(5000);
             hero.setTarget(attack.target = null);
         } else if (attack.target.playerInfo.username.contains("Invoke") && attack.target.npcInfo.extra.has(NpcExtra.PASSIVE)
-                && attack.target == hero.target && !attack.castingAbility()) {
+                && attack.target == hero.getLocalTarget() && !attack.castingAbility()) {
             attack.target.setTimerTo(600_000);
             hero.setTarget(attack.target = null);
         }
@@ -210,7 +210,7 @@ public class LootModule implements Module {
 
     protected Npc closestNpc(Location location) {
         int extraPriority = attack.hasTarget() &&
-                (hero.target == attack.target || hero.locationInfo.distance(attack.target) < 600)
+                (hero.getLocalTarget() == attack.target || hero.locationInfo.distance(attack.target) < 600)
                 ? 20 - (int)(attack.target.health.hpPercent() * 10) : 0;
         return this.npcs.stream()
                 .filter(n -> (n == attack.target && hero.isAttacking(attack.target)) ||

@@ -1,10 +1,11 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.extensions.IssueHandler;
 
 import java.util.Objects;
 
-public class PluginIssue implements Comparable<PluginIssue> {
+public class PluginIssue implements Comparable<PluginIssue>, IssueHandler.Issue {
 
     public enum Level {
         INFO, WARNING, ERROR
@@ -32,6 +33,11 @@ public class PluginIssue implements Comparable<PluginIssue> {
 
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public IssueHandler.Level getIssueLevel() {
+        return IssueHandler.Level.values()[level.ordinal()];
     }
 
     public boolean preventsLoading() {

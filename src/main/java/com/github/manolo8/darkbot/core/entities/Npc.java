@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.entities;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
@@ -8,7 +9,7 @@ import java.util.Objects;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Npc extends Ship {
+public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
     private static final NpcInfo INITIAL_NPC_INFO = new NpcInfo(); // Prevent NPE trying to obtain npc info.
 
     public NpcInfo npcInfo = INITIAL_NPC_INFO;
@@ -25,6 +26,11 @@ public class Npc extends Ship {
     }
 
     @Override
+    public void added(Main main) {
+        super.added(main);
+    }
+
+    @Override
     public void update() {
         String oldName = playerInfo.username;
         super.update();
@@ -36,5 +42,15 @@ public class Npc extends Ship {
             npcInfo = ConfigEntity.INSTANCE.getOrCreateNpcInfo(playerInfo.username);
             npcInfo.npcId = npcId;
         }
+    }
+
+    @Override
+    public int getNpcId() {
+        return npcId;
+    }
+
+    @Override
+    public eu.darkbot.api.config.types.NpcInfo getInfo() {
+        return npcInfo;
     }
 }

@@ -2,15 +2,14 @@ package com.github.manolo8.darkbot;
 
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.ConfigHandler;
 import com.github.manolo8.darkbot.config.ConfigManager;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
+import com.github.manolo8.darkbot.config.utils.PlayerTagTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.core.itf.Behaviour;
-import com.github.manolo8.darkbot.core.itf.Configurable;
-import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.FacadeManager;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
@@ -22,7 +21,7 @@ import com.github.manolo8.darkbot.core.manager.SettingsManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
-import com.github.manolo8.darkbot.extensions.features.Feature;
+import com.github.manolo8.darkbot.extensions.DarkBotPluginApiImpl;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
@@ -41,6 +40,11 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import eu.darkbot.api.extensions.Behavior;
+import eu.darkbot.api.extensions.Configurable;
+import eu.darkbot.api.extensions.Installable;
+import eu.darkbot.api.extensions.Module;
+import eu.darkbot.api.managers.BotAPI;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -49,9 +53,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class Main extends Thread implements PluginListener {
+public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 101 alpha 1");
+    public static final Version VERSION      = new Version("1.13.17 beta 101");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -60,11 +64,15 @@ public class Main extends Thread implements PluginListener {
             .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
+            .registerTypeAdapterFactory(new PlayerTagTypeAdapterFactory())
             .create();
 
     public ConfigManager configManager = new ConfigManager();
+    public ConfigHandler configHandler;
     public Config config;
     public static IDarkBotAPI API;
+
+    public DarkBotPluginApiImpl pluginAPI;
 
     public final Lazy.Sync<Boolean> status      = new Lazy.Sync<>();
     public final Lazy.Sync<String> configChange = new Lazy.Sync<>();
@@ -86,45 +94,58 @@ public class Main extends Thread implements PluginListener {
     private final MainGui form;
     private final BotInstaller botInstaller;
 
-    public Module module;
+    public com.github.manolo8.darkbot.core.itf.Module module; // Legacy module, kept for old plugin compatibility
+    private Module newModule;
     public long lastRefresh = System.currentTimeMillis();
     public double avgTick;
     public boolean tickingModule;
 
     private String moduleId;
-    private List<Behaviour> behaviours = new ArrayList<>();
+    private List<Behavior> behaviours = new ArrayList<>();
     private final List<Runnable> tasks = new ArrayList<>();
 
     private volatile boolean running;
 
     public Main(StartupParams params) {
         super("Main");
+
+        // The order here is a bit tricky, because generating the config tree
+        // requires i18n being configured with a locale, but the locale is
+        // defined in the config
+        // 1: Load the config without generating the config tree
         config = configManager.loadConfig(params.getStartConfig());
+        // 2: Create the plugin API (uses the config manager internally)
+        this.pluginAPI = new DarkBotPluginApiImpl(this);
+        // 3: Initialize i18n with the locale from the config
+        I18n.init(pluginAPI, config.BOT_SETTINGS.BOT_GUI.LOCALE);
+        // 4: Generate the actual config
+        this.configHandler = pluginAPI.requireInstance(ConfigHandler.class);
 
         VerifierChecker.getAuthApi().setupAuth();
+        this.pluginAPI.addInstance(VerifierChecker.getAuthApi());
 
-        this.starManager     = StarManager.getInstance();
-        this.mapManager      = new MapManager(this);
-        this.settingsManager = new SettingsManager(this);
-        this.facadeManager   = new FacadeManager(this);
-        this.hero            = new HeroManager(this);
-        this.effectManager   = new EffectManager(this);
-        this.guiManager      = new GuiManager(this);
-        this.statsManager    = new StatsManager(this);
-        this.pingManager     = new PingManager();
-        this.pluginHandler   = new PluginHandler();
-        this.pluginUpdater   = new PluginUpdater(this);
-        this.backpage        = new BackpageManager(this);
-        this.featureRegistry = new FeatureRegistry(this, pluginHandler);
-        this.repairManager   = new RepairManager();
+        this.starManager     = pluginAPI.requireInstance(StarManager.class);
+        this.mapManager      = pluginAPI.requireInstance(MapManager.class);
+        this.settingsManager = pluginAPI.requireInstance(SettingsManager.class);
+        this.facadeManager   = pluginAPI.requireInstance(FacadeManager.class);
+        this.hero            = pluginAPI.requireInstance(HeroManager.class);
+        this.effectManager   = pluginAPI.requireInstance(EffectManager.class);
+        this.guiManager      = pluginAPI.requireInstance(GuiManager.class);
+        this.statsManager    = pluginAPI.requireInstance(StatsManager.class);
+        this.pingManager     = pluginAPI.requireInstance(PingManager.class);
+        this.pluginHandler   = pluginAPI.requireInstance(PluginHandler.class);
+        this.pluginUpdater   = pluginAPI.requireInstance(PluginUpdater.class);
+        this.backpage        = pluginAPI.requireInstance(BackpageManager.class);
+        this.featureRegistry = pluginAPI.requireInstance(FeatureRegistry.class);
+        this.repairManager   = pluginAPI.requireInstance(RepairManager.class);
 
         this.botInstaller = new BotInstaller(
                 settingsManager, facadeManager, effectManager, guiManager, mapManager,
                 hero, statsManager, pingManager, repairManager);
 
-
         API = configManager.getAPI(params);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
+        pluginAPI.addInstance(API);
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();
@@ -237,16 +258,16 @@ public class Main extends Thread implements PluginListener {
     private void tickLogic(boolean running) {
         synchronized (pluginHandler) {
             try {
-                if (running) module.tickModule();
-                else module.tickStopped();
+                if (running) newModule.onTickModule();
+                else newModule.onTickStopped();
             } catch (Throwable e) {
-                FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(module);
+                FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(newModule);
                 if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
             }
-            for (Behaviour behaviour : behaviours) {
+            for (Behavior behaviour : behaviours) {
                 try {
-                    if (running) behaviour.tickBehaviour();
-                    else behaviour.tickStopped();
+                    if (running) behaviour.onTickBehavior();
+                    else behaviour.onStoppedBehavior();
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
@@ -258,9 +279,9 @@ public class Main extends Thread implements PluginListener {
 
     private void checkRefresh() {
         if (config.MISCELLANEOUS.REFRESH_TIME == 0 ||
-                System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000) return;
+                System.currentTimeMillis() - lastRefresh < config.MISCELLANEOUS.REFRESH_TIME * 60 * 1000L) return;
 
-        if (!module.canRefresh()) return;
+        if (!newModule.canRefresh()) return;
 
         lastRefresh = System.currentTimeMillis();
         if (config.MISCELLANEOUS.PAUSE_FOR > 0) {
@@ -272,31 +293,53 @@ public class Main extends Thread implements PluginListener {
         }
     }
 
+    @Deprecated
+    public <A extends com.github.manolo8.darkbot.core.itf.Module> A setModule(A module) {
+        return this.setModule(module, false);
+    }
+
     public <A extends Module> A setModule(A module) {
         return setModule(module, false);
     }
 
     private <A extends Module> A setModule(A module, boolean setConfig) {
         if (module != null) {
-            module.install(this);
+            if (module instanceof Installable)
+                ((Installable) module).install(pluginAPI);
             if (setConfig) updateCustomConfig(module);
         }
-        this.module = module;
+        this.newModule = module;
+        // For legacy purposes, keep the old module field with the old module datatype. Use a dummy for new modules.
+        this.module = module instanceof com.github.manolo8.darkbot.core.itf.Module ?
+                (com.github.manolo8.darkbot.core.itf.Module) module : new DummyModule();
         return module;
     }
 
     private <A extends Module> void updateCustomConfig(A module) {
+        // Fun one: add ALL configs as tabs, creates one massive config tree
+        /*
+        ConfigSetting.Parent<?>[] configs = featureRegistry.getFeatures()
+                .stream()
+                //.filter(FeatureDefinition::isEnabled)
+                .map(FeatureDefinition::getConfig)
+                .filter(Objects::nonNull)
+                .toArray(ConfigSetting.Parent<?>[]::new);
+        form.setCustomConfig(configs);
+        */
+
         if (module instanceof Configurable) {
-            String name = module.getClass().getAnnotation(Feature.class).name();
-            form.setCustomConfig(name, config.CUSTOM_CONFIGS.get(module.getClass().getCanonicalName()));
-        } else {
-            form.setCustomConfig(null, null);
+            FeatureDefinition<A> fd = featureRegistry.getFeatureDefinition(module);
+            if (fd != null) {
+                form.setCustomConfig(fd.getConfig());
+                return;
+            }
         }
+        form.setCustomConfig();
     }
 
     @Override
     public void beforeLoad() {
-        if (module != null) setModule(new DummyModule(), true);
+        if (newModule != null) setModule(new DummyModule(), true);
     }
 
     @Override
@@ -317,7 +360,7 @@ public class Main extends Thread implements PluginListener {
     private void onRunningToggle(boolean running) {
         if (config.MISCELLANEOUS.RESET_REFRESH)
             lastRefresh = System.currentTimeMillis();
-        if (running && module instanceof TemporalModule) {
+        if (running && newModule instanceof TemporalModule) {
             moduleId = "(none)";
         }
 
@@ -325,12 +368,12 @@ public class Main extends Thread implements PluginListener {
         else hero.pet.clickable.reset();
     }
 
-    public void setBehaviours(List<Behaviour> behaviours) {
+    public void setBehaviours(List<Behavior> behaviours) {
         this.behaviours = behaviours;
     }
 
     private void checkModule() {
-        if (module == null || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE)) {
+        if (newModule == null || !Objects.equals(moduleId, config.GENERAL.CURRENT_MODULE)) {
             Module module = featureRegistry.getFeature(moduleId = config.GENERAL.CURRENT_MODULE, Module.class)
                 .orElseGet(() -> {
                     String name = moduleId.substring(moduleId.lastIndexOf(".") + 1);
@@ -352,8 +395,9 @@ public class Main extends Thread implements PluginListener {
     private void setConfigInternal(String config) {
         if (configManager.getConfigName().equals(config)) return;
         try {
+            configManager.saveConfig();
             SwingUtilities.invokeAndWait(() -> {
-                this.config = configManager.loadConfig(config);
+                this.config = configHandler.loadConfig(config);
                 mapManager.updateAreas(true);
                 pluginHandler.updateConfig(); // Get plugins to update what features are enabled
                 featureRegistry.updateConfig(); // Update the features & configurables
@@ -369,6 +413,21 @@ public class Main extends Thread implements PluginListener {
         synchronized (Main.UPDATE_LOCKER) {
             this.tasks.add(task);
         }
+    }
+
+    @Override
+    public Version getVersion() {
+        return VERSION;
+    }
+
+    @Override
+    public double getTickTime() {
+        return avgTick;
+    }
+
+    @Override
+    public Module getModule() {
+        return newModule;
     }
 
 }

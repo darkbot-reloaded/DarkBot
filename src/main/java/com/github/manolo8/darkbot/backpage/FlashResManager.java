@@ -1,16 +1,18 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.itf.Task;
-import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.utils.XmlHelper;
 import com.github.manolo8.darkbot.utils.http.Http;
+import eu.darkbot.api.API;
+import eu.darkbot.api.extensions.Feature;
+import eu.darkbot.api.extensions.Task;
+import eu.darkbot.api.managers.GameResourcesAPI;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -20,24 +22,23 @@ import java.util.stream.Collectors;
  * manner we will substring all resources to the first N characters to be able to do an initial fast search.
  */
 @Feature(name = "Flash resource manager", description = "Holds the resources for the in-game language")
-public class FlashResManager implements Task {
+public class FlashResManager implements Task, GameResourcesAPI {
 
     private static final String URL = "https://darkorbit-22.bpsecure.com/spacemap/templates/{lang}/flashres.xml";
 
-    private Main main;
+    private final Main main;
 
     private String lang = null;
+    private Locale inGameLocale;
 
     private volatile Map<String, String> ALL_TRANSLATIONS = Collections.emptyMap();
 
-
-    @Override
-    public void install(Main main) {
+    public FlashResManager(Main main) {
         this.main = main;
     }
 
     @Override
-    public void tick() {
+    public void onTickTask() {
         if (main == null) return;
         String currLang = main.settingsManager.lang;
         if (currLang == null
@@ -57,6 +58,14 @@ public class FlashResManager implements Task {
 
             // TODO: store in an efficient way to reverse-translate
             lang = currLang;
+
+            try {
+                inGameLocale = new Locale(currLang);
+            } catch (IllformedLocaleException e) {
+                e.printStackTrace();
+                inGameLocale = null;
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             lang = null;
@@ -65,5 +74,15 @@ public class FlashResManager implements Task {
 
     public String getTranslation(String key) {
         return ALL_TRANSLATIONS.get(key);
+    }
+
+    @Override
+    public Locale getLanguage() {
+        return inGameLocale;
+    }
+
+    @Override
+    public Optional<String> findTranslation(@NotNull String key) {
+        return Optional.ofNullable(getTranslation(key));
     }
 }

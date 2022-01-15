@@ -8,12 +8,14 @@ import com.github.manolo8.darkbot.core.entities.bases.BaseHeadquarters;
 import com.github.manolo8.darkbot.core.entities.bases.BaseSpot;
 import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
 import com.github.manolo8.darkbot.utils.I18n;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 
-public class SafetyInfo implements Serializable, Ignorable {
+public class SafetyInfo implements Serializable, Ignorable, eu.darkbot.api.config.types.SafetyInfo {
     public enum Type {
         PORTAL, CBS, BASE;
         public static Type of(Entity entity) {
@@ -130,4 +132,60 @@ public class SafetyInfo implements Serializable, Ignorable {
         return Objects.hash(type, x, y);
     }
 
+    @Override
+    public eu.darkbot.api.config.types.SafetyInfo.Type getType() {
+        return eu.darkbot.api.config.types.SafetyInfo.Type.values()[type.ordinal()];
+    }
+
+    @Override
+    public eu.darkbot.api.config.types.SafetyInfo.RunMode getRunMode() {
+        return eu.darkbot.api.config.types.SafetyInfo.RunMode.values()[runMode.ordinal()];
+    }
+
+    @Override
+    public void setRunMode(eu.darkbot.api.config.types.SafetyInfo.RunMode runMode) {
+        this.runMode = RunMode.values()[runMode.ordinal()];
+    }
+
+    @Override
+    public eu.darkbot.api.config.types.SafetyInfo.JumpMode getJumpMode() {
+        if (jumpMode == null) return null;
+        return eu.darkbot.api.config.types.SafetyInfo.JumpMode.values()[jumpMode.ordinal()];
+    }
+
+    @Override
+    public eu.darkbot.api.config.types.SafetyInfo.CbsMode getCbsMode() {
+        if (cbsMode == null) return null;
+        return eu.darkbot.api.config.types.SafetyInfo.CbsMode.values()[cbsMode.ordinal()];
+    }
+
+    @Override
+    public double getX() {
+        return x;
+    }
+
+    @Override
+    public double getY() {
+        return y;
+    }
+
+    @Override
+    public int getDiameter() {
+        return diameter();
+    }
+
+    @Override
+    public Optional<eu.darkbot.api.game.entities.Entity> getEntity() {
+        return Optional.ofNullable(entity);
+    }
+
+    @Override
+    public void setDistance(double d) {
+        this.distance = d;
+    }
+
+    @Override
+    public double getDistance() {
+        return this.distance;
+    }
 }

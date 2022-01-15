@@ -9,6 +9,10 @@ import com.github.manolo8.darkbot.gui.utils.SpinnerNumberMinMaxFix;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * @deprecated Use NumberEditor instead, kept for legacy plugin compatibility
+ */
+@Deprecated
 public class JNumberField extends JSpinner implements OptionEditor {
 
     private ConfigField field;

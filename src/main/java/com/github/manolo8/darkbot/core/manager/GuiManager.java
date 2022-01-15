@@ -8,18 +8,33 @@ import com.github.manolo8.darkbot.core.objects.LogoutGui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.RefinementGui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
+import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
+import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
+import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.game.other.Area;
+import eu.darkbot.api.managers.GameScreenAPI;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class GuiManager implements Manager {
+public class GuiManager implements Manager, GameScreenAPI {
 
     private final Main main;
+    private final PluginAPI pluginAPI;
+    private final SlotBarsProxy slotBarsProxy;
+    private final SettingsProxy settingsProxy;
+    private final StatsProxy statsProxy;
+
     private final PairArray guis = PairArray.ofDictionary();
 
     private long reconnectTime;
@@ -33,18 +48,18 @@ public class GuiManager implements Manager {
     private long guiAddress;
     private long mainAddress;
 
-    private final List<Gui> registeredGuis = new ArrayList<>();
+    private final Map<String, Gui> registeredGuis = new HashMap<>();
 
-    public final Gui lostConnection = register("lost_connection");
-    public final Gui connecting = register("connection");
-    public final Gui quests = register("quests");
-    public final Gui minimap = register("minimap");
-    public final Gui targetedOffers = register("targetedOffers", new TargetedOfferGui());
-    public final LogoutGui logout = register("logout", new LogoutGui());
-    public final Gui eventProgress =  register("eventProgress");
-    public final Gui eternalGate = register("eternal_gate");
-    public final Gui blacklightGate = register("eternal_blacklight");
-    public final RefinementGui refinement = register("refinement", new RefinementGui());
+    public final Gui lostConnection;
+    public final Gui connecting;
+    public final Gui quests;
+    public final Gui minimap;
+    public final Gui targetedOffers;
+    public final LogoutGui logout;
+    public final Gui eventProgress;
+    public final Gui eternalGate;
+    public final Gui blacklightGate;
+    public final RefinementGui refinement;
     public final PetManager pet;
     public final OreTradeGui oreTrade;
     public final GroupManager group;
@@ -69,28 +84,43 @@ public class GuiManager implements Manager {
 
     private boolean needRefresh;
 
-    public GuiManager(Main main) {
+    public GuiManager(Main main, PluginAPI pluginAPI) {
         this.main = main;
+        this.pluginAPI = pluginAPI;
+        this.slotBarsProxy = pluginAPI.requireInstance(SlotBarsProxy.class);
+        this.settingsProxy = pluginAPI.requireInstance(SettingsProxy.class);
+        this.statsProxy = pluginAPI.requireInstance(StatsProxy.class);
 
         this.validTime = System.currentTimeMillis();
 
-        this.pet = register("pet", new PetManager(main));
-        this.oreTrade = register("ore_trade", new OreTradeGui(main));
-        this.group = register("group", new GroupManager(main));
+        this.pet = register("pet", PetManager.class);
+        this.oreTrade = register("ore_trade", OreTradeGui.class);
+        this.group = register("group", GroupManager.class);
 
         this.main.status.add(value -> validTime = System.currentTimeMillis());
+        this.lostConnection = register("lost_connection");
+        this.connecting = register("connection");
+        this.quests = register("quests");
+        this.minimap = register("minimap");
+        this.targetedOffers = register("targetedOffers", TargetedOfferGui.class);
+        this.logout = register("logout", LogoutGui.class);
+        this.eventProgress = register("eventProgress");
+        this.eternalGate = register("eternal_gate");
+        this.blacklightGate = register("eternal_blacklight");
+        this.refinement = register("refinement", RefinementGui.class);
     }
 
     public Gui register(String key) {
-        return register(key, new Gui());
+        return register(key, Gui.class);
     }
 
-    public <T extends Gui> T register(String key, T gui) {
-        @SuppressWarnings("UnnecessaryLocalVariable")
-        Gui guiFix = gui; // Workaround for a java compiler assertion bug having issues with types
+    @SuppressWarnings({"unchecked", "CastCanBeRemovedNarrowingVariableType"})
+    public <T extends Gui> T register(String key, Class<T> gui) {
+        Gui guiFix = pluginAPI.requireInstance(gui); // Workaround for a java compiler assertion bug having issues with types
         this.guis.addLazy(key, guiFix::update);
-        this.registeredGuis.add(guiFix);
-        return gui;
+        this.registeredGuis.put(key, guiFix);
+
+        return (T) guiFix;
     }
 
     @Override
@@ -111,7 +141,7 @@ public class GuiManager implements Manager {
             guis.update(API.readMemoryLong(guiAddress + 112));
 
             repairAddress = 0;
-            registeredGuis.forEach(Gui::reset);
+            registeredGuis.values().forEach(Gui::reset);
             checks = LoadStatus.WAITING;
         });
     }
@@ -119,7 +149,7 @@ public class GuiManager implements Manager {
     public void tick() {
         guis.update();
 
-        registeredGuis.forEach(Gui::update);
+        registeredGuis.values().forEach(Gui::update);
 
         if (checks != LoadStatus.DONE && checks.canAdvance.test(this))
             checks = LoadStatus.values()[checks.ordinal() + 1];
@@ -138,13 +168,13 @@ public class GuiManager implements Manager {
         }
     }
 
-    private boolean tryRevive() {
+    public boolean tryRevive() {
         if (System.currentTimeMillis() - lastDeath < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L))
             return false;
         if (System.currentTimeMillis() - lastRepairAttempt <= 10000)
             return false;
 
-        long respawnId = main.config.GENERAL.SAFETY.REVIVE_LOCATION;
+        long respawnId = main.config.GENERAL.SAFETY.REVIVE_LOCATION.getId();
 
         if (main.repairManager.canRespawn((int) respawnId))
             API.writeMemoryLong(repairAddress + 32, respawnId);
@@ -217,7 +247,8 @@ public class GuiManager implements Manager {
 
             if (!tryRevive()) return false;
 
-            if (deaths >= main.config.GENERAL.SAFETY.MAX_DEATHS) main.setRunning(false);
+            if (main.config.GENERAL.SAFETY.MAX_DEATHS != -1 &&
+                    deaths >= main.config.GENERAL.SAFETY.MAX_DEATHS) main.setRunning(false);
             else checkInvalid();
 
             return false;
@@ -241,7 +272,7 @@ public class GuiManager implements Manager {
             return false;
         } else if (hero.locationInfo.isLoaded()
                 && (hero.locationInfo.isMoving() || System.currentTimeMillis() - hero.drive.lastMoved > 20 * 1000)
-                && (hero.health.hpIncreasedIn(30_000) || hero.health.hpDecreasedIn(30_000) || hero.health.hpPercent() == 1 || (hero.hasTarget() && hero.isAttacking(hero.target)))
+                && (hero.health.hpIncreasedIn(30_000) || hero.health.hpDecreasedIn(30_000) || hero.health.hpPercent() == 1 || (hero.hasTarget() && hero.isAttacking(hero.getLocalTarget())))
                 && (hero.health.shIncreasedIn(30_000) || hero.health.shDecreasedIn(30_000) || hero.health.shieldPercent() == 1 || hero.health.shieldPercent() == 0)) {
             validTime = System.currentTimeMillis();
         }
@@ -251,4 +282,72 @@ public class GuiManager implements Manager {
         return main.hero.locationInfo.isLoaded();
     }
 
+    @Override
+    public Area.Rectangle getViewBounds() {
+        return main.mapManager.screenBound;
+    }
+
+    @Override
+    public Collection<? extends eu.darkbot.api.game.other.Gui> getGuis() {
+        return registeredGuis.values();
+    }
+
+    @Override
+    public @Nullable Gui getGui(String key) {
+        return registeredGuis.get(key);
+    }
+
+    @Override
+    public int getFps() {
+        return statsProxy.getFps();
+    }
+
+    @Override
+    public int getMemory() {
+        return statsProxy.getMemory();
+    }
+
+    @Override
+    public void zoomIn() {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.ZOOM_IN)
+                .ifPresent(API::keyboardClick);
+    }
+
+    @Override
+    public void zoomOut() {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.ZOOM_OUT)
+                .ifPresent(API::keyboardClick);
+    }
+
+    @Override
+    public void focusOnChat() {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.FOCUS_CHAT)
+                .ifPresent(API::keyboardClick);
+    }
+
+    @Override
+    public void toggleMonitoring() {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_MONITORING)
+                .ifPresent(API::keyboardClick);
+    }
+
+    @Override
+    public void toggleWindows() {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_WINDOWS)
+                .ifPresent(API::keyboardClick);
+    }
+
+    @Override
+    public void toggleCategoryBar(boolean visible) {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_CATEGORYBAR)
+                .filter(c -> slotBarsProxy.isCategoryBarVisible() != visible)
+                .ifPresent(API::keyboardClick);
+    }
+
+    @Override
+    public void toggleProActionBar(boolean visible) {
+        settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION)
+                .filter(c -> slotBarsProxy.proActionBar.address != 0 && slotBarsProxy.isProActionBarVisible() != visible)
+                .ifPresent(API::keyboardClick);
+    }
 }

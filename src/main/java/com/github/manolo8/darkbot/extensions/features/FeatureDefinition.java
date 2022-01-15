@@ -5,14 +5,21 @@ import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
+import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.extensions.FeatureInfo;
+import eu.darkbot.api.extensions.PluginInfo;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
-public class FeatureDefinition<T> {
+public class FeatureDefinition<T> implements FeatureInfo<T> {
 
-    private final Plugin plugin;
+    private final @Nullable Plugin plugin;
     private final Class<T> clazz;
-    private final Feature feature;
     private final IssueHandler issues;
 
     private final String id;
@@ -21,26 +28,46 @@ public class FeatureDefinition<T> {
 
     private final Lazy<FeatureDefinition<T>> listener = new Lazy.NoCache<>();
 
-    private T instance;
+    private final @Nullable ConfigSetting.Parent<?> config;
+    private @Nullable T instance;
 
-    public FeatureDefinition(Plugin plugin, Class<T> clazz) {
+    public FeatureDefinition(@Nullable Plugin plugin,
+                             Class<T> clazz,
+                             Function<FeatureDefinition<T>, ConfigSetting.Parent<?>> configBuilder) {
         this.plugin = plugin;
         this.clazz = clazz;
-        this.feature = clazz.getAnnotation(Feature.class);
         this.issues = new IssueHandler(plugin == null ? null : plugin.getIssues());
 
         this.id = clazz.getCanonicalName();
-        this.name = feature.name();
-        this.description = feature.description();
+
+
+        boolean enabledByDefault;
+        if (clazz.getAnnotation(Feature.class) != null) {
+            Feature feature = clazz.getAnnotation(Feature.class);
+            this.name = feature.name();
+            this.description = feature.description();
+            enabledByDefault = feature.enabledByDefault();
+        } else {
+            eu.darkbot.api.extensions.Feature feature = clazz.getAnnotation(eu.darkbot.api.extensions.Feature.class);
+            if (feature == null)
+                throw new IllegalStateException("Feature class must be annotated with @Feature: " + clazz.getCanonicalName());
+            this.name = feature.name();
+            this.description = feature.description();
+            enabledByDefault = feature.enabledByDefault();
+        }
 
         if (plugin != null
                 && !plugin.getInfo().ENABLED_FEATURES.contains(id)
                 && !plugin.getInfo().DISABLED_FEATURES.contains(id)) {
-            setStatusInternal(Module.class.isAssignableFrom(clazz) || feature.enabledByDefault());
+            // Intentionally uses old module class, newer features will
+            // always rely exclusively on if set to be enabled by default
+            setStatusInternal(Module.class.isAssignableFrom(clazz) || enabledByDefault);
         }
+
+        this.config = configBuilder.apply(this);
     }
 
-    public Plugin getPlugin() {
+    public @Nullable Plugin getPlugin() {
         return plugin;
     }
 
@@ -48,14 +75,9 @@ public class FeatureDefinition<T> {
         return clazz;
     }
 
-    public Feature getFeature() {
-        return feature;
-    }
-
     public IssueHandler getIssues() {
         return issues;
     }
-
 
     public String getId() {
         return id;
@@ -69,7 +91,11 @@ public class FeatureDefinition<T> {
         return description;
     }
 
-    public T getInstance() {
+    public @Nullable ConfigSetting.Parent<?> getConfig() {
+        return config;
+    }
+
+    public @Nullable T getInstance() {
         return instance;
     }
 
@@ -90,6 +116,8 @@ public class FeatureDefinition<T> {
     }
 
     private boolean setStatusInternal(boolean enabled) {
+        if (plugin == null)
+            throw new IllegalStateException("Native features cannot be enabled or disabled");
         if (enabled) return plugin.getInfo().ENABLED_FEATURES.add(id) | plugin.getInfo().DISABLED_FEATURES.remove(id);
         else return plugin.getInfo().ENABLED_FEATURES.remove(id) | plugin.getInfo().DISABLED_FEATURES.add(id);
     }
@@ -102,8 +130,31 @@ public class FeatureDefinition<T> {
         return plugin == null || plugin.getInfo().ENABLED_FEATURES.contains(id);
     }
 
+    public void setEnabled(boolean enabled) {
+        this.setStatus(enabled);
+    }
+
+    @Override
+    public Class<T> getFeatureClass() {
+        return getClazz();
+    }
+
+    @Override
+    public @Nullable PluginInfo getPluginInfo() {
+        return plugin;
+    }
+
     public boolean canLoad() {
         return issues.canLoad() && isEnabled();
     }
 
+    @Override
+    public @NotNull Set<? extends Issue> getIssueSet() {
+        return issues.getIssues();
+    }
+
+    @Override
+    public void addIssue(@NotNull String message, @NotNull String description, @NotNull Level level) {
+        issues.add(message, description, PluginIssue.Level.values()[level.ordinal()]);
+    }
 }

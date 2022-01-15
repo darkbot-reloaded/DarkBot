@@ -1,20 +1,25 @@
 package com.github.manolo8.darkbot.extensions.features.handlers;
 
 import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
-import com.github.manolo8.darkbot.core.itf.Module;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.modules.CollectorModule;
-import com.github.manolo8.darkbot.modules.LootModule;
-import com.github.manolo8.darkbot.modules.LootNCollectorModule;
+import eu.darkbot.api.extensions.Module;
+import eu.darkbot.shared.modules.CollectorModule;
+import eu.darkbot.shared.modules.LootCollectorModule;
+import eu.darkbot.shared.modules.LootModule;
 
 import java.util.LinkedHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ModuleHandler extends FeatureHandler<Module> {
+public class ModuleHandler extends FeatureHandler<eu.darkbot.api.extensions.Module> {
 
-    private static final Class<?>[] NATIVE = new Class[]{CollectorModule.class, LootModule.class, LootNCollectorModule.class};
+    private static final Class<?>[] NATIVE = new Class[]{
+            CollectorModule.class, LootModule.class, LootCollectorModule.class,
+            // Legacy
+            com.github.manolo8.darkbot.modules.CollectorModule.class,
+            com.github.manolo8.darkbot.modules.LootModule.class,
+            com.github.manolo8.darkbot.modules.LootNCollectorModule.class};
 
     @Override
     public Class<?>[] getNativeFeatures() {

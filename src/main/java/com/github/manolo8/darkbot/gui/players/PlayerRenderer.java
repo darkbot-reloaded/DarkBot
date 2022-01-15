@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.gui.players;
 
 import com.github.manolo8.darkbot.config.PlayerInfo;
-import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import eu.darkbot.api.config.types.PlayerTag;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -40,7 +40,7 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
 
         add(id, "grow");
         add(playername, "grow");
-        for (PlayerTag tag : value.getTags())
+        for (PlayerTag tag : value.getTags().get())
             add(tagCache.computeIfAbsent(tag, Tag::new), "grow");
 
         return this;
@@ -51,10 +51,10 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
         private static final Border MARGIN = new EmptyBorder(1, 5, 1, 5);
 
         public Tag(PlayerTag tag) {
-            super(tag.name);
+            super(tag.getName());
             setOpaque(true);
-            setBorder(new CompoundBorder(BorderFactory.createLineBorder(tag.color), MARGIN));
-            setBackground(UIUtils.blendColor(tag.color, ALPHA));
+            setBorder(new CompoundBorder(BorderFactory.createLineBorder(tag.getColor()), MARGIN));
+            setBackground(UIUtils.blendColor(tag.getColor(), ALPHA));
         }
     }
 

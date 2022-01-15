@@ -1,16 +1,13 @@
 package com.github.manolo8.darkbot.extensions.features;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.extensions.features.handlers.BehaviourHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.ExtraMenuHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.FeatureHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.ModuleHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.NpcExtraHandler;
-import com.github.manolo8.darkbot.extensions.features.handlers.TaskHandler;
+import com.github.manolo8.darkbot.extensions.features.handlers.*;
+import eu.darkbot.api.API;
+import eu.darkbot.api.PluginAPI;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -19,22 +16,26 @@ import java.util.stream.Stream;
  * apply actions when the features are going to be reloaded or after they have been loaded.
  * e.g. Updating the list of available modules in the dropdown selector in the config.
  */
-public class FeatureRegisterHandler {
+public class FeatureRegisterHandler implements API.Singleton {
 
     private final FeatureRegistry featureRegistry;
     private final List<FeatureHandler<?>> FEATURE_HANDLERS;
 
-    private AtomicBoolean updating = new AtomicBoolean();
+    private final AtomicBoolean updating = new AtomicBoolean();
 
-    public FeatureRegisterHandler(Main main, FeatureRegistry featureRegistry) {
+    public FeatureRegisterHandler(PluginAPI api, FeatureRegistry featureRegistry) {
         this.featureRegistry = featureRegistry;
-        this.FEATURE_HANDLERS = Arrays.asList(
-                new ModuleHandler(),
-                new BehaviourHandler(main, featureRegistry),
-                new TaskHandler(main, featureRegistry),
-                new NpcExtraHandler(featureRegistry),
-                new ExtraMenuHandler(featureRegistry)
-        );
+        this.FEATURE_HANDLERS = Stream.of(
+                ModuleHandler.class,
+                BehaviourHandler.class,
+                TaskHandler.class,
+                LegacyNpcExtraHandler.class,
+                NpcExtraHandler.class,
+                ExtraMenuHandler.class,
+                LaserSelectorHandler.class,
+                ShipModeSelectorHandler.class,
+                PetGearSelectorHandler.class
+        ).map(api::requireInstance).collect(Collectors.toList());
     }
 
     Stream<Class<?>> getNativeFeatures() {
