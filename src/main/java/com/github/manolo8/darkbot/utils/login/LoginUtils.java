@@ -82,12 +82,15 @@ public class LoginUtils {
             usernameLogin(loginData);
             System.out.println("Loading spacemap (2/2)");
             findPreloader(loginData);
+        } catch (IOException e) {
+            System.err.println("IOException trying to perform auto login, servers may be down");
+            e.printStackTrace();
         } catch (WrongCredentialsException e) {
             System.err.println("Wrong credentials, check your username and password");
         }
 
         if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
-            System.err.println("Could not find preloader url or parameters");
+            System.err.println("Could not find preloader url or parameters, exiting bot.");
             System.exit(-1);
         }
         return loginData;
@@ -163,7 +166,7 @@ public class LoginUtils {
         loginData.setSid(cookie.getValue(), cookie.getDomain());
     }
 
-    public static void findPreloader(LoginData loginData) {
+    public static void findPreloader(LoginData loginData) throws IOException {
         Http req = Http.create("https://" + loginData.getUrl() + "/indexInternal.es?action=internalMapRevolution", false)
                 .setRawHeader("Cookie", "dosid=" + loginData.getSid());
 

@@ -9,9 +9,9 @@ import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.game.other.Locatable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
 
@@ -43,6 +43,8 @@ public class GameAPIImpl<
     protected boolean initiallyShown;
     protected boolean autoHidden = false;
 
+    protected long lastFailedLogin;
+
     public GameAPIImpl(StartupParams params,
                        W window, H handler, M memory, S stringReader, I interaction, D direct,
                        GameAPI.Capability... capabilityArr) {
@@ -69,19 +71,42 @@ public class GameAPIImpl<
         this.initiallyShown = hasCapability(GameAPI.Capability.INITIALLY_SHOWN) && !params.getAutoHide();
     }
 
-    protected void relogin() {
+    protected void reload() {
         if (loginData == null || loginData.getUsername() == null) {
             System.out.println("Re-logging in is unsupported for this browser/API, or you logged in with SID");
             return;
         }
+
+        if (lastFailedLogin + 30_000 > System.currentTimeMillis()) {
+            System.out.println("Last failed login was <30s ago, ignoring re-login attempt.");
+            return;
+        }
+
         try {
             System.out.println("Reloading, updating flash vars/preloader");
             LoginUtils.findPreloader(loginData);
+        } catch (IOException e) {
+            System.out.println("Failed to find preloader, aborting re-login");
+            e.printStackTrace();
+            lastFailedLogin = System.currentTimeMillis();
         } catch (LoginUtils.WrongCredentialsException e) {
+            // SID probably expired, time to log in again
+            relogin();
+        }
+    }
+
+    protected void relogin() {
+        try {
             System.out.println("Re-logging in: Logging in (1/2)");
             LoginUtils.usernameLogin(loginData);
             System.out.println("Re-logging in: Loading spacemap (2/2)");
             LoginUtils.findPreloader(loginData);
+        } catch (IOException e) {
+            System.err.println("IOException trying to perform re-login, servers may be down");
+            e.printStackTrace();
+            lastFailedLogin = System.currentTimeMillis();
+        } catch (LoginUtils.WrongCredentialsException e) {
+            System.err.println("Wrong credentials, check your username and password");
         }
     }
 
@@ -284,7 +309,7 @@ public class GameAPIImpl<
     @Override
     public void handleRefresh() {
         if (hasCapability(GameAPI.Capability.LOGIN)) {
-            relogin();
+            reload();
             setData();
         }
         handler.reload();

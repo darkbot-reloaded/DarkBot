@@ -6,7 +6,6 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.WindowAPI;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
