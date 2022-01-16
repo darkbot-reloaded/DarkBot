@@ -11,6 +11,7 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class MainGui extends JFrame {
@@ -92,7 +93,17 @@ public class MainGui extends JFrame {
         }
     }
 
+    @Override
+    public void setTitle(String title) {
+        if (!Objects.equals(getTitle(), title)) super.setTitle(title);
+    }
+
     public void tick() {
+        if (main.config.MISCELLANEOUS.USERNAME_ON_TITLE) {
+            if (main.hero.playerInfo.username != null) setTitle("DarkBot - " + main.hero.playerInfo.username);
+        }
+        else setTitle("DarkBot");
+
         mapDrawer.repaint();
     }
 
