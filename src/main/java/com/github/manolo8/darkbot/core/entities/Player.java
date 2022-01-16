@@ -11,7 +11,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class Player extends Ship implements eu.darkbot.api.game.entities.Player {
 
     protected com.github.manolo8.darkbot.core.entities.Pet pet;
-    private String shipTypeId;
+    private String shipTypeId = "";
 
     public Player() {}
 
