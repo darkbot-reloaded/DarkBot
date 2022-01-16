@@ -35,8 +35,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
         private static final int NO_SID = -1, ERROR = -2, UNKNOWN = -3;
     }
 
-    public final HangarManager hangarManager;
     public final LegacyHangarManager legacyHangarManager;
+    public final HangarManager hangarManager;
     public final GalaxyManager galaxyManager;
     public final DispatchManager dispatchManager;
     public final AuctionManager auctionManager;
@@ -55,8 +55,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
     public BackpageManager(Main main) {
         super("BackpageManager");
         this.main = main;
-        this.hangarManager = new HangarManager(main, this);
         this.legacyHangarManager = new LegacyHangarManager(main, this);
+        this.hangarManager = new HangarManager(main, this);
         this.galaxyManager = new GalaxyManager(main);
         this.dispatchManager = new DispatchManager(main);
         this.auctionManager = new AuctionManager(main, this);
