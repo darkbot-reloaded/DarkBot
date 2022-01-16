@@ -188,6 +188,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option boolean LOG_CHAT = false;
         public @Option boolean LOG_DEATHS = false;
         public @Option boolean AVOID_MINES = true;
+        public @Option boolean ADD_PILOT_NAME_TO_TITLE = false;
     }
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
