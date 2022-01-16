@@ -11,6 +11,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class Player extends Ship implements eu.darkbot.api.game.entities.Player {
 
     protected com.github.manolo8.darkbot.core.entities.Pet pet;
+    private String shipTypeId = "";
 
     public Player() {}
 
@@ -20,7 +21,12 @@ public class Player extends Ship implements eu.darkbot.api.game.entities.Player 
 
     @Override
     public void update() {
+        int oldShipId = getShipId();
         super.update();
+
+        if (oldShipId != getShipId()) {
+            shipTypeId = API.readString(address, 192, 128);
+        }
 
         if (this instanceof HeroManager) return;
 
@@ -32,6 +38,11 @@ public class Player extends Ship implements eu.darkbot.api.game.entities.Player 
                     .filter(p -> p.address == petAddress)
                     .findAny()
                     .orElse(null);
+    }
+
+    @Override
+    public String getShipType() {
+        return shipTypeId;
     }
 
     @Override

@@ -57,6 +57,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
     private final Target attackTarget = new Target();
     private long lockPtr;
+    private int shipId;
 
     @Override
     public void update() {
@@ -69,6 +70,8 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
         formationId = API.readMemoryInt(address, 280, 40, 40);
         invisible = API.readMemoryBoolean(API.readMemoryLong(address + 160) + 32);
+
+        shipId = API.readInt(address, 192, 76);
     }
 
     @Override
@@ -142,6 +145,11 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
                         .findAny().orElse(null);
             }
         }
+    }
+
+    @Override
+    public int getShipId() {
+        return shipId;
     }
 
     @Override

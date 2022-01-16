@@ -546,6 +546,11 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
+    public int getShipId() {
+        return pet.getShipId();
+    }
+
+    @Override
     public boolean isInvisible() {
         return pet.isInvisible();
     }
