@@ -85,7 +85,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option @Percentage double REPAIR_HP_NO_NPC = 0.5;
             public @Option @Percentage double REPAIR_TO_SHIELD = 1;
             public @Option ShipConfig REPAIR = new ShipConfig(1, '9');
-            public @Option @Number(min = 1, max = 9999) @Number.Disabled(value = -1, def = 10) int MAX_DEATHS = 10;
+            public @Option @Number(min = 1, max = 9999) @Number.Disabled(value = '∞', def = 10) int MAX_DEATHS = 10;
             @Deprecated
             public long REVIVE_LOCATION = 1L;
             public @Option("config.general.safety.revive_location") @Dropdown ReviveLocation REVIVE = ReviveLocation.BASE;
