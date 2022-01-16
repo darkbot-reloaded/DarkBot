@@ -7,8 +7,11 @@ import javax.swing.*;
 
 class FeatureCheckbox extends JCheckBox {
 
+    private final boolean builtin;
+
     FeatureCheckbox(FeatureDefinition<?> feature) {
         super(feature.getName(), null, feature.canLoad());
+        this.builtin = feature.getPlugin() == null;
 
         if (!feature.getDescription().isEmpty())
             setToolTipText(feature.getDescription());
@@ -20,8 +23,8 @@ class FeatureCheckbox extends JCheckBox {
     }
 
     private void updateIssues(IssueHandler issueList) {
-        setEnabled(issueList.canLoad());
-        setSelected(isSelected() && issueList.canLoad());
+        setEnabled(!builtin && issueList.canLoad());
+        setSelected(builtin || (isSelected() && issueList.canLoad()));
     }
 
 }
