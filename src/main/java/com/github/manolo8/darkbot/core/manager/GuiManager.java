@@ -18,10 +18,8 @@ import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.managers.GameScreenAPI;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -174,7 +172,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         if (System.currentTimeMillis() - lastRepairAttempt <= 10000)
             return false;
 
-        long respawnId = main.config.GENERAL.SAFETY.REVIVE_LOCATION.getId();
+        long respawnId = main.config.GENERAL.SAFETY.REVIVE.getId();
 
         if (main.repairManager.canRespawn((int) respawnId))
             API.writeMemoryLong(repairAddress + 32, respawnId);

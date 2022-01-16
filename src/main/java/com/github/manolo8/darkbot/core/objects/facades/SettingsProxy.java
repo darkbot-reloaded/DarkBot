@@ -73,25 +73,25 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
     }
 
     public enum KeyBind {
-        SLOTBAR_1(SlotBarsProxy.Type.DEFAULT_BAR),
-        SLOTBAR_2(SlotBarsProxy.Type.DEFAULT_BAR),
-        SLOTBAR_3(SlotBarsProxy.Type.DEFAULT_BAR),
-        SLOTBAR_4(SlotBarsProxy.Type.DEFAULT_BAR),
-        SLOTBAR_5(SlotBarsProxy.Type.DEFAULT_BAR),
-        SLOTBAR_6(SlotBarsProxy.Type.DEFAULT_BAR),
-        SLOTBAR_7(SlotBarsProxy.Type.DEFAULT_BAR),
-        SLOTBAR_8(SlotBarsProxy.Type.DEFAULT_BAR),
-        SLOTBAR_9(SlotBarsProxy.Type.DEFAULT_BAR),
-        SLOTBAR_0(SlotBarsProxy.Type.DEFAULT_BAR),
-        PREMIUM_1(SlotBarsProxy.Type.PREMIUM_BAR),
-        PREMIUM_2(SlotBarsProxy.Type.PREMIUM_BAR),
-        PREMIUM_3(SlotBarsProxy.Type.PREMIUM_BAR),
-        PREMIUM_4(SlotBarsProxy.Type.PREMIUM_BAR),
-        PREMIUM_5(SlotBarsProxy.Type.PREMIUM_BAR),
-        PREMIUM_6(SlotBarsProxy.Type.PREMIUM_BAR),
-        PREMIUM_7(SlotBarsProxy.Type.PREMIUM_BAR),
-        PREMIUM_8(SlotBarsProxy.Type.PREMIUM_BAR),
-        PREMIUM_9(SlotBarsProxy.Type.PREMIUM_BAR),
+        SLOTBAR_1(SlotBarsProxy.Type.DEFAULT_BAR, 0),
+        SLOTBAR_2(SlotBarsProxy.Type.DEFAULT_BAR, 1),
+        SLOTBAR_3(SlotBarsProxy.Type.DEFAULT_BAR, 2),
+        SLOTBAR_4(SlotBarsProxy.Type.DEFAULT_BAR, 3),
+        SLOTBAR_5(SlotBarsProxy.Type.DEFAULT_BAR, 4),
+        SLOTBAR_6(SlotBarsProxy.Type.DEFAULT_BAR, 5),
+        SLOTBAR_7(SlotBarsProxy.Type.DEFAULT_BAR, 6),
+        SLOTBAR_8(SlotBarsProxy.Type.DEFAULT_BAR, 7),
+        SLOTBAR_9(SlotBarsProxy.Type.DEFAULT_BAR, 8),
+        SLOTBAR_0(SlotBarsProxy.Type.DEFAULT_BAR, 9),
+        PREMIUM_1(SlotBarsProxy.Type.PREMIUM_BAR, 0),
+        PREMIUM_2(SlotBarsProxy.Type.PREMIUM_BAR, 1),
+        PREMIUM_3(SlotBarsProxy.Type.PREMIUM_BAR, 2),
+        PREMIUM_4(SlotBarsProxy.Type.PREMIUM_BAR, 3),
+        PREMIUM_5(SlotBarsProxy.Type.PREMIUM_BAR, 4),
+        PREMIUM_6(SlotBarsProxy.Type.PREMIUM_BAR, 5),
+        PREMIUM_7(SlotBarsProxy.Type.PREMIUM_BAR, 6),
+        PREMIUM_8(SlotBarsProxy.Type.PREMIUM_BAR, 7),
+        PREMIUM_9(SlotBarsProxy.Type.PREMIUM_BAR, 8),
         JUMP_GATE,
         TOGGLE_CONFIG,
         ATTACK_LASER,
@@ -106,17 +106,19 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
         ZOOM_OUT,
         FOCUS_CHAT,
         TOGGLE_CATEGORYBAR,
-        PREMIUM_0(SlotBarsProxy.Type.PREMIUM_BAR),
+        PREMIUM_0(SlotBarsProxy.Type.PREMIUM_BAR, 9),
         TOGGLE_PRO_ACTION;
 
         private final SlotBarsProxy.Type type;
+        private final int slotIdx;
 
         KeyBind() {
-            this(null);
+            this(null, -1);
         }
 
-        KeyBind(SlotBarsProxy.Type type) {
+        KeyBind(SlotBarsProxy.Type type, int slotIdx) {
             this.type = type;
+            this.slotIdx = slotIdx;
         }
 
         public static KeyBind of(int index) {
@@ -130,6 +132,10 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
 
         public SlotBarsProxy.Type getType() {
             return type;
+        }
+
+        public int getSlotIdx() {
+            return slotIdx;
         }
     }
 }

@@ -49,13 +49,12 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
 
     @Nullable
     public SlotBar.Slot getSlot(SettingsProxy.KeyBind keybind) {
-        if (keybind == null) return null;
-        String keyStr = keybind.toString();
+        if (keybind == null || keybind.getType() == null || keybind.getSlotIdx() == -1) return null;
 
-        SlotBar sb = keyStr.startsWith("SLOTBAR") ? standardBar :
-                keyStr.startsWith("PREMIUM") ? premiumBar : null;
+        SlotBar sb = keybind.getType() == Type.DEFAULT_BAR ? standardBar :
+                keybind.getType() == Type.PREMIUM_BAR ? premiumBar : null;
 
-        return sb == null ? null : sb.slots.get((Integer.parseInt(keyStr.split("_")[1]) + 9) % 10);
+        return sb == null || sb.slots.size() < 10 ? null : sb.slots.get(keybind.getSlotIdx());
     }
 
     @Override
