@@ -60,8 +60,7 @@ public class HookManager implements Manager, GameAPI.DirectInteraction, API.Sing
     }
 
     private void setup() {
-        boolean isEnabled = canLoad && Main.API instanceof DarkBoatAdapter &&
-                main.config.BOT_SETTINGS.API_CONFIG.DARK_HOOK.ENABLED;
+        boolean isEnabled = canLoad && main.config.BOT_SETTINGS.API_CONFIG.DARK_HOOK.ENABLED;
 
         if ((hook != null) == isEnabled) return;
 
