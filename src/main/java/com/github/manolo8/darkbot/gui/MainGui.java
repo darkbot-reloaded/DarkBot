@@ -99,7 +99,7 @@ public class MainGui extends JFrame {
     }
 
     public void tick() {
-        if (main.config.MISCELLANEOUS.ADD_PILOT_NAME_TO_TITLE) {
+        if (main.config.MISCELLANEOUS.USERNAME_ON_TITLE) {
             if (main.hero.playerInfo.username != null) setTitle("DarkBot - " + main.hero.playerInfo.username);
         }
         else setTitle("DarkBot");
