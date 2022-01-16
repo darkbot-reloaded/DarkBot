@@ -87,10 +87,6 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     void writeMemoryLong(long address, long value);
     void writeMemoryDouble(long address, double value);
 
-    default void replaceInt(long address, int oldValue, int newValue) {
-        writeMemoryInt(address, oldValue);
-    }
-
     long[] queryMemoryInt(int value, int maxQuantity);
     long[] queryMemoryLong(long value, int maxQuantity);
     long[] queryMemory(byte[] query, int maxQuantity);
@@ -149,19 +145,16 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     }
 
     @Override
-    default void replaceLong(long address, long oldValue, long newValue) {
-        if (readLong(address) == oldValue) writeLong(address, newValue);
-    }
+    void replaceInt(long address, int oldValue, int newValue);
 
     @Override
-    default void replaceDouble(long address, double oldValue, double newValue) {
-        if (readDouble(address) == oldValue) writeDouble(address, newValue);
-    }
+    void replaceLong(long address, long oldValue, long newValue);
 
     @Override
-    default void replaceBoolean(long address, boolean oldValue, boolean newValue) {
-        if (readBoolean(address) == oldValue) writeBoolean(address, newValue);
-    }
+    void replaceDouble(long address, double oldValue, double newValue);
+
+    @Override
+    void replaceBoolean(long address, boolean oldValue, boolean newValue);
 
     @Override
     default void writeInt(long address, int value) {

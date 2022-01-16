@@ -262,6 +262,26 @@ public class GameAPIImpl<
     }
 
     @Override
+    public void replaceInt(long address, int oldValue, int newValue) {
+        memory.replaceInt(address, oldValue, newValue);
+    }
+
+    @Override
+    public void replaceLong(long address, long oldValue, long newValue) {
+        memory.replaceLong(address, oldValue, newValue);
+    }
+
+    @Override
+    public void replaceDouble(long address, double oldValue, double newValue) {
+        memory.replaceDouble(address, oldValue, newValue);
+    }
+
+    @Override
+    public void replaceBoolean(long address, boolean oldValue, boolean newValue) {
+        memory.replaceBoolean(address, oldValue, newValue);
+    }
+
+    @Override
     public void writeMemoryInt(long address, int value) {
         memory.writeInt(address, value);
     }
