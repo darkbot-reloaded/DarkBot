@@ -106,7 +106,8 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
         drive.checkMove();
 
-        setConfigAndFormation(shipModeHandler.getBest());
+        if (main.isRunning())
+            setConfigAndFormation(shipModeHandler.getBest());
     }
 
     @Override

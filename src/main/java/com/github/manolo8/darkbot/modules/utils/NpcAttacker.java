@@ -30,6 +30,15 @@ import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyB
 
 public class NpcAttacker implements AttackAPI {
 
+    // This is a very, very dirty variable for backwards compatibility.
+    // Newer api assumes AttackAPI to be a singleton, so there will be a single
+    // instance used by all features, and that same instance is available in the
+    // PrioritizedSuppliers for lasers.
+    // However, legacy features will continue to call new NpcAttacker creating their own
+    // instance, for those cases, this variable is set right before calling to get what ammo
+    // should be used, so that suppliers check for flags against the right attacker.
+    private static NpcAttacker caller;
+
     protected Main main;
     protected MapManager mapManager;
     protected HeroManager hero;
@@ -158,7 +167,9 @@ public class NpcAttacker implements AttackAPI {
     }
 
     private Character getAttackKey() {
+        caller = this;
         SelectableItem.Laser laser = laserHandler.getBest();
+        caller = null;
 
         if (laser != null) {
             Character key = items.getKeyBind(laser);
@@ -225,6 +236,9 @@ public class NpcAttacker implements AttackAPI {
         return castingAbility();
     }
 
+    public static AttackAPI getCallerOr(AttackAPI api) {
+        return caller != null ? caller : api;
+    }
 
     @Feature(name = "RSB supplier", description = "Supplies RSB ammo if enabled & it's time")
     public static class RsbSupplier implements LaserSelector, PrioritizedSupplier<SelectableItem.Laser> {
@@ -256,7 +270,7 @@ public class NpcAttacker implements AttackAPI {
 
         private boolean shouldRsb() {
             if (!main.config.LOOT.RSB.ENABLED || main.config.LOOT.RSB.KEY == null
-                    || !attacker.hasExtraFlag(NpcExtra.USE_RSB)) return false;
+                    || !getCallerOr(attacker).hasExtraFlag(NpcExtra.USE_RSB)) return false;
 
             rsbItem = items.getItem(main.config.LOOT.RSB.KEY);
             boolean isReady = rsbItem != null && rsbItem.isUsable();
@@ -299,7 +313,7 @@ public class NpcAttacker implements AttackAPI {
         }
 
         private boolean shouldSab() {
-            if (!main.config.LOOT.SAB.ENABLED || attacker.hasExtraFlag(NpcExtra.NO_SAB)) return false;
+            if (!main.config.LOOT.SAB.ENABLED || getCallerOr(attacker).hasExtraFlag(NpcExtra.NO_SAB)) return false;
 
             Config.Loot.Sab SAB = main.config.LOOT.SAB;
             return hero.getHealth().shieldPercent() <= SAB.PERCENT
