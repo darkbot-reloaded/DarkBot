@@ -147,7 +147,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 cs.setValue(new ColorScheme());
                 ConfigEntity.changed();
             }));
-            list.add(create("reset_stats", e -> {
+            list.add(create(i18n.get(p + "reset_stats"), e -> {
                 main.statsManager.resetValues();
                 main.guiManager.deaths = 0;
             }));
