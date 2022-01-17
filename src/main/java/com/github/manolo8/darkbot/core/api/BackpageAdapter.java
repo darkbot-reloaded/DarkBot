@@ -24,8 +24,8 @@ public class BackpageAdapter extends GameAPIImpl<
                 new GameAPI.NoOpStringReader(),
                 new GameAPI.NoOpInteraction(),
                 new GameAPI.NoOpDirectInteraction(),
-                GameAPI.Capability.LOGIN
-                );
+                GameAPI.Capability.LOGIN,
+                GameAPI.Capability.BACKGROUND_ONLY);
 
         this.statsManager = statsManager;
     }

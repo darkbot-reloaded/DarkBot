@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
@@ -8,6 +9,7 @@ import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.BackpageAPI;
+import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -49,6 +51,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
     protected long lastRequest;
     protected long sidLastUpdate = System.currentTimeMillis();
     protected long sidNextUpdate = sidLastUpdate;
+    protected Timer refreshTimer = Timer.get(30_000L);
+
     protected long checkDrones = Long.MAX_VALUE;
     protected int sidStatus = -1;
 
@@ -84,6 +88,14 @@ public class BackpageManager extends Thread implements BackpageAPI {
                                 .addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
                     }
                 }
+            }
+
+            // For backpage-only apis we don't need to care about the running ship, can just arbitrarily refresh
+            if (Main.API.hasCapability(GameAPI.Capability.BACKGROUND_ONLY)
+                    && (isInvalid() || sidStatus == 302)
+                    && refreshTimer.tryActivate()) {
+                Main.API.handleRefresh();
+                continue;
             }
 
             if (isInvalid()) {
