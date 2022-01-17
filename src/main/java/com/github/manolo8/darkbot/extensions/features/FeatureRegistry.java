@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.managers.ExtensionsAPI;
@@ -65,9 +66,10 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
     }
 
     public void updateConfig() {
-        for (FeatureDefinition<?> feature : FEATURES_BY_ID.values()) {
-            feature.sendUpdate();
-            featureLoader.updateConfig(feature);
+        for (FeatureDefinition<?> fd : FEATURES_BY_ID.values()) {
+            fd.sendUpdate(); // Update the checkbox in plugins tab
+            configHandler.updateFeatureConfig(fd); // Update the value available in the feature definition
+            featureLoader.updateConfig(fd);        // Update the value in the instance (eg: call feature.setConfig)
         }
     }
 

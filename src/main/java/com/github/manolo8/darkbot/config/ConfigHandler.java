@@ -86,14 +86,23 @@ public class ConfigHandler implements ConfigAPI, Listener {
         @SuppressWarnings("unchecked")
         Class<T> configClass = (Class<T>) configType[0];
         ConfigSetting.Parent<T> configSetting = builder.of(configClass, fd.getName(), fd.getPluginInfo());
+        configSetting.setValue(getFeatureConfigValue(fd, configClass));
+        return configSetting;
+    }
 
+    public <T> T getFeatureConfigValue(FeatureDefinition<?> fd, Class<T> configClass) {
         Map<String, Object> customConfigs = configuration.getValue().CUSTOM_CONFIGS;
 
         T configObj = toConfig(customConfigs.get(fd.getId()), configClass);
         customConfigs.put(fd.getId(), configObj);
+        return configObj;
+    }
 
-        configSetting.setValue(configObj);
-        return configSetting;
+    public <T> void updateFeatureConfig(FeatureDefinition<?> fd) {
+        @SuppressWarnings("unchecked")
+        ConfigSetting.Parent<T> config = (ConfigSetting.Parent<T>) fd.getConfig();
+        if (config == null) return;
+        config.setValue(getFeatureConfigValue(fd, config.getType()));
     }
 
     private JsonElement toJsonElement(Object config) {

@@ -42,7 +42,7 @@ public class FeatureTypeButton extends MainButton {
         setText(description.isEmpty() ? "-" : description.substring(0, 1));
 
         updateStatus(feature);
-        feature.addStatusListener(this::updateStatus);
+        feature.addStatusUiListener(this::updateStatus);
     }
 
     private void updateStatus(FeatureDefinition<?> feature) {

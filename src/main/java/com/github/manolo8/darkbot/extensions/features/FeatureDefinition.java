@@ -27,6 +27,7 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
     private final String description;
 
     private final Lazy<FeatureDefinition<T>> listener = new Lazy.NoCache<>();
+    private final Lazy.Swing<FeatureDefinition<T>> uiListener = new Lazy.Swing<>();
 
     private final @Nullable ConfigSetting.Parent<?> config;
     private @Nullable T instance;
@@ -39,7 +40,7 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
         this.issues = new IssueHandler(plugin == null ? null : plugin.getIssues());
 
         this.id = clazz.getCanonicalName();
-
+        this.listener.add(uiListener::send);
 
         boolean enabledByDefault;
         if (clazz.getAnnotation(Feature.class) != null) {
@@ -124,6 +125,10 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
 
     public void addStatusListener(Consumer<FeatureDefinition<T>> listener) {
         this.listener.add(listener);
+    }
+
+    public void addStatusUiListener(Consumer<FeatureDefinition<T>> listener) {
+        this.uiListener.add(listener);
     }
 
     public boolean isEnabled() {
