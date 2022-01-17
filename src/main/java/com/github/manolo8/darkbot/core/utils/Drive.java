@@ -149,7 +149,9 @@ public class Drive implements MovementAPI {
         if (heroLoc.isMoving() && current) {
             Location stopLoc = heroLoc.now.copy();
             stopLoc.toAngle(heroLoc.now, heroLoc.last.angle(heroLoc.now), 100);
-            mouse.clickLoc(stopLoc);
+
+            if (Main.API.hasCapability(GameAPI.Capability.DIRECT_MOVE_SHIP)) Main.API.moveShip(stopLoc);
+            else mouse.clickLoc(stopLoc);
         }
 
         endLoc = tempDest = null;

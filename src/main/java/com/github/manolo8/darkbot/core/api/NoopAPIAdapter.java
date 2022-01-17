@@ -23,10 +23,6 @@ public class NoopAPIAdapter extends GameAPIImpl<
                 new GameAPI.NoOpDirectInteraction());
     }
 
-    public static NoopAPIAdapter of(StartupParams params) {
-        return new NoopAPIAdapter(params);
-    }
-
     @Override
     public String getVersion() {
         return "no-op";

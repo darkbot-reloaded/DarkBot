@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import eu.darkbot.api.API;
+import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.types.PercentRange;
 import eu.darkbot.api.config.types.ShipMode;
 import org.jetbrains.annotations.Nullable;
@@ -167,17 +168,18 @@ public class ConfigManager implements API.Singleton {
         return config;
     }
 
-    public IDarkBotAPI getAPI(StartupParams params) {
+    public IDarkBotAPI getAPI(PluginAPI pluginApi) {
+        StartupParams params = pluginApi.requireInstance(StartupParams.class);
         BrowserApi api = params.useNoOp() ? BrowserApi.NO_OP_API : config.BOT_SETTINGS.API_CONFIG.BROWSER_API;
         try {
             if (api == null) throw new IllegalArgumentException("No API has been set!");
-            return api.getInstance(params);
+            return pluginApi.requireInstance(api.clazz);
         } catch (Throwable e) {
             System.out.println("Error enabling " + api + ", using no-op api");
             e.printStackTrace();
             ApiErrors.displayException(api, e);
             config.BOT_SETTINGS.API_CONFIG.BROWSER_API = BrowserApi.NO_OP_API;
-            return BrowserApi.NO_OP_API.getInstance(params);
+            return pluginApi.requireInstance(BrowserApi.NO_OP_API.clazz);
         }
     }
 

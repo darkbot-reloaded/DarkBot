@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.utils;
 
+import eu.darkbot.api.API;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,7 +10,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
 
-public class StartupParams {
+public class StartupParams implements API.Singleton {
     private static final String COMMAND_PREFIX = "-";
 
     /**

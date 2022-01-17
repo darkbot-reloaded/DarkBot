@@ -108,13 +108,11 @@ public interface GameAPI {
 
         void lockEntity(int id);
 
-        default void moveShip(Locatable destination) {
-            collectBox(destination, null);
-        }
+        void moveShip(Locatable destination);
 
-        void collectBox(Locatable destination, @Nullable Long collectableAddress);
+        void collectBox(Locatable destination, long collectableAddress);
 
-        long callMethod(long object, int index, long[] arguments);
+        long callMethod(int index, long... arguments);
     }
 
     enum Capability {
@@ -122,11 +120,12 @@ public interface GameAPI {
         ATTACH,
         INITIALLY_SHOWN,
         CREATE_WINDOW_THREAD,
+        BACKGROUND_ONLY,
 
         DIRECT_ENTITY_LOCK,
         DIRECT_MOVE_SHIP,
         DIRECT_COLLECT_BOX,
-        CALL_METHOD;
+        DIRECT_CALL_METHOD;
     }
 
     class NoOpWindow implements Window {
@@ -302,12 +301,17 @@ public interface GameAPI {
         }
 
         @Override
-        public void collectBox(Locatable destination, @Nullable Long collectableAddress) {
+        public void moveShip(Locatable destination) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public long callMethod(long object, int index, long[] arguments) {
+        public void collectBox(Locatable destination, long collectableAddress) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public long callMethod(int index, long... arguments) {
             throw new UnsupportedOperationException();
         }
     }

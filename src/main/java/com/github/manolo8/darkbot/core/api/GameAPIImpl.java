@@ -64,7 +64,8 @@ public class GameAPIImpl<
                 handler.getVersion() + "h " +
                 memory.getVersion() + "m " +
                 stringReader.getVersion() + "s " +
-                interaction.getVersion() + "i";
+                interaction.getVersion() + "i" +
+                direct.getVersion() + "d";
 
 
         this.loginData = hasCapability(GameAPI.Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
@@ -137,6 +138,8 @@ public class GameAPIImpl<
     @Override
     public void createWindow() {
         if (hasCapability(GameAPI.Capability.LOGIN)) setData();
+
+        if (hasCapability(GameAPI.Capability.BACKGROUND_ONLY)) return;
 
         if (hasCapability(GameAPI.Capability.ATTACH)) {
             PidSelector pidSelector = new PidSelector(window.getProcesses());
@@ -353,12 +356,12 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void collectBox(Locatable destination, @NotNull Long collectableAddress) {
+    public void collectBox(Locatable destination, long collectableAddress) {
         direct.collectBox(destination, collectableAddress);
     }
 
     @Override
-    public long callMethod(long object, int index, long[] arguments) {
-        return direct.callMethod(object, index, arguments);
+    public long callMethod(int index, long... arguments) {
+        return direct.callMethod(index, arguments);
     }
 }

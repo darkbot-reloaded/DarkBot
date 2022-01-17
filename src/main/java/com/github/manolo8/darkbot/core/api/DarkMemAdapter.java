@@ -23,10 +23,6 @@ public class DarkMemAdapter extends GameAPIImpl<DarkMem, DarkMemAdapter.DarkMemH
                 GameAPI.Capability.ATTACH);
     }
 
-    public static DarkMemAdapter of(StartupParams params) {
-        return new DarkMemAdapter(params, new DarkMem());
-    }
-
     @Override
     public void createWindow() {
         super.createWindow();

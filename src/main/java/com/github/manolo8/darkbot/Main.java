@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.config.utils.PlayerTagTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.FacadeManager;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
@@ -67,6 +68,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
             .registerTypeAdapterFactory(new PlayerTagTypeAdapterFactory())
             .create();
 
+    public final StartupParams params;
+
     public ConfigManager configManager = new ConfigManager();
     public ConfigHandler configHandler;
     public Config config;
@@ -109,6 +112,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
     public Main(StartupParams params) {
         super("Main");
 
+        this.params = params;
+
         // The order here is a bit tricky, because generating the config tree
         // requires i18n being configured with a locale, but the locale is
         // defined in the config
@@ -143,7 +148,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 settingsManager, facadeManager, effectManager, guiManager, mapManager,
                 hero, statsManager, pingManager, repairManager);
 
-        API = configManager.getAPI(params);
+        API = configManager.getAPI(pluginAPI);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
         pluginAPI.addInstance(API);
 
@@ -165,7 +170,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
         API.createWindow();
         if (params.getAutoStart()) setRunning(true);
-        start();
+        this.start();
+        backpage.start();
     }
 
     @Override
@@ -194,8 +200,11 @@ public class Main extends Thread implements PluginListener, BotAPI {
         this.status.tick();
         checkModule();
 
-        if (isInvalid()) tickingModule = false;
-        else validTick();
+        // Do not care for either valid nor invalid if we're running a background-only bot
+        if (!Main.API.hasCapability(GameAPI.Capability.BACKGROUND_ONLY)) {
+            if (isInvalid()) tickingModule = false;
+            else validTick();
+        }
 
         this.form.tick();
         this.configManager.saveChangedConfig();
@@ -234,6 +243,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         guiManager.tick();
         statsManager.tick();
         repairManager.tick();
+        API.tick();
 
         tickingModule = running && guiManager.canTickModule();
         if (tickingModule) tickRunning();

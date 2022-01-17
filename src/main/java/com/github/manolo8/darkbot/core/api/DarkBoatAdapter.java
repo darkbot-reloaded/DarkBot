@@ -12,7 +12,7 @@ public class DarkBoatAdapter extends GameAPIImpl<
         DarkBoat,
         GameAPI.NoOpDirectInteraction> {
 
-    private DarkBoatAdapter(StartupParams params, DarkBoat darkboat) {
+    public DarkBoatAdapter(StartupParams params, DarkBoat darkboat) {
         super(params,
                 darkboat,
                 darkboat,
@@ -23,10 +23,6 @@ public class DarkBoatAdapter extends GameAPIImpl<
                 GameAPI.Capability.LOGIN,
                 GameAPI.Capability.INITIALLY_SHOWN,
                 GameAPI.Capability.CREATE_WINDOW_THREAD);
-    }
-
-    public static DarkBoatAdapter of(StartupParams params) {
-        return new DarkBoatAdapter(params, new DarkBoat());
     }
 
     @Override

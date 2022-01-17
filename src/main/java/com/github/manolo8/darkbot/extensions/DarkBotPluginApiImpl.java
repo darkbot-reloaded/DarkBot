@@ -20,7 +20,7 @@ import eu.darkbot.impl.managers.I18n;
 public class DarkBotPluginApiImpl extends PluginApiImpl {
 
     public DarkBotPluginApiImpl(Main main) {
-        addInstance(main, Main.API, StarManager.getInstance(), main.configManager);
+        addInstance(main, main.params, StarManager.getInstance(), main.configManager);
         addImplementations(
                 BackpageManager.class,
                 EntityList.class,

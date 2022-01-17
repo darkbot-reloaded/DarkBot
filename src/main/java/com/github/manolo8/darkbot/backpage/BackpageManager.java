@@ -62,7 +62,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
         this.auctionManager = new AuctionManager(main, this);
 
         setDaemon(true);
-        start();
     }
 
     private static String getRandomAction() {

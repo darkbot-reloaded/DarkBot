@@ -110,8 +110,8 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     void setMaxFps(int maxCps);
     void lockEntity(int id);
     void moveShip(Locatable destination);
-    void collectBox(Locatable destination, @NotNull Long collectableAddress);
-    long callMethod(long object, int index, long[] arguments);
+    void collectBox(Locatable destination, long collectableAddress);
+    long callMethod(int index, long... arguments);
 
     //MemoryAPI
     @Override
