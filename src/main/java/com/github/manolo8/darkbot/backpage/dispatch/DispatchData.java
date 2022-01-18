@@ -114,6 +114,7 @@ public class DispatchData {
             r.setId(m.group(2));
             r.setSlotId(slotID);
             r.setName(m.group(4));
+            r.setForRemoval(false);
             return true;
         }
     }
