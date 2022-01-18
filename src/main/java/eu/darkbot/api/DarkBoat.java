@@ -3,7 +3,7 @@ package eu.darkbot.api;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.LibUtils;
 
-public class DarkBoat implements GameAPI.Memory, GameAPI.Window, GameAPI.Handler, GameAPI.Interaction {
+public class DarkBoat implements GameAPI.Memory, GameAPI.Window, GameAPI.Handler, GameAPI.Interaction, API.Singleton {
 
     static {
         LibUtils.loadLibrary("DarkBoatAPI");
@@ -18,6 +18,7 @@ public class DarkBoat implements GameAPI.Memory, GameAPI.Window, GameAPI.Handler
     public native void    reload();
     public native boolean isValid();
     public native long    getMemoryUsage();
+    public native void    setMaxFps(int maxFps);
     public native int     getVersion();
 
     public native void keyClick  (int keyCode);

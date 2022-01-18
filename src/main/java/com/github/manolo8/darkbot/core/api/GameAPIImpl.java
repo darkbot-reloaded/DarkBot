@@ -7,13 +7,16 @@ import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.managers.ConfigAPI;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.function.Consumer;
 
 public class GameAPIImpl<
         W extends GameAPI.Window,
@@ -37,6 +40,8 @@ public class GameAPIImpl<
     protected final EnumSet<GameAPI.Capability> capabilities;
 
     protected final String version;
+
+    private final Consumer<Integer> fpsLimitListener; // Needs to be kept as a strong reference to avoid GC
 
     protected final LoginData loginData; // Used only if api supports LOGIN
     protected int pid; // Used only if api supports ATTACH
@@ -70,6 +75,15 @@ public class GameAPIImpl<
 
         this.loginData = hasCapability(GameAPI.Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
         this.initiallyShown = hasCapability(GameAPI.Capability.INITIALLY_SHOWN) && !params.getAutoHide();
+
+        if (hasCapability(GameAPI.Capability.DIRECT_LIMIT_FPS)) {
+            ConfigAPI config = HeroManager.instance.main.configHandler;
+            ConfigSetting<Integer> maxFps = config.requireConfig("bot_settings.api_config.max_fps");
+            maxFps.addListener(fpsLimitListener = direct::setMaxFps);
+            direct.setMaxFps(maxFps.getValue());
+        } else {
+            this.fpsLimitListener = null;
+        }
     }
 
     protected void reload() {

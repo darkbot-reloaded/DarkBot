@@ -122,6 +122,7 @@ public interface GameAPI {
         CREATE_WINDOW_THREAD,
         BACKGROUND_ONLY,
 
+        DIRECT_LIMIT_FPS,
         DIRECT_ENTITY_LOCK,
         DIRECT_MOVE_SHIP,
         DIRECT_COLLECT_BOX,
