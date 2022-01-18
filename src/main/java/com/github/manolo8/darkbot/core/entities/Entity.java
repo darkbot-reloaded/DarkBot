@@ -9,6 +9,8 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
+import eu.darkbot.api.game.entities.Ship;
+import eu.darkbot.api.game.other.Lockable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -136,7 +138,8 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     public boolean trySelect(boolean tryAttack) {
         if (!isSelectable() || distanceTo(main.hero) > DEFAULT_CLICK_RADIUS) return false;
 
-        if (API.hasCapability(GameAPI.Capability.DIRECT_ENTITY_LOCK)) {
+        // Use direct locking, but only on things that can be locked (eg: boxes can't be locked)
+        if (API.hasCapability(GameAPI.Capability.DIRECT_ENTITY_LOCK) && this instanceof Lockable) {
             API.lockEntity(id);
         } else {
             clickable.setRadius(DEFAULT_CLICK_RADIUS);
@@ -144,7 +147,7 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
             clickable.setRadius(0);
         }
 
-        return true; // We can't know if successful...
+        return true; // We assume it was successful
     }
 
     @Override
