@@ -8,8 +8,10 @@ import eu.darkbot.api.config.util.OptionEditor;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
 
 public class DropdownEditor extends JComboBox<Object> implements OptionEditor<Object> {
 
@@ -36,6 +38,16 @@ public class DropdownEditor extends JComboBox<Object> implements OptionEditor<Ob
         setSelectedItem(dropdown.getValue());
 
         return this;
+    }
+
+    public void processKeyEvent(KeyEvent e) {
+        super.processKeyEvent(e);
+
+        // After closing the popup with enter, confirm the change in the editor and go to the next node in the tree
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && !isPopupVisible()) {
+            JTree tree = (JTree) SwingUtilities.getAncestorOfClass(JTree.class, this);
+            if (tree != null) tree.stopEditing();
+        }
     }
 
     @Override
