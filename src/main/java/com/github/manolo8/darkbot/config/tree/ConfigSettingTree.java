@@ -10,7 +10,6 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ConfigSettingTree implements TreeModel {
 

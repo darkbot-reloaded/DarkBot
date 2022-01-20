@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui;
 import com.github.manolo8.darkbot.config.tree.ConfigSettingTree;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.gui.components.MainButton;
+import com.github.manolo8.darkbot.gui.tree.ConfigTree;
 import com.github.manolo8.darkbot.gui.tree.EditorProvider;
 import com.github.manolo8.darkbot.gui.tree.TreeEditor;
 import com.github.manolo8.darkbot.gui.tree.TreeRenderer;
@@ -181,35 +182,10 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     }
 
     private JComponent setupUI() {
-        JTree configTree = new JTree(treeModel);
-        configTree.setEditable(true);
-        configTree.setInvokesStopCellEditing(true);
-        configTree.setRootVisible(false);
-        configTree.setShowsRootHandles(true);
-        configTree.setToggleClickCount(1);
-        configTree.setRowHeight(0);
-        configTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        configTree.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNext");
-        configTree.getInputMap(JComponent.WHEN_FOCUSED)
-                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "startEditing");
-
-        ToolTipManager.sharedInstance().registerComponent(configTree);
-
         EditorProvider renderer = api.requireInstance(EditorProvider.class);
         EditorProvider editor = new EditorProvider(renderer);
 
-        configTree.setCellRenderer(new TreeRenderer(renderer));
-        configTree.setCellEditor(new TreeEditor(configTree, editor));
-
-        treeModel.addTreeModelListener((SimpleTreeListener) e -> {
-            unfoldTopLevelTree(configTree);
-            SwingUtilities.invokeLater(() -> {
-                configTree.validate();
-                configTree.repaint();
-            });
-        });
-        unfoldTopLevelTree(configTree);
+        ConfigTree configTree = new ConfigTree(treeModel, renderer, editor);
 
         JScrollPane scrollPane = new JScrollPane(configTree);
         scrollPane.setBorder(null);
@@ -220,29 +196,6 @@ public class AdvancedConfig extends JPanel implements PluginListener {
             scrollPane.setPreferredSize(new Dimension(treeSize.width + 15, Math.min(400, treeSize.height)));
         }
         return new JLayer<>(scrollPane, new WheelScrollLayerUI());
-    }
-
-    private void unfoldTopLevelTree(JTree configTree) {
-        for (int row = 0; row < configTree.getRowCount(); row++) {
-            if (configTree.isExpanded(row)) continue;
-
-            TreePath path = configTree.getPathForRow(row);
-            if (treeModel.isLeaf(path.getLastPathComponent())) continue; // Ignore leaf nodes
-
-            if (treeModel.getChildCount(path.getLastPathComponent()) <= 5 || // Has few children
-                    (path = path.getParentPath()) == null || // Is the root, no parent
-                    path.getPathCount() == 1 || // Is one-level in
-                    hasNoLeaf(path.getLastPathComponent())) { // No sibling is a leaf
-                configTree.expandRow(row);
-            }
-        }
-    }
-
-    private boolean hasNoLeaf(Object parent) {
-        int children = treeModel.getChildCount(parent);
-        for (int child = 0; child < children; child++)
-            if (treeModel.isLeaf(treeModel.getChild(parent, child))) return false;
-        return true;
     }
 
     public static Dimension forcePreferredHeight(Dimension preferred) {
