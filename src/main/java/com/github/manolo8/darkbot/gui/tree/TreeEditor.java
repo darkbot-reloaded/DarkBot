@@ -16,7 +16,7 @@ public class TreeEditor extends AbstractCellEditor implements TreeCellEditor {
 
     public TreeEditor(JTree tree, EditorProvider editors) {
         this.tree = tree;
-        this.treeCell = new TreeCell(editors);
+        this.treeCell = new TreeCell(editors, true);
         // Don't let focus leave the cell until it's confirmed or cancelled
         this.treeCell.setFocusCycleRoot(true);
     }

@@ -228,6 +228,7 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
             super(insert);
             // Allow minimum size, otherwise L&F forces big buttons
             putClientProperty("JComponent.minimumWidth", 0);
+            setFocusable(false);
             if (!inline) setHorizontalAlignment(SwingConstants.LEFT);
 
             setMargin(new Insets(2, 3, 2, 3));

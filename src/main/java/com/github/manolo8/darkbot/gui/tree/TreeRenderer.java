@@ -10,7 +10,7 @@ public class TreeRenderer implements TreeCellRenderer {
     private final TreeCell treeCell;
 
     public TreeRenderer(EditorProvider editors) {
-        this.treeCell = new TreeCell(editors);
+        this.treeCell = new TreeCell(editors, false);
     }
 
     @Override

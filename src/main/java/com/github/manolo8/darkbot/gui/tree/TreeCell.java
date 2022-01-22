@@ -5,9 +5,15 @@ import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.config.ConfigSetting;
+import sun.awt.CausedFocusEvent;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class TreeCell extends JPanel {
@@ -15,6 +21,7 @@ public class TreeCell extends JPanel {
             ERROR_EDITOR = UIUtils.setRed(new JLabel("Error creating editor (hover for details)"), true);
 
     private final EditorProvider editors;
+    private final boolean isEditor; // Editor = true, Renderer = false
 
     private int nameWidth;
     private int minHeight;
@@ -23,19 +30,29 @@ public class TreeCell extends JPanel {
     private JComponent component = EMPTY_EDITOR;
     private ConfigSetting<?> setting;
 
-
     private OptionEditor legacyEditor;
     private eu.darkbot.api.config.util.OptionEditor<?> editor;
 
-    public TreeCell(EditorProvider editors) {
+    private final List<Component> focusableComponents = new ArrayList<>();
+    private final FocusListener focusListener = new EditorFocusListener();
+
+    public TreeCell(EditorProvider editors, boolean editor) {
         setLayout(new TreeCellLayout());
 
         this.editors = editors;
+        this.isEditor = editor;
         setOpaque(false);
 
         add(name);
         add(component);
+        if (isEditor) {
+            add(new EditorButton(UIUtils.getIcon("tick"),
+                    "Save edition\nDefault if you click outside the editor" ,JTree::stopEditing));
+            add(new EditorButton(UIUtils.getIcon("cross"),
+                    "Cancel edition\nCan also be triggered by ESC", JTree::cancelEditing));
+        }
     }
+
 
     public <T> void setEditing(ConfigSetting<T> setting) {
         this.setting = setting;
@@ -75,8 +92,27 @@ public class TreeCell extends JPanel {
     }
 
     private void replaceComponent(JComponent component) {
-        if (this.component != null) remove(this.component);
-        add(this.component = component);
+        if (this.component != null) {
+            if (isEditor) {
+                focusableComponents.forEach(c -> c.removeFocusListener(focusListener));
+                focusableComponents.clear();
+            }
+            remove(this.component);
+        }
+        add(this.component = component, 1);
+        if (isEditor) registerFocusListener(this.component);
+    }
+
+    private void registerFocusListener(Component component) {
+        if (component.isFocusable()) {
+            focusableComponents.add(component);
+            component.addFocusListener(focusListener);
+        }
+        if (component instanceof Container) {
+            for (Component c : ((Container) component).getComponents()) {
+                registerFocusListener(c);
+            }
+        }
     }
 
     public Object getValue() {
@@ -139,7 +175,7 @@ public class TreeCell extends JPanel {
                 dim.setSize(Math.max(dim.width, res.width), Math.max(dim.height, res.height));
 
 
-            dim.width += nameWidth;
+            dim.width += nameWidth + (nameWidth > 0 ? 3 + 18 + 18 : 0);
             dim.height = Math.max(dim.height, minHeight);
             return dim;
         }
@@ -156,6 +192,72 @@ public class TreeCell extends JPanel {
             int height = Math.max(minHeight, editorSize.height);
             parent.getComponent(0).setBounds(0, 0, nameWidth, height);
             parent.getComponent(1).setBounds(nameWidth, (height - editorSize.height) / 2, editorSize.width, editorSize.height);
+            if (nameWidth > 0 && isEditor) {
+                parent.getComponent(2).setBounds(nameWidth + editorSize.width + 3     , 0, 18, height);
+                parent.getComponent(3).setBounds(nameWidth + editorSize.width + 3 + 18, 0, 18, height);
+            }
+        }
+    }
+
+    private static class EditorFocusListener implements FocusListener {
+        @Override
+        public void focusGained(FocusEvent e) {}
+
+        @Override
+        public void focusLost(FocusEvent e) {
+            if (shouldStopEditing(e)) {
+                JTree tree = (JTree) SwingUtilities.getAncestorOfClass(JTree.class, e.getComponent());
+                tree.stopEditing();
+            }
+        }
+
+        private boolean shouldStopEditing(FocusEvent e) {
+            Component component = e.getComponent();
+
+            // We wouldn't be able to find the tree even if we wanted to stop.
+            if (component == null) return false;
+
+            // Another window has been activated, always stop editing
+            if (e instanceof CausedFocusEvent &&
+                    ((CausedFocusEvent) e).getCause() == CausedFocusEvent.Cause.ACTIVATION) return true;
+
+            // Temporary focus loss, this is triggered by dropdown menus and similar things
+            if (e.isTemporary()) return false;
+
+            // opposite is null sometimes when switching between 2 editors of same type, not enough info to decide
+            Component opposite = e.getOppositeComponent();
+            if (opposite == null) return false;
+
+            // Both components are in the same editor (eg: Switching inside range editor min & max), do nothing
+            if (component.getFocusCycleRootAncestor() == opposite.getFocusCycleRootAncestor()) return false;
+
+            // Opposite component isn't even in a tree (it's something outside the tree), stop the edition
+            JTree oppositeTree = getTree(opposite);
+            if (oppositeTree == null) return true;
+
+            // If they belong on the same tree, do nothing, tree handles it on its own
+            JTree componentTree = getTree(component);
+            return componentTree != oppositeTree;
+        }
+
+        private JTree getTree(Component component) {
+            if (component instanceof JTree) return (JTree) component;
+            return (JTree) SwingUtilities.getAncestorOfClass(JTree.class, component);
+        }
+
+    }
+
+    private static class EditorButton extends JButton {
+
+        public EditorButton(ImageIcon icon, String tooltip, Consumer<JTree> action) {
+            super(icon);
+            setFocusable(false);
+            setContentAreaFilled(false);
+            setOpaque(false);
+            setToolTipText(tooltip);
+
+            addActionListener(e ->
+                    action.accept((JTree) SwingUtilities.getAncestorOfClass(JTree.class, EditorButton.this)));
         }
     }
 
