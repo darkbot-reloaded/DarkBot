@@ -317,7 +317,7 @@ public class NpcAttacker implements AttackAPI {
 
             Config.Loot.Sab SAB = main.config.LOOT.SAB;
             return hero.getHealth().shieldPercent() <= SAB.PERCENT
-                    && attacker.getTarget().getHealth().getShield() > SAB.NPC_AMOUNT
+                    && getCallerOr(attacker).getTarget().getHealth().getShield() > SAB.NPC_AMOUNT
                     && (SAB.CONDITION == null || SAB.CONDITION.get(main).toBoolean());
         }
 
