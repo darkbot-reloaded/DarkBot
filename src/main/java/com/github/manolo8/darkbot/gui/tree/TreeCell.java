@@ -3,9 +3,9 @@ package com.github.manolo8.darkbot.gui.tree;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
+import com.github.manolo8.darkbot.gui.tree.utils.FocusEventUtil;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.config.ConfigSetting;
-import sun.awt.CausedFocusEvent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -218,8 +218,7 @@ public class TreeCell extends JPanel {
             if (component == null) return false;
 
             // Another window has been activated, always stop editing
-            if (e instanceof CausedFocusEvent &&
-                    ((CausedFocusEvent) e).getCause() == CausedFocusEvent.Cause.ACTIVATION) return true;
+            if (FocusEventUtil.isWindowActivation(e)) return true;
 
             // Temporary focus loss, this is triggered by dropdown menus and similar things
             if (e.isTemporary()) return false;
