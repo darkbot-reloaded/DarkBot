@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -14,27 +13,27 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class LibSetup {
 
-    private static final String BASE_URL = "https://gist.github.com/Pablete1234/25e057781868db1397f1b3a8414203e1/raw/";
-    private static final String LIBS_FILE = "libs.json";
+    private static final String BASE_URL = "https://gist.github.com/Pablete1234/2e43458bb3b644e16d146969069b1548/raw/";
+    private static final Type LIB_LIST_TYPE = new TypeToken<Map<String, Lib>>(){}.getType();
 
-    private static final Type LIB_LIST_TYPE = new TypeToken<List<Lib>>(){}.getType();
+    private static Map<String, Lib> libraries;
 
-    private static class Lib {
-        private String path;
-        private String sha256;
-        private String download;
-        private boolean keep;
+    public static class Lib {
+        public String path;
+        public String sha256;
+        public Set<String> altSha256;
+        public String download;
+        public boolean auto;
     }
 
     public static void setupLibraries() {
-        List<Lib> libraries;
         try {
             libraries = Http.create(BASE_URL + "/libs.json")
                     .consumeInputStream(is -> Main.GSON.fromJson(IOUtils.read(is), LIB_LIST_TYPE));
@@ -44,58 +43,52 @@ public class LibSetup {
             return;
         }
 
-        for (Lib lib : libraries) {
-            Path libPath = Paths.get(lib.path);
+        for (Lib lib : libraries.values()) {
+            if (lib.auto) downloadLib(lib);
+        }
+    }
 
-            if (Files.exists(libPath)) {
-                if (lib.keep) continue;
-                try {
-                    if (Objects.equals(FileUtils.calcSHA256(libPath), lib.sha256)) continue;
-                } catch (IOException e) {
-                    System.out.println("Exception checking library file SHA");
-                    e.printStackTrace();
-                }
-            } else {
-                FileUtils.ensureDirectoryExists(libPath.getParent());
-            }
-            System.out.println("Downloading missing or outdated library file: " + lib.path);
+    public static void downloadLib(String path) {
+        downloadLib(libraries.get(path));
+    }
 
-            try (InputStream is = new URL(lib.download).openConnection().getInputStream()) {
-                Files.copy(is, libPath, StandardCopyOption.REPLACE_EXISTING);
+    public static void downloadLib(Lib lib) {
+        if (lib == null) return;
+        Path libPath = Paths.get(lib.path);
+
+        if (Files.exists(libPath)) {
+            try {
+                String sha = FileUtils.calcSHA256(libPath);
+                if (Objects.equals(sha, lib.sha256) || (lib.altSha256 != null && lib.altSha256.contains(sha))) return;
             } catch (IOException e) {
-                System.err.println("Failed to download library file: " + lib.path + " from " + lib.download);
+                System.out.println("Exception checking library file SHA");
                 e.printStackTrace();
             }
+        } else {
+            FileUtils.ensureDirectoryExists(libPath.getParent());
+        }
+        System.out.println("Downloading missing or outdated library file: " + lib.path);
+
+        try (InputStream is = new URL(lib.download).openConnection().getInputStream()) {
+            Files.copy(is, libPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            System.err.println("Failed to download library file: " + lib.path + " from " + lib.download);
+            e.printStackTrace();
         }
     }
 
     /**
-     * Simple utility method to generate the libs file
+     * Simple utility method to generate sha256 hashes
      */
-
     public static void main(String[] args) throws IOException {
-        List<Lib> libraries = new ArrayList<>();
-
-        Path libFolder = Paths.get("lib"), libFile = libFolder.resolve(LIBS_FILE);
+        Path libFolder = Paths.get("lib");
         if (!Files.exists(libFolder) || !Files.isDirectory(libFolder)) {
             throw new RuntimeException("Cant create a libraries file without a lib folder");
         }
 
         for (Path path : Files.walk(libFolder, 1).collect(Collectors.toList())) {
             if (!Files.isRegularFile(path)) continue;
-            if (Files.isSameFile(path, libFile)) continue;
-            Lib l = new Lib();
-            l.path = path.toString().replace("\\", "/");
-            l.sha256 = FileUtils.calcSHA256(path);
-            l.download = BASE_URL + path.getFileName().toString();
-            l.keep = false;
-            libraries.add(l);
-        }
-
-        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("lib", LIBS_FILE))) {
-            Main.GSON.toJson(libraries, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
+            System.out.format("%-20s\t%s\n", path.getFileName(), FileUtils.calcSHA256(path));
         }
     }
 

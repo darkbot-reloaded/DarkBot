@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 public class LibUtils {
 
     public static void loadLibrary(String library) {
+        LibSetup.downloadLib(library + "." + getExtension());
         System.load(getLibPath(library));
     }
 
