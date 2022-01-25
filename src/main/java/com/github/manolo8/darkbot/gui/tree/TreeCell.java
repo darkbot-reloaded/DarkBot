@@ -5,7 +5,9 @@ import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.utils.FocusEventUtil;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.gui.utils.tree.PluginListConfigSetting;
 import eu.darkbot.api.config.ConfigSetting;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -133,9 +135,13 @@ public class TreeCell extends JPanel {
      * @return the minimum height the component should have
      */
     private int getMinHeight(ConfigSetting<?> node) {
-        return !(node instanceof ConfigSetting.Parent) ||
-                (node.getParent() != null && node.getParent().getParent() != null) ?
-                AdvancedConfig.ROW_HEIGHT : AdvancedConfig.HEADER_HEIGHT;
+        return node instanceof ConfigSetting.Parent &&
+                (isRoot(node) || isRoot(node.getParent())) ?
+                AdvancedConfig.HEADER_HEIGHT : AdvancedConfig.ROW_HEIGHT;
+    }
+
+    private boolean isRoot(@Nullable ConfigSetting<?> node) {
+        return node != null && (node.getParent() == null || node.getParent() instanceof PluginListConfigSetting);
     }
 
     /**
@@ -207,7 +213,7 @@ public class TreeCell extends JPanel {
         public void focusLost(FocusEvent e) {
             if (shouldStopEditing(e)) {
                 JTree tree = (JTree) SwingUtilities.getAncestorOfClass(JTree.class, e.getComponent());
-                tree.stopEditing();
+                if (tree != null) tree.stopEditing();
             }
         }
 

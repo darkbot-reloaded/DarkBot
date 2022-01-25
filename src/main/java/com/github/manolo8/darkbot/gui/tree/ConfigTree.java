@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.gui.tree;
 
-import com.github.manolo8.darkbot.config.tree.ConfigSettingTree;
+import com.github.manolo8.darkbot.gui.utils.tree.ConfigSettingTreeModel;
 import com.github.manolo8.darkbot.gui.utils.SimpleTreeListener;
 
 import javax.swing.*;
@@ -11,7 +11,7 @@ import java.awt.event.KeyEvent;
 
 public class ConfigTree extends JTree {
 
-    public ConfigTree(ConfigSettingTree model, EditorProvider renderer, EditorProvider editor) {
+    public ConfigTree(ConfigSettingTreeModel model, EditorProvider renderer, EditorProvider editor) {
         super(model);
         setEditable(true);
         setInvokesStopCellEditing(true);

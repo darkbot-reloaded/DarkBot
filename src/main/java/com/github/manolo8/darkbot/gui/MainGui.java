@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import net.miginfocom.swing.MigLayout;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -76,7 +77,7 @@ public class MainGui extends JFrame {
         }
     }
 
-    public void setCustomConfig(ConfigSetting.Parent<?>... config) {
+    public void setCustomConfig(@Nullable ConfigSetting.Parent<?> config) {
         configGui.setCustomConfig(config);
     }
 

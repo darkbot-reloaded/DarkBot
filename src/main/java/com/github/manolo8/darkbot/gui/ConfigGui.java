@@ -15,6 +15,7 @@ import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import net.miginfocom.swing.MigLayout;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -98,8 +99,8 @@ public class ConfigGui extends JFrame {
         pluginDisplay.setup(main, pluginTab);
     }
 
-    void setCustomConfig(ConfigSetting.Parent<?>... configs) {
-        SwingUtilities.invokeLater(() -> advancedPane.setCustomConfig(configs));
+    void setCustomConfig(@Nullable ConfigSetting.Parent<?> config) {
+        SwingUtilities.invokeLater(() -> advancedPane.setCustomConfig(config));
     }
 
     @Override

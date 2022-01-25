@@ -29,7 +29,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -130,6 +132,7 @@ public class ConfigManager implements API.Singleton {
         FileUtils.ensureDirectoryExists(Paths.get(ConfigManager.CONFIG_FOLDER));
         try {
             Files.list(Paths.get(ConfigManager.CONFIG_FOLDER))
+                    .sorted(Comparator.comparing(this::getLastModified).reversed())
                     .map(Path::getFileName)
                     .map(Path::toString)
                     .filter(n -> !n.endsWith(ConfigManager.BACKUP + ConfigManager.EXTENSION))
@@ -140,6 +143,15 @@ public class ConfigManager implements API.Singleton {
             e.printStackTrace();
         }
         return configs;
+    }
+
+    private FileTime getLastModified(Path path) {
+        try {
+            return Files.getLastModifiedTime(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return FileTime.fromMillis(0);
+        }
     }
 
     private Config loadConfig(Path configFile, Path backupFile) {

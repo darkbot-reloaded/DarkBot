@@ -326,17 +326,6 @@ public class Main extends Thread implements PluginListener, BotAPI {
     }
 
     private <A extends Module> void updateCustomConfig(A module) {
-        // Fun one: add ALL configs as tabs, creates one massive config tree
-        /*
-        ConfigSetting.Parent<?>[] configs = featureRegistry.getFeatures()
-                .stream()
-                //.filter(FeatureDefinition::isEnabled)
-                .map(FeatureDefinition::getConfig)
-                .filter(Objects::nonNull)
-                .toArray(ConfigSetting.Parent<?>[]::new);
-        form.setCustomConfig(configs);
-        */
-
         if (module instanceof Configurable) {
             FeatureDefinition<A> fd = featureRegistry.getFeatureDefinition(module);
             if (fd != null) {
@@ -344,7 +333,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 return;
             }
         }
-        form.setCustomConfig();
+        form.setCustomConfig(null);
     }
 
     @Override

@@ -132,6 +132,10 @@ public class Plugin implements PluginInfo {
         return definition.download;
     }
 
+    public String[] getFeatureIds() {
+        return definition.features;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

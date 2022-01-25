@@ -1,9 +1,8 @@
-package com.github.manolo8.darkbot.config.tree;
+package com.github.manolo8.darkbot.gui.utils.tree;
 
 import com.github.manolo8.darkbot.utils.StringQuery;
 import eu.darkbot.api.config.ConfigSetting;
 
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
