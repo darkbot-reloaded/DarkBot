@@ -117,7 +117,7 @@ public class GroupManager extends Gui  implements GroupAPI {
             Long inviteTime = pastInvites.get(player.username);
             if (inviteTime != null && System.currentTimeMillis() < inviteTime) continue;
 
-            pending = () -> sendInvite(player.username, inviteTime == null ? 60_000 : 300_000);
+            pending = () -> sendInvite(player.username, inviteTime == null ? 60_000 : 120_000);
             break;
         }
     }
@@ -150,9 +150,9 @@ public class GroupManager extends Gui  implements GroupAPI {
     }
     public void sendInvite(String username, long wait) {
         click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
-        Time.sleep(75); // This should not be here, but will stay for now
+        Time.sleep(100); // This should not be here, but will stay for now
         API.sendText(username);
-        Time.sleep(75); // This should not be here, but will stay for now
+        Time.sleep(500); // This should not be here, but will stay for now
         click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
         pastInvites.put(username, System.currentTimeMillis() + wait); // Wait until re-invite
     }
