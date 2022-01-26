@@ -127,7 +127,7 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
         }
 
         public static KeyBind of(SlotBarsProxy.Type slotType, int slotNumber) {
-            return KeyBind.valueOf(slotType == SlotBarsProxy.Type.PREMIUM_BAR ? "PREMIUM_" : "SLOTBAR_" + slotNumber % 10);
+            return KeyBind.valueOf((slotType == SlotBarsProxy.Type.PREMIUM_BAR ? "PREMIUM_" : "SLOTBAR_") + slotNumber % 10);
         }
 
         public SlotBarsProxy.Type getType() {
