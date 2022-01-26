@@ -140,6 +140,11 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         setCorrectRoot();
     }
 
+    public void updateConfigTreeListeners() {
+        treeModel.updateListeners();
+        tabsModel.updateListeners();
+    }
+
     private void setSearch(String search) {
         boolean wasFiltered = treeModel.isFiltered();
         treeModel.setSearch(search);

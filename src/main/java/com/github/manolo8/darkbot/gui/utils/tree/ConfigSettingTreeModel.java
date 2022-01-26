@@ -16,9 +16,15 @@ public class ConfigSettingTreeModel implements TreeModel {
     private ConfigSetting.Parent<?> root;
     private final List<TreeModelListener> listeners = new ArrayList<>();
 
-    private final TreeFilter filter = new TreeFilter();
+    private final TreeFilter filter;
 
-    public ConfigSettingTreeModel() {}
+    public ConfigSettingTreeModel() {
+        this(new TreeFilter());
+    }
+
+    public ConfigSettingTreeModel(TreeFilter filter) {
+        this.filter = filter;
+    }
 
     public void setRoot(ConfigSetting.Parent<?> root) {
         this.root = root;

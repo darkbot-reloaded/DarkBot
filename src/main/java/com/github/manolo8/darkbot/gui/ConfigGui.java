@@ -103,6 +103,10 @@ public class ConfigGui extends JFrame {
         SwingUtilities.invokeLater(() -> advancedPane.setCustomConfig(config));
     }
 
+    void updateConfigTreeListeners() {
+        SwingUtilities.invokeLater(() -> advancedPane.updateConfigTreeListeners());
+    }
+
     @Override
     public void setVisible(boolean b) {
         super.setVisible(b);

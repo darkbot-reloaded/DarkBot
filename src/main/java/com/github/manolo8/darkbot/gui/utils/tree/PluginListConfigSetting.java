@@ -41,7 +41,7 @@ public class PluginListConfigSetting extends DummyConfigSetting<Void> {
     /**
      * A config node that holds a plugin and all of its features
      */
-    private static class PluginConfigSetting extends DummyConfigSetting<Void> {
+    private static class PluginConfigSetting extends DummyConfigSetting<Void> implements ToggleableNode {
 
         private final Map<String, ConfigSetting<?>> children = new LinkedHashMap<>();
 
@@ -51,7 +51,7 @@ public class PluginListConfigSetting extends DummyConfigSetting<Void> {
             for (String featureId : ((Plugin) plugin).getFeatureIds()) {
                 FeatureDefinition<?> feature = extensions.getFeatureDefinition(featureId);
                 if (feature.getConfig() != null)
-                    children.put(feature.getId(), reParent(feature.getConfig(), this));
+                    children.put(feature.getId(), new FeatureSettingParent<>(feature.getConfig(), this, feature));
             }
         }
 
@@ -59,6 +59,27 @@ public class PluginListConfigSetting extends DummyConfigSetting<Void> {
         public Map<String, ConfigSetting<?>> getChildren() {
             return children;
         }
+
+        @Override
+        public boolean isShown() {
+            return children.values().stream().anyMatch(s -> ((ToggleableNode) s).isShown());
+        }
+    }
+
+    private static class FeatureSettingParent<T> extends ReParentingSettingParent<T> implements ToggleableNode {
+
+        private final FeatureDefinition<?> fd;
+
+        public FeatureSettingParent(ConfigSetting.Parent<T> setting, ConfigSetting.Parent<?> parent,
+                                    FeatureDefinition<?> fd) {
+            super(setting, parent);
+            this.fd = fd;
+        }
+
+        public boolean isShown() {
+            return fd.isEnabled();
+        }
+
     }
 
     private static <T> ConfigSetting<T> reParent(ConfigSetting<T> setting, ConfigSetting.Parent<?> parent) {

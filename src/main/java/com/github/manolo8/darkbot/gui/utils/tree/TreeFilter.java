@@ -57,12 +57,13 @@ public class TreeFilter implements Predicate<ConfigSetting<?>> {
 
     @Override
     public boolean test(ConfigSetting<?> setting) {
+        if (setting instanceof ToggleableNode && !((ToggleableNode) setting).isShown()) return false;
         if (isUnfiltered()) return true;
 
         return isVisible(setting);
     }
 
-    private boolean isVisible(ConfigSetting<?> setting) {
+    protected boolean isVisible(ConfigSetting<?> setting) {
         return visibilityCache.compute(setting, (s, v) -> {
             if (v == null) v = Visibility.UNKNOWN;
             else if (v.visible != null) return v;
@@ -82,7 +83,7 @@ public class TreeFilter implements Predicate<ConfigSetting<?>> {
         }).visible;
     }
 
-    private boolean matches(ConfigSetting<?> setting) {
+    protected boolean matches(ConfigSetting<?> setting) {
         return visibilityCache.compute(setting, (s, v) -> {
             if (v == null) v = Visibility.UNKNOWN;
             else if (v.matches != null) return v;

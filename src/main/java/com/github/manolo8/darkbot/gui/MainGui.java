@@ -81,6 +81,10 @@ public class MainGui extends JFrame {
         configGui.setCustomConfig(config);
     }
 
+    public void updateConfigTreeListeners() {
+        configGui.updateConfigTreeListeners();
+    }
+
     public void updateConfiguration() {
         mapDrawer.setup(main);
         configGui.setComponentData();
