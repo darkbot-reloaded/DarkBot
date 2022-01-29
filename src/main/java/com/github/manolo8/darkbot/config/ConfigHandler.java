@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.config;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.tree.ConfigBuilder;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;

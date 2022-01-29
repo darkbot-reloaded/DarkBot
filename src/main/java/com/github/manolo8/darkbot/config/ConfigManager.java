@@ -29,9 +29,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Responsible for loading & saving configuration files
@@ -43,9 +44,9 @@ public class ConfigManager implements API.Singleton {
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .setLenient()
-            .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
-            .registerTypeHierarchyAdapter(Color.class, new ColorAdapter())
-            .registerTypeHierarchyAdapter(Font.class, new FontAdapter())
+            .registerTypeAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
+            .registerTypeAdapter(Color.class, new ColorAdapter())
+            .registerTypeAdapter(Font.class, new FontAdapter())
             .registerTypeAdapter(ShipMode.class, (InstanceCreator<ShipMode>) type -> new Config.ShipConfig())
             .registerTypeAdapter(PercentRange.class, (InstanceCreator<PercentRange>) type -> new Config.PercentRange())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
@@ -130,6 +131,7 @@ public class ConfigManager implements API.Singleton {
         FileUtils.ensureDirectoryExists(Paths.get(ConfigManager.CONFIG_FOLDER));
         try {
             Files.list(Paths.get(ConfigManager.CONFIG_FOLDER))
+                    .sorted(Comparator.comparing(this::getLastModified).reversed())
                     .map(Path::getFileName)
                     .map(Path::toString)
                     .filter(n -> !n.endsWith(ConfigManager.BACKUP + ConfigManager.EXTENSION))
@@ -140,6 +142,15 @@ public class ConfigManager implements API.Singleton {
             e.printStackTrace();
         }
         return configs;
+    }
+
+    private FileTime getLastModified(Path path) {
+        try {
+            return Files.getLastModifiedTime(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return FileTime.fromMillis(0);
+        }
     }
 
     private Config loadConfig(Path configFile, Path backupFile) {

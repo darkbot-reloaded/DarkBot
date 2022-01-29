@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.extensions.features;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigHandler;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
@@ -23,6 +24,7 @@ import java.util.stream.Stream;
 
 public class FeatureRegistry implements PluginListener, ExtensionsAPI {
 
+    private final Main main;
     private final PluginHandler pluginHandler;
     private final Map<String, FeatureDefinition<?>> FEATURES_BY_ID = new LinkedHashMap<>();
     private final FeatureInstanceLoader featureLoader;
@@ -30,9 +32,11 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
 
     private FeatureRegisterHandler registryHandler;
 
-    public FeatureRegistry(FeatureInstanceLoader featureLoader,
+    public FeatureRegistry(Main main,
+                           FeatureInstanceLoader featureLoader,
                            PluginHandler pluginHandler,
                            ConfigHandler configHandler) {
+        this.main = main;
         this.pluginHandler = pluginHandler;
         this.featureLoader = featureLoader;
         this.configHandler = configHandler;
@@ -62,7 +66,12 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
         pluginHandler.LOADED_PLUGINS.forEach(pl ->
                 Arrays.stream(pl.getDefinition().features)
                         .forEach(feature -> registerPluginFeature(pl, feature)));
+        pluginHandler.LOADED_PLUGINS.sort((p1, p2) -> Boolean.compare(isDisabled(p1), isDisabled(p2)));
         registryHandler.update();
+    }
+
+    private boolean isDisabled(Plugin plugin) {
+        return Arrays.stream(plugin.getFeatureIds()).noneMatch(id -> getFeatureDefinition(id).isEnabled());
     }
 
     public void updateConfig() {
@@ -81,7 +90,11 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
         try {
             Class<?> feature = pluginHandler.PLUGIN_CLASS_LOADER.loadClass(clazzName);
             FeatureDefinition<?> fd = new FeatureDefinition<>(plugin, feature, configHandler::getFeatureConfig);
-            fd.addStatusListener(def -> registryHandler.update());
+            fd.addStatusListener(def -> {
+                registryHandler.update();
+                if (main.getGui() != null)
+                    main.getGui().updateConfigTreeListeners();
+            });
             fd.getIssues().addListener(iss -> registryHandler.update());
             FEATURES_BY_ID.put(clazzName, fd);
         } catch (Throwable e) {
@@ -163,12 +176,16 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
     }
 
     @Override
-    public <T> FeatureInfo<T> getFeatureInfo(Class<T> feature) {
+    public <T> FeatureInfo<T> getFeatureInfo(@NotNull Class<T> feature) {
         return getFeatureDefinition(feature);
     }
 
+    public <T> FeatureInfo<T> getFeatureInfo(@NotNull String featureId) {
+        return getFeatureDefinition(featureId);
+    }
+
     @Override
-    public ClassLoader getClassLoader(PluginInfo pluginInfo) {
+    public ClassLoader getClassLoader(@NotNull PluginInfo pluginInfo) {
         return pluginHandler.PLUGIN_CLASS_LOADER;
     }
 }

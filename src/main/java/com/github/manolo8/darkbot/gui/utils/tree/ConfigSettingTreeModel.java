@@ -1,4 +1,4 @@
-package com.github.manolo8.darkbot.config.tree;
+package com.github.manolo8.darkbot.gui.utils.tree;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import eu.darkbot.api.config.ConfigSetting;
@@ -11,14 +11,20 @@ import javax.swing.tree.TreePath;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConfigSettingTree implements TreeModel {
+public class ConfigSettingTreeModel implements TreeModel {
 
     private ConfigSetting.Parent<?> root;
     private final List<TreeModelListener> listeners = new ArrayList<>();
 
-    private final TreeFilter filter = new TreeFilter();
+    private final TreeFilter filter;
 
-    public ConfigSettingTree() {}
+    public ConfigSettingTreeModel() {
+        this(new TreeFilter());
+    }
+
+    public ConfigSettingTreeModel(TreeFilter filter) {
+        this.filter = filter;
+    }
 
     public void setRoot(ConfigSetting.Parent<?> root) {
         this.root = root;
