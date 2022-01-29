@@ -21,6 +21,11 @@ public class CompoundConfigSetting<T> implements ConfigSetting.Parent<T> {
                                  ConfigSetting<?>... appended) {
         this.base = base;
         this.remapped = new LinkedHashMap<>();
+        setAppended(appended);
+    }
+
+    public void setAppended(ConfigSetting<?>... appended) {
+        remapped.clear();
         remapped.putAll(base.getChildren());
 
         if (appended == null) return;

@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.gui;
 
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.gui.utils.WidthEnforcedScrollPane;
 import com.github.manolo8.darkbot.gui.utils.tree.ConfigSettingTreeModel;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
@@ -12,12 +14,17 @@ import com.github.manolo8.darkbot.gui.utils.tree.SimpleConfigSettingRenderer;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import net.miginfocom.swing.MigLayout;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.plaf.LayerUI;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseWheelEvent;
 import java.util.Iterator;
 
@@ -29,7 +36,9 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
     private final PluginAPI api;
 
-    private ConfigSetting.Parent<?> baseConfig, extendedConfig, lastSelection;
+    private ConfigSetting.Parent<?> baseConfig, lastSelection;
+    private @Nullable CompoundConfigSetting<?> extendedConfig;
+    private PluginListConfigSetting pluginNode;
 
     private final TreeTabsModel tabsModel = new TreeTabsModel();
     private final ConfigSettingTreeModel treeModel = new ConfigSettingTreeModel();
@@ -60,10 +69,12 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
     public void setEditingConfig(ConfigSetting.Parent<?> config) {
         this.baseConfig = config;
-        this.extendedConfig = packed ? config : new CompoundConfigSetting<>(this.baseConfig,
-                new PluginListConfigSetting(baseConfig, api.requireInstance(FeatureRegistry.class)));
+        this.extendedConfig = null;
         this.lastSelection = config;
         if (!packed) {
+            this.pluginNode = new PluginListConfigSetting(baseConfig, api.requireInstance(FeatureRegistry.class));
+            this.extendedConfig = new CompoundConfigSetting<>(baseConfig, pluginNode);
+
             Iterator<ConfigSetting<?>> children = config.getChildren().values().iterator();
             if (children.hasNext()) {
                 ConfigSetting<?> child = children.next();
@@ -75,7 +86,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
     void rebuildUI() {
         if (this.baseConfig == null ||
-                this.extendedConfig == null ||
+                (!packed && this.extendedConfig == null) ||
                 (packed && this.lastSelection == null)) return;
 
         removeAll();
@@ -87,19 +98,37 @@ public class AdvancedConfig extends JPanel implements PluginListener {
             tabsTree.setCellRenderer(new SimpleConfigSettingRenderer());
             tabsTree.setRootVisible(false);
             tabsTree.setShowsRootHandles(true);
+            tabsTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
             tabsTree.getSelectionModel().addTreeSelectionListener(e -> {
                 if (configTree != null) configTree.stopEditing(); // Save any midway edition
 
                 if (treeModel.isFiltered()) scrollToPath(e.getPath());
-                else treeModel.setRoot(lastSelection = (ConfigSetting.Parent<?>) e.getPath().getLastPathComponent());
+                else if (lastSelection != e.getPath().getLastPathComponent())
+                    treeModel.setRoot(lastSelection = (ConfigSetting.Parent<?>) e.getPath().getLastPathComponent());
             });
             tabsTree.setRowHeight(24);
+            tabsTree.setBackground(UIUtils.BACKGROUND);
+            tabsTree.setSelectionRow(0);
 
             add(new SearchField(this::setSearch), "grow");
 
             JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                    wrapInScrollPane(tabsTree),
+                    wrapInScrollPane(tabsTree, true),
                     setupUI());
+            splitPane.setDividerLocation(0);
+            splitPane.setDividerSize(3);
+
+            ComponentListener cl = new ComponentAdapter() {
+                @Override
+                public void componentResized(ComponentEvent e) {
+                    int min = splitPane.getMinimumDividerLocation();
+                    if (min > splitPane.getDividerLocation()) splitPane.setDividerLocation(min);
+                }
+            };
+
+            tabsTree.addComponentListener(cl);
+            splitPane.addComponentListener(cl);
+
             add(splitPane, "grow");
         } else {
             add(setupUI());
@@ -123,6 +152,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     @Override
     public void beforeLoad() {
         removeAll();
+        this.pluginNode = null;
         this.extendedConfig = null;
         this.lastSelection = null;
     }
@@ -134,36 +164,34 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     }
 
     public void setCustomConfig(@Nullable ConfigSetting.Parent<?> config) {
-        this.extendedConfig = new CompoundConfigSetting<>(this.baseConfig,
-                config,
-                new PluginListConfigSetting(baseConfig, api.requireInstance(FeatureRegistry.class)));
+        if (extendedConfig != null) this.extendedConfig.setAppended(config, pluginNode);
         setCorrectRoot();
     }
 
     public void updateConfigTreeListeners() {
         treeModel.updateListeners();
+
+        TreePath selection = tabsTree == null ? null : tabsTree.getSelectionPath();
         tabsModel.updateListeners();
+        if (selection != null) tabsTree.setSelectionPath(selection);
     }
 
     private void setSearch(String search) {
-        boolean wasFiltered = treeModel.isFiltered();
         treeModel.setSearch(search);
         tabsModel.setSearch(search);
-
-        if (wasFiltered != treeModel.isFiltered()) {
-            setCorrectRoot();
-        } else {
-            treeModel.updateListeners();
-            tabsModel.updateListeners();
-        }
+        setCorrectRoot();
     }
 
     private void setCorrectRoot() {
+        TreePath currentSelection = tabsTree == null ? null : tabsTree.getSelectionPath();
+
         treeModel.setRoot(packed ? baseConfig :
                 treeModel.isFiltered() ?
                         extendedConfig != null ? extendedConfig : baseConfig :
                         lastSelection != null ? lastSelection : baseConfig);
         tabsModel.setRoot(extendedConfig != null ? extendedConfig : baseConfig);
+
+        if (currentSelection != null) tabsTree.setSelectionPath(currentSelection);
     }
 
     private JComponent setupUI() {
@@ -172,7 +200,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
         configTree = new ConfigTree(treeModel, renderer, editor);
 
-        JScrollPane scrollPane = wrapInScrollPane(configTree);
+        JScrollPane scrollPane = wrapInScrollPane(configTree, false);
 
         if (packed) {
             Dimension treeSize = configTree.getPreferredSize();
@@ -181,8 +209,8 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         return new JLayer<>(scrollPane, new WheelScrollLayerUI());
     }
 
-    private static JScrollPane wrapInScrollPane(JComponent component) {
-        JScrollPane scrollPane = new JScrollPane(component);
+    private static JScrollPane wrapInScrollPane(JComponent component, boolean enforceWidth) {
+        JScrollPane scrollPane = enforceWidth ? new WidthEnforcedScrollPane(component) : new JScrollPane(component);
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(25);
         return scrollPane;

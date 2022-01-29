@@ -33,7 +33,6 @@ import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Responsible for loading & saving configuration files
@@ -45,9 +44,9 @@ public class ConfigManager implements API.Singleton {
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .setLenient()
-            .registerTypeHierarchyAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
-            .registerTypeHierarchyAdapter(Color.class, new ColorAdapter())
-            .registerTypeHierarchyAdapter(Font.class, new FontAdapter())
+            .registerTypeAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
+            .registerTypeAdapter(Color.class, new ColorAdapter())
+            .registerTypeAdapter(Font.class, new FontAdapter())
             .registerTypeAdapter(ShipMode.class, (InstanceCreator<ShipMode>) type -> new Config.ShipConfig())
             .registerTypeAdapter(PercentRange.class, (InstanceCreator<PercentRange>) type -> new Config.PercentRange())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
