@@ -1,12 +1,12 @@
 package com.github.manolo8.darkbot.config.utils;
 
-import com.github.manolo8.darkbot.config.PlayerTag;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import eu.darkbot.api.config.types.PlayerTag;
 
 import java.io.IOException;
 
@@ -30,7 +30,7 @@ public class PlayerTagTypeAdapterFactory implements TypeAdapterFactory {
 
         @Override
         public PlayerTag read(JsonReader in) throws IOException {
-            return PlayerTag.getTag(in.nextString());
+            return com.github.manolo8.darkbot.config.PlayerTag.getTag(in.nextString());
         }
     }
 

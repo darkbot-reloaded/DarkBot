@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.config.utils;
 
-import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.google.gson.Gson;
@@ -9,6 +8,7 @@ import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import eu.darkbot.api.config.types.Condition;
 
 import java.io.IOException;
 
