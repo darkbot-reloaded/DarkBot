@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.plaf.LayerUI;
+import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
@@ -95,6 +96,9 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         setCorrectRoot();
         if (!packed) {
             tabsTree = new JTree(tabsModel);
+            BasicTreeUI treeUi = (BasicTreeUI) tabsTree.getUI();
+            treeUi.setRightChildIndent(7);
+
             tabsTree.setCellRenderer(new SimpleConfigSettingRenderer());
             tabsTree.setRootVisible(false);
             tabsTree.setShowsRootHandles(true);
