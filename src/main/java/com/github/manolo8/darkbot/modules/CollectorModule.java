@@ -207,8 +207,12 @@ public class CollectorModule implements Module {
         return box.boxInfo.collect
                 && !box.isCollected()
                 && drive.canMove(box.locationInfo.now)
-                && (!box.type.equals("FROM_SHIP") || main.statsManager.deposit < main.statsManager.depositTotal)
+                && (!isResource(box.type) || main.statsManager.deposit < main.statsManager.depositTotal)
                 && !isContested(box);
+    }
+
+    private boolean isResource(String type) {
+        return type.equals("FROM_SHIP") || type.equals("PROSPEROUS_CARGO");
     }
 
     private boolean isContested(Box box){
