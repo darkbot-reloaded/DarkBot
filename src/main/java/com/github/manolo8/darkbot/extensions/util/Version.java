@@ -104,6 +104,12 @@ public class Version implements eu.darkbot.api.utils.Version {
                 alpha == v.alpha;
     }
 
+    // Kept for backwards compat of plugins built against darkbot
+    // Plugins built against api will use super.compareTo already
+    public int compareTo(Version o) {
+        return eu.darkbot.api.utils.Version.super.compareTo(o);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(major, minor, patch, revision, beta, alpha);
