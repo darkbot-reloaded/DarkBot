@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.gui;
 
+import com.github.manolo8.darkbot.config.tree.ConfigBuilder;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.WidthEnforcedScrollPane;
 import com.github.manolo8.darkbot.gui.utils.tree.ConfigSettingTreeModel;
@@ -56,7 +58,16 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
     @Deprecated
     public AdvancedConfig(Object obj) {
-        this.api = null;
+        this(HeroManager.instance.main.pluginAPI, createConfig(obj));
+    }
+
+    private static <T> ConfigSetting.Parent<T> createConfig(T obj) {
+        ConfigBuilder cb = HeroManager.instance.main.pluginAPI.requireInstance(ConfigBuilder.class);
+        @SuppressWarnings("unchecked")
+        Class<T> clz = (Class<T>) obj.getClass();
+        ConfigSetting.Parent<T> p = cb.of(clz, "Root", null);
+        p.setValue(obj);
+        return p;
     }
 
     public AdvancedConfig(PluginAPI api, ConfigSetting.Parent<?> config) {

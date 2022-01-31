@@ -133,12 +133,11 @@ public class ConfigBuilder implements API.Singleton {
          * @return true if this field participates in the configuration tree, false otherwise
          */
         private boolean participates(Field field) {
-            if (!Modifier.isPublic(field.getModifiers()) ||
-                    Modifier.isTransient(field.getModifiers()) ||
-                    Modifier.isStatic(field.getModifiers())) return false;
+            if (!Modifier.isPublic(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) return false;
+            if (field.isAnnotationPresent(com.github.manolo8.darkbot.config.types.Option.class)) return true;
             if (field.isAnnotationPresent(Option.Ignore.class)) return false;
             if (field.isAnnotationPresent(Option.class)) return true;
-            if (field.isAnnotationPresent(com.github.manolo8.darkbot.config.types.Option.class)) return true;
+            if (Modifier.isTransient(field.getModifiers())) return false;
             return allConfig;
         }
 
