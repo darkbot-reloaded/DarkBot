@@ -20,7 +20,7 @@ import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class GroupManager extends Gui  implements GroupAPI {
+public class GroupManager extends Gui implements GroupAPI {
     private static final int HEADER_HEIGHT = 26; // Height of the top margin of the group
     private static final int BUTTON_HEIGHT = 28; // Height of one invite or button set
     private static final int MEMBER_HEIGHT = 48; // Height of one member
@@ -56,9 +56,9 @@ public class GroupManager extends Gui  implements GroupAPI {
     public void update() {
         super.update();
 
-        if (address == 0 || main.mapManager.eventAddress == 0) return;
+        if (address == 0) return;
 
-        long groupAddress = API.readMemoryLong(API.readMemoryLong(main.mapManager.eventAddress) + 0x48);
+        long groupAddress = main.facadeManager.getProxyAddressOf("GroupProxy");
         if (groupAddress == 0) return;
         group.update(API.readMemoryLong(groupAddress + 0x30));
 
