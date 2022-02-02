@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.config.UnresolvedPlayer;
 import com.github.manolo8.darkbot.gui.components.MainButton;
+import com.github.manolo8.darkbot.gui.nearplayers.NearPlayerEditor;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -24,9 +25,10 @@ public class PlayerEditor extends JPanel {
     private SearchField sf;
     private PlayerTagEditor tagEditor;
     protected Main main;
+    NearPlayerEditor nearPlayerEditor = new NearPlayerEditor();
 
     public PlayerEditor() {
-        super(new MigLayout("ins 0, gap 0, wrap 5, fill", "[][][][grow][]", "[][grow,fill]"));
+        super(new MigLayout("ins 0, gap 0, wrap 5, fill", "[][][][grow][][]", "[][grow,fill]"));
 
         add(new AddPlayer(), "grow");
         add(new AddId(), "grow");
@@ -38,11 +40,13 @@ public class PlayerEditor extends JPanel {
         playerInfoList.setCellRenderer(new PlayerRenderer());
 
         add(new JScrollPane(playerInfoList,
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), "span, grow");
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), "span 5, grow");
+        add(nearPlayerEditor, "grow, cell 5 0 1 2"); //cell column row width height
     }
 
     public void setup(Main main) {
         this.main = main;
+        nearPlayerEditor.setup(main);
 
         tagEditor.setup(main);
 
