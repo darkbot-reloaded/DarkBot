@@ -53,6 +53,7 @@ public class PlayerTagEditor extends JButton implements OptionEditor<PlayerTag> 
     public JComponent getEditorComponent(ConfigSetting<PlayerTag> playerTag) {
         this.unset = playerTag.getMetadata("tagDefault");
         shown = false;
+        tagPopup.setTags(root.getValue().PLAYER_TAGS);
         setEditing(playerTag.getValue());
         return this;
     }

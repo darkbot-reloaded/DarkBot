@@ -19,20 +19,20 @@ import java.util.List;
 import java.util.Locale;
 
 public class PlayerEditor extends JPanel {
-    private JList<PlayerInfo> playerInfoList;
-    private DefaultListModel<PlayerInfo> playersModel;
-    private SearchField sf;
-    private PlayerTagEditor tagEditor;
+    private final JList<PlayerInfo> playerInfoList;
+    private final DefaultListModel<PlayerInfo> playersModel;
+
+    private final PlayerManager playerManager;
+    private final SearchField sf;
+    private final PlayerTagManager tagEditor;
     protected Main main;
 
     public PlayerEditor() {
-        super(new MigLayout("ins 0, gap 0, wrap 5, fill", "[][][][grow][]", "[][grow,fill]"));
+        super(new MigLayout("ins 0, gap 0, wrap 3, fill", "[][grow][]", "[][grow,fill]"));
 
-        add(new AddPlayer(), "grow");
-        add(new AddId(), "grow");
-        add(new RemovePlayers(), "grow");
+        add(playerManager = new PlayerManager(this), "grow");
         add(sf = new SearchField(this::refreshList), "grow");
-        add(tagEditor = new PlayerTagEditor(this), "grow");
+        add(tagEditor = new PlayerTagManager(this), "grow");
 
         playerInfoList = new JList<>(playersModel = new DefaultListModel<>());
         playerInfoList.setCellRenderer(new PlayerRenderer());
@@ -130,50 +130,6 @@ public class PlayerEditor extends JPanel {
             playersModel.removeElement(player);
         }
         ConfigEntity.changed();
-    }
-
-    public class AddPlayer extends MainButton {
-        public AddPlayer() {
-            super(UIUtils.getIcon("add"), I18n.get("players.add_player.by_name"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            String name = JOptionPane.showInputDialog(this, I18n.get("players.add_player.username"),
-                    I18n.get("players.add_player"), JOptionPane.QUESTION_MESSAGE);
-            if (name == null) return;
-            main.config.UNRESOLVED.add(new UnresolvedPlayer(name));
-        }
-    }
-
-    public class AddId extends MainButton {
-        public AddId() {
-            super(UIUtils.getIcon("add"), I18n.get("players.add_player.by_id"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            String id = JOptionPane.showInputDialog(this, I18n.get("players.add_player.user_id"),
-                    I18n.get("players.add_player"), JOptionPane.QUESTION_MESSAGE);
-            if (id == null) return;
-            try {
-                main.config.UNRESOLVED.add(new UnresolvedPlayer(Integer.parseInt(id.trim())));
-            } catch (NumberFormatException ex) {
-                Popups.showMessageAsync(I18n.get("players.add_player.invalid_id"),
-                        I18n.get("players.add_player.invalid_id.no_number", id), JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    public class RemovePlayers extends MainButton {
-        public RemovePlayers() {
-            super(UIUtils.getIcon("remove"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            removePlayers();
-        }
     }
 
 }
