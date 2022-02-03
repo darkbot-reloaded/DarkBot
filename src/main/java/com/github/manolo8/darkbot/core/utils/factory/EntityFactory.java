@@ -12,6 +12,9 @@ import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Player;
 import com.github.manolo8.darkbot.core.entities.Portal;
+import com.github.manolo8.darkbot.core.entities.Relay;
+import com.github.manolo8.darkbot.core.entities.SpaceBall;
+import com.github.manolo8.darkbot.core.entities.StaticEntity;
 import com.github.manolo8.darkbot.core.entities.Unknown;
 import com.github.manolo8.darkbot.core.entities.bases.BaseHangar;
 import com.github.manolo8.darkbot.core.entities.bases.BaseHeadquarters;
@@ -33,14 +36,14 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public enum EntityFactory implements EntityBuilder {
     BOX             (Box::new,           "box_.*"),
-    ORE             (Box::new,           "ore_.*"),
-    X2_BEACON       (Box::new,           "beacon_.*"),
+    ORE             (Box.Ore::new,       "ore_.*"),
+    X2_BEACON       (Box.Beacon::new,    "beacon_.*"),
     MINE            (Mine::new,          "mine_.*"),
     FIREWORK        (Entity::new,        "firework_box"),
 
-    LOW_RELAY       (MapNpc::new,        "relay"),
+    LOW_RELAY       (Relay::new,         "relay"),
     NPC_BEACON      (MapNpc::new,        "npc-beacon.*"),
-    SPACE_BALL      (MapNpc::new,        "mapIcon_spaceball"),
+    SPACE_BALL      (SpaceBall::new,     "mapIcon_spaceball"),
 
     CBS_ASTEROID    (BattleStation::new, "asteroid"),
     CBS_CONSTRUCTION(BattleStation::new, "cbs-construction"),
@@ -48,10 +51,10 @@ public enum EntityFactory implements EntityBuilder {
     CBS_MODULE_CON  (BattleStation::new, "module-construction"),
     CBS_STATION     (BattleStation::new, "battleStation"),
 
-    POD_HEAL        (Entity::new, "pod_heal"),               // Aegis/hammerclaw healing pods
-    BUFF_CAPSULE    (Entity::new, "buffCapsule_.*"),
-    BURNING_TRAIL   (Entity::new, "burning_trail_entity_.*"),
-    PLUTUS_GENERATOR(Entity::new, "plutus-generator"),
+    POD_HEAL        (StaticEntity.PodHeal::new,         "pod_heal"),               // Aegis/hammerclaw healing pods
+    BUFF_CAPSULE    (StaticEntity.BuffCapsule::new,     "buffCapsule_.*"),
+    BURNING_TRAIL   (StaticEntity.BurningTrail::new,    "burning_trail_entity_.*"),
+    PLUTUS_GENERATOR(StaticEntity.PlutusGenerator::new, "plutus-generator"),
 
     BASE_TURRET     (BaseTurret::new,       "turret_.*"),       // Turrets around x-1 and x-8 bases
     REFINERY        (BaseRefinery::new,     "refinery_.*"),     // Refinery to sell ores at
@@ -62,7 +65,7 @@ public enum EntityFactory implements EntityBuilder {
     BASE_STATION    (BaseStation::new,      "station_.*"),      // Standalone station on 5-2
     CTB_HOME_ZONE   (BasePoint::new,        "ctbHomeZone_.*"),
 
-    PORTAL   (EntityFactory::getOrCreatePortal, "[0-9]+$"),
+    PORTAL   (EntityFactory::getOrCreatePortal, "\\d+$"),
 
     ZONE     (EntityFactory::isZone, EntityFactory::defineZoneType), // Generic zone, redirects to BARRIER or MIST_ZONE
     BARRIER  (Barrier::new),
