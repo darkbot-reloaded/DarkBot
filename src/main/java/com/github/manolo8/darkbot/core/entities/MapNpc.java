@@ -9,6 +9,7 @@ public class MapNpc extends Npc {
     @Override
     public void update() {
         locationInfo.update();
+        clickable.update();
     }
 
 }
