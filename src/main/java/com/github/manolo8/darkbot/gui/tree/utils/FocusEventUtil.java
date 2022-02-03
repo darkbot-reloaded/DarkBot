@@ -1,7 +1,5 @@
 package com.github.manolo8.darkbot.gui.tree.utils;
 
-import sun.awt.CausedFocusEvent;
-
 import java.awt.event.FocusEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -16,8 +14,8 @@ public class FocusEventUtil {
     static {
         try {
             if (System.getProperty("java.version").startsWith("1.8")) {
-                focusEventClass = CausedFocusEvent.class;
-                getCause = CausedFocusEvent.class.getDeclaredMethod("getCause");
+                focusEventClass = Class.forName("sun.awt.CausedFocusEvent");
+                getCause = focusEventClass.getDeclaredMethod("getCause");
             } else {
                 focusEventClass = FocusEvent.class;
                 //noinspection JavaReflectionMemberAccess - This was added in java 9, we're compiling against 8

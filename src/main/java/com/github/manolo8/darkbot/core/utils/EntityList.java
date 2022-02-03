@@ -14,7 +14,10 @@ import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Player;
 import com.github.manolo8.darkbot.core.entities.Portal;
+import com.github.manolo8.darkbot.core.entities.Relay;
 import com.github.manolo8.darkbot.core.entities.Ship;
+import com.github.manolo8.darkbot.core.entities.SpaceBall;
+import com.github.manolo8.darkbot.core.entities.StaticEntity;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
@@ -23,6 +26,7 @@ import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
 import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,6 +59,10 @@ public class EntityList extends Updatable implements EntitiesAPI {
     public final List<BasePoint> basePoints         = register(BASE_HANGAR, BASE_STATION, HEADQUARTER, QUEST_GIVER, BASE_TURRET, REPAIR_STATION, REFINERY);
     public final List<Entity> unknown               = register();
     public final FakeNpc fakeNpc;
+
+    private final List<Relay> relays = register(LOW_RELAY);
+    private final List<SpaceBall> spaceBalls = register(SPACE_BALL);
+    private final List<StaticEntity> staticEntities = register(POD_HEAL, BUFF_CAPSULE, BURNING_TRAIL, PLUTUS_GENERATOR);
 
     private final Main main;
     private final EventBrokerAPI eventBroker;
@@ -220,6 +228,21 @@ public class EntityList extends Updatable implements EntitiesAPI {
     @Override
     public Collection<? extends eu.darkbot.api.game.entities.BattleStation> getBattleStations() {
         return Collections.unmodifiableList(battleStations);
+    }
+
+    @Override
+    public @UnmodifiableView Collection<? extends eu.darkbot.api.game.entities.Relay> getRelays() {
+        return Collections.unmodifiableList(relays);
+    }
+
+    @Override
+    public @UnmodifiableView Collection<? extends eu.darkbot.api.game.entities.SpaceBall> getSpaceBalls() {
+        return Collections.unmodifiableList(spaceBalls);
+    }
+
+    @Override
+    public @UnmodifiableView Collection<? extends eu.darkbot.api.game.entities.StaticEntity> getStaticEntities() {
+        return Collections.unmodifiableList(staticEntities);
     }
 
     @Override
