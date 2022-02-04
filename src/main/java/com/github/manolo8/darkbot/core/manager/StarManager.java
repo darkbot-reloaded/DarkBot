@@ -3,20 +3,15 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.objects.Map;
-import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.API;
 import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.managers.StarSystemAPI;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -230,10 +225,12 @@ public class StarManager implements API.Singleton {
 
     public Portal next(HeroManager hero, Map target) {
         DijkstraShortestPath<Map, Portal> path = new DijkstraShortestPath<>(starSystem);
-        return hero.main.mapManager.entities.portals.stream().filter(p -> !p.removed && p.target != null).min(
-                Comparator.<Portal>comparingDouble(p -> path.getPaths(p.target).getWeight(target))
-                        .thenComparing(p -> p.factionId == -1 ? 0 : p.factionId == hero.playerInfo.factionId ? -1 : 1)
-                        .thenComparing(p -> hero.locationInfo.distance(p.locationInfo))).orElse(null);
+        return hero.main.mapManager.entities.portals.stream()
+                .filter(p -> !p.removed && p.target != null)
+                .filter(p -> target.gg || !p.target.gg)
+                .min(Comparator.<Portal>comparingDouble(p -> path.getPaths(p.target).getWeight(target))
+                                .thenComparing(p -> p.factionId == -1 ? 0 : p.factionId == hero.playerInfo.factionId ? -1 : 1)
+                                .thenComparing(p -> hero.locationInfo.distance(p.locationInfo))).orElse(null);
     }
 
     public Map byName(String name) {
