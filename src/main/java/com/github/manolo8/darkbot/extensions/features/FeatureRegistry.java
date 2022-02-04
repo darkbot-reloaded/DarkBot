@@ -71,7 +71,10 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
     }
 
     private boolean isDisabled(Plugin plugin) {
-        return Arrays.stream(plugin.getFeatureIds()).noneMatch(id -> getFeatureDefinition(id).isEnabled());
+        return Arrays.stream(plugin.getFeatureIds())
+                .map(this::getFeatureDefinition)
+                .filter(Objects::nonNull)
+                .noneMatch(FeatureDefinition::isEnabled);
     }
 
     public void updateConfig() {
