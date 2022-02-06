@@ -12,6 +12,7 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.hook.HookFlag;
 import eu.darkbot.api.hook.JNIUtil;
 import eu.darkbot.api.hook.NativeCallback;
+import eu.darkbot.api.managers.OreAPI;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
@@ -115,6 +116,11 @@ public class HookManager implements Manager, GameAPI.DirectInteraction, API.Sing
     @Override
     public void collectBox(Locatable dest, long boxAddr) {
         callMethodSync(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.getX(), (long) dest.getY(), boxAddr);
+    }
+
+    @Override
+    public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
