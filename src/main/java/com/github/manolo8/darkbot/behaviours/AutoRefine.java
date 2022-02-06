@@ -52,9 +52,9 @@ public class AutoRefine implements Behavior {
     private int maxRefine(OreAPI.Ore ore) {
         switch (ore) {
             case PROMETID:
-                return Math.min(ores.getAmount(Ore.PROMETIUM) / 20, ores.getAmount(Ore.ENDRIUM) / 10);
+                return Math.min(ores.getAmount(Ore.PROMETIUM) / 20, ores.getAmount(Ore.ENDURIUM) / 10);
             case DURANIUM:
-                return Math.min(ores.getAmount(Ore.TERBIUM) / 20, ores.getAmount(Ore.ENDRIUM) / 10);
+                return Math.min(ores.getAmount(Ore.TERBIUM) / 20, ores.getAmount(Ore.ENDURIUM) / 10);
             case PROMERIUM:
                 return Math.min(
                         Math.min(ores.getAmount(Ore.PROMETID) / 10, ores.getAmount(Ore.DURANIUM) / 10),
