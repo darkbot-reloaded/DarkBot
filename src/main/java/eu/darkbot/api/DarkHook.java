@@ -31,6 +31,8 @@ public class DarkHook implements NativeTaskRunner, NativeCallbackManager, API.Si
     public native boolean isTaskRunnerValid();
     public native boolean setTaskRunnerHook(long scriptObject, int methodIdx, int hookFlag);
 
+    public native void refine(long refineUtilAddress, int oreId, int amount);
+
     @Override
     public long callMethodSync(int methodIdx, long... args) {
         return callMethod(methodIdx, true, args);

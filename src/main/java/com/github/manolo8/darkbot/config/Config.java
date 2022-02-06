@@ -227,6 +227,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
                 public @Option boolean ENABLED = false;
                 public @Option boolean TRAVEL = true;
                 public @Option boolean COLLECT = true;
+                public @Option boolean REFINE = true;
             }
 
             public int width = 1280;

@@ -28,6 +28,7 @@ public class DarkBoatHookAdapter extends GameAPIImpl<
                 GameAPI.Capability.DIRECT_LIMIT_FPS,
                 GameAPI.Capability.DIRECT_COLLECT_BOX,
                 GameAPI.Capability.DIRECT_MOVE_SHIP,
+                GameAPI.Capability.DIRECT_REFINE,
                 GameAPI.Capability.DIRECT_CALL_METHOD);
     }
 
@@ -41,6 +42,7 @@ public class DarkBoatHookAdapter extends GameAPIImpl<
         if (capability == GameAPI.Capability.DIRECT_LIMIT_FPS && !direct.isHookEnabled()) return false;
         if (capability == GameAPI.Capability.DIRECT_MOVE_SHIP && !direct.isTravelEnabled()) return false;
         if (capability == GameAPI.Capability.DIRECT_COLLECT_BOX && !direct.isCollectEnabled()) return false;
+        if (capability == GameAPI.Capability.DIRECT_REFINE && !direct.isRefineEnabled()) return false;
         if (capability == GameAPI.Capability.DIRECT_CALL_METHOD && !direct.isHookEnabled()) return false;
 
         return super.hasCapability(capability);

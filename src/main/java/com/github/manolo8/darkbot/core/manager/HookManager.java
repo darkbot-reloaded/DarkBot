@@ -91,6 +91,10 @@ public class HookManager implements Manager, GameAPI.DirectInteraction, API.Sing
         return isHookEnabled() && main.config.BOT_SETTINGS.API_CONFIG.DARK_HOOK.COLLECT;
     }
 
+    public boolean isRefineEnabled() {
+        return isHookEnabled() && main.config.BOT_SETTINGS.API_CONFIG.DARK_HOOK.REFINE;
+    }
+
     @Override
     public int getVersion() {
         return 0;
@@ -120,7 +124,8 @@ public class HookManager implements Manager, GameAPI.DirectInteraction, API.Sing
 
     @Override
     public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
-        throw new UnsupportedOperationException();
+        if (hook == null) throw new IllegalStateException("Tried to refine while hook isn't initialized");
+        hook.refine(refineUtilAddress, oreType.getId(), amount);
     }
 
     @Override
