@@ -189,6 +189,10 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option boolean LOG_DEATHS = false;
         public @Option boolean AVOID_MINES = true;
         public @Option boolean USERNAME_ON_TITLE = false;
+        @com.github.manolo8.darkbot.config.types.Option(
+                value = "Auto refine (unsupported)",
+                description = "Automatically refine materials, not currently supported, still in development.")
+        public boolean AUTO_REFINE = false;
     }
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();

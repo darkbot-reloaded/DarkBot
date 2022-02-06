@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.managers.OreAPI;
 import org.jetbrains.annotations.Nullable;
 
 public interface GameAPI {
@@ -112,6 +113,8 @@ public interface GameAPI {
 
         void collectBox(Locatable destination, long collectableAddress);
 
+        void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount);
+
         long callMethod(int index, long... arguments);
     }
 
@@ -126,6 +129,7 @@ public interface GameAPI {
         DIRECT_ENTITY_LOCK,
         DIRECT_MOVE_SHIP,
         DIRECT_COLLECT_BOX,
+        DIRECT_REFINE,
         DIRECT_CALL_METHOD;
     }
 
@@ -303,6 +307,11 @@ public interface GameAPI {
 
         @Override
         public void moveShip(Locatable destination) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
             throw new UnsupportedOperationException();
         }
 
