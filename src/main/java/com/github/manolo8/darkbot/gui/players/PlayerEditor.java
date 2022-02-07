@@ -32,9 +32,15 @@ public class PlayerEditor extends JPanel implements Listener {
     @EventHandler
     public void onEntityPlayerAdd(EntitiesAPI.EntityCreateEvent event) {
         if (event.getEntity() instanceof Player) {
-            if (playersModel != null && main.config.PLAYER_INFOS != null && main.config.PLAYER_INFOS.values().stream().noneMatch(a -> a.toString().contains(((Player) event.getEntity()).getEntityInfo().getUsername()))) {
-                nearbyPlayerList.add(new PlayerInfo(((Player) event.getEntity()).getEntityInfo().getUsername(), event.getEntity().getId()));
-                SwingUtilities.invokeLater(() -> playersModel.addElement(new PlayerInfo(((Player) event.getEntity()).getEntityInfo().getUsername(), event.getEntity().getId())));
+            if (playersModel != null && main.config.PLAYER_INFOS != null && main.config.PLAYER_INFOS.values()
+                    .stream().noneMatch(a -> a.toString()
+                            .contains(((Player) event.getEntity()).getEntityInfo().getUsername()))) {
+                nearbyPlayerList.add(new PlayerInfo(((Player) event.getEntity())
+                        .getEntityInfo().getUsername(), event.getEntity().getId()));
+
+                SwingUtilities.invokeLater(() -> playersModel.
+                        addElement(new PlayerInfo(((Player) event.getEntity())
+                                .getEntityInfo().getUsername(), event.getEntity().getId())));
                 System.out.println("added " + ((Player) event.getEntity()).getEntityInfo().getUsername());
             } else {
                 System.out.println("in list yet " + ((Player) event.getEntity()).getEntityInfo().getUsername());
@@ -45,9 +51,17 @@ public class PlayerEditor extends JPanel implements Listener {
     @EventHandler
     public void onEntityPlayerRemove(EntitiesAPI.EntityRemoveEvent event) {
         if (event.getEntity() instanceof Player) {
-            if (playersModel != null && main.config.PLAYER_INFOS != null && main.config.PLAYER_INFOS.values().stream().noneMatch(a -> a.toString().contains(((Player) event.getEntity()).getEntityInfo().getUsername()))) {
-                nearbyPlayerList.stream().filter(a -> a.toString().contains(((Player) event.getEntity()).getEntityInfo().getUsername())).collect(toList()).forEach(nearbyPlayerList::remove);
-                SwingUtilities.invokeLater(() -> Arrays.stream(playersModel.toArray()).filter(a -> a.toString().contains(((Player) event.getEntity()).getEntityInfo().getUsername())).forEach(playersModel::removeElement));
+            if (playersModel != null && main.config.PLAYER_INFOS != null && main.config.PLAYER_INFOS.values()
+                    .stream()
+                    .noneMatch(a -> a.toString()
+                            .contains(((Player) event.getEntity()).getEntityInfo().getUsername()))) {
+                nearbyPlayerList.stream()
+                        .filter(a -> a.toString().contains(((Player) event.getEntity()).getEntityInfo().getUsername()))
+                        .collect(toList()).forEach(nearbyPlayerList::remove);
+                
+                SwingUtilities.invokeLater(() -> Arrays.stream(playersModel.toArray())
+                        .filter(a -> a.toString().contains(((Player) event.getEntity()).getEntityInfo().getUsername()))
+                        .forEach(playersModel::removeElement));
                 System.out.println("removed " + ((Player) event.getEntity()).getEntityInfo().getUsername());
             } else {
                 System.out.println("in list yet " + ((Player) event.getEntity()).getEntityInfo().getUsername());
