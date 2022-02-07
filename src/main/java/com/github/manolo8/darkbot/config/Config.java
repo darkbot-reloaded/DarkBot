@@ -8,6 +8,8 @@ import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGears;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation;
 import com.github.manolo8.darkbot.config.utils.ItemUtils;
+import com.github.manolo8.darkbot.core.api.DarkBoatHookAdapter;
+import com.github.manolo8.darkbot.core.manager.HookAdapter;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
@@ -222,13 +224,8 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean ENFORCE_HW_ACCEL = true;
             public @Option @Number(min = 1, max = 60) @Number.Disabled(value = 0, def = 30) int MAX_FPS = 0;
 
-            public @Option DarkHookConfig DARK_HOOK = new DarkHookConfig();
-            public static class DarkHookConfig {
-                public @Option boolean ENABLED = false;
-                public @Option boolean TRAVEL = true;
-                public @Option boolean COLLECT = true;
-                public @Option boolean REFINE = true;
-            }
+            @Option @Dropdown(multi = true)
+            public Set<HookAdapter.Flag> DARK_HOOK_FLAGS = EnumSet.allOf(HookAdapter.Flag.class);
 
             public int width = 1280;
             public int height = 800;

@@ -10,6 +10,10 @@ import java.nio.ByteOrder;
 import java.nio.LongBuffer;
 
 public class DarkHook implements NativeTaskRunner, NativeCallbackManager, API.Singleton {
+    static {
+        LibUtils.loadLibrary("DarkHookAPI");
+    }
+
     private final @Native LongBuffer buffer = ByteBuffer
             .allocateDirect(32 * Long.BYTES)
             .order(ByteOrder.nativeOrder())
@@ -19,19 +23,26 @@ public class DarkHook implements NativeTaskRunner, NativeCallbackManager, API.Si
             .allocateDirect(32 * Long.BYTES)
             .order(ByteOrder.nativeOrder());
 
-    public DarkHook() throws UnsatisfiedLinkError {
-            LibUtils.loadLibrary("DarkHookAPI");
-            onLoad();
+    public DarkHook() {
+        onLoad();
     }
 
+    @Override
+    public ByteBuffer getCallbackBuffer() {
+        return callbackBuffer;
+    }
+
+    /* Native */
     private native void onLoad();
 
+    public native int getVersion();
     public native void setMaxCps(int maxCps);
-    public native boolean clearTaskRunner();
-    public native boolean isTaskRunnerValid();
-    public native boolean setTaskRunnerHook(long scriptObject, int methodIdx, int hookFlag);
-
     public native void refine(long refineUtilAddress, int oreId, int amount);
+
+    /* Native Task Runner*/
+    public @Override native boolean clearTaskRunner();
+    public @Override native boolean isTaskRunnerValid();
+    public @Override native boolean setTaskRunnerHook(long scriptObject, int methodIdx, int hookFlag);
 
     @Override
     public long callMethodSync(int methodIdx, long... args) {
@@ -43,28 +54,20 @@ public class DarkHook implements NativeTaskRunner, NativeCallbackManager, API.Si
         return callMethod(methodIdx, false, args) == 1;
     }
 
-    private long callMethod(int methodIdx, boolean sync, long... args) {
-        LongBuffer buf = buffer;
-        buf.clear();
-        for (long arg : args)
-            buf.put(arg);
-
+    public long callMethod(int methodIdx, boolean sync, long... args) {
+        buffer.clear();
+        for (long arg : args) buffer.put(arg);
         return callMethod(methodIdx, args.length, sync);
     }
 
+    /** Requires arguments to be put in buffer, see {@link #callMethod(int, boolean, long...)} */
     private native long callMethod(int methodIdx, int argc, boolean sync);
 
-    @Override
-    public ByteBuffer getCallbackBuffer() {
-        return callbackBuffer;
-    }
 
-    //Callback Manager
-    public native void clearAllCallbacks();
-    //returns true if there was removed MethodEnv from native map
-    public native boolean clearCallback(long methodEnv);
-    public native boolean isCallbackValid(long methodEnv);
-    /** @return methodEnv address if valid, 0 otherwise */
-    public native long setMethodCallback(long scriptObject, int methodIdx, int hookFlag,
-                                          Object object, String methodName, String methodSignature);
+    /* NativeCallbackManager */
+    public @Override native void    clearAllCallbacks();
+    public @Override native boolean clearCallback(long methodEnv);
+    public @Override native boolean isCallbackValid(long methodEnv);
+    public @Override native long    setMethodCallback(long scriptObject, int methodIdx, int hookFlag,
+                                                      Object object, String methodName, String methodSignature);
 }

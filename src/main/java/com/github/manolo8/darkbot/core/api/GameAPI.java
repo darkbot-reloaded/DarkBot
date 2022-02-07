@@ -115,6 +115,10 @@ public interface GameAPI {
         void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount);
 
         long callMethod(int index, long... arguments);
+
+        default boolean callMethodAsync(int index, long... arguments) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     enum Capability {

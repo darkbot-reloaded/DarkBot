@@ -2,10 +2,11 @@ package com.github.manolo8.darkbot.core;
 
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import eu.darkbot.api.API;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class BotInstaller {
+public class BotInstaller implements API.Singleton {
     private static final byte[] bytesToMainApplication =
             new byte[]{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0,
                     0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -26,12 +27,15 @@ public class BotInstaller {
 
     private long timer;
 
-    public BotInstaller(Manager... managers) {
+    public BotInstaller() {
         this.invalid.add(value -> {
             if (value) timer = System.currentTimeMillis();
         });
+    }
 
-        for (Manager manager : managers) manager.install(this);
+    public void install(Manager... managers) {
+        for (Manager manager : managers)
+            manager.install(this);
     }
 
     public boolean isInvalid() {

@@ -2,7 +2,6 @@ package eu.darkbot.api.hook;
 
 public interface NativeTaskRunner {
 
-    void setMaxCps(int maxCps);
     boolean clearTaskRunner();
     boolean isTaskRunnerValid();
     boolean setTaskRunnerHook(long scriptObject, int methodIdx, int hookFlag);

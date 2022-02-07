@@ -2,12 +2,11 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
-import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
 import com.github.manolo8.darkbot.core.api.GameAPI;
-import com.github.manolo8.darkbot.core.itf.Manager;
-import com.github.manolo8.darkbot.core.utils.Location;
 import eu.darkbot.api.API;
 import eu.darkbot.api.DarkHook;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.hook.HookFlag;
 import eu.darkbot.api.hook.JNIUtil;
@@ -22,87 +21,76 @@ import java.util.function.Supplier;
 
 /**
  * Manager used as DirectInteraction api in darkboat with darkhook api.
- * The instance will always exist, but tick() will only be called if it's in use, therefore, any initialization
- * will be done on tick.
+ * The instance will only exist if darkboat with darkhook API is in use.
  */
-public class HookManager implements Manager, GameAPI.DirectInteraction, API.Singleton {
+public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
 
     private final Main main;
     private final HeroManager hero;
-    private @Nullable DarkHook hook;
+    private final DarkHook hook;
 
-    private boolean canLoad = true;
     private long guiAddress;
     private long staticEventAddress;
     private int lastFps;
     private List<CallbackHolder> callbacks;
 
-    public HookManager(Main main) {
+    public HookAdapter(Main main, HeroManager hero, PluginAPI pluginAPI, BotInstaller botInstaller) {
         this.main = main;
-        this.hero = main.hero;
-    }
+        this.hero = hero;
+        this.hook = createDarkHook(pluginAPI);
 
-    @Override
-    public void install(BotInstaller botInstaller) {
-        botInstaller.invalid.add(state -> clear());
+        botInstaller.invalid.add(state -> {
+            if (hook == null) return;
+            hook.clearTaskRunner();
+            hook.clearAllCallbacks();
+        });
         botInstaller.guiManagerAddress.add(value -> guiAddress = value);
         botInstaller.screenManagerAddress.add(value -> staticEventAddress = value + 200);
     }
 
+    private static DarkHook createDarkHook(PluginAPI api) {
+        try {
+            return api.requireInstance(DarkHook.class);
+        } catch (UnsatisfiedLinkError e) {
+            System.out.println("DarkHook could not be enabled as the dll is not present.");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
     public void tick() {
-        setup();
-        if (hook == null) return; // Hook is disabled
+        if (isHookDisabled()) return;
 
         if (callbacks != null)
             callbacks.forEach(CallbackHolder::checkCallback);
 
-        tryHook();
-        setMaxFps(main.config.BOT_SETTINGS.API_CONFIG.MAX_FPS);
+        if (!hook.isTaskRunnerValid() && hero.address > 0xFFFF)
+            hook.setTaskRunnerHook(guiAddress, 3, HookFlag.ENV.ordinal());
     }
 
-    private void setup() {
-        boolean isEnabled = canLoad && main.config.BOT_SETTINGS.API_CONFIG.DARK_HOOK.ENABLED;
-
-        if ((hook != null) == isEnabled) return;
-
-        if (hook == null) {
-            try {
-                hook = new DarkHook();
-            } catch (UnsatisfiedLinkError e) {
-                canLoad = false;
-                System.out.println("Darkhook could not be enabled as the dll is not present.");
-                e.printStackTrace();
-            }
-        } else {
-            clear();
-            hook = null;
-        }
+    public boolean isHookDisabled() {
+        return hook == null;
     }
 
-    public boolean isHookEnabled() {
-        return hook != null;
+    public boolean isEnabled(Flag flag) {
+        return !isHookDisabled() && main.config.BOT_SETTINGS.API_CONFIG.DARK_HOOK_FLAGS.contains(flag);
     }
 
-    public boolean isTravelEnabled() {
-        return isHookEnabled() && main.config.BOT_SETTINGS.API_CONFIG.DARK_HOOK.TRAVEL;
+    private void checkEnabled(String operation) {
+        if (isHookDisabled())
+            throw new IllegalStateException("Tried to " + operation + " while hook isn't initialized");
     }
 
-    public boolean isCollectEnabled() {
-        return isHookEnabled() && main.config.BOT_SETTINGS.API_CONFIG.DARK_HOOK.COLLECT;
-    }
-
-    public boolean isRefineEnabled() {
-        return isHookEnabled() && main.config.BOT_SETTINGS.API_CONFIG.DARK_HOOK.REFINE;
-    }
-
+    // Direct interaction api implementation
     @Override
     public int getVersion() {
-        return 0;
+        return hook.getVersion();
     }
 
     @Override
-    public void setMaxFps(int maxFps) {
-        if (hook == null) throw new IllegalStateException("Tried to setFps while hook isn't initialized");
+    public void setMaxFps(int maxFps) { // NOTE: unused, max fps is now enforced via dark boat
+        checkEnabled("set max fps");
         if (lastFps == maxFps) return;
         hook.setMaxCps(lastFps = maxFps);
     }
@@ -114,48 +102,55 @@ public class HookManager implements Manager, GameAPI.DirectInteraction, API.Sing
 
     @Override
     public void moveShip(Locatable dest) {
+        checkEnabled("move ship");
         callMethodAsync(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.getX(), (long) dest.getY());
     }
 
     @Override
     public void collectBox(Locatable dest, long boxAddr) {
-        callMethodSync(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.getX(), (long) dest.getY(), boxAddr);
+        checkEnabled("collect box");
+        callMethod(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.getX(), (long) dest.getY(), boxAddr);
     }
 
     @Override
     public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
-        if (hook == null) throw new IllegalStateException("Tried to refine while hook isn't initialized");
+        checkEnabled("refine");
         hook.refine(refineUtilAddress, oreType.getId(), amount);
     }
 
     @Override
     public long callMethod(int index, long... arguments) {
-        return callMethodSync(index, arguments);
+        checkEnabled("call method");
+        return hook.callMethodSync(index, arguments);
     }
 
-
-    public long callMethodSync(int methodIdx, long... args) {
-        if (hook == null) throw new IllegalStateException("Tried to callMethodSync while hook isn't initialized");
-        return hook.callMethodSync(methodIdx, args);
+    @Override
+    public boolean callMethodAsync(int index, long... arguments) {
+        checkEnabled("call method async");
+        return hook.callMethodAsync(index, arguments);
     }
 
-    public boolean callMethodAsync(int methodIdx, long... args) {
-        if (hook == null) throw new IllegalStateException("Tried to callMethodASync while hook isn't initialized");
-        return hook.callMethodAsync(methodIdx, args);
+    @Configuration("config.bot_settings.api_config.dark_hook_flags")
+    public enum Flag {
+        TRAVEL(GameAPI.Capability.DIRECT_MOVE_SHIP),
+        COLLECT(GameAPI.Capability.DIRECT_COLLECT_BOX),
+        REFINE(GameAPI.Capability.DIRECT_REFINE);
+
+        private final GameAPI.Capability capability;
+
+        Flag(GameAPI.Capability capability) {
+            this.capability = capability;
+        }
+
+        public static @Nullable Flag of(GameAPI.Capability capability) {
+            for (Flag flag : values())
+                if (flag.capability == capability)
+                    return flag;
+            return null;
+        }
     }
 
-    private void tryHook() {
-        if (hook == null) throw new IllegalStateException("Tried to tryHook while hook isn't initialized");
-
-        if (!hook.isTaskRunnerValid() && hero.address > 0xFFFF)
-            hook.setTaskRunnerHook(guiAddress, 3, HookFlag.ENV.ordinal());
-    }
-
-    private void clear() {
-        if (hook == null) return;
-        hook.clearTaskRunner();
-        hook.clearAllCallbacks();
-    }
+    // Callbacks
 
     public boolean addMethodCallback(Object object, Supplier<Long> scriptObject) {
         return addMethodCallback(object, scriptObject, 0);
