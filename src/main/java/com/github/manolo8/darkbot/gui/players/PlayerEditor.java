@@ -15,9 +15,10 @@ import eu.darkbot.api.managers.EventBrokerAPI;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import java.util.*;
-
-import static java.util.stream.Collectors.toList;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 
 public class PlayerEditor extends JPanel implements Listener {
     private final JList<PlayerInfo> playerInfoList;
@@ -31,41 +32,37 @@ public class PlayerEditor extends JPanel implements Listener {
 
     @EventHandler
     public void onEntityPlayerAdd(EntitiesAPI.EntityCreateEvent event) {
-        if (event.getEntity() instanceof Player) {
-            if (playersModel != null && main.config.PLAYER_INFOS != null && main.config.PLAYER_INFOS.values()
-                    .stream().noneMatch(a -> a.toString()
-                            .contains(((Player) event.getEntity()).getEntityInfo().getUsername()))) {
-                nearbyPlayerList.add(new PlayerInfo(((Player) event.getEntity())
-                        .getEntityInfo().getUsername(), event.getEntity().getId()));
+        if (event.getEntity() instanceof Player
+                && playersModel != null
+                && main.config.PLAYER_INFOS != null
+                && !main.config.PLAYER_INFOS.containsKey(event.getEntity().getId())) {
 
-                SwingUtilities.invokeLater(() -> playersModel.
-                        addElement(new PlayerInfo(((Player) event.getEntity())
-                                .getEntityInfo().getUsername(), event.getEntity().getId())));
-                System.out.println("added " + ((Player) event.getEntity()).getEntityInfo().getUsername());
-            } else {
-                System.out.println("in list yet " + ((Player) event.getEntity()).getEntityInfo().getUsername());
-            }
+            SwingUtilities.invokeLater(() -> {
+                PlayerInfo playerInfo = new PlayerInfo((Player) event.getEntity());
+                nearbyPlayerList.add(playerInfo);
+                playersModel.addElement(playerInfo);
+            });
         }
     }
 
     @EventHandler
     public void onEntityPlayerRemove(EntitiesAPI.EntityRemoveEvent event) {
-        if (event.getEntity() instanceof Player) {
-            if (playersModel != null && main.config.PLAYER_INFOS != null && main.config.PLAYER_INFOS.values()
-                    .stream()
-                    .noneMatch(a -> a.toString()
-                            .contains(((Player) event.getEntity()).getEntityInfo().getUsername()))) {
-                nearbyPlayerList.stream()
-                        .filter(a -> a.toString().contains(((Player) event.getEntity()).getEntityInfo().getUsername()))
-                        .collect(toList()).forEach(nearbyPlayerList::remove);
-                
-                SwingUtilities.invokeLater(() -> Arrays.stream(playersModel.toArray())
-                        .filter(a -> a.toString().contains(((Player) event.getEntity()).getEntityInfo().getUsername()))
-                        .forEach(playersModel::removeElement));
-                System.out.println("removed " + ((Player) event.getEntity()).getEntityInfo().getUsername());
-            } else {
-                System.out.println("in list yet " + ((Player) event.getEntity()).getEntityInfo().getUsername());
-            }
+        if (event.getEntity() instanceof Player
+                && playersModel != null
+                && main.config.PLAYER_INFOS != null
+                && !main.config.PLAYER_INFOS.containsKey(event.getEntity().getId())) {
+
+            SwingUtilities.invokeLater(() -> {
+                nearbyPlayerList.removeIf(p -> p.userId == event.getEntity().getId());
+                for (int i = 0; i < playersModel.size(); i++) {
+                    PlayerInfo info = playersModel.getElementAt(i);
+                    if (info.getUserId() == event.getEntity().getId()) {
+                        nearbyPlayerList.remove(info);
+                        playersModel.removeElement(info);
+                        break;
+                    }
+                }
+            });
         }
     }
 
@@ -109,10 +106,9 @@ public class PlayerEditor extends JPanel implements Listener {
                 .filter(pi -> pi.filter(query))
                 .sorted(Comparator.comparing(pi -> pi.username))
                 .forEach(playersModel::addElement);
-        if (nearbyPlayerList != null)
-            for (PlayerInfo p : nearbyPlayerList) {
-                playersModel.addElement(p);
-            }
+        for (PlayerInfo p : nearbyPlayerList) {
+            playersModel.addElement(p);
+        }
     }
 
     public void addTagToPlayers(PlayerTag tag) {

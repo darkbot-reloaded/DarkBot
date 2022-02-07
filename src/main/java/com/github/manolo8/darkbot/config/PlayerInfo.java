@@ -1,15 +1,11 @@
 package com.github.manolo8.darkbot.config;
 
+import eu.darkbot.api.game.entities.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
     public String username;
@@ -26,6 +22,10 @@ public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
     public PlayerInfo(String username, int userId) {
         this.username = username;
         this.userId = userId;
+    }
+
+    public PlayerInfo(Player player) {
+        this(player.getEntityInfo().getUsername(), player.getId());
     }
 
     public void setTag(PlayerTag tag, Long until) {
@@ -52,7 +52,7 @@ public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
 
     @Override
     public String toString() {
-        return username + "(" + userId +")";
+        return username + "(" + userId + ")";
     }
 
     @Override
