@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.tree;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
+import com.github.manolo8.darkbot.gui.tree.components.JLabelField;
 import com.github.manolo8.darkbot.gui.tree.utils.FocusEventUtil;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.tree.PluginListConfigSetting;
@@ -181,7 +182,7 @@ public class TreeCell extends JPanel {
                 dim.setSize(Math.max(dim.width, res.width), Math.max(dim.height, res.height));
 
 
-            dim.width += nameWidth + (nameWidth > 0 ? 3 + 18 + 18 : 0);
+            dim.width += nameWidth + (showButtons(parent.getComponent(1)) ? 3 + 18 + 18 : 0);
             dim.height = Math.max(dim.height, minHeight);
             return dim;
         }
@@ -198,10 +199,15 @@ public class TreeCell extends JPanel {
             int height = Math.max(minHeight, editorSize.height);
             parent.getComponent(0).setBounds(0, 0, nameWidth, height);
             parent.getComponent(1).setBounds(nameWidth, (height - editorSize.height) / 2, editorSize.width, editorSize.height);
-            if (nameWidth > 0 && isEditor) {
+            if (showButtons(parent.getComponent(1)) && isEditor) {
                 parent.getComponent(2).setBounds(nameWidth + editorSize.width + 3     , 0, 18, height);
                 parent.getComponent(3).setBounds(nameWidth + editorSize.width + 3 + 18, 0, 18, height);
             }
+        }
+
+        private boolean showButtons(Component comp) {
+            return nameWidth > 0 && !(comp instanceof JLabel)
+                    && !Boolean.TRUE.equals(setting.getMetadata("readonly"));
         }
     }
 

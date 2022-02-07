@@ -128,7 +128,7 @@ public class CollectorModule implements Module {
 
 
         boolean direct = API.hasCapability(GameAPI.Capability.DIRECT_COLLECT_BOX);
-        if (distance < (direct ? 800 : 200)) {
+        if (distance < (direct ? 800 : 250)) {
             drive.stop(false);
             if (direct) {
                 API.collectBox(current, current.address);
@@ -206,7 +206,7 @@ public class CollectorModule implements Module {
     private boolean canCollect(Box box) {
         return box.boxInfo.collect
                 && !box.isCollected()
-                && drive.canMove(box.locationInfo.now)
+                && drive.closestDistance(box.locationInfo.now) < 200
                 && (!isResource(box.type) || main.statsManager.deposit < main.statsManager.depositTotal)
                 && !isContested(box);
     }

@@ -101,4 +101,18 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
 
         boxInfo = ConfigEntity.INSTANCE.getOrCreateBoxInfo(type);
     }
+
+    public static class Ore extends Box implements eu.darkbot.api.game.entities.Ore {
+
+        public Ore(int id, long address) {
+            super(id, address);
+        }
+    }
+
+    public static class Beacon extends Box implements eu.darkbot.api.game.entities.Box.BeaconBox {
+
+        public Beacon(int id, long address) {
+            super(id, address);
+        }
+    }
 }

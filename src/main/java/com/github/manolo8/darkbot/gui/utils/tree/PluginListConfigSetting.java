@@ -50,7 +50,7 @@ public class PluginListConfigSetting extends DummyConfigSetting<Void> {
 
             for (String featureId : ((Plugin) plugin).getFeatureIds()) {
                 FeatureDefinition<?> feature = extensions.getFeatureDefinition(featureId);
-                if (feature.getConfig() != null)
+                if (feature != null && feature.getConfig() != null)
                     children.put(feature.getId(), new FeatureSettingParent<>(feature.getConfig(), this, feature));
             }
         }

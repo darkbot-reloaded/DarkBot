@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class PlayerEditor extends JPanel implements Listener {
+
     private final JList<PlayerInfo> playerInfoList;
     private final DefaultListModel<PlayerInfo> playersModel;
 

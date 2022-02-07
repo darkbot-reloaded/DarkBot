@@ -72,7 +72,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         }),
         DONE(q -> false);
 
-        Predicate<GuiManager> canAdvance;
+        final Predicate<GuiManager> canAdvance;
         LoadStatus(Predicate<GuiManager> next) {
             this.canAdvance = next;
         }
@@ -142,6 +142,10 @@ public class GuiManager implements Manager, GameScreenAPI {
             registeredGuis.values().forEach(Gui::reset);
             checks = LoadStatus.WAITING;
         });
+    }
+
+    public long getAddress() {
+        return guiAddress;
     }
 
     public void tick() {

@@ -16,10 +16,10 @@ import java.util.function.Consumer;
 public class TagPopup extends JPopupMenu {
 
     private Collection<PlayerTag> playerTags;
-    private Consumer<PlayerTag> callback;
+    private final Consumer<PlayerTag> callback;
 
-    private Map<PlayerTag, TagEntry> tagCache = new HashMap<>();
-    private Map<String, TagEntry> nullTagsCache = new HashMap<>();
+    private final Map<PlayerTag, TagEntry> tagCache = new HashMap<>();
+    private final Map<String, TagEntry> nullTagsCache = new HashMap<>();
 
     public TagPopup(Collection<PlayerTag> playerTags, Consumer<PlayerTag> callback) {
         super("Player tags");
@@ -34,6 +34,7 @@ public class TagPopup extends JPopupMenu {
     }
 
     public void setTags(Collection<PlayerTag> tags) {
+        if (this.playerTags == tags) return;
         this.playerTags = tags;
         this.tagCache.clear();
         this.nullTagsCache.clear();

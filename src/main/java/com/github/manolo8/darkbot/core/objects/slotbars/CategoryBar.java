@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -62,6 +63,7 @@ public class CategoryBar extends MenuBar {
         if (item.getCategory() == null)
             return categories.stream()
                     .map(c -> c.findItem(item))
+                    .filter(Objects::nonNull)
                     .findFirst();
 
         Category category = get(item.getCategory());

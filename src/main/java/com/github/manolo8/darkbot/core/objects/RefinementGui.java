@@ -34,7 +34,7 @@ public class RefinementGui extends Gui implements API.Singleton {
 
     public int getAmount(OreAPI.Ore ore) {
         return Stream.concat(basicOres.stream(), upgradableOres.stream())
-                .filter(o -> o.name.endsWith(ore.name().toLowerCase()))
+                .filter(o -> o.name.endsWith(ore.getName()))
                 .map(o -> o.amount)
                 .findFirst().orElse(-1);
     }

@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.core.api.GameAPI;
 
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MemoryAPI;
+import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.managers.WindowAPI;
 import org.jetbrains.annotations.NotNull;
 
@@ -111,6 +112,7 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     void lockEntity(int id);
     void moveShip(Locatable destination);
     void collectBox(Locatable destination, long collectableAddress);
+    void refine(long refineUtilAddress, OreAPI.Ore ore, int amount);
     long callMethod(int index, long... arguments);
 
     //MemoryAPI

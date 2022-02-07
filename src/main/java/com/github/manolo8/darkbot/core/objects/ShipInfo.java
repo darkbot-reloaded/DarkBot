@@ -38,7 +38,7 @@ public class ShipInfo extends Updatable {
         long newTarget = API.readMemoryLong(address + 112);
         if (newTarget != 0 || keepTargetTime > System.currentTimeMillis()) {
             target = newTarget;
-            if (target != 0) keepTargetTime = System.currentTimeMillis() + 500;
+            if (target != 0) keepTargetTime = System.currentTimeMillis() + 1000;
         }
         angle = Math.toRadians(API.readMemoryInt(API.readMemoryLong(address + 48) + 32));
         speed = API.readMemoryInt(API.readMemoryLong(address + 72) + 40);

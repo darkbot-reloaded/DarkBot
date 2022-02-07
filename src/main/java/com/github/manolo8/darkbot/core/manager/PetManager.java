@@ -320,7 +320,7 @@ public class PetManager extends Gui implements PetAPI {
         while (it1.hasNext() && it2.hasNext()) {
             Gear g1 = it1.next();
             PetGear g2 = it2.next();
-            if (g1.id != g2.getId()) return true;
+            if (g1 == null || g2 == null || g1.id != g2.getId()) return true;
         }
         return it1.hasNext() || it2.hasNext();
     }

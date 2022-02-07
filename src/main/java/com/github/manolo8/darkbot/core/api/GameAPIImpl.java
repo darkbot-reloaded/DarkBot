@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.api.managers.OreAPI;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -372,6 +373,11 @@ public class GameAPIImpl<
     @Override
     public void collectBox(Locatable destination, long collectableAddress) {
         direct.collectBox(destination, collectableAddress);
+    }
+
+    @Override
+    public void refine(long refineUtilAddress, OreAPI.Ore ore, int amount) {
+        direct.refine(refineUtilAddress, ore, amount);
     }
 
     @Override

@@ -15,7 +15,7 @@ public class PlayerTagUtils {
         JPanel panel = new JPanel(new MigLayout("ins 0, wrap 2", "[]3px[grow]"));
         JTextField name = new JTextField(20);
         JSlider color = new JSlider(0, 255);
-        color.setUI(new PlayerTagUtils.ColoredSliderUI(0.6f, 0.6f));
+        color.setUI(new PlayerTagUtils.ColoredSliderUI());
 
         panel.add(new JLabel("Tag "));
         panel.add(name, "grow");
@@ -40,10 +40,10 @@ public class PlayerTagUtils {
     public static class ColoredSliderUI extends FlatSliderUI {
         private static final int TRACK_HEIGHT = 8;
         private static final int THUMB_WIDTH = 20;
-        private Color[] gradient;
-        public ColoredSliderUI(float sat, float val) {
-            gradient = IntStream.rangeClosed(0, 255).mapToObj(i -> Color.getHSBColor(i / 255f, sat, val)).toArray(Color[]::new);
-        }
+
+        private static final float sat = 0.6f, val = 0.6f;
+        private static final Color[] gradient = IntStream.rangeClosed(0, 255)
+                .mapToObj(i -> Color.getHSBColor(i / 255f, sat, val)).toArray(Color[]::new);
 
         protected Dimension getThumbSize() {
             return new Dimension(UIScale.scale(THUMB_WIDTH), UIScale.scale(THUMB_WIDTH));

@@ -13,6 +13,7 @@ import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.managers.ExtensionsAPI;
 import eu.darkbot.api.utils.Inject;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -71,7 +72,10 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
     }
 
     private boolean isDisabled(Plugin plugin) {
-        return Arrays.stream(plugin.getFeatureIds()).noneMatch(id -> getFeatureDefinition(id).isEnabled());
+        return Arrays.stream(plugin.getFeatureIds())
+                .map(this::getFeatureDefinition)
+                .filter(Objects::nonNull)
+                .noneMatch(FeatureDefinition::isEnabled);
     }
 
     public void updateConfig() {
@@ -155,15 +159,15 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
                 .filter(fd -> fd.getPlugin() == plugin);
     }
 
-    public <T> FeatureDefinition<T> getFeatureDefinition(T feature) {
+    public <T> @Nullable FeatureDefinition<T> getFeatureDefinition(T feature) {
         return getFeatureDefinition(feature.getClass().getCanonicalName());
     }
 
-    public <T> FeatureDefinition<T> getFeatureDefinition(Class<T> feature) {
+    public <T> @Nullable FeatureDefinition<T> getFeatureDefinition(Class<T> feature) {
         return getFeatureDefinition(feature.getCanonicalName());
     }
 
-    public <T> FeatureDefinition<T> getFeatureDefinition(String id) {
+    public <T> @Nullable FeatureDefinition<T> getFeatureDefinition(String id) {
         synchronized (pluginHandler) {
             //noinspection unchecked
             return (FeatureDefinition<T>) FEATURES_BY_ID.get(id);
