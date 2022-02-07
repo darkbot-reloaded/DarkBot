@@ -32,6 +32,7 @@ import eu.darkbot.api.game.other.Health;
 import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.game.other.LocationInfo;
 import eu.darkbot.api.game.other.Lockable;
+import eu.darkbot.api.game.other.Movable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -415,8 +416,11 @@ public class MapDrawer extends JPanel {
 
         Lockable target = hero.getLocalTarget();
         if (target != null && target.isValid()) {
-            g2.setColor(cs.GOING);
-            drawLine(g2, target.getLocationInfo(), hero.getLocationInfo());
+            if (target instanceof Movable) {
+                g2.setColor(cs.GOING);
+                ((Movable) target).getDestination()
+                        .ifPresent(dest -> drawLine(g2, target.getLocationInfo(), dest));
+            }
             g2.setColor(cs.TARGET);
             drawEntity(g2, target.getLocationInfo(), true);
         }
