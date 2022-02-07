@@ -33,8 +33,8 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
 
     public LinkedList<PathPoint> createRote(PathPoint current, PathPoint destination) {
         LinkedList<PathPoint> paths = new LinkedList<>();
-        fixToClosest(current);
-        fixToClosest(destination);
+        current = fixToClosest(current);
+        destination = fixToClosest(destination);
 
         if (hasLineOfSight(current, destination)) {
             paths.add(destination);
@@ -57,13 +57,17 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
         double initialX = point.x, initialY = point.y;
 
         AreaImpl area = areaTo(point);
-        if (area != null) area = areaTo(area.toSide(point)); // Inside an area, get out of it
+        if (area != null) {
+            point = area.toSide(point); // Inside an area, get out of it
+            area = areaTo(point); // See if leaving an area got us inside another one
+        }
         if (map.isOutOfMap(point.x, point.y)) { // In radiation, get out of it
             point.x = Math.min(Math.max(point.x, 0), MapManager.internalWidth);
             point.y = Math.min(Math.max(point.y, 0), MapManager.internalHeight);
             if (areaTo(point) == null) return point; // Got out of rad and not in area
         } else if (area == null) return point; // Inside map & not in area (anymore)
 
+        // Search for point in spiral pattern
         double angle = 0, distance = 0;
         do {
             point.x = initialX - (int) (cos(angle) * distance);
@@ -72,11 +76,10 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
             distance += 2;
         } while (areaTo(point) != null || map.isOutOfMap(point.x, point.y) && distance < 20000);
 
+        // Worst case scenario, just pick the closest known path point
         if (distance >= 20000) {
             PathPoint closest = closest(point);
-            if (closest == null) return point;
-            point.x = closest.x;
-            point.y = closest.y;
+            if (closest != null) return closest;
         }
         return point;
     }
