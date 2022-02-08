@@ -23,7 +23,7 @@ import java.util.Locale;
 public class PlayerEditor extends JPanel implements Listener {
     private final JList<PlayerInfo> playerInfoList;
     private final DefaultListModel<PlayerInfo> playersModel;
-    private final List<PlayerInfo> nearbyPlayerList = new ArrayList<>();
+    public static final List<PlayerInfo> nearbyPlayerList = new ArrayList<>();
 
     private final PlayerManager playerManager;
     private final SearchField sf;
@@ -39,8 +39,10 @@ public class PlayerEditor extends JPanel implements Listener {
 
             SwingUtilities.invokeLater(() -> {
                 PlayerInfo playerInfo = new PlayerInfo((Player) event.getEntity());
-                nearbyPlayerList.add(playerInfo);
-                playersModel.addElement(playerInfo);
+                if (!playersModel.contains(playerInfo)) {
+                    nearbyPlayerList.add(playerInfo);
+                    playersModel.addElement(playerInfo);
+                }
             });
         }
     }
@@ -53,10 +55,9 @@ public class PlayerEditor extends JPanel implements Listener {
                 && !main.config.PLAYER_INFOS.containsKey(event.getEntity().getId())) {
 
             SwingUtilities.invokeLater(() -> {
-                nearbyPlayerList.removeIf(p -> p.userId == event.getEntity().getId());
                 for (int i = 0; i < playersModel.size(); i++) {
                     PlayerInfo info = playersModel.getElementAt(i);
-                    if (info.getUserId() == event.getEntity().getId()) {
+                    if (info.getUserId() == event.getEntity().getId() && !playerInfoList.isSelectedIndex(i)) {
                         nearbyPlayerList.remove(info);
                         playersModel.removeElement(info);
                         break;

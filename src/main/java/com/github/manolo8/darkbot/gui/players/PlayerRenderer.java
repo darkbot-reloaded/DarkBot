@@ -34,6 +34,7 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
 
         setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
         setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
+        playername.setForeground(PlayerEditor.nearbyPlayerList.contains(value) ? new Color(41, 182, 246) : list.getForeground());
 
         this.playername.setText(value.username);
         this.id.setText(String.valueOf(value.userId));
