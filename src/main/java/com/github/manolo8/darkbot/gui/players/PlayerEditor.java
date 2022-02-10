@@ -15,6 +15,7 @@ import eu.darkbot.api.managers.EventBrokerAPI;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -24,11 +25,19 @@ public class PlayerEditor extends JPanel implements Listener {
     private final JList<PlayerInfo> playerInfoList;
     private final DefaultListModel<PlayerInfo> playersModel;
     public static final List<PlayerInfo> nearbyPlayerList = new ArrayList<>();
+    private final List<PlayerInfo> nearbySelectedPlayerList = new ArrayList<>();
+    private final List<PlayerInfo> queuePlayerToRemoveList = new ArrayList<>();
 
     private final PlayerManager playerManager;
     private final SearchField sf;
     private final PlayerTagManager tagEditor;
     protected Main main;
+
+    public int indexOfPlayersModel(int playerId) {
+        for (int i = 0; i < playersModel.size(); i++)
+            if (playerId == playersModel.get(i).getUserId()) return i;
+        return -1;
+    }
 
     @EventHandler
     public void onEntityPlayerAdd(EntitiesAPI.EntityCreateEvent event) {
@@ -39,9 +48,10 @@ public class PlayerEditor extends JPanel implements Listener {
 
             SwingUtilities.invokeLater(() -> {
                 PlayerInfo playerInfo = new PlayerInfo((Player) event.getEntity());
-                if (!playersModel.contains(playerInfo)) {
+                if (indexOfPlayersModel(event.getEntity().getId()) == -1) {
                     nearbyPlayerList.add(playerInfo);
                     playersModel.addElement(playerInfo);
+                    queuePlayerToRemoveList.remove(playerInfo); //not works
                 }
             });
         }
@@ -55,12 +65,21 @@ public class PlayerEditor extends JPanel implements Listener {
                 && !main.config.PLAYER_INFOS.containsKey(event.getEntity().getId())) {
 
             SwingUtilities.invokeLater(() -> {
+                /*int idx = indexOf(event.getEntity().getId());
+                if (idx == -1 || playerInfoList.isSelectedIndex(idx)) return;
+                PlayerInfo info = playersModel.getElementAt(idx);
+                nearbyPlayerList.remove(info);
+                playersModel.removeElement(info);*/
                 for (int i = 0; i < playersModel.size(); i++) {
                     PlayerInfo info = playersModel.getElementAt(i);
-                    if (info.getUserId() == event.getEntity().getId() && !playerInfoList.isSelectedIndex(i)) {
-                        nearbyPlayerList.remove(info);
-                        playersModel.removeElement(info);
-                        break;
+                    if (info.getUserId() == event.getEntity().getId()) {
+                        if (!playerInfoList.isSelectedIndex(i)) {
+                            nearbyPlayerList.remove(info);
+                            playersModel.removeElement(info);
+                            break;
+                        } else {
+                            queuePlayerToRemoveList.add(info);
+                        }
                     }
                 }
             });
@@ -79,6 +98,43 @@ public class PlayerEditor extends JPanel implements Listener {
 
         add(new JScrollPane(playerInfoList,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), "span, grow");
+
+        /*playerInfoList.addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) {
+
+            }
+        });*/
+
+        playerInfoList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    if (!nearbySelectedPlayerList.contains(playerInfoList.getSelectedValue()))
+                        nearbySelectedPlayerList.add(playerInfoList.getSelectedValue());
+                    for (int i = 0; i < nearbySelectedPlayerList.size(); i++) {
+                        if (!nearbyPlayerList.contains(nearbySelectedPlayerList.get(i))) {
+                            if (!main.config.PLAYER_INFOS.containsKey(playerInfoList.getSelectedValue().userId)) {
+                                if (!main.config.PLAYER_INFOS.containsKey(nearbySelectedPlayerList.get(i).userId)) {
+                                    playersModel.removeElement(nearbySelectedPlayerList.get(i));
+                                    nearbyPlayerList.remove(nearbySelectedPlayerList.get(i));
+                                    nearbySelectedPlayerList.remove(i);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    for (int i = 0; i < nearbySelectedPlayerList.size(); i++) {
+                        if (!playerInfoList.isSelectedIndex(i + (playersModel.size() - nearbyPlayerList.size()))) {
+                            nearbySelectedPlayerList.remove(i);
+                            break;
+                        }
+                    }
+                    for (PlayerInfo playerInfo : queuePlayerToRemoveList) {
+                        playersModel.removeElement(playerInfo);
+                    }
+                });
+            }
+        });
     }
 
     public void setup(Main main) {
