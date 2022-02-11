@@ -13,6 +13,7 @@ import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MovementAPI;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -239,6 +240,11 @@ public class Drive implements MovementAPI {
     @Override
     public Location getCurrentLocation() {
         return heroLoc.now;
+    }
+
+    @Override
+    public @NotNull List<? extends Locatable> getPath() {
+        return Collections.unmodifiableList(paths);
     }
 
     @Override
