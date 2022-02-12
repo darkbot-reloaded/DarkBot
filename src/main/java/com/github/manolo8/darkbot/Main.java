@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigHandler;
 import com.github.manolo8.darkbot.config.ConfigManager;
-import com.github.manolo8.darkbot.config.tree.ConfigBuilder;
 import com.github.manolo8.darkbot.config.utils.ByteArrayToBase64TypeAdapter;
 import com.github.manolo8.darkbot.config.utils.ConditionTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.PlayerTagTypeAdapterFactory;
@@ -144,14 +143,14 @@ public class Main extends Thread implements PluginListener, BotAPI {
         this.backpage        = pluginAPI.requireInstance(BackpageManager.class);
         this.featureRegistry = pluginAPI.requireInstance(FeatureRegistry.class);
         this.repairManager   = pluginAPI.requireInstance(RepairManager.class);
-
-        this.botInstaller = new BotInstaller(
-                settingsManager, facadeManager, effectManager, guiManager, mapManager,
-                hero, statsManager, pingManager, repairManager);
+        this.botInstaller    = pluginAPI.requireInstance(BotInstaller.class);
 
         API = configManager.getAPI(pluginAPI);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
         pluginAPI.addInstance(API);
+
+        this.botInstaller.install(settingsManager, facadeManager, effectManager, guiManager, mapManager,
+                hero, statsManager, pingManager, repairManager);
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();

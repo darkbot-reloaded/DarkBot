@@ -80,8 +80,8 @@ public class GameAPIImpl<
         if (hasCapability(GameAPI.Capability.DIRECT_LIMIT_FPS)) {
             ConfigAPI config = HeroManager.instance.main.configHandler;
             ConfigSetting<Integer> maxFps = config.requireConfig("bot_settings.api_config.max_fps");
-            maxFps.addListener(fpsLimitListener = direct::setMaxFps);
-            direct.setMaxFps(maxFps.getValue());
+            maxFps.addListener(fpsLimitListener = this::setMaxFps);
+            setMaxFps(maxFps.getValue());
         } else {
             this.fpsLimitListener = null;
         }
@@ -384,4 +384,5 @@ public class GameAPIImpl<
     public long callMethod(int index, long... arguments) {
         return direct.callMethod(index, arguments);
     }
+
 }
