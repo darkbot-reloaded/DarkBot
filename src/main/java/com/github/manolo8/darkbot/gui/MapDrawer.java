@@ -251,7 +251,7 @@ public class MapDrawer extends JPanel {
         g2.setColor(cs.AVOID);
         drawCustomZone(g2, config.AVOIDED.get(hero.map.id));
         g2.setColor(cs.SAFETY);
-        for (SafetyInfo safety : config.SAFETY.get(hero.map.id)) {
+        for (SafetyInfo safety : config.SAFETY.getOrDefault(hero.map.id, Collections.emptySet())) {
             if (safety.runMode == SafetyInfo.RunMode.NEVER
                     || safety.entity == null || safety.entity.removed) continue;
             drawSafeZone(g2, safety);
