@@ -15,8 +15,8 @@ import eu.darkbot.api.managers.EventBrokerAPI;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -25,8 +25,6 @@ public class PlayerEditor extends JPanel implements Listener {
     private final JList<PlayerInfo> playerInfoList;
     private final DefaultListModel<PlayerInfo> playersModel;
     public static final List<PlayerInfo> nearbyPlayerList = new ArrayList<>();
-    private final List<PlayerInfo> nearbySelectedPlayerList = new ArrayList<>();
-    private final List<PlayerInfo> queuePlayerToRemoveList = new ArrayList<>();
 
     private final PlayerManager playerManager;
     private final SearchField sf;
@@ -51,7 +49,6 @@ public class PlayerEditor extends JPanel implements Listener {
                 if (indexOfPlayersModel(event.getEntity().getId()) == -1) {
                     nearbyPlayerList.add(playerInfo);
                     playersModel.addElement(playerInfo);
-                    queuePlayerToRemoveList.remove(playerInfo); //not works
                 }
             });
         }
@@ -78,7 +75,8 @@ public class PlayerEditor extends JPanel implements Listener {
                             playersModel.removeElement(info);
                             break;
                         } else {
-                            queuePlayerToRemoveList.add(info);
+                            nearbyPlayerList.remove(info);
+                            break;
                         }
                     }
                 }
@@ -99,42 +97,22 @@ public class PlayerEditor extends JPanel implements Listener {
         add(new JScrollPane(playerInfoList,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), "span, grow");
 
-        /*playerInfoList.addListSelectionListener(event -> {
+        playerInfoList.addListSelectionListener(event -> SwingUtilities.invokeLater(() -> {
             if (!event.getValueIsAdjusting()) {
-
-            }
-        });*/
-
-        playerInfoList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                SwingUtilities.invokeLater(() -> {
-                    if (!nearbySelectedPlayerList.contains(playerInfoList.getSelectedValue()))
-                        nearbySelectedPlayerList.add(playerInfoList.getSelectedValue());
-                    for (int i = 0; i < nearbySelectedPlayerList.size(); i++) {
-                        if (!nearbyPlayerList.contains(nearbySelectedPlayerList.get(i))) {
-                            if (!main.config.PLAYER_INFOS.containsKey(playerInfoList.getSelectedValue().userId)) {
-                                if (!main.config.PLAYER_INFOS.containsKey(nearbySelectedPlayerList.get(i).userId)) {
-                                    playersModel.removeElement(nearbySelectedPlayerList.get(i));
-                                    nearbyPlayerList.remove(nearbySelectedPlayerList.get(i));
-                                    nearbySelectedPlayerList.remove(i);
-                                    break;
-                                }
-                            }
+                List<Integer> listToRemove = new ArrayList<>();
+                for (int i = 0; i < playersModel.size() - main.config.PLAYER_INFOS.size(); i++) {
+                    if (!nearbyPlayerList.contains(playersModel.get(i + main.config.PLAYER_INFOS.size()))) {
+                        if (!playerInfoList.getSelectedValuesList().contains(playersModel.get(i + main.config.PLAYER_INFOS.size()))) {
+                            listToRemove.add(i + main.config.PLAYER_INFOS.size());
                         }
                     }
-                    for (int i = 0; i < nearbySelectedPlayerList.size(); i++) {
-                        if (!playerInfoList.isSelectedIndex(i + (playersModel.size() - nearbyPlayerList.size()))) {
-                            nearbySelectedPlayerList.remove(i);
-                            break;
-                        }
-                    }
-                    for (PlayerInfo playerInfo : queuePlayerToRemoveList) {
-                        playersModel.removeElement(playerInfo);
-                    }
-                });
+                }
+                Collections.reverse(listToRemove);
+                for (int p : listToRemove) {
+                    playersModel.remove(p);
+                }
             }
-        });
+        }));
     }
 
     public void setup(Main main) {

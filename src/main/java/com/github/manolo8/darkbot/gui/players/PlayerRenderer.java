@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInfo> {
 
-    private final JLabel playername = new JLabel();
+    private final JLabel playerName = new JLabel();
     private final JLabel id = new JLabel();
 
     private final Map<PlayerTag, Tag> tagCache = new HashMap<>();
@@ -34,13 +34,13 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
 
         setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
         setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
-        playername.setForeground(PlayerEditor.nearbyPlayerList.contains(value) ? new Color(41, 182, 246) : list.getForeground());
+        playerName.setForeground(PlayerEditor.nearbyPlayerList.contains(value) ? new Color(41, 182, 246) : list.getForeground());
 
-        this.playername.setText(value.username);
+        this.playerName.setText(value.username);
         this.id.setText(String.valueOf(value.userId));
 
         add(id, "grow");
-        add(playername, "grow");
+        add(playerName, "grow");
         for (PlayerTag tag : value.getTags().get())
             add(tagCache.computeIfAbsent(tag, Tag::new), "grow");
 
