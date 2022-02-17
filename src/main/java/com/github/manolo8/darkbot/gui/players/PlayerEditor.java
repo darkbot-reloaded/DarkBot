@@ -50,6 +50,14 @@ public class PlayerEditor extends JPanel implements Listener {
                     nearbyPlayerList.add(playerInfo);
                     playersModel.addElement(playerInfo);
                 }
+                if (playerInfoList.getSelectedValuesList().toString().contains(String.valueOf(playerInfo.userId)) && !nearbyPlayerList.toString().contains(String.valueOf(playerInfo.userId))){
+                    for (int i = 0; i < playersModel.size(); i++) {
+                        if (playersModel.get(i).toString().contains(playerInfo.toString())) {
+                            nearbyPlayerList.add(playersModel.get(i));
+                            break;
+                        }
+                    }
+                }
             });
         }
     }
@@ -99,6 +107,19 @@ public class PlayerEditor extends JPanel implements Listener {
 
         playerInfoList.addListSelectionListener(event -> SwingUtilities.invokeLater(() -> {
             if (!event.getValueIsAdjusting()) {
+
+                int min = Math.max(event.getFirstIndex(), main.config.PLAYER_INFOS.size());
+                int max = Math.min(event.getLastIndex() + 1, playersModel.size());
+                for (int i = min; i < max; i++) {
+                    PlayerInfo pl = playersModel.get(i);
+                    if (!playerInfoList.isSelectedIndex(i) &&
+                            !main.config.PLAYER_INFOS.containsKey(pl.getUserId()) &&
+                            !nearbyPlayerList.toString().contains(pl.toString())) {
+                        playersModel.removeElementAt(i--);
+                        max--;
+                    }
+                }
+                /*
                 List<Integer> listToRemove = new ArrayList<>();
                 for (int i = 0; i < playersModel.size() - main.config.PLAYER_INFOS.size(); i++) {
                     if (!nearbyPlayerList.contains(playersModel.get(i + main.config.PLAYER_INFOS.size()))) {
@@ -110,7 +131,8 @@ public class PlayerEditor extends JPanel implements Listener {
                 Collections.reverse(listToRemove);
                 for (int p : listToRemove) {
                     playersModel.remove(p);
-                }
+                }*/
+
             }
         }));
     }
