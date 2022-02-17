@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.EntityList;
@@ -151,19 +152,23 @@ public class MapManager implements Manager, StarSystemAPI {
         }
     }
 
+    public ViewBounds viewBounds = new ViewBounds();
+
     private void updateBounds() {
         long temp = API.readMemoryLong(viewAddressStatic);
 
         if (viewAddress != temp) {
             viewAddress = temp;
-            boundsAddress = API.readMemoryLong(viewAddress + 208);
+            boundsAddress = API.readMemoryLong(viewAddress + (main.settingsManager.is3D() ? 216 : 208));
         }
 
         clientWidth = API.readMemoryInt(boundsAddress + 168);
         clientHeight = API.readMemoryInt(boundsAddress + 172);
 
-        long updated = API.readMemoryLong(boundsAddress + 280);
+        long updated = API.readMemoryLong(boundsAddress + (main.settingsManager.is3D() ? 320 : 280));
         updated = API.readMemoryLong(updated + 112);
+
+        viewBounds.update(updated);
 
         boundX = API.readMemoryDouble(updated + 80);
         boundY = API.readMemoryDouble(updated + 88);
@@ -172,6 +177,25 @@ public class MapManager implements Manager, StarSystemAPI {
         screenBound.set(boundX, boundY, boundMaxX, boundMaxY);
         width = boundMaxX - boundX;
         height = boundMaxY - boundY;
+    }
+
+    public static class ViewBounds extends UpdatableAuto {
+        public double leftTopX, leftTopY;
+        public double rightTopX, rightTopY;
+        public double rightBotX, rightBotY;
+        public double leftBotX, leftBotY;
+
+        @Override
+        public void update() {
+            this.leftTopX = API.readMemoryDouble(address + 80);
+            this.leftTopY = API.readMemoryDouble(address + 88);
+            this.rightTopX = API.readMemoryDouble(address + 96);
+            this.rightTopY = API.readMemoryDouble(address + 104);
+            this.rightBotX = API.readMemoryDouble(address + 112);
+            this.rightBotY = API.readMemoryDouble(address + 120);
+            this.leftBotX = API.readMemoryDouble(address + 128);
+            this.leftBotY = API.readMemoryDouble(address + 136);
+        }
     }
 
     private Location getEnemyLocatorTarget() {

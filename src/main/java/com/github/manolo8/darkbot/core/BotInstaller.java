@@ -93,7 +93,7 @@ public class BotInstaller implements API.Singleton {
         BotInstaller.SEP = API.readMemoryInt(mainApplicationAddress.get() + 4);
 
         if ((query = API.queryMemory(bytesToSettings, 1)).length != 1) return true;
-        this.settingsAddress.send(query[0] - 237);
+        this.settingsAddress.send(query[0] - 277);
 
         if ((temp = API.readMemoryLong(mainApplicationAddress.get() + 1344)) == 0) return true;
         this.mainAddress.send(temp);

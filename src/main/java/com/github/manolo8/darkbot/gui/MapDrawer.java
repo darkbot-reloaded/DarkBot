@@ -6,8 +6,17 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
+import com.github.manolo8.darkbot.core.entities.Barrier;
+import com.github.manolo8.darkbot.core.entities.BasePoint;
+import com.github.manolo8.darkbot.core.entities.BattleStation;
 import com.github.manolo8.darkbot.core.entities.Box;
-import com.github.manolo8.darkbot.core.entities.*;
+import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.FakeNpc;
+import com.github.manolo8.darkbot.core.entities.Mine;
+import com.github.manolo8.darkbot.core.entities.NoCloack;
+import com.github.manolo8.darkbot.core.entities.Npc;
+import com.github.manolo8.darkbot.core.entities.Portal;
+import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.entities.bases.BaseHeadquarters;
 import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
 import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
@@ -15,10 +24,10 @@ import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.PetManager;
-import com.github.manolo8.darkbot.core.manager.PingManager;
-import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.manager.PetManager.PetStats;
 import com.github.manolo8.darkbot.core.manager.PetManager.PetStatsType;
+import com.github.manolo8.darkbot.core.manager.PingManager;
+import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.utils.Drive;
@@ -42,8 +51,14 @@ import java.awt.font.TextAttribute;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -460,9 +475,25 @@ public class MapDrawer extends JPanel {
         g2.fillOval(translateX(loc.getX()) - 3, translateY(loc.getY()) - 3, 7, 7);
 
         g2.setColor(cs.BARRIER_BORDER);
-        g2.drawRect(translateX(mapManager.boundX), translateY(mapManager.boundY),
-                translateX(mapManager.boundMaxX - mapManager.boundX),
-                translateY(mapManager.boundMaxY - mapManager.boundY));
+
+        // draw view bounds of game screen
+        MapManager.ViewBounds view = mapManager.viewBounds;
+
+        g2.drawLine(translateX(view.leftTopX), translateY(view.leftTopY),
+                translateX(view.rightTopX), translateY(view.rightTopY));
+
+        g2.drawLine(translateX(view.rightTopX), translateY(view.rightTopY),
+                translateX(view.rightBotX), translateY(view.rightBotY));
+
+        g2.drawLine(translateX(view.rightBotX), translateY(view.rightBotY),
+                translateX(view.leftBotX), translateY(view.leftBotY));
+
+        g2.drawLine(translateX(view.leftBotX), translateY(view.leftBotY),
+                translateX(view.leftTopX), translateY(view.leftTopY));
+
+//        g2.drawRect(translateX(mapManager.boundX), translateY(mapManager.boundY),
+//                translateX(mapManager.boundMaxX - mapManager.boundX),
+//                translateY(mapManager.boundMaxY - mapManager.boundY));
 
         if (hero.pet.removed || !hero.pet.locationInfo.isLoaded()) return;
         loc = hero.pet.locationInfo.now;

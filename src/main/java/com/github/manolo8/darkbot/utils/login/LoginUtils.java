@@ -183,6 +183,9 @@ public class LoginUtils {
     }
 
     private static String replaceParameters(String params) {
+        // update it here so on refresh can be used 2d or 3d
+        FORCED_PARAMS.put("display2d", ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.USE_3D ? "1" : "2");
+
         params = params.replaceAll("\"", "").replaceAll(",", "&").replaceAll(": ", "=");
         for (Map.Entry<String, String> replaces : FORCED_PARAMS.entrySet()) {
             params = params.replaceAll(replaces.getKey() + "=[^&]+", replaces.getKey() + "=" + replaces.getValue());
