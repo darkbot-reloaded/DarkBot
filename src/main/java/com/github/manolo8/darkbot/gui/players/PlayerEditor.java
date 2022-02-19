@@ -15,82 +15,23 @@ import eu.darkbot.api.managers.EventBrokerAPI;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class PlayerEditor extends JPanel implements Listener {
     private final JList<PlayerInfo> playerInfoList;
     private final DefaultListModel<PlayerInfo> playersModel;
-    public static final List<PlayerInfo> nearbyPlayerList = new ArrayList<>();
+    public static final Set<PlayerInfo> nearbyPlayers = new LinkedHashSet<>();
 
     private final PlayerManager playerManager;
     private final SearchField sf;
     private final PlayerTagManager tagEditor;
     protected Main main;
+    private boolean registered;
 
-    public int indexOfPlayersModel(int playerId) {
-        for (int i = 0; i < playersModel.size(); i++)
-            if (playerId == playersModel.get(i).getUserId()) return i;
-        return -1;
-    }
-
-    @EventHandler
-    public void onEntityPlayerAdd(EntitiesAPI.EntityCreateEvent event) {
-        if (event.getEntity() instanceof Player
-                && playersModel != null
-                && main.config.PLAYER_INFOS != null
-                && !main.config.PLAYER_INFOS.containsKey(event.getEntity().getId())) {
-
-            SwingUtilities.invokeLater(() -> {
-                PlayerInfo playerInfo = new PlayerInfo((Player) event.getEntity());
-                if (indexOfPlayersModel(event.getEntity().getId()) == -1) {
-                    nearbyPlayerList.add(playerInfo);
-                    playersModel.addElement(playerInfo);
-                }
-                if (playerInfoList.getSelectedValuesList().toString().contains(String.valueOf(playerInfo.userId)) && !nearbyPlayerList.toString().contains(String.valueOf(playerInfo.userId))){
-                    for (int i = 0; i < playersModel.size(); i++) {
-                        if (playersModel.get(i).toString().contains(playerInfo.toString())) {
-                            nearbyPlayerList.add(playersModel.get(i));
-                            break;
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    @EventHandler
-    public void onEntityPlayerRemove(EntitiesAPI.EntityRemoveEvent event) {
-        if (event.getEntity() instanceof Player
-                && playersModel != null
-                && main.config.PLAYER_INFOS != null
-                && !main.config.PLAYER_INFOS.containsKey(event.getEntity().getId())) {
-
-            SwingUtilities.invokeLater(() -> {
-                /*int idx = indexOf(event.getEntity().getId());
-                if (idx == -1 || playerInfoList.isSelectedIndex(idx)) return;
-                PlayerInfo info = playersModel.getElementAt(idx);
-                nearbyPlayerList.remove(info);
-                playersModel.removeElement(info);*/
-                for (int i = 0; i < playersModel.size(); i++) {
-                    PlayerInfo info = playersModel.getElementAt(i);
-                    if (info.getUserId() == event.getEntity().getId()) {
-                        if (!playerInfoList.isSelectedIndex(i)) {
-                            nearbyPlayerList.remove(info);
-                            playersModel.removeElement(info);
-                            break;
-                        } else {
-                            nearbyPlayerList.remove(info);
-                            break;
-                        }
-                    }
-                }
-            });
-        }
-    }
 
     public PlayerEditor() {
         super(new MigLayout("ins 0, gap 0, wrap 3, fill", "[][grow][]", "[][grow,fill]"));
@@ -105,36 +46,20 @@ public class PlayerEditor extends JPanel implements Listener {
         add(new JScrollPane(playerInfoList,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), "span, grow");
 
-        playerInfoList.addListSelectionListener(event -> SwingUtilities.invokeLater(() -> {
-            if (!event.getValueIsAdjusting()) {
-
-                int min = Math.max(event.getFirstIndex(), main.config.PLAYER_INFOS.size());
-                int max = Math.min(event.getLastIndex() + 1, playersModel.size());
-                for (int i = min; i < max; i++) {
-                    PlayerInfo pl = playersModel.get(i);
-                    if (!playerInfoList.isSelectedIndex(i) &&
-                            !main.config.PLAYER_INFOS.containsKey(pl.getUserId()) &&
-                            !nearbyPlayerList.toString().contains(pl.toString())) {
-                        playersModel.removeElementAt(i--);
-                        max--;
-                    }
+        playerInfoList.addListSelectionListener((event) -> {
+            if (event.getValueIsAdjusting()) return;
+            int min = Math.max(event.getFirstIndex(), main.config.PLAYER_INFOS.size());
+            int max = Math.min(event.getLastIndex() + 1, playersModel.size());
+            for (int i = min; i < max; i++) {
+                PlayerInfo pl = playersModel.get(i);
+                if (!playerInfoList.isSelectedIndex(i) &&
+                        !main.config.PLAYER_INFOS.containsKey(pl.getUserId()) &&
+                        !nearbyPlayers.contains(pl)) {
+                    playersModel.removeElementAt(i--);
+                    max--;
                 }
-                /*
-                List<Integer> listToRemove = new ArrayList<>();
-                for (int i = 0; i < playersModel.size() - main.config.PLAYER_INFOS.size(); i++) {
-                    if (!nearbyPlayerList.contains(playersModel.get(i + main.config.PLAYER_INFOS.size()))) {
-                        if (!playerInfoList.getSelectedValuesList().contains(playersModel.get(i + main.config.PLAYER_INFOS.size()))) {
-                            listToRemove.add(i + main.config.PLAYER_INFOS.size());
-                        }
-                    }
-                }
-                Collections.reverse(listToRemove);
-                for (int p : listToRemove) {
-                    playersModel.remove(p);
-                }*/
-
             }
-        }));
+        });
     }
 
     public void setup(Main main) {
@@ -142,8 +67,11 @@ public class PlayerEditor extends JPanel implements Listener {
 
         tagEditor.setup(main);
 
-        EventBrokerAPI eventBroker = main.pluginAPI.requireAPI(EventBrokerAPI.class);
-        eventBroker.registerListener(this);
+        if (!registered) {
+            registered = true;
+            EventBrokerAPI eventBroker = main.pluginAPI.requireAPI(EventBrokerAPI.class);
+            eventBroker.registerListener(this);
+        }
 
         refreshList();
         main.config.PLAYER_UPDATED.add(i -> SwingUtilities.invokeLater(this::refreshList));
@@ -163,9 +91,58 @@ public class PlayerEditor extends JPanel implements Listener {
                 .filter(pi -> pi.filter(query))
                 .sorted(Comparator.comparing(pi -> pi.username))
                 .forEach(playersModel::addElement);
-        for (PlayerInfo p : nearbyPlayerList) {
+        for (PlayerInfo p : nearbyPlayers) {
             playersModel.addElement(p);
         }
+    }
+
+    @EventHandler
+    public void onEntityPlayerAdd(EntitiesAPI.EntityCreateEvent event) {
+        if (event.getEntity() instanceof Player
+                && playersModel != null
+                && main.config.PLAYER_INFOS != null
+                && !main.config.PLAYER_INFOS.containsKey(event.getEntity().getId())) {
+
+            SwingUtilities.invokeLater(() -> {
+                int idx = indexOfPlayersModel(event.getEntity().getId());
+                if (idx < 0) {
+                    PlayerInfo playerInfo = new PlayerInfo((Player) event.getEntity());
+                    nearbyPlayers.add(playerInfo);
+                    playersModel.addElement(playerInfo);
+                } else {
+                    PlayerInfo info = playersModel.get(idx);
+                    nearbyPlayers.add(info);
+                }
+            });
+        }
+    }
+
+    @EventHandler
+    public void onEntityPlayerRemove(EntitiesAPI.EntityRemoveEvent event) {
+        if (event.getEntity() instanceof Player
+                && playersModel != null
+                && main.config.PLAYER_INFOS != null
+                && !main.config.PLAYER_INFOS.containsKey(event.getEntity().getId())) {
+
+            SwingUtilities.invokeLater(() -> {
+                int idx = indexOfPlayersModel(event.getEntity().getId());
+                if (idx != -1) {
+                    PlayerInfo info = playersModel.getElementAt(idx);
+                    if (!playerInfoList.isSelectedIndex(idx)) {
+                        nearbyPlayers.remove(info);
+                        playersModel.removeElement(info);
+                    } else {
+                        nearbyPlayers.remove(info);
+                    }
+                }
+            });
+        }
+    }
+
+    public int indexOfPlayersModel(int playerId) {
+        for (int i = 0; i < playersModel.size(); i++)
+            if (playerId == playersModel.get(i).getUserId()) return i;
+        return -1;
     }
 
     public void addTagToPlayers(PlayerTag tag) {
