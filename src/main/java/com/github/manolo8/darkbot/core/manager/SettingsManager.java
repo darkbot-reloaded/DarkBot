@@ -49,7 +49,7 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
         }
     }
 
-    public boolean is3D() {
-        return force2d == 0;
+    public boolean is2DForced() {
+        return force2d == 1;
     }
 }

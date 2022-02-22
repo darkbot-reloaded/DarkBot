@@ -191,22 +191,22 @@ public class MapManager implements Manager, StarSystemAPI {
     //   Slot[248] _-73v::_-X5l
     //   Slot[256] _-J4u::_-4L
 
-    boolean has3DSupport;
+    private boolean is3DView;
     private void updateBounds() {
         long temp = API.readMemoryLong(viewAddressStatic);
 
         if (viewAddress != temp) {
             viewAddress = temp;
 
-            has3DSupport = main.settingsManager.is3D()
-                           && ByteUtils.StringReader.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
-            boundsAddress = API.readMemoryLong(viewAddress + (has3DSupport? 216 : 208));
+            is3DView = !main.settingsManager.is2DForced()
+                       && ByteUtils.StringReader.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
+            boundsAddress = API.readMemoryLong(viewAddress + (is3DView ? 216 : 208));
         }
 
         clientWidth = API.readMemoryInt(boundsAddress + 168);
         clientHeight = API.readMemoryInt(boundsAddress + 172);
 
-        long updated = API.readMemoryLong(boundsAddress + (has3DSupport ? 320 : 280));
+        long updated = API.readMemoryLong(boundsAddress + (is3DView ? 320 : 280));
         updated = API.readMemoryLong(updated + 112);
 
         viewBounds.update(updated);
