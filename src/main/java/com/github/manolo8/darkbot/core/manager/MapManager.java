@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.core.utils.Location;
@@ -154,18 +155,58 @@ public class MapManager implements Manager, StarSystemAPI {
 
     public ViewBounds viewBounds = new ViewBounds();
 
+    // viewAddress
+    // 2D
+    //   Slot[168] int
+    //   Slot[172] int
+    //   Slot[176] Boolean
+    //   Slot[180] Boolean
+    //   Slot[184] starling.core::Starling
+    //   Slot[192] _-73v::_-X5l
+    //   Slot[200] _-e4L::HUD
+    //   Slot[208] net.bigpoint.darkorbit.map.view2D::_-v25
+    //   Slot[216] net.bigpoint.darkorbit.map.view2D::_-C4s
+    //   Slot[224] net.bigpoint.darkorbit.map.model::_-332
+    //   Slot[232] __AS3__.vec::Vector.<net.bigpoint.darkorbit.map.common::_-kb>
+    //   Slot[240] __AS3__.vec::Vector.<String>
+    //   Slot[248] _-J4u::_-4L
+    //   Slot[256] flash.display::Bitmap
+    //   Slot[264] flash.geom::Matrix
+    //   Slot[272] Number
+
+
+    // 3D
+    //   Slot[168] int
+    //   Slot[172] int
+    //   Slot[176] Boolean
+    //   Slot[180] Boolean
+    //   Slot[184] int
+    //   Slot[192] flash.geom::Vector3D
+    //   Slot[200] starling.core::Starling
+    //   Slot[208] _-e4L::HUD
+    //   Slot[216] net.bigpoint.darkorbit.map.view3D::_-U4m
+    //   Slot[224] net.bigpoint.darkorbit.map.model::_-332
+    //   Slot[232] _-d5C::Stage3DManager
+    //   Slot[240] _-d5C::_-T3i
+    //   Slot[248] _-73v::_-X5l
+    //   Slot[256] _-J4u::_-4L
+
+    boolean has3DSupport;
     private void updateBounds() {
         long temp = API.readMemoryLong(viewAddressStatic);
 
         if (viewAddress != temp) {
             viewAddress = temp;
-            boundsAddress = API.readMemoryLong(viewAddress + (main.settingsManager.is3D() ? 216 : 208));
+
+            has3DSupport = main.settingsManager.is3D()
+                           && ByteUtils.StringReader.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
+            boundsAddress = API.readMemoryLong(viewAddress + (has3DSupport? 216 : 208));
         }
 
         clientWidth = API.readMemoryInt(boundsAddress + 168);
         clientHeight = API.readMemoryInt(boundsAddress + 172);
 
-        long updated = API.readMemoryLong(boundsAddress + (main.settingsManager.is3D() ? 320 : 280));
+        long updated = API.readMemoryLong(boundsAddress + (has3DSupport ? 320 : 280));
         updated = API.readMemoryLong(updated + 112);
 
         viewBounds.update(updated);

@@ -161,7 +161,7 @@ public class LoginUtils {
         HttpCookie cookie = cookieManager.getCookieStore().getCookies().stream()
                 .filter(c -> c.getName().equalsIgnoreCase("dosid"))
                 .filter(c -> c.getDomain().matches(".*\\d+.*"))
-                .findFirst().orElseThrow(WrongCredentialsException::new);
+                .findFirst().orElseThrow(() -> new WrongCredentialsException("Wrong credentials or unsolved reCaptcha"));
 
         loginData.setSid(cookie.getValue(), cookie.getDomain());
     }
@@ -175,16 +175,16 @@ public class LoginUtils {
                         .lines()
                         .filter(l -> l.contains("flashembed("))
                         .findFirst()
-                        .orElseThrow(WrongCredentialsException::new));
+                        .orElseThrow(() -> new WrongCredentialsException("Failed to find flashEmbed vars")));
 
         Matcher m = DATA_PATTERN.matcher(flashEmbed);
         if (m.find()) loginData.setPreloader(m.group(1), replaceParameters(m.group(2)));
-        else throw new WrongCredentialsException("Can't parse flashembed vars");
+        else throw new WrongCredentialsException("Can't parse flashEmbed vars");
     }
 
     private static String replaceParameters(String params) {
         // update it here so on refresh can be used 2d or 3d
-        FORCED_PARAMS.put("display2d", ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.USE_3D ? "1" : "2");
+        //FORCED_PARAMS.put("display2d", ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.USE_3D ? "1" : "2");
 
         params = params.replaceAll("\"", "").replaceAll(",", "&").replaceAll(": ", "=");
         for (Map.Entry<String, String> replaces : FORCED_PARAMS.entrySet()) {
@@ -204,7 +204,7 @@ public class LoginUtils {
         Path file = Paths.get("credentials.json");
         if (!Files.exists(file)) return Credentials.create();
 
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get("credentials.json"))) {
+        try (BufferedReader reader = Files.newBufferedReader(file)) {
             return Credentials.GSON.fromJson(reader, Credentials.class);
         } catch (Exception e) {
             e.printStackTrace();
