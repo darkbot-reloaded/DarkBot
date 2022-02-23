@@ -110,6 +110,10 @@ public class ByteUtils {
         return b;
     }
 
+    public static String readObjectName(long object) {
+        return Main.API.readString(object, 0x10, 0x28, 0x90);
+    }
+
     public static class StringReader implements GameAPI.StringReader {
         private static final int TYPE_DYNAMIC = 0, TYPE_STATIC = 1, TYPE_DEPENDENT = 2;
         private static final int WIDTH_AUTO = -1, WIDTH_8 = 0, WIDTH_16 = 1;
@@ -119,10 +123,6 @@ public class ByteUtils {
 
         public StringReader(GameAPI.Memory reader) {
             this.reader = reader;
-        }
-
-        public static String readObjectName(long object) {
-            return Main.API.readString(object, 0x10, 0x28, 0x90);
         }
 
         private class StrLocation {

@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.objects;
 
+import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -14,6 +15,12 @@ public class Clickable extends Updatable {
 
     public int defRadius = -1;
     public int defPriority = -1;
+
+    private final Entity owner;
+
+    public Clickable(Entity owner) {
+        this.owner = owner;
+    }
 
     public void setPriority(int priority) {
         if (this.priority == priority || isInvalid()) return;
@@ -40,7 +47,8 @@ public class Clickable extends Updatable {
      * @return prevent swf crash
      */
     private boolean isInvalid() {
-        return defRadius <= 0 || address == 0 || API.readMemoryLong(address) != confirm;
+        return address == 0
+               || API.readLong(address + 32) != owner.address; // confirm owner address
     }
 
     @Override

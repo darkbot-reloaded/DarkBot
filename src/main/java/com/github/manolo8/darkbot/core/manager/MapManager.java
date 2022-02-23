@@ -19,10 +19,13 @@ import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.game.other.GameMap;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -199,7 +202,7 @@ public class MapManager implements Manager, StarSystemAPI {
             viewAddress = temp;
 
             is3DView = !main.settingsManager.is2DForced()
-                       && ByteUtils.StringReader.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
+                       && ByteUtils.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
             boundsAddress = API.readMemoryLong(viewAddress + (is3DView ? 216 : 208));
         }
 
@@ -303,6 +306,11 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     public boolean isCurrentTargetOwned() {
+        if (is3DView)
+            return Optional.ofNullable(main.hero.getTargetAs(Lockable.class))
+                    .map(Lockable::isOwned)
+                    .orElse(false);
+
         long temp = API.readMemoryLong(viewAddressStatic);
         temp = API.readMemoryLong(temp + 216); //
         temp = API.readMemoryLong(temp + 200); //
@@ -342,7 +350,7 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     @Override
-    public GameMap getByName(String mapName) throws MapNotFoundException {
+    public GameMap getByName(@NotNull String mapName) throws MapNotFoundException {
         return starManager.getByName(mapName);
     }
 

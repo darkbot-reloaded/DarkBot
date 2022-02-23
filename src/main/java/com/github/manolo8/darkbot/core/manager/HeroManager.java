@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Player;
@@ -16,7 +17,6 @@ import com.github.manolo8.darkbot.extensions.features.handlers.ShipModeSelectorH
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.extensions.selectors.PrioritizedSupplier;
 import eu.darkbot.api.extensions.selectors.ShipModeSelector;
-import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.items.Item;
 import eu.darkbot.api.game.items.ItemCategory;
@@ -125,10 +125,12 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
         if (targetPtr == 0) inGameTarget = null;
         else if (targetPtr == petAddress) inGameTarget = pet;
-        else inGameTarget = main.mapManager.entities.allEntities.stream()
-                .flatMap(Collection::stream)
-                .filter(entity -> entity.address == targetPtr)
-                .findAny().orElse(null);
+        else if (inGameTarget == null
+                 || inGameTarget.address != targetPtr)
+            inGameTarget = main.mapManager.entities.allEntities.stream()
+                    .flatMap(Collection::stream)
+                    .filter(entity -> entity.address == targetPtr)
+                    .findAny().orElse(null);
 
         if (lastTarget != target) setLocalTarget(target);
     }
@@ -209,14 +211,23 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 //        }
 
         Configuration conf = Configuration.of(con);
-        if (conf == Configuration.UNKNOWN) return false; // unknown config? return, as we can't select unknown configuration.
+        if (conf == Configuration.UNKNOWN)
+            return false; // unknown config? return, as we can't select unknown configuration.
 
         Item item = items.getItem(form, ItemCategory.DRONE_FORMATIONS);
-        if (item == null) return false; // item not found & probably not possible to click, return
+        if (item == null && shipModeHandler.getBest().getClass() == MutableShipMode.class) {
+            if ((this.formation != form) && System.currentTimeMillis() - formationTime > 3500L) {
+                Main.API.keyboardClick(this.formation = form);
+                if (formation != null) this.formationTime = System.currentTimeMillis();
+            }
 
-        this.formation = form;
+            shipMode.set(conf, null);
+            return isInMode(conf.ordinal(), formation);
+
+        } else if (item == null) return false;
+
+        formation = form;
         shipMode.set(conf, item.getAs(SelectableItem.Formation.class));
-
         return isInMode(shipMode);
     }
 
