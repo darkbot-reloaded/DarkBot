@@ -477,23 +477,21 @@ public class MapDrawer extends JPanel {
         g2.setColor(cs.BARRIER_BORDER);
 
         // draw view bounds of game screen
-        MapManager.ViewBounds view = mapManager.viewBounds;
+        {
+            MapManager.ViewBounds view = mapManager.viewBounds;
 
-        g2.drawLine(translateX(view.leftTopX), translateY(view.leftTopY),
-                translateX(view.rightTopX), translateY(view.rightTopY));
+            g2.drawLine(translateX(view.leftTopX), translateY(view.leftTopY),
+                    translateX(view.rightTopX), translateY(view.rightTopY));
 
-        g2.drawLine(translateX(view.rightTopX), translateY(view.rightTopY),
-                translateX(view.rightBotX), translateY(view.rightBotY));
+            g2.drawLine(translateX(view.rightTopX), translateY(view.rightTopY),
+                    translateX(view.rightBotX), translateY(view.rightBotY));
 
-        g2.drawLine(translateX(view.rightBotX), translateY(view.rightBotY),
-                translateX(view.leftBotX), translateY(view.leftBotY));
+            g2.drawLine(translateX(view.rightBotX), translateY(view.rightBotY),
+                    translateX(view.leftBotX), translateY(view.leftBotY));
 
-        g2.drawLine(translateX(view.leftBotX), translateY(view.leftBotY),
-                translateX(view.leftTopX), translateY(view.leftTopY));
-
-//        g2.drawRect(translateX(mapManager.boundX), translateY(mapManager.boundY),
-//                translateX(mapManager.boundMaxX - mapManager.boundX),
-//                translateY(mapManager.boundMaxY - mapManager.boundY));
+            g2.drawLine(translateX(view.leftBotX), translateY(view.leftBotY),
+                    translateX(view.leftTopX), translateY(view.leftTopY));
+        }
 
         if (hero.pet.removed || !hero.pet.locationInfo.isLoaded()) return;
         loc = hero.pet.locationInfo.now;

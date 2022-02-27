@@ -125,7 +125,7 @@ public class NpcAttacker implements AttackAPI {
         laserTime = 0;
         firstAttack = false;
         if (hero.locationInfo.distance(target) < 800 && System.currentTimeMillis() - clickDelay > 500) {
-            hero.setTarget(target);
+            hero.setLocalTarget(target);
             target.trySelect(false);
             clickDelay = System.currentTimeMillis();
             if (main.config.LOOT.SHIP_ABILITY != null) ability = clickDelay + 4000;

@@ -7,8 +7,6 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class Clickable extends Updatable {
 
-    private long confirm;
-
     public int radius;
     public int priority;
     public boolean enabled;
@@ -47,13 +45,12 @@ public class Clickable extends Updatable {
      * @return prevent swf crash
      */
     private boolean isInvalid() {
-        return address == 0
-               || API.readLong(address + 32) != owner.address; // confirm owner address
+        return address == 0 || defRadius <= 0 || API.readLong(address + 32) != owner.address; // confirm owner address
     }
 
     @Override
     public void update() {
-        if (isInvalid()) return;
+        if (address == 0) return;
         int oldRad = radius, oldPri = priority;
         this.radius = API.readMemoryInt(address + 40);
         this.priority = API.readMemoryInt(address + 44);
@@ -73,7 +70,6 @@ public class Clickable extends Updatable {
     public void update(long address) {
         super.update(address);
         if (address == 0) return;
-        this.confirm = API.readMemoryLong(address);
         this.radius = defRadius = API.readMemoryInt(address + 40);
         this.priority = defPriority = API.readMemoryInt(address + 44);
     }
