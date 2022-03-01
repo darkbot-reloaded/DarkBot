@@ -8,7 +8,6 @@ import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGears;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation;
 import com.github.manolo8.darkbot.config.utils.ItemUtils;
-import com.github.manolo8.darkbot.core.api.DarkBoatHookAdapter;
 import com.github.manolo8.darkbot.core.manager.HookAdapter;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
@@ -22,13 +21,13 @@ import eu.darkbot.api.config.annotations.Option;
 import eu.darkbot.api.config.annotations.Percentage;
 import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.annotations.Tag;
-import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.game.enums.PetGear;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.shared.modules.LootCollectorModule;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -260,7 +259,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public transient Lazy<String> MODIFIED_ACTIONS = new Lazy.NoCache<>();
     }
 
-    public static class ShipConfig implements ShipMode {
+    public static class ShipConfig implements LegacyShipMode {
         public int CONFIG = 1;
         public Character FORMATION;
 
@@ -285,6 +284,11 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         @Override
         public String toString() {
             return "Config: " + CONFIG + "   Formation: " + CharacterEditor.getDisplay(FORMATION);
+        }
+
+        @Override
+        public @Nullable Character getLegacyFormation() {
+            return FORMATION;
         }
     }
 
