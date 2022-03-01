@@ -62,7 +62,6 @@ public class PlayerManager extends JPanel {
         }
 
         private void addSelectedUserId() {
-            assert false;
             if (editor.playerInfoList.getSelectedValuesList().isEmpty()) {
                 Popups.showMessageAsync("Error",
                         "You need to select nearby player", JOptionPane.ERROR_MESSAGE);
