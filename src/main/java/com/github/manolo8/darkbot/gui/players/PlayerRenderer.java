@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.players;
 
 import com.github.manolo8.darkbot.config.PlayerInfo;
+import com.github.manolo8.darkbot.gui.utils.ListCellTitledBorder;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.config.types.PlayerTag;
 import net.miginfocom.swing.MigLayout;
@@ -18,13 +19,23 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
     private final JLabel playername = new JLabel();
     private final JLabel id = new JLabel();
 
+    private final Border defaultBorder, titledBorder;
     private final Map<PlayerTag, Tag> tagCache = new HashMap<>();
 
-    public PlayerRenderer() {
+    private int addedPlayerCount = -1;
+
+    public PlayerRenderer(JList<? extends PlayerInfo> list) {
         super(new MigLayout("ins 4px 0px 4px 5px, fill, h 28px!", "[50px!]8px![120px!]8px:push[]8px!", "[]"));
         id.setFont(id.getFont().deriveFont(9f));
         id.setHorizontalAlignment(SwingConstants.RIGHT);
         id.setVerticalAlignment(SwingConstants.BOTTOM);
+
+        this.defaultBorder = this.getBorder();
+        this.titledBorder = new ListCellTitledBorder(list, "Nearby Players");
+    }
+
+    public void setAddedPlayerCount(int addedPlayers) {
+        this.addedPlayerCount = addedPlayers;
     }
 
     @Override
@@ -34,7 +45,6 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
 
         setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
         setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
-        playername.setForeground(PlayerEditor.nearbyPlayers.contains(value) ? new Color(41, 182, 246) : list.getForeground());
 
         this.playername.setText(value.username);
         this.id.setText(String.valueOf(value.userId));
@@ -43,6 +53,8 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
         add(playername, "grow");
         for (PlayerTag tag : value.getTags().get())
             add(tagCache.computeIfAbsent(tag, Tag::new), "grow");
+
+        setBorder(index == addedPlayerCount ? titledBorder : defaultBorder);
 
         return this;
     }

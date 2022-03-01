@@ -24,7 +24,8 @@ import java.util.Set;
 public class PlayerEditor extends JPanel implements Listener {
     private final JList<PlayerInfo> playerInfoList;
     private final DefaultListModel<PlayerInfo> playersModel;
-    public static final Set<PlayerInfo> nearbyPlayers = new LinkedHashSet<>();
+    private final PlayerRenderer renderer;
+    private final Set<PlayerInfo> nearbyPlayers = new LinkedHashSet<>();
 
     private final PlayerManager playerManager;
     private final SearchField sf;
@@ -41,7 +42,7 @@ public class PlayerEditor extends JPanel implements Listener {
         add(tagEditor = new PlayerTagManager(this), "grow");
 
         playerInfoList = new JList<>(playersModel = new DefaultListModel<>());
-        playerInfoList.setCellRenderer(new PlayerRenderer());
+        playerInfoList.setCellRenderer(renderer = new PlayerRenderer(playerInfoList));
 
         add(new JScrollPane(playerInfoList,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), "span, grow");
@@ -91,6 +92,7 @@ public class PlayerEditor extends JPanel implements Listener {
                 .filter(pi -> pi.filter(query))
                 .sorted(Comparator.comparing(pi -> pi.username))
                 .forEach(playersModel::addElement);
+        renderer.setAddedPlayerCount(playersModel.getSize());
         for (PlayerInfo p : nearbyPlayers) {
             playersModel.addElement(p);
         }
