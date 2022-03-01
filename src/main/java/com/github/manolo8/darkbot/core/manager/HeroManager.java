@@ -64,6 +64,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     private long staticAddress;
     private Entity inGameTarget;
     private Configuration configuration = Configuration.UNKNOWN;
+    private Character formationChar; // Only present for legacy formation changes
     private long configTime;
     private long formationTime;
     private long portalTime;
@@ -190,26 +191,25 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         return setMode(main.config.GENERAL.ROAM);
     }
 
+    @Deprecated
     public boolean setMode(Config.ShipConfig config) {
         return setMode(config.CONFIG, config.FORMATION);
     }
 
+    @Deprecated
     public boolean setMode(int con, Character form) {
-        Configuration conf = Configuration.of(con);
-        if (conf == Configuration.UNKNOWN) return false; // unknown config? return, as we can't select unknown configuration.
-
-        Item item = items.getItem(form, ItemCategory.DRONE_FORMATIONS);
-        shipMode.set(conf, item == null ? null : item.getAs(SelectableItem.Formation.class), form);
-
+        shipMode.setLegacy(con, form);
         return isInMode(shipMode);
     }
 
+    @Deprecated
     public boolean isInMode(Config.ShipConfig config) {
         return isInMode(config.CONFIG, config.FORMATION);
     }
 
+    @Deprecated
     public boolean isInMode(int config, Character formation) {
-        return this.config == config && this.selectedChar == formation;
+        return this.config == config && this.formationChar == formation;
     }
 
     /**
@@ -219,6 +219,15 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     @Deprecated
     public void setTarget(Ship entity) {
         this.localTarget = this.target = this.lastTarget = entity;
+    }
+
+    private void setConfigAndFormation(ShipMode mode) {
+        if (mode.getConfiguration() != null &&
+                mode.getConfiguration() != getConfiguration()) toggleConfiguration();
+
+        if (mode instanceof LegacyShipMode && ((LegacyShipMode) mode).isLegacyFormation())
+            setFormationLegacy(((LegacyShipMode) mode).getLegacyFormation());
+        else setFormation(mode.getFormation());
     }
 
     private void toggleConfiguration() {
@@ -235,6 +244,16 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
         main.facadeManager.slotBars.useItem(formation, ItemFlag.NOT_SELECTED)
                 .ifSuccessful(r -> formationTime = System.currentTimeMillis());
+    }
+
+    @Deprecated
+    private void setFormationLegacy(Character formation) {
+        if ((this.formationChar != formation && System.currentTimeMillis() - formationTime > 3500L)
+                || System.currentTimeMillis() - formationTime > 60_000) { // re-click formation after 60sec
+
+            Main.API.keyboardClick(this.formationChar = formation);
+            if (formationChar != null) this.formationTime = System.currentTimeMillis();
+        }
     }
 
     @Override
@@ -267,20 +286,12 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     }
 
     @Override
-    public boolean isInMode(ShipMode mode) {
-        return mode.getConfiguration() == getConfiguration() && (mode.getFormation() == getFormation()
-                || (mode.getFormation() == null && mode instanceof LegacyShipMode
-                    && ((LegacyShipMode) mode).getLegacyFormation() == selectedChar));
-    }
-
-    private Character selectedChar;
-    @Deprecated
-    private void selectLegacyFormation(LegacyShipMode shipMode) {
-        if ((this.selectedChar != shipMode.getLegacyFormation() && System.currentTimeMillis() - formationTime > 3500L)
-            || System.currentTimeMillis() - formationTime > 60_000) { // re-click formation after 60sec
-
-            Main.API.keyboardClick(this.selectedChar = shipMode.getLegacyFormation());
-            if (selectedChar != null) this.formationTime = System.currentTimeMillis();
+    public boolean isInMode(@NotNull ShipMode mode) {
+        if (mode instanceof LegacyShipMode && ((LegacyShipMode) mode).isLegacyFormation()) {
+            return mode.getConfiguration() == getConfiguration() &&
+                    formationChar == ((LegacyShipMode) mode).getLegacyFormation();
+        } else {
+            return mode.getConfiguration() == getConfiguration() && mode.getFormation() == getFormation();
         }
     }
 
@@ -288,18 +299,6 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     public boolean setMode(@NotNull ShipMode mode) {
         this.shipMode.set(mode);
         return isInMode(mode);
-    }
-
-    private void setConfigAndFormation(ShipMode mode) {
-        if (mode.getConfiguration() != null &&
-                mode.getConfiguration() != getConfiguration()) toggleConfiguration();
-
-        SelectableItem.Formation formation = mode.getFormation();
-
-        if (formation == null && mode instanceof LegacyShipMode) //todo remove me later
-            selectLegacyFormation((LegacyShipMode) mode); //todo remove me later
-
-        else setFormation(formation);
     }
 
     @Override
@@ -358,6 +357,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         private SelectableItem.Formation formation;
 
         private Character toSelectChar;
+        private boolean isLegacyFormation;
 
         @Override
         public Configuration getConfiguration() {
@@ -371,22 +371,31 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
         public void set(ShipMode other) {
             this.configuration = other.getConfiguration();
-            this.formation = other.getFormation();
-
-            if (other instanceof LegacyShipMode)
+            if (other instanceof LegacyShipMode) {
+                this.formation = null;
                 this.toSelectChar = ((LegacyShipMode) other).getLegacyFormation();
-            else this.toSelectChar = null;
+                this.isLegacyFormation = true;
+            } else {
+                this.formation = other.getFormation();
+                this.toSelectChar = null;
+                this.isLegacyFormation = false;
+            }
         }
 
-        public void set(Configuration configuration, SelectableItem.Formation formation, Character toSelectChar) {
-            this.configuration = configuration;
-            this.formation = formation;
+        public void setLegacy(int configuration, Character toSelectChar) {
+            this.configuration = Configuration.of(configuration);
+            this.formation = null;
             this.toSelectChar = toSelectChar;
         }
 
         @Override
         public @Nullable Character getLegacyFormation() {
             return toSelectChar;
+        }
+
+        @Override
+        public boolean isLegacyFormation() {
+            return isLegacyFormation;
         }
     }
 

@@ -8,4 +8,8 @@ public interface LegacyShipMode extends ShipMode {
 
     @Nullable
     Character getLegacyFormation();
+
+    default boolean isLegacyFormation() {
+        return true;
+    }
 }
