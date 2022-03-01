@@ -22,10 +22,10 @@ import java.util.Locale;
 import java.util.Set;
 
 public class PlayerEditor extends JPanel implements Listener {
-    private final JList<PlayerInfo> playerInfoList;
+    final JList<PlayerInfo> playerInfoList;
     private final DefaultListModel<PlayerInfo> playersModel;
     private final PlayerRenderer renderer;
-    private final Set<PlayerInfo> nearbyPlayers = new LinkedHashSet<>();
+    final Set<PlayerInfo> nearbyPlayers = new LinkedHashSet<>();
 
     private final PlayerManager playerManager;
     private final SearchField sf;
@@ -115,6 +115,7 @@ public class PlayerEditor extends JPanel implements Listener {
                     PlayerInfo info = playersModel.get(idx);
                     nearbyPlayers.add(info);
                 }
+                refreshList();
             });
         }
     }
@@ -209,6 +210,7 @@ public class PlayerEditor extends JPanel implements Listener {
         for (PlayerInfo player : players) {
             main.config.PLAYER_INFOS.remove(player.userId);
             playersModel.removeElement(player);
+            nearbyPlayers.remove(player);
         }
         ConfigEntity.changed();
     }
