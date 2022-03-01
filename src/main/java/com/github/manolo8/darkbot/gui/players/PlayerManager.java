@@ -62,15 +62,15 @@ public class PlayerManager extends JPanel {
         }
 
         private void addSelectedUserId() {
-            if (editor.playerInfoList.getSelectedValuesList().isEmpty()) {
+            if (editor.getPlayerInfoList().getSelectedValuesList().isEmpty()) {
                 Popups.showMessageAsync("Error",
                         "You need to select nearby player", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            for (PlayerInfo pl : editor.playerInfoList.getSelectedValuesList()) {
+            for (PlayerInfo pl : editor.getPlayerInfoList().getSelectedValuesList()) {
                 editor.main.config.PLAYER_INFOS.put(pl.getUserId(), pl);
-                editor.nearbyPlayers.remove(pl);
+                editor.getNearbyPlayers().remove(pl);
             }
             editor.refreshList();
         }

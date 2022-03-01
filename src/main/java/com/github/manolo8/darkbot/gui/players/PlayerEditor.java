@@ -22,17 +22,16 @@ import java.util.Locale;
 import java.util.Set;
 
 public class PlayerEditor extends JPanel implements Listener {
-    final JList<PlayerInfo> playerInfoList;
+    private final JList<PlayerInfo> playerInfoList;
     private final DefaultListModel<PlayerInfo> playersModel;
     private final PlayerRenderer renderer;
-    final Set<PlayerInfo> nearbyPlayers = new LinkedHashSet<>();
+    private final Set<PlayerInfo> nearbyPlayers = new LinkedHashSet<>();
 
     private final PlayerManager playerManager;
     private final SearchField sf;
     private final PlayerTagManager tagEditor;
     protected Main main;
     private boolean registered;
-
 
     public PlayerEditor() {
         super(new MigLayout("ins 0, gap 0, wrap 3, fill", "[][grow][]", "[][grow,fill]"));
@@ -115,7 +114,6 @@ public class PlayerEditor extends JPanel implements Listener {
                     PlayerInfo info = playersModel.get(idx);
                     nearbyPlayers.add(info);
                 }
-                refreshList();
             });
         }
     }
@@ -213,6 +211,14 @@ public class PlayerEditor extends JPanel implements Listener {
             nearbyPlayers.remove(player);
         }
         ConfigEntity.changed();
+        refreshList();
     }
 
+    public Set<PlayerInfo> getNearbyPlayers() {
+        return nearbyPlayers;
+    }
+
+    public JList<PlayerInfo> getPlayerInfoList() {
+        return playerInfoList;
+    }
 }
