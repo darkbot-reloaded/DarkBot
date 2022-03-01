@@ -28,7 +28,7 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     public Main main;
     public Map<String, Object> metadata;
     public LocationInfo locationInfo = new LocationInfo();
-    public Clickable clickable = new Clickable();
+    public Clickable clickable = new Clickable(this);
     public ObjArray traits = ObjArray.ofVector(true);
 
     public int id;

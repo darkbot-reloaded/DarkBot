@@ -7,8 +7,10 @@ import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.core.utils.Location;
@@ -17,10 +19,13 @@ import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.game.other.GameMap;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -151,19 +156,63 @@ public class MapManager implements Manager, StarSystemAPI {
         }
     }
 
+    public ViewBounds viewBounds = new ViewBounds();
+
+    // viewAddress
+    // 2D
+    //   Slot[168] int
+    //   Slot[172] int
+    //   Slot[176] Boolean
+    //   Slot[180] Boolean
+    //   Slot[184] starling.core::Starling
+    //   Slot[192] _-73v::_-X5l
+    //   Slot[200] _-e4L::HUD
+    //   Slot[208] net.bigpoint.darkorbit.map.view2D::_-v25
+    //   Slot[216] net.bigpoint.darkorbit.map.view2D::_-C4s
+    //   Slot[224] net.bigpoint.darkorbit.map.model::_-332
+    //   Slot[232] __AS3__.vec::Vector.<net.bigpoint.darkorbit.map.common::_-kb>
+    //   Slot[240] __AS3__.vec::Vector.<String>
+    //   Slot[248] _-J4u::_-4L
+    //   Slot[256] flash.display::Bitmap
+    //   Slot[264] flash.geom::Matrix
+    //   Slot[272] Number
+
+
+    // 3D
+    //   Slot[168] int
+    //   Slot[172] int
+    //   Slot[176] Boolean
+    //   Slot[180] Boolean
+    //   Slot[184] int
+    //   Slot[192] flash.geom::Vector3D
+    //   Slot[200] starling.core::Starling
+    //   Slot[208] _-e4L::HUD
+    //   Slot[216] net.bigpoint.darkorbit.map.view3D::_-U4m
+    //   Slot[224] net.bigpoint.darkorbit.map.model::_-332
+    //   Slot[232] _-d5C::Stage3DManager
+    //   Slot[240] _-d5C::_-T3i
+    //   Slot[248] _-73v::_-X5l
+    //   Slot[256] _-J4u::_-4L
+
+    private boolean is3DView;
     private void updateBounds() {
         long temp = API.readMemoryLong(viewAddressStatic);
 
         if (viewAddress != temp) {
             viewAddress = temp;
-            boundsAddress = API.readMemoryLong(viewAddress + 208);
+
+            is3DView = !main.settingsManager.is2DForced()
+                       && ByteUtils.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
+            boundsAddress = API.readMemoryLong(viewAddress + (is3DView ? 216 : 208));
         }
 
         clientWidth = API.readMemoryInt(boundsAddress + 168);
         clientHeight = API.readMemoryInt(boundsAddress + 172);
 
-        long updated = API.readMemoryLong(boundsAddress + 280);
+        long updated = API.readMemoryLong(boundsAddress + (is3DView ? 320 : 280));
         updated = API.readMemoryLong(updated + 112);
+
+        viewBounds.update(updated);
 
         boundX = API.readMemoryDouble(updated + 80);
         boundY = API.readMemoryDouble(updated + 88);
@@ -172,6 +221,25 @@ public class MapManager implements Manager, StarSystemAPI {
         screenBound.set(boundX, boundY, boundMaxX, boundMaxY);
         width = boundMaxX - boundX;
         height = boundMaxY - boundY;
+    }
+
+    public static class ViewBounds extends UpdatableAuto {
+        public double leftTopX, leftTopY;
+        public double rightTopX, rightTopY;
+        public double rightBotX, rightBotY;
+        public double leftBotX, leftBotY;
+
+        @Override
+        public void update() {
+            this.leftTopX = API.readMemoryDouble(address + 80);
+            this.leftTopY = API.readMemoryDouble(address + 88);
+            this.rightTopX = API.readMemoryDouble(address + 96);
+            this.rightTopY = API.readMemoryDouble(address + 104);
+            this.rightBotX = API.readMemoryDouble(address + 112);
+            this.rightBotY = API.readMemoryDouble(address + 120);
+            this.leftBotX = API.readMemoryDouble(address + 128);
+            this.leftBotY = API.readMemoryDouble(address + 136);
+        }
     }
 
     private Location getEnemyLocatorTarget() {
@@ -238,6 +306,11 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     public boolean isCurrentTargetOwned() {
+        if (is3DView)
+            return Optional.ofNullable(main.hero.getTargetAs(Lockable.class))
+                    .map(Lockable::isOwned)
+                    .orElse(false);
+
         long temp = API.readMemoryLong(viewAddressStatic);
         temp = API.readMemoryLong(temp + 216); //
         temp = API.readMemoryLong(temp + 200); //
@@ -277,7 +350,7 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     @Override
-    public GameMap getByName(String mapName) throws MapNotFoundException {
+    public GameMap getByName(@NotNull String mapName) throws MapNotFoundException {
         return starManager.getByName(mapName);
     }
 

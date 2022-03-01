@@ -33,21 +33,23 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
 
     @Override
     public void tick() {
-        this.config = API.readMemoryInt(address + 0x34);
+        this.config = API.readMemoryInt(address + 92);
 
-        this.nextMap = API.readMemoryInt(address + 0xCC);
-        this.currMap = API.readMemoryInt(address + 0xD0);
+        this.nextMap = API.readMemoryInt(address + 244);
+        this.currMap = API.readMemoryInt(address + 248);
 
-        this.force2d = API.readMemoryInt(address, 0x2D0, 0x20);
+        this.force2d = API.readMemoryInt(address, 784, 0x20);
 
-        this.lang = API.readMemoryStringFallback(address, null, 0x258);
+        this.lang = API.readMemoryStringFallback(address, null, 640);
 
         // Enforce GPU capabilities support
         if (main.config.BOT_SETTINGS.API_CONFIG.ENFORCE_HW_ACCEL) {
-            API.replaceInt(address + 292, 0, 1);
-            API.replaceInt(address + 300, 0, 1);
+            API.replaceInt(address + 332, 0, 1);
+            API.replaceInt(address + 340, 0, 1);
         }
     }
 
-
+    public boolean is2DForced() {
+        return force2d == 1;
+    }
 }
