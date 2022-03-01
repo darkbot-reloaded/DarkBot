@@ -198,9 +198,8 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         if (conf == Configuration.UNKNOWN) return false; // unknown config? return, as we can't select unknown configuration.
 
         Item item = items.getItem(form, ItemCategory.DRONE_FORMATIONS);
-        shipMode.set(conf, item == null ? null : item.getAs(SelectableItem.Formation.class));
+        shipMode.set(conf, item == null ? null : item.getAs(SelectableItem.Formation.class), form);
 
-        toSelectChar = form;
         return isInMode(shipMode);
     }
 
@@ -269,14 +268,16 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     @Override
     public boolean isInMode(ShipMode mode) {
         return mode.getConfiguration() == getConfiguration() && (mode.getFormation() == getFormation()
-                || (mode.getFormation() == null && mode instanceof MutableShipMode && toSelectChar == selectedChar));
+                || (mode.getFormation() == null && mode instanceof MutableShipMode
+                    && ((MutableShipMode) mode).toSelectChar == selectedChar));
     }
 
-    private Character toSelectChar, selectedChar;
+    private Character selectedChar;
     @Deprecated
-    private void selectLegacyFormation() {
-        if ((this.selectedChar != toSelectChar) && System.currentTimeMillis() - formationTime > 3500L) {
-            Main.API.keyboardClick(this.selectedChar = toSelectChar);
+    private void selectLegacyFormation(MutableShipMode shipMode) {
+        if ((this.selectedChar != shipMode.toSelectChar && System.currentTimeMillis() - formationTime > 3500L)
+            || System.currentTimeMillis() - formationTime > 60_000) { // re-click formation after 60sec
+            Main.API.keyboardClick(this.selectedChar = shipMode.toSelectChar);
             if (selectedChar != null) this.formationTime = System.currentTimeMillis();
         }
     }
@@ -294,7 +295,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         SelectableItem.Formation formation = mode.getFormation();
 
         if (formation == null && mode instanceof MutableShipMode) //todo remove me later
-            selectLegacyFormation(); //todo remove me later
+            selectLegacyFormation((MutableShipMode) mode); //todo remove me later
 
         else setFormation(formation);
     }
@@ -354,6 +355,8 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         private Configuration configuration;
         private SelectableItem.Formation formation;
 
+        private Character toSelectChar;
+
         @Override
         public Configuration getConfiguration() {
             return configuration;
@@ -367,11 +370,13 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         public void set(ShipMode other) {
             this.configuration = other.getConfiguration();
             this.formation = other.getFormation();
+            this.toSelectChar = null;
         }
 
-        public void set(Configuration configuration, SelectableItem.Formation formation) {
+        public void set(Configuration configuration, SelectableItem.Formation formation, Character toSelectChar) {
             this.configuration = configuration;
             this.formation = formation;
+            this.toSelectChar = toSelectChar;
         }
     }
 
