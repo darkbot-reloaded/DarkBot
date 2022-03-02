@@ -87,6 +87,18 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
         lockPtr = findInTraits(TraitPattern::ofLockType);
     }
 
+//    // implementation of fast select & instant attack
+//    @Override
+//    public boolean trySelect(boolean tryAttack) {
+//        if (!isSelectable() || distanceTo(main.hero) > DEFAULT_CLICK_RADIUS) return false;
+//
+//        API.writeMemoryLong(API.readMemoryLong(main.mapManager.mapAddress, 120) + 40, address);
+//        if (tryAttack)
+//            main.facadeManager.settings.pressKeybind(SettingsProxy.KeyBind.ATTACK_LASER);
+//
+//        return true;
+//    }
+
     @Override
     public void removed() {
         super.removed();
@@ -130,16 +142,14 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
             if (entityPtr == 0) targetedEntity = null;
             else if (targetedEntity == null || entityPtr != targetedEntity.address) {
+
                 if (entityPtr == main.hero.address) {
                     targetedEntity = main.hero;
-                    return;
-                           //entity ptr can't be assigned to 0 here so don't need that check
-                } else if (/*main.hero.pet.address != 0 && */entityPtr == main.hero.pet.address) {
-                    targetedEntity = main.hero.pet;
-                    return;
-                }
 
-                targetedEntity = main.mapManager.entities.allEntities.stream()
+                } else if (entityPtr == main.hero.pet.address) {
+                    targetedEntity = main.hero.pet;
+
+                } else targetedEntity = main.mapManager.entities.allEntities.stream()
                         .flatMap(Collection::stream)
                         .filter(entity -> entity.address == entityPtr)
                         .findAny().orElse(null);

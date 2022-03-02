@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.core.utils.Location;
 import eu.darkbot.api.game.other.Locatable;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
@@ -17,7 +18,7 @@ public class PathPoint implements Locatable {
     public int g;
     public int s;
 
-    public HashSet<PathPoint> lineOfSight = new HashSet<>();
+    public Set<PathPoint> lineOfSight = new HashSet<>();
 
     public PathPoint(double x, double y) {
         this.x = x;
@@ -29,13 +30,11 @@ public class PathPoint implements Locatable {
     }
 
     public void fillLineOfSight(PathFinder finder) {
-
         lineOfSight.clear();
 
         for (PathPoint point : finder.points)
-            if (point != this)
-                if (finder.hasLineOfSight(point, this))
-                    lineOfSight.add(point);
+            if (point != this && finder.hasLineOfSight(point, this))
+                lineOfSight.add(point);
     }
 
     public Location toLocation() {

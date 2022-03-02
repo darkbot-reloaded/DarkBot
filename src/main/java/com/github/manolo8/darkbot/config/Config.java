@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGears;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation;
 import com.github.manolo8.darkbot.config.utils.ItemUtils;
+import com.github.manolo8.darkbot.core.manager.HookAdapter;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
@@ -20,13 +21,13 @@ import eu.darkbot.api.config.annotations.Option;
 import eu.darkbot.api.config.annotations.Percentage;
 import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.annotations.Tag;
-import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.game.enums.PetGear;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.shared.modules.LootCollectorModule;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -189,10 +190,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option boolean LOG_DEATHS = false;
         public @Option boolean AVOID_MINES = true;
         public @Option boolean USERNAME_ON_TITLE = false;
-        @com.github.manolo8.darkbot.config.types.Option(
-                value = "Auto refine (unsupported)",
-                description = "Automatically refine materials, not currently supported, still in development.")
-        public boolean AUTO_REFINE = false;
+        public @Option boolean AUTO_REFINE = false;
     }
 
     public @Option BotSettings BOT_SETTINGS = new BotSettings();
@@ -223,7 +221,11 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean FULLY_HIDE_API = true;
             public @Option boolean FORCE_GAME_LANGUAGE = false;
             public @Option boolean ENFORCE_HW_ACCEL = true;
+            //public @Option boolean USE_3D = false; // After reload with forced HW_ACCEL in 3D, cpu usage is really high
             public @Option @Number(min = 1, max = 60) @Number.Disabled(value = 0, def = 30) int MAX_FPS = 0;
+
+            @Option @Dropdown(multi = true)
+            public Set<HookAdapter.Flag> DARK_HOOK_FLAGS = EnumSet.allOf(HookAdapter.Flag.class);
 
             public int width = 1280;
             public int height = 800;
@@ -257,7 +259,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public transient Lazy<String> MODIFIED_ACTIONS = new Lazy.NoCache<>();
     }
 
-    public static class ShipConfig implements ShipMode {
+    public static class ShipConfig implements LegacyShipMode {
         public int CONFIG = 1;
         public Character FORMATION;
 
@@ -282,6 +284,11 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         @Override
         public String toString() {
             return "Config: " + CONFIG + "   Formation: " + CharacterEditor.getDisplay(FORMATION);
+        }
+
+        @Override
+        public @Nullable Character getLegacyFormation() {
+            return FORMATION;
         }
     }
 

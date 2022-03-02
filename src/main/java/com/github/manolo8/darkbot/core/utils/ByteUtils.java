@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.utils;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 
 import java.nio.charset.StandardCharsets;
@@ -107,6 +108,10 @@ public class ByteUtils {
         }
 
         return b;
+    }
+
+    public static String readObjectName(long object) {
+        return Main.API.readString(object, 0x10, 0x28, 0x90);
     }
 
     public static class StringReader implements GameAPI.StringReader {

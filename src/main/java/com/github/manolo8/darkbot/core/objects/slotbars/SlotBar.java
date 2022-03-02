@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -75,7 +76,7 @@ public class SlotBar extends MenuBar {
         private void editItem(String itemId, Consumer<Item> consumer) {
             categoryBar.categories.stream()
                     .flatMap(category -> category.items.stream())
-                    .filter(i -> i.id.equals(itemId))
+                    .filter(i -> Objects.equals(i.id, itemId))
                     .findAny()
                     .ifPresent(consumer);
         }
