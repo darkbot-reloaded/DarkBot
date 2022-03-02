@@ -31,7 +31,7 @@ public class PlayerManager extends JPanel {
 
             popup.add(create(UIUtils.getIcon("add"), I18n.get("players.add_player.by_id"), this::addPlayerById));
             popup.add(create(UIUtils.getIcon("add"), I18n.get("players.add_player.by_name"), this::addPlayerByUsername));
-            popup.add(create(UIUtils.getIcon("add"), "Selected user", this::addSelectedUserId));
+            popup.add(create(UIUtils.getIcon("add"), I18n.get("players.add_player.selected"), this::addSelectedPlayer));
 
             setBorder(UIUtils.getPartialBorder(1, 1, 1, 0));
         }
@@ -61,10 +61,10 @@ public class PlayerManager extends JPanel {
             editor.main.config.UNRESOLVED.add(new UnresolvedPlayer(name));
         }
 
-        private void addSelectedUserId() {
+        private void addSelectedPlayer() {
             if (editor.getPlayerInfoList().getSelectedValuesList().isEmpty()) {
-                Popups.showMessageAsync("Error",
-                        "You need to select nearby player", JOptionPane.ERROR_MESSAGE);
+                Popups.showMessageAsync(I18n.get("players.add_player.selected.invalid_selection"),
+                        I18n.get("players.add_player.selected.invalid_selection.no_selected"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
