@@ -62,7 +62,7 @@ public class PlayerManager extends JPanel {
         }
 
         private void addSelectedPlayer() {
-            if (editor.getPlayerInfoList().getSelectedValuesList().isEmpty()) {
+            if (editor.getPlayerInfoList().isSelectionEmpty()) {
                 Popups.showMessageAsync(I18n.get("players.add_player.selected.invalid_selection"),
                         I18n.get("players.add_player.selected.invalid_selection.no_selected"), JOptionPane.ERROR_MESSAGE);
                 return;
