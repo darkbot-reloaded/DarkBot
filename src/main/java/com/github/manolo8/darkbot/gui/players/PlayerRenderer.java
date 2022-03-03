@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.players;
 import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.gui.utils.ListCellTitledBorder;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.config.types.PlayerTag;
 import net.miginfocom.swing.MigLayout;
 
@@ -31,7 +32,7 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
         id.setVerticalAlignment(SwingConstants.BOTTOM);
 
         this.defaultBorder = this.getBorder();
-        this.titledBorder = new ListCellTitledBorder(list, "Nearby Players");
+        this.titledBorder = new ListCellTitledBorder(list, I18n.get("players.title_separator"));
     }
 
     public void setAddedPlayerCount(int addedPlayers) {
