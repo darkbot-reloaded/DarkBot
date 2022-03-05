@@ -133,7 +133,7 @@ public class DynamicEntitiesDrawer implements Drawable {
     }
 
     private void drawHeroTarget(MapGraphics mg) {
-        Lockable target = hero.getLocalTarget();
+        Lockable target = hero.getLocalTarget() == null ?  hero.getTargetAs(Lockable.class) : hero.getLocalTarget();
 
         if (target != null && target.isValid()) {
             if (target instanceof Movable) {

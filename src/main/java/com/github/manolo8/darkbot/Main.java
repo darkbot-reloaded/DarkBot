@@ -249,11 +249,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
         if (tickingModule) tickRunning();
         else tickLogic(false);
 
-        if (!running && (!hero.hasTarget() || !mapManager.isTarget(hero.target))) {
-            hero.setTarget(Stream.concat(mapManager.entities.ships.stream(), mapManager.entities.npcs.stream())
-                    .filter(mapManager::isTarget)
-                    .findFirst().orElse(null));
-        }
+        if (!running)
+            hero.setLocalTarget(null);
 
         pingManager.tick();
     }

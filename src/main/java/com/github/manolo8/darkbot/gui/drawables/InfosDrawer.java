@@ -126,6 +126,8 @@ public class InfosDrawer implements Drawable {
         }
 
         Lockable target = hero.getLocalTarget();
+        if (target == null) target = hero.getTargetAs(Lockable.class);
+
         if (target != null && target.isValid()) {
             if (target instanceof Npc || target.getEntityInfo().isEnemy()) mg.setColor("enemies");
             else mg.setColor("allies");
