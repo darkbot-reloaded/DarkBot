@@ -45,6 +45,7 @@ import eu.darkbot.api.extensions.Behavior;
 import eu.darkbot.api.extensions.Configurable;
 import eu.darkbot.api.extensions.Installable;
 import eu.darkbot.api.extensions.Module;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.BotAPI;
 
 import javax.swing.*;
@@ -52,7 +53,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
@@ -250,7 +250,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         else tickLogic(false);
 
         if (!running)
-            hero.setLocalTarget(null);
+            hero.setLocalTarget(hero.getTargetAs(Lockable.class));
 
         pingManager.tick();
     }
