@@ -3,77 +3,123 @@ package com.github.manolo8.darkbot.gui.zones.safety;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.gui.MapDrawer;
+import com.github.manolo8.darkbot.gui.drawables.StaticEntitiesDrawer;
+import com.github.manolo8.darkbot.gui.drawables.ZonesDrawer;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.extensions.MapGraphics;
+import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Point;
+import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.api.managers.EntitiesAPI;
+import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.api.managers.StarSystemAPI;
 
-import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Comparator;
 
-class SafetiesDisplay extends MapDrawer {
+public class SafetiesDisplay extends MapDrawer {
 
-    private SafetiesEditor editor;
-    private SafetyInfo closest;
+    private final SafetiesEditor editor;
+    private SafetiesDisplayDrawer<MapDrawer> safetiesDisplay;
 
     SafetiesDisplay(SafetiesEditor editor) {
         this.editor = editor;
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                updateClosest(e);
-                if (closest != null) editor.edit(closest);
+                safetiesDisplay.updateClosest(e, true);
             }
         });
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                updateClosest(e);
-                repaint();
+                safetiesDisplay.updateClosest(e, false);
             }
         });
     }
 
-    private void updateClosest(MouseEvent e) {
-        double x = undoTranslateX(e.getX()), y = undoTranslateY(e.getY());
-        closest = editor.safetyInfos.stream()
-                .filter(s -> s.entity != null && !s.entity.removed)
-                .min(Comparator.comparingDouble(s -> Math.pow(s.x - x, 2) + Math.pow(s.y - y, 2)))// squared distance
-                .orElse(null);
-        repaint();
+    @Override
+    public void setup(Main main) {
+        super.setup(main);
+
+        this.safetiesDisplay = new SafetiesDisplayDrawer<>(main.pluginAPI, this);
+        this.safetiesDisplay.setup(editor);
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2 = setupDraw(g);
-        synchronized (Main.UPDATE_LOCKER) {
-            drawZones(g2);
-            drawStaticEntities(g2);
-            drawMap(g2);
-            if (editor.safetyInfos == null) return;
-            drawCustomZones(g2);
-        }
+    protected void onPaint() {
+        safetiesDisplay.onDraw(mapGraphics);
     }
 
-    @Override
-    protected void drawMap(Graphics2D g2) {
-        g2.setColor(cs.TEXT_DARK);
-        g2.setFont(cs.FONTS.BIG);
-        drawString(g2, hero.map.name, mid, (height / 2) + 12, Align.MID);
-    }
+    public static class SafetiesDisplayDrawer<T extends MapDrawer> extends ZonesDrawer {
 
-    @Override
-    protected void drawCustomZones(Graphics2D g2) {
-        if (hovering && closest != null && closest != editor.editing) {
-            g2.setColor(cs.SAFETY_EDITOR.ZONE_HIGHLIGHT);
-            drawSafeZone(g2, closest);
-            g2.setColor(cs.SAFETY_EDITOR.ZONE_SOLID);
-            int radius = closest.radius();
-            g2.drawOval(translateX(closest.x - radius), translateY(closest.y - radius),
-                        translateX(closest.diameter()), translateY(closest.diameter()));
+        protected final HeroAPI hero;
+        protected final StaticEntitiesDrawer staticEntitiesDrawer;
+        protected final T drawer;
+
+        private SafetyInfo closest;
+        private SafetiesEditor safetiesEditor;
+
+        public SafetiesDisplayDrawer(PluginAPI api, T mapDrawer) {
+            super(api.requireAPI(EntitiesAPI.class), api.requireAPI(ConfigAPI.class), api.requireAPI(StarSystemAPI.class));
+
+            this.hero = api.requireAPI(HeroAPI.class);
+            this.drawer = mapDrawer;
+            this.staticEntitiesDrawer = api.requireInstance(StaticEntitiesDrawer.class);
         }
-        if (editor.editing != null) {
-            g2.setColor(cs.SAFETY_EDITOR.ZONE_SELECTED);
-            drawSafeZone(g2, editor.editing);
+
+        private void setup(SafetiesEditor safetiesEditor) {
+            this.safetiesEditor = safetiesEditor;
+        }
+
+        @Override
+        public void onDraw(MapGraphics mg) {
+            synchronized (Main.UPDATE_LOCKER) {
+                drawZones(mg);
+                staticEntitiesDrawer.onDraw(mg);
+                drawMap(mg);
+
+                if (safetiesEditor.safetyInfos == null) return;
+                drawCustomZones(mg);
+            }
+        }
+
+        @Override
+        protected void drawCustomZones(MapGraphics mg) {
+            if (drawer.hovering && closest != null && closest != safetiesEditor.editing) {
+                mg.setColor("safety_editor.zone_highlight");
+                drawSafeZone(mg, closest);
+
+                mg.setColor("safety_editor.zone_solid");
+
+                Point size = mg.translate(closest.diameter(), closest.diameter());
+                mg.drawOval(closest, false, size.x(), size.y());
+            }
+
+            if (safetiesEditor.editing != null) {
+                mg.setColor("safety_editor.zone_selected");
+                drawSafeZone(mg, safetiesEditor.editing);
+            }
+        }
+
+        protected void drawMap(MapGraphics mg) {
+            mg.setColor("text_dark");
+            mg.setFont("big");
+
+            mg.drawString(hero.getMap().getName(), mg.getMiddle(), mg.getHeight() / 2 + 12, MapGraphics.Align.MID);
+        }
+
+        private void updateClosest(MouseEvent e, boolean edit) {
+            Locatable click = drawer.mapGraphics.undoTranslate(e.getX(), e.getY());
+            closest = safetiesEditor.safetyInfos.stream()
+                    .filter(s -> s.entity != null && !s.entity.removed)
+                    .min(Comparator.comparingDouble(s -> Math.pow(s.x - click.getX(), 2) + Math.pow(s.y - click.getY(), 2)))// squared distance
+                    .orElse(null);
+
+            drawer.repaint();
+
+            if (closest != null) safetiesEditor.edit(closest);
         }
     }
-
 }

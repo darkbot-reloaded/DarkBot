@@ -171,6 +171,10 @@ public class Drive implements MovementAPI {
         move(location.x, location.y);
     }
 
+    public void move(Locatable locatable) {
+        move(locatable.getX(), locatable.getY());
+    }
+
     public void move(double x, double y) {
         Location newDir = new Location(x, y);
         if (movingTo().distance(newDir) > 10) tempDest = endLoc = newDir;

@@ -12,6 +12,7 @@ import java.io.IOException;
 public class Bot {
 
     public static void main(String[] args) throws IOException {
+        System.setProperty("sun.java2d.opengl", "True");
         if (System.console() == null
                 && Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")) {
             LogUtils.setOutputToFile();

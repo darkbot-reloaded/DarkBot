@@ -46,7 +46,7 @@ public class Zone
     }
 
     @Override
-    public Area getArea() {
+    public Area getZoneArea() {
         return area;
     }
 

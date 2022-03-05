@@ -48,7 +48,10 @@ public abstract class AbstractSelectorHandler<T, P, PS extends PrioritizedSuppli
         suppliers.sort(COMPARATOR);
         for (PS supplier : suppliers) {
             P res = supplier.get();
-            if (res != null) return res;
+            if (res != null) {
+                last = supplier;
+                return res;
+            }
         }
         return null;
     }
