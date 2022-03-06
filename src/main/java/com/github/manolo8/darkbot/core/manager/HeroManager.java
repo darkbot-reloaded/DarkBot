@@ -386,6 +386,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
             this.configuration = Configuration.of(configuration);
             this.formation = null;
             this.toSelectChar = toSelectChar;
+            this.isLegacyFormation = true;
         }
 
         @Override
