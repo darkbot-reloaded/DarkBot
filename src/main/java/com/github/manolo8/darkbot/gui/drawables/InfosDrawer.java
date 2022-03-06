@@ -77,19 +77,23 @@ public class InfosDrawer implements Drawable {
     private void drawInfos(MapGraphics mg) {
         mg.setColor("text_dark");
 
-        String status = i18n.get((main.isRunning() ? "gui.map.running" : "gui.map.waiting"), Time.toString(stats.getRunningTime().toMillis()));
+        String status = i18n.get((main.isRunning() ? "gui.map.running" : "gui.map.waiting"),
+                Time.toString(stats.getRunningTime().toMillis()));
 
         mg.drawString(mg.getWidthMiddle(), mg.getHeight() / 2 + 35, status, MapGraphics.StringAlign.MID);
 
         mg.setFont("small");
-        String info = i18n.get("gui.map.info", main.getVersion().toString(), (main.isRunning() || !resetRefresh.getValue() ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"), Time.toString(refreshTime.getValue() * 60 * 1000L));
+        String info = i18n.get("gui.map.info", main.getVersion().toString(),
+                (main.isRunning() || !resetRefresh.getValue() ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"), Time.toString(refreshTime.getValue() * 60 * 1000L));
 
         mg.drawString(5, 12, info, MapGraphics.StringAlign.LEFT);
         if (main.getModule() != null) {
-            mg.drawString(5, 26, main.tickingModule ? main.getModule().getStatus() : main.getModule().getStoppedStatus(), MapGraphics.StringAlign.LEFT);
+            mg.drawString(5, 26, main.tickingModule ? main.getModule().getStatus()
+                    : main.getModule().getStoppedStatus(), MapGraphics.StringAlign.LEFT);
         }
 
-        mg.drawString(mg.getWidth() - 5, 12, String.format("%.1ftick %dms ping", main.getTickTime(), stats.getPing()), MapGraphics.StringAlign.RIGHT);
+        mg.drawString(mg.getWidth() - 5, 12,
+                String.format("%.1ftick %dms ping", main.getTickTime(), stats.getPing()), MapGraphics.StringAlign.RIGHT);
         mg.drawString(mg.getWidth() - 5, 26, "SID: " + main.backpage.sidStatus(), MapGraphics.StringAlign.RIGHT);
     }
 
@@ -106,7 +110,8 @@ public class InfosDrawer implements Drawable {
         mg.setFont("mid");
 
         if (hasDisplayFlag(DisplayFlag.HERO_NAME))
-            mg.drawString(10 + (mg.getWidthMiddle() - 20) / 2, mg.getHeight() - 40, hero.getEntityInfo().getUsername(), MapGraphics.StringAlign.MID);
+            mg.drawString(10 + (mg.getWidthMiddle() - 20) / 2, mg.getHeight() - 40,
+                    hero.getEntityInfo().getUsername(), MapGraphics.StringAlign.MID);
 
         Point pos = Point.of(10, mg.getHeight() - 34);
         drawHealth(mg, hero.getHealth(), pos, mg.getWidthMiddle() - 20, 12, 0);
