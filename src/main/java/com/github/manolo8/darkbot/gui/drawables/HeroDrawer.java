@@ -33,8 +33,7 @@ public class HeroDrawer implements Drawable {
         drawHeroDestination(mg);
 
         mg.setColor("hero");
-        mg.drawOval(hero, true, 7);
-        mg.drawOval(hero, false, 9);
+        mg.drawOval(hero, 8, true);
 
         drawScreenBounds(mg);
         drawPet(mg);
@@ -44,7 +43,7 @@ public class HeroDrawer implements Drawable {
         mg.setColor("text");
         mg.setFont("small");
 
-        mg.drawString(hero.getConfiguration().toString(), Point.of(12, mg.getHeight() - 12), MapGraphics.Align.LEFT);
+        mg.drawString(12, mg.getHeight() - 12, hero.getConfiguration().toString(), MapGraphics.StringAlign.LEFT);
     }
 
     private void drawHeroDestination(MapGraphics mg) {
@@ -65,25 +64,22 @@ public class HeroDrawer implements Drawable {
         MapManager.ViewBounds view = mapManager.viewBounds;
         if (view.address == 0) return;
 
-        Point a = mg.translate(view.leftTopX, view.leftTopY);
-        Point b = mg.translate(view.rightTopX, view.rightTopY);
-        Point c = mg.translate(view.rightBotX, view.rightBotY);
-        Point d = mg.translate(view.leftBotX, view.leftBotY);
+        Point tl = mg.toScreenPoint(view.leftTopX, view.leftTopY);
+        Point tr = mg.toScreenPoint(view.rightTopX, view.rightTopY);
+        Point br = mg.toScreenPoint(view.rightBotX, view.rightBotY);
+        Point bl = mg.toScreenPoint(view.leftBotX, view.leftBotY);
 
         mg.setColor("barrier_border");
-        mg.drawLine(a, b);
-        mg.drawLine(b, c);
-        mg.drawLine(c, d);
-        mg.drawLine(d, a);
+        mg.drawPoly(MapGraphics.PolyType.DRAW_POLYGON, tl, tr, br, bl);
     }
 
     private void drawPet(MapGraphics mg) {
         hero.getPet().ifPresent(pet -> {
             mg.setColor("pet");
-            mg.drawRect(pet, true, 6);
+            mg.drawRect(pet, 6, true);
 
             mg.setColor("pet_in");
-            mg.drawRect(pet, true, 4);
+            mg.drawRect(pet, 4, true);
         });
     }
 }

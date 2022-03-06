@@ -20,7 +20,6 @@ import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.managers.StatsAPI;
 import eu.darkbot.api.utils.Inject;
 
-import java.awt.*;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -70,6 +69,8 @@ public class InfosDrawer implements Drawable {
     @Override
     public void onDraw(MapGraphics mg) {
         drawInfos(mg);
+        drawMap(mg);
+
         drawHealth(mg);
     }
 
@@ -78,28 +79,26 @@ public class InfosDrawer implements Drawable {
 
         String status = i18n.get((main.isRunning() ? "gui.map.running" : "gui.map.waiting"), Time.toString(stats.getRunningTime().toMillis()));
 
-        mg.drawString(status, mg.getMiddle(), mg.getHeight() / 2 + 35, MapGraphics.Align.MID);
+        mg.drawString(mg.getWidthMiddle(), mg.getHeight() / 2 + 35, status, MapGraphics.StringAlign.MID);
 
         mg.setFont("small");
         String info = i18n.get("gui.map.info", main.getVersion().toString(), (main.isRunning() || !resetRefresh.getValue() ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"), Time.toString(refreshTime.getValue() * 60 * 1000L));
 
-        mg.drawString(info, 5, 12, MapGraphics.Align.LEFT);
+        mg.drawString(5, 12, info, MapGraphics.StringAlign.LEFT);
         if (main.getModule() != null) {
-            mg.drawString(main.tickingModule ? main.getModule().getStatus() : main.getModule().getStoppedStatus(), 5, 26, MapGraphics.Align.LEFT);
+            mg.drawString(5, 26, main.tickingModule ? main.getModule().getStatus() : main.getModule().getStoppedStatus(), MapGraphics.StringAlign.LEFT);
         }
 
-        mg.drawString(String.format("%.1ftick %dms ping", main.getTickTime(), stats.getPing()), mg.getWidth() - 5, 12, MapGraphics.Align.RIGHT);
-        mg.drawString("SID: " + main.backpage.sidStatus(), mg.getWidth() - 5, 26, MapGraphics.Align.RIGHT);
-
-        drawMap(mg);
+        mg.drawString(mg.getWidth() - 5, 12, String.format("%.1ftick %dms ping", main.getTickTime(), stats.getPing()), MapGraphics.StringAlign.RIGHT);
+        mg.drawString(mg.getWidth() - 5, 26, "SID: " + main.backpage.sidStatus(), MapGraphics.StringAlign.RIGHT);
     }
 
-    protected void drawMap(MapGraphics mg) {
+    public void drawMap(MapGraphics mg) {
         mg.setColor("text_dark");
         mg.setFont("big");
 
         String name = hero.getMap().getId() == -1 ? I18n.get("gui.map.loading") : hero.getMap().getName();
-        mg.drawString(name, mg.getMiddle(), mg.getHeight() / 2 - 5, MapGraphics.Align.MID);
+        mg.drawString(mg.getWidthMiddle(), mg.getHeight() / 2 - 5, name, MapGraphics.StringAlign.MID);
     }
 
     private void drawHealth(MapGraphics mg) {
@@ -107,21 +106,21 @@ public class InfosDrawer implements Drawable {
         mg.setFont("mid");
 
         if (hasDisplayFlag(DisplayFlag.HERO_NAME))
-            mg.drawString(hero.getEntityInfo().getUsername(), 10 + (mg.getMiddle() - 20) / 2, mg.getHeight() - 40, MapGraphics.Align.MID);
+            mg.drawString(10 + (mg.getWidthMiddle() - 20) / 2, mg.getHeight() - 40, hero.getEntityInfo().getUsername(), MapGraphics.StringAlign.MID);
 
         Point pos = Point.of(10, mg.getHeight() - 34);
-        drawHealth(mg, hero.getHealth(), pos, mg.getMiddle() - 20, 12, 0);
+        drawHealth(mg, hero.getHealth(), pos, mg.getWidthMiddle() - 20, 12, 0);
 
         if (pet.isValid() && hasDisplayFlag(DisplayFlag.SHOW_PET)) {
             pos = Point.of(10, mg.getHeight() - 52);
-            drawHealth(mg, pet.getHealth(), pos, (int) ((mg.getMiddle() - 20) * 0.25), 6, 0);
+            drawHealth(mg, pet.getHealth(), pos, (int) ((mg.getWidthMiddle() - 20) * 0.25), 6, 0);
 
             PetAPI.PetStat fuel = pet.getStat(PetAPI.Stat.FUEL);
             if (fuel != null) {
                 double fuelPercent = fuel.getCurrent() / fuel.getTotal();
 
                 pos = Point.of(10, mg.getHeight() - 40);
-                drawPetFuel(mg, pos, (int) ((mg.getMiddle() - 20) * 0.25), 6, fuelPercent);
+                drawPetFuel(mg, pos, (int) ((mg.getWidthMiddle() - 20) * 0.25), 6, fuelPercent);
             }
         }
 
@@ -133,11 +132,11 @@ public class InfosDrawer implements Drawable {
             mg.setFont("mid");
             String name = target.getEntityInfo().getUsername();
 
-            pos = Point.of(mg.getMiddle() + 10 + ((mg.getMiddle() - 20) >> 1), mg.getHeight() - 40);
-            mg.drawString(name, pos, MapGraphics.Align.MID);
+            pos = Point.of(mg.getWidthMiddle() + 10 + ((mg.getWidthMiddle() - 20) >> 1), mg.getHeight() - 40);
+            mg.drawString(pos, name, MapGraphics.StringAlign.MID);
 
-            pos = Point.of(mg.getMiddle() + 10, mg.getHeight() - 34);
-            drawHealth(mg, target.getHealth(), pos, mg.getMiddle() - 20, 12, 0);
+            pos = Point.of(mg.getWidthMiddle() + 10, mg.getHeight() - 34);
+            drawHealth(mg, target.getHealth(), pos, mg.getWidthMiddle() - 20, 12, 0);
         }
     }
 
@@ -148,37 +147,41 @@ public class InfosDrawer implements Drawable {
         int hullWidth = totalMaxHealth == 0 ? 0 : (health.getHull() * width / totalMaxHealth);
 
         mg.setFont("small");
-        mg.setColor("health", Color::darker);
-        mg.drawRect(pos, true, width, height);
+        mg.setColor(mg.getColor("health").darker());
+        mg.drawRect(pos, width, height, true);
         mg.setColor("health");
-        mg.drawRect(pos, true, hullWidth + (int) (health.hpPercent() * (width - hullWidth)), height);
+        mg.drawRect(pos, hullWidth + (int) (health.hpPercent() * (width - hullWidth)), height, true);
         mg.setColor("nano_hull");
-        mg.drawRect(pos, true, hullWidth, height);
+        mg.drawRect(pos, hullWidth, height, true);
 
         mg.setColor("text");
         if (displayAmount) {
-            mg.drawString(HEALTH_FORMAT.format(health.getHull() + health.getHp()) + "/" + HEALTH_FORMAT.format(totalMaxHealth), pos.x() + width / 2, pos.y() + height - 2, MapGraphics.Align.MID);
+            mg.drawString(pos.x() + width / 2, pos.y() + height - 2,
+                    HEALTH_FORMAT.format(health.getHull() + health.getHp())
+                    + "/" + HEALTH_FORMAT.format(totalMaxHealth), MapGraphics.StringAlign.MID);
         }
 
         if (health.getMaxShield() != 0) {
-            mg.setColor("shield", Color::darker);
+            mg.setColor(mg.getColor("shield").darker());
             Point shieldPos = Point.of(pos.x(), pos.y() + height + margin);
 
-            mg.drawRect(shieldPos, true, width, height);
+            mg.drawRect(shieldPos, width, height, true);
             mg.setColor("shield");
-            mg.drawRect(shieldPos, true, (int) (health.shieldPercent() * width), height);
+            mg.drawRect(shieldPos, (int) (health.shieldPercent() * width), height, true);
             mg.setColor("text");
             if (displayAmount) {
-                mg.drawString(HEALTH_FORMAT.format(health.getShield()) + "/" + HEALTH_FORMAT.format(health.getMaxShield()), pos.x() + width / 2, pos.y() + height + height - 2, MapGraphics.Align.MID);
+                mg.drawString(pos.x() + width / 2, pos.y() + height + height - 2,
+                        HEALTH_FORMAT.format(health.getShield())
+                        + "/" + HEALTH_FORMAT.format(health.getMaxShield()), MapGraphics.StringAlign.MID);
             }
         }
     }
 
     private void drawPetFuel(MapGraphics mg, Point pos, int width, int height, double fuelPercent) {
-        mg.setColor("fuel", Color::darker);
-        mg.drawRect(pos, true, width, height);
+        mg.setColor(mg.getColor("fuel").darker());
+        mg.drawRect(pos, width, height, true);
         mg.setColor("fuel");
-        mg.drawRect(pos, true, (int) (fuelPercent * width), height);
+        mg.drawRect(pos, (int) (fuelPercent * width), height, true);
     }
 
     private boolean hasDisplayFlag(DisplayFlag displayFlag) {

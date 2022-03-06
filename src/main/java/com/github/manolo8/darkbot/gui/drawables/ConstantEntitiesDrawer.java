@@ -2,14 +2,19 @@ package com.github.manolo8.darkbot.gui.drawables;
 
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
+import com.github.manolo8.darkbot.core.entities.Zone;
+import com.github.manolo8.darkbot.extensions.features.Feature;
+import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.types.SafetyInfo;
 import eu.darkbot.api.extensions.Drawable;
-import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.entities.Barrier;
+import eu.darkbot.api.game.entities.BattleStation;
 import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.entities.Mist;
+import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Point;
@@ -21,25 +26,31 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-@Feature(name = "Zones Drawer", description = "Draws zones")
-public class ZonesDrawer implements Drawable {
+@Feature(name = "Constant Entities Drawer", description = "Draws not-movable entities")
+public class ConstantEntitiesDrawer implements Drawable {
 
     protected final ConfigAPI config;
     protected final StarSystemAPI starSystem;
 
     protected final Collection<? extends Mist> mists;
     protected final Collection<? extends Barrier> barriers;
+    protected final Collection<? extends Portal> portals;
+    protected final Collection<? extends Station> stations;
+    protected final Collection<? extends BattleStation> battleStations;
 
     protected final ConfigSetting<Set<DisplayFlag>> displayFlags;
     protected final ConfigSetting<Integer> zoneResolution;
     protected final ConfigSetting<Boolean> roamingSequential;
 
-    public ZonesDrawer(EntitiesAPI entities, ConfigAPI config, StarSystemAPI starSystem) {
+    public ConstantEntitiesDrawer(EntitiesAPI entities, ConfigAPI config, StarSystemAPI starSystem) {
         this.config = config;
         this.starSystem = starSystem;
 
         this.mists = entities.getMists();
         this.barriers = entities.getBarriers();
+        this.portals = entities.getPortals();
+        this.stations = entities.getStations();
+        this.battleStations = entities.getBattleStations();
 
         this.displayFlags = config.requireConfig("bot_settings.map_display.toggle");
         this.zoneResolution = config.requireConfig("bot_settings.other.zone_resolution");
@@ -50,36 +61,35 @@ public class ZonesDrawer implements Drawable {
     public void onDraw(MapGraphics mg) {
         drawZones(mg);
         drawCustomZones(mg);
+
+        drawPortals(mg);
+        drawBattleStations(mg);
+        drawStations(mg);
     }
 
-    protected void drawZones(MapGraphics mg) {
+    public void drawZones(MapGraphics mg) {
         for (Barrier barrier : barriers) {
             if (!barrier.use()) return;
 
-            Area.Rectangle bounds = barrier.getZoneArea().getBounds();
-
-            Point pos = mg.translate(bounds.getX(), bounds.getY());
-            Point size = mg.translate(bounds.getWidth(), bounds.getHeight());
-
             mg.setColor("barrier");
-            mg.drawRect(pos, true, size.x(), size.y());
+            mg.drawPoly(MapGraphics.PolyType.FILL_POLYGON, ((Zone) barrier).points);
 
             mg.setColor("barrier_border");
-            mg.drawRect(pos, false, size.x(), size.y());
+            mg.drawPoly(MapGraphics.PolyType.DRAW_POLYGON, ((Zone) barrier).points);
         }
 
         mg.setColor("no_cloack");
         for (Mist mist : mists) {
             Area.Rectangle bounds = mist.getZoneArea().getBounds();
 
-            Point pos = mg.translate(bounds.getX(), bounds.getY());
-            Point size = mg.translate(bounds.getWidth(), bounds.getHeight());
+            Point pos = mg.toScreenPoint(bounds.getX(), bounds.getY());
+            Point size = mg.toScreenPoint(bounds.getWidth(), bounds.getHeight());
 
-            mg.drawRect(pos, true, size.x(), size.y());
+            mg.drawRect(pos, size.x(), size.y(), true);
         }
     }
 
-    protected void drawCustomZones(MapGraphics mg) {
+     public void drawCustomZones(MapGraphics mg) {
         if (!hasDisplayFlag(DisplayFlag.ZONES)) return;
 
         mg.setColor("prefer");
@@ -100,19 +110,19 @@ public class ZonesDrawer implements Drawable {
         }
     }
 
-    protected void drawCustomZone(MapGraphics mg, ZoneInfo zoneInfo) {
+    public void drawCustomZone(MapGraphics mg, ZoneInfo zoneInfo) {
         if (zoneInfo == null) return;
         for (int x = 0; x < zoneInfo.getResolution(); x++) {
             for (int y = 0; y < zoneInfo.getResolution(); y++) {
                 if (!zoneInfo.get(x, y)) continue;
 
                 Point pos = Point.of(gridToMapX(mg, x), gridToMapY(mg, y));
-                mg.drawRect(pos, true, gridToMapX(mg, x + 1) - pos.x(), gridToMapY(mg, y + 1) - pos.y());
+                mg.drawRect(pos, gridToMapX(mg, x + 1) - pos.x(), gridToMapY(mg, y + 1) - pos.y(), true);
             }
         }
     }
 
-    protected void drawCustomZonePath(MapGraphics mg, ZoneInfo zoneInfo) {
+    public void drawCustomZonePath(MapGraphics mg, ZoneInfo zoneInfo) {
         if (zoneInfo == null) return;
 
         List<ZoneInfo.Zone> sortedZones = zoneInfo.getSortedZones();
@@ -125,11 +135,51 @@ public class ZonesDrawer implements Drawable {
         }
     }
 
-    protected void drawSafeZone(MapGraphics mg, SafetyInfo safetyInfo) {
+    public void drawSafeZone(MapGraphics mg, SafetyInfo safetyInfo) {
         if (safetyInfo == null) return;
 
-        Point size = mg.translate(safetyInfo.getDiameter(), safetyInfo.getDiameter());
-        mg.drawOval(safetyInfo, true, size.x(), size.y());
+        Point size = mg.toScreenPoint(safetyInfo.getDiameter(), safetyInfo.getDiameter());
+        mg.drawOval(safetyInfo, size.x(), size.y(), true);
+    }
+
+    public void drawPortals(MapGraphics mg) {
+        mg.setColor("portals");
+
+        for (Portal portal : portals) {
+            mg.drawOval(portal, 12, false);
+        }
+    }
+
+    public void drawBattleStations(MapGraphics mg) {
+        for (BattleStation bs : battleStations) {
+            if (bs.getHullId() == 0) mg.setColor("meteroid");
+            else if (bs.getEntityInfo().isEnemy()) mg.setColor("enemies");
+            else mg.setColor("allies");
+
+            if (bs.getHullId() >= 0 && bs.getHullId() < 255)
+                mg.drawOval(bs, 11, 9, true);
+
+            else mg.drawRect(bs, 3, false);
+        }
+    }
+
+    public void drawStations(MapGraphics mg) {
+        for (Station station : stations) {
+            if (station instanceof Station.Turret) {
+                mg.setColor("bases");
+                mg.drawOval(station, 2, true);
+
+            } else {
+                mg.setColor("base_spots");
+
+                int radius = station instanceof Station.Headquarter ? 3500
+                        : station instanceof Station.HomeBase ? 3000 : 1000;
+
+                Point p = mg.toScreenPoint(radius, radius);
+                mg.drawOval(station, p.x(), p.y(), true);
+            }
+
+        }
     }
 
     protected int gridToMapX(MapGraphics mg, int x) {

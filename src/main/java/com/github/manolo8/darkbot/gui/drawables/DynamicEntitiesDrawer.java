@@ -66,7 +66,7 @@ public class DynamicEntitiesDrawer implements Drawable {
             drawEntity(mg, box, box.getInfo().shouldCollect());
 
             if (hasDisplayFlag(DisplayFlag.RESOURCE_NAMES))
-                mg.drawString(box.getTypeName(), box, -5, MapGraphics.Align.MID);
+                mg.drawString(box, box.getTypeName(), -5, MapGraphics.StringAlign.MID);
         }
     }
 
@@ -90,9 +90,9 @@ public class DynamicEntitiesDrawer implements Drawable {
 
         if (pingEntity != null) {
             mg.setColor("ping");
-            mg.drawOval(pingEntity, true, 15);
+            mg.drawOval(pingEntity, 15, true);
             mg.setColor("ping_border");
-            mg.drawOval(pingEntity, false, 15);
+            mg.drawOval(pingEntity, 15, false);
         }
     }
 
@@ -104,7 +104,7 @@ public class DynamicEntitiesDrawer implements Drawable {
 
 
             if (hasDisplayFlag(DisplayFlag.USERNAMES))
-                mg.drawString(player.getEntityInfo().getUsername(), player, -5, MapGraphics.Align.MID);
+                mg.drawString(player, player.getEntityInfo().getUsername(), -5, MapGraphics.StringAlign.MID);
         }
     }
 
@@ -114,7 +114,7 @@ public class DynamicEntitiesDrawer implements Drawable {
             drawEntity(mg, pet, false);
 
             if (hasDisplayFlag(DisplayFlag.USERNAMES))
-                mg.drawString(pet.getEntityInfo().getUsername(), pet, -5, MapGraphics.Align.MID);
+                mg.drawString(pet, pet.getEntityInfo().getUsername(), -5, MapGraphics.StringAlign.MID);
         }
     }
 
@@ -144,7 +144,7 @@ public class DynamicEntitiesDrawer implements Drawable {
             }
 
             mg.setColor("target");
-            mg.drawRect(target, true, 3);
+            mg.drawRect(target, 4, true);
 
             // target circle
 //            mg.getGraphics2D().setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 10.0f, new float[] {3, 5},  0.0f));
@@ -155,8 +155,7 @@ public class DynamicEntitiesDrawer implements Drawable {
     }
 
     private void drawEntity(MapGraphics mg, Locatable pos, boolean fill) {
-        mg.drawRect(pos, false, 5);
-        if (fill) mg.drawRect(pos, true, 3);
+        mg.drawRect(pos, fill ? 4 : 3, fill);
     }
 
     private boolean hasDisplayFlag(DisplayFlag displayFlag) {

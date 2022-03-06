@@ -61,7 +61,7 @@ public class StatsDrawer extends InfosDrawer {
 
         boolean hideNames = !hasDisplayFlag(DisplayFlag.GROUP_NAMES);
 
-        drawBackgrounded(mg, 28, MapGraphics.Align.RIGHT,
+        drawBackgrounded(mg, 28, MapGraphics.StringAlign.RIGHT,
                 (x, y, w, member) -> {
 
                     Map<TextAttribute, Object> attrs = new HashMap<>();
@@ -69,8 +69,8 @@ public class StatsDrawer extends InfosDrawer {
                     attrs.put(TextAttribute.STRIKETHROUGH, member.isDead() ? TextAttribute.STRIKETHROUGH_ON : false);
                     attrs.put(TextAttribute.UNDERLINE, member.isLocked() ? TextAttribute.UNDERLINE_ON : -1);
 
-                    mg.setFont("small", f -> f.deriveFont(attrs));
-                    mg.setColor("text", c -> member.isCloaked() ? c.darker() : c);
+                    mg.setFont(mg.getFont("small").deriveFont(attrs));
+                    mg.setColor(member.isCloaked() ? mg.getColor("text").darker() : mg.getColor("text"));
 
                     String text = ((GroupMember) member).getDisplayText(hideNames);
                     mg.getGraphics2D().drawString(text, x, y + 14);
@@ -96,7 +96,7 @@ public class StatsDrawer extends InfosDrawer {
         if (hasDisplayFlag(DisplayFlag.SORT_BOOSTERS))
             boosters = boosters.sorted(Comparator.comparingDouble(b -> -b.getRemainingTime()));
 
-        drawBackgrounded(mg, 15, MapGraphics.Align.RIGHT,
+        drawBackgrounded(mg, 15, MapGraphics.StringAlign.RIGHT,
                 (x, y, w, booster) -> {
                     mg.setColor(booster.getColor());
                     mg.getGraphics2D().drawString(((BoosterProxy.Booster) booster).toSimpleString(), x, y + 14);
@@ -118,13 +118,13 @@ public class StatsDrawer extends InfosDrawer {
     }
 
     private void drawBackgroundedText(MapGraphics mg, String... texts) {
-        this.drawBackgrounded(mg, 15, MapGraphics.Align.LEFT,
+        this.drawBackgrounded(mg, 15, MapGraphics.StringAlign.LEFT,
                 (x, y, h, str) -> mg.getGraphics2D().drawString(str, x, y + 14),
                 s -> mg.getGraphics2D().getFontMetrics().stringWidth(s),
                 Arrays.asList(texts));
     }
 
-    private <T> void drawBackgrounded(MapGraphics mg, int lineHeight, MapGraphics.Align align,
+    private <T> void drawBackgrounded(MapGraphics mg, int lineHeight, MapGraphics.StringAlign align,
                                       Renderer<T> renderer,
                                       ToIntFunction<T> widthGetter,
                                       Collection<T> toRender) {
@@ -134,10 +134,10 @@ public class StatsDrawer extends InfosDrawer {
         int width = toRender.stream().mapToInt(widthGetter).max().orElse(0) + 8;
         int height = toRender.size() * lineHeight + 4;
         int top = mg.getHeight() / 2 - height / 2;
-        int left = align == MapGraphics.Align.RIGHT ? mg.getWidth() - width : 0;
+        int left = align == MapGraphics.StringAlign.RIGHT ? mg.getWidth() - width : 0;
 
         mg.setColor("texts_background");
-        mg.drawRect(Point.of(left, top), true, width, height);
+        mg.drawRect(left, top, width, height, true);
         mg.setColor("text");
 
         for (T render : toRender) {

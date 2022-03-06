@@ -4,8 +4,8 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.gui.MapDrawer;
-import com.github.manolo8.darkbot.gui.zones.safety.SafetiesDisplay;
-import eu.darkbot.api.PluginAPI;
+import com.github.manolo8.darkbot.gui.drawables.ConstantEntitiesDrawer;
+import com.github.manolo8.darkbot.gui.drawables.InfosDrawer;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.MapGraphics;
@@ -13,17 +13,21 @@ import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Map;
 
-public class ZoneEditor extends MapDrawer {
+public class ZoneEditor extends MapDrawer implements Listener {
 
     private final Rect area = new Rect();
-
-    private ZoneEditorDrawer zonesDrawer;
-
+    private ZoneInfo zoneInfo = null;
     private boolean selecting;
     private int startX, startY;
+
+    private Map<Integer, ZoneInfo> zonesByMap;
+    private InfosDrawer infosDrawer;
+    private ConstantEntitiesDrawer constantEntitiesDrawer;
 
     ZoneEditor() {
         addMouseListener(new MouseAdapter() {
@@ -38,7 +42,7 @@ public class ZoneEditor extends MapDrawer {
             public void mouseReleased(MouseEvent e) {
                 selecting = false;
                 area.set(startX, startY, e.getX(), e.getY());
-                zonesDrawer.toggleSelection(SwingUtilities.isMiddleMouseButton(e), SwingUtilities.isLeftMouseButton(e));
+                toggleSelection(SwingUtilities.isMiddleMouseButton(e), SwingUtilities.isLeftMouseButton(e));
                 area.set(e.getX(), e.getY(), e.getX(), e.getY());
                 ZoneEditor.super.repaint();
             }
@@ -60,121 +64,99 @@ public class ZoneEditor extends MapDrawer {
 
     void setup(Main main, java.util.Map<Integer, ZoneInfo> zonesByMap) {
         super.setup(main);
-        this.zonesDrawer = new ZoneEditorDrawer(main.pluginAPI, this, zonesByMap);
+
+        main.pluginAPI.requireAPI(EventBrokerAPI.class).registerListener(this);
+
+        this.infosDrawer = main.pluginAPI.requireInstance(InfosDrawer.class);
+        this.constantEntitiesDrawer = main.pluginAPI.requireInstance(ConstantEntitiesDrawer.class);
+
+        this.zonesByMap = zonesByMap;
+        this.zoneInfo = zonesByMap.get(main.hero.map.id);
     }
 
     @Override
     protected void onPaint() {
-        zonesDrawer.onDraw(mapGraphics);
-    }
+        synchronized (Main.UPDATE_LOCKER) {
+            constantEntitiesDrawer.drawZones(mapGraphics);
 
-    public static class ZoneEditorDrawer extends SafetiesDisplay.SafetiesDisplayDrawer<ZoneEditor> implements Listener {
+            constantEntitiesDrawer.drawPortals(mapGraphics);
+            constantEntitiesDrawer.drawBattleStations(mapGraphics);
+            constantEntitiesDrawer.drawStations(mapGraphics);
 
-        private final java.util.Map<Integer, ZoneInfo> zonesByMap;
-        private ZoneInfo zoneInfo;
-
-        public ZoneEditorDrawer(PluginAPI api, ZoneEditor zoneEditor, java.util.Map<Integer, ZoneInfo> zonesByMap) {
-            super(api, zoneEditor);
-
-            this.zonesByMap = zonesByMap;
-            this.zoneInfo = zonesByMap.get(hero.getMap().getId());
-
-            api.requireAPI(EventBrokerAPI.class).registerListener(this);
-        }
-
-        @Override
-        public void onDraw(MapGraphics mg) {
-            synchronized (Main.UPDATE_LOCKER) {
-                drawZones(mg);
-                staticEntitiesDrawer.onDraw(mg);
-                drawMap(mg);
-            }
+            infosDrawer.drawMap(mapGraphics);
 
             if (zoneInfo == null) return;
-
-            int res = zoneResolution.getValue();
+            int res = main.config.BOT_SETTINGS.OTHER.ZONE_RESOLUTION;
             if (zoneInfo.resolution != res) zoneInfo.setResolution(res);
 
-            drawCustomZones(mg);
-            drawGrid(mg, res);
+            mapGraphics.setColor("zone_editor.zone");
+            constantEntitiesDrawer.drawCustomZone(mapGraphics, zoneInfo);
+            drawGrid(mapGraphics, res);
 
-            if (!drawer.selecting && !drawer.hovering) return;
+            if (!selecting && !hovering) return;
 
-            mg.setColor(drawer.selecting ? "zone_editor.selecting" : "zone_editor.hovering");
-            drawer.area.update(drawer.getWidth(), drawer.getHeight(), res);
-            drawer.area.draw(mg);
-
-        }
-
-        @Override
-        protected void drawCustomZones(MapGraphics mg) {
-            mg.setColor("zone_editor.zone");
-            drawCustomZone(mg, zoneInfo);
-        }
-
-        protected void drawMap(MapGraphics mg) {
-            mg.setColor("text_dark");
-            mg.setFont("big");
-
-            mg.drawString(hero.getMap().getName(), mg.getMiddle(), mg.getHeight() / 2 + 12, MapGraphics.Align.MID);
-        }
-
-        private void drawGrid(MapGraphics mg, int resolution) {
-            mg.setColor("zone_editor.lines");
-
-            for (int i = 1; i < resolution; i++) {
-                int x = i * drawer.getWidth() / resolution;
-                mg.getGraphics2D().drawLine(x, 0, x, drawer.getHeight());
-            }
-            for (int i = 1; i < resolution; i++) {
-                int y = i * drawer.getHeight() / resolution;
-                mg.getGraphics2D().drawLine(0, y, drawer.getWidth(), y);
-            }
-        }
-
-        private void toggleSelection(boolean toggle, boolean def) {
-            if (zoneInfo == null) return;
-            drawer.area.update(drawer.getWidth(), drawer.getHeight(), zoneInfo.resolution);
-
-            int startX = mapToGridX(drawer.area.x1), startY = mapToGridY(drawer.area.y1),
-                    endX = mapToGridX(drawer.area.x2), endY = mapToGridY(drawer.area.y2);
-
-            if (toggle) {
-                zoneInfo.toggle(startX, startY, endX, endY);
-                ConfigEntity.changed();
-                return;
-            }
-
-            boolean differ = false;
-            boolean sel = zoneInfo.get(startX, startY);
-            for (int x = startX; x < endX; x++) {
-                for (int y = startY; y < endY; y++) {
-                    if (zoneInfo.get(x, y) != sel && (differ = true)) break;
-                }
-                if (differ) break;
-            }
-
-            zoneInfo.set(startX, startY, endX, endY, !differ ? !sel : def);
-            ConfigEntity.changed();
-        }
-
-        @EventHandler
-        public void onMapChange(StarSystemAPI.MapChangeEvent m) {
-            zoneInfo = zonesByMap.computeIfAbsent(m.getNext().getId(), id -> new ZoneInfo(zoneResolution.getValue()));
-            drawer.repaint();
-        }
-
-        protected int mapToGridX(int x) {
-            return (x + 1) * zoneResolution.getValue() / drawer.mapGraphics.getWidth();
-        }
-
-        protected int mapToGridY(int y) {
-            return (y + 1) * zoneResolution.getValue() / drawer.mapGraphics.getHeight();
+            mapGraphics.setColor(selecting ? "zone_editor.selecting" : "zone_editor.hovering");
+            area.update(res);
+            area.draw(mapGraphics.getGraphics2D());
         }
     }
 
-    private static class Rect {
-        private int x1, x2, y1, y2;
+    private void drawGrid(MapGraphics mg, int resolution) {
+        mg.setColor("zone_editor.lines");
+
+        for (int i = 1; i < resolution; i++) {
+            int x = i * mg.getWidth() / resolution;
+            mg.getGraphics2D().drawLine(x, 0, x, mg.getHeight());
+        }
+        for (int i = 1; i < resolution; i++) {
+            int y = i * mg.getHeight() / resolution;
+            mg.getGraphics2D().drawLine(0, y, mg.getWidth(), y);
+        }
+    }
+
+    private void toggleSelection(boolean toggle, boolean def) {
+        if (zoneInfo == null) return;
+        area.update(zoneInfo.resolution);
+
+        int startX = mapToGridX(area.x1), startY = mapToGridY(area.y1),
+                endX = mapToGridX(area.x2), endY = mapToGridY(area.y2);
+
+        if (toggle) {
+            zoneInfo.toggle(startX, startY, endX, endY);
+            ConfigEntity.changed();
+            return;
+        }
+
+        boolean differ = false;
+        boolean sel = zoneInfo.get(startX, startY);
+        for (int x = startX; x < endX; x++) {
+            for (int y = startY; y < endY; y++) {
+                if (zoneInfo.get(x, y) != sel && (differ = true)) break;
+            }
+            if (differ) break;
+        }
+
+        zoneInfo.set(startX, startY, endX, endY, !differ ? !sel : def);
+        ConfigEntity.changed();
+    }
+
+    @EventHandler
+    public void onMapChange(StarSystemAPI.MapChangeEvent event) {
+        zoneInfo = zonesByMap.computeIfAbsent(event.getNext().getId(),
+                id -> new ZoneInfo(main.config.BOT_SETTINGS.OTHER.ZONE_RESOLUTION));
+        repaint();
+    }
+
+    protected int mapToGridX(int x) {
+        return (x + 1) * main.config.BOT_SETTINGS.OTHER.ZONE_RESOLUTION / mapGraphics.getWidth();
+    }
+
+    protected int mapToGridY(int y) {
+        return (y + 1) * main.config.BOT_SETTINGS.OTHER.ZONE_RESOLUTION / mapGraphics.getHeight();
+    }
+
+    private class Rect {
+        int x1, x2, y1, y2;
 
         public void set(int x1, int y1, int x2, int y2) {
             this.x1 = Math.min(x1, x2);
@@ -183,7 +165,10 @@ public class ZoneEditor extends MapDrawer {
             this.y2 = Math.max(y1, y2);
         }
 
-        public void update(int width, int height, double divisions) {
+        public void update(double divisions) {
+            int width = getWidth();
+            int height = getHeight();
+
             double widthDivision = width / divisions, heightDivision = height / divisions;
             x1 -= x1 % widthDivision;
             y1 -= y1 % heightDivision;
@@ -196,9 +181,8 @@ public class ZoneEditor extends MapDrawer {
             if (y2 > height) y2 = height;
         }
 
-        private void draw(MapGraphics mg) {
-            mg.getGraphics2D().drawRect(x1, y1, x2 - x1 - (x2 == mg.getWidth() ? 1 : 0),
-                    y2 - y1 - (y2 == mg.getHeight() ? 1 : 0));
+        private void draw(Graphics2D g2) {
+            g2.drawRect(x1, y1, x2 - x1 - (x2 == getWidth() ? 1 : 0), y2 - y1 - (y2 == getHeight() ? 1 : 0));
         }
     }
 }
