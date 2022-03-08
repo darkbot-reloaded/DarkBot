@@ -8,6 +8,7 @@ import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.entities.Mine;
+import eu.darkbot.api.game.entities.Ship;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
 
@@ -48,7 +49,7 @@ public class DevStuffDrawer implements Drawable {
         mg.setFont("tiny");
         mg.setColor("text");
         entities.getAll().stream()
-                .filter(e -> e.getId() > 150_000_000 && e.getId() < 160_000_000 || e instanceof Mine)
+                .filter(e -> e.getId() > 150_000_000 && e.getId() < 160_000_000 || e instanceof Mine || e instanceof Ship)
                 .filter(e -> e.getLocationInfo().isInitialized())
                 .forEach(e -> mg.drawBackgroundedText(e, e.toString(), -4, MapGraphics.StringAlign.MID));
     }

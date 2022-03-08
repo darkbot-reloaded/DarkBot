@@ -226,4 +226,9 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     public Optional<Location> getDestination() {
         return shipInfo.getDestination();
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + " I:" + getShipId() + " S:" + getSpeed() + " " + getLockType();
+    }
 }
