@@ -80,12 +80,7 @@ public class ConstantEntitiesDrawer implements Drawable {
 
         mg.setColor("no_cloack");
         for (Mist mist : mists) {
-            Area.Rectangle bounds = mist.getZoneArea().getBounds();
-
-            Point pos = mg.toScreenPoint(bounds.getX(), bounds.getY());
-            Point size = mg.toScreenPoint(bounds.getWidth(), bounds.getHeight());
-
-            mg.drawRect(pos, size.x(), size.y(), true);
+            mg.drawPoly(MapGraphics.PolyType.FILL_POLYGON, ((Zone)mist).points);
         }
     }
 
@@ -138,15 +133,15 @@ public class ConstantEntitiesDrawer implements Drawable {
     public void drawSafeZone(MapGraphics mg, SafetyInfo safetyInfo) {
         if (safetyInfo == null) return;
 
-        Point size = mg.toScreenPoint(safetyInfo.getDiameter(), safetyInfo.getDiameter());
-        mg.drawOval(safetyInfo, size.x(), size.y(), true);
+        mg.drawOvalCentered(safetyInfo, mg.toScreenPointX(safetyInfo.getDiameter()),
+                mg.toScreenPointY(safetyInfo.getDiameter()), true);
     }
 
     public void drawPortals(MapGraphics mg) {
         mg.setColor("portals");
 
         for (Portal portal : portals) {
-            mg.drawOval(portal, 12, false);
+            mg.drawOvalCentered(portal, 12, false);
         }
     }
 
@@ -157,9 +152,9 @@ public class ConstantEntitiesDrawer implements Drawable {
             else mg.setColor("allies");
 
             if (bs.getHullId() >= 0 && bs.getHullId() < 255)
-                mg.drawOval(bs, 11, 9, true);
+                mg.drawOvalCentered(bs, 11, 9, true);
 
-            else mg.drawRect(bs, 3, false);
+            else mg.drawRectCentered(bs, 3, false);
         }
     }
 
@@ -167,16 +162,15 @@ public class ConstantEntitiesDrawer implements Drawable {
         for (Station station : stations) {
             if (station instanceof Station.Turret) {
                 mg.setColor("bases");
-                mg.drawOval(station, 2, true);
+                mg.drawOvalCentered(station, 2, true);
 
             } else {
                 mg.setColor("base_spots");
 
                 int radius = station instanceof Station.Headquarter ? 3500
                         : station instanceof Station.HomeBase ? 3000 : 1000;
-
-                Point p = mg.toScreenPoint(radius, radius);
-                mg.drawOval(station, p.x(), p.y(), true);
+                
+                mg.drawOvalCentered(station, mg.toScreenPointX(radius), mg.toScreenPointY(radius), true);
             }
 
         }

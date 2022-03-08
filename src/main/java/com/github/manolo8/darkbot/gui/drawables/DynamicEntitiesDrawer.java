@@ -90,9 +90,9 @@ public class DynamicEntitiesDrawer implements Drawable {
 
         if (pingEntity != null) {
             mg.setColor("ping");
-            mg.drawOval(pingEntity, 15, true);
+            mg.drawOvalCentered(pingEntity, 15, true);
             mg.setColor("ping_border");
-            mg.drawOval(pingEntity, 15, false);
+            mg.drawOvalCentered(pingEntity, 15, false);
         }
     }
 
@@ -144,18 +144,18 @@ public class DynamicEntitiesDrawer implements Drawable {
             }
 
             mg.setColor("target");
-            mg.drawRect(target, 4, true);
+            mg.drawRectCentered(target, 4, true);
 
             // target circle
 //            mg.getGraphics2D().setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 10.0f, new float[] {3, 5},  0.0f));
-//            mg.drawOval(target, false, 21);
+//            mg.drawOvalCentered(target, false, 21);
 //            mg.getGraphics2D().setStroke(new BasicStroke());
 
         }
     }
 
     private void drawEntity(MapGraphics mg, Locatable pos, boolean fill) {
-        mg.drawRect(pos, fill ? 4 : 3, fill);
+        mg.drawRectCentered(pos, fill ? 4 : 3, fill);
     }
 
     private boolean hasDisplayFlag(DisplayFlag displayFlag) {

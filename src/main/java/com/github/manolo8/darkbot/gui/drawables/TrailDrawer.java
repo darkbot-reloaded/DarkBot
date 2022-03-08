@@ -50,12 +50,9 @@ public class TrailDrawer implements Drawable {
         if (positions.isEmpty()) return;
 
         mg.getGraphics2D().setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
-
         List<List<Location>> paths = Line.getSmoothedPaths(positions.values());
 
-
         double max = paths.stream().mapToInt(Collection::size).sum() / 255d, curr = 0;
-
         for (List<Location> points : paths) {
             Location last = null;
             for (Location point : points) {

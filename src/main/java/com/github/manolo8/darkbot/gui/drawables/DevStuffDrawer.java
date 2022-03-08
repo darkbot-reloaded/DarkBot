@@ -38,11 +38,11 @@ public class DevStuffDrawer implements Drawable {
 
         mg.setColor("unknown");
         for (Entity entity : unknown) {
-            mg.drawRect(entity, 3, false);
+            mg.drawRectCentered(entity, 3, false);
         }
 
         for (PathPoint point : drive.pathFinder.points) {
-            mg.drawRect(point, 2, true);
+            mg.drawRectCentered(point, 2, true);
         }
 
         mg.setFont("tiny");
