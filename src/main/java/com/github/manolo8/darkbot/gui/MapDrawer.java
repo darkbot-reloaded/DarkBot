@@ -20,7 +20,9 @@ import java.awt.event.MouseEvent;
 public class MapDrawer extends JPanel {
 
     private static final RenderingHints RENDERING_HINTS =
-            new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON) {{
+                put(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+            }};
 
     public MapGraphicsImpl mapGraphics;
 

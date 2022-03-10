@@ -14,6 +14,7 @@ import eu.darkbot.api.game.entities.Player;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.game.other.Movable;
+import eu.darkbot.api.game.other.Point;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.HeroAPI;
@@ -85,6 +86,10 @@ public class DynamicEntitiesDrawer implements Drawable {
             if (npc instanceof FakeNpc)
                 pingEntity = (FakeNpc) npc;
 
+            if (npc.getEntityInfo().getUsername().contains("EM Freighter")) {
+                Point point = mg.toScreenPoint(3200, 3200);
+                mg.drawOvalCentered(npc, point.x(), point.y(), false);
+            }
             drawEntity(mg, npc, npc.getInfo().getShouldKill());
         }
 

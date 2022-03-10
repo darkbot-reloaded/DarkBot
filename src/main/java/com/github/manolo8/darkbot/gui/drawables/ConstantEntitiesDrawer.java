@@ -72,15 +72,15 @@ public class ConstantEntitiesDrawer implements Drawable {
             if (!barrier.use()) return;
 
             mg.setColor("barrier");
-            mg.drawPoly(MapGraphics.PolyType.FILL_POLYGON, ((Zone) barrier).points);
+            mg.drawPolyLocs(MapGraphics.PolyType.FILL_POLYGON, ((Zone) barrier).points);
 
             mg.setColor("barrier_border");
-            mg.drawPoly(MapGraphics.PolyType.DRAW_POLYGON, ((Zone) barrier).points);
+            mg.drawPolyLocs(MapGraphics.PolyType.DRAW_POLYGON, ((Zone) barrier).points);
         }
 
         mg.setColor("no_cloack");
         for (Mist mist : mists) {
-            mg.drawPoly(MapGraphics.PolyType.FILL_POLYGON, ((Zone)mist).points);
+            mg.drawPolyLocs(MapGraphics.PolyType.FILL_POLYGON, ((Zone)mist).points);
         }
     }
 

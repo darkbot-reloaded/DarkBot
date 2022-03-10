@@ -13,6 +13,7 @@ import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.GroupAPI;
 import eu.darkbot.api.managers.RepairAPI;
 import eu.darkbot.api.managers.StatsAPI;
+import eu.darkbot.util.TimeUtils;
 
 import java.awt.font.TextAttribute;
 import java.text.DecimalFormat;
@@ -108,13 +109,17 @@ public class StatsDrawer extends InfosDrawer {
     private void drawStats(MapGraphics mg) {
         if (hasDisplayFlag(DisplayFlag.STATS_AREA))
             drawBackgroundedText(mg,
-                    "cre/h " + STAT_FORMAT.format(stats.getEarnedCredits()),
-                    "uri/h " + STAT_FORMAT.format(stats.getEarnedUridium()),
-                    "exp/h " + STAT_FORMAT.format(stats.getEarnedExperience()),
-                    "hon/h " + STAT_FORMAT.format(stats.getEarnedHonor()),
+                    "cre/h " + toEarnedPerHour(stats.getEarnedCredits()),
+                    "uri/h " + toEarnedPerHour(stats.getEarnedUridium()),
+                    "exp/h " + toEarnedPerHour(stats.getEarnedExperience()),
+                    "hon/h " + toEarnedPerHour(stats.getEarnedHonor()),
                     "cargo " + stats.getCargo() + "/" + stats.getMaxCargo(),
                     "death " + repair.getDeathAmount() + '/' + (maxDeaths.getValue() > -1 ? maxDeaths.getValue() : "∞"));
 
+    }
+
+    private String toEarnedPerHour(double value) {
+        return STAT_FORMAT.format(value / ((double) stats.getRunningTime().toMillis() / TimeUtils.HOUR));
     }
 
     private void drawBackgroundedText(MapGraphics mg, String... texts) {
