@@ -62,17 +62,16 @@ public class AuctionData {
         r.setId(id);
         r.setName(m.group(2));
         r.setItemType(m.group(3));
-        Matcher x = Pattern.compile("showUser=\"(.+?)\"").matcher(m.group(4));
-        if (x.find()) {
-            long user_id = Base62.decode(x.group(1));
-            ;
-            r.setHighestBidderId(user_id);
+        Matcher user = Pattern.compile("showUser=\"(.+?)\"").matcher(m.group(4));
+        if (user.find()) {
+            long userId = Base62.decode(user.group(1));
+            r.setHighestBidderId(userId);
         } else {
             r.setHighestBidderId(1L);
         }
-        r.setCurrentBid(Long.parseLong(m.group(5).replace(",", "")));
-        r.setOwnBid(Long.parseLong(m.group(6).replace(",", "")));
-        r.setInstantBuy(Long.parseLong(m.group(7)));
+        r.setCurrentBid(Long.parseLong(m.group(5).replace(",", "").replace(".", "")));
+        r.setOwnBid(Long.parseLong(m.group(6).replace(",", "").replace(".", "")));
+        r.setInstantBuy(Long.parseLong(m.group(7).replace(",", "").replace(".", "")));
         r.setLootId(m.group(8));
         if (string.contains("hour")) r.setAuctionType(AuctionItems.AuctionType.HOUR);
         if (string.contains("day")) r.setAuctionType(AuctionItems.AuctionType.DAY);
