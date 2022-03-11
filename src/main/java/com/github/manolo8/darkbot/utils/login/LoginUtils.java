@@ -3,15 +3,18 @@ package com.github.manolo8.darkbot.utils.login;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.utils.*;
+import com.github.manolo8.darkbot.utils.CaptchaAPI;
+import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.IOUtils;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
+import javafx.application.Application;
 
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -30,8 +33,10 @@ import java.util.regex.Pattern;
 public class LoginUtils {
     private static final Pattern LOGIN_PATTERN = Pattern.compile("\"bgcdw_login_form\" action=\"(.*)\"");
     private static final Pattern DATA_PATTERN = Pattern.compile("\"src\": \"([^\"]*)\".*}, \\{(.*)}");
-
     private static final Map<String, String> FORCED_PARAMS = new HashMap<>();
+    static CookieManager cookieManager;
+    static boolean captcha;
+
     static {
         String lang = I18n.getLocale().getLanguage();
         if (!lang.isEmpty() && ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.FORCE_GAME_LANGUAGE)
@@ -115,6 +120,8 @@ public class LoginUtils {
 
     public static void usernameLogin(LoginData loginData) {
         try {
+            cookieManager = new CookieManager();
+            CookieHandler.setDefault(cookieManager);
             usernameLogin(loginData, "www");
         } catch (Exception e) {
             try {
@@ -142,13 +149,14 @@ public class LoginUtils {
 
         String loginUrl = getLoginUrl(frontPage);
 
-        CookieManager cookieManager = new CookieManager();
+        cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
 
         try {
             Http http = Http.create(loginUrl, Method.POST)
-                        .setParam("username", loginData.getUsername())
-                        .setParam("password", loginData.getPassword());
+                    .setParam("username", loginData.getUsername())
+                    .setParam("password", loginData.getPassword());
+
             extraPostParams.forEach(http::setParam);
             http.closeInputStream();
 
@@ -158,10 +166,16 @@ public class LoginUtils {
 
         CookieHandler.setDefault(null);
 
-        HttpCookie cookie = cookieManager.getCookieStore().getCookies().stream()
+        HttpCookie cookie;
+
+        if (captcha && domain.equals("lp")) {
+            Application.launch(LoginBrowser.class, loginData.getUsername(), loginData.getPassword());
+        }
+
+        cookie = cookieManager.getCookieStore().getCookies().stream()
                 .filter(c -> c.getName().equalsIgnoreCase("dosid"))
                 .filter(c -> c.getDomain().matches(".*\\d+.*"))
-                .findFirst().orElseThrow(() -> new WrongCredentialsException("Wrong credentials or unsolved reCaptcha"));
+                .findFirst().orElse(null);
 
         loginData.setSid(cookie.getValue(), cookie.getDomain());
     }
@@ -194,6 +208,8 @@ public class LoginUtils {
     }
 
     private static String getLoginUrl(String in) {
+        System.out.println("captcha: " + in.contains("recaptcha_image"));
+        captcha = in.contains("recaptcha_image");
         Matcher match = LOGIN_PATTERN.matcher(in);
         if (match.find()) return match.group(1).replace("&amp;", "&");
 
