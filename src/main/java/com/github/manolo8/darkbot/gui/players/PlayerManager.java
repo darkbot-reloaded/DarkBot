@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.players;
 
+import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.UnresolvedPlayer;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.PopupButton;
@@ -30,6 +31,7 @@ public class PlayerManager extends JPanel {
 
             popup.add(create(UIUtils.getIcon("add"), I18n.get("players.add_player.by_id"), this::addPlayerById));
             popup.add(create(UIUtils.getIcon("add"), I18n.get("players.add_player.by_name"), this::addPlayerByUsername));
+            popup.add(create(UIUtils.getIcon("add"), I18n.get("players.add_player.selected"), this::addSelectedPlayer));
 
             setBorder(UIUtils.getPartialBorder(1, 1, 1, 0));
         }
@@ -57,6 +59,20 @@ public class PlayerManager extends JPanel {
                     I18n.get("players.add_player"), JOptionPane.QUESTION_MESSAGE);
             if (name == null) return;
             editor.main.config.UNRESOLVED.add(new UnresolvedPlayer(name));
+        }
+
+        private void addSelectedPlayer() {
+            if (editor.getPlayerInfoList().isSelectionEmpty()) {
+                Popups.showMessageAsync(I18n.get("players.add_player.selected.invalid_selection"),
+                        I18n.get("players.add_player.selected.invalid_selection.no_selected"), JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            for (PlayerInfo pl : editor.getPlayerInfoList().getSelectedValuesList()) {
+                editor.main.config.PLAYER_INFOS.put(pl.getUserId(), pl);
+                editor.getNearbyPlayers().remove(pl);
+            }
+            editor.refreshList();
         }
     }
 
