@@ -48,7 +48,7 @@ public class PlayerEditor extends JPanel implements Listener {
 
         playerInfoList.addListSelectionListener((event) -> {
             if (event.getValueIsAdjusting()) return;
-            int min = Math.max(event.getFirstIndex(), main.config.PLAYER_INFOS.size());
+            int min = event.getFirstIndex();
             int max = Math.min(event.getLastIndex() + 1, playersModel.size());
             for (int i = min; i < max; i++) {
                 PlayerInfo pl = playersModel.get(i);
@@ -111,8 +111,7 @@ public class PlayerEditor extends JPanel implements Listener {
                     nearbyPlayers.add(playerInfo);
                     playersModel.addElement(playerInfo);
                 } else {
-                    PlayerInfo info = playersModel.get(idx);
-                    nearbyPlayers.add(info);
+                    nearbyPlayers.add(playersModel.get(idx));
                 }
             });
         }
@@ -127,14 +126,13 @@ public class PlayerEditor extends JPanel implements Listener {
 
             SwingUtilities.invokeLater(() -> {
                 int idx = indexOfPlayersModel(event.getEntity().getId());
-                if (idx != -1) {
-                    PlayerInfo info = playersModel.getElementAt(idx);
-                    if (!playerInfoList.isSelectedIndex(idx)) {
-                        nearbyPlayers.remove(info);
-                        playersModel.removeElement(info);
-                    } else {
-                        nearbyPlayers.remove(info);
-                    }
+                if (idx == -1) return;
+                PlayerInfo info = playersModel.getElementAt(idx);
+                if (!playerInfoList.isSelectedIndex(idx)) {
+                    nearbyPlayers.remove(info);
+                    playersModel.removeElement(info);
+                } else {
+                    nearbyPlayers.remove(info);
                 }
             });
         }
