@@ -126,6 +126,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
             tabsTree.setSelectionRow(0);
 
             add(new SearchField(this::setSearch), "grow");
+            setSearch("");
 
             JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                     wrapInScrollPane(tabsTree, true),
