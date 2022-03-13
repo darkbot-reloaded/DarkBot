@@ -2,13 +2,13 @@ package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ColorScheme;
+import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.extensions.features.handlers.DrawableHandler;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Area;
-import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 
@@ -16,6 +16,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Set;
 
 public class MapDrawer extends JPanel {
 
@@ -79,14 +80,13 @@ public class MapDrawer extends JPanel {
     }
 
     protected void onPaint() {
-        synchronized (Main.UPDATE_LOCKER) {
-            for (Drawable drawable : drawableHandler.getDrawables()) {
-                drawable.onDraw(mapGraphics);
-            }
+        for (Drawable drawable : drawableHandler.getDrawables()) {
+            drawable.onDraw(mapGraphics);
         }
 
         // just ensure that is drawn always last
-        if (hovering && main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP) mapGraphics.drawActionButton();
+        if (hovering && main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP)
+            drawActionButton();
     }
 
     @Override
@@ -94,29 +94,50 @@ public class MapDrawer extends JPanel {
         if (main == null) return;
 
         mapGraphics.setup(g, getWidth(), getHeight());
-        onPaint();
-        mapGraphics.dispose();
+
+        synchronized (Main.UPDATE_LOCKER) {
+            onPaint();
+        }
+
+        //mapGraphics.dispose();
+    }
+
+    private void drawActionButton() {
+        mapGraphics.setColor("darken_back");
+        mapGraphics.getGraphics2D().fillRect(0, 0, this.getWidth(), this.getHeight());
+
+        mapGraphics.setColor("action_button");
+        int height2 = this.getHeight() / 2, height3 = this.getHeight() / 3,
+                width3 = this.getWidth() / 3, width9 = this.getWidth() / 9;
+
+        if (main.isRunning()) {
+            mapGraphics.g2.fillRect(width3, height3, width9, height3); // Two vertical parallel lines
+            mapGraphics.g2.fillRect((width3 * 2) - width9, height3, width9, height3);
+        } else { // A "play" triangle
+            mapGraphics.g2.fillPolygon(new int[]{width3, width3 * 2, width3},
+                    new int[]{height3, height2, height3 * 2}, 3);
+        }
     }
 
     public static class MapGraphicsImpl implements MapGraphics {
 
-        private final BotAPI bot;
         private final ConfigAPI config;
         private final Area.Rectangle mapBounds;
 
         private final ConfigSetting<ColorScheme> cs;
         private final ConfigSetting<ColorScheme.Fonts> fonts;
+        private final ConfigSetting<Set<DisplayFlag>> displayFlags;
 
         private Graphics2D g2;
         private int width, widthMid, height, heightMid;
 
-        public MapGraphicsImpl(BotAPI bot, StarSystemAPI star, ConfigAPI config) {
-            this.bot = bot;
+        public MapGraphicsImpl(StarSystemAPI star, ConfigAPI config) {
             this.config = config;
             this.mapBounds = star.getCurrentMapBounds();
 
             this.cs = config.requireConfig("bot_settings.map_display.cs");
             this.fonts = config.requireConfig("bot_settings.map_display.cs.fonts");
+            this.displayFlags = config.requireConfig("bot_settings.map_display.toggle");
         }
 
         public void setup(Graphics graphics, int width, int height) {
@@ -125,16 +146,16 @@ public class MapDrawer extends JPanel {
             this.widthMid = width / 2;
             this.heightMid = height / 2;
 
-            this.g2 = (Graphics2D) graphics.create();
+            this.g2 = (Graphics2D) graphics; //graphics.create();
 
             this.setColor("background");
             this.g2.fillRect(0, 0, getWidth(), getHeight());
             this.g2.setRenderingHints(RENDERING_HINTS);
         }
 
-        public void dispose() {
-            if (g2 != null) g2.dispose();
-        }
+//        public void dispose() {
+//            if (g2 != null) g2.dispose();
+//        }
 
         @Override
         public Graphics2D getGraphics2D() {
@@ -159,6 +180,12 @@ public class MapDrawer extends JPanel {
         @Override
         public int getHeightMiddle() {
             return heightMid;
+        }
+
+        @Override
+        public boolean hasDisplayFlag(eu.darkbot.api.config.types.DisplayFlag displayFlag) {
+            DisplayFlag legacyFlag = DisplayFlag.values()[displayFlag.ordinal()];
+            return displayFlags.getValue().contains(legacyFlag);
         }
 
         @Override
@@ -189,23 +216,6 @@ public class MapDrawer extends JPanel {
         @Override
         public double toGameLocationY(int screenY) {
             return ((screenY / (double) getHeight()) * mapBounds.getHeight());
-        }
-
-        private void drawActionButton() {
-            setColor("darken_back");
-            g2.fillRect(0, 0, this.getWidth(), this.getHeight());
-
-            setColor("action_button");
-            int height2 = this.getHeight() / 2, height3 = this.getHeight() / 3,
-                    width3 = this.getWidth() / 3, width9 = this.getWidth() / 9;
-
-            if (bot.isRunning()) {
-                g2.fillRect(width3, height3, width9, height3); // Two vertical parallel lines
-                g2.fillRect((width3 * 2) - width9, height3, width9, height3);
-            } else { // A "play" triangle
-                g2.fillPolygon(new int[]{width3, width3 * 2, width3},
-                        new int[]{height3, height2, height3 * 2}, 3);
-            }
         }
     }
 }

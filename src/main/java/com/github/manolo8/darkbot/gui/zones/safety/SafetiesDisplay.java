@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.gui.MapDrawer;
 import com.github.manolo8.darkbot.gui.drawables.ConstantEntitiesDrawer;
 import com.github.manolo8.darkbot.gui.drawables.InfosDrawer;
+import com.github.manolo8.darkbot.gui.drawables.ZonesDrawer;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Point;
@@ -21,6 +22,7 @@ class SafetiesDisplay extends MapDrawer {
 
     private InfosDrawer infosDrawer;
     private ConstantEntitiesDrawer constantEntitiesDrawer;
+    private ZonesDrawer zonesDrawer;
 
     SafetiesDisplay(SafetiesEditor editor) {
         this.editor = editor;
@@ -44,29 +46,29 @@ class SafetiesDisplay extends MapDrawer {
         super.setup(main);
 
         this.infosDrawer = main.pluginAPI.requireInstance(InfosDrawer.class);
+        this.zonesDrawer = main.pluginAPI.requireInstance(ZonesDrawer.class);
         this.constantEntitiesDrawer = main.pluginAPI.requireInstance(ConstantEntitiesDrawer.class);
     }
 
     @Override
     protected void onPaint() {
-        synchronized (Main.UPDATE_LOCKER) {
-            constantEntitiesDrawer.drawZones(mapGraphics);
+        zonesDrawer.drawZones(mapGraphics);
 
-            constantEntitiesDrawer.drawPortals(mapGraphics);
-            constantEntitiesDrawer.drawBattleStations(mapGraphics);
-            constantEntitiesDrawer.drawStations(mapGraphics);
+        constantEntitiesDrawer.drawPortals(mapGraphics);
+        constantEntitiesDrawer.drawBattleStations(mapGraphics);
+        constantEntitiesDrawer.drawStations(mapGraphics);
 
-            infosDrawer.drawMap(mapGraphics);
+        infosDrawer.drawMap(mapGraphics);
 
-            if (editor.safetyInfos == null) return;
-            drawCustomZones(mapGraphics);
-        }
+        if (editor.safetyInfos == null) return;
+        drawCustomZones(mapGraphics);
+
     }
 
     private void drawCustomZones(MapGraphics mg) {
         if (hovering && closest != null && closest != editor.editing) {
             mg.setColor("safety_editor.zone_highlight");
-            constantEntitiesDrawer.drawSafeZone(mg, closest);
+            zonesDrawer.drawSafeZone(mg, closest);
 
             mg.setColor("safety_editor.zone_solid");
 
@@ -76,7 +78,7 @@ class SafetiesDisplay extends MapDrawer {
 
         if (editor.editing != null) {
             mg.setColor("safety_editor.zone_selected");
-            constantEntitiesDrawer.drawSafeZone(mg, editor.editing);
+            zonesDrawer.drawSafeZone(mg, editor.editing);
         }
     }
 

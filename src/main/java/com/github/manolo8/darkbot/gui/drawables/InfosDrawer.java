@@ -1,13 +1,13 @@
 package com.github.manolo8.darkbot.gui.drawables;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.config.types.DisplayFlag;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Health;
@@ -23,7 +23,6 @@ import eu.darkbot.api.utils.Inject;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.util.Set;
 
 @Feature(name = "Infos Drawer", description = "Draws infos about map, hero, health etc.")
 public class InfosDrawer implements Drawable {
@@ -42,7 +41,6 @@ public class InfosDrawer implements Drawable {
     private final I18nAPI i18n;
     private final StatsAPI stats;
 
-    private final ConfigSetting<Set<DisplayFlag>> displayFlags;
     private final ConfigSetting<Boolean> resetRefresh;
     private final ConfigSetting<Integer> refreshTime;
 
@@ -59,8 +57,6 @@ public class InfosDrawer implements Drawable {
         this.pet = pet;
         this.i18n = i18n;
         this.stats = stats;
-
-        this.displayFlags = config.requireConfig("bot_settings.map_display.toggle");
 
         this.resetRefresh = config.requireConfig("miscellaneous.reset_refresh");
         this.refreshTime = config.requireConfig("miscellaneous.refresh_time");
@@ -109,14 +105,14 @@ public class InfosDrawer implements Drawable {
         mg.setColor("text");
         mg.setFont("mid");
 
-        if (hasDisplayFlag(DisplayFlag.HERO_NAME))
+        if (mg.hasDisplayFlag(DisplayFlag.HERO_NAME))
             mg.drawString(10 + (mg.getWidthMiddle() - 20) / 2, mg.getHeight() - 40,
                     hero.getEntityInfo().getUsername(), MapGraphics.StringAlign.MID);
 
         Point pos = Point.of(10, mg.getHeight() - 34);
         drawHealth(mg, hero.getHealth(), pos, mg.getWidthMiddle() - 20, 12, 0);
 
-        if (pet.isValid() && hasDisplayFlag(DisplayFlag.SHOW_PET)) {
+        if (pet.isValid() && mg.hasDisplayFlag(DisplayFlag.SHOW_PET)) {
             pos = Point.of(10, mg.getHeight() - 52);
             drawHealth(mg, pet.getHealth(), pos, (int) ((mg.getWidthMiddle() - 20) * 0.25), 6, 0);
 
@@ -145,8 +141,8 @@ public class InfosDrawer implements Drawable {
         }
     }
 
-    protected void drawHealth(MapGraphics mg, Health health, Point pos, int width, int height, int margin) {
-        boolean displayAmount = height >= 8 && hasDisplayFlag(DisplayFlag.HP_SHIELD_NUM);
+    public static void drawHealth(MapGraphics mg, Health health, Point pos, int width, int height, int margin) {
+        boolean displayAmount = height >= 8 && mg.hasDisplayFlag(DisplayFlag.HP_SHIELD_NUM);
 
         int totalMaxHealth = health.getMaxHp() + health.getHull();
         int hullWidth = totalMaxHealth == 0 ? 0 : (health.getHull() * width / totalMaxHealth);
@@ -187,9 +183,5 @@ public class InfosDrawer implements Drawable {
         mg.drawRect(pos, width, height, true);
         mg.setColor("fuel");
         mg.drawRect(pos, (int) (fuelPercent * width), height, true);
-    }
-
-    private boolean hasDisplayFlag(DisplayFlag displayFlag) {
-        return displayFlags.getValue().contains(displayFlag);
     }
 }

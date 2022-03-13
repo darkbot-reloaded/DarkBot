@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.gui.drawables.InfosDrawer;
 import com.github.manolo8.darkbot.gui.drawables.ConstantEntitiesDrawer;
 import com.github.manolo8.darkbot.gui.drawables.StatsDrawer;
 import com.github.manolo8.darkbot.gui.drawables.TrailDrawer;
+import com.github.manolo8.darkbot.gui.drawables.ZonesDrawer;
 import eu.darkbot.api.extensions.Drawable;
 
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.stream.Stream;
 
 public class DrawableHandler extends FeatureHandler<Drawable> {
     private static final Class<?>[] NATIVE =
-            new Class[]{InfosDrawer.class, TrailDrawer.class, ConstantEntitiesDrawer.class,
+            new Class[]{ZonesDrawer.class, InfosDrawer.class, TrailDrawer.class, ConstantEntitiesDrawer.class,
                     DynamicEntitiesDrawer.class, HeroDrawer.class, DevStuffDrawer.class, StatsDrawer.class};
 
     private List<Drawable> drawables;

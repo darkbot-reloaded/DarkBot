@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.gui.MapDrawer;
 import com.github.manolo8.darkbot.gui.drawables.ConstantEntitiesDrawer;
 import com.github.manolo8.darkbot.gui.drawables.InfosDrawer;
+import com.github.manolo8.darkbot.gui.drawables.ZonesDrawer;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.MapGraphics;
@@ -28,6 +29,7 @@ public class ZoneEditor extends MapDrawer implements Listener {
     private Map<Integer, ZoneInfo> zonesByMap;
     private InfosDrawer infosDrawer;
     private ConstantEntitiesDrawer constantEntitiesDrawer;
+    private ZonesDrawer zonesDrawer;
 
     ZoneEditor() {
         addMouseListener(new MouseAdapter() {
@@ -68,6 +70,7 @@ public class ZoneEditor extends MapDrawer implements Listener {
         main.pluginAPI.requireAPI(EventBrokerAPI.class).registerListener(this);
 
         this.infosDrawer = main.pluginAPI.requireInstance(InfosDrawer.class);
+        this.zonesDrawer = main.pluginAPI.requireInstance(ZonesDrawer.class);
         this.constantEntitiesDrawer = main.pluginAPI.requireInstance(ConstantEntitiesDrawer.class);
 
         this.zonesByMap = zonesByMap;
@@ -76,29 +79,27 @@ public class ZoneEditor extends MapDrawer implements Listener {
 
     @Override
     protected void onPaint() {
-        synchronized (Main.UPDATE_LOCKER) {
-            constantEntitiesDrawer.drawZones(mapGraphics);
+        zonesDrawer.drawZones(mapGraphics);
 
-            constantEntitiesDrawer.drawPortals(mapGraphics);
-            constantEntitiesDrawer.drawBattleStations(mapGraphics);
-            constantEntitiesDrawer.drawStations(mapGraphics);
+        constantEntitiesDrawer.drawPortals(mapGraphics);
+        constantEntitiesDrawer.drawBattleStations(mapGraphics);
+        constantEntitiesDrawer.drawStations(mapGraphics);
 
-            infosDrawer.drawMap(mapGraphics);
+        infosDrawer.drawMap(mapGraphics);
 
-            if (zoneInfo == null) return;
-            int res = main.config.BOT_SETTINGS.OTHER.ZONE_RESOLUTION;
-            if (zoneInfo.resolution != res) zoneInfo.setResolution(res);
+        if (zoneInfo == null) return;
+        int res = main.config.BOT_SETTINGS.OTHER.ZONE_RESOLUTION;
+        if (zoneInfo.resolution != res) zoneInfo.setResolution(res);
 
-            mapGraphics.setColor("zone_editor.zone");
-            constantEntitiesDrawer.drawCustomZone(mapGraphics, zoneInfo);
-            drawGrid(mapGraphics, res);
+        mapGraphics.setColor("zone_editor.zone");
+        zonesDrawer.drawCustomZone(mapGraphics, zoneInfo);
+        drawGrid(mapGraphics, res);
 
-            if (!selecting && !hovering) return;
+        if (!selecting && !hovering) return;
 
-            mapGraphics.setColor(selecting ? "zone_editor.selecting" : "zone_editor.hovering");
-            area.update(res);
-            area.draw(mapGraphics.getGraphics2D());
-        }
+        mapGraphics.setColor(selecting ? "zone_editor.selecting" : "zone_editor.hovering");
+        area.update(res);
+        area.draw(mapGraphics.getGraphics2D());
     }
 
     private void drawGrid(MapGraphics mg, int resolution) {

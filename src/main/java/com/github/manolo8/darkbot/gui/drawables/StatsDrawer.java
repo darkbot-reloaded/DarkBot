@@ -1,10 +1,10 @@
 package com.github.manolo8.darkbot.gui.drawables;
 
-import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.group.GroupMember;
-import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.config.types.DisplayFlag;
+import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Point;
@@ -22,13 +22,12 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Feature(name = "Stats Drawer", description = "Draws statistics")
-public class StatsDrawer extends InfosDrawer {
+public class StatsDrawer implements Drawable {
     private static final DecimalFormat STAT_FORMAT = new DecimalFormat("###,###,###");
 
     private final BoosterAPI boosters;
@@ -37,18 +36,14 @@ public class StatsDrawer extends InfosDrawer {
     private final RepairAPI repair;
 
     private final ConfigSetting<Integer> maxDeaths;
-    private final ConfigSetting<Set<DisplayFlag>> displayFlags;
 
-    public StatsDrawer(PluginAPI api, BoosterAPI boosters, GroupAPI group, StatsAPI stats, RepairAPI repair, ConfigAPI config) {
-        super(api);
-
+    public StatsDrawer(BoosterAPI boosters, GroupAPI group, StatsAPI stats, RepairAPI repair, ConfigAPI config) {
         this.boosters = boosters;
         this.group = group;
         this.stats = stats;
         this.repair = repair;
 
         this.maxDeaths = config.requireConfig("general.safety.max_deaths");
-        this.displayFlags = config.requireConfig("bot_settings.map_display.toggle");
     }
 
     @Override
@@ -58,9 +53,9 @@ public class StatsDrawer extends InfosDrawer {
     }
 
     private boolean drawGroup(MapGraphics mg) {
-        if (!hasDisplayFlag(DisplayFlag.GROUP_AREA) || !group.hasGroup()) return false;
+        if (!mg.hasDisplayFlag(DisplayFlag.GROUP_AREA) || !group.hasGroup()) return false;
 
-        boolean hideNames = !hasDisplayFlag(DisplayFlag.GROUP_NAMES);
+        boolean hideNames = !mg.hasDisplayFlag(DisplayFlag.GROUP_NAMES);
 
         drawBackgrounded(mg, 28, MapGraphics.StringAlign.RIGHT,
                 (x, y, w, member) -> {
@@ -76,10 +71,10 @@ public class StatsDrawer extends InfosDrawer {
                     String text = ((GroupMember) member).getDisplayText(hideNames);
                     mg.getGraphics2D().drawString(text, x, y + 14);
 
-                    drawHealth(mg, member.getMemberInfo(), Point.of(x, y + 18), w / 2 - 3, 4, 2);
+                    InfosDrawer.drawHealth(mg, member.getMemberInfo(), Point.of(x, y + 18), w / 2 - 3, 4, 2);
 
                     if (member.getTargetInfo().getShipType() != 0)
-                        drawHealth(mg, member.getTargetInfo(), Point.of(x + (w / 2d) + 3, y + 18), w / 2 - 3, 4, 2);
+                        InfosDrawer.drawHealth(mg, member.getTargetInfo(), Point.of(x + (w / 2d) + 3, y + 18), w / 2 - 3, 4, 2);
 
                 },
                 member -> {
@@ -91,10 +86,10 @@ public class StatsDrawer extends InfosDrawer {
     }
 
     private void drawBoosters(MapGraphics mg) {
-        if (!hasDisplayFlag(DisplayFlag.BOOSTER_AREA)) return;
+        if (!mg.hasDisplayFlag(DisplayFlag.BOOSTER_AREA)) return;
 
         Stream<? extends BoosterAPI.Booster> boosters = this.boosters.getBoosters().stream().filter(b -> b.getAmount() > 0);
-        if (hasDisplayFlag(DisplayFlag.SORT_BOOSTERS))
+        if (mg.hasDisplayFlag(DisplayFlag.SORT_BOOSTERS))
             boosters = boosters.sorted(Comparator.comparingDouble(b -> -b.getRemainingTime()));
 
         drawBackgrounded(mg, 15, MapGraphics.StringAlign.RIGHT,
@@ -107,7 +102,7 @@ public class StatsDrawer extends InfosDrawer {
     }
 
     private void drawStats(MapGraphics mg) {
-        if (hasDisplayFlag(DisplayFlag.STATS_AREA))
+        if (mg.hasDisplayFlag(DisplayFlag.STATS_AREA))
             drawBackgroundedText(mg,
                     "cre/h " + toEarnedPerHour(stats.getEarnedCredits()),
                     "uri/h " + toEarnedPerHour(stats.getEarnedUridium()),
@@ -149,10 +144,6 @@ public class StatsDrawer extends InfosDrawer {
             renderer.render(left + 4, top, width - 8, render);
             top += lineHeight;
         }
-    }
-
-    private boolean hasDisplayFlag(DisplayFlag displayFlag) {
-        return displayFlags.getValue().contains(displayFlag);
     }
 
     private interface Renderer<T> {
