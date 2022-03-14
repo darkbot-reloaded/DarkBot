@@ -5,7 +5,6 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.utils.PathFinder;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.geom.Line2D;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -14,6 +13,8 @@ public class PolygonImpl extends AreaImpl implements Area.Polygon {
 
     private final List<? extends Locatable> vertices;
     private final RectangleImpl bounds = new RectangleImpl();
+
+    private boolean invalidate = true;
 
     public PolygonImpl(Locatable... vertices) {
         this.vertices = Arrays.asList(vertices);
@@ -25,6 +26,9 @@ public class PolygonImpl extends AreaImpl implements Area.Polygon {
 
     @Override
     public RectangleImpl getBounds() {
+        if (!invalidate) return bounds;
+        invalidate = false;
+
         double minX = Double.MAX_VALUE;
         double maxX = Double.MIN_VALUE;
         double minY = Double.MAX_VALUE;
@@ -38,6 +42,10 @@ public class PolygonImpl extends AreaImpl implements Area.Polygon {
         }
         bounds.set(minX, minY, maxX, maxY);
         return bounds;
+    }
+
+    public void invalidateBounds() {
+        this.invalidate = true;
     }
 
     @Override
@@ -62,8 +70,10 @@ public class PolygonImpl extends AreaImpl implements Area.Polygon {
             Locatable b = getVertices().get(j);
 
             if ((a.getX() > y != b.getY() > y)
-                && (x < (b.getX() - a.getX()) * (y - a.getY()) / (b.getY() - a.getY()) + a.getX()))
+                && (x < (b.getX() - a.getX()) * (y - a.getY()) / (b.getY() - a.getY()) + a.getX())) {
+
                 res = !res;
+            }
         }
         return res;
     }
@@ -74,7 +84,7 @@ public class PolygonImpl extends AreaImpl implements Area.Polygon {
             Locatable a = getVertices().get(i);
             Locatable b = getVertices().get((i + 1) % getVertices().size());
 
-            if (Line2D.linesIntersect(a.getX(), a.getY(), b.getX(), b.getY(),
+            if (Area.linesIntersect(a.getX(), a.getY(), b.getX(), b.getY(),
                     x, y, x2, y2)) return true;
         }
 
