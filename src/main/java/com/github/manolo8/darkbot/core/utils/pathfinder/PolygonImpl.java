@@ -14,7 +14,7 @@ public class PolygonImpl extends AreaImpl implements Area.Polygon {
     private final List<? extends Locatable> vertices;
     private final RectangleImpl bounds = new RectangleImpl();
 
-    private boolean invalidate = true;
+    private boolean invalid = true;
 
     public PolygonImpl(Locatable... vertices) {
         this.vertices = Arrays.asList(vertices);
@@ -26,8 +26,8 @@ public class PolygonImpl extends AreaImpl implements Area.Polygon {
 
     @Override
     public RectangleImpl getBounds() {
-        if (!invalidate) return bounds;
-        invalidate = false;
+        if (!invalid) return bounds;
+        invalid = false;
 
         double minX = Double.MAX_VALUE;
         double maxX = Double.MIN_VALUE;
@@ -45,7 +45,7 @@ public class PolygonImpl extends AreaImpl implements Area.Polygon {
     }
 
     public void invalidateBounds() {
-        this.invalidate = true;
+        this.invalid = true;
     }
 
     @Override

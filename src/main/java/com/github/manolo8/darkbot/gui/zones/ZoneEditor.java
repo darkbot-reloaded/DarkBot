@@ -80,11 +80,7 @@ public class ZoneEditor extends MapDrawer implements Listener {
     @Override
     protected void onPaint() {
         zonesDrawer.drawZones(mapGraphics);
-
-        constantEntitiesDrawer.drawPortals(mapGraphics);
-        constantEntitiesDrawer.drawBattleStations(mapGraphics);
-        constantEntitiesDrawer.drawStations(mapGraphics);
-
+        constantEntitiesDrawer.onDraw(mapGraphics);
         infosDrawer.drawMap(mapGraphics);
 
         if (zoneInfo == null) return;

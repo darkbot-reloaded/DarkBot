@@ -53,16 +53,11 @@ class SafetiesDisplay extends MapDrawer {
     @Override
     protected void onPaint() {
         zonesDrawer.drawZones(mapGraphics);
-
-        constantEntitiesDrawer.drawPortals(mapGraphics);
-        constantEntitiesDrawer.drawBattleStations(mapGraphics);
-        constantEntitiesDrawer.drawStations(mapGraphics);
-
+        constantEntitiesDrawer.onDraw(mapGraphics);
         infosDrawer.drawMap(mapGraphics);
 
         if (editor.safetyInfos == null) return;
         drawCustomZones(mapGraphics);
-
     }
 
     private void drawCustomZones(MapGraphics mg) {

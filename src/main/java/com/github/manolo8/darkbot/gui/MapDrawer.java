@@ -99,7 +99,7 @@ public class MapDrawer extends JPanel {
             onPaint();
         }
 
-        //mapGraphics.dispose();
+        mapGraphics.dispose();
     }
 
     private void drawActionButton() {
@@ -153,9 +153,10 @@ public class MapDrawer extends JPanel {
             this.g2.setRenderingHints(RENDERING_HINTS);
         }
 
-//        public void dispose() {
-//            if (g2 != null) g2.dispose();
-//        }
+        public void dispose() {
+            //if (g2 != null) g2.dispose();
+            g2 = null;
+        }
 
         @Override
         public Graphics2D getGraphics2D() {
