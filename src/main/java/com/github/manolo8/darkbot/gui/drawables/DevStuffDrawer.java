@@ -9,8 +9,11 @@ import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.entities.Mine;
 import eu.darkbot.api.game.entities.Ship;
+import eu.darkbot.api.game.other.Lockable;
+import eu.darkbot.api.game.other.Point;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
+import eu.darkbot.api.managers.HeroAPI;
 
 import java.util.Collection;
 
@@ -23,10 +26,12 @@ public class DevStuffDrawer implements Drawable {
     private final Collection<? extends Entity> unknown;
 
     private final ConfigSetting<Boolean> showDevStuff;
+    private final HeroAPI hero;
 
-    public DevStuffDrawer(EntitiesAPI entities, ConfigAPI config, Drive drive) {
+    public DevStuffDrawer(EntitiesAPI entities, ConfigAPI config, Drive drive, HeroAPI hero) {
         this.drive = drive;
         this.entities = entities;
+        this.hero = hero;
 
         this.unknown = entities.getUnknown();
 
@@ -52,5 +57,16 @@ public class DevStuffDrawer implements Drawable {
                 .filter(e -> e.getId() > 150_000_000 && e.getId() < 160_000_000 || e instanceof Mine || e instanceof Ship)
                 .filter(e -> e.getLocationInfo().isInitialized())
                 .forEach(e -> mg.drawBackgroundedText(e, e.toString(), -4, MapGraphics.StringAlign.MID));
+
+        Point p = Point.of(mg.getWidthMiddle() - 20, mg.getHeight() - 40);
+
+        mg.setFont("small");
+        mg.drawBackgroundedText(p, hero.toString(), MapGraphics.StringAlign.RIGHT);
+
+        Lockable target = hero.getLocalTarget();
+        if (target != null && target.isValid()) {
+            p = Point.of(mg.getWidth() - 20, mg.getHeight() - 40);
+            mg.drawBackgroundedText(p, target.toString(), MapGraphics.StringAlign.RIGHT);
+        }
     }
 }
