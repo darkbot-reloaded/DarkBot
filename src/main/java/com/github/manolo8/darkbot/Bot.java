@@ -12,7 +12,8 @@ import java.io.IOException;
 public class Bot {
 
     public static void main(String[] args) throws IOException {
-        System.setProperty("sun.java2d.opengl", "True");
+        // You can enable hardware acceleration via adding jvm arg: -Dsun.java2d.opengl=True
+
         if (System.console() == null
                 && Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")) {
             LogUtils.setOutputToFile();
