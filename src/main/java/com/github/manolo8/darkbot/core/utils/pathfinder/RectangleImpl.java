@@ -14,6 +14,8 @@ import static java.lang.Math.min;
 
 public class RectangleImpl extends AreaImpl implements Area.Rectangle {
 
+    private static final int MARGIN = 5;
+    
     public double minX;
     public double minY;
     public double maxX;
@@ -39,16 +41,15 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
         double diffLeft = point.getX() - minX, diffRight = maxX - point.getX();
         double diffTop = point.getY() - minY, diffBottom = maxY - point.getY();
 
+        double newX = point.getX(), newY = point.getY();
+
         double min = min(min(diffBottom, diffTop), min(diffLeft, diffRight));
+        if (min == diffTop) newY = minY - MARGIN;
+        else if (min == diffBottom) newY = maxY + MARGIN;
+        else if (min == diffLeft) newX = minX - MARGIN;
+        else newX = (int) maxX + MARGIN;
 
-        PathPoint result = new PathPoint(point.getX(), point.getY());
-
-        if (min == diffTop) result.y = (int) minY - 5;
-        else if (min == diffBottom) result.y = (int) maxY + 5;
-        else if (min == diffLeft) result.x = (int) minX - 5;
-        else result.x = (int) maxX + 5;
-
-        return result;
+        return new PathPoint(newX, newY);
     }
 
     public Collection<PathPoint> getPoints(@NotNull eu.darkbot.api.utils.PathFinder pf) {
@@ -62,8 +63,12 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
     }
 
     private enum Corner {
-        TOP_LEFT(-5, -5), TOP_RIGHT(5, -5), BOTTOM_LEFT(-5, 5), BOTTOM_RIGHT(5, 5);
-        final int xDiff, yDiff;
+        TOP_LEFT(-MARGIN, -MARGIN),
+        TOP_RIGHT(MARGIN, -MARGIN),
+        BOTTOM_LEFT(-MARGIN, MARGIN),
+        BOTTOM_RIGHT(MARGIN, MARGIN);
+
+        private final int xDiff, yDiff;
 
         Corner(int x, int y) {
             this.xDiff = x;

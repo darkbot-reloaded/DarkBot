@@ -206,7 +206,7 @@ public class CollectorModule implements Module {
     private boolean canCollect(Box box) {
         return box.boxInfo.collect
                 && !box.isCollected()
-                && drive.closestDistance(box.locationInfo.now) < 200
+                && drive.getClosestDistance(box.locationInfo.now) < 200
                 && (!isResource(box.type) || main.statsManager.deposit < main.statsManager.depositTotal)
                 && !isContested(box);
     }

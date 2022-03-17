@@ -36,10 +36,10 @@ public class CircleImpl extends AreaImpl implements Area.Circle {
     }
 
     @Override
-    public PathPoint toSide(Locatable point) {
+    public Locatable toSide(Locatable point) {
         double angle = Math.atan2(y - point.getY(), x - point.getX());
 
-        return new PathPoint((x - Math.cos(angle) * radius), (y - Math.sin(angle) * radius));
+        return Locatable.of(x - Math.cos(angle) * radius, y - Math.sin(angle) * radius);
     }
 
     @Override

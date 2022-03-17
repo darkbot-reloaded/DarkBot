@@ -103,7 +103,7 @@ public class LootModule implements Module {
     }
 
     protected void ignoreInvalidTarget() {
-        double closestDist = drive.closestDistance(attack.target.locationInfo.now);
+        double closestDist = drive.getClosestDistance(attack.target.locationInfo.now);
         if (!main.mapManager.isTarget(attack.target)) {
             if (closestDist > 600) {
                 attack.target.setTimerTo(1000);
@@ -216,7 +216,7 @@ public class LootModule implements Module {
                 .filter(n -> (n == attack.target && hero.isAttacking(attack.target)) ||
                         ((!config.GENERAL.ROAMING.ONLY_KILL_PREFERRED || main.mapManager.preferred.contains(n.locationInfo.now))
                                 && shouldKill(n)
-                                && drive.closestDistance(n.locationInfo.now) < 500))
+                                && drive.getClosestDistance(n.locationInfo.now) < 500))
                 .min(Comparator.<Npc>comparingInt(n -> n.npcInfo.priority - (n == attack.target ? extraPriority : 0))
                         .thenComparing(n -> n.health.hpPercent())
                         .thenComparing(n -> n.locationInfo.now.distance(location))).orElse(null);

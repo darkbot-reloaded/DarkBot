@@ -11,7 +11,7 @@ public abstract class AreaImpl implements Area {
 
     public boolean changed;
 
-    public abstract PathPoint toSide(Locatable point);
+    public abstract Locatable toSide(Locatable point);
 
     public abstract Collection<PathPoint> getPoints(@NotNull PathFinder pf);
 
