@@ -107,13 +107,12 @@ public class ZonesDrawer implements Drawable {
                 ((com.github.manolo8.darkbot.config.ZoneInfo) zoneInfo).getSortedZones();
 
         Area.Rectangle mapBounds = starSystem.getCurrentMapBounds();
+        Locatable[] zones = new Locatable[sortedZones.size()];
 
-        //convert it to actual list of locatables?
-        for (int i = 0; i < sortedZones.size(); i++) {
-            Locatable a = sortedZones.get(i).innerPoint(0.5, 0.5, mapBounds.getWidth(), mapBounds.getHeight());
-            Locatable b = sortedZones.get((i + 1) % sortedZones.size()).innerPoint(0.5, 0.5, mapBounds.getWidth(), mapBounds.getHeight());
-            mg.drawLine(a, b);
-        }
+        for (int i = 0; i < sortedZones.size(); i++)
+            zones[i] = sortedZones.get(i).innerPoint(0.5, 0.5, mapBounds.getWidth(), mapBounds.getHeight());
+
+        mg.drawPoly(MapGraphics.PolyType.DRAW_POLYGON, zones);
     }
 
     public void drawSafeZone(MapGraphics mg, SafetyInfo safetyInfo) {

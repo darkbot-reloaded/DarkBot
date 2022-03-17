@@ -74,7 +74,10 @@ public abstract class PairArray extends SwfPtrCollection {
     }
 
     public Pair get(String key) {
-        for (Pair pair : pairs) if (pair.key.equals(key)) return pair;
+        for (Pair pair : pairs)
+            if (pair.key != null && pair.key.equals(key))
+                return pair;
+
         return null;
     }
 
