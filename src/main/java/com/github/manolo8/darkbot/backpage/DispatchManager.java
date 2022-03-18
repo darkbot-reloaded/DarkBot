@@ -33,20 +33,16 @@ public class DispatchManager {
 
     public boolean update(int expiryTime) {
         try {
-            return update(main.backpage, expiryTime);
+            if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
+            String page = main.backpage.getConnection("indexInternal.es?action=internalDispatch", Method.GET).getContent();
+
+            if (page == null || page.isEmpty()) return false;
+            lastDispatcherUpdate = System.currentTimeMillis();
+            return InfoReader.updateAll(page, data);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
-    }
-
-    public boolean update(BackpageManager manager, int expiryTime) throws Exception {
-        if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
-        String page = manager.getConnection("indexInternal.es?action=internalDispatch", Method.GET).getContent();
-
-        if (page == null || page.isEmpty()) return false;
-        lastDispatcherUpdate = System.currentTimeMillis();
-        return InfoReader.updateAll(page, data);
     }
 
     public boolean hireRetriever(Retriever retriever) {
@@ -85,7 +81,6 @@ public class DispatchManager {
     public boolean handleResponse(String type, String id, String response) {
         boolean failed = response.contains("\"result\":\"ERROR\"");
         System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + response);
-        update(-1);
         return !failed;
     }
 
