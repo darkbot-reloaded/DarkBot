@@ -16,7 +16,6 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
     private ImageWrapper image;
 
     public ImagePicker(){
-        putClientProperty("JButton.buttonType", "square");
         addActionListener(e -> {
             if (fc == null) {
                 String path = image == null ? "." : image.getPath();
@@ -36,15 +35,15 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
 
             if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 image.setPath(fc.getSelectedFile().getAbsolutePath());
-                setText(Strings.fileName(image.getPath()));
+                setEditing(image);
             }
         });
 
     }
     @Override
     public void setText(String text) {
-        if(text != null && text.contains("\\") && text.length() > 20){
-            super.setText(".."+text.substring(text.lastIndexOf("\\", text.length()-20)));
+        if(text != null && text.contains(File.separator) && text.length() > 30){
+            super.setText(".."+text.substring(text.lastIndexOf(File.separator, text.length()-30)));
         }else{
             super.setText(text);
         }
@@ -59,7 +58,7 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
     }
 
     private void setEditing(ImageWrapper image){
-        this.image = image == null ? new ImageWrapper() : image; //do i need this, i dont think its needed
+        this.image = image == null ? new ImageWrapper() : image;
         setText(image.getPath());
     }
 
