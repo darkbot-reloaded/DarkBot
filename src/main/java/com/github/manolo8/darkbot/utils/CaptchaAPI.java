@@ -12,7 +12,9 @@ public interface CaptchaAPI {
     static CaptchaAPI createInstance() {
         try {
             return ReflectionUtils.createInstance("eu.darkbot.captcha.CaptchaSolver", SOLVER_PATH);
-        } catch (Exception ignore) {}
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
         System.out.println("No captcha resolver is configured, if you're not trying to use one you can safely ignore this message");
         return null;
     }

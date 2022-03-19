@@ -27,7 +27,12 @@ public class VerifierChecker {
 
     public static AuthAPI getAuthApi() {
         AuthAPI instance = AuthAPI.getInstance();
-        try (JarFile jf = new JarFile(findPathJar(instance.getClass()), true)) {
+        verifyClass(instance.getClass());
+        return instance;
+    }
+
+    public static void verifyClass(Class<?> clazz) {
+        try (JarFile jf = new JarFile(findPathJar(clazz), true)) {
             Vector<JarEntry> entriesVec = new Vector<>();
             byte[] buffer = new byte[8192];
 
@@ -63,7 +68,6 @@ public class VerifierChecker {
         } catch (Exception e) {
             throw new SecurityException("Failed to check verifier signature", e);
         }
-        return instance;
     }
 
     private static Boolean checkCertificates(Certificate[] certs, Set<Certificate> allowedCerts) {
