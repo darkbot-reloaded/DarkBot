@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
 import com.github.manolo8.darkbot.utils.http.Method;
+import java.io.IOException;
 
 public class AuctionManager {
     private final Main main;
@@ -21,13 +22,18 @@ public class AuctionManager {
         return data;
     }
 
-    public boolean update(int expiryTime) throws Exception {
-        if (System.currentTimeMillis() <= lasAuctionUpdate + expiryTime) return false;
-        String page = backpage.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
+    public boolean update(int expiryTime) {
+        try {
+            if (System.currentTimeMillis() <= lasAuctionUpdate + expiryTime) return false;
+            String page = backpage.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
 
-        if (page == null || page.isEmpty()) return false;
-        lasAuctionUpdate = System.currentTimeMillis();
-        return data.parse(page);
+            if (page == null || page.isEmpty()) return false;
+            lasAuctionUpdate = System.currentTimeMillis();
+            return data.parse(page);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public boolean bidItem(AuctionItems auctionItem) {

@@ -84,14 +84,12 @@ public class DispatchManager {
         return !failed;
     }
 
-
     public List<String> collectAll() {
         return data.getInProgress().values().stream()
                 .filter(this::collect)
                 .map(InProgress::getId)
                 .collect(Collectors.toList());
     }
-
 
     private enum InfoReader {
         PERMIT("name=\"permit\" value=\"([0-9]+)\"", DispatchData::setPermit),
@@ -144,6 +142,4 @@ public class DispatchManager {
             return m.groupCount() == consumers.size();
         }
     }
-
-
 }
