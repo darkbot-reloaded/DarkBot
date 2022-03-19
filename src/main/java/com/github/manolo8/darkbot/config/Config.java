@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.actions.Condition;
+import com.github.manolo8.darkbot.config.types.Editor;
 import com.github.manolo8.darkbot.config.types.suppliers.BrowserApi;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
@@ -29,16 +30,7 @@ import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.shared.modules.LootCollectorModule;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.BOOSTER_AREA;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.GROUP_AREA;
@@ -239,6 +231,12 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option @Number(max = 300, step = 1) int TRAIL_LENGTH = 15;
             public @Option boolean MAP_START_STOP = false;
             public @Option("colors") ColorScheme cs = new ColorScheme();
+        }
+        public @Option CustomBackground CUSTOM_BACKGROUND = new CustomBackground();
+        public static class CustomBackground{
+            public @Option boolean ENABLED = false;
+            public @Option @Percentage double OPACITY = 0.3f;
+            public @Option ImageWrapper IMAGE = new ImageWrapper();
         }
 
         public @Option Other OTHER = new Other();

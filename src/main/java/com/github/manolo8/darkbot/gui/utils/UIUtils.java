@@ -25,7 +25,11 @@ public class UIUtils {
     }
 
     public static Image getImage(String name) {
-        return new ImageIcon(UIUtils.class.getResource("/" + name + ".png")).getImage();
+        return getImage(name, "png");
+    }
+
+    public static Image getImage(String name, String extension) {
+        return new ImageIcon(UIUtils.class.getResource("/" + name + "." + extension)).getImage();
     }
 
     public static Insets getInsetConfig(boolean textPadding) {

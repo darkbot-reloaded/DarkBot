@@ -1,22 +1,10 @@
 package com.github.manolo8.darkbot.gui.tree;
 
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.ImageWrapper;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.Editor;
-import com.github.manolo8.darkbot.gui.tree.editors.BooleanEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.ColorEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.ConditionEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.DropdownEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.FontEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.MultiDropdownEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.NumberEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.PercentEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.PlayerTagEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.RangeEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.ShipModeEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.StringEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.TableEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.*;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.types.Condition;
 import eu.darkbot.api.config.types.PercentRange;
@@ -73,6 +61,8 @@ public class EditorProvider {
 
         defaultEditors.put(ShipMode.class, ShipModeEditor.class);
         defaultEditors.put(Config.ShipConfig.class, ShipModeEditor.class);
+
+        defaultEditors.put(ImageWrapper.class, ImagePicker.class);
 
         metadataEditors.put("isPercent", PercentEditor.class);
         metadataEditors.put("isTable", TableEditor.class);
