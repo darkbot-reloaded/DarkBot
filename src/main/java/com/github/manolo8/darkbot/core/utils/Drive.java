@@ -124,12 +124,12 @@ public class Drive implements MovementAPI {
     }
 
     public boolean canMove(Location location) {
-        return !map.isOutOfMap(location.x, location.y) && pathFinder.canMove((int) location.x, (int) location.y);
+        return !map.isOutOfMap(location.x, location.y) && pathFinder.canMove(location.x, location.y);
     }
 
+    @Deprecated /* Use getClosestDistance(Location) instead */
     public double closestDistance(Location location) {
-        PathPoint closest = pathFinder.fixToClosest(new PathPoint((int) location.x, (int) location.y));
-        return location.distance(closest.toLocation());
+        return getClosestDistance(location);
     }
 
     public double distanceBetween(Location loc, int x, int y) {
@@ -259,8 +259,8 @@ public class Drive implements MovementAPI {
 
     @Override
     public double getClosestDistance(double x, double y) {
-        PathPoint closest = pathFinder.fixToClosest(new PathPoint((int) x, (int) y));
-        return closest.distanceTo(x, y);
+        Locatable from = Locatable.of(x, y);
+        return from.distanceTo(pathFinder.fixToClosest(from));
     }
 
     @Override

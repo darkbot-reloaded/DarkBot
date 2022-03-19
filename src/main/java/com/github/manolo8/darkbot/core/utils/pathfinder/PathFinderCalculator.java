@@ -16,15 +16,19 @@ public class PathFinderCalculator {
 
     private final List<PathPoint> fragmentedPath;
 
-    public PathFinderCalculator(PathPoint come,
-                                PathPoint destination) {
-
-        this.come = come;
-        this.destination = destination;
+    private PathFinderCalculator(PathPoint from, PathPoint to) {
+        this.come = from;
+        this.destination = to;
 
         this.fragmentedPath = new ArrayList<>();
         this.closedList = new HashSet<>();
         this.openList = new HashSet<>();
+    }
+
+    public static LinkedList<PathPoint> calculate(PathPoint from, PathPoint to) {
+        LinkedList<PathPoint> list = new LinkedList<>();
+        new PathFinderCalculator(from, to).fillGeneratedPathTo(list);
+        return list;
     }
 
     public void fillGeneratedPathTo(LinkedList<PathPoint> target) {
@@ -55,7 +59,7 @@ public class PathFinderCalculator {
 
         PathPoint current = come;
 
-        current.f = (int) destination.distance(come);
+        current.f = (int) destination.distanceTo(come);
         current.g = 0;
         current.s = 0;
 
@@ -79,14 +83,14 @@ public class PathFinderCalculator {
             if (closedList.contains(neighbor))
                 continue;
 
-            int g = current.g + (int) current.distance(neighbor);
+            int g = current.g + (int) current.distanceTo(neighbor);
 
             if (!openList.add(neighbor) && g >= neighbor.g)
                 continue;
 
             neighbor.g = g;
             neighbor.s = current.s + 1;
-            neighbor.f = g + (int) destination.distance(neighbor);
+            neighbor.f = g + (int) destination.distanceTo(neighbor);
 
             fragmentedPath.add(neighbor);
         }
@@ -109,7 +113,7 @@ public class PathFinderCalculator {
 
             if (!current.lineOfSight.contains(loop)) continue;
 
-            int csum = loop.g + (int) loop.distance(current);
+            int csum = loop.g + (int) loop.distanceTo(current);
 
             if (current.s == loop.s + 1 && (closest == null || csum < sum)) {
                 closest = loop;

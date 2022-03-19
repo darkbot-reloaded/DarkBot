@@ -11,8 +11,8 @@ import static java.lang.Math.sqrt;
 
 public class PathPoint implements Locatable {
 
-    public double x;
-    public double y;
+    public final double x;
+    public final double y;
 
     public int f;
     public int g;
@@ -23,10 +23,6 @@ public class PathPoint implements Locatable {
     public PathPoint(double x, double y) {
         this.x = x;
         this.y = y;
-    }
-
-    public double distance(PathPoint o) {
-        return sqrt(pow(x - o.x, 2) + pow(y - o.y, 2));
     }
 
     public void fillLineOfSight(PathFinder finder) {
