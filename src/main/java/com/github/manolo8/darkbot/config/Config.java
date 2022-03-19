@@ -29,7 +29,6 @@ import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.shared.modules.LootCollectorModule;
 import org.jetbrains.annotations.Nullable;
 
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
