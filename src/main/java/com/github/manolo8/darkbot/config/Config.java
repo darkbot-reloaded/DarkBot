@@ -241,6 +241,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean MAP_START_STOP = false;
             public @Option("colors") ColorScheme cs = new ColorScheme();
         }
+
         public @Option CustomBackground CUSTOM_BACKGROUND = new CustomBackground();
         public static class CustomBackground{
             public @Option boolean ENABLED = false;
