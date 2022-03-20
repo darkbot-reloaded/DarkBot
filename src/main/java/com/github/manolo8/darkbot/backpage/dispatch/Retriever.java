@@ -11,7 +11,9 @@ public class Retriever {
         int uri;
         int permit;
     }
-    private final Pattern DISPATCH_COST = Pattern.compile("(?:Credits x (\\d+)(?:\\s+&\\s+)?)?(?:Uridium x (\\d+)(?:\\s+&\\s+)?)?(?:Permit x (\\d+)(?:\\s+&\\s+)?)?", Pattern.DOTALL);
+    private final Pattern DISPATCH_COST = Pattern.compile("(?:Credits x (\\d+)(?:\\s+&\\s+)?)?" +
+            "(?:Uridium x (\\d+)(?:\\s+&\\s+)?)?" +
+            "(?:Permit x (\\d+)(?:\\s+&\\s+)?)?", Pattern.DOTALL);
 
     public String getId() {
         return id;
@@ -53,7 +55,7 @@ public class Retriever {
         this.costString = costString;
         Matcher m = DISPATCH_COST.matcher(costString);
         if (m.find()){
-            cost = new Cost();
+            cost = cost == null ? new Cost() : cost;
             cost.credits = m.group(1) == null ? 0 : Integer.parseInt(m.group(1));
             cost.uri = m.group(2) == null ? 0 : Integer.parseInt(m.group(2));
             cost.permit = m.group(3) == null ? 0 : Integer.parseInt(m.group(3));
