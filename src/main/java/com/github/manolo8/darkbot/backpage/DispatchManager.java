@@ -81,14 +81,14 @@ public class DispatchManager {
     public boolean handleResponse(String type, String id, String response) {
         boolean failed = response.contains("\"result\":\"ERROR\"");
         System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + response);
+        update(-1);
         return !failed;
     }
 
     public List<String> collectAll() {
-        return data.getInProgress().values().stream()
-                .filter(this::collect)
-                .map(InProgress::getId)
-                .collect(Collectors.toList());
+        List<InProgress> toCollect = data.getInProgress().values().stream()
+                .filter(ip -> !ip.getCollectable().equals("0")).collect(Collectors.toList());
+        return toCollect.stream().filter(this::collect).map(InProgress::getId).collect(Collectors.toList());
     }
 
     private enum InfoReader {

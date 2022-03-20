@@ -1,7 +1,17 @@
 package com.github.manolo8.darkbot.backpage.dispatch;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class Retriever {
-    protected String id, name, type, tier, cost;
+    protected String id, name, type, tier, costString;
+    protected Cost cost;
+    public class Cost{
+        int credits;
+        int uri;
+        int permit;
+    }
+    private final Pattern DISPATCH_COST = Pattern.compile("(?:Credits x (\\d+)(?:\\s+&\\s+)?)?(?:Uridium x (\\d+)(?:\\s+&\\s+)?)?(?:Permit x (\\d+)(?:\\s+&\\s+)?)?", Pattern.DOTALL);
 
     public String getId() {
         return id;
@@ -36,13 +46,30 @@ public class Retriever {
     }
 
     public String getCost() {
-        return cost;
+        return costString;
     }
 
-    public void setCost(String cost) {
-        this.cost = cost;
+    public void setCost(String costString) {
+        this.costString = costString;
+        Matcher m = DISPATCH_COST.matcher(costString);
+        if (m.find()){
+            cost = new Cost();
+            cost.credits = m.group(1) == null ? 0 : Integer.parseInt(m.group(1));
+            cost.uri = m.group(2) == null ? 0 : Integer.parseInt(m.group(2));
+            cost.permit = m.group(3) == null ? 0 : Integer.parseInt(m.group(3));
+        }
+
     }
 
+    public int getCreditCost(){
+        return cost.credits;
+    }
+    public int getUridiumCost(){
+        return cost.uri;
+    }
+    public int getPermitCost(){
+        return cost.permit;
+    }
     @Override
     public String toString() {
         return "Retriever{" +

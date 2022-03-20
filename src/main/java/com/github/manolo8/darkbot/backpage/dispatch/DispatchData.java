@@ -71,7 +71,7 @@ public class DispatchData {
                 "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_type\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_tier\">\\s+(.+?)\\s+<.*?" +
-                "dispatch_item_cost\">\\s+(.+?)\\s+<", Pattern.DOTALL);
+                "dispatch_item_cost\">(?:\\s+(.+?)\\s+<br>)?(?:\\s+(.+?)\\s+<br>)", Pattern.DOTALL);
         private final Pattern PROGRESS_PATTERN = Pattern.compile("collectable=\"(.+?)\".*?" +
                 "dispatchId=\"(.+?)\".*?" +
                 "slotId=\"(.+?)\".*?" +
@@ -94,7 +94,12 @@ public class DispatchData {
             r.setName(m.group(2));
             r.setType(m.group(3));
             r.setTier(m.group(4));
-            r.setCost(m.group(5));
+            if(m.group(5)!= null){
+                r.setCost(m.group(5) + " & " +m.group(6));
+            }else{
+                r.setCost(m.group(6));
+            }
+            System.out.println(r.getCost());
             return true;
         }
 
