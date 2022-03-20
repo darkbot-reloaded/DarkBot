@@ -76,6 +76,7 @@ public class DispatchData {
                 "dispatchId=\"(.+?)\".*?" +
                 "slotId=\"(.+?)\".*?" +
                 "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?", Pattern.DOTALL);
+        private final Pattern DISPATCH_COST = Pattern.compile("(\\d+)", Pattern.DOTALL);
 
         public boolean buildRetriever(String string) {
             if (string == null || string.isEmpty()) return false;
@@ -96,10 +97,16 @@ public class DispatchData {
             r.setTier(m.group(4));
             if(m.group(5)!= null){
                 r.setCost(m.group(5) + " & " +m.group(6));
+                Matcher n = DISPATCH_COST.matcher(m.group(5));
+                if(n.find()) r.setUridiumCost(n.group(1));
+
+                n = DISPATCH_COST.matcher(m.group(6));
+                if(n.find()) r.setPermitCost(n.group(1));
             }else{
                 r.setCost(m.group(6));
+                Matcher n = DISPATCH_COST.matcher(m.group(6));
+                if(n.find()) r.setCreditCost(n.group(1));
             }
-            System.out.println(r.getCost());
             return true;
         }
 

@@ -1,19 +1,13 @@
 package com.github.manolo8.darkbot.backpage.dispatch;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class Retriever {
     protected String id, name, type, tier, costString;
     protected Cost cost;
-    public class Cost{
+    public static class Cost{
         int credits;
         int uri;
         int permit;
     }
-    private final Pattern DISPATCH_COST = Pattern.compile("(?:Credits x (\\d+)(?:\\s+&\\s+)?)?" +
-            "(?:Uridium x (\\d+)(?:\\s+&\\s+)?)?" +
-            "(?:Permit x (\\d+)(?:\\s+&\\s+)?)?", Pattern.DOTALL);
 
     public String getId() {
         return id;
@@ -53,16 +47,19 @@ public class Retriever {
 
     public void setCost(String costString) {
         this.costString = costString;
-        Matcher m = DISPATCH_COST.matcher(costString);
-        if (m.find()){
-            cost = cost == null ? new Cost() : cost;
-            cost.credits = m.group(1) == null ? 0 : Integer.parseInt(m.group(1));
-            cost.uri = m.group(2) == null ? 0 : Integer.parseInt(m.group(2));
-            cost.permit = m.group(3) == null ? 0 : Integer.parseInt(m.group(3));
-        }
-
     }
-
+    public void setCreditCost(String creditCost){
+        cost = cost == null ? new Cost() : cost;
+        cost.credits = Integer.parseInt(creditCost);
+    }
+    public void setUridiumCost(String uridiumCost){
+        cost = cost == null ? new Cost() : cost;
+        cost.uri = Integer.parseInt(uridiumCost);
+    }
+    public void setPermitCost(String permitCost){
+        cost = cost == null ? new Cost() : cost;
+        cost.permit = Integer.parseInt(permitCost);
+    }
     public int getCreditCost(){
         return cost.credits;
     }

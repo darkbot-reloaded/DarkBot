@@ -8,8 +8,6 @@ import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
 import com.github.manolo8.darkbot.utils.http.Method;
 import org.intellij.lang.annotations.Language;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -81,7 +79,7 @@ public class DispatchManager {
     public boolean handleResponse(String type, String id, String response) {
         boolean failed = response.contains("\"result\":\"ERROR\"");
         System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + response);
-        update(-1);
+        update(0);
         return !failed;
     }
 
