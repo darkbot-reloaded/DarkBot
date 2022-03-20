@@ -98,14 +98,14 @@ public class DispatchData {
             if(m.group(5)!= null){
                 r.setCost(m.group(5) + " & " +m.group(6));
                 Matcher n = DISPATCH_COST.matcher(m.group(5));
-                if(n.find()) r.setUridiumCost(n.group(1));
+                if(n.find()) r.setUridiumCost(Integer.parseInt(n.group(1)));
 
                 n = DISPATCH_COST.matcher(m.group(6));
-                if(n.find()) r.setPermitCost(n.group(1));
+                if(n.find()) r.setPermitCost(Integer.parseInt(n.group(1)));
             }else{
                 r.setCost(m.group(6));
                 Matcher n = DISPATCH_COST.matcher(m.group(6));
-                if(n.find()) r.setCreditCost(n.group(1));
+                if(n.find()) r.setCreditCost(Integer.parseInt(n.group(1)));
             }
             return true;
         }

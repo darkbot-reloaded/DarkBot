@@ -48,17 +48,17 @@ public class Retriever {
     public void setCost(String costString) {
         this.costString = costString;
     }
-    public void setCreditCost(String creditCost){
+    public void setCreditCost(int creditCost){
         cost = cost == null ? new Cost() : cost;
-        cost.credits = Integer.parseInt(creditCost);
+        cost.credits = creditCost;
     }
-    public void setUridiumCost(String uridiumCost){
+    public void setUridiumCost(int uridiumCost){
         cost = cost == null ? new Cost() : cost;
-        cost.uri = Integer.parseInt(uridiumCost);
+        cost.uri = uridiumCost;
     }
-    public void setPermitCost(String permitCost){
+    public void setPermitCost(int permitCost){
         cost = cost == null ? new Cost() : cost;
-        cost.permit = Integer.parseInt(permitCost);
+        cost.permit = permitCost;
     }
     public int getCreditCost(){
         return cost.credits;
