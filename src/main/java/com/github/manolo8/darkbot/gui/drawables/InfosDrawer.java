@@ -24,7 +24,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 
-@Feature(name = "Infos Drawer", description = "Draws infos about map, hero, health etc.")
+@Feature(name = "Infos Drawer", description = "Draws info about bot state, current map, hero & target health etc.")
 public class InfosDrawer implements Drawable {
 
     private static final NumberFormat HEALTH_FORMAT;

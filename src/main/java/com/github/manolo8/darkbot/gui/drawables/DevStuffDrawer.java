@@ -17,7 +17,7 @@ import eu.darkbot.api.managers.HeroAPI;
 
 import java.util.Collection;
 
-@Feature(name = "DevStuff Drawer", description = "Draws dev infos")
+@Feature(name = "DevStuff Drawer", description = "Draws dev infos (eg: unknown entities, pathfinding points, and entity metadata)")
 public class DevStuffDrawer implements Drawable {
 
     private final Drive drive;

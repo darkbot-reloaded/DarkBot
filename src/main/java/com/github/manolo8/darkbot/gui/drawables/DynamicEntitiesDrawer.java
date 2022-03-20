@@ -19,7 +19,7 @@ import eu.darkbot.api.managers.HeroAPI;
 
 import java.util.Collection;
 
-@Feature(name = "Dynamic Entities Drawer", description = "Draws dynamic entities")
+@Feature(name = "Dynamic Entities Drawer", description = "Draws dynamic entities (eg: npcs, boxes, or players)")
 public class DynamicEntitiesDrawer implements Drawable {
 
     private final HeroAPI hero;

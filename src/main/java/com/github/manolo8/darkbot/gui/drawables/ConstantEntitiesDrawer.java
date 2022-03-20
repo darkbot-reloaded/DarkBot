@@ -10,7 +10,7 @@ import eu.darkbot.api.managers.EntitiesAPI;
 
 import java.util.Collection;
 
-@Feature(name = "Constant Entities Drawer", description = "Draws not-movable entities (eg: portals, CBS, and stations)")
+@Feature(name = "Constant Entities Drawer", description = "Draws entities that are constantly on the map (eg: portals, CBS, and stations)")
 public class ConstantEntitiesDrawer implements Drawable {
 
     private final Collection<? extends Portal> portals;
