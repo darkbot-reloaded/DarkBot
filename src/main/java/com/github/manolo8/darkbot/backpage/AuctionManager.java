@@ -66,7 +66,7 @@ public class AuctionManager {
 
     private boolean handleResponse(String type, String id, String response) throws Exception {
         boolean failed = response.contains("question icon_error");
-        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + response);
+        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
         return !failed;
     }
 }

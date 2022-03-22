@@ -78,7 +78,7 @@ public class DispatchManager {
 
     public boolean handleResponse(String type, String id, String response) {
         boolean failed = response.contains("\"result\":\"ERROR\"");
-        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + response);
+        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
         update(0);
         return !failed;
     }
