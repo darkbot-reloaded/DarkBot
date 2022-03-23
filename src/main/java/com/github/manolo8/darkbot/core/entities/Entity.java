@@ -68,7 +68,6 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     @Override
     public void update() {
         locationInfo.update();
-        clickable.update();
     }
 
     @Override
