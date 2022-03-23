@@ -64,13 +64,19 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
 
         // Search for point in spiral pattern
         double angle = 0, distance = 0;
-        do {
+        while (distance < 20_000) {
             result.setTo(
                     initial.getX() - (int) (cos(angle) * distance),
                     initial.getY() - (int) (sin(angle) * distance));
             angle += 0.3;
-            distance += 2;
-        } while (areaTo(initial) != null || isOutOfMap(initial.getX(), initial.getY()) && distance < 20000);
+            distance += 5;
+
+            if (!isOutOfMap(result)
+                    && (area == null || !area.containsPoint(result))
+                    && (area = areaTo(result)) == null) {
+                return result;
+            }
+        }
 
         // Worst case scenario, just pick the closest known path point
         if (distance >= 20000) {
