@@ -6,14 +6,13 @@ import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
 import com.github.manolo8.darkbot.utils.http.Method;
-import org.intellij.lang.annotations.Language;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.intellij.lang.annotations.Language;
 
 public class DispatchManager {
     private final Main main;

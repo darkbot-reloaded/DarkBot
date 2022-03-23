@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.backpage.auction;
 
 import com.github.manolo8.darkbot.utils.Base62;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;

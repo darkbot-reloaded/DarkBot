@@ -3,11 +3,6 @@ package com.github.manolo8.darkbot.backpage.dispatch;
 public class Retriever {
     protected String id, name, type, tier, costString;
     protected Cost cost;
-    public static class Cost{
-        int credits;
-        int uri;
-        int permit;
-    }
 
     public String getId() {
         return id;
@@ -48,27 +43,34 @@ public class Retriever {
     public void setCost(String costString) {
         this.costString = costString;
     }
-    public void setCreditCost(int creditCost){
+
+    public int getCreditCost() {
+        return cost.credits;
+    }
+
+    public void setCreditCost(int creditCost) {
         cost = cost == null ? new Cost() : cost;
         cost.credits = creditCost;
     }
-    public void setUridiumCost(int uridiumCost){
+
+    public int getUridiumCost() {
+        return cost.uri;
+    }
+
+    public void setUridiumCost(int uridiumCost) {
         cost = cost == null ? new Cost() : cost;
         cost.uri = uridiumCost;
     }
-    public void setPermitCost(int permitCost){
+
+    public int getPermitCost() {
+        return cost.permit;
+    }
+
+    public void setPermitCost(int permitCost) {
         cost = cost == null ? new Cost() : cost;
         cost.permit = permitCost;
     }
-    public int getCreditCost(){
-        return cost.credits;
-    }
-    public int getUridiumCost(){
-        return cost.uri;
-    }
-    public int getPermitCost(){
-        return cost.permit;
-    }
+
     @Override
     public String toString() {
         return "Retriever{" +
@@ -78,5 +80,11 @@ public class Retriever {
                 "tier=" + tier +
                 "cost=" + cost +
                 "}";
+    }
+
+    public static class Cost {
+        int credits;
+        int uri;
+        int permit;
     }
 }

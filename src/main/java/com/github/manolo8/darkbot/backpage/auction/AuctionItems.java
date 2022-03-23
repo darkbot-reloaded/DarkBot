@@ -2,12 +2,6 @@ package com.github.manolo8.darkbot.backpage.auction;
 
 public class AuctionItems {
 
-    protected enum AuctionType {
-        HOUR,
-        DAY,
-        WEEK;
-    }
-
     public AuctionType auctionType;
     protected String id, lootId, name, itemType;
     protected long highestBidderId, currentBid, ownBid, instantBuy;
@@ -97,5 +91,11 @@ public class AuctionItems {
                 "ownBid=" + ownBid +
                 "instant=" + instantBuy +
                 "}";
+    }
+
+    protected enum AuctionType {
+        HOUR,
+        DAY,
+        WEEK
     }
 }
