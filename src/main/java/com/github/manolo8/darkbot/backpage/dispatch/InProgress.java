@@ -37,12 +37,12 @@ public class InProgress {
         this.collectable = collectable;
     }
 
-    public void setForRemoval(boolean forRemoval) {
-        this.forRemoval = forRemoval;
-    }
-
     public boolean getForRemoval() {
         return this.forRemoval;
+    }
+
+    public void setForRemoval(boolean forRemoval) {
+        this.forRemoval = forRemoval;
     }
 
     @Override

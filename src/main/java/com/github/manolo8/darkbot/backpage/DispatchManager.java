@@ -6,16 +6,13 @@ import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
 import com.github.manolo8.darkbot.utils.http.Method;
-import org.intellij.lang.annotations.Language;
-
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.intellij.lang.annotations.Language;
 
 public class DispatchManager {
     private final Main main;
@@ -33,20 +30,16 @@ public class DispatchManager {
 
     public boolean update(int expiryTime) {
         try {
-            return update(main.backpage, expiryTime);
+            if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
+            String page = main.backpage.getConnection("indexInternal.es?action=internalDispatch", Method.GET).getContent();
+
+            if (page == null || page.isEmpty()) return false;
+            lastDispatcherUpdate = System.currentTimeMillis();
+            return InfoReader.updateAll(page, data);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
-    }
-
-    public boolean update(BackpageManager manager, int expiryTime) throws Exception {
-        if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
-        String page = manager.getConnection("indexInternal.es?action=internalDispatch", Method.GET).getContent();
-
-        if (page == null || page.isEmpty()) return false;
-        lastDispatcherUpdate = System.currentTimeMillis();
-        return InfoReader.updateAll(page, data);
     }
 
     public boolean hireRetriever(Retriever retriever) {
@@ -84,19 +77,16 @@ public class DispatchManager {
 
     public boolean handleResponse(String type, String id, String response) {
         boolean failed = response.contains("\"result\":\"ERROR\"");
-        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + response);
-        update(-1);
+        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
+        update(0);
         return !failed;
     }
 
-
     public List<String> collectAll() {
-        return data.getInProgress().values().stream()
-                .filter(this::collect)
-                .map(InProgress::getId)
-                .collect(Collectors.toList());
+        List<InProgress> toCollect = data.getInProgress().values().stream()
+                .filter(ip -> !ip.getCollectable().equals("0")).collect(Collectors.toList());
+        return toCollect.stream().filter(this::collect).map(InProgress::getId).collect(Collectors.toList());
     }
-
 
     private enum InfoReader {
         PERMIT("name=\"permit\" value=\"([0-9]+)\"", DispatchData::setPermit),
@@ -149,6 +139,4 @@ public class DispatchManager {
             return m.groupCount() == consumers.size();
         }
     }
-
-
 }
