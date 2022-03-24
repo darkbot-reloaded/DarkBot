@@ -58,7 +58,19 @@ public class AuctionData {
         AuctionItems r = auctionItems.get(id);
         if (r == null) auctionItems.put(id, r = new AuctionItems());
 
-        r.setId(id);
+        if (string.contains("hour")) {
+            r.setId("item_hour_" + id);
+            r.setAuctionType("hour");
+        }
+        if (string.contains("day")) {
+            r.setId("item_day_" + id);
+            r.setAuctionType("day");
+        }
+        if (string.contains("week")) {
+            r.setId("item_week_" + id);
+            r.setAuctionType("week");
+        }
+
         r.setName(m.group(2));
         r.setItemType(m.group(3));
         Matcher user = Pattern.compile("showUser=\"(.+?)\"").matcher(m.group(4));
@@ -72,9 +84,6 @@ public class AuctionData {
         r.setOwnBid(Long.parseLong(m.group(6).replace(",", "").replace(".", "")));
         r.setInstantBuy(Long.parseLong(m.group(7).replace(",", "").replace(".", "")));
         r.setLootId(m.group(8));
-        if (string.contains("hour")) r.setAuctionType(AuctionItems.AuctionType.HOUR);
-        if (string.contains("day")) r.setAuctionType(AuctionItems.AuctionType.DAY);
-        if (string.contains("week")) r.setAuctionType(AuctionItems.AuctionType.WEEK);
 
         return true;
     }

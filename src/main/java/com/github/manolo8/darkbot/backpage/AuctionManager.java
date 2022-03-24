@@ -45,11 +45,10 @@ public class AuctionManager {
             String token = main.backpage.getConnection("indexInternal.es", Method.GET)
                     .setRawParam("action", "internalAuction")
                     .consumeInputStream(main.backpage::getReloadToken);
-
             String response = main.backpage.getConnection("indexInternal.es", Method.POST)
                     .setRawParam("action", "internalAuction")
                     .setRawParam("reloadToken", token)
-                    .setRawParam("auctionType", "hour")
+                    .setRawParam("auctionType", auctionItem.getAuctionType())
                     .setRawParam("subAction", "bid")
                     .setRawParam("lootId", auctionItem.getLootId())
                     .setRawParam("itemId", auctionItem.getId())
