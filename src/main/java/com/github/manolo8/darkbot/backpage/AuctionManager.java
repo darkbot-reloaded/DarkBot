@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
 import com.github.manolo8.darkbot.utils.http.Method;
 import java.io.IOException;
+import java.util.Locale;
 
 public class AuctionManager {
     private final Main main;
@@ -48,7 +49,7 @@ public class AuctionManager {
             String response = main.backpage.getConnection("indexInternal.es", Method.POST)
                     .setRawParam("action", "internalAuction")
                     .setRawParam("reloadToken", token)
-                    .setRawParam("auctionType", auctionItem.getAuctionType().getId())
+                    .setRawParam("auctionType", auctionItem.getAuctionType().name().toLowerCase(Locale.ROOT))
                     .setRawParam("subAction", "bid")
                     .setRawParam("lootId", auctionItem.getLootId())
                     .setRawParam("itemId", auctionItem.getId())
@@ -63,7 +64,7 @@ public class AuctionManager {
         return false;
     }
 
-    private boolean handleResponse(String type, String id, String response) throws Exception {
+    private boolean handleResponse(String type, String id, String response) {
         boolean failed = response.contains("question icon_error");
         System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
         return !failed;

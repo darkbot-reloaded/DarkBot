@@ -55,21 +55,25 @@ public class AuctionData {
         if (!m.find()) return false;
 
         String id = m.group(1);
-        AuctionItems r = auctionItems.get(id);
-        if (r == null) auctionItems.put(id, r = new AuctionItems());
+        AuctionItems r = null;
 
         if (string.contains("hour")) {
+            r = auctionItems.get("item_hour_" + id);
+            if (r == null) auctionItems.put(id, r = new AuctionItems()); //need to clean up this somehow
             r.setId("item_hour_" + id);
             r.setAuctionType(AuctionItems.Type.HOUR);
-        }
-        if (string.contains("day")) {
+        } else if (string.contains("day")) {
+            r = auctionItems.get("item_day_" + id);
+            if (r == null) auctionItems.put(id, r = new AuctionItems()); //need to clean up this somehow
             r.setId("item_day_" + id);
-            r.setAuctionType("day");
-        }
-        if (string.contains("week")) {
+            r.setAuctionType(AuctionItems.Type.DAY);
+        } else if (string.contains("week")) {
+            r = auctionItems.get("item_week_" + id);
+            if (r == null) auctionItems.put(id, r = new AuctionItems()); //need to clean up this somehow
             r.setId("item_week_" + id);
-            r.setAuctionType("week");
+            r.setAuctionType(AuctionItems.Type.WEEK);
         }
+        if (r == null) auctionItems.put(id, r = new AuctionItems()); //need to clean up this somehow
 
         r.setName(m.group(2));
         r.setItemType(m.group(3));
