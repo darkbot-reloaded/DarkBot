@@ -14,7 +14,7 @@ public class DiagnosticsPanel extends JPanel {
 
     /* Component events for visibility didn't fire at all. Ended up making the timer clean itself up. */
     private final Timer timer = new Timer(500, e -> {
-        if (!isVisible()) {
+        if (!isDisplayable()) {
             this.timer.stop();
             return;
         }

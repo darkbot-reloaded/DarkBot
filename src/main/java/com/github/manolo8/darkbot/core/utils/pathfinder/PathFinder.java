@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.manager.MapManager;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -88,21 +89,7 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
     }
 
     private PathPoint closest(Locatable point) {
-
-        double distance = 0;
-        PathPoint current = null;
-
-        for (PathPoint loop : points) {
-            double cd = loop.distanceTo(point);
-
-            if (current == null || cd < distance) {
-                current = loop;
-                distance = cd;
-            }
-
-        }
-
-        return current;
+        return points.stream().min(Comparator.comparingDouble(p -> p.distanceTo(point))).orElse(null);
     }
 
     public boolean isOutOfMap(Locatable loc) {
