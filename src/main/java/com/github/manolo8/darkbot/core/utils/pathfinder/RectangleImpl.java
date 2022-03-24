@@ -21,8 +21,6 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
     public double maxX;
     public double maxY;
 
-    public boolean changed;
-
     public RectangleImpl() {
     }
 
@@ -47,7 +45,7 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
         if (min == diffTop) newY = minY - MARGIN;
         else if (min == diffBottom) newY = maxY + MARGIN;
         else if (min == diffLeft) newX = minX - MARGIN;
-        else newX = (int) maxX + MARGIN;
+        else newX = maxX + MARGIN;
 
         return new PathPoint(newX, newY);
     }

@@ -31,6 +31,7 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
 
         if (hasLineOfSight(current, destination)) {
             LinkedList<PathPoint> list = new LinkedList<>();
+            list.add(new PathPoint(current.getX(), current.getY()));
             list.add(new PathPoint(destination.getX(), destination.getY()));
             return list;
         }
@@ -66,9 +67,9 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
         double angle = 0, distance = 0;
         while (distance < 20_000) {
             result.setTo(
-                    initial.getX() - (int) (cos(angle) * distance),
-                    initial.getY() - (int) (sin(angle) * distance));
-            angle += 0.3;
+                    initial.getX() - (cos(angle) * distance),
+                    initial.getY() - (sin(angle) * distance));
+            angle += 0.306;
             distance += 5;
 
             if (!isOutOfMap(result)
