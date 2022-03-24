@@ -60,7 +60,7 @@ public class AuctionData {
 
         if (string.contains("hour")) {
             r.setId("item_hour_" + id);
-            r.setAuctionType("hour");
+            r.setAuctionType(AuctionItems.Type.HOUR);
         }
         if (string.contains("day")) {
             r.setId("item_day_" + id);
