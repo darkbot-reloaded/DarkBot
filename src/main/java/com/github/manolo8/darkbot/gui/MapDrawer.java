@@ -447,6 +447,17 @@ public class MapDrawer extends JPanel {
             drawEntity(g2, entity.locationInfo.now, false);
         }
 
+        g2.setColor(new Color(0, 128, 255, 64));
+        for (PathPoint point : hero.drive.pathFinder.points) {
+            for (PathPoint other : point.lineOfSight) {
+                g2.drawLine(translateX(point.x),
+                        translateY(point.y),
+                        translateX(point.x + (other.x - point.x) / 3),
+                        translateY(point.y + (other.y - point.y) / 3));
+            }
+        }
+
+        g2.setColor(cs.UNKNOWN);
         for (PathPoint point : hero.drive.pathFinder.points) {
             g2.fillRect(translateX(point.x), translateY(point.y), 2, 2);
         }
