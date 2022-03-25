@@ -71,8 +71,9 @@ public class AuctionData {
             if (r == null) auctionItems.put(id, r = new AuctionItems()); //need to clean up this somehow
             r.setId("item_week_" + id);
             r.setAuctionType(AuctionItems.Type.WEEK);
+        } else {
+            r = auctionItems.computeIfAbsent(id, i -> new AuctionItems());
         }
-        if (r == null) auctionItems.put(id, r = new AuctionItems()); //need to clean up this somehow
 
         r.setName(m.group(2));
         r.setItemType(m.group(3));
