@@ -62,13 +62,11 @@ public class AuctionData {
             r.setId("item_hour_" + id);
             r.setAuctionType(AuctionItems.Type.HOUR);
         } else if (string.contains("day")) {
-            r = auctionItems.get("item_day_" + id);
-            if (r == null) auctionItems.put(id, r = new AuctionItems()); //need to clean up this somehow
+            r = auctionItems.computeIfAbsent("item_day_" + id, i -> new AuctionItems());
             r.setId("item_day_" + id);
             r.setAuctionType(AuctionItems.Type.DAY);
         } else if (string.contains("week")) {
-            r = auctionItems.get("item_week_" + id);
-            if (r == null) auctionItems.put(id, r = new AuctionItems()); //need to clean up this somehow
+            r = auctionItems.computeIfAbsent("item_week_" + id, i -> new AuctionItems());
             r.setId("item_week_" + id);
             r.setAuctionType(AuctionItems.Type.WEEK);
         } else {
