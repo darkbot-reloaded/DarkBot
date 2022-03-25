@@ -211,12 +211,12 @@ public class MapDrawer extends JPanel {
 
         @Override
         public double toGameLocationX(int screenX) {
-            return ((screenX / (double) getWidth()) * mapBounds.getWidth());
+            return (screenX / (double) getWidth()) * mapBounds.getWidth();
         }
 
         @Override
         public double toGameLocationY(int screenY) {
-            return ((screenY / (double) getHeight()) * mapBounds.getHeight());
+            return (screenY / (double) getHeight()) * mapBounds.getHeight();
         }
     }
 }
