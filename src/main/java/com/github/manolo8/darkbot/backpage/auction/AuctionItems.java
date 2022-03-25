@@ -82,7 +82,7 @@ public class AuctionItems {
     @Override
     public String toString() {
         return "Auction Item{" +
-                "auctionType=" + type.name() +
+                "auctionType=" + type.getId() +
                 "id=" + id +
                 "lootId=" + lootId +
                 "name=" + name +

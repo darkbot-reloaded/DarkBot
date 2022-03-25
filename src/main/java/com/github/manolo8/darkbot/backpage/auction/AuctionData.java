@@ -38,7 +38,7 @@ public class AuctionData {
     public boolean parse(String page) {
         Matcher m = AUCTION_TABLE.matcher(page);
         while (m.find()) {
-            if (m.group().contains("item_")) buildAuctionItems(m.group(), AUCTION_PATTERN);
+            buildAuctionItems(m.group(), AUCTION_PATTERN);
         }
         return true;
     }
@@ -50,7 +50,6 @@ public class AuctionData {
 
     private boolean buildAuctionItems(String string, Pattern type) {
         if (string == null || string.isEmpty()) return false;
-        string = "itemKey=" + string;
         if (!string.contains("itemKey") ||
                 !string.contains("auction_item_name_col") ||
                 !string.contains("auction_item_type") ||
