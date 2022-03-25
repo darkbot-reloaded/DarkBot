@@ -19,19 +19,22 @@ public class AuctionData {
             "auction_item_you\">\\s+(.+?)\\s+<.*?" +
             "item_[a-zA-Z]+_\\d+_buyPrice\" value=\"(.+?)\".*?" +
             "item_[a-zA-Z]+_\\d+_lootId\" value=\"(.+?)\".*?";
-    private final Pattern AUCTION_PATTERN = Pattern.compile( AUCTION_PATTERN_STRING, Pattern.DOTALL);
+    private final Pattern AUCTION_PATTERN = Pattern.compile(AUCTION_PATTERN_STRING, Pattern.DOTALL);
 
     public Map<String, AuctionItems> getAuctionItems() {
         return auctionItems;
     }
+
     public Map<String, AuctionItems> getAuctionHourItems() {
-        return auctionItems.entrySet().stream().filter(a-> a.getValue().type == AuctionItems.Type.HOUR).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return auctionItems.entrySet().stream().filter(a -> a.getValue().type == AuctionItems.Type.HOUR).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
+
     public Map<String, AuctionItems> getAuctionDayItems() {
-        return auctionItems.entrySet().stream().filter(a-> a.getValue().type == AuctionItems.Type.DAY).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return auctionItems.entrySet().stream().filter(a -> a.getValue().type == AuctionItems.Type.DAY).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
+
     public Map<String, AuctionItems> getAuctionWeekItems() {
-        return auctionItems.entrySet().stream().filter(a-> a.getValue().type == AuctionItems.Type.WEEK).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return auctionItems.entrySet().stream().filter(a -> a.getValue().type == AuctionItems.Type.WEEK).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
 
@@ -89,9 +92,9 @@ public class AuctionData {
         } else {
             r.setHighestBidderId(1L);
         }
-        r.setCurrentBid(Long.parseLong("0"+m.group(5).replace(",", "").replace(".", "").replace("-", "")));
-        r.setOwnBid(Long.parseLong("0"+m.group(6).replace(",", "").replace(".", "").replace("-", "")));
-        r.setInstantBuy(Long.parseLong("0"+m.group(7).replace(",", "").replace(".", "").replace("-", "")));
+        r.setCurrentBid(Long.parseLong("0" + m.group(5).replace(",", "").replace(".", "").replace("-", "")));
+        r.setOwnBid(Long.parseLong("0" + m.group(6).replace(",", "").replace(".", "").replace("-", "")));
+        r.setInstantBuy(Long.parseLong("0" + m.group(7).replace(",", "").replace(".", "").replace("-", "")));
         r.setLootId(m.group(8));
 
         return true;

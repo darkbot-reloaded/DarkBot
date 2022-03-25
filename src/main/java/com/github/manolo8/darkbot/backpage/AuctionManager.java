@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
 import com.github.manolo8.darkbot.utils.http.Method;
 import java.io.IOException;
-import java.util.Locale;
 
 public class AuctionManager {
     private final Main main;
