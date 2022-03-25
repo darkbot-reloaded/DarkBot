@@ -5,7 +5,9 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Map;
@@ -146,6 +148,13 @@ public class MapManager implements Manager, StarSystemAPI {
                 for (Entity e : entities) ConfigEntity.INSTANCE.updateSafetyFor(e);
             }
         }
+    }
+
+    public void updateEntityConfigs() {
+        for (Npc npc : entities.npcs)
+            npc.npcInfo = ConfigEntity.INSTANCE.getOrCreateNpcInfo(npc.playerInfo.username);
+        for (Box box : entities.boxes)
+            box.boxInfo = ConfigEntity.INSTANCE.getOrCreateBoxInfo(box.type);
     }
 
     private void checkMirror() {

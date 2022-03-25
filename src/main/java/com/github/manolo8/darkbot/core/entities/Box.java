@@ -78,6 +78,12 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
     }
 
     @Override
+    public void update() {
+        super.update();
+        clickable.update();
+    }
+
+    @Override
     public void update(long address) {
         super.update(address);
 

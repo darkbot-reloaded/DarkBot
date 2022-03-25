@@ -1,5 +1,9 @@
 package com.github.manolo8.darkbot.utils;
 
+import com.github.manolo8.darkbot.extensions.plugins.PluginClassLoader;
+import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
+
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -12,6 +16,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.jar.JarFile;
 
 public class ReflectionUtils {
     private ReflectionUtils() {};
@@ -33,15 +38,37 @@ public class ReflectionUtils {
         PRIMITIVE_TO_WRAPPER = Collections.unmodifiableMap(primitiveToWrapper);
     }
 
+
     public static <T> T createInstance(String className, Path path) {
         if (!Files.exists(path))
-            throw new RuntimeException("Required library file " + path + " not present");
+            throw new RuntimeException("Library file " + path + " not present");
+
+        // Cannot validate auth api with this, or else it would recurse infinitely
+        if (!className.contains("AuthAPIImpl")) validateJar(path);
+
         try {
             URLClassLoader loader = new URLClassLoader(new URL[]{path.toUri().toURL()});
-            return createInstance((Class<T>) loader.loadClass(className));
+            @SuppressWarnings("unchecked")
+            Class<T> cl = (Class<T>) loader.loadClass(className);
+
+            // Check the class before creating instance
+            if (className.contains("AuthAPIImpl")) VerifierChecker.verifyClass(cl);
+
+            return createInstance(cl);
         } catch (MalformedURLException | ClassNotFoundException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to find class: " + className);
+        }
+    }
+
+    private static void validateJar(Path path) {
+        try (JarFile jar = new JarFile(path.toFile())) {
+            Boolean valid = AuthAPI.getInstance().checkPluginJarSignature(jar);
+            if (valid == null || !valid)
+                throw new SecurityException("Failed to verify signature of " + path);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed verify jar file: " + path);
         }
     }
 

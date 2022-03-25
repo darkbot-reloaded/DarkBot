@@ -35,7 +35,7 @@ public class Drive implements MovementAPI {
     private LocationInfo heroLoc = new LocationInfo();
 
     public PathFinder pathFinder;
-    public LinkedList<PathPoint> paths = new LinkedList<>();
+    public LinkedList<Locatable> paths = new LinkedList<>();
 
     private Location tempDest, endLoc, lastSegment = new Location();
 
@@ -110,8 +110,8 @@ public class Drive implements MovementAPI {
 
     private Location current() {
         if (paths.isEmpty()) return null;
-        PathPoint point = paths.getFirst();
-        return new Location(point.x, point.y);
+        Locatable point = paths.getFirst();
+        return new Location(point.getX(), point.getY());
     }
 
     private void click(Location loc) {
@@ -124,20 +124,16 @@ public class Drive implements MovementAPI {
     }
 
     public boolean canMove(Location location) {
-        return !map.isOutOfMap(location.x, location.y) && pathFinder.canMove((int) location.x, (int) location.y);
+        return !map.isOutOfMap(location.x, location.y) && pathFinder.canMove(location.x, location.y);
     }
 
+    @Deprecated /* Use getClosestDistance(Location) instead */
     public double closestDistance(Location location) {
-        PathPoint closest = pathFinder.fixToClosest(new PathPoint((int) location.x, (int) location.y));
-        return location.distance(closest.toLocation());
+        return getClosestDistance(location);
     }
 
     public double distanceBetween(Location loc, int x, int y) {
-        double sum = 0;
-        PathPoint begin = new PathPoint((int) loc.x, (int) loc.y);
-        for (PathPoint curr : pathFinder.createRote(begin, new PathPoint(x, y)))
-            sum += Math.sqrt(Math.pow(begin.x - curr.x, 2) + Math.pow(begin.y - curr.y, 2));
-        return sum;
+        return getDistanceBetween(loc.x, loc.y, x, y);
     }
 
     public void toggleRunning(boolean running) {
@@ -263,17 +259,19 @@ public class Drive implements MovementAPI {
 
     @Override
     public double getClosestDistance(double x, double y) {
-        PathPoint closest = pathFinder.fixToClosest(new PathPoint((int) x, (int) y));
-        return closest.distanceTo(x, y);
+        Locatable from = Locatable.of(x, y);
+        return from.distanceTo(pathFinder.fixToClosest(from));
     }
 
     @Override
     public double getDistanceBetween(double x, double y, double ox, double oy) {
+        Locatable previous = Locatable.of(x, y);
+        LinkedList<Locatable> path = pathFinder.createRote(previous, Locatable.of(x, y));
         double sum = 0;
-
-        PathPoint begin = new PathPoint((int) x, (int) y);
-        for (PathPoint curr : pathFinder.createRote(begin, new PathPoint(ox, oy)))
-            sum += Math.sqrt(Math.pow(begin.x - curr.x, 2) + Math.pow(begin.y - curr.y, 2));
+        for (Locatable curr : path) {
+            sum += previous.distanceTo(curr);
+            previous = curr;
+        }
         return sum;
     }
 

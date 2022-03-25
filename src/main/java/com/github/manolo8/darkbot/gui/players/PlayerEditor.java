@@ -4,28 +4,34 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.PlayerTag;
-import com.github.manolo8.darkbot.config.UnresolvedPlayer;
-import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
-import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.events.EventHandler;
+import eu.darkbot.api.events.Listener;
+import eu.darkbot.api.game.entities.Player;
+import eu.darkbot.api.managers.EntitiesAPI;
+import eu.darkbot.api.managers.EventBrokerAPI;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
-public class PlayerEditor extends JPanel {
+public class PlayerEditor extends JPanel implements Listener {
     private final JList<PlayerInfo> playerInfoList;
     private final DefaultListModel<PlayerInfo> playersModel;
+    private final PlayerRenderer renderer;
+    private final Set<PlayerInfo> nearbyPlayers = new LinkedHashSet<>();
 
     private final PlayerManager playerManager;
     private final SearchField sf;
     private final PlayerTagManager tagEditor;
     protected Main main;
+    private boolean registered;
 
     public PlayerEditor() {
         super(new MigLayout("ins 0, gap 0, wrap 3, fill", "[][grow][]", "[][grow,fill]"));
@@ -35,16 +41,37 @@ public class PlayerEditor extends JPanel {
         add(tagEditor = new PlayerTagManager(this), "grow");
 
         playerInfoList = new JList<>(playersModel = new DefaultListModel<>());
-        playerInfoList.setCellRenderer(new PlayerRenderer());
+        playerInfoList.setCellRenderer(renderer = new PlayerRenderer(playerInfoList));
 
         add(new JScrollPane(playerInfoList,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), "span, grow");
+
+        playerInfoList.addListSelectionListener((event) -> {
+            if (event.getValueIsAdjusting()) return;
+            int min = event.getFirstIndex();
+            int max = Math.min(event.getLastIndex() + 1, playersModel.size());
+            for (int i = min; i < max; i++) {
+                PlayerInfo pl = playersModel.get(i);
+                if (!playerInfoList.isSelectedIndex(i) &&
+                        !main.config.PLAYER_INFOS.containsKey(pl.getUserId()) &&
+                        !nearbyPlayers.contains(pl)) {
+                    playersModel.removeElementAt(i--);
+                    max--;
+                }
+            }
+        });
     }
 
     public void setup(Main main) {
         this.main = main;
 
         tagEditor.setup(main);
+
+        if (!registered) {
+            registered = true;
+            EventBrokerAPI eventBroker = main.pluginAPI.requireAPI(EventBrokerAPI.class);
+            eventBroker.registerListener(this);
+        }
 
         refreshList();
         main.config.PLAYER_UPDATED.add(i -> SwingUtilities.invokeLater(this::refreshList));
@@ -64,6 +91,57 @@ public class PlayerEditor extends JPanel {
                 .filter(pi -> pi.filter(query))
                 .sorted(Comparator.comparing(pi -> pi.username))
                 .forEach(playersModel::addElement);
+        renderer.setAddedPlayerCount(playersModel.getSize());
+        for (PlayerInfo p : nearbyPlayers) {
+            playersModel.addElement(p);
+        }
+    }
+
+    @EventHandler
+    public void onEntityPlayerAdd(EntitiesAPI.EntityCreateEvent event) {
+        if (event.getEntity() instanceof Player
+                && playersModel != null
+                && main.config.PLAYER_INFOS != null
+                && !main.config.PLAYER_INFOS.containsKey(event.getEntity().getId())) {
+
+            SwingUtilities.invokeLater(() -> {
+                int idx = indexOfPlayersModel(event.getEntity().getId());
+                if (idx < 0) {
+                    PlayerInfo playerInfo = new PlayerInfo((Player) event.getEntity());
+                    nearbyPlayers.add(playerInfo);
+                    playersModel.addElement(playerInfo);
+                } else {
+                    nearbyPlayers.add(playersModel.get(idx));
+                }
+            });
+        }
+    }
+
+    @EventHandler
+    public void onEntityPlayerRemove(EntitiesAPI.EntityRemoveEvent event) {
+        if (event.getEntity() instanceof Player
+                && playersModel != null
+                && main.config.PLAYER_INFOS != null
+                && !main.config.PLAYER_INFOS.containsKey(event.getEntity().getId())) {
+
+            SwingUtilities.invokeLater(() -> {
+                int idx = indexOfPlayersModel(event.getEntity().getId());
+                if (idx == -1) return;
+                PlayerInfo info = playersModel.getElementAt(idx);
+                if (!playerInfoList.isSelectedIndex(idx)) {
+                    nearbyPlayers.remove(info);
+                    playersModel.removeElement(info);
+                } else {
+                    nearbyPlayers.remove(info);
+                }
+            });
+        }
+    }
+
+    public int indexOfPlayersModel(int playerId) {
+        for (int i = 0; i < playersModel.size(); i++)
+            if (playerId == playersModel.get(i).getUserId()) return i;
+        return -1;
     }
 
     public void addTagToPlayers(PlayerTag tag) {
@@ -128,8 +206,17 @@ public class PlayerEditor extends JPanel {
         for (PlayerInfo player : players) {
             main.config.PLAYER_INFOS.remove(player.userId);
             playersModel.removeElement(player);
+            nearbyPlayers.remove(player);
         }
         ConfigEntity.changed();
+        refreshList();
     }
 
+    public Set<PlayerInfo> getNearbyPlayers() {
+        return nearbyPlayers;
+    }
+
+    public JList<PlayerInfo> getPlayerInfoList() {
+        return playerInfoList;
+    }
 }

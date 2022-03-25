@@ -71,11 +71,12 @@ public class DispatchData {
                 "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_type\">\\s+(.+?)\\s+<.*?" +
                 "dispatch_item_tier\">\\s+(.+?)\\s+<.*?" +
-                "dispatch_item_cost\">\\s+(.+?)\\s+<", Pattern.DOTALL);
+                "dispatch_item_cost\">(?:\\s+(.+?)\\s+<br>)?(?:\\s+(.+?)\\s+<br>)", Pattern.DOTALL);
         private final Pattern PROGRESS_PATTERN = Pattern.compile("collectable=\"(.+?)\".*?" +
                 "dispatchId=\"(.+?)\".*?" +
                 "slotId=\"(.+?)\".*?" +
                 "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?", Pattern.DOTALL);
+        private final Pattern DISPATCH_COST = Pattern.compile("(\\d+)", Pattern.DOTALL);
 
         public boolean buildRetriever(String string) {
             if (string == null || string.isEmpty()) return false;
@@ -94,7 +95,18 @@ public class DispatchData {
             r.setName(m.group(2));
             r.setType(m.group(3));
             r.setTier(m.group(4));
-            r.setCost(m.group(5));
+            if (m.group(5) != null) {
+                r.setCost(m.group(5) + " & " + m.group(6));
+                Matcher n = DISPATCH_COST.matcher(m.group(5));
+                if (n.find()) r.setUridiumCost(Integer.parseInt(n.group(1)));
+
+                n = DISPATCH_COST.matcher(m.group(6));
+                if (n.find()) r.setPermitCost(Integer.parseInt(n.group(1)));
+            } else {
+                r.setCost(m.group(6));
+                Matcher n = DISPATCH_COST.matcher(m.group(6));
+                if (n.find()) r.setCreditCost(Integer.parseInt(n.group(1)));
+            }
             return true;
         }
 

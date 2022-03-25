@@ -1,7 +1,8 @@
 package com.github.manolo8.darkbot.backpage.dispatch;
 
 public class Retriever {
-    protected String id, name, type, tier, cost;
+    protected String id, name, type, tier, costString;
+    protected Cost cost;
 
     public String getId() {
         return id;
@@ -36,11 +37,38 @@ public class Retriever {
     }
 
     public String getCost() {
-        return cost;
+        return costString;
     }
 
-    public void setCost(String cost) {
-        this.cost = cost;
+    public void setCost(String costString) {
+        this.costString = costString;
+    }
+
+    public int getCreditCost() {
+        return cost.credits;
+    }
+
+    public void setCreditCost(int creditCost) {
+        cost = cost == null ? new Cost() : cost;
+        cost.credits = creditCost;
+    }
+
+    public int getUridiumCost() {
+        return cost.uri;
+    }
+
+    public void setUridiumCost(int uridiumCost) {
+        cost = cost == null ? new Cost() : cost;
+        cost.uri = uridiumCost;
+    }
+
+    public int getPermitCost() {
+        return cost.permit;
+    }
+
+    public void setPermitCost(int permitCost) {
+        cost = cost == null ? new Cost() : cost;
+        cost.permit = permitCost;
     }
 
     @Override
@@ -52,5 +80,11 @@ public class Retriever {
                 "tier=" + tier +
                 "cost=" + cost +
                 "}";
+    }
+
+    public static class Cost {
+        int credits;
+        int uri;
+        int permit;
     }
 }

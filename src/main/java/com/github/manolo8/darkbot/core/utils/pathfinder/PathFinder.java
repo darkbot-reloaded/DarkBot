@@ -2,8 +2,10 @@ package com.github.manolo8.darkbot.core.utils.pathfinder;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.manager.MapManager;
-import com.github.manolo8.darkbot.core.utils.Location;
+import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Location;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -24,86 +26,83 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
         this.points = new HashSet<>();
     }
 
-    public LinkedList<PathPoint> createRote(Location current, Location destination) {
-        return createRote(
-                new PathPoint((int) current.x, (int) current.y),
-                new PathPoint((int) destination.x, (int) destination.y)
-        );
-    }
+    public LinkedList<Locatable> createRote(Locatable current, Locatable destination) {
+        Locatable fixedCurrent = fixToClosest(current);
+        Locatable fixedDestination = fixToClosest(destination);
 
-    public LinkedList<PathPoint> createRote(PathPoint current, PathPoint destination) {
-        LinkedList<PathPoint> paths = new LinkedList<>();
-        current = fixToClosest(current);
-        destination = fixToClosest(destination);
+        LinkedList<Locatable> list = new LinkedList<>();
 
-        if (hasLineOfSight(current, destination)) {
-            paths.add(destination);
-            return paths;
+        // Always add an initial point if current needs to be fixed
+        if (current.distanceTo(fixedCurrent) > 1) list.add(fixedCurrent);
+
+        // Trivial case, just directly move to destination
+        if (hasLineOfSight(fixedCurrent, fixedDestination)) {
+            list.add(new PathPoint(fixedDestination.getX(), fixedDestination.getY()));
+            return list;
         }
 
-        current.fillLineOfSight(this);
-        destination.fillLineOfSight(this);
-
-        new PathFinderCalculator(current, destination)
-                .fillGeneratedPathTo(paths);
+        list = PathFinderCalculator.calculate(this, fixedCurrent, fixedDestination, list);
 
         // If no possible path is found, try to fly straight
-        if (paths.isEmpty()) paths.add(destination);
+        if (list.isEmpty() || list.getLast().distanceTo(fixedDestination) > 1)
+            list.add(fixedDestination);
 
-        return paths;
+        return list;
     }
 
-    public PathPoint fixToClosest(PathPoint point) {
-        double initialX = point.x, initialY = point.y;
+    public Locatable fixToClosest(final Locatable initial) {
+        Location result = Location.of(initial.getX(), initial.getY());
 
-        AreaImpl area = areaTo(point);
+        AreaImpl area = areaTo(result);
         if (area != null) {
-            point = area.toSide(point); // Inside an area, get out of it
-            area = areaTo(point); // See if leaving an area got us inside another one
+            result.setTo(area.toSide(result)); // Inside an area, get out of it
+            area = areaTo(result); // See if leaving an area got us inside another one
         }
-        if (map.isOutOfMap(point.x, point.y)) { // In radiation, get out of it
-            point.x = Math.min(Math.max(point.x, 0), MapManager.internalWidth);
-            point.y = Math.min(Math.max(point.y, 0), MapManager.internalHeight);
-            if (areaTo(point) == null) return point; // Got out of rad and not in area
-        } else if (area == null) return point; // Inside map & not in area (anymore)
+        if (isOutOfMap(result)) { // In radiation, get out of it
+            result.setTo(
+                    Math.min(Math.max(result.getX(), 0), MapManager.internalWidth),
+                    Math.min(Math.max(result.getY(), 0), MapManager.internalHeight));
+            if (canMove(result)) return result; // Got out of rad and not in area
+        } else if (area == null) return result; // Inside map & not in area (anymore)
 
         // Search for point in spiral pattern
         double angle = 0, distance = 0;
-        do {
-            point.x = initialX - (int) (cos(angle) * distance);
-            point.y = initialY - (int) (sin(angle) * distance);
-            angle += 0.3;
-            distance += 2;
-        } while (areaTo(point) != null || map.isOutOfMap(point.x, point.y) && distance < 20000);
+        while (distance < 20_000) {
+            result.setTo(
+                    initial.getX() - (cos(angle) * distance),
+                    initial.getY() - (sin(angle) * distance));
+            angle += 0.306;
+            distance += 5;
+
+            if (!isOutOfMap(result)
+                    && (area == null || !area.containsPoint(result))
+                    && (area = areaTo(result)) == null) {
+                return result;
+            }
+        }
 
         // Worst case scenario, just pick the closest known path point
         if (distance >= 20000) {
-            PathPoint closest = closest(point);
-            if (closest != null) return closest;
+            PathPoint closest = closest(initial);
+            if (closest != null) return closest.toLocation();
         }
-        return point;
+        return initial;
     }
 
-    private PathPoint closest(PathPoint point) {
+    private PathPoint closest(Locatable point) {
+        return points.stream().min(Comparator.comparingDouble(p -> p.distanceTo(point))).orElse(null);
+    }
 
-        double distance = 0;
-        PathPoint current = null;
-
-        for (PathPoint loop : points) {
-            double cd = loop.distance(point);
-
-            if (current == null || cd < distance) {
-                current = loop;
-                distance = cd;
-            }
-
-        }
-
-        return current;
+    public boolean isOutOfMap(Locatable loc) {
+        return map.isOutOfMap(loc.getX(), loc.getY());
     }
 
     public boolean isOutOfMap(double x, double y) {
         return map.isOutOfMap(x, y);
+    }
+
+    public boolean canMove(Locatable loc) {
+        return canMove(loc.getX(), loc.getY());
     }
 
     public boolean canMove(double x, double y) {
@@ -125,11 +124,11 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
         return true;
     }
 
-    private AreaImpl areaTo(PathPoint point) {
-        return obstacleHandler.stream().filter(a -> a.containsPoint(point.x, point.y)).findAny().orElse(null);
+    private AreaImpl areaTo(Locatable point) {
+        return obstacleHandler.stream().filter(a -> a.containsPoint(point.getX(), point.getY())).findAny().orElse(null);
     }
 
-    boolean hasLineOfSight(PathPoint point1, PathPoint point2) {
+    boolean hasLineOfSight(Locatable point1, Locatable point2) {
         return obstacleHandler.stream().noneMatch(a -> a.intersectsLine(point1, point2));
     }
 

@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.core.utils.pathfinder;
 
+import eu.darkbot.api.game.other.Locatable;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -8,60 +10,69 @@ import java.util.Set;
 
 public class PathFinderCalculator {
 
-    private final PathPoint come;
-    private final PathPoint destination;
+    private final PathFinder pf;
+    private final PathPoint from;
+    private final PathPoint to;
 
     private final Set<PathPoint> closedList;
     private final Set<PathPoint> openList;
 
     private final List<PathPoint> fragmentedPath;
 
-    public PathFinderCalculator(PathPoint come,
-                                PathPoint destination) {
-
-        this.come = come;
-        this.destination = destination;
+    private PathFinderCalculator(PathFinder pf, Locatable from, Locatable to) {
+        this.pf = pf;
+        this.from =  new PathPoint(from.getX(), from.getY());
+        this.to = new PathPoint(to.getX(), to.getY());
 
         this.fragmentedPath = new ArrayList<>();
         this.closedList = new HashSet<>();
         this.openList = new HashSet<>();
     }
 
-    public void fillGeneratedPathTo(LinkedList<PathPoint> target) {
-        addDefs();
+    public static LinkedList<Locatable> calculate(
+            PathFinder finder, Locatable from, Locatable to, LinkedList<Locatable> path) {
+        if (path == null) path = new LinkedList<>();
+        new PathFinderCalculator(finder, from, to).fillGeneratedPathTo(path);
+        return path;
+    }
+
+    public void fillGeneratedPathTo(LinkedList<Locatable> target) {
+        addPoints();
 
         if (build()) unfragment(target);
 
-        remDefs();
+        removePoints();
     }
 
-    private void addDefs() {
-        for (PathPoint temp : destination.lineOfSight)
-            temp.lineOfSight.add(destination);
+    private void addPoints() {
+        pf.points.add(from);
+        pf.points.add(to);
 
-        for (PathPoint temp : come.lineOfSight)
-            temp.lineOfSight.add(come);
+        from.fillLineOfSight(pf);
+        for (PathPoint other : from.lineOfSight) other.lineOfSight.add(from);
+
+        to.fillLineOfSight(pf);
+        for (PathPoint other : to.lineOfSight) other.lineOfSight.add(to);
     }
 
-    private void remDefs() {
-        for (PathPoint temp : destination.lineOfSight)
-            temp.lineOfSight.remove(destination);
+    private void removePoints() {
+        pf.points.remove(from);
+        pf.points.remove(to);
 
-        for (PathPoint temp : come.lineOfSight)
-            temp.lineOfSight.remove(come);
+        for (PathPoint other : to.lineOfSight) other.lineOfSight.remove(to);
+        for (PathPoint other : from.lineOfSight) other.lineOfSight.remove(from);
     }
 
     private boolean build() {
+        PathPoint current = from;
 
-        PathPoint current = come;
-
-        current.f = (int) destination.distance(come);
+        current.f = (int) to.distanceTo(from);
         current.g = 0;
         current.s = 0;
 
         openList.add(current);
 
-        fragmentedPath.add(come);
+        fragmentedPath.add(from);
 
         do {
 
@@ -69,8 +80,8 @@ public class PathFinderCalculator {
             closedList.add(current);
 
             update(current);
-        } while ((current = pickupOne()) != destination && !openList.isEmpty());
-        return current == destination;
+        } while ((current = pickupOne()) != to && !openList.isEmpty());
+        return current == to;
     }
 
     private void update(PathPoint current) {
@@ -79,25 +90,25 @@ public class PathFinderCalculator {
             if (closedList.contains(neighbor))
                 continue;
 
-            int g = current.g + (int) current.distance(neighbor);
+            int g = current.g + (int) current.distanceTo(neighbor);
 
             if (!openList.add(neighbor) && g >= neighbor.g)
                 continue;
 
             neighbor.g = g;
             neighbor.s = current.s + 1;
-            neighbor.f = g + (int) destination.distance(neighbor);
+            neighbor.f = g + (int) to.distanceTo(neighbor);
 
             fragmentedPath.add(neighbor);
         }
     }
 
-    private void unfragment(LinkedList<PathPoint> target) {
-        PathPoint current = destination;
+    private void unfragment(LinkedList<Locatable> target) {
+        PathPoint current = to;
 
         do {
             target.addFirst(current);
-        } while ((current = next(current)) != come);
+        } while ((current = next(current)) != from);
     }
 
     private PathPoint next(PathPoint current) {
@@ -109,7 +120,7 @@ public class PathFinderCalculator {
 
             if (!current.lineOfSight.contains(loop)) continue;
 
-            int csum = loop.g + (int) loop.distance(current);
+            int csum = loop.g + (int) loop.distanceTo(current);
 
             if (current.s == loop.s + 1 && (closest == null || csum < sum)) {
                 closest = loop;

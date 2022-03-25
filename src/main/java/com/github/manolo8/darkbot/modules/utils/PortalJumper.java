@@ -27,7 +27,7 @@ public class PortalJumper {
     }
 
     public boolean travel(Portal target) {
-        double leniency = Math.min(200 + drive.closestDistance(target.locationInfo.now), 600);
+        double leniency = Math.min(200 + drive.getClosestDistance(target.locationInfo.now), 600);
         if (target.locationInfo.isLoaded() && drive.movingTo().distance(target.locationInfo.now) > leniency) {
             drive.move(Location.of(target.locationInfo.now, Math.random() * Math.PI * 2, Math.random() * 200));
             return false;
