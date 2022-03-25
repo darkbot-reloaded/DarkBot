@@ -6,24 +6,24 @@ import com.github.manolo8.darkbot.gui.drawables.DevStuffDrawer;
 import com.github.manolo8.darkbot.gui.drawables.DynamicEntitiesDrawer;
 import com.github.manolo8.darkbot.gui.drawables.HeroDrawer;
 import com.github.manolo8.darkbot.gui.drawables.InfosDrawer;
-import com.github.manolo8.darkbot.gui.drawables.StatsDrawer;
+import com.github.manolo8.darkbot.gui.drawables.OverlayDrawer;
 import com.github.manolo8.darkbot.gui.drawables.TrailDrawer;
 import com.github.manolo8.darkbot.gui.drawables.ZonesDrawer;
 import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DrawableHandler extends FeatureHandler<Drawable> {
     private static final Class<?>[] NATIVE =
             new Class[]{ZonesDrawer.class, InfosDrawer.class, TrailDrawer.class, ConstantEntitiesDrawer.class,
-                    DynamicEntitiesDrawer.class, HeroDrawer.class, DevStuffDrawer.class, StatsDrawer.class};
+                    DynamicEntitiesDrawer.class, HeroDrawer.class, DevStuffDrawer.class, OverlayDrawer.class};
 
     private List<Drawable> drawables;
 
@@ -38,49 +38,39 @@ public class DrawableHandler extends FeatureHandler<Drawable> {
 
     @Override
     public void update(Stream<FeatureDefinition<Drawable>> features) {
-        List<Drawable> all = features.map(featureRegistry::getFeature)
+        List<Drawable> drawables = features.map(featureRegistry::getFeature)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .sorted(Comparator.nullsLast(Comparator.comparing(this::getStep))
+                        .thenComparing(this::getAttach))
                 .collect(Collectors.toList());
 
-        List<Drawable> drawables = new ArrayList<>();
-        Set<Drawable> toRemove = new HashSet<>();
+        if (drawables.isEmpty()) return;
 
-        all.removeIf(drawable -> {
-            if (isNative(drawable)) {
-                drawables.add(drawable);
-                return true;
-            }
-            return false;
-        });
+        Draw previous = drawables.get(0).getClass().getAnnotation(Draw.class);
+        for (int i = 1; i < drawables.size(); i++) {
+            Draw draw = drawables.get(i).getClass().getAnnotation(Draw.class);
 
-        for (Drawable drawable : all) {
-            Draw draw = drawable.getClass().getAnnotation(Draw.class);
-
-            if (draw == null) drawables.add(drawable);
-            else {
-                Drawable n = drawables.stream()
-                        .filter(d -> d.getClass() == NATIVE[draw.value().ordinal()])
-                        .findAny().orElse(null);
-                int index = drawables.indexOf(n);
-
-                Draw.Stage stage = draw.stage();
-                drawables.add(index + (stage == Draw.Stage.BEFORE ? 0 : 1), drawable);
-
-                if (stage == Draw.Stage.REPLACE)
-                    toRemove.add(n);
+            if (previous != null && draw != null &&
+                    previous.value() == draw.value() &&
+                    previous.attach() == Draw.Attach.REPLACE &&
+                    draw.attach() == Draw.Attach.REPLACE) {
+                drawables.remove(i - 1);
+                i--;
             }
         }
 
-        toRemove.forEach(drawables::remove);
         this.drawables = drawables;
     }
 
-    private boolean isNative(Object o) {
-        for (Class<?> drawableClass : NATIVE)
-            if (drawableClass == o.getClass())
-                return true;
-
-        return false;
+    private @Nullable Draw.Stage getStep(Drawable drawable) {
+        Draw draw = drawable.getClass().getAnnotation(Draw.class);
+        return draw == null ? null : draw.value();
     }
+
+    private @NotNull Draw.Attach getAttach(Drawable drawable) {
+        Draw draw = drawable.getClass().getAnnotation(Draw.class);
+        return draw == null || draw.attach() == null ? Draw.Attach.AFTER : draw.attach();
+    }
+
 }

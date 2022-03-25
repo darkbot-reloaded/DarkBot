@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.drawables;
 
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.extensions.features.Feature;
+import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Locatable;
@@ -12,6 +13,7 @@ import eu.darkbot.api.managers.MovementAPI;
 import java.util.List;
 
 @Feature(name = "Hero drawer", description = "Draws hero & pet on the bot map")
+@Draw(value = Draw.Stage.HERO_AND_PET, attach = Draw.Attach.REPLACE)
 public class HeroDrawer implements Drawable {
 
     private final HeroAPI hero;

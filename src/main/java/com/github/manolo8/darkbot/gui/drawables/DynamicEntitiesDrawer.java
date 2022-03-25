@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.drawables;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import eu.darkbot.api.config.types.DisplayFlag;
+import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.entities.Box;
@@ -20,6 +21,7 @@ import eu.darkbot.api.managers.HeroAPI;
 import java.util.Collection;
 
 @Feature(name = "Dynamic Entities Drawer", description = "Draws dynamic entities (eg: npcs, boxes, or players)")
+@Draw(value = Draw.Stage.DYNAMIC_ENTITIES, attach = Draw.Attach.REPLACE)
 public class DynamicEntitiesDrawer implements Drawable {
 
     private final HeroAPI hero;

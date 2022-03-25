@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.drawables;
 import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.gui.trail.Line;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.MapGraphics;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 @Feature(name = "Trail Drawer", description = "Draws hero's trail")
+@Draw(value = Draw.Stage.HERO_TRAIL, attach = Draw.Attach.REPLACE)
 public class TrailDrawer implements Drawable {
 
     private final ConfigSetting<Integer> trailLength;

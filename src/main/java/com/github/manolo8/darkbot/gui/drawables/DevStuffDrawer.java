@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.entities.Entity;
@@ -18,6 +19,7 @@ import eu.darkbot.api.managers.HeroAPI;
 import java.util.Collection;
 
 @Feature(name = "DevStuff Drawer", description = "Draws dev infos (eg: unknown entities, pathfinding points, and entity metadata)")
+@Draw(value = Draw.Stage.DEV_STUFF, attach = Draw.Attach.REPLACE)
 public class DevStuffDrawer implements Drawable {
 
     private final Drive drive;

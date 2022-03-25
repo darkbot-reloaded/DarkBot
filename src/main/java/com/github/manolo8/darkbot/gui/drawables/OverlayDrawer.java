@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.group.GroupMember;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.types.DisplayFlag;
+import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.MapGraphics;
@@ -26,8 +27,9 @@ import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Feature(name = "Stats Drawer", description = "Draws statistics")
-public class StatsDrawer implements Drawable {
+@Feature(name = "Overlay Drawer", description = "Draws overlays (eg: stats, boosters, or group info)")
+@Draw(value = Draw.Stage.OVERLAY, attach = Draw.Attach.REPLACE)
+public class OverlayDrawer implements Drawable {
     private static final DecimalFormat STAT_FORMAT = new DecimalFormat("###,###,###");
 
     private final BoosterAPI boosters;
@@ -37,7 +39,7 @@ public class StatsDrawer implements Drawable {
 
     private final ConfigSetting<Integer> maxDeaths;
 
-    public StatsDrawer(BoosterAPI boosters, GroupAPI group, StatsAPI stats, RepairAPI repair, ConfigAPI config) {
+    public OverlayDrawer(BoosterAPI boosters, GroupAPI group, StatsAPI stats, RepairAPI repair, ConfigAPI config) {
         this.boosters = boosters;
         this.group = group;
         this.stats = stats;

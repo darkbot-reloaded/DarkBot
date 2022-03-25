@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.drawables;
 
 import com.github.manolo8.darkbot.extensions.features.Feature;
+import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.entities.BattleStation;
@@ -11,6 +12,7 @@ import eu.darkbot.api.managers.EntitiesAPI;
 import java.util.Collection;
 
 @Feature(name = "Constant Entities Drawer", description = "Draws entities that are constantly on the map (eg: portals, CBS, and stations)")
+@Draw(value = Draw.Stage.CONSTANT_ENTITIES, attach = Draw.Attach.REPLACE)
 public class ConstantEntitiesDrawer implements Drawable {
 
     private final Collection<? extends Portal> portals;

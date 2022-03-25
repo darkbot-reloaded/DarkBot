@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.types.DisplayFlag;
+import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Health;
@@ -25,6 +26,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 
 @Feature(name = "Infos Drawer", description = "Draws info about bot state, current map, hero & target health etc.")
+@Draw(value = Draw.Stage.INFO_AND_HEALTH, attach = Draw.Attach.REPLACE)
 public class InfosDrawer implements Drawable {
 
     private static final NumberFormat HEALTH_FORMAT;

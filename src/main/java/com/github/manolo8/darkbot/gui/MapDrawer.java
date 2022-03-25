@@ -21,9 +21,7 @@ import java.util.Set;
 public class MapDrawer extends JPanel {
 
     private static final RenderingHints RENDERING_HINTS =
-            new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON) {{
-                put(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-            }};
+            new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
     public MapGraphicsImpl mapGraphics;
 
@@ -206,7 +204,7 @@ public class MapDrawer extends JPanel {
 
         @Override
         public int toScreenPointY(double gameY) {
-            return (int) Math.round(((gameY / mapBounds.getHeight()) * getHeight()));
+            return (int) Math.round((gameY / mapBounds.getHeight()) * getHeight());
         }
 
         @Override

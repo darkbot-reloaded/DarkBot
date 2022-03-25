@@ -5,6 +5,7 @@ import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.types.DisplayFlag;
 import eu.darkbot.api.config.types.SafetyInfo;
 import eu.darkbot.api.config.types.ZoneInfo;
+import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.entities.Barrier;
@@ -21,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Feature(name = "Zones Drawer", description = "Draws zones (eg: barriers, mist, bot zones)")
+@Draw(value = Draw.Stage.ZONES, attach = Draw.Attach.REPLACE)
 public class ZonesDrawer implements Drawable {
 
     private final ConfigAPI config;
