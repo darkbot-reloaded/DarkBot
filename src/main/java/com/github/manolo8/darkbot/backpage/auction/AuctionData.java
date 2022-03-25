@@ -58,8 +58,7 @@ public class AuctionData {
         AuctionItems r = null;
 
         if (string.contains("hour")) {
-            r = auctionItems.get("item_hour_" + id);
-            if (r == null) auctionItems.put(id, r = new AuctionItems()); //need to clean up this somehow
+            r = auctionItems.computeIfAbsent("item_hour_" + id, i -> new AuctionItems());
             r.setId("item_hour_" + id);
             r.setAuctionType(AuctionItems.Type.HOUR);
         } else if (string.contains("day")) {
