@@ -62,7 +62,7 @@ public class AuctionData {
         if (!m.find()) return false;
 
         String id = m.group(1);
-        AuctionItems r = null;
+        AuctionItems r;
 
         if (string.contains("hour")) {
             r = auctionItems.computeIfAbsent("item_hour_" + id, i -> new AuctionItems());
