@@ -1,9 +1,14 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.api.util.AbstractDataReader;
+import com.github.manolo8.darkbot.core.api.util.DataReader;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.DarkBoat;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class DarkBoatAdapter extends GameAPIImpl<
         DarkBoat,
@@ -46,4 +51,57 @@ public class DarkBoatAdapter extends GameAPIImpl<
         }
     }
 
+    @Override
+    protected DataReader createReader(int idx) {
+        if (window.getVersion() >= 9)
+            return new DarkBoatDataReader(idx, memory, extraMemoryReader);
+
+        return super.createReader(idx);
+    }
+
+    static class DarkBoatDataReader extends AbstractDataReader {
+
+        private final int idx;
+        private final ByteBuffer byteBuffer;
+        private final DarkBoat darkBoat;
+
+        public DarkBoatDataReader(int idx, DarkBoat darkBoat, GameAPI.ExtraMemoryReader reader) {
+            super(reader);
+            this.idx = idx;
+            this.darkBoat = darkBoat;
+
+            ByteBuffer[] buffers = darkBoat.buffers;
+            ByteBuffer buffer = buffers[idx];
+
+            if (buffer == null)
+                buffers[idx] = buffer = ByteBuffer.allocateDirect(DataReader.MAX_CHUNK_SIZE)
+                        .order(ByteOrder.nativeOrder());
+
+            this.byteBuffer = buffer;
+        }
+
+        @Override
+        public ByteBuffer getByteBuffer() {
+            return byteBuffer;
+        }
+
+        @Override
+        public Boolean read(long address, int length) {
+            if (!inUse.compareAndSet(false, true)) return false;
+
+            boolean res = darkBoat.readToBuffer(idx, address, length);
+            if (!res) return null;
+
+            reset(length);
+            return true;
+        }
+
+        @Override
+        public byte[] toArray() {
+            byte[] bytes = new byte[getAvailable()];
+            setArray(bytes, 0, getAvailable());
+
+            return bytes;
+        }
+    }
 }

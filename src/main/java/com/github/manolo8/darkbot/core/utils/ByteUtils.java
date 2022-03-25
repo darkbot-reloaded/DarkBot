@@ -10,6 +10,8 @@ import java.util.function.Predicate;
 
 public class ByteUtils {
 
+    public static final int ATOM_KIND = 0b111;
+
     /**
      * The AtomConstants namespace defines constants for
      * manipulating atoms.
@@ -47,9 +49,7 @@ public class ByteUtils {
      *
      * A mask that will remove atom constant bits:
      */
-    public static final long ATOM_MASK = ~0b111L;
-    @Deprecated // Use ATOM_MASK instead.
-    public static final long FIX = ~0b111L;
+    public static final int ATOM_MASK = ~ATOM_KIND;
 
     /**
      * Constant value which means that reference to the object,

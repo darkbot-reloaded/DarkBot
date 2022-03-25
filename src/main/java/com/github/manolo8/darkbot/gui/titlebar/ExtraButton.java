@@ -153,7 +153,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             }));
             ConfigSetting<Config> root = config.getConfigRoot();
             if (root.getValue().BOT_SETTINGS.OTHER.DEV_STUFF) {
-                list.add(createSeparator("Dev stuff"));
+                list.add(createSeparator("Dev stuff")); // somehow check if api can do async reads.
                 list.add(create("Save SWF", e -> main.addTask(SWFUtils::dumpMainSWF)));
             }
 

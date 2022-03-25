@@ -1,5 +1,8 @@
 package com.github.manolo8.darkbot.utils.debug;
 
+import com.github.manolo8.darkbot.core.api.util.AbstractDataReader;
+import com.github.manolo8.darkbot.core.api.util.DataReader;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -16,7 +19,13 @@ public class SWFUtils {
             if (size < 11_500_000 || size > 13_000_000) continue;
 
             try (FileOutputStream writer = new FileOutputStream("main.swf")) {
-                writer.write(API.readMemory(addr, size));
+                for (int i = 0; i < size; i += DataReader.MAX_CHUNK_SIZE) {
+                    try (AbstractDataReader reader = (AbstractDataReader) API.readData(addr + i,
+                            Math.min(DataReader.MAX_CHUNK_SIZE, size - i))) {
+
+                        writer.getChannel().write(reader.getByteBuffer(), i);
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -24,5 +33,4 @@ public class SWFUtils {
         }
         System.out.println("SWF not found, are you running the flash client?");
     }
-
 }

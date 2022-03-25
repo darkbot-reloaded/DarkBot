@@ -3,6 +3,9 @@ package eu.darkbot.api;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.LibUtils;
 
+import java.lang.annotation.Native;
+import java.nio.ByteBuffer;
+
 public class DarkBoat implements GameAPI.Window, GameAPI.Handler, GameAPI.Memory, GameAPI.Interaction, API.Singleton {
 
     static {
@@ -50,4 +53,16 @@ public class DarkBoat implements GameAPI.Window, GameAPI.Handler, GameAPI.Memory
     public native long[] queryInt    (int    value  , int maxSize);
     public native long[] queryLong   (long   value  , int maxSize);
     public native long[] queryBytes  (byte[] pattern, int maxSize);
+
+    // DarkBoat v9+
+    public final @Native ByteBuffer[] buffers = new ByteBuffer[10];
+
+    // writes data at given address to direct buffer
+    public native boolean readToBuffer(int bufferIdx, long address, int length);
+
+    // writes string data to direct buffer
+    public native int readStringBuffer(int bufferIdx, long address);
+
+    // same as above but reads the pointer before reading the string
+    public native int readStringBufferPtr(int bufferIdx, long address);
 }
