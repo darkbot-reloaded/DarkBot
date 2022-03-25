@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.drawables;
 
+import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.extensions.features.Feature;
@@ -16,11 +17,14 @@ import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.HeroAPI;
 
+import java.awt.Color;
 import java.util.Collection;
 
 @Feature(name = "DevStuff Drawer", description = "Draws dev infos (eg: unknown entities, pathfinding points, and entity metadata)")
 @Draw(value = Draw.Stage.DEV_STUFF, attach = Draw.Attach.REPLACE)
 public class DevStuffDrawer implements Drawable {
+
+    private static final Color PATH_COLOR = new Color(0, 128, 255, 64);
 
     private final Drive drive;
     private final EntitiesAPI entities;
@@ -47,6 +51,16 @@ public class DevStuffDrawer implements Drawable {
         mg.setColor("unknown");
         for (Entity entity : unknown) {
             mg.drawRectCentered(entity, 3, false);
+        }
+
+        mg.setColor(PATH_COLOR);
+        for (PathPoint point : ((HeroManager) hero).drive.pathFinder.points) {
+            for (PathPoint other : point.lineOfSight) {
+                mg.drawLine(mg.toScreenPointX(point.x),
+                        mg.toScreenPointY(point.y),
+                        mg.toScreenPointX(point.x + (other.x - point.x) / 3),
+                        mg.toScreenPointY(point.y + (other.y - point.y) / 3));
+            }
         }
 
         for (PathPoint point : drive.pathFinder.points) {
