@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.backpage.auction;
 
+import java.util.Locale;
+
 public class AuctionItems {
     protected Type type;
     protected String id, lootId, name, itemType;
@@ -95,6 +97,10 @@ public class AuctionItems {
     public enum Type {
         HOUR,
         DAY,
-        WEEK
+        WEEK;
+
+        public String getId() {
+            return this.name().toLowerCase(Locale.ROOT);
+        }
     }
 }
