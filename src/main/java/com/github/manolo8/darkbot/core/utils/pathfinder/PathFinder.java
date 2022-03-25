@@ -26,27 +26,28 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
         this.points = new HashSet<>();
     }
 
-    public LinkedList<PathPoint> createRote(Locatable current, Locatable destination) {
-        current = fixToClosest(current);
-        destination = fixToClosest(destination);
+    public LinkedList<Locatable> createRote(Locatable current, Locatable destination) {
+        Locatable fixedCurrent = fixToClosest(current);
+        Locatable fixedDestination = fixToClosest(destination);
 
-        if (hasLineOfSight(current, destination)) {
-            LinkedList<PathPoint> list = new LinkedList<>();
-            list.add(new PathPoint(current.getX(), current.getY()));
-            list.add(new PathPoint(destination.getX(), destination.getY()));
+        LinkedList<Locatable> list = new LinkedList<>();
+
+        // Always add an initial point if current needs to be fixed
+        if (current.distanceTo(fixedCurrent) > 1) list.add(fixedCurrent);
+
+        // Trivial case, just directly move to destination
+        if (hasLineOfSight(fixedCurrent, fixedDestination)) {
+            list.add(new PathPoint(fixedDestination.getX(), fixedDestination.getY()));
             return list;
         }
 
-        PathPoint from = new PathPoint(current.getX(), current.getY());
-        PathPoint to = new PathPoint(destination.getX(), destination.getY());
-        from.fillLineOfSight(this);
-        to.fillLineOfSight(this);
-
-        LinkedList<PathPoint> paths = PathFinderCalculator.calculate(from, to);
+        list = PathFinderCalculator.calculate(this, fixedCurrent, fixedDestination, list);
 
         // If no possible path is found, try to fly straight
-        if (paths.isEmpty()) paths.add(to);
-        return paths;
+        if (list.isEmpty() || list.getLast().distanceTo(fixedDestination) > 1)
+            list.add(fixedDestination);
+
+        return list;
     }
 
     public Locatable fixToClosest(final Locatable initial) {

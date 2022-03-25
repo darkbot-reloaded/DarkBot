@@ -38,6 +38,7 @@ import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.game.other.Health;
+import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.game.other.LocationInfo;
 import eu.darkbot.api.game.other.Lockable;
@@ -471,10 +472,10 @@ public class MapDrawer extends JPanel {
         if (!hero.locationInfo.isLoaded()) return;
 
         g2.setColor(cs.GOING);
-        PathPoint begin = new PathPoint((int) hero.locationInfo.now.x, (int) hero.locationInfo.now.y);
-        for (PathPoint path : drive.paths) {
-            g2.drawLine(translateX(begin.x), translateY(begin.y),
-                    translateX(path.x), translateY((begin = path).y));
+        Locatable begin = hero;
+        for (Locatable path : drive.paths) {
+            g2.drawLine(translateX(begin.getX()), translateY(begin.getY()),
+                    translateX(path.getX()), translateY((begin = path).getY()));
         }
 
         if (hasFlag(DisplayFlag.SHOW_DESTINATION) && drive.paths.isEmpty())
