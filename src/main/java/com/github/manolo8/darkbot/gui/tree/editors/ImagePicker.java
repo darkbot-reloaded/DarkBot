@@ -46,8 +46,9 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
 
     @Override
     public void setText(String text) {
-        if (text != null && text.contains(File.separator) && text.length() > 30) {
-            super.setText(".." + text.substring(text.lastIndexOf(File.separator, text.length() - 30)));
+        int separatorIndex = text.lastIndexOf(File.separator, text.length() - 30);
+        if (separatorIndex != -1) {
+            super.setText(".." + text.substring(separatorIndex));
         } else {
             super.setText(text);
         }
