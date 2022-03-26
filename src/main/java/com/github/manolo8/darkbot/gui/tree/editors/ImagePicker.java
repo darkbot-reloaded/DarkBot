@@ -2,20 +2,23 @@ package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.config.ImageWrapper;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
-import eu.darkbot.api.config.util.OptionEditor;
-import com.github.manolo8.darkbot.gui.utils.Strings;
 import eu.darkbot.api.config.ConfigSetting;
-
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
+import eu.darkbot.api.config.util.OptionEditor;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.io.File;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
     private JFileChooser fc;
     private ImageWrapper image;
 
-    public ImagePicker(){
+    public ImagePicker() {
         addActionListener(e -> {
             if (fc == null) {
                 String path = image == null ? "." : image.getPath();
@@ -40,11 +43,12 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
         });
 
     }
+
     @Override
     public void setText(String text) {
-        if(text != null && text.contains(File.separator) && text.length() > 30){
-            super.setText(".."+text.substring(text.lastIndexOf(File.separator, text.length()-30)));
-        }else{
+        if (text != null && text.contains(File.separator) && text.length() > 30) {
+            super.setText(".." + text.substring(text.lastIndexOf(File.separator, text.length() - 30)));
+        } else {
             super.setText(text);
         }
 
@@ -57,7 +61,7 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
         return this;
     }
 
-    private void setEditing(ImageWrapper image){
+    private void setEditing(ImageWrapper image) {
         this.image = image == null ? new ImageWrapper() : image;
         setText(image.getPath());
     }

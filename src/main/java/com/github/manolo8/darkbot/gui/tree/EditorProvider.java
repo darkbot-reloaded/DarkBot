@@ -4,31 +4,17 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ImageWrapper;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.config.types.Editor;
-import com.github.manolo8.darkbot.gui.tree.editors.BooleanEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.ColorEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.ConditionEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.DropdownEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.FontEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.MultiDropdownEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.NumberEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.PercentEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.PlayerTagEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.RangeEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.ShipModeEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.StringEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.TableEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.ImagePicker;
+import com.github.manolo8.darkbot.gui.tree.editors.*;
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.types.Condition;
 import eu.darkbot.api.config.types.PercentRange;
 import eu.darkbot.api.config.types.PlayerTag;
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.config.util.OptionEditor;
-import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.utils.Inject;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -116,7 +102,6 @@ public class EditorProvider {
     public com.github.manolo8.darkbot.gui.tree.OptionEditor getLegacyEditor(ConfigField field) {
         return legacy.getEditor(field);
     }
-
 
 
 }

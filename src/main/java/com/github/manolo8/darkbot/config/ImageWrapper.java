@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.config;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Image;
+import javax.swing.ImageIcon;
 
 public class ImageWrapper {
     private String path;
@@ -9,7 +9,7 @@ public class ImageWrapper {
     private transient boolean loaded;
 
     public String getPath() {
-        if(this.path == null)
+        if (this.path == null)
             return "None";
         return this.path;
     }
