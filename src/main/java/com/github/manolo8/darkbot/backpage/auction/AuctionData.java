@@ -26,17 +26,19 @@ public class AuctionData {
     }
 
     public Map<String, AuctionItems> getAuctionHourItems() {
-        return auctionItems.entrySet().stream().filter(a -> a.getValue().type == AuctionItems.Type.HOUR).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return auctionItems.entrySet().stream().filter(a -> a.getValue().type == AuctionItems.Type.HOUR)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public Map<String, AuctionItems> getAuctionDayItems() {
-        return auctionItems.entrySet().stream().filter(a -> a.getValue().type == AuctionItems.Type.DAY).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return auctionItems.entrySet().stream().filter(a -> a.getValue().type == AuctionItems.Type.DAY)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public Map<String, AuctionItems> getAuctionWeekItems() {
-        return auctionItems.entrySet().stream().filter(a -> a.getValue().type == AuctionItems.Type.WEEK).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return auctionItems.entrySet().stream().filter(a -> a.getValue().type == AuctionItems.Type.WEEK)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
-
 
     public boolean parse(String page) {
         Matcher m = AUCTION_TABLE.matcher(page);
