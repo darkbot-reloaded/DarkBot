@@ -120,7 +120,7 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
 
     @Override
     public String toString() {
-        return String.valueOf(id);
+        return id + getEffects().toString();
     }
 
     @Override

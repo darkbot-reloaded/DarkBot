@@ -3,77 +3,88 @@ package com.github.manolo8.darkbot.gui.zones.safety;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.gui.MapDrawer;
+import com.github.manolo8.darkbot.gui.drawables.ConstantEntitiesDrawer;
+import com.github.manolo8.darkbot.gui.drawables.InfosDrawer;
+import com.github.manolo8.darkbot.gui.drawables.ZonesDrawer;
+import eu.darkbot.api.extensions.MapGraphics;
+import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Point;
 
-import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Comparator;
 
 class SafetiesDisplay extends MapDrawer {
 
-    private SafetiesEditor editor;
+    private final SafetiesEditor editor;
+
     private SafetyInfo closest;
+
+    private InfosDrawer infosDrawer;
+    private ConstantEntitiesDrawer constantEntitiesDrawer;
+    private ZonesDrawer zonesDrawer;
 
     SafetiesDisplay(SafetiesEditor editor) {
         this.editor = editor;
+
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                updateClosest(e);
-                if (closest != null) editor.edit(closest);
+                updateClosest(e, true);
             }
         });
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                updateClosest(e);
-                repaint();
+                updateClosest(e, false);
             }
         });
     }
 
-    private void updateClosest(MouseEvent e) {
-        double x = undoTranslateX(e.getX()), y = undoTranslateY(e.getY());
+    @Override
+    public void setup(Main main) {
+        super.setup(main);
+
+        this.infosDrawer = main.pluginAPI.requireInstance(InfosDrawer.class);
+        this.zonesDrawer = main.pluginAPI.requireInstance(ZonesDrawer.class);
+        this.constantEntitiesDrawer = main.pluginAPI.requireInstance(ConstantEntitiesDrawer.class);
+    }
+
+    @Override
+    protected void onPaint() {
+        zonesDrawer.drawZones(mapGraphics);
+        constantEntitiesDrawer.onDraw(mapGraphics);
+        infosDrawer.drawMap(mapGraphics);
+
+        if (editor.safetyInfos == null) return;
+        drawCustomZones(mapGraphics);
+    }
+
+    private void drawCustomZones(MapGraphics mg) {
+        if (hovering && closest != null && closest != editor.editing) {
+            mg.setColor("safety_editor.zone_highlight");
+            zonesDrawer.drawSafeZone(mg, closest);
+
+            mg.setColor("safety_editor.zone_solid");
+
+            Point size = mg.toScreenPoint(closest.diameter(), closest.diameter());
+            mg.drawOval(closest, size.x(), size.y(), false);
+        }
+
+        if (editor.editing != null) {
+            mg.setColor("safety_editor.zone_selected");
+            zonesDrawer.drawSafeZone(mg, editor.editing);
+        }
+    }
+
+    private void updateClosest(MouseEvent e, boolean edit) {
+        Locatable click = mapGraphics.toGameLocation(e.getX(), e.getY());
         closest = editor.safetyInfos.stream()
                 .filter(s -> s.entity != null && !s.entity.removed)
-                .min(Comparator.comparingDouble(s -> Math.pow(s.x - x, 2) + Math.pow(s.y - y, 2)))// squared distance
+                .min(Comparator.comparingDouble(s -> Math.pow(s.x - click.getX(), 2) + Math.pow(s.y - click.getY(), 2)))// squared distance
                 .orElse(null);
+
         repaint();
+        if (edit && closest != null) editor.edit(closest);
     }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2 = setupDraw(g);
-        synchronized (Main.UPDATE_LOCKER) {
-            drawZones(g2);
-            drawStaticEntities(g2);
-            drawMap(g2);
-            if (editor.safetyInfos == null) return;
-            drawCustomZones(g2);
-        }
-    }
-
-    @Override
-    protected void drawMap(Graphics2D g2) {
-        g2.setColor(cs.TEXT_DARK);
-        g2.setFont(cs.FONTS.BIG);
-        drawString(g2, hero.map.name, mid, (height / 2) + 12, Align.MID);
-    }
-
-    @Override
-    protected void drawCustomZones(Graphics2D g2) {
-        if (hovering && closest != null && closest != editor.editing) {
-            g2.setColor(cs.SAFETY_EDITOR.ZONE_HIGHLIGHT);
-            drawSafeZone(g2, closest);
-            g2.setColor(cs.SAFETY_EDITOR.ZONE_SOLID);
-            int radius = closest.radius();
-            g2.drawOval(translateX(closest.x - radius), translateY(closest.y - radius),
-                        translateX(closest.diameter()), translateY(closest.diameter()));
-        }
-        if (editor.editing != null) {
-            g2.setColor(cs.SAFETY_EDITOR.ZONE_SELECTED);
-            drawSafeZone(g2, editor.editing);
-        }
-    }
-
 }

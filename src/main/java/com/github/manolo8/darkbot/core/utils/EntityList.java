@@ -23,6 +23,7 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.factory.EntityFactory;
 import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
+import eu.darkbot.api.game.entities.Mist;
 import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
@@ -260,5 +261,15 @@ public class EntityList extends Updatable implements EntitiesAPI {
     @Override
     public Collection<? extends eu.darkbot.api.game.other.Obstacle> getObstacles() {
         return Collections.unmodifiableList(obstacles);
+    }
+
+    @Override
+    public @UnmodifiableView Collection<? extends Mist> getMists() {
+        return Collections.unmodifiableList(noCloack);
+    }
+
+    @Override
+    public @UnmodifiableView Collection<? extends eu.darkbot.api.game.entities.Barrier> getBarriers() {
+        return Collections.unmodifiableList(barriers);
     }
 }

@@ -1,0 +1,88 @@
+package com.github.manolo8.darkbot.gui.drawables;
+
+import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.utils.Drive;
+import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
+import com.github.manolo8.darkbot.extensions.features.Feature;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.extensions.Draw;
+import eu.darkbot.api.extensions.Drawable;
+import eu.darkbot.api.extensions.MapGraphics;
+import eu.darkbot.api.game.entities.Entity;
+import eu.darkbot.api.game.entities.Mine;
+import eu.darkbot.api.game.entities.Ship;
+import eu.darkbot.api.game.other.Lockable;
+import eu.darkbot.api.game.other.Point;
+import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.api.managers.EntitiesAPI;
+import eu.darkbot.api.managers.HeroAPI;
+
+import java.awt.Color;
+import java.util.Collection;
+
+@Feature(name = "DevStuff Drawer", description = "Draws dev infos (eg: unknown entities, pathfinding points, and entity metadata)")
+@Draw(value = Draw.Stage.DEV_STUFF, attach = Draw.Attach.REPLACE)
+public class DevStuffDrawer implements Drawable {
+
+    private static final Color PATH_COLOR = new Color(0, 128, 255, 64);
+
+    private final Drive drive;
+    private final EntitiesAPI entities;
+
+    private final Collection<? extends Entity> unknown;
+
+    private final ConfigSetting<Boolean> showDevStuff;
+    private final HeroAPI hero;
+
+    public DevStuffDrawer(EntitiesAPI entities, ConfigAPI config, Drive drive, HeroAPI hero) {
+        this.drive = drive;
+        this.entities = entities;
+        this.hero = hero;
+
+        this.unknown = entities.getUnknown();
+
+        this.showDevStuff = config.requireConfig("bot_settings.other.dev_stuff");
+    }
+
+    @Override
+    public void onDraw(MapGraphics mg) {
+        if (!showDevStuff.getValue()) return;
+
+        mg.setColor("unknown");
+        for (Entity entity : unknown) {
+            mg.drawRectCentered(entity, 3, false);
+        }
+
+        mg.setColor(PATH_COLOR);
+        for (PathPoint point : ((HeroManager) hero).drive.pathFinder.points) {
+            for (PathPoint other : point.lineOfSight) {
+                mg.drawLine(mg.toScreenPointX(point.x),
+                        mg.toScreenPointY(point.y),
+                        mg.toScreenPointX(point.x + (other.x - point.x) / 3),
+                        mg.toScreenPointY(point.y + (other.y - point.y) / 3));
+            }
+        }
+
+        for (PathPoint point : drive.pathFinder.points) {
+            mg.drawRectCentered(point, 2, true);
+        }
+
+        mg.setFont("tiny");
+        mg.setColor("text");
+        entities.getAll().stream()
+                .filter(e -> e.getId() > 150_000_000 && e.getId() < 160_000_000 || e instanceof Mine || e instanceof Ship)
+                .filter(e -> e.getLocationInfo().isInitialized())
+                .forEach(e -> mg.drawBackgroundedText(e, e.toString(), -4, MapGraphics.StringAlign.MID));
+
+        Point p = Point.of(mg.getWidthMiddle() - 20, mg.getHeight() - 40);
+
+        mg.setFont("small");
+        mg.drawBackgroundedText(p, hero.toString(), MapGraphics.StringAlign.RIGHT);
+
+        Lockable target = hero.getLocalTarget();
+        if (target != null && target.isValid()) {
+            p = Point.of(mg.getWidth() - 20, mg.getHeight() - 40);
+            mg.drawBackgroundedText(p, target.toString(), MapGraphics.StringAlign.RIGHT);
+        }
+    }
+}

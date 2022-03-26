@@ -34,7 +34,8 @@ public class FeatureRegisterHandler implements API.Singleton {
                 ExtraMenuHandler.class,
                 LaserSelectorHandler.class,
                 ShipModeSelectorHandler.class,
-                PetGearSelectorHandler.class
+                PetGearSelectorHandler.class,
+                DrawableHandler.class
         ).map(api::requireInstance).collect(Collectors.toList());
     }
 

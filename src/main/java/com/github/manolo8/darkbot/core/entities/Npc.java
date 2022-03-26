@@ -53,4 +53,10 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
     public eu.darkbot.api.config.types.NpcInfo getInfo() {
         return npcInfo;
     }
+
+    // shipId for npcs is always 0
+    @Override
+    public int getShipId() {
+        return getNpcId();
+    }
 }

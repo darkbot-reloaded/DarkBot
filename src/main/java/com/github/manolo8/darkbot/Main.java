@@ -45,6 +45,7 @@ import eu.darkbot.api.extensions.Behavior;
 import eu.darkbot.api.extensions.Configurable;
 import eu.darkbot.api.extensions.Installable;
 import eu.darkbot.api.extensions.Module;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.BotAPI;
 
 import javax.swing.*;
@@ -52,11 +53,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 104 alpha 2");
+    public static final Version VERSION      = new Version("1.13.17 beta 104 alpha 3");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -249,11 +249,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
         if (tickingModule) tickRunning();
         else tickLogic(false);
 
-        if (!running && (!hero.hasTarget() || !mapManager.isTarget(hero.target))) {
-            hero.setTarget(Stream.concat(mapManager.entities.ships.stream(), mapManager.entities.npcs.stream())
-                    .filter(mapManager::isTarget)
-                    .findFirst().orElse(null));
-        }
+        if (!running)
+            hero.setLocalTarget(hero.getTargetAs(Lockable.class));
 
         pingManager.tick();
     }
