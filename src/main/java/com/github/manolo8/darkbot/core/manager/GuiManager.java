@@ -13,9 +13,17 @@ import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.extensions.features.handlers.ReviveSelectorHandler;
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.extensions.Feature;
+import eu.darkbot.api.extensions.selectors.PrioritizedSupplier;
+import eu.darkbot.api.extensions.selectors.ReviveSelector;
+import eu.darkbot.api.game.enums.ReviveLocation;
 import eu.darkbot.api.game.other.Area;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.GameScreenAPI;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -34,6 +42,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     private final StatsProxy statsProxy;
 
     private final PairArray guis = PairArray.ofDictionary();
+    private final ReviveSelectorHandler reviveHandler;
 
     private long reconnectTime;
     private long lastDeath = -1;
@@ -82,12 +91,14 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     private boolean needRefresh;
 
-    public GuiManager(Main main, PluginAPI pluginAPI) {
+    public GuiManager(Main main, PluginAPI pluginAPI, ReviveSelectorHandler reviveHandler) {
         this.main = main;
         this.pluginAPI = pluginAPI;
         this.slotBarsProxy = pluginAPI.requireInstance(SlotBarsProxy.class);
         this.settingsProxy = pluginAPI.requireInstance(SettingsProxy.class);
         this.statsProxy = pluginAPI.requireInstance(StatsProxy.class);
+
+        this.reviveHandler = reviveHandler;
 
         this.validTime = System.currentTimeMillis();
 
@@ -176,7 +187,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         if (System.currentTimeMillis() - lastRepairAttempt <= 10000)
             return false;
 
-        long respawnId = main.config.GENERAL.SAFETY.REVIVE.getId();
+        long respawnId = reviveHandler.getBest().getId();
 
         if (main.repairManager.canRespawn((int) respawnId))
             API.writeMemoryLong(repairAddress + 32, respawnId);
@@ -351,5 +362,25 @@ public class GuiManager implements Manager, GameScreenAPI {
         settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION)
                 .filter(c -> slotBarsProxy.proActionBar.address != 0 && slotBarsProxy.isProActionBarVisible() != visible)
                 .ifPresent(API::keyboardClick);
+    }
+
+    @Feature(name = "Revive Supplier", description = "Provides a place where ship should be revived")
+    public static class DefaultReviveSupplier implements ReviveSelector, PrioritizedSupplier<ReviveLocation> {
+
+        private final ConfigSetting<com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation> reviveLocation;
+
+        public DefaultReviveSupplier(ConfigAPI config) {
+            this.reviveLocation = config.requireConfig("general.safety.revive");
+        }
+
+        @Override
+        public @NotNull PrioritizedSupplier<ReviveLocation> getReviveLocationSupplier() {
+            return this;
+        }
+
+        @Override
+        public ReviveLocation get() {
+            return ReviveLocation.values()[reviveLocation.getValue().ordinal()];
+        }
     }
 }
