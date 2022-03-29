@@ -141,6 +141,13 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         pet.update(API.readMemoryLong(address + 176));
         clickable.setRadius(0);
         id = API.readMemoryInt(address + 56);
+
+        if (locationInfo.isInitialized()) {
+            locationInfo.update();
+
+            drive.directStop();
+            drive.directStop();
+        }
     }
 
     public boolean hasTarget() {

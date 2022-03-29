@@ -155,6 +155,14 @@ public class Drive implements MovementAPI {
         if (!paths.isEmpty()) paths = new LinkedList<>();
     }
 
+    public void directStop() { // Used mostly after a portal jump
+        if (Main.API.hasCapability(GameAPI.Capability.DIRECT_MOVE_SHIP)) Main.API.moveShip(heroLoc.now);
+        else mouse.clickLoc(heroLoc.now);
+
+        endLoc = tempDest = null;
+        if (!paths.isEmpty()) paths = new LinkedList<>();
+    }
+
     public void clickCenter(boolean single, Location aim) {
         mouse.clickCenter(single, aim);
     }
