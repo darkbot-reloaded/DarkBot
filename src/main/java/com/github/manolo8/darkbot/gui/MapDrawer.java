@@ -78,6 +78,12 @@ public class MapDrawer extends JPanel {
     }
 
     protected void onPaint() {
+        //background image is drawn first
+        if (main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.ENABLED && main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage() != null) {
+            mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.OPACITY));
+            mapGraphics.g2.drawImage(main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage(), 0, 0, mapGraphics.width, mapGraphics.height, this);
+            mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        }
         for (Drawable drawable : drawableHandler.getDrawables()) {
             drawable.onDraw(mapGraphics);
         }
