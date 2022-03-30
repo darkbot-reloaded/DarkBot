@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.DarkBoat;
@@ -12,8 +13,9 @@ public class DarkBoatAdapter extends GameAPIImpl<
         DarkBoat,
         DarkBoatAdapter.DarkBoatDirectInteraction> {
 
-    public DarkBoatAdapter(StartupParams params, DarkBoatDirectInteraction di, DarkBoat darkboat) {
-        super(params,
+    public DarkBoatAdapter(BotInstaller botInstaller, StartupParams params, DarkBoatDirectInteraction di, DarkBoat darkboat) {
+        super(botInstaller,
+                params,
                 darkboat,
                 darkboat,
                 darkboat,
@@ -22,8 +24,7 @@ public class DarkBoatAdapter extends GameAPIImpl<
                 di,
                 GameAPI.Capability.LOGIN,
                 GameAPI.Capability.INITIALLY_SHOWN,
-                GameAPI.Capability.CREATE_WINDOW_THREAD,
-                GameAPI.Capability.DIRECT_LIMIT_FPS);
+                GameAPI.Capability.CREATE_WINDOW_THREAD, GameAPI.Capability.DIRECT_LIMIT_FPS);
     }
 
     @Override

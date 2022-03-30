@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.DarkCef;
@@ -15,12 +16,13 @@ public class DarkCefAdapter extends GameAPIImpl<
         GameAPI.NoOpDirectInteraction> {
 
     @Inject
-    public DarkCefAdapter(StartupParams params, DarkMem mem) {
-        this(params, DarkCef.getInstance(), mem);
+    public DarkCefAdapter(BotInstaller botInstaller, StartupParams params, DarkMem mem) {
+        this(botInstaller, params, DarkCef.getInstance(), mem);
     }
 
-    protected DarkCefAdapter(StartupParams params, DarkCef cef, DarkMem mem) {
-        super(params,
+    protected DarkCefAdapter(BotInstaller botInstaller, StartupParams params, DarkCef cef, DarkMem mem) {
+        super(botInstaller,
+                params,
                 cef,
                 cef,
                 mem,
@@ -28,8 +30,7 @@ public class DarkCefAdapter extends GameAPIImpl<
                 cef,
                 new GameAPI.NoOpDirectInteraction(),
                 GameAPI.Capability.LOGIN,
-                GameAPI.Capability.INITIALLY_SHOWN,
-                GameAPI.Capability.CREATE_WINDOW_THREAD);
+                GameAPI.Capability.INITIALLY_SHOWN, GameAPI.Capability.CREATE_WINDOW_THREAD);
     }
 
 }

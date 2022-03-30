@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.utils.StartupParams;
 
 /**
@@ -13,14 +14,14 @@ public class NoopAPIAdapter extends GameAPIImpl<
         GameAPI.NoOpInteraction,
         GameAPI.NoOpDirectInteraction> {
 
-    public NoopAPIAdapter(StartupParams params) {
-        super(params,
+    public NoopAPIAdapter(BotInstaller botInstaller, StartupParams params) {
+        super(botInstaller,
+                params,
                 new GameAPI.NoOpWindow(),
                 new GameAPI.NoOpHandler(),
                 new GameAPI.NoOpMemory(),
                 new GameAPI.NoOpStringReader(),
-                new GameAPI.NoOpInteraction(),
-                new GameAPI.NoOpDirectInteraction());
+                new GameAPI.NoOpInteraction(), new GameAPI.NoOpDirectInteraction());
     }
 
     @Override

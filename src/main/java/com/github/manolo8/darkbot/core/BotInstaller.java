@@ -55,28 +55,27 @@ public class BotInstaller implements API.Singleton {
     }
 
     private void checkUserData() {
-        int id = API.readMemoryInt(API.readMemoryLong(screenManagerAddress.get() + 240) + 56);
-        if (id == 0) return;
+        // could use ID from flash vars here
+        int heroId = API.readMemoryInt(API.readMemoryLong(screenManagerAddress.get() + 240) + 56);
+        if (heroId == 0) return;
 
-        long[] address = API.queryMemoryInt(id, 10);
-        for (long value : address) {
-            int level    = API.readMemoryInt(value + 4);
-            int speed    = API.readMemoryInt(value + 8);
-            int bool     = API.readMemoryInt(value + 12);
-            int val      = API.readMemoryInt(value + 16);
-            int cargo    = API.readMemoryInt(API.readMemoryLong(value - 48 + 248) + 40);
-            int maxCargo = API.readMemoryInt(API.readMemoryLong(value - 48 + 256) + 40);
+        long address = API.searchClassClosure(closure -> {
+            int level = API.readMemoryInt(closure + 52);
+            int speed = API.readMemoryInt(closure + 56);
+            int bool = API.readMemoryInt(closure + 60);
+            int val = API.readMemoryInt(closure + 64);
+            int cargo = API.readMemoryInt(API.readMemoryLong(closure + 248) + 40);
+            int maxCargo = API.readMemoryInt(API.readMemoryLong(closure + 256) + 40);
 
-            if (level >= 0 && level <= 100
-                    && speed > 50 && speed < 2000
-                    && (bool == 1 || bool == 2)
-                    && val == 0
-                    && cargo >= 0
-                    && maxCargo >= 100 && maxCargo < 100_000) {
-                heroInfoAddress.send(value - 48);
-                break;
-            }
-        }
+            return heroId == API.readMemoryInt(closure + 0x30)
+                   && level >= 0 && level <= 100
+                   && speed > 50 && speed < 2000
+                   && (bool == 1 || bool == 2)
+                   && val == 0
+                   && cargo >= 0
+                   && maxCargo >= 100 && maxCargo < 100_000;
+        });
+        if (address != 0) heroInfoAddress.send(address);
     }
 
     /**
@@ -92,8 +91,8 @@ public class BotInstaller implements API.Singleton {
         this.mainApplicationAddress.send(query[0] - 228);
         BotInstaller.SEP = API.readMemoryInt(mainApplicationAddress.get() + 4);
 
-        if ((query = API.queryMemory(bytesToSettings, 1)).length != 1) return true;
-        this.settingsAddress.send(query[0] - 277);
+        if ((temp = API.searchClassClosure(this::settingsPattern)) == 0) return true;
+        this.settingsAddress.send(temp);
 
         if ((temp = API.readMemoryLong(mainApplicationAddress.get() + 1344)) == 0) return true;
         this.mainAddress.send(temp);
@@ -107,6 +106,14 @@ public class BotInstaller implements API.Singleton {
         //reset address
         this.heroInfoAddress.send(0L);
         return false;
+    }
+
+    private boolean settingsPattern(long address) {
+        return API.readMemoryInt(address + 48) == -1
+               && API.readMemoryInt(address + 52) == 0
+               && API.readMemoryInt(address + 56) == 2
+               && API.readMemoryInt(address + 60) == 1;
+        // address + 280 - starts old pattern here
     }
 
     private void checkInvalid() {

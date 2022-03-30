@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.utils.StartupParams;
 
@@ -16,16 +17,16 @@ public class BackpageAdapter extends GameAPIImpl<
 
     private final StatsManager statsManager;
 
-    public BackpageAdapter(StartupParams params, StatsManager statsManager) {
-        super(params,
+    public BackpageAdapter(BotInstaller botInstaller, StartupParams params, StatsManager statsManager) {
+        super(botInstaller,
+                params,
                 new GameAPI.NoOpWindow(),
                 new GameAPI.NoOpHandler(),
                 new GameAPI.NoOpMemory(),
                 new GameAPI.NoOpStringReader(),
                 new GameAPI.NoOpInteraction(),
                 new GameAPI.NoOpDirectInteraction(),
-                GameAPI.Capability.LOGIN,
-                GameAPI.Capability.BACKGROUND_ONLY);
+                GameAPI.Capability.LOGIN, GameAPI.Capability.BACKGROUND_ONLY);
 
         this.statsManager = statsManager;
     }

@@ -1,9 +1,11 @@
 package com.github.manolo8.darkbot.core.manager;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.swf.IntArray;
+import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import eu.darkbot.api.managers.RepairAPI;
@@ -23,33 +25,33 @@ import java.util.Map;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class RepairManager implements Manager, RepairAPI {
+    private final Main main;
     private boolean writtenToLog = true;
-    private long guiAddress, mainAddress, userDataAddress, repairAddress;
+    private long userDataAddress, repairAddress;
 
     private String killerName;
     private final IntArray repairOptions = IntArray.ofArray(true);
+    private final ObjArray repairTypes = ObjArray.ofVector(true);
 
     private final Map<String, OutputStream> streams = new HashMap<>();
     private final GuiManager guiManager;
 
-    public RepairManager(GuiManager guiManager) {
+    public RepairManager(Main main, GuiManager guiManager) {
+        this.main = main;
         this.guiManager = guiManager;
     }
 
     @Override
     public void install(BotInstaller botInstaller) {
         botInstaller.guiManagerAddress.add(value -> {
-            guiAddress = value;
             repairAddress = 0;
         });
-        botInstaller.mainAddress.add(value -> mainAddress = value);
         botInstaller.heroInfoAddress.add(value -> userDataAddress = value);
     }
 
     private final List<Integer> repairOptionsList = new ArrayList<>();
     public void tick() {
-        if (isDead()) writtenToLog = false;
-        else {
+        if (!isDead()) {
             if (!writtenToLog) {
                 writeKiller();
                 writtenToLog = true;
@@ -58,6 +60,7 @@ public class RepairManager implements Manager, RepairAPI {
             return;
         }
         if (repairAddress == 0) updateRepairAddr();
+        if (repairAddress == 0) return;
 
         killerName = API.readMemoryString(API.readMemoryLong(repairAddress + 0x68));
         repairOptions.update(API.readMemoryLong(repairAddress + 0x58));
@@ -65,11 +68,15 @@ public class RepairManager implements Manager, RepairAPI {
         repairOptionsList.clear();
         for (int i = 0; i < repairOptions.getSize(); i++)
             this.repairOptionsList.add(repairOptions.get(i));
+
+        repairTypes.update(API.readMemoryLong(repairAddress + 0x60));
     }
 
     private void updateRepairAddr() {
-        long[] values = API.queryMemory(ByteUtils.getBytes(guiAddress, mainAddress), 1);
-        if (values.length == 1) repairAddress = values[0] - 0x38;
+        long repairClosure = API.searchClassClosure(this::repairClosurePattern);
+        if (repairClosure == 0) return;
+
+        repairAddress = API.readLong(repairClosure + 72);
     }
 
     public String getKillerName() {
@@ -77,7 +84,20 @@ public class RepairManager implements Manager, RepairAPI {
     }
 
     public boolean isDead() {
-        return userDataAddress != 0 && API.readMemoryBoolean(userDataAddress + 0x4C);
+        if (repairAddress != 0) {
+            boolean isReallyDead = API.readMemoryBoolean(repairAddress + 0x28);
+            if (isReallyDead) writtenToLog = false;
+
+            return isReallyDead; // the below ones except userData are only assumptions
+        }
+
+        // user data is initialized only if hero was initialized before death
+        if (userDataAddress != 0) return API.readMemoryBoolean(userDataAddress + 0x4C);
+
+        return main.mapManager.mapAddress != 0
+               && !guiManager.lostConnection.isVisible()
+               && !guiManager.connecting.isVisible()
+               && (main.hero.address == 0 || main.hero.id == 0); // still does a query on startup, same like in GuiManager
     }
 
     public boolean canRespawn(int option) {
@@ -90,6 +110,10 @@ public class RepairManager implements Manager, RepairAPI {
             options[i] = repairOptions.get(i);
         }
         return options;
+    }
+
+    private int getCooldown(int repairOption) {
+        return API.readInt(repairTypes.get(repairOption) + 48);
     }
 
     private int deaths;
@@ -124,6 +148,20 @@ public class RepairManager implements Manager, RepairAPI {
 
     private OutputStream getOrCreateStream(String name) {
         return this.streams.computeIfAbsent(name, LogUtils::createLogFile);
+    }
+
+    private final byte[] cache = new byte[40];
+    private boolean repairClosurePattern(long addr){
+        API.readMemory(addr + 48, cache);
+
+        return ByteUtils.getInt(cache, 0) == 0
+               && ByteUtils.getInt(cache, 4) == 1
+               && ByteUtils.getInt(cache, 8) == 2
+               && ByteUtils.getInt(cache, 12) == 3
+               && ByteUtils.getInt(cache, 16) == 4
+               && ByteUtils.getInt(cache, 20) == 0 // align to 8
+               && API.readLong(ByteUtils.getLong(cache, 24), 0x10) != 0
+               && API.readLong(ByteUtils.getLong(cache, 32), 0x10) != 0;
     }
 
     @Override
