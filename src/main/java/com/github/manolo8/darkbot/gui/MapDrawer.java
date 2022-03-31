@@ -84,7 +84,7 @@ public class MapDrawer extends JPanel {
             mapGraphics.g2.drawImage(main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage(), 0, 0, mapGraphics.width, mapGraphics.height, this);
             mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
         }
-        
+
         for (Drawable drawable : drawableHandler.getDrawables()) {
             drawable.onDraw(mapGraphics);
         }
