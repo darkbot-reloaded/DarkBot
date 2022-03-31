@@ -54,8 +54,6 @@ public interface GameAPI {
         byte[]  readBytes  (long address, int length);
         void    readBytes  (long address, byte[] buff, int length);
 
-        long searchClassClosure(Predicate<Long> pattern);
-
         default int readInt(long address, int... offsets) {
             for (int i = 0; i < offsets.length - 1; i++) address = readLong(address + offsets[i]);
             return readInt(address + offsets[offsets.length - 1]);
@@ -92,9 +90,11 @@ public interface GameAPI {
         long[] queryBytes  (byte[] pattern, int maxSize);
     }
 
-    interface StringReader extends Base {
+    interface ExtraMemoryReader extends Base {
         String readString(long address);
         void resetCache();
+
+        long searchClassClosure(Predicate<Long> pattern);
     }
 
     interface Interaction extends Base {
@@ -214,11 +214,6 @@ public interface GameAPI {
         public void readBytes(long address, byte[] buff, int length) {}
 
         @Override
-        public long searchClassClosure(Predicate<Long> pattern) {
-            return 0;
-        }
-
-        @Override
         public void replaceInt(long address, int oldValue, int newValue) {}
 
         @Override
@@ -261,9 +256,14 @@ public interface GameAPI {
         }
     }
 
-    class NoOpStringReader implements StringReader {
+    class NoOpExtraMemoryReader implements ExtraMemoryReader {
         @Override
         public int getVersion() {
+            return 0;
+        }
+
+        @Override
+        public long searchClassClosure(Predicate<Long> pattern) {
             return 0;
         }
 

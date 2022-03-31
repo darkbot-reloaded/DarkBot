@@ -9,7 +9,7 @@ public class NoopAPIAdapter extends GameAPIImpl<
         GameAPI.NoOpWindow,
         GameAPI.NoOpHandler,
         GameAPI.NoOpMemory,
-        GameAPI.NoOpStringReader,
+        GameAPI.NoOpExtraMemoryReader,
         GameAPI.NoOpInteraction,
         GameAPI.NoOpDirectInteraction> {
 
@@ -18,8 +18,9 @@ public class NoopAPIAdapter extends GameAPIImpl<
                 new GameAPI.NoOpWindow(),
                 new GameAPI.NoOpHandler(),
                 new GameAPI.NoOpMemory(),
-                new GameAPI.NoOpStringReader(),
-                new GameAPI.NoOpInteraction(), new GameAPI.NoOpDirectInteraction());
+                new GameAPI.NoOpExtraMemoryReader(),
+                new GameAPI.NoOpInteraction(),
+                new GameAPI.NoOpDirectInteraction());
     }
 
     @Override

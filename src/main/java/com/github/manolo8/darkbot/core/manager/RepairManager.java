@@ -86,7 +86,7 @@ public class RepairManager implements Manager, RepairAPI {
             System.out.println(killerMessage);
 
             if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.LOG_DEATHS)
-                writeToFile(LogUtils.START_TIME + "death", formatLogMessage(killerMessage));
+                writeToFile("deaths_" + LogUtils.START_TIME, formatLogMessage(killerMessage));
         }
 
         repairOptions.update(API.readMemoryLong(repairAddress + 0x58));

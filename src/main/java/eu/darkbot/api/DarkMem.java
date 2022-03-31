@@ -1,18 +1,12 @@
 package eu.darkbot.api;
 
-import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.LibUtils;
-import com.github.manolo8.darkbot.core.api.util.ExtraMemoryReader;
 
-public class DarkMem extends ExtraMemoryReader implements GameAPI.Window {
+public class DarkMem implements GameAPI.Window, GameAPI.Memory {
 
     static {
         LibUtils.loadLibrary("DarkMemAPI");
-    }
-
-    public DarkMem(BotInstaller botInstaller) {
-        super(botInstaller);
     }
 
     public native int    getVersion();

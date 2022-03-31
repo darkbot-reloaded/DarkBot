@@ -1,9 +1,11 @@
 package com.github.manolo8.darkbot.core.utils;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 
 import java.nio.charset.StandardCharsets;
+import java.util.function.Predicate;
 
 public class ByteUtils {
 
@@ -114,15 +116,17 @@ public class ByteUtils {
         return Main.API.readString(object, 0x10, 0x28, 0x90);
     }
 
-    public static class StringReader implements GameAPI.StringReader {
+    public static class ExtraMemoryReader implements GameAPI.ExtraMemoryReader {
         private static final int TYPE_DYNAMIC = 0, TYPE_STATIC = 1, TYPE_DEPENDENT = 2;
         private static final int WIDTH_AUTO = -1, WIDTH_8 = 0, WIDTH_16 = 1;
 
         private final GameAPI.Memory reader;
+        private final BotInstaller botInstaller;
         private final WeakValueHashMap<StrLocation, String> stringCache = new WeakValueHashMap<>();
 
-        public StringReader(GameAPI.Memory reader) {
+        public ExtraMemoryReader(GameAPI.Memory reader, BotInstaller botInstaller) {
             this.reader = reader;
+            this.botInstaller = botInstaller;
         }
 
         private class StrLocation {
@@ -221,6 +225,43 @@ public class ByteUtils {
         @Override
         public int getVersion() {
             return 1;
+        }
+
+        private byte[] tableData = new byte[0];
+        private long lastTableUpdate;
+        /**
+         * @author Alph4rd
+         */
+        @Override
+        public long searchClassClosure(Predicate<Long> pattern) {
+            long mainAddress = botInstaller.mainApplicationAddress.get();
+            if (mainAddress == 0) return 0;
+
+            long table = Main.API.readMemoryLong(mainAddress, 0x10, 0x10, 0x18, 0x10, 0x28);
+            int capacity = Main.API.readMemoryInt(table + 8) * 8;
+
+            if (tableData.length < capacity) {
+                tableData = new byte[capacity];
+                Main.API.readMemory(table + 0x10, tableData, capacity);
+                lastTableUpdate = System.currentTimeMillis() + 750; // cache for 750ms
+            }
+
+            if (lastTableUpdate < System.currentTimeMillis()) {
+                Main.API.readMemory(table + 0x10, tableData, capacity);
+                lastTableUpdate = System.currentTimeMillis() + 750; // cache for 750ms
+            }
+
+            for (int i = 0; i < capacity; i += 8) {
+                long entry = ByteUtils.getLong(tableData, i);
+
+                if (entry == 0) continue;
+
+                long closure = Main.API.readMemoryLong(entry + 0x20);
+                if (closure == 0 || closure == 0x200000001L) continue;
+
+                if (pattern.test(closure)) return closure;
+            }
+            return 0;
         }
     }
 }

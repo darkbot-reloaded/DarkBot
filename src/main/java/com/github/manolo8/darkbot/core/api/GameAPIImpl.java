@@ -23,7 +23,7 @@ public class GameAPIImpl<
         W extends GameAPI.Window,
         H extends GameAPI.Handler,
         M extends GameAPI.Memory,
-        S extends GameAPI.StringReader,
+        EM extends GameAPI.ExtraMemoryReader,
         I extends GameAPI.Interaction,
         D extends GameAPI.DirectInteraction> implements IDarkBotAPI {
 
@@ -34,7 +34,7 @@ public class GameAPIImpl<
     protected final W window;
     protected final H handler;
     protected final M memory;
-    protected final S stringReader;
+    protected final EM extraMemoryReader;
     protected final I interaction;
     protected final D direct;
 
@@ -52,14 +52,14 @@ public class GameAPIImpl<
     protected long lastFailedLogin;
 
     public GameAPIImpl(StartupParams params,
-                       W window, H handler, M memory, S stringReader, I interaction, D direct,
+                       W window, H handler, M memory, EM extraMemoryReader, I interaction, D direct,
                        GameAPI.Capability... capabilityArr) {
         this.params = params;
 
         this.window = window;
         this.handler = handler;
         this.memory = memory;
-        this.stringReader = stringReader;
+        this.extraMemoryReader = extraMemoryReader;
         this.interaction = interaction;
         this.direct = direct;
 
@@ -69,7 +69,7 @@ public class GameAPIImpl<
         this.version = window.getVersion() + "w " +
                 handler.getVersion() + "h " +
                 memory.getVersion() + "m " +
-                stringReader.getVersion() + "s " +
+                extraMemoryReader.getVersion() + "s " +
                 interaction.getVersion() + "i" +
                 direct.getVersion() + "d";
 
@@ -140,7 +140,7 @@ public class GameAPIImpl<
         window.tick();
         handler.tick();
         memory.tick();
-        stringReader.tick();
+        extraMemoryReader.tick();
         interaction.tick();
         direct.tick();
     }
@@ -265,7 +265,7 @@ public class GameAPIImpl<
 
     @Override
     public String readMemoryStringFallback(long address, String fallback) {
-        String str = stringReader.readString(address);
+        String str = extraMemoryReader.readString(address);
         return str == null ? fallback : str;
     }
 
@@ -331,7 +331,7 @@ public class GameAPIImpl<
 
     @Override
     public long searchClassClosure(Predicate<Long> pattern) {
-        return memory.searchClassClosure(pattern);
+        return extraMemoryReader.searchClassClosure(pattern);
     }
 
     @Override
@@ -346,7 +346,7 @@ public class GameAPIImpl<
 
     @Override
     public void resetCache() {
-        stringReader.resetCache();
+        extraMemoryReader.resetCache();
     }
 
     @Override
@@ -357,7 +357,7 @@ public class GameAPIImpl<
         }
         handler.reload();
 
-        stringReader.resetCache();
+        extraMemoryReader.resetCache();
     }
 
     @Override
