@@ -1,12 +1,18 @@
 package eu.darkbot.api;
 
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.LibUtils;
+import com.github.manolo8.darkbot.core.api.util.ExtraMemoryReader;
 
-public class DarkBoat implements GameAPI.Memory, GameAPI.Window, GameAPI.Handler, GameAPI.Interaction, API.Singleton {
+public class DarkBoat extends ExtraMemoryReader implements GameAPI.Window, GameAPI.Handler, GameAPI.Interaction, API.Singleton {
 
     static {
         LibUtils.loadLibrary("DarkBoatAPI");
+    }
+
+    public DarkBoat(BotInstaller botInstaller) {
+        super(botInstaller);
     }
 
     public native void    setData(String url, String sid, String preloader, String vars);

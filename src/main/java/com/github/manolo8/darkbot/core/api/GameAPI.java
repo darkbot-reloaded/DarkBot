@@ -4,6 +4,8 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
 
+import java.util.function.Predicate;
+
 public interface GameAPI {
 
     interface Base {
@@ -51,6 +53,8 @@ public interface GameAPI {
         boolean readBoolean(long address);
         byte[]  readBytes  (long address, int length);
         void    readBytes  (long address, byte[] buff, int length);
+
+        long searchClassClosure(Predicate<Long> pattern);
 
         default int readInt(long address, int... offsets) {
             for (int i = 0; i < offsets.length - 1; i++) address = readLong(address + offsets[i]);
@@ -208,6 +212,11 @@ public interface GameAPI {
 
         @Override
         public void readBytes(long address, byte[] buff, int length) {}
+
+        @Override
+        public long searchClassClosure(Predicate<Long> pattern) {
+            return 0;
+        }
 
         @Override
         public void replaceInt(long address, int oldValue, int newValue) {}

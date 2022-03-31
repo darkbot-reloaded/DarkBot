@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.core.api;
 
-import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.DarkBoat;
@@ -13,9 +12,8 @@ public class DarkBoatAdapter extends GameAPIImpl<
         DarkBoat,
         DarkBoatAdapter.DarkBoatDirectInteraction> {
 
-    public DarkBoatAdapter(BotInstaller botInstaller, StartupParams params, DarkBoatDirectInteraction di, DarkBoat darkboat) {
-        super(botInstaller,
-                params,
+    public DarkBoatAdapter(StartupParams params, DarkBoatDirectInteraction di, DarkBoat darkboat) {
+        super(params,
                 darkboat,
                 darkboat,
                 darkboat,

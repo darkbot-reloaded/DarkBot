@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.core.manager;
 
-import com.github.manolo8.darkbot.config.LegacyShipMode;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.config.LegacyShipMode;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.Npc;
@@ -97,6 +97,9 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     @Override
     public void install(BotInstaller botInstaller) {
         botInstaller.screenManagerAddress.add(value -> staticAddress = value + 240);
+        botInstaller.invalid.add(v -> {
+            if (v) locationInfo.update(0);
+        });
     }
 
     public void tick() {
