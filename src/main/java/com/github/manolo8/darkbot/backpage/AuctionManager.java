@@ -45,11 +45,10 @@ public class AuctionManager {
             String token = main.backpage.getConnection("indexInternal.es", Method.GET)
                     .setRawParam("action", "internalAuction")
                     .consumeInputStream(main.backpage::getReloadToken);
-
             String response = main.backpage.getConnection("indexInternal.es", Method.POST)
                     .setRawParam("action", "internalAuction")
                     .setRawParam("reloadToken", token)
-                    .setRawParam("auctionType", "hour")
+                    .setRawParam("auctionType", auctionItem.getAuctionType().getId())
                     .setRawParam("subAction", "bid")
                     .setRawParam("lootId", auctionItem.getLootId())
                     .setRawParam("itemId", auctionItem.getId())
@@ -64,9 +63,9 @@ public class AuctionManager {
         return false;
     }
 
-    private boolean handleResponse(String type, String id, String response) throws Exception {
-        boolean failed = response.contains("question icon_error");
-        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
+    private boolean handleResponse(String type, String id, String response) {
+        boolean failed = response.contains("icon = 'error';");
+        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + " : " + (failed ? response.substring(0, response.indexOf("function showHelp()")) : ""));
         return !failed;
     }
 }
