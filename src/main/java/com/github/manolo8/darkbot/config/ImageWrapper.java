@@ -9,8 +9,6 @@ public class ImageWrapper {
     private transient boolean loaded;
 
     public String getPath() {
-        if (this.path == null)
-            return "None";
         return this.path;
     }
 
