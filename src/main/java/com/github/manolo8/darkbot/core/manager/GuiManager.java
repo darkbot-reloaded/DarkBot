@@ -39,12 +39,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     private long lastDeath = -1;
     private long lastRepairAttempt;
     private long validTime;
-
-    private long repairAddress;
-
-    private long screenAddress;
     private long guiAddress;
-    private long mainAddress;
 
     private final Map<String, Gui> registeredGuis = new HashMap<>();
 
@@ -124,9 +119,6 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     @Override
     public void install(BotInstaller botInstaller) {
-        botInstaller.screenManagerAddress.add(value -> screenAddress = value);
-        botInstaller.mainAddress.add(value -> mainAddress = value);
-
         botInstaller.invalid.add(value -> {
             if (!value) {
                 validTime = System.currentTimeMillis();
@@ -139,7 +131,6 @@ public class GuiManager implements Manager, GameScreenAPI {
             guiAddress = value;
             guis.update(API.readMemoryLong(guiAddress + 112));
 
-            repairAddress = 0;
             registeredGuis.values().forEach(Gui::reset);
             checks = LoadStatus.WAITING;
         });
@@ -174,7 +165,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     }
 
     public boolean tryRevive() {
-        if (System.currentTimeMillis() - lastDeath < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L))
+        if (repairManager.setBeforeReviveTime())
             return false;
         if (System.currentTimeMillis() - lastRepairAttempt <= 10000) return false;
 

@@ -49,7 +49,7 @@ public class RepairManager implements Manager, RepairAPI {
     private Instant lastDeath;
 
     private boolean destroyed;
-    private long userDataAddress, repairAddress;
+    private long userDataAddress, repairAddress, beforeReviveTime;
     private int deaths;
 
     public RepairManager(Main main, ReviveSelectorHandler reviveHandler) {
@@ -63,6 +63,23 @@ public class RepairManager implements Manager, RepairAPI {
         botInstaller.heroInfoAddress.add(value -> userDataAddress = value);
     }
 
+    public String getStatus() {
+        ReviveLocation location = reviveHandler.getBest();
+        int availableIn = optionAvailableIn(getRepairOptionFromType(location));
+
+        int beforeRevive = (int) (((beforeReviveTime + (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L))
+                                   - System.currentTimeMillis()) / 1000);
+
+        return "Reviving at: " + location + ", in " + Math.max(beforeRevive, availableIn) + "s";
+    }
+
+    public boolean setBeforeReviveTime() {
+        if (beforeReviveTime == -1)
+            beforeReviveTime = System.currentTimeMillis();
+
+        return System.currentTimeMillis() - beforeReviveTime < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L);
+    }
+
     public void tick() {
         boolean alive = isAlive();
 
@@ -70,6 +87,7 @@ public class RepairManager implements Manager, RepairAPI {
             if (main.hero.address != 0) // possibly alive but we are not sure yet
                 destroyed = false;
 
+            beforeReviveTime = -1;
             return;
         }
 
@@ -100,12 +118,19 @@ public class RepairManager implements Manager, RepairAPI {
         repairTypes.update(API.readMemoryLong(repairAddress + 0x60));
     }
 
+    private long afterAvailableWait;
     // return true if clicked, false if should wait
     public boolean tryRevive() {
         int repairOption = getRepairOptionFromType(reviveHandler.getBest());
         int availableIn = optionAvailableIn(repairOption);
 
-        if (availableIn > 0) return false;
+        if (availableIn > 0) {
+            afterAvailableWait = System.currentTimeMillis();
+            return false;
+        }
+
+        // wait 1 second after the option is available to potentially fix in-game bug
+        if (System.currentTimeMillis() - afterAvailableWait < 1000) return false;
 
         if (repairOption != -1)
             API.writeMemoryLong(repairAddress + 32, repairOption);
