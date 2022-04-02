@@ -8,6 +8,7 @@ import eu.darkbot.api.DarkHook;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.hook.HookFlag;
 import eu.darkbot.api.hook.JNIUtil;
 import eu.darkbot.api.hook.NativeCallback;
@@ -96,7 +97,7 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
     }
 
     @Override
-    public void lockEntity(int id) {
+    public void lockEntity(Lockable lockable) {
         throw new UnsupportedOperationException();
     }
 

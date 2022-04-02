@@ -7,6 +7,8 @@ import com.github.manolo8.darkbot.core.api.DarkBoatHookAdapter;
 import com.github.manolo8.darkbot.core.api.DarkCefAdapter;
 import com.github.manolo8.darkbot.core.api.DarkMemAdapter;
 import com.github.manolo8.darkbot.core.api.NoopAPIAdapter;
+import com.github.manolo8.darkbot.core.api.DarkPlayerAdapter;
+
 import eu.darkbot.api.config.annotations.Configuration;
 
 
@@ -17,7 +19,8 @@ public enum BrowserApi {
     BACKPAGE_ONLY(BackpageAdapter.class),
     NO_OP_API(NoopAPIAdapter.class),
     DARK_MEM_API(DarkMemAdapter.class),
-    DARK_CEF_API(DarkCefAdapter.class);
+    DARK_CEF_API(DarkCefAdapter.class),
+    DARK_PLAYER(DarkPlayerAdapter.class);
 
     public final Class<? extends IDarkBotAPI> clazz;
 

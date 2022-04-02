@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.managers.WindowAPI;
@@ -109,7 +110,7 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     // Direct game access
     void setMaxFps(int maxCps);
-    void lockEntity(int id);
+    void lockEntity(Lockable lockable);
     void moveShip(Locatable destination);
     void collectBox(Locatable destination, long collectableAddress);
     void refine(long refineUtilAddress, OreAPI.Ore ore, int amount);

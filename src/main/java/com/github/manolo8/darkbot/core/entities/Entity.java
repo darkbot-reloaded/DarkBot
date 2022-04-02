@@ -139,7 +139,7 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
 
         // Use direct locking, but only on things that can be locked (eg: boxes can't be locked)
         if (API.hasCapability(GameAPI.Capability.DIRECT_ENTITY_LOCK) && this instanceof Lockable) {
-            API.lockEntity(id);
+            API.lockEntity((Lockable)this);
         } else {
             clickable.setRadius(DEFAULT_CLICK_RADIUS);
             main.hero.drive.clickCenter(!tryAttack, locationInfo.now);

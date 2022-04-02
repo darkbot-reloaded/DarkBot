@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.OreAPI;
 
 public interface GameAPI {
@@ -106,7 +107,7 @@ public interface GameAPI {
     interface DirectInteraction extends Base {
         void setMaxFps(int maxFps);
 
-        void lockEntity(int id);
+        void lockEntity(Lockable lockable);
 
         void moveShip(Locatable destination);
 
@@ -304,7 +305,7 @@ public interface GameAPI {
         }
 
         @Override
-        public void lockEntity(int id) {
+        public void lockEntity(Lockable lockable) {
             throw new UnsupportedOperationException();
         }
 

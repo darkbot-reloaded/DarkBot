@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.OreAPI;
 import org.jetbrains.annotations.NotNull;
@@ -361,8 +362,8 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void lockEntity(int id) {
-        direct.lockEntity(id);
+    public void lockEntity(Lockable lockable) {
+        direct.lockEntity(lockable);
     }
 
     @Override
