@@ -23,7 +23,7 @@ public class GameAPIImpl<
         W extends GameAPI.Window,
         H extends GameAPI.Handler,
         M extends GameAPI.Memory,
-        EM extends GameAPI.ExtraMemoryReader,
+        E extends GameAPI.ExtraMemoryReader,
         I extends GameAPI.Interaction,
         D extends GameAPI.DirectInteraction> implements IDarkBotAPI {
 
@@ -34,7 +34,7 @@ public class GameAPIImpl<
     protected final W window;
     protected final H handler;
     protected final M memory;
-    protected final EM extraMemoryReader;
+    protected final E extraMemoryReader;
     protected final I interaction;
     protected final D direct;
 
@@ -52,7 +52,7 @@ public class GameAPIImpl<
     protected long lastFailedLogin;
 
     public GameAPIImpl(StartupParams params,
-                       W window, H handler, M memory, EM extraMemoryReader, I interaction, D direct,
+                       W window, H handler, M memory, E extraMemoryReader, I interaction, D direct,
                        GameAPI.Capability... capabilityArr) {
         this.params = params;
 
@@ -69,7 +69,7 @@ public class GameAPIImpl<
         this.version = window.getVersion() + "w " +
                 handler.getVersion() + "h " +
                 memory.getVersion() + "m " +
-                extraMemoryReader.getVersion() + "s " +
+                extraMemoryReader.getVersion() + "e " +
                 interaction.getVersion() + "i" +
                 direct.getVersion() + "d";
 

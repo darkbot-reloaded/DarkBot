@@ -90,7 +90,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             @Deprecated
             public long REVIVE_LOCATION = 1L;
             public @Option("config.general.safety.revive_location") @Dropdown ReviveLocation REVIVE = ReviveLocation.BASE;
-            public @Option @Number(min = 3, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
+            public @Option @Number(min = 5, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
             public @Option @Number(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
         }
 
