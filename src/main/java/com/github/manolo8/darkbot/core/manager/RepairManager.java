@@ -67,7 +67,9 @@ public class RepairManager implements Manager, RepairAPI {
         boolean alive = isAlive();
 
         if (alive) {
-            destroyed = false;
+            if (main.hero.address != 0) // possibly alive but we are not sure yet
+                destroyed = false;
+
             return;
         }
 

@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.utils;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.GameAPI;
+import eu.darkbot.util.Timer;
 
 import java.nio.charset.StandardCharsets;
 import java.util.function.Predicate;
@@ -227,8 +228,10 @@ public class ByteUtils {
             return 1;
         }
 
-        private byte[] tableData = new byte[0];
-        private long lastTableUpdate;
+        private static final int MAX_TABLE_SIZE = 2 << 20; // 2MB
+
+        private final Timer timer = Timer.get(750);
+        private byte[] tableData = null;
         /**
          * @author Alph4rd
          */
@@ -238,22 +241,20 @@ public class ByteUtils {
             if (mainAddress == 0) return 0;
 
             long table = Main.API.readMemoryLong(mainAddress, 0x10, 0x10, 0x18, 0x10, 0x28);
-            int capacity = Main.API.readMemoryInt(table + 8) * 8;
+            int capacity = Main.API.readMemoryInt(table + 8) * 8; // capacity generally is always the same.
 
-            if (tableData.length < capacity) {
+            if (capacity > MAX_TABLE_SIZE) return 0;
+
+            if (tableData == null || tableData.length < capacity) {
                 tableData = new byte[capacity];
                 Main.API.readMemory(table + 0x10, tableData, capacity);
-                lastTableUpdate = System.currentTimeMillis() + 750; // cache for 750ms
-            }
+                timer.activate();
 
-            if (lastTableUpdate < System.currentTimeMillis()) {
+            } else if (timer.tryActivate())
                 Main.API.readMemory(table + 0x10, tableData, capacity);
-                lastTableUpdate = System.currentTimeMillis() + 750; // cache for 750ms
-            }
 
             for (int i = 0; i < capacity; i += 8) {
                 long entry = ByteUtils.getLong(tableData, i);
-
                 if (entry == 0) continue;
 
                 long closure = Main.API.readMemoryLong(entry + 0x20);
@@ -262,6 +263,14 @@ public class ByteUtils {
                 if (pattern.test(closure)) return closure;
             }
             return 0;
+        }
+
+        @Override
+        public void tick() {
+            if (tableData == null || timer.isActive()) return;
+
+            // keep the table data for 15 seconds if it's not used
+            if (timer.getRemainingFuse() < -15_000) tableData = null;
         }
     }
 }
