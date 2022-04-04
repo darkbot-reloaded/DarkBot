@@ -20,7 +20,7 @@ public class DarkPlayerAdapter extends GameAPIImpl<
         DarkPlayer,
         DarkPlayerAdapter.DarkPlayerDirectInteraction> {
 
-    public DarkPlayerAdapter(StartupParams params, DarkPlayerWindow dpw, DarkPlayerDirectInteraction di, DarkPlayer darkPlayer, BotInstaller botInstaller) {
+    public DarkPlayerAdapter(StartupParams params, DarkPlayerWindow dpw, DarkPlayerDirectInteraction di, DarkPlayer darkPlayer, Main main) {
         super(params,
                 dpw,
                 dpw,
@@ -37,6 +37,7 @@ public class DarkPlayerAdapter extends GameAPIImpl<
                 GameAPI.Capability.DIRECT_COLLECT_BOX);
 
         dpw.setDarkPlayerAdapter(this);
+        dpw.setMain(main);
     }
 
     @Override
@@ -47,6 +48,7 @@ public class DarkPlayerAdapter extends GameAPIImpl<
     public static class DarkPlayerWindow implements GameAPI.Window, GameAPI.Handler {
         private final DarkPlayer darkPlayer;
         private DarkPlayerAdapter darkPlayerAdapter;
+        private Main main;
 
         private boolean isProcessOpen = false;
 
@@ -56,6 +58,10 @@ public class DarkPlayerAdapter extends GameAPIImpl<
 
         public void setDarkPlayerAdapter(DarkPlayerAdapter darkPlayerAdapter) {
             this.darkPlayerAdapter = darkPlayerAdapter;
+        }
+
+        public void setMain(Main main) {
+            this.main = main;
         }
 
         @Override
@@ -75,6 +81,7 @@ public class DarkPlayerAdapter extends GameAPIImpl<
                 if (isProcessOpen) {
                     darkPlayerAdapter.setData();
                     darkPlayer.createWindow();
+                    darkPlayer.setMaxFps(main.config.BOT_SETTINGS.API_CONFIG.MAX_FPS);
                 }
             }
         }
