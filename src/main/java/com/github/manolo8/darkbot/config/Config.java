@@ -241,6 +241,13 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option("colors") ColorScheme cs = new ColorScheme();
         }
 
+        public @Option CustomBackground CUSTOM_BACKGROUND = new CustomBackground();
+        public static class CustomBackground {
+            public @Option boolean ENABLED = false;
+            public @Option @Percentage double OPACITY = 0.3f;
+            public @Option ImageWrapper IMAGE = new ImageWrapper();
+        }
+
         public @Option Other OTHER = new Other();
         public static class Other {
             public @Option boolean DISABLE_MASTER_PASSWORD = false;
