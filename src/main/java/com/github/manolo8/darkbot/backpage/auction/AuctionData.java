@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 
 public class AuctionData {
     private final Map<String, AuctionItems> auctionItems = new LinkedHashMap<>();
-    private final Pattern AUCTION_TABLE = Pattern.compile("<tr class=\"auctionItemRow[\\S\\s]+?itemGroup=[\\S\\s]+?(itemKey=\"item_[\\S\\s]+?)</tr>", Pattern.DOTALL);
-
+    private final Pattern AUCTION_TABLE = Pattern.compile("(itemKey=\"item_[\\S\\s]+?)</tr>", Pattern.DOTALL);
+    
     private final String AUCTION_PATTERN_STRING = "itemKey=\"item_[a-zA-Z]+_(.+?)\".*?" +
             "auction_item_name_col\">\\s+(.+?)\\s+<.*?" +
             "auction_item_type\">\\s+(.+?)\\s+<.*?" +
