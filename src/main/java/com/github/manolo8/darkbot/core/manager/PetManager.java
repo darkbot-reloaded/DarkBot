@@ -22,7 +22,7 @@ import eu.darkbot.api.game.other.Health;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.game.other.LocationInfo;
-import eu.darkbot.api.game.other.Lockable;
+import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.utils.Inject;
 import eu.darkbot.api.utils.ItemNotEquippedException;
@@ -53,6 +53,7 @@ public class PetManager extends Gui implements PetAPI {
     private final List<Ship> ships;
     private final Pet pet;
     private final PetGearSelectorHandler gearSelectorHandler;
+    private final EventBrokerAPI eventBroker;
 
     private long togglePetTime, selectModuleTime;
     private long activeUntil;
@@ -88,11 +89,12 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     public PetManager(Main main, MapManager mapManager, HeroManager hero,
-                      PetGearSelectorHandler gearSelectorHandler) {
+                      PetGearSelectorHandler gearSelectorHandler, EventBrokerAPI eventBroker) {
         this.main = main;
         this.ships = mapManager.entities.ships;
         this.pet = hero.pet;
         this.gearSelectorHandler = gearSelectorHandler;
+        this.eventBroker = eventBroker;
 
         PetGearSupplier.updateGears(gearList);
 
@@ -383,7 +385,10 @@ public class PetManager extends Gui implements PetAPI {
         if (locatorNpcList.getSize() < oldSize && validUntil > System.currentTimeMillis()) return;
 
         validUntil = System.currentTimeMillis() + 100;
+        int oldState = locatorList.hashCode();
         locatorNpcList.sync(locatorList, Gear::new, null);
+        if (oldState != locatorList.hashCode())
+            eventBroker.sendEvent(new PetAPI.LocatorNpcChangeListEvent(locatorList));
     }
 
     private void updatePetStats(long elementsListAddress) {
@@ -426,6 +431,11 @@ public class PetManager extends Gui implements PetAPI {
             this.name = API.readMemoryString(API.readMemoryLong(address + 200));
             this.fuzzyName = Strings.fuzzyMatcher(name);
             this.check = API.readMemoryLong(address, 208, 152, 0x10);
+        }
+
+        @Override
+        public int hashCode() {
+            return name.hashCode();
         }
     }
 
