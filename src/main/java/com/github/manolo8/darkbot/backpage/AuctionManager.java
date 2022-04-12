@@ -5,11 +5,14 @@ import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
 import com.github.manolo8.darkbot.utils.http.Method;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AuctionManager {
     private final Main main;
     private final BackpageManager backpage;
     private final AuctionData data;
+    private final Pattern AUCTION_ERROR_PATTERN = Pattern.compile("infoText = '(.*?)';.*?" + "icon = '(.*)';", Pattern.DOTALL);
     private long lasAuctionUpdate;
 
     AuctionManager(Main main, BackpageManager backpage) {
@@ -64,8 +67,12 @@ public class AuctionManager {
     }
 
     private boolean handleResponse(String type, String id, String response) {
-        boolean failed = response.contains("icon = 'error';");
-        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + " : " + (failed ? response.substring(0, response.indexOf("function showHelp()")) : ""));
-        return !failed;
+        Matcher m = AUCTION_ERROR_PATTERN.matcher(response);
+        boolean valid = false;
+        if (m.find()) {
+            valid = !m.group(2).contains("error");
+            System.out.println(type + " (" + id + ") " + (valid ? "succeeded" : "failed") + " : " + m.group(1));
+        }
+        return valid;
     }
 }

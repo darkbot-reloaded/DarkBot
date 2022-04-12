@@ -18,7 +18,7 @@ public class AuctionData {
             "auction_item_current\">\\s+(.+?)\\s+<.*?" +
             "auction_item_you\">\\s+(.+?)\\s+<.*?" +
             "item_[a-zA-Z]+_\\d+_buyPrice\" value=\"(.+?)\".*?" +
-            "item_[a-zA-Z]+_\\d+_lootId\" value=\"(.+?)\"";
+            "item_[a-zA-Z]+_\\d+_lootId\" value=\"(.+?)\".*?";
     private final Pattern AUCTION_PATTERN = Pattern.compile(AUCTION_PATTERN_STRING, Pattern.DOTALL);
 
     public Map<String, AuctionItems> getAuctionItems() {
@@ -62,8 +62,8 @@ public class AuctionData {
                 !string.contains("auction_item_highest") ||
                 !string.contains("auction_item_current") ||
                 !string.contains("auction_item_you") ||
-                !string.contains("_buyPrice") ||
-                !string.contains("_lootId")) return false;
+                !string.contains("buyPrice") ||
+                !string.contains("lootId")) return false;
         Matcher m = type.matcher(string);
         if (!m.find()) return false;
 
