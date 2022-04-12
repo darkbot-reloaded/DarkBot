@@ -55,7 +55,7 @@ public class AuctionManager {
                     .setRawParam("credits", String.valueOf(amount))
                     .setRawParam("auction_buy_button", "BID")
                     .getContent();
-            return handleResponse("Bid on Item", auctionItem.getLootId(), response);
+            return handleResponse("Bid on Item", auctionItem.getName(), response);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Exception Bidding on Item: " + e);
