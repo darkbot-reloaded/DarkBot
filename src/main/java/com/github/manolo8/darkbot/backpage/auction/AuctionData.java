@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class AuctionData {
     private final Map<String, AuctionItems> auctionItems = new LinkedHashMap<>();
     private final Pattern AUCTION_TABLE = Pattern.compile("(itemKey=\"item_[\\S\\s]+?)</tr>", Pattern.DOTALL);
-    
+
     private final String AUCTION_PATTERN_STRING = "itemKey=\"item_[a-zA-Z]+_(.+?)\".*?" +
             "auction_item_name_col\">\\s+(.+?)\\s+<.*?" +
             "auction_item_type\">\\s+(.+?)\\s+<.*?" +
@@ -18,7 +18,7 @@ public class AuctionData {
             "auction_item_current\">\\s+(.+?)\\s+<.*?" +
             "auction_item_you\">\\s+(.+?)\\s+<.*?" +
             "item_[a-zA-Z]+_\\d+_buyPrice\" value=\"(.+?)\".*?" +
-            "item_[a-zA-Z]+_\\d+_lootId\" value=\"(.+?)\".*?";
+            "item_[a-zA-Z]+_\\d+_lootId\" value=\"(.+?)\"";
     private final Pattern AUCTION_PATTERN = Pattern.compile(AUCTION_PATTERN_STRING, Pattern.DOTALL);
 
     public Map<String, AuctionItems> getAuctionItems() {
@@ -55,7 +55,8 @@ public class AuctionData {
 
     private boolean buildAuctionItems(String string, Pattern type) {
         if (string == null || string.isEmpty()) return false;
-        if (!string.contains("itemKey") ||
+        if (string.contains("value=\"\"") ||
+                !string.contains("itemKey") ||
                 !string.contains("auction_item_name_col") ||
                 !string.contains("auction_item_type") ||
                 !string.contains("auction_item_highest") ||
