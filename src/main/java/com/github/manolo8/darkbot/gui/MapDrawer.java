@@ -5,20 +5,35 @@ import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.extensions.features.handlers.DrawableHandler;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.http.Http;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.events.EventHandler;
+import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-public class MapDrawer extends JPanel {
+public class MapDrawer extends JPanel implements Listener {
 
     private static final RenderingHints RENDERING_HINTS =
             new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -29,6 +44,8 @@ public class MapDrawer extends JPanel {
 
     protected Main main;
     protected DrawableHandler drawableHandler;
+
+    private Image backgroundImage;
 
     public MapDrawer() {
         addMouseListener(new MouseAdapter() {
@@ -50,6 +67,7 @@ public class MapDrawer extends JPanel {
         setup(main);
 
         this.drawableHandler = main.pluginAPI.requireInstance(DrawableHandler.class);
+        main.pluginAPI.requireAPI(EventBrokerAPI.class).registerListener(this);
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -79,10 +97,20 @@ public class MapDrawer extends JPanel {
 
     protected void onPaint() {
         //background image is drawn first
-        if (main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.ENABLED && main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage() != null) {
-            mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.OPACITY));
-            mapGraphics.g2.drawImage(main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage(), 0, 0, mapGraphics.width, mapGraphics.height, this);
-            mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        if (main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.ENABLED) {
+            Image img = null;
+
+            if (main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.USE_GAME_BACKGROUND)
+                img = backgroundImage;
+
+            if (img == null)
+                img = main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage();
+
+            if (img != null) {
+                mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.OPACITY));
+                mapGraphics.g2.drawImage(img, 0, 0, mapGraphics.width, mapGraphics.height, this);
+                mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+            }
         }
 
         for (Drawable drawable : drawableHandler.getDrawables()) {
@@ -121,6 +149,20 @@ public class MapDrawer extends JPanel {
         } else { // A "play" triangle
             mapGraphics.g2.fillPolygon(new int[]{width3, width3 * 2, width3},
                     new int[]{height3, height2, height3 * 2}, 3);
+        }
+    }
+
+    @EventHandler
+    public void onMapChange(StarSystemAPI.MapChangeEvent e) {
+        if (e.getNext().getId() <= 0) {
+            backgroundImage = null;
+            return;
+        }
+
+        if (main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.ENABLED
+                && main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.USE_GAME_BACKGROUND) {
+            new BackgroundImgDownloaderTask(this, e.getNext().getId())
+                    .execute();
         }
     }
 
@@ -222,6 +264,74 @@ public class MapDrawer extends JPanel {
         @Override
         public double toGameLocationY(int screenY) {
             return (screenY / (double) getHeight()) * mapBounds.getHeight();
+        }
+    }
+
+    private static class BackgroundImgDownloaderTask extends SwingWorker<Image, Void> {
+        private static final Pattern MINIMAP_ID_PATTERN = Pattern.compile("id=\"(\\d+)\".*minimap=\"(\\d+)\"");
+        private static Map<Integer, Integer> mapBackgroundIds;
+
+        private final MapDrawer mapDrawer;
+        private final int mapId;
+
+        public BackgroundImgDownloaderTask(MapDrawer mapDrawer, int mapId) {
+            this.mapDrawer = mapDrawer;
+            this.mapId = mapId;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                mapDrawer.backgroundImage = get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected Image doInBackground() {
+            if (parseMinimapIds()) {
+                try {
+                    URL backgroundURL = new URL("https://darkorbit-22.bpsecure.com/spacemap/graphics/minimaps/minimap-"
+                            + mapBackgroundIds.getOrDefault(mapId, mapId) + "-700.jpg");
+
+                    return ImageIO.read(backgroundURL);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return null;
+        }
+
+        private boolean parseMinimapIds() {
+            if (mapBackgroundIds != null && !mapBackgroundIds.isEmpty())
+                return true;
+
+            try {
+                InputStream is = Http.create("https://darkorbit-22.bpsecure.com/spacemap/graphics/maps-config.xml")
+                        .getInputStream();
+
+                Matcher matcher = MINIMAP_ID_PATTERN.matcher("");
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+                    mapBackgroundIds = br.lines()
+                            .map(String::trim)
+                            .filter(s -> s.startsWith("<map "))
+                            .map(matcher::reset)
+                            .filter(Matcher::find)
+                            .collect(Collectors.toMap(m -> Integer.parseInt(m.group(1)), m -> Integer.parseInt(m.group(2))));
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    mapBackgroundIds = null;
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                mapBackgroundIds = null;
+            }
+
+            return mapBackgroundIds != null && !mapBackgroundIds.isEmpty();
         }
     }
 }
