@@ -44,16 +44,15 @@ public class CircleImpl extends AreaImpl implements Area.Circle {
     }
 
     @Override
-    public Collection<PathPoint> getPoints(@NotNull PathFinder pf) {
+    public Collection<Locatable> getPoints(@NotNull PathFinder pf) {
         int pointCount = (int) (MathUtils.TAU * radius / POINT_DISTANCE);
 
-        List<PathPoint> points = new ArrayList<>(pointCount);
+        List<Locatable> points = new ArrayList<>(pointCount);
 
         double angleDiff = MathUtils.TAU / pointCount;
         for (double angle = 0; angle < MathUtils.TAU; angle += angleDiff) {
-            points.add(new PathPoint(
-                    (int) (x - Math.cos(angle) * (radius + MARGIN)),
-                    (int) (y - Math.sin(angle) * (radius + MARGIN))));
+            points.add(Locatable.of((x - Math.cos(angle) * (radius + MARGIN)),
+                    (y - Math.sin(angle) * (radius + MARGIN))));
         }
 
         return points;

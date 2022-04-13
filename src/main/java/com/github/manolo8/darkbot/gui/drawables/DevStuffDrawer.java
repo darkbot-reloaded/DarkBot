@@ -11,6 +11,7 @@ import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.entities.Mine;
 import eu.darkbot.api.game.entities.Ship;
+import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.game.other.Point;
 import eu.darkbot.api.managers.ConfigAPI;
@@ -54,7 +55,7 @@ public class DevStuffDrawer implements Drawable {
         }
 
         mg.setColor(PATH_COLOR);
-        for (PathPoint point : ((HeroManager) hero).drive.pathFinder.points) {
+        for (PathPoint point : ((HeroManager) hero).drive.pathFinder.getPathPoints()) {
             for (PathPoint other : point.lineOfSight) {
                 mg.drawLine(mg.toScreenPointX(point.x),
                         mg.toScreenPointY(point.y),
@@ -64,7 +65,7 @@ public class DevStuffDrawer implements Drawable {
         }
 
         mg.setColor("unknown");
-        for (PathPoint point : drive.pathFinder.points) {
+        for (Locatable point : drive.pathFinder.getPathPoints()) {
             mg.drawRectCentered(point, 3, true);
         }
 

@@ -49,12 +49,12 @@ public class PolygonImpl implements Area.Polygon {
     }
 
     @Override
-    public PathPoint toSide(Locatable point) {
+    public Locatable toSide(Locatable point) {
         return getBounds().toSide(point);
     }
 
     @Override
-    public Collection<PathPoint> getPoints(@NotNull PathFinder pf) {
+    public Collection<Locatable> getPoints(@NotNull PathFinder pf) {
         return getBounds().getPoints(pf);
     }
 
