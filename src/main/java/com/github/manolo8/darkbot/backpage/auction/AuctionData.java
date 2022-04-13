@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class AuctionData {
     private final Map<String, AuctionItems> auctionItems = new LinkedHashMap<>();
-    private final Pattern AUCTION_TABLE = Pattern.compile("<tr class=\"auctionItemRow[\\S\\s]+?itemGroup=[\\S\\s]+?(itemKey=\"item_[\\S\\s]+?)</tr>", Pattern.DOTALL);
+    private final Pattern AUCTION_TABLE = Pattern.compile("(itemKey=\"item_[\\S\\s]+?)</tr>", Pattern.DOTALL);
 
     private final String AUCTION_PATTERN_STRING = "itemKey=\"item_[a-zA-Z]+_(.+?)\".*?" +
             "auction_item_name_col\">\\s+(.+?)\\s+<.*?" +
@@ -55,14 +55,15 @@ public class AuctionData {
 
     private boolean buildAuctionItems(String string, Pattern type) {
         if (string == null || string.isEmpty()) return false;
-        if (!string.contains("itemKey") ||
+        if (string.contains("value=\"\"") ||
+                !string.contains("itemKey") ||
                 !string.contains("auction_item_name_col") ||
                 !string.contains("auction_item_type") ||
                 !string.contains("auction_item_highest") ||
                 !string.contains("auction_item_current") ||
                 !string.contains("auction_item_you") ||
-                !string.contains("_buyPrice") ||
-                !string.contains("_lootId")) return false;
+                !string.contains("buyPrice") ||
+                !string.contains("lootId")) return false;
         Matcher m = type.matcher(string);
         if (!m.find()) return false;
 

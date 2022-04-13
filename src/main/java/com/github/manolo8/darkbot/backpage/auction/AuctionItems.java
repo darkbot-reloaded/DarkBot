@@ -83,14 +83,14 @@ public class AuctionItems {
     public String toString() {
         return "Auction Item{" +
                 "auctionType=" + type.getId() +
-                "id=" + id +
-                "lootId=" + lootId +
-                "name=" + name +
-                "itemType=" + itemType +
-                "highestBidderId=" + highestBidderId +
-                "currentBid=" + currentBid +
-                "ownBid=" + ownBid +
-                "instant=" + instantBuy +
+                ", id=" + id +
+                ", lootId=" + lootId +
+                ", name=" + name +
+                ", itemType=" + itemType +
+                ", highestBidderId=" + highestBidderId +
+                ", currentBid=" + currentBid +
+                ", ownBid=" + ownBid +
+                ", instant=" + instantBuy +
                 "}";
     }
 

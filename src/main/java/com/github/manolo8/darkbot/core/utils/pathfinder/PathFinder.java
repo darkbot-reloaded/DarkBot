@@ -5,10 +5,12 @@ import com.github.manolo8.darkbot.core.manager.MapManager;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.Map;
 
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
@@ -16,36 +18,38 @@ import static java.lang.Math.sin;
 public class PathFinder implements eu.darkbot.api.utils.PathFinder {
 
     private final MapManager map;
-    public final Set<PathPoint> points;
+    private final Map<Locatable, PathPoint> points;
 
     private final ObstacleHandler obstacleHandler;
 
     public PathFinder(MapManager map) {
         this.map = map;
         this.obstacleHandler = new ObstacleHandler(map);
-        this.points = new HashSet<>();
+        this.points = new HashMap<>();
+    }
+
+    public Collection<PathPoint> getPathPoints() {
+        return Collections.unmodifiableCollection(points.values());
+    }
+
+    public PathPoint getPathPoint(Locatable point) {
+        return points.get(point);
     }
 
     public LinkedList<Locatable> createRote(Locatable current, Locatable destination) {
-        Locatable fixedCurrent = fixToClosest(current);
-        Locatable fixedDestination = fixToClosest(destination);
+        Locatable fixedCurrent = toImmutable(fixToClosest(current));
+        Locatable fixedDestination = toImmutable(fixToClosest(destination));
 
         LinkedList<Locatable> list = new LinkedList<>();
 
-        // Always add an initial point if current needs to be fixed
-        if (current.distanceTo(fixedCurrent) > 1) list.add(fixedCurrent);
-
-        // Trivial case, just directly move to destination
-        if (hasLineOfSight(fixedCurrent, fixedDestination)) {
-            list.add(new PathPoint(fixedDestination.getX(), fixedDestination.getY()));
-            return list;
+        if (hasLineOfSight(fixedCurrent, fixedDestination)
+                || !PathFinderCalculator.calculate(this, fixedCurrent, fixedDestination, list)) {
+            // Either trivial case, or no path exists
+            list.add(fixedDestination);
         }
 
-        list = PathFinderCalculator.calculate(this, fixedCurrent, fixedDestination, list);
-
-        // If no possible path is found, try to fly straight
-        if (list.isEmpty() || list.getLast().distanceTo(fixedDestination) > 1)
-            list.add(fixedDestination);
+        // Always add an initial point if current needs to be fixed
+        if (current.distanceTo(fixedCurrent) > 5) list.addFirst(fixedCurrent);
 
         return list;
     }
@@ -83,14 +87,57 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
 
         // Worst case scenario, just pick the closest known path point
         if (distance >= 20000) {
-            PathPoint closest = closest(initial);
-            if (closest != null) return closest.toLocation();
+            Locatable closest = closest(initial);
+            if (closest != null) return closest;
         }
         return initial;
     }
 
-    private PathPoint closest(Locatable point) {
-        return points.stream().min(Comparator.comparingDouble(p -> p.distanceTo(point))).orElse(null);
+    private Locatable toImmutable(Locatable point) {
+        if (point instanceof Locatable.LocatableImpl) return point;
+        return Locatable.of(point.getX(), point.getY());
+    }
+
+    public boolean changed() {
+        if (!obstacleHandler.changed()) return false;
+        synchronized (Main.UPDATE_LOCKER) {
+            points.clear();
+
+            for (AreaImpl a : obstacleHandler) {
+                for (Locatable p : a.getPoints(this)) {
+                    if (!isOutOfMap(p) && canMove(p))
+                        // Ensure the locatable is immutable and properly implements equals & hashCode
+                        this.points.put(toImmutable(p), new PathPoint(p));
+                }
+            }
+        }
+
+        for (PathPoint point : points.values()) point.fillLineOfSight(this);
+        return true;
+    }
+
+    public boolean insertPathPoint(Locatable point) {
+        point = toImmutable(point);
+        if (points.containsKey(point)) return false;
+
+        PathPoint newPoint = new PathPoint(point);
+        points.put(point, newPoint);
+
+        newPoint.fillLineOfSight(this);
+        for (PathPoint other : newPoint.lineOfSight) other.lineOfSight.add(newPoint);
+        return true;
+    }
+
+    public void removePathPoint(Locatable point) {
+        point = toImmutable(point);
+
+        PathPoint oldPoint = points.remove(point);
+        if (oldPoint == null) return;
+        for (PathPoint other : oldPoint.lineOfSight) other.lineOfSight.remove(oldPoint);
+    }
+
+    private Locatable closest(Locatable point) {
+        return points.keySet().stream().min(Comparator.comparingDouble(p -> p.distanceTo(point))).orElse(null);
     }
 
     public boolean isOutOfMap(Locatable loc) {
@@ -107,21 +154,6 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
 
     public boolean canMove(double x, double y) {
         return obstacleHandler.stream().noneMatch(a -> a.containsPoint(x, y));
-    }
-
-    public boolean changed() {
-        if (!obstacleHandler.changed()) return false;
-        synchronized (Main.UPDATE_LOCKER) {
-            points.clear();
-
-            for (AreaImpl a : obstacleHandler)
-                for (PathPoint p : a.getPoints(this))
-                    if (!isOutOfMap(p.x, p.y) && canMove(p.x, p.y))
-                        this.points.add(p);
-        }
-
-        for (PathPoint point : points) point.fillLineOfSight(this);
-        return true;
     }
 
     private AreaImpl areaTo(Locatable point) {

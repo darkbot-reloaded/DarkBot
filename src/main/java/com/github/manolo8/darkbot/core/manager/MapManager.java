@@ -9,7 +9,7 @@ import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.itf.Manager;
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
+import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
@@ -232,7 +232,7 @@ public class MapManager implements Manager, StarSystemAPI {
         height = boundMaxY - boundY;
     }
 
-    public static class ViewBounds extends UpdatableAuto {
+    public static class ViewBounds extends Updatable.Auto {
         public double leftTopX, leftTopY;
         public double rightTopX, rightTopY;
         public double rightBotX, rightBotY;
