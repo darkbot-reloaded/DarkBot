@@ -71,7 +71,7 @@ public class AuctionManager {
         boolean valid = false;
         if (m.find()) {
             valid = !m.group(2).contains("error");
-            System.out.println(type + " (" + id + ") " + (valid ? "succeeded" : "failed") + " : " + m.group(1));
+            System.out.println("AuctionManager: " + type + " (" + id + ") " + (valid ? "succeeded" : "failed") + " : " + m.group(1));
         }
         return valid;
     }
