@@ -63,8 +63,9 @@ public class DevStuffDrawer implements Drawable {
             }
         }
 
+        mg.setColor("unknown");
         for (PathPoint point : drive.pathFinder.points) {
-            mg.drawRectCentered(point, 2, true);
+            mg.drawRectCentered(point, 3, true);
         }
 
         mg.setFont("tiny");

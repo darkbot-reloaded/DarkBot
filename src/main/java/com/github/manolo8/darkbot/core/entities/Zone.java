@@ -56,13 +56,12 @@ public class Zone extends Entity implements eu.darkbot.api.game.entities.Zone {
         public boolean updateAndReport() {
             if (address == 0) return false;
             double newX = API.readMemoryDouble(address + 32),
-                    newY = API.readMemoryDouble(address + 32);
+                    newY = API.readMemoryDouble(address + 40);
 
-            boolean changed = this.x != newX || this.y != newY;
+            if (this.x == newX && this.y == newY) return false;
             this.x = newX;
             this.y = newY;
-
-            return changed;
+            return true;
         }
     }
 }
