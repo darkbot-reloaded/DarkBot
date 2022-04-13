@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.EternalGateAPI;
@@ -34,11 +33,11 @@ public class EternalGateProxy extends Updatable implements EternalGateAPI {
         this.activeBoostersArr.update(API.readMemoryLong( data + 0x68));
         this.boostersOptionsArr.update(API.readMemoryLong(data + 0x70));
 
-        this.activeBoostersArr.sync(activeBoosters, Booster::new, null);
-        this.boostersOptionsArr.sync(boostersOptions, Booster::new, null);
+        this.activeBoostersArr.sync(activeBoosters, Booster::new);
+        this.boostersOptionsArr.sync(boostersOptions, Booster::new);
     }
 
-    public static class Booster extends UpdatableAuto implements EternalGateAPI.Booster {
+    public static class Booster extends Auto implements EternalGateAPI.Booster {
         public int percentage;
         public String category;
 

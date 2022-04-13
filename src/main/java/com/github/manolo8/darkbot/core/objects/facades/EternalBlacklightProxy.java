@@ -1,11 +1,9 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.EternalBlacklightGateAPI;
-import eu.darkbot.api.managers.EternalGateAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +40,12 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
         this.topRankersArr.update(API.readMemoryLong(data + 0x90));
         this.myRank.update(API.readMemoryLong(data + 0x98));
 
-        this.activeBoostersArr.sync(activeBoosters, EternalBlacklightProxy.Booster::new, null);
-        this.boostersOptionsArr.sync(boostersOptions, EternalBlacklightProxy.Booster::new, null);
-        this.topRankersArr.sync(topRankers, EternalBlacklightProxy.Leaderboard::new, null);
+        this.activeBoostersArr.sync(activeBoosters, EternalBlacklightProxy.Booster::new);
+        this.boostersOptionsArr.sync(boostersOptions, EternalBlacklightProxy.Booster::new);
+        this.topRankersArr.sync(topRankers, EternalBlacklightProxy.Leaderboard::new);
     }
 
-    public static class Booster extends UpdatableAuto implements EternalBlacklightGateAPI.Booster {
+    public static class Booster extends Auto implements EternalBlacklightGateAPI.Booster {
         public int percentage;
         public String category;
 
@@ -68,7 +66,7 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
         }
     }
 
-    public static class Leaderboard extends UpdatableAuto {
+    public static class Leaderboard extends Auto {
         public int waves, rank;
         public String lastUpdateTime, name;
 

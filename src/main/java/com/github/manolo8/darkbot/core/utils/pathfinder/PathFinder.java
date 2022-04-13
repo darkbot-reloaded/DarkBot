@@ -33,18 +33,16 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
         LinkedList<Locatable> list = new LinkedList<>();
 
         // Always add an initial point if current needs to be fixed
-        if (current.distanceTo(fixedCurrent) > 1) list.add(fixedCurrent);
+        if (current.distanceTo(fixedCurrent) > 5) list.add(fixedCurrent);
 
         // Trivial case, just directly move to destination
         if (hasLineOfSight(fixedCurrent, fixedDestination)) {
-            list.add(new PathPoint(fixedDestination.getX(), fixedDestination.getY()));
+            list.add(Locatable.of(fixedDestination.getX(), fixedDestination.getY()));
             return list;
         }
 
-        list = PathFinderCalculator.calculate(this, fixedCurrent, fixedDestination, list);
-
         // If no possible path is found, try to fly straight
-        if (list.isEmpty() || list.getLast().distanceTo(fixedDestination) > 1)
+        if (!PathFinderCalculator.calculate(this, fixedCurrent, fixedDestination, list))
             list.add(fixedDestination);
 
         return list;

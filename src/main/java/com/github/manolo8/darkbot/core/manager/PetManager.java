@@ -8,7 +8,6 @@ import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Ship;
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.extensions.features.Feature;
@@ -22,7 +21,6 @@ import eu.darkbot.api.game.other.Health;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.game.other.LocationInfo;
-import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.utils.Inject;
 import eu.darkbot.api.utils.ItemNotEquippedException;
@@ -289,7 +287,7 @@ public class PetManager extends Gui implements PetAPI {
 
         long gearsSprite = getSpriteChild(address, -1);
         gearsArr.update(API.readMemoryLong(gearsSprite, 176, 224));
-        gearsArr.sync(gearList, Gear::new, null);
+        gearsArr.sync(gearList, Gear::new);
         if (modulesChanged()) {
             newGears.clear();
             for (Gear gear : gearList)
@@ -383,7 +381,7 @@ public class PetManager extends Gui implements PetAPI {
         if (locatorNpcList.getSize() < oldSize && validUntil > System.currentTimeMillis()) return;
 
         validUntil = System.currentTimeMillis() + 100;
-        locatorNpcList.sync(locatorList, Gear::new, null);
+        locatorNpcList.sync(locatorList, Gear::new);
     }
 
     private void updatePetStats(long elementsListAddress) {
@@ -414,7 +412,7 @@ public class PetManager extends Gui implements PetAPI {
         return gearOverride;
     }
 
-    public static class Gear extends UpdatableAuto {
+    public static class Gear extends Auto {
         public int id, parentId;
         public long check;
         public String name, fuzzyName;

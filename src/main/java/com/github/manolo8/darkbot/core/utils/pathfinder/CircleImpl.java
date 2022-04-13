@@ -28,6 +28,7 @@ public class CircleImpl extends AreaImpl implements Area.Circle {
     }
 
     public void set(double x, double y, double radius) {
+        if (x == this.x && y == this.y && radius == this.radius) return;
         this.x = x;
         this.y = y;
         this.radius = radius;

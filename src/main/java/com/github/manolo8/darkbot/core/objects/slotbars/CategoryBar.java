@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
@@ -23,7 +22,7 @@ public class CategoryBar extends MenuBar {
     public void update() {
         super.update();
         this.categoriesArr.update(API.readMemoryLong(address + 56));
-        this.categoriesArr.sync(this.categories, Category::new, null);
+        this.categoriesArr.sync(this.categories, Category::new);
     }
 
     public Category get(CategoryType type) {
@@ -73,7 +72,7 @@ public class CategoryBar extends MenuBar {
         return Optional.ofNullable(category.findItem(item));
     }
 
-    public static class Category extends UpdatableAuto {
+    public static class Category extends Auto {
         public String categoryId;
         public List<Item> items = new ArrayList<>();
 
@@ -91,7 +90,7 @@ public class CategoryBar extends MenuBar {
         @Override
         public void update() {
             this.itemsArr.update(API.readMemoryLong(address + 40));
-            this.itemsArr.sync(this.items, () -> new Item(itemCategory), null);
+            this.itemsArr.sync(this.items, () -> new Item(itemCategory));
         }
 
         @Override

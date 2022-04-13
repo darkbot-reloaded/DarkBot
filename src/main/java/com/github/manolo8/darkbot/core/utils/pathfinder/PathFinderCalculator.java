@@ -29,19 +29,18 @@ public class PathFinderCalculator {
         this.openList = new HashSet<>();
     }
 
-    public static LinkedList<Locatable> calculate(
-            PathFinder finder, Locatable from, Locatable to, LinkedList<Locatable> path) {
-        if (path == null) path = new LinkedList<>();
-        new PathFinderCalculator(finder, from, to).fillGeneratedPathTo(path);
-        return path;
+    public static boolean calculate(PathFinder finder, Locatable from, Locatable to, LinkedList<Locatable> path) {
+        return new PathFinderCalculator(finder, from, to).generatePath(path);
     }
 
-    public void fillGeneratedPathTo(LinkedList<Locatable> target) {
+    public boolean generatePath(LinkedList<Locatable> target) {
         addPoints();
 
-        if (build()) unfragment(target);
+        boolean built = build();
+        if (built) unfragment(target);
 
         removePoints();
+        return built;
     }
 
     private void addPoints() {
