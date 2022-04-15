@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.Time;
@@ -27,11 +26,11 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
 
         boostersArr.update(API.readMemoryLong(data + 0x48));
         synchronized (UPDATE_LOCKER) {
-            boostersArr.sync(boosters, Booster::new, null);
+            boostersArr.sync(boosters, Booster::new);
         }
     }
 
-    public static class Booster extends UpdatableAuto implements BoosterAPI.Booster {
+    public static class Booster extends Auto implements BoosterAPI.Booster {
         public double amount, cd;
         public String category, name;
         public BoosterCategory cat;

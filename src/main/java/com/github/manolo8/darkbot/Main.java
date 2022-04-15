@@ -56,7 +56,7 @@ import java.util.Objects;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 104 alpha 3");
+    public static final Version VERSION      = new Version("1.13.17 beta 104");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -214,11 +214,11 @@ public class Main extends Thread implements PluginListener, BotAPI {
     }
 
     private void processTasks() {
-        Runnable[] tasks = new Runnable[0];
+        Runnable[] tasks;
         synchronized (Main.UPDATE_LOCKER) {
             if (this.tasks.isEmpty()) return;
 
-            tasks = this.tasks.toArray(tasks);
+            tasks = this.tasks.toArray(new Runnable[0]);
             this.tasks.clear();
         }
         for (Runnable task : tasks) {

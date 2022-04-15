@@ -1,10 +1,10 @@
 package com.github.manolo8.darkbot.core.objects;
 
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
+import com.github.manolo8.darkbot.core.itf.Updatable;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Point extends UpdatableAuto implements eu.darkbot.api.game.other.Point {
+public class Point extends Updatable.Auto implements eu.darkbot.api.game.other.Point {
 
     public double x;
     public double y;

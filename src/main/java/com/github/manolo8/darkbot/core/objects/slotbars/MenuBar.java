@@ -1,11 +1,11 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
+import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.Point;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public abstract class MenuBar extends UpdatableAuto {
+public abstract class MenuBar extends Updatable.Auto {
     public String barId, layoutId;
     public Point barLocation = new Point();
 

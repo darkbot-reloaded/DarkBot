@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core.entities;
 
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
+import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PolygonImpl;
 import eu.darkbot.api.game.other.Area;
@@ -29,8 +29,8 @@ public class Zone extends Entity implements eu.darkbot.api.game.entities.Zone {
         pointsArr.update(API.readMemoryLong(address + 216));
         if (pointsArr.getSize() < 3) return;
 
-        pointsArr.sync(points, Position::new, null);
-        zoneArea.invalidateBounds();
+        if (pointsArr.syncAndReport(points, Position::new))
+            zoneArea.invalidateBounds();
     }
 
     @Override
@@ -38,7 +38,7 @@ public class Zone extends Entity implements eu.darkbot.api.game.entities.Zone {
         return zoneArea;
     }
 
-    private static class Position extends UpdatableAuto implements Locatable {
+    private static class Position extends Updatable.Reporting implements Locatable {
 
         private double x, y;
 
@@ -53,10 +53,15 @@ public class Zone extends Entity implements eu.darkbot.api.game.entities.Zone {
         }
 
         @Override
-        public void update() {
-            if (address == 0) return;
-            this.x = API.readMemoryDouble(address + 32);
-            this.y = API.readMemoryDouble(address + 40);
+        public boolean updateAndReport() {
+            if (address == 0) return false;
+            double newX = API.readMemoryDouble(address + 32),
+                    newY = API.readMemoryDouble(address + 40);
+
+            if (this.x == newX && this.y == newY) return false;
+            this.x = newX;
+            this.y = newY;
+            return true;
         }
     }
 }

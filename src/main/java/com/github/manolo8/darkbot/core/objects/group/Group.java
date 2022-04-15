@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.core.objects.group;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
+import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 
@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Group extends UpdatableAuto {
+public class Group extends Updatable.Auto {
     private final HeroManager hero;
 
     public List<GroupMember> members = new ArrayList<>();

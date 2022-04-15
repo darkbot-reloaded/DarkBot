@@ -35,7 +35,7 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
         return new RectangleImpl(minX, minY, minX + width, minY + height);
     }
 
-    public PathPoint toSide(Locatable point) {
+    public Locatable toSide(Locatable point) {
         double diffLeft = point.getX() - minX, diffRight = maxX - point.getX();
         double diffTop = point.getY() - minY, diffBottom = maxY - point.getY();
 
@@ -47,11 +47,11 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
         else if (min == diffLeft) newX = minX - MARGIN;
         else newX = maxX + MARGIN;
 
-        return new PathPoint(newX, newY);
+        return Locatable.of(newX, newY);
     }
 
-    public Collection<PathPoint> getPoints(@NotNull eu.darkbot.api.utils.PathFinder pf) {
-        List<PathPoint> points = new ArrayList<>(4);
+    public Collection<Locatable> getPoints(@NotNull eu.darkbot.api.utils.PathFinder pf) {
+        List<Locatable> points = new ArrayList<>(4);
 
         for (Corner corner : Corner.values())
             if (corner.include(pf, this))
@@ -88,8 +88,8 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
                     && pf.canMove(getX(r) + xDiff, getY(r) + yDiff);
         }
 
-        private PathPoint get(Rectangle r) {
-            return new PathPoint(getX(r) + this.xDiff, getY(r) + this.yDiff);
+        private Locatable get(Rectangle r) {
+            return Locatable.of(getX(r) + this.xDiff, getY(r) + this.yDiff);
         }
     }
 

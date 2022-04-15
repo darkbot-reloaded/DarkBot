@@ -9,12 +9,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class PolygonImpl extends AreaImpl implements Area.Polygon {
+public class PolygonImpl implements Area.Polygon {
 
     private final List<? extends Locatable> vertices;
     private final RectangleImpl bounds = new RectangleImpl();
 
-    private boolean invalid = true;
+    private boolean invalidBounds = true;
 
     public PolygonImpl(Locatable... vertices) {
         this.vertices = Arrays.asList(vertices);
@@ -26,8 +26,8 @@ public class PolygonImpl extends AreaImpl implements Area.Polygon {
 
     @Override
     public RectangleImpl getBounds() {
-        if (!invalid) return bounds;
-        invalid = false;
+        if (!invalidBounds) return bounds;
+        invalidBounds = false;
 
         double minX = Double.MAX_VALUE;
         double maxX = Double.MIN_VALUE;
@@ -45,16 +45,16 @@ public class PolygonImpl extends AreaImpl implements Area.Polygon {
     }
 
     public void invalidateBounds() {
-        this.invalid = true;
+        this.invalidBounds = true;
     }
 
     @Override
-    public PathPoint toSide(Locatable point) {
+    public Locatable toSide(Locatable point) {
         return getBounds().toSide(point);
     }
 
     @Override
-    public Collection<PathPoint> getPoints(@NotNull PathFinder pf) {
+    public Collection<Locatable> getPoints(@NotNull PathFinder pf) {
         return getBounds().getPoints(pf);
     }
 

@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
+import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.game.items.ItemCategory;
@@ -15,7 +15,7 @@ import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Item {
+public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.Item {
     private static final int START = 36, END = 128 + 8;
     private static final byte[] BUFFER = new byte[END - START];
 
@@ -189,7 +189,7 @@ public class Item extends UpdatableAuto implements eu.darkbot.api.game.items.Ite
                 '}';
     }
 
-    public class ItemTimer extends UpdatableAuto implements eu.darkbot.api.game.items.ItemTimer {
+    public class ItemTimer extends Auto implements eu.darkbot.api.game.items.ItemTimer {
         private final static String ACTIVE_ITEM_STATE = "active";
 
         public double elapsed, startTime, itemDelay, availableIn;

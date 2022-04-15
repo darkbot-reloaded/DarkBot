@@ -13,6 +13,6 @@ public abstract class AreaImpl implements Area {
 
     public abstract Locatable toSide(Locatable point);
 
-    public abstract Collection<PathPoint> getPoints(@NotNull PathFinder pf);
+    public abstract Collection<? extends Locatable> getPoints(@NotNull PathFinder pf);
 
 }
