@@ -16,6 +16,7 @@ public class Zone extends Entity implements eu.darkbot.api.game.entities.Zone {
     private final ObjArray pointsArr = ObjArray.ofVector(true);
     private final List<Position> points = new ArrayList<>();
     private final PolygonImpl zoneArea = new PolygonImpl(points);
+    private boolean useBounds;
 
     Zone(int id, long address) {
         super(id);
@@ -29,13 +30,24 @@ public class Zone extends Entity implements eu.darkbot.api.game.entities.Zone {
         pointsArr.update(API.readMemoryLong(address + 216));
         if (pointsArr.getSize() < 3) return;
 
-        if (pointsArr.syncAndReport(points, Position::new))
+        if (pointsArr.syncAndReport(points, Position::new)) {
             zoneArea.invalidateBounds();
+            useBounds = isRectangle(zoneArea);
+        }
+    }
+
+    private static boolean isRectangle(Area.Polygon polygon) {
+        if (polygon.getVertices().size() != 4) return false;
+        Area.Rectangle bounds = polygon.getBounds();
+
+        return polygon.getVertices().stream()
+                .allMatch(v -> (v.getX() == bounds.getX() || v.getX() == bounds.getX2()) &&
+                        (v.getY() == bounds.getY() || v.getY() == bounds.getY2()));
     }
 
     @Override
     public Area getZoneArea() {
-        return zoneArea;
+        return useBounds ? zoneArea.getBounds() : zoneArea;
     }
 
     private static class Position extends Updatable.Reporting implements Locatable {
