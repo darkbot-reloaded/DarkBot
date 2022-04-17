@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.utils.pathfinder;
 
+import com.github.manolo8.darkbot.Main;
 import eu.darkbot.api.game.other.Locatable;
 
 import java.util.ArrayList;
@@ -19,19 +20,20 @@ public class PathFinderCalculator {
     private PathFinderCalculator() {}
 
     public static boolean calculate(PathFinder finder, Locatable from, Locatable to, LinkedList<Locatable> path) {
-        boolean isFromNew = finder.insertPathPoint(from);
-        boolean isToNew = finder.insertPathPoint(to);
+        synchronized (Main.UPDATE_LOCKER) {
+            boolean isFromNew = finder.insertPathPoint(from);
+            boolean isToNew = finder.insertPathPoint(to);
 
-        PathPoint fromPoint = finder.getPathPoint(from);
-        PathPoint toPoint = finder.getPathPoint(to);
+            PathPoint fromPoint = finder.getPathPoint(from);
+            PathPoint toPoint = finder.getPathPoint(to);
 
-        boolean foundPath = INSTANCE.build(fromPoint, toPoint);
-        if (foundPath) INSTANCE.unfragment(fromPoint, toPoint, path);
+            boolean foundPath = INSTANCE.build(fromPoint, toPoint);
+            if (foundPath) INSTANCE.unfragment(fromPoint, toPoint, path);
 
-        if (isFromNew) finder.removePathPoint(from);
-        if (isToNew) finder.removePathPoint(to);
-
-        return foundPath;
+            if (isFromNew) finder.removePathPoint(from);
+            if (isToNew) finder.removePathPoint(to);
+            return foundPath;
+        }
     }
 
     private boolean build(PathPoint from, PathPoint to) {

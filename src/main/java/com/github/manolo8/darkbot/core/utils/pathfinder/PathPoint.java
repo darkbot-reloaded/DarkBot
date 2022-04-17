@@ -18,7 +18,7 @@ public class PathPoint implements Locatable {
         this.y = loc.getY();
     }
 
-    public void fillLineOfSight(PathFinder finder) {
+    protected void fillLineOfSight(PathFinder finder) {
         lineOfSight.clear();
 
         for (PathPoint point : finder.getPathPoints())
