@@ -127,10 +127,11 @@ public class MapDrawer extends JPanel {
                 lastMap = currentMap;
                 backgroundImage = null;
 
-                minimapFuture = currentMap.getId() <= 0 ? null :
-                        flashResManager.getBackgroundImage(currentMap)
-                                .thenApply(r -> backgroundImage = r)
-                                .whenComplete((r, t) -> minimapFuture = null);
+                minimapFuture = currentMap.getId() <= 0 ? null : flashResManager.getBackgroundImage(currentMap);
+                if (minimapFuture != null)
+                    minimapFuture
+                            .thenApply(r -> backgroundImage = r)
+                            .whenComplete((r, t) -> minimapFuture = null);
             }
             bgImg = backgroundImage;
 
