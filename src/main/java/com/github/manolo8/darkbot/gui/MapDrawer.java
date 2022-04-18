@@ -20,6 +20,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 public class MapDrawer extends JPanel {
 
@@ -36,6 +37,7 @@ public class MapDrawer extends JPanel {
 
     private CompletableFuture<Image> minimapFuture;
     private GameMap lastMap;
+    private Image backgroundImage;
 
     public MapDrawer() {
         addMouseListener(new MouseAdapter() {
@@ -87,28 +89,7 @@ public class MapDrawer extends JPanel {
 
     protected void onPaint() {
         //background image is drawn first
-        if (main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.ENABLED) {
-            Image img = null;
-
-            if (main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.USE_GAME_BACKGROUND) {
-                GameMap currentMap = main.hero.getMap();
-
-                if (currentMap != lastMap) {
-                    minimapFuture = currentMap.getId() > 0 ? flashResManager.getBackgroundImage(currentMap) : null;
-                    lastMap = currentMap;
-                }
-
-                if (minimapFuture != null)
-                    img = minimapFuture.getNow(null);
-
-            } else img = main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage();
-
-            if (img != null) {
-                mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.OPACITY));
-                mapGraphics.g2.drawImage(img, 0, 0, mapGraphics.width, mapGraphics.height, this);
-                mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-            }
-        }
+        drawBackgroundImage();
 
         for (Drawable drawable : drawableHandler.getDrawables()) {
             drawable.onDraw(mapGraphics);
@@ -130,6 +111,41 @@ public class MapDrawer extends JPanel {
         }
 
         mapGraphics.dispose();
+    }
+
+    private void drawBackgroundImage() {
+        if (!main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.ENABLED) return;
+
+        Image bgImg;
+        if (main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.USE_GAME_BACKGROUND) {
+            GameMap currentMap = main.hero.getMap();
+
+            if (currentMap != lastMap) {
+                Future<?> f = minimapFuture; //prevent race condition
+                if (f != null) f.cancel(true);
+
+                lastMap = currentMap;
+                backgroundImage = null;
+
+                minimapFuture = currentMap.getId() <= 0 ? null :
+                        flashResManager.getBackgroundImage(currentMap)
+                                .thenApply(r -> backgroundImage = r)
+                                .whenComplete((r, t) -> minimapFuture = null);
+            }
+            bgImg = backgroundImage;
+
+        } else {
+            if (backgroundImage != null)
+                backgroundImage = null;
+
+            bgImg = main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage();
+        }
+
+        if (bgImg != null) {
+            mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.OPACITY));
+            mapGraphics.g2.drawImage(bgImg, 0, 0, mapGraphics.width, mapGraphics.height, this);
+            mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        }
     }
 
     private void drawActionButton() {

@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.FileUtils;
-import com.github.manolo8.darkbot.utils.OS;
+import com.github.manolo8.darkbot.utils.OSUtil;
 import com.github.manolo8.darkbot.utils.XmlHelper;
 import com.github.manolo8.darkbot.utils.http.Http;
 import eu.darkbot.api.extensions.Feature;
@@ -19,7 +19,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
@@ -40,8 +39,10 @@ import java.util.stream.Collectors;
  */
 @Feature(name = "Flash resource manager", description = "Holds the resources for the in-game language")
 public class FlashResManager implements Task, GameResourcesAPI {
-
+    private static final Path MINIMAPS_PATH = OSUtil.getDataPath("Images", "minimaps");
     private static final String URL = "https://darkorbit-22.bpsecure.com/spacemap/templates/{lang}/flashres.xml";
+
+    private static Map<Integer, String> mapBackgroundIds = new HashMap<>();
 
     private final Main main;
     private final Queue<Runnable> tasksQueue = new ConcurrentLinkedQueue<>();
@@ -92,6 +93,7 @@ public class FlashResManager implements Task, GameResourcesAPI {
 
     @Override
     public void onBackgroundTick() {
+        parseMinimapIds(); // should be lazy-loaded?
         if (tasksQueue.isEmpty()) return;
 
         Runnable task;
@@ -114,81 +116,54 @@ public class FlashResManager implements Task, GameResourcesAPI {
     }
 
     public CompletableFuture<Image> getBackgroundImage(GameMap gameMap) {
-        MinimapBackgroundTask task = new MinimapBackgroundTask(gameMap.getId());
+        String name = "minimap-" + mapBackgroundIds.getOrDefault(gameMap.getId(),
+                String.valueOf(gameMap.getId())) + "-700.jpg";
 
-        tasksQueue.add(task);
-        return task;
+        Path minimapPath = MINIMAPS_PATH.resolve(name);
+        CompletableFuture<Image> future = new CompletableFuture<>();
+
+        if (Files.exists(minimapPath)) {
+            try {
+                future.complete(ImageIO.read(minimapPath.toFile()));
+            } catch (IOException e) {
+                future.completeExceptionally(e);
+            }
+            return future;
+        }
+
+        tasksQueue.add(() -> {
+            FileUtils.ensureDirectoryExists(MINIMAPS_PATH);
+            try {
+                URL backgroundURL = new URL("https://darkorbit-22.bpsecure.com/spacemap/graphics/minimaps/" + name);
+                BufferedImage img = ImageIO.read(backgroundURL);
+                ImageIO.write(img, "jpg", minimapPath.toFile());
+                future.complete(img);
+            } catch (Throwable t) {
+                future.completeExceptionally(t);
+            }
+        });
+        return future;
     }
 
-    private static class MinimapBackgroundTask extends CompletableFuture<Image> implements Runnable {
-        private static final Pattern MINIMAP_ID_PATTERN = Pattern.compile("id=\"(\\d+)\".*minimap=\"([^\"]+)\"");
-        private static final Path MINIMAPS_PATH = OS.getDataPath().resolve("Images/minimaps");
+    private void parseMinimapIds() {
+        if (!mapBackgroundIds.isEmpty()) return;
 
-        private static Map<Integer, String> mapBackgroundIds;
+        try {
+            mapBackgroundIds = Http.create("https://darkorbit-22.bpsecure.com/spacemap/graphics/maps-config.xml")
+                    .consumeInputStream(is -> {
 
-        private final int mapId;
-
-        private MinimapBackgroundTask(int mapId) {
-            this.mapId = mapId;
-        }
-
-        @Override
-        public void run() {
-            if (parseMinimapIds()) {
-                try {
-                    if (!FileUtils.ensureDirectoriesExists(MINIMAPS_PATH)) {
-                        complete(null);
-                        return; // if can't create directory, return null cause can't cache images
-                    }
-
-                    String name = "minimap-" + mapBackgroundIds.getOrDefault(mapId, String.valueOf(mapId)) + "-700.jpg";
-                    Path minimapPath = MINIMAPS_PATH.resolve(name);
-
-                    if (Files.exists(minimapPath))
-                        complete(ImageIO.read(minimapPath.toFile()));
-
-                    else {
-                        URL backgroundURL = new URL("https://darkorbit-22.bpsecure.com/spacemap/graphics/minimaps/" + name);
-                        BufferedImage img = ImageIO.read(backgroundURL);
-                        ImageIO.write(img, "jpg", minimapPath.toFile());
-
-                        complete(img);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    complete(null);
-                }
-            }
-        }
-
-        private boolean parseMinimapIds() {
-            if (mapBackgroundIds != null && !mapBackgroundIds.isEmpty())
-                return true;
-
-            try {
-                InputStream is = Http.create("https://darkorbit-22.bpsecure.com/spacemap/graphics/maps-config.xml")
-                        .getInputStream();
-
-                Matcher matcher = MINIMAP_ID_PATTERN.matcher("");
-                try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-                    mapBackgroundIds = br.lines()
-                            .map(String::trim)
-                            .filter(s -> s.startsWith("<map "))
-                            .map(matcher::reset)
-                            .filter(Matcher::find)
-                            .collect(Collectors.toMap(m -> Integer.parseInt(m.group(1)), m -> m.group(2)));
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    mapBackgroundIds = null;
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                mapBackgroundIds = null;
-            }
-
-            return mapBackgroundIds != null && !mapBackgroundIds.isEmpty();
+                        Pattern minimapIdPattern = Pattern.compile("id=\"(\\d+)\".*minimap=\"([^\"]+)\"");
+                        Matcher matcher = minimapIdPattern.matcher("");
+                        return new BufferedReader(new InputStreamReader(is))
+                                .lines()
+                                .map(String::trim)
+                                .filter(s -> s.startsWith("<map "))
+                                .map(matcher::reset)
+                                .filter(Matcher::find)
+                                .collect(Collectors.toMap(m -> Integer.parseInt(m.group(1)), m -> m.group(2)));
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
