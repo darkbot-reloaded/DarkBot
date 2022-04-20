@@ -79,9 +79,15 @@ public class DarkPlayerAdapter extends GameAPIImpl<
             if (!isProcessOpen) {
                 isProcessOpen = darkPlayer.createProcess("./lib/DarkPlayer.exe", UUID.randomUUID().toString());
                 if (isProcessOpen) {
-                    darkPlayerAdapter.setData();
-                    darkPlayer.createWindow();
-                    darkPlayer.setMaxFps(main.config.BOT_SETTINGS.API_CONFIG.MAX_FPS);
+                    try {
+                        Thread.sleep(500);
+                        darkPlayerAdapter.setData();
+                        Thread.sleep(500);
+                        darkPlayer.createWindow();
+                        Thread.sleep(500);
+                        darkPlayer.setMaxFps(main.config.BOT_SETTINGS.API_CONFIG.MAX_FPS);
+                    } catch(InterruptedException e) {
+                    }
                 }
             }
         }
