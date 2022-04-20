@@ -149,7 +149,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             }));
             list.add(create(i18n.get(p + "reset_stats"), e -> {
                 main.statsManager.resetValues();
-                main.guiManager.deaths = 0;
+                main.repairManager.resetDeaths();
             }));
             ConfigSetting<Config> root = config.getConfigRoot();
             if (root.getValue().BOT_SETTINGS.OTHER.DEV_STUFF) {

@@ -5,6 +5,8 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.OreAPI;
 
+import java.util.function.Predicate;
+
 public interface GameAPI {
 
     interface Base {
@@ -89,9 +91,11 @@ public interface GameAPI {
         long[] queryBytes  (byte[] pattern, int maxSize);
     }
 
-    interface StringReader extends Base {
+    interface ExtraMemoryReader extends Base {
         String readString(long address);
         void resetCache();
+
+        long searchClassClosure(Predicate<Long> pattern);
     }
 
     interface Interaction extends Base {
@@ -253,9 +257,14 @@ public interface GameAPI {
         }
     }
 
-    class NoOpStringReader implements StringReader {
+    class NoOpExtraMemoryReader implements ExtraMemoryReader {
         @Override
         public int getVersion() {
+            return 0;
+        }
+
+        @Override
+        public long searchClassClosure(Predicate<Long> pattern) {
             return 0;
         }
 

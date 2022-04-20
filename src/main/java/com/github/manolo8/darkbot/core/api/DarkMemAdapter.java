@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
@@ -8,19 +9,19 @@ import eu.darkbot.api.DarkInput;
 import eu.darkbot.api.DarkMem;
 
 public class DarkMemAdapter extends GameAPIImpl<DarkMem, DarkMemAdapter.DarkMemHandler, DarkMem,
-        ByteUtils.StringReader, DarkMemAdapter.DarkMemInput, GameAPI.NoOpDirectInteraction> {
+        ByteUtils.ExtraMemoryReader, DarkMemAdapter.DarkMemInput, GameAPI.NoOpDirectInteraction> {
+
     private final DarkMem MEM = new DarkMem();
     private final DarkInput INPUT = new DarkInput();
 
-    public DarkMemAdapter(StartupParams params, DarkMem mem) {
+    public DarkMemAdapter(StartupParams params, DarkMem mem, BotInstaller botInstaller) {
         super(params,
                 mem,
                 new DarkMemHandler(),
                 mem,
-                new ByteUtils.StringReader(mem),
+                new ByteUtils.ExtraMemoryReader(mem, botInstaller),
                 new DarkMemInput(),
-                new GameAPI.NoOpDirectInteraction(),
-                GameAPI.Capability.ATTACH);
+                new GameAPI.NoOpDirectInteraction(), GameAPI.Capability.ATTACH);
     }
 
     @Override

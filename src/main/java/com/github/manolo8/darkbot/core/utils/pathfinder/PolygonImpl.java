@@ -29,15 +29,15 @@ public class PolygonImpl implements Area.Polygon {
         if (!invalidBounds) return bounds;
         invalidBounds = false;
 
-        double minX = Double.MAX_VALUE;
-        double maxX = Double.MIN_VALUE;
-        double minY = Double.MAX_VALUE;
-        double maxY = Double.MIN_VALUE;
+        double minX = Double.POSITIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
 
         for (Locatable vertex : getVertices()) {
             minX = Double.min(minX, vertex.getX());
-            maxX = Double.max(maxX, vertex.getX());
             minY = Double.min(minY, vertex.getY());
+            maxX = Double.max(maxX, vertex.getX());
             maxY = Double.max(maxY, vertex.getY());
         }
         bounds.set(minX, minY, maxX, maxY);

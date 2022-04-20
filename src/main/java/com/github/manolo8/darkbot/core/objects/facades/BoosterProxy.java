@@ -10,6 +10,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -39,8 +40,10 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
 
         @Override
         public void update() {
+            String oldCat = this.category;
             this.category = API.readMemoryString(address, 0x20);
-            this.cat      = BoosterCategory.of(category);
+            if (!Objects.equals(this.category, oldCat))
+                this.cat = BoosterCategory.of(category);
             this.name     = API.readMemoryString(address, 0x40); //0x48 description;
             this.amount   = API.readMemoryDouble(address + 0x50);
             this.subBoostersArr.update(API.readMemoryLong(address + 0x30));
@@ -99,6 +102,7 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
         UNKNOWN                 ("?"     , new Color(0x808080)) {
             @Override
             public String getSmall(String category) {
+                if (category.isEmpty()) return "";
                 return Arrays.stream(category.split("_"))
                         .map(str -> str.length() <= 3 ? str : str.substring(0, 3))
                         .collect(Collectors.joining(" "));

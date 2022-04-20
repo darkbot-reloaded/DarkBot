@@ -439,6 +439,7 @@ public class PetManager extends Gui implements PetAPI {
             return curr;
         }
 
+        @Override
         public double getTotal() {
             return total;
         }
@@ -450,8 +451,8 @@ public class PetManager extends Gui implements PetAPI {
 
         private void update(long elementsListAddress, int id) {
             long address = getAddress(elementsListAddress, id);
-            curr = API.readMemoryDouble(address, 0x120);
-            total = API.readMemoryDouble(address, 0x128);
+            curr = API.readMemoryDouble(address, 0x118);
+            total = API.readMemoryDouble(address, 0x120);
         }
 
         private long getAddress(long elementsListAddress, int id) {

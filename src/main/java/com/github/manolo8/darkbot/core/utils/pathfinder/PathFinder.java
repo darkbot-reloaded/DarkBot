@@ -110,13 +110,13 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
                         this.points.put(toImmutable(p), new PathPoint(p));
                 }
             }
+            for (PathPoint point : points.values()) point.fillLineOfSight(this);
         }
 
-        for (PathPoint point : points.values()) point.fillLineOfSight(this);
         return true;
     }
 
-    public boolean insertPathPoint(Locatable point) {
+    protected boolean insertPathPoint(Locatable point) {
         point = toImmutable(point);
         if (points.containsKey(point)) return false;
 
@@ -128,7 +128,7 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
         return true;
     }
 
-    public void removePathPoint(Locatable point) {
+    protected void removePathPoint(Locatable point) {
         point = toImmutable(point);
 
         PathPoint oldPoint = points.remove(point);
@@ -137,7 +137,9 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
     }
 
     private Locatable closest(Locatable point) {
-        return points.keySet().stream().min(Comparator.comparingDouble(p -> p.distanceTo(point))).orElse(null);
+        synchronized (Main.UPDATE_LOCKER) {
+            return points.keySet().stream().min(Comparator.comparingDouble(p -> p.distanceTo(point))).orElse(null);
+        }
     }
 
     public boolean isOutOfMap(Locatable loc) {

@@ -10,7 +10,7 @@ public class BackpageAdapter extends GameAPIImpl<
         GameAPI.NoOpWindow,
         GameAPI.NoOpHandler,
         GameAPI.NoOpMemory,
-        GameAPI.NoOpStringReader,
+        GameAPI.NoOpExtraMemoryReader,
         GameAPI.NoOpInteraction,
         GameAPI.NoOpDirectInteraction> {
 
@@ -21,11 +21,10 @@ public class BackpageAdapter extends GameAPIImpl<
                 new GameAPI.NoOpWindow(),
                 new GameAPI.NoOpHandler(),
                 new GameAPI.NoOpMemory(),
-                new GameAPI.NoOpStringReader(),
+                new GameAPI.NoOpExtraMemoryReader(),
                 new GameAPI.NoOpInteraction(),
                 new GameAPI.NoOpDirectInteraction(),
-                GameAPI.Capability.LOGIN,
-                GameAPI.Capability.BACKGROUND_ONLY);
+                GameAPI.Capability.LOGIN, GameAPI.Capability.BACKGROUND_ONLY);
 
         this.statsManager = statsManager;
     }

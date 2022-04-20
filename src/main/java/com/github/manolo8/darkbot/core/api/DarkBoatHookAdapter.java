@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.manager.HookAdapter;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
@@ -9,27 +10,26 @@ public class DarkBoatHookAdapter extends GameAPIImpl<
         DarkBoat,
         DarkBoat,
         DarkBoat,
-        ByteUtils.StringReader,
+        ByteUtils.ExtraMemoryReader,
         DarkBoat,
         HookAdapter> {
 
-    public DarkBoatHookAdapter(StartupParams params, DarkBoat darkboat, HookAdapter hookAdapter) {
+    public DarkBoatHookAdapter(StartupParams params, DarkBoat darkboat, HookAdapter hookAdapter, BotInstaller botInstaller) {
         super(params,
                 darkboat,
                 darkboat,
                 darkboat,
-                new ByteUtils.StringReader(darkboat),
+                new ByteUtils.ExtraMemoryReader(darkboat, botInstaller),
                 darkboat,
                 hookAdapter,
                 GameAPI.Capability.LOGIN,
                 GameAPI.Capability.INITIALLY_SHOWN,
                 GameAPI.Capability.CREATE_WINDOW_THREAD,
-                GameAPI.Capability.DIRECT_LIMIT_FPS,
                 // Dark Hook!
+                GameAPI.Capability.DIRECT_LIMIT_FPS,
                 GameAPI.Capability.DIRECT_MOVE_SHIP,
                 GameAPI.Capability.DIRECT_COLLECT_BOX,
-                GameAPI.Capability.DIRECT_REFINE,
-                GameAPI.Capability.DIRECT_CALL_METHOD);
+                GameAPI.Capability.DIRECT_REFINE, GameAPI.Capability.DIRECT_CALL_METHOD);
     }
 
     @Override

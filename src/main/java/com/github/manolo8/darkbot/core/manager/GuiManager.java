@@ -12,7 +12,6 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.managers.GameScreenAPI;
@@ -32,6 +31,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     private final SlotBarsProxy slotBarsProxy;
     private final SettingsProxy settingsProxy;
     private final StatsProxy statsProxy;
+    private final RepairManager repairManager;
 
     private final PairArray guis = PairArray.ofDictionary();
 
@@ -39,12 +39,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     private long lastDeath = -1;
     private long lastRepairAttempt;
     private long validTime;
-
-    private long repairAddress;
-
-    private long screenAddress;
     private long guiAddress;
-    private long mainAddress;
 
     private final Map<String, Gui> registeredGuis = new HashMap<>();
 
@@ -82,12 +77,13 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     private boolean needRefresh;
 
-    public GuiManager(Main main, PluginAPI pluginAPI) {
+    public GuiManager(Main main, PluginAPI pluginAPI, RepairManager repairManager) {
         this.main = main;
         this.pluginAPI = pluginAPI;
         this.slotBarsProxy = pluginAPI.requireInstance(SlotBarsProxy.class);
         this.settingsProxy = pluginAPI.requireInstance(SettingsProxy.class);
         this.statsProxy = pluginAPI.requireInstance(StatsProxy.class);
+        this.repairManager = repairManager;
 
         this.validTime = System.currentTimeMillis();
 
@@ -123,9 +119,6 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     @Override
     public void install(BotInstaller botInstaller) {
-        botInstaller.screenManagerAddress.add(value -> screenAddress = value);
-        botInstaller.mainAddress.add(value -> mainAddress = value);
-
         botInstaller.invalid.add(value -> {
             if (!value) {
                 validTime = System.currentTimeMillis();
@@ -138,7 +131,6 @@ public class GuiManager implements Manager, GameScreenAPI {
             guiAddress = value;
             guis.update(API.readMemoryLong(guiAddress + 112));
 
-            repairAddress = 0;
             registeredGuis.values().forEach(Gui::reset);
             checks = LoadStatus.WAITING;
         });
@@ -156,6 +148,8 @@ public class GuiManager implements Manager, GameScreenAPI {
         if (checks != LoadStatus.DONE && checks.canAdvance.test(this))
             checks = LoadStatus.values()[checks.ordinal() + 1];
         targetedOffers.show(false);
+
+        this.deaths = repairManager.getDeathAmount();
     }
 
     private void tryReconnect(Gui gui) {
@@ -171,34 +165,16 @@ public class GuiManager implements Manager, GameScreenAPI {
     }
 
     public boolean tryRevive() {
-        if (System.currentTimeMillis() - lastDeath < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L))
+        if (repairManager.setBeforeReviveTime())
             return false;
-        if (System.currentTimeMillis() - lastRepairAttempt <= 10000)
-            return false;
+        if (System.currentTimeMillis() - lastRepairAttempt <= 10000) return false;
 
-        long respawnId = main.config.GENERAL.SAFETY.REVIVE.getId();
+        if (repairManager.tryRevive()) {
+            lastRepairAttempt = System.currentTimeMillis();
+            if (main.config.MISCELLANEOUS.DRONE_REPAIR_PERCENTAGE != 0) this.main.backpage.checkDronesAfterKill();
+        } else return false;
 
-        if (main.repairManager.canRespawn((int) respawnId))
-            API.writeMemoryLong(repairAddress + 32, respawnId);
-
-        API.mouseClick(MapManager.clientWidth / 2, (MapManager.clientHeight / 2) + 190);
-        lastRepairAttempt = System.currentTimeMillis();
-        if (main.config.MISCELLANEOUS.DRONE_REPAIR_PERCENTAGE != 0) this.main.backpage.checkDronesAfterKill();
         return true;
-    }
-
-    private boolean isInvalidShip() {
-        return API.readMemoryInt(API.readMemoryLong(screenAddress + 240) + 56) == 0;
-    }
-
-    private boolean isDead() {
-        if (repairAddress != 0) {
-            return API.readMemoryBoolean(repairAddress + 40);
-        } else if (isInvalidShip()) {
-            long[] values = API.queryMemory(ByteUtils.getBytes(guiAddress, mainAddress), 1);
-            if (values.length == 1) repairAddress = values[0] - 56;
-        }
-        return false;
     }
 
     private void checkInvalid() {
@@ -238,19 +214,19 @@ public class GuiManager implements Manager, GameScreenAPI {
             return false;
         }
 
-        if (isDead()) {
+        if (repairManager.isDestroyed()) {
             this.needRefresh = true;
             main.hero.drive.stop(false);
 
             if (lastDeath == -1) {
                 lastDeath = System.currentTimeMillis();
-                deaths++;
+                //deaths++;
             }
 
             if (!tryRevive()) return false;
 
             if (main.config.GENERAL.SAFETY.MAX_DEATHS != -1 &&
-                    deaths >= main.config.GENERAL.SAFETY.MAX_DEATHS) main.setRunning(false);
+                    repairManager.getDeathAmount() >= main.config.GENERAL.SAFETY.MAX_DEATHS) main.setRunning(false);
             else checkInvalid();
 
             return false;
@@ -352,4 +328,5 @@ public class GuiManager implements Manager, GameScreenAPI {
                 .filter(c -> slotBarsProxy.proActionBar.address != 0 && slotBarsProxy.isProActionBarVisible() != visible)
                 .ifPresent(API::keyboardClick);
     }
+
 }
