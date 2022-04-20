@@ -3,7 +3,7 @@ package eu.darkbot.api;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.LibUtils;
 
-public class DarkMem implements GameAPI.Memory, GameAPI.Window {
+public class DarkMem implements GameAPI.Window, GameAPI.Memory {
 
     static {
         LibUtils.loadLibrary("DarkMemAPI");

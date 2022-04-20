@@ -12,19 +12,19 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.OreAPI;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class GameAPIImpl<
         W extends GameAPI.Window,
         H extends GameAPI.Handler,
         M extends GameAPI.Memory,
-        S extends GameAPI.StringReader,
+        E extends GameAPI.ExtraMemoryReader,
         I extends GameAPI.Interaction,
         D extends GameAPI.DirectInteraction> implements IDarkBotAPI {
 
@@ -35,7 +35,7 @@ public class GameAPIImpl<
     protected final W window;
     protected final H handler;
     protected final M memory;
-    protected final S stringReader;
+    protected final E extraMemoryReader;
     protected final I interaction;
     protected final D direct;
 
@@ -53,14 +53,14 @@ public class GameAPIImpl<
     protected long lastFailedLogin;
 
     public GameAPIImpl(StartupParams params,
-                       W window, H handler, M memory, S stringReader, I interaction, D direct,
+                       W window, H handler, M memory, E extraMemoryReader, I interaction, D direct,
                        GameAPI.Capability... capabilityArr) {
         this.params = params;
 
         this.window = window;
         this.handler = handler;
         this.memory = memory;
-        this.stringReader = stringReader;
+        this.extraMemoryReader = extraMemoryReader;
         this.interaction = interaction;
         this.direct = direct;
 
@@ -70,7 +70,7 @@ public class GameAPIImpl<
         this.version = window.getVersion() + "w " +
                 handler.getVersion() + "h " +
                 memory.getVersion() + "m " +
-                stringReader.getVersion() + "s " +
+                extraMemoryReader.getVersion() + "e " +
                 interaction.getVersion() + "i" +
                 direct.getVersion() + "d";
 
@@ -141,7 +141,7 @@ public class GameAPIImpl<
         window.tick();
         handler.tick();
         memory.tick();
-        stringReader.tick();
+        extraMemoryReader.tick();
         interaction.tick();
         direct.tick();
     }
@@ -266,7 +266,7 @@ public class GameAPIImpl<
 
     @Override
     public String readMemoryStringFallback(long address, String fallback) {
-        String str = stringReader.readString(address);
+        String str = extraMemoryReader.readString(address);
         return str == null ? fallback : str;
     }
 
@@ -331,6 +331,11 @@ public class GameAPIImpl<
     }
 
     @Override
+    public long searchClassClosure(Predicate<Long> pattern) {
+        return extraMemoryReader.searchClassClosure(pattern);
+    }
+
+    @Override
     public void setVisible(boolean visible) {
         handler.setVisible(visible);
     }
@@ -342,7 +347,7 @@ public class GameAPIImpl<
 
     @Override
     public void resetCache() {
-        stringReader.resetCache();
+        extraMemoryReader.resetCache();
     }
 
     @Override
@@ -353,7 +358,7 @@ public class GameAPIImpl<
         }
         handler.reload();
 
-        stringReader.resetCache();
+        extraMemoryReader.resetCache();
     }
 
     @Override

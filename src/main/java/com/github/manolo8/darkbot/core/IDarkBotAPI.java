@@ -7,7 +7,8 @@ import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.managers.WindowAPI;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Predicate;
 
 public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
@@ -92,6 +93,8 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     long[] queryMemoryInt(int value, int maxQuantity);
     long[] queryMemoryLong(long value, int maxQuantity);
     long[] queryMemory(byte[] query, int maxQuantity);
+
+    long searchClassClosure(Predicate<Long> pattern);
 
     void setVisible(boolean visible);
     default void setMinimized(boolean minimized) {

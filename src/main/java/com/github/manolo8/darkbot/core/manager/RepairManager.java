@@ -1,12 +1,23 @@
 package com.github.manolo8.darkbot.core.manager;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.swf.IntArray;
+import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.extensions.features.handlers.ReviveSelectorHandler;
 import com.github.manolo8.darkbot.utils.LogUtils;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.extensions.Feature;
+import eu.darkbot.api.extensions.selectors.PrioritizedSupplier;
+import eu.darkbot.api.extensions.selectors.ReviveSelector;
+import eu.darkbot.api.game.enums.ReviveLocation;
+import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.RepairAPI;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -15,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,87 +33,152 @@ import java.util.Map;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class RepairManager implements Manager, RepairAPI {
-    private boolean writtenToLog = true;
-    private long guiAddress, mainAddress, userDataAddress, repairAddress;
-
-    private String killerName;
-    private final IntArray repairOptions = IntArray.ofArray(true);
+    private final Main main;
+    private final ReviveSelectorHandler reviveHandler;
 
     private final Map<String, OutputStream> streams = new HashMap<>();
-    private final GuiManager guiManager;
+    private final List<Integer> repairOptionsList = new ArrayList<>();
 
-    public RepairManager(GuiManager guiManager) {
-        this.guiManager = guiManager;
+    private final IntArray repairOptions = IntArray.ofArray(true);
+    private final ObjArray repairTypes = ObjArray.ofVector(true);
+
+    private final byte[] patternCache = new byte[40];
+
+    private String killerName;
+    private Locatable deathLocation;
+    private Instant lastDeath;
+
+    private boolean destroyed;
+    private long userDataAddress, repairAddress, beforeReviveTime;
+    private int deaths;
+
+    public RepairManager(Main main, ReviveSelectorHandler reviveHandler) {
+        this.main = main;
+        this.reviveHandler = reviveHandler;
     }
 
     @Override
     public void install(BotInstaller botInstaller) {
-        botInstaller.guiManagerAddress.add(value -> {
-            guiAddress = value;
-            repairAddress = 0;
-        });
-        botInstaller.mainAddress.add(value -> mainAddress = value);
+        botInstaller.guiManagerAddress.add(value -> repairAddress = 0);
         botInstaller.heroInfoAddress.add(value -> userDataAddress = value);
     }
 
-    private final List<Integer> repairOptionsList = new ArrayList<>();
-    public void tick() {
-        if (isDead()) writtenToLog = false;
-        else {
-            if (!writtenToLog) {
-                writeKiller();
-                writtenToLog = true;
-            }
+    public String getStatus() {
+        ReviveLocation location = reviveHandler.getBest();
+        int availableIn = optionAvailableIn(getRepairOptionFromType(location));
 
+        int beforeRevive = (int) (((beforeReviveTime + (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L))
+                                   - System.currentTimeMillis()) / 1000);
+
+        return "Reviving at: " + location + ", in " + Math.max(beforeRevive, availableIn) + "s";
+    }
+
+    public boolean setBeforeReviveTime() {
+        if (beforeReviveTime == -1)
+            beforeReviveTime = System.currentTimeMillis();
+
+        return System.currentTimeMillis() - beforeReviveTime < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L);
+    }
+
+    public void tick() {
+        boolean alive = isAlive();
+
+        if (alive) {
+            if (main.hero.address != 0) // possibly alive but we are not sure yet
+                destroyed = false;
+
+            beforeReviveTime = -1;
             return;
         }
-        if (repairAddress == 0) updateRepairAddr();
 
-        killerName = API.readMemoryString(API.readMemoryLong(repairAddress + 0x68));
+        if (!destroyed) {
+            destroyed = true;
+            deaths++;
+            lastDeath = Instant.now();
+            if (userDataAddress != 0) // only if hero was alive
+                deathLocation = main.hero.getLocationInfo().getCurrent().copy();
+
+            killerName = API.readMemoryStringFallback(API.readMemoryLong(repairAddress + 0x68), null);
+
+            String killerMessage = killerName == null || killerName.isEmpty()
+                    ? "You were destroyed by a radiation/mine/unknown"
+                    : "You have been destroyed by: " + killerName;
+            System.out.println(killerMessage);
+
+            if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.LOG_DEATHS)
+                writeToFile("deaths_" + LogUtils.START_TIME, formatLogMessage(killerMessage));
+        }
+
         repairOptions.update(API.readMemoryLong(repairAddress + 0x58));
 
         repairOptionsList.clear();
         for (int i = 0; i < repairOptions.getSize(); i++)
             this.repairOptionsList.add(repairOptions.get(i));
+
+        repairTypes.update(API.readMemoryLong(repairAddress + 0x60));
     }
 
-    private void updateRepairAddr() {
-        long[] values = API.queryMemory(ByteUtils.getBytes(guiAddress, mainAddress), 1);
-        if (values.length == 1) repairAddress = values[0] - 0x38;
+    private long afterAvailableWait;
+    // return true if clicked, false if should wait
+    public boolean tryRevive() {
+        int repairOption = getRepairOptionFromType(reviveHandler.getBest());
+        int availableIn = optionAvailableIn(repairOption);
+
+        if (availableIn > 0) {
+            afterAvailableWait = System.currentTimeMillis();
+            return false;
+        }
+
+        // wait 1 second after the option is available to potentially fix in-game bug
+        if (System.currentTimeMillis() - afterAvailableWait < 1000) return false;
+
+        if (repairOption != -1)
+            API.writeMemoryLong(repairAddress + 32, repairOption);
+
+        API.mouseClick(MapManager.clientWidth / 2, (MapManager.clientHeight / 2) + 190);
+
+        return true;
     }
 
+    private boolean isAlive() {
+        if (repairAddress != 0) return !API.readMemoryBoolean(repairAddress + 0x28);
+
+        if (main.mapManager.mapAddress == 0 || main.guiManager.lostConnection.isVisible()
+            || main.guiManager.connecting.isVisible() || (main.hero.address != 0 && main.hero.id != 0))
+            return true;
+
+        if (userDataAddress == 0 || API.readMemoryBoolean(userDataAddress + 0x4C)) {
+            long repairClosure = API.searchClassClosure(this::repairClosurePattern);
+            if (repairClosure == 0) return true;
+
+            repairAddress = API.readLong(repairClosure + 72); // check on next tick
+        }
+
+        return true;
+    }
+
+    @Deprecated
     public String getKillerName() {
         return killerName;
     }
 
+    @Deprecated
     public boolean isDead() {
-        return userDataAddress != 0 && API.readMemoryBoolean(userDataAddress + 0x4C);
+        return isDestroyed();
     }
 
+    @Deprecated
     public boolean canRespawn(int option) {
         return repairOptionsList.contains(option);
     }
 
-    public int[] getRespawnOptionsIds() {
-        int[] options = new int[repairOptions.getSize()];
-        for (int i = 0; i < repairOptions.getSize(); i++) {
-            options[i] = repairOptions.get(i);
-        }
-        return options;
+    public void resetDeaths() {
+        deaths = 0;
     }
 
-    private int deaths;
-    private Instant lastDeath;
-    private void writeKiller() {
-        String killerMessage = killerName == null || killerName.isEmpty()
-                ? "You were destroyed by a radiation/mine/unknown"
-                : "You have been destroyed by: " + killerName;
-        System.out.println(killerMessage);
-        deaths++;
-        lastDeath = Instant.now();
-
-        if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.LOG_DEATHS)
-            writeToFile(LogUtils.START_TIME + "death", formatLogMessage(killerMessage));
+    private int optionAvailableIn(int repairOption) {
+        if (repairOption == -1) return -1;
+        return API.readInt(repairTypes.get(repairOption) + 48);
     }
 
     private String formatLogMessage(String message) {
@@ -111,6 +186,7 @@ public class RepairManager implements Manager, RepairAPI {
                 LocalDateTime.now().format(LogUtils.LOG_DATE),
                 message);
     }
+
     private void writeToFile(String name, String message) {
         try {
             OutputStream os = getOrCreateStream(name);
@@ -126,6 +202,29 @@ public class RepairManager implements Manager, RepairAPI {
         return this.streams.computeIfAbsent(name, LogUtils::createLogFile);
     }
 
+    private boolean repairClosurePattern(long addr) {
+        API.readMemory(addr + 48, patternCache);
+
+        return ByteUtils.getInt(patternCache, 0) == 0
+               && ByteUtils.getInt(patternCache, 4) == 1
+               && ByteUtils.getInt(patternCache, 8) == 2
+               && ByteUtils.getInt(patternCache, 12) == 3
+               && ByteUtils.getInt(patternCache, 16) == 4
+               && ByteUtils.getInt(patternCache, 20) == 0 // align to 8
+               && API.readLong(ByteUtils.getLong(patternCache, 24), 0x10) != 0
+               && API.readLong(ByteUtils.getLong(patternCache, 32), 0x10) != 0;
+    }
+
+    private int getRepairOptionFromType(ReviveLocation reviveLocation) {
+        for (int i = 0; i < repairOptions.getSize(); i++) {
+            if (ReviveLocation.of(repairOptions.get(i)) == reviveLocation) {
+                return repairOptions.get(i);
+            }
+        }
+
+        return -1;
+    }
+
     @Override
     public int getDeathAmount() {
         return deaths;
@@ -133,20 +232,12 @@ public class RepairManager implements Manager, RepairAPI {
 
     @Override
     public boolean isDestroyed() {
-        return isDead();
+        return destroyed;
     }
 
     @Override
-    public void tryRevive(int repairOption) throws IllegalStateException {
-        if (!isDead())
-            throw new IllegalStateException("Ship already revived!");
-
-        guiManager.tryRevive();
-    }
-
-    @Override
-    public Collection<Integer> getAvailableRepairOptions() {
-        return repairOptionsList;
+    public int isAvailableIn(ReviveLocation reviveLocation) {
+        return optionAvailableIn(getRepairOptionFromType(reviveLocation));
     }
 
     @Override
@@ -157,5 +248,30 @@ public class RepairManager implements Manager, RepairAPI {
     @Override
     public @Nullable Instant getLastDeathTime() {
         return lastDeath;
+    }
+
+    @Override
+    public @Nullable Locatable getLastDeathLocation() {
+        return deathLocation;
+    }
+
+    @Feature(name = "Revive Supplier", description = "Provides a place where ship should be revived")
+    public static class DefaultReviveSupplier implements ReviveSelector, PrioritizedSupplier<ReviveLocation> {
+
+        private final ConfigSetting<com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation> reviveLocation;
+
+        public DefaultReviveSupplier(ConfigAPI config) {
+            this.reviveLocation = config.requireConfig("general.safety.revive");
+        }
+
+        @Override
+        public @NotNull PrioritizedSupplier<ReviveLocation> getReviveLocationSupplier() {
+            return this;
+        }
+
+        @Override
+        public ReviveLocation get() {
+            return ReviveLocation.values()[reviveLocation.getValue().ordinal() + 1];
+        }
     }
 }

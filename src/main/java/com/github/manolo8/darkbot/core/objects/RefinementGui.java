@@ -1,16 +1,13 @@
 package com.github.manolo8.darkbot.core.objects;
 
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import eu.darkbot.api.API;
 import eu.darkbot.api.managers.OreAPI;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -47,11 +44,11 @@ public class RefinementGui extends Gui implements API.Singleton {
         basicOresArr.update(API.readMemoryLong(getElementsList(37), 184));
         upgradableOresArr.update(API.readMemoryLong(getElementsList(31), 184));
 
-        basicOresArr.sync(basicOres, Ore::new, null);
-        upgradableOresArr.sync(upgradableOres, Ore::new, null);
+        basicOresArr.sync(basicOres, Ore::new);
+        upgradableOresArr.sync(upgradableOres, Ore::new);
     }
 
-    public static class Ore extends UpdatableAuto {
+    public static class Ore extends Auto {
         private String name, fuzzyName;
         private int amount;
 

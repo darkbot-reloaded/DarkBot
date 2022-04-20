@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.LogUtils;
@@ -41,7 +40,7 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
 
         this.chatsArr.update(API.readMemoryLong(data + 64));
         if (chatsArr.getSize() > 20) return;
-        this.chatsArr.sync(chats, ChatRoom::new, null);
+        this.chatsArr.sync(chats, ChatRoom::new);
 
         for (ChatRoom chat : chats) {
             if (chat.messagesArr.getSize() > 150) continue;
@@ -50,7 +49,7 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
         }
     }
 
-    public static class ChatRoom extends UpdatableAuto {
+    public static class ChatRoom extends Auto {
         private String chatName;
         private final ObjArray messagesArr = ObjArray.ofVector(true);
 
@@ -61,7 +60,7 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
         }
     }
 
-    public static class Message extends UpdatableAuto implements ChatAPI.Message {
+    public static class Message extends Auto implements ChatAPI.Message {
         public String message, username, role, clanTag, globalId, userId;
 
         public Message(long address) {

@@ -1,10 +1,8 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
 import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import eu.darkbot.api.managers.HeroItemsAPI;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -36,10 +34,10 @@ public class SlotBar extends MenuBar {
         this.stickOffset.update(API.readMemoryLong(address + 72));
 
         this.slotsArr.update(API.readMemoryLong(address + 64));
-        this.slotsArr.sync(slots, Slot::new, null);
+        this.slotsArr.sync(slots, Slot::new);
     }
 
-    public class Slot extends UpdatableAuto {
+    public class Slot extends Auto {
         public int slotNumber;
         public boolean premium; //not sure
         public String slotBarId;

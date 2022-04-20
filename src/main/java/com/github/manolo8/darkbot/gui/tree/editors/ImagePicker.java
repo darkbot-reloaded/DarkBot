@@ -21,8 +21,8 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
     public ImagePicker() {
         addActionListener(e -> {
             if (fc == null) {
-                String path = image == null ? "." : image.getPath();
-                fc = new JFileChooser(new File(path)) {
+                String path = image == null ? new File(System.getProperty("user.dir")).getAbsolutePath() : image.getPath();
+                fc = new JFileChooser(path) {
                     @Override
                     protected JDialog createDialog(Component parent) throws HeadlessException {
                         JDialog dialog = super.createDialog(parent);

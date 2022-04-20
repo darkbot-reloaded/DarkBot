@@ -21,10 +21,8 @@ public class Barrier
         super.update();
 
         Area.Rectangle zone = getZoneArea().getBounds();
-        area.minX = zone.getX() - BARRIER_RADIUS;
-        area.minY = zone.getY() - BARRIER_RADIUS;
-        area.maxX = zone.getX2() + BARRIER_RADIUS;
-        area.maxY = zone.getY2() + BARRIER_RADIUS;
+        area.set(zone.getX() - BARRIER_RADIUS, zone.getY() - BARRIER_RADIUS,
+                zone.getX2() + BARRIER_RADIUS, zone.getY2() + BARRIER_RADIUS);
     }
 
     @Override

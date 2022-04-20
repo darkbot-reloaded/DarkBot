@@ -9,7 +9,7 @@ import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.itf.Manager;
-import com.github.manolo8.darkbot.core.itf.UpdatableAuto;
+import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
@@ -95,7 +95,10 @@ public class MapManager implements Manager, StarSystemAPI {
             mapAddressStatic = value + 256;
         });
         botInstaller.invalid.add(invalid -> {
-            if (invalid) entities.clear();
+            if (invalid) {
+                entities.clear();
+                switchMap(starManager.byId(-1));
+            }
         });
     }
 
@@ -125,18 +128,25 @@ public class MapManager implements Manager, StarSystemAPI {
 
         int currMap = API.readMemoryInt(address + 76);
         boolean switched = currMap != id;
-        if (switched) {
-            id = currMap;
 
-            Map old = main.hero.map;
-            Map next = main.hero.map = main.starManager.byId(id);
+        if (switched)
+            switchMap(main.starManager.byId(currMap));
 
-            eventBroker.sendEvent(new MapChangeEvent(old, next));
-
-            updateAreas(false);
-        }
         entities.update(address);
-        if (switched) mapChange.send(main.hero.map);
+    }
+
+    private void switchMap(Map next) {
+        Map old = main.hero.map;
+        if (old.getId() == next.getId()) return;
+
+        id = next.getId();
+        main.hero.map = next;
+
+        eventBroker.sendEvent(new MapChangeEvent(old, next));
+
+        updateAreas(false);
+
+        mapChange.send(main.hero.map);
     }
 
     public void updateAreas(boolean createSafeties) {
@@ -232,7 +242,7 @@ public class MapManager implements Manager, StarSystemAPI {
         height = boundMaxY - boundY;
     }
 
-    public static class ViewBounds extends UpdatableAuto {
+    public static class ViewBounds extends Updatable.Auto {
         public double leftTopX, leftTopY;
         public double rightTopX, rightTopY;
         public double rightBotX, rightBotY;

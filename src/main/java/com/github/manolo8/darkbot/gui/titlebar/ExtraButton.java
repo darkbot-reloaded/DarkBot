@@ -129,7 +129,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 if ((e.getModifiers() & InputEvent.BUTTON3_MASK) != 0) SystemUtils.toClipboard(url);
                 else SystemUtils.openUrl(url);
             }));
-            list.add(create(i18n.get(p + "reload"), e -> {
+            list.add(create(i18n.get(p + "reload"), e -> main.addTask(() -> {
                 System.out.println("Triggering refresh: user requested");
                 try {
                     Main.API.handleRefresh();
@@ -137,7 +137,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                     System.out.println("Exception handling user requested refresh:");
                     ex.printStackTrace();
                 }
-            }));
+            })));
             list.add(create(i18n.get(p + "discord"), UIUtils.getIcon("discord"),
                     e -> SystemUtils.openUrl("https://discord.gg/KFd8vZT")));
             list.add(create(i18n.get(p + "copy_sid"), e -> SystemUtils.toClipboard(backpage.getSid())));
@@ -149,7 +149,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             }));
             list.add(create(i18n.get(p + "reset_stats"), e -> {
                 main.statsManager.resetValues();
-                main.guiManager.deaths = 0;
+                main.repairManager.resetDeaths();
             }));
             ConfigSetting<Config> root = config.getConfigRoot();
             if (root.getValue().BOT_SETTINGS.OTHER.DEV_STUFF) {
