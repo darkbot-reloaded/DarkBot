@@ -136,8 +136,10 @@ public class MapDrawer extends JPanel {
             bgImg = backgroundImage;
 
         } else {
-            if (backgroundImage != null)
+            if (backgroundImage != null || lastMap != null) {
                 backgroundImage = null;
+                lastMap = null;
+            }
 
             bgImg = main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage();
         }
