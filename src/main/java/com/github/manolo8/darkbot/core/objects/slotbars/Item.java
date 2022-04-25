@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
-import com.github.manolo8.darkbot.core.api.util.DataReader;
+import com.github.manolo8.darkbot.core.api.util.DataBuffer;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
@@ -59,7 +59,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
         // We also avoid updating timer if no other flags change for the extra 3 long-read calls
 
         long timerAdr;
-        try (DataReader reader = API.readData(address + START, END)){
+        try (DataBuffer reader = API.readData(address + START, END)){
             if (reader.getAvailable() == 0) return; //failed to read data
 
             buyable = reader.getBoolean(0);

@@ -56,7 +56,7 @@ public class DarkBoatHookAdapter extends GameAPIImpl<
     @Override
     protected DataReader createReader(int idx) {
         if (window.getVersion() >= 9)
-            return new DarkBoatAdapter.DarkBoatDataReader(idx, memory, extraMemoryReader);
+            return new DarkBoatAdapter.DarkBoatByteBufferReader(idx, memory, extraMemoryReader);
 
         return super.createReader(idx);
     }

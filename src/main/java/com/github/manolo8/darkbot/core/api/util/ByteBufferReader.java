@@ -6,54 +6,59 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class AbstractDataReader implements DataReader {
+/**
+ * Generic DataReader implementation backed by a byte buffer.
+ * May be extended to provide reading in different ways.
+ */
+public class ByteBufferReader implements DataBuffer {
 
-    private final GameAPI.ExtraMemoryReader reader;
+    protected final ByteBuffer buffer;
+    protected final GameAPI.ExtraMemoryReader reader;
 
     protected final AtomicBoolean inUse = new AtomicBoolean();
 
-    public AbstractDataReader(GameAPI.ExtraMemoryReader reader) {
+    public ByteBufferReader(ByteBuffer buffer, GameAPI.ExtraMemoryReader reader) {
+        this.buffer = buffer;
         this.reader = reader;
     }
 
-    public abstract ByteBuffer getByteBuffer();
-
-    // if returns null, something bad happen while reading the data
-    public abstract Boolean read(long address, int length);
+    public ByteBuffer getByteBuffer() {
+        return buffer;
+    }
 
     public void reset(int limit) {
-        getByteBuffer().clear();
-        getByteBuffer().limit(limit);
+        buffer.clear();
+        buffer.limit(limit);
     }
 
     @Override
     public int getPosition() {
-        return getByteBuffer().position();
+        return buffer.position();
     }
 
     @Override
     public void setPosition(int pos) {
-        getByteBuffer().position(pos);
+        buffer.position(pos);
     }
 
     @Override
     public int getLimit() {
-        return getByteBuffer().limit();
+        return buffer.limit();
     }
 
     @Override
     public int getAvailable() {
-        return getByteBuffer().remaining();
+        return buffer.remaining();
     }
 
     @Override
     public byte getByte() {
-        return getByteBuffer().get();
+        return buffer.get();
     }
 
     @Override
     public byte getByte(int idx) {
-        return getByteBuffer().get(idx);
+        return buffer.get(idx);
     }
 
     @Override
@@ -68,52 +73,52 @@ public abstract class AbstractDataReader implements DataReader {
 
     @Override
     public short getShort() {
-        return getByteBuffer().getShort();
+        return buffer.getShort();
     }
 
     @Override
     public short getShort(int idx) {
-        return getByteBuffer().getShort(idx);
+        return buffer.getShort(idx);
     }
 
     @Override
     public int getInt() {
-        return getByteBuffer().getInt();
+        return buffer.getInt();
     }
 
     @Override
     public int getInt(int idx) {
-        return getByteBuffer().getInt(idx);
+        return buffer.getInt(idx);
     }
 
     @Override
     public long getLong() {
-        return getByteBuffer().getLong();
+        return buffer.getLong();
     }
 
     @Override
     public long getLong(int idx) {
-        return getByteBuffer().getLong(idx);
+        return buffer.getLong(idx);
     }
 
     @Override
     public long getPointer() {
-        return getByteBuffer().getLong() & ByteUtils.ATOM_MASK;
+        return buffer.getLong() & ByteUtils.ATOM_MASK;
     }
 
     @Override
     public long getPointer(int idx) {
-        return getByteBuffer().getLong(idx) & ByteUtils.ATOM_MASK;
+        return buffer.getLong(idx) & ByteUtils.ATOM_MASK;
     }
 
     @Override
     public double getDouble() {
-        return getByteBuffer().getDouble();
+        return buffer.getDouble();
     }
 
     @Override
     public double getDouble(int idx) {
-        return getByteBuffer().getDouble(idx);
+        return buffer.getDouble(idx);
     }
 
     @Override
@@ -128,12 +133,12 @@ public abstract class AbstractDataReader implements DataReader {
 
     @Override
     public byte[] toArray() {
-        return getByteBuffer().array();
+        return buffer.array();
     }
 
     @Override
-    public byte[] setArray(byte[] dst, int pos, int length) {
-        getByteBuffer().get(dst, pos, length);
+    public byte[] getArray(byte[] dst, int offset, int length) {
+        buffer.get(dst, offset, length);
         return dst;
     }
 

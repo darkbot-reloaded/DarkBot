@@ -1,10 +1,12 @@
 package eu.darkbot.api;
 
 import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.util.DataBuffer;
 import com.github.manolo8.darkbot.utils.LibUtils;
 
 import java.lang.annotation.Native;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class DarkBoat implements GameAPI.Window, GameAPI.Handler, GameAPI.Memory, GameAPI.Interaction, API.Singleton {
 
@@ -56,6 +58,11 @@ public class DarkBoat implements GameAPI.Window, GameAPI.Handler, GameAPI.Memory
 
     // DarkBoat v9+
     public final @Native ByteBuffer[] buffers = new ByteBuffer[10];
+    public ByteBuffer getBuffer(int idx) {
+        ByteBuffer buffer = buffers[idx];
+        if (buffer != null) return buffer;
+        return buffers[idx] = ByteBuffer.allocateDirect(DataBuffer.MAX_CHUNK_SIZE).order(ByteOrder.nativeOrder());
+    }
 
     // writes data at given address to direct buffer
     public native boolean readToBuffer(int bufferIdx, long address, int length);

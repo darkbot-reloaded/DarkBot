@@ -1,9 +1,9 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.core.api.util.AbstractDataReader;
+import com.github.manolo8.darkbot.core.api.util.DataBuffer;
 import com.github.manolo8.darkbot.core.api.util.DataReader;
-import com.github.manolo8.darkbot.core.api.util.DefaultDataReader;
+import com.github.manolo8.darkbot.core.api.util.DefaultByteBufferReader;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.utils.PidSelector;
 import com.github.manolo8.darkbot.gui.utils.Popups;
@@ -45,7 +45,8 @@ public class GameAPIImpl<
 
     protected final String version;
 
-    private final Consumer<Integer> fpsLimitListener; // Needs to be kept as a strong reference to avoid GC
+    @SuppressWarnings("FieldCanBeLocal") // Needs to be kept as a strong reference to avoid GC
+    private final Consumer<Integer> fpsLimitListener;
 
     protected final LoginData loginData; // Used only if api supports LOGIN
     protected int pid; // Used only if api supports ATTACH
@@ -285,30 +286,29 @@ public class GameAPIImpl<
     }
 
     @Override
-    public DataReader readData(long address, int length) throws RuntimeException {
-        if (length <= 0 || length > DataReader.MAX_CHUNK_SIZE)
-            throw new ArrayIndexOutOfBoundsException("Length is <= 0 or exceeds max chunk size: " + DataReader.MAX_CHUNK_SIZE);
+    public DataBuffer readData(long address, int length) throws RuntimeException {
+        if (length <= 0 || length > DataBuffer.MAX_CHUNK_SIZE)
+            throw new ArrayIndexOutOfBoundsException("Length is <= 0 or exceeds max chunk size: " + DataBuffer.MAX_CHUNK_SIZE);
 
         for (int i = 0; i < dataReaders.length; i++) {
-            AbstractDataReader reader = (AbstractDataReader) dataReaders[i];
-            if (reader == null) reader = (AbstractDataReader) (dataReaders[i] = createReader(i));
+            DataReader reader = dataReaders[i];
+            if (reader == null) reader = (dataReaders[i] = createReader(i));
 
-            Boolean result = reader.read(address, length);
-
-            if (result == null) {
-                reader.reset(0);
-                return reader;
+            switch (reader.read(address, length)) {
+                case BUSY: continue;
+                case ERROR:
+                    reader.reset(0);
+                case OK:
+                    return reader;
             }
-
-            if (result) return reader;
         }
 
         throw new RuntimeException("All DataReaders are in use. Some code is calling readData and not closing the resource!");
     }
 
     @Override
-    public boolean readData(long address, int length, Consumer<DataReader> reader) {
-        try (DataReader r = readData(address, length)) {
+    public boolean readData(long address, int length, Consumer<DataBuffer> reader) {
+        try (DataBuffer r = readData(address, length)) {
             if (r.getLimit() != length) return false;
 
             reader.accept(r);
@@ -317,7 +317,7 @@ public class GameAPIImpl<
     }
 
     protected DataReader createReader(int idx) {
-        return new DefaultDataReader(memory, extraMemoryReader);
+        return DefaultByteBufferReader.of(memory, extraMemoryReader);
     }
 
     @Override

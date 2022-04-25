@@ -1,45 +1,23 @@
 package com.github.manolo8.darkbot.core.api.util;
 
-public interface DataReader extends AutoCloseable {
+public interface DataReader extends DataBuffer {
 
-    int MAX_CHUNK_SIZE = 2048;
-
-    int getPosition();
-    void setPosition(int pos);
-
-    int getLimit();
-    int getAvailable();
-
-    byte getByte();
-    byte getByte(int idx);
-
-    boolean getBoolean();
-    boolean getBoolean(int idx);
-
-    short getShort();
-    short getShort(int idx);
-
-    int getInt();
-    int getInt(int idx);
-
-    long getLong();
-    long getLong(int idx);
+    enum Result {
+        OK, ERROR, BUSY
+    }
 
     /**
-     * @return readLong() & ATOM_MASK
+     * Read data from in-game to the data buffer.
+     * Once read is called, this buffer becomes {@link Result#BUSY},
+     * and any further attempts to this function will return {@link Result#BUSY},
+     * until {@link #close()} is called.
+     *
+     * @param address The address to read from.
+     * @param length How many bytes to read.
+     * @return The result of the operation.
      */
-    long getPointer();
-    long getPointer(int idx);
+    Result read(long address, int length);
 
-    double getDouble();
-    double getDouble(int idx);
+    void reset(int limit);
 
-    String getString();
-    String getString(int idx);
-
-    byte[] toArray();
-    byte[] setArray(byte[] dst, int pos, int length);
-
-    @Override
-    void close();
 }

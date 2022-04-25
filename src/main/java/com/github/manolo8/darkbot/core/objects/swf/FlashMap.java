@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.swf;
 
-import com.github.manolo8.darkbot.core.api.util.DataReader;
+import com.github.manolo8.darkbot.core.api.util.DataBuffer;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
@@ -82,9 +82,9 @@ public class FlashMap<K, V> extends SwfPtrCollection {
 
         atoms = (atoms & ByteUtils.ATOM_MASK) + 8; //remove tags & skip c++ vtable
 
-        for (int offset = 0, idx = 0; offset < capacity && idx < size; offset += DataReader.MAX_CHUNK_SIZE) {
-            try (DataReader r = API.readData(atoms + offset,
-                    Math.min(DataReader.MAX_CHUNK_SIZE, capacity - offset))) {
+        for (int offset = 0, idx = 0; offset < capacity && idx < size; offset += DataBuffer.MAX_CHUNK_SIZE) {
+            try (DataBuffer r = API.readData(atoms + offset,
+                    Math.min(DataBuffer.MAX_CHUNK_SIZE, capacity - offset))) {
 
                 while (r.getAvailable() >= 16 && idx < size) {
                     long key = r.getLong();

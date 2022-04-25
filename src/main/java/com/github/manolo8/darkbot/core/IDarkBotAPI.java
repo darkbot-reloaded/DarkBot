@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.core;
 
 import com.github.manolo8.darkbot.core.api.GameAPI;
-import com.github.manolo8.darkbot.core.api.util.DataReader;
+import com.github.manolo8.darkbot.core.api.util.DataBuffer;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.OreAPI;
@@ -88,23 +88,23 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     /**
      * Reads data at given address, use always with try-with-resources
-     * Length limit is {@link DataReader#MAX_CHUNK_SIZE}
+     * Length limit is {@link DataBuffer#MAX_CHUNK_SIZE}
      *
      * @param address to read
      * @param length  the length of the data to read
-     * @return {@link DataReader}
+     * @return {@link DataBuffer}
      */
-    DataReader readData(long address, int length);
+    DataBuffer readData(long address, int length);
 
     /**
-     * Length limit is {@link DataReader#MAX_CHUNK_SIZE}
+     * Length limit is {@link DataBuffer#MAX_CHUNK_SIZE}
      *
      * @param address to read
      * @param length  the length of the data to read
      * @param reader  consumer which will be used if read was success
      * @return false if read failed, true otherwise
      */
-    boolean readData(long address, int length, Consumer<DataReader> reader);
+    boolean readData(long address, int length, Consumer<DataBuffer> reader);
 
     void writeMemoryInt(long address, int value);
     void writeMemoryLong(long address, long value);
