@@ -10,10 +10,9 @@ import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-// TODO unfished, dont use it
-
 // tableOffset = API.readInt(address, 0x10, 0x28, 236);
 // isDictionary = (API.readInt(address, 0x10, 0x28, 248) & (1 << 4)) != 0; // need to read heap hashtable
+@Deprecated // TODO unfished, dont use it
 public class FlashMap<K, V> extends SwfPtrCollection {
 
     private final AtomKind keyKind;
@@ -119,7 +118,7 @@ public class FlashMap<K, V> extends SwfPtrCollection {
         if (i < getSize()) {
             Entry entry = entries[i];
             if (entry != null && entry.value instanceof Long)
-                return (long) entry.value;
+                return (Long) entry.value;
         }
         return 0;
     }
