@@ -64,7 +64,7 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
 
     private void setEditing(ImageWrapper image) {
         this.image = image == null ? new ImageWrapper() : image;
-        setText(image.getPath() == null ? "None" : image.getPath());
+        setText(this.image.getPath() == null ? "None" : this.image.getPath());
     }
 
     @Override

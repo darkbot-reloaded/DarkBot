@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.backpage.FlashResManager;
 import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.extensions.features.handlers.DrawableHandler;
@@ -9,6 +10,7 @@ import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Area;
+import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 
@@ -17,6 +19,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 public class MapDrawer extends JPanel {
 
@@ -24,11 +28,16 @@ public class MapDrawer extends JPanel {
             new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
     public MapGraphicsImpl mapGraphics;
-
     public boolean hovering;
 
     protected Main main;
     protected DrawableHandler drawableHandler;
+
+    private FlashResManager flashResManager;
+
+    private CompletableFuture<Image> minimapFuture;
+    private GameMap lastMap;
+    private Image backgroundImage;
 
     public MapDrawer() {
         addMouseListener(new MouseAdapter() {
@@ -50,6 +59,7 @@ public class MapDrawer extends JPanel {
         setup(main);
 
         this.drawableHandler = main.pluginAPI.requireInstance(DrawableHandler.class);
+        this.flashResManager = main.pluginAPI.requireInstance(FlashResManager.class);
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -79,11 +89,7 @@ public class MapDrawer extends JPanel {
 
     protected void onPaint() {
         //background image is drawn first
-        if (main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.ENABLED && main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage() != null) {
-            mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.OPACITY));
-            mapGraphics.g2.drawImage(main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage(), 0, 0, mapGraphics.width, mapGraphics.height, this);
-            mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-        }
+        drawBackgroundImage();
 
         for (Drawable drawable : drawableHandler.getDrawables()) {
             drawable.onDraw(mapGraphics);
@@ -105,6 +111,44 @@ public class MapDrawer extends JPanel {
         }
 
         mapGraphics.dispose();
+    }
+
+    private void drawBackgroundImage() {
+        if (!main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.ENABLED) return;
+
+        Image bgImg;
+        if (main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.USE_GAME_BACKGROUND) {
+            GameMap currentMap = main.hero.getMap();
+
+            if (currentMap != lastMap) {
+                Future<?> f = minimapFuture; //prevent race condition
+                if (f != null) f.cancel(true);
+
+                lastMap = currentMap;
+                backgroundImage = null;
+
+                minimapFuture = currentMap.getId() <= 0 ? null : flashResManager.getBackgroundImage(currentMap);
+                if (minimapFuture != null)
+                    minimapFuture
+                            .thenApply(r -> backgroundImage = r)
+                            .whenComplete((r, t) -> minimapFuture = null);
+            }
+            bgImg = backgroundImage;
+
+        } else {
+            if (backgroundImage != null || lastMap != null) {
+                backgroundImage = null;
+                lastMap = null;
+            }
+
+            bgImg = main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.IMAGE.getImage();
+        }
+
+        if (bgImg != null) {
+            mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) main.config.BOT_SETTINGS.CUSTOM_BACKGROUND.OPACITY));
+            mapGraphics.g2.drawImage(bgImg, 0, 0, mapGraphics.width, mapGraphics.height, this);
+            mapGraphics.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        }
     }
 
     private void drawActionButton() {

@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 
 public class FileUtils {
     private static final MessageDigest SHA_256_DIGEST;
+
     static {
         try {
             SHA_256_DIGEST = MessageDigest.getInstance("SHA-256");
@@ -20,7 +21,7 @@ public class FileUtils {
     public static void ensureDirectoryExists(Path path) {
         if (Files.exists(path)) return;
         try {
-            Files.createDirectory(path);
+            Files.createDirectories(path);
         } catch (IOException e) {
             System.err.println("Failed to create: " + path);
             e.printStackTrace();
