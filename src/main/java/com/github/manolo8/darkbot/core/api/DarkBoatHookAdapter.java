@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.api.util.DataReader;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.manager.HookAdapter;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
@@ -52,4 +53,11 @@ public class DarkBoatHookAdapter extends GameAPIImpl<
         return super.hasCapability(capability);
     }
 
+    @Override
+    protected DataReader createReader(int idx) {
+        if (window.getVersion() >= 9)
+            return new DarkBoatAdapter.DarkBoatByteBufferReader(idx, memory, extraMemoryReader);
+
+        return super.createReader(idx);
+    }
 }

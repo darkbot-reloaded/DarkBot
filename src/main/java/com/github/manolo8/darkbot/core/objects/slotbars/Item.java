@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
+import com.github.manolo8.darkbot.core.api.util.DataBuffer;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
@@ -16,8 +17,7 @@ import java.util.Set;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.Item {
-    private static final int START = 36, END = 128 + 8;
-    private static final byte[] BUFFER = new byte[END - START];
+    private static final int START = 36, END = 136 - START;
 
     public final ItemTimer itemTimer = new ItemTimer();
     private final Map<SlotBarsProxy.Type, Set<Integer>> associatedSlots = new EnumMap<>(SlotBarsProxy.Type.class);
@@ -57,16 +57,22 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
         // Doing 5 boolean-read calls is way more expensive than a single mem-read to the buffer
         // This IS very ugly, but improves performance.
         // We also avoid updating timer if no other flags change for the extra 3 long-read calls
-        API.readMemory(address + START, BUFFER);
 
-        buyable = BUFFER[0] == 1;
-        activatable = BUFFER[4] == 1;
-        selected = BUFFER[8] == 1;
-        available = BUFFER[12] == 1;
-        visible = BUFFER[16] == 1;
-        quantity = ByteUtils.getDouble(BUFFER, 92);
+        long timerAdr;
+        try (DataBuffer reader = API.readData(address + START, END)){
+            if (reader.getAvailable() == 0) return; //failed to read data
 
-        long timerAdr = API.readMemoryLong(ByteUtils.getLong(BUFFER, 52), 40);
+            buyable = reader.getBoolean(0);
+            activatable = reader.getBoolean(4);
+            selected = reader.getBoolean(8);
+            available = reader.getBoolean(12);
+            visible = reader.getBoolean(16);
+
+            quantity = reader.getDouble(92);
+            timerAdr = reader.getLong(52);
+        }
+
+        timerAdr = API.readMemoryLong(timerAdr, 40);
         if (itemTimer.address != timerAdr) this.itemTimer.update(timerAdr);
         this.itemTimer.update();
     }

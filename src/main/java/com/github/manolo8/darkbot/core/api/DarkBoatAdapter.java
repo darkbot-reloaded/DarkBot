@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.api.util.ByteBufferReader;
+import com.github.manolo8.darkbot.core.api.util.DataReader;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
@@ -46,4 +48,39 @@ public class DarkBoatAdapter extends GameAPIImpl<
         }
     }
 
+    @Override
+    protected DataReader createReader(int idx) {
+        if (window.getVersion() >= 9)
+            return new DarkBoatByteBufferReader(idx, memory, extraMemoryReader);
+
+        return super.createReader(idx);
+    }
+
+    static class DarkBoatByteBufferReader extends ByteBufferReader implements DataReader {
+
+        private final int idx;
+        private final DarkBoat darkBoat;
+
+        public DarkBoatByteBufferReader(int idx, DarkBoat darkBoat, GameAPI.ExtraMemoryReader reader) {
+            super(darkBoat.getBuffer(idx), reader);
+            this.idx = idx;
+            this.darkBoat = darkBoat;
+        }
+
+        @Override
+        public Result read(long address, int length) {
+            if (!inUse.compareAndSet(false, true)) return DataReader.Result.BUSY;
+
+            boolean res = darkBoat.readToBuffer(idx, address, length);
+            if (!res) return Result.ERROR;
+
+            reset(length);
+            return Result.OK;
+        }
+
+        @Override
+        public byte[] toArray() {
+            return getArray(new byte[getAvailable()], 0, getAvailable());
+        }
+    }
 }

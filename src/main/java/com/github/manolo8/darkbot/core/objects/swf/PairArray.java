@@ -20,7 +20,7 @@ public abstract class PairArray extends SwfPtrCollection {
     public int size;
 
     private Pair[] pairs = new Pair[0];
-    private Map<String, Lazy<Long>> lazy = new HashMap<>();
+    private final Map<String, Lazy<Long>> lazy = new HashMap<>();
 
     protected PairArray() {}
 
@@ -28,14 +28,14 @@ public abstract class PairArray extends SwfPtrCollection {
      * Reads pairs of {@code Array} type
      */
     public static PairArray ofArray() {
-        return new PairArray.Pairs();
+        return new Pairs();
     }
 
     /**
      * Reads pairs of {@code Dictionary} type
      */
     public static PairArray ofDictionary() {
-        return new PairArray.Dictionary();
+        return new Dictionary();
     }
 
     public PairArray setAutoUpdatable(boolean updatable) {
@@ -105,8 +105,9 @@ public abstract class PairArray extends SwfPtrCollection {
         }
 
         public String getKey(long addr) {
-            if (isInvalid(addr)) return null;
-            String key = API.readMemoryStringFallback(addr, null);
+            if (AtomKind.isNullAtom(addr) || !AtomKind.isString(addr)) return null; //keys shouldn't be null
+
+            String key = API.readMemoryStringFallback(addr & ByteUtils.ATOM_MASK, null);
             return key == null || key.isEmpty() ? null : key;
         }
 
@@ -138,7 +139,7 @@ public abstract class PairArray extends SwfPtrCollection {
             String key = null;
             offset = 8;
             for (int i = 0; offset < 8192 && i < size; offset += 8) {
-                if (key == null && (key = getKey(readLong(table, offset, expected) & ByteUtils.ATOM_MASK)) == null) continue;
+                if (key == null && (key = getKey(readLong(table, offset, expected))) == null) continue;
 
                 long value = readLong(table, offset += 8, expected);
                 if (isInvalid(value)) continue;
@@ -178,15 +179,15 @@ public abstract class PairArray extends SwfPtrCollection {
 
             int current = 0, remove = 0;
             for (int offset = 0; offset < length && current < size; offset += 16) {
-                long keyAddr = ByteUtils.getLong(bytes, offset) - 2, valAddr = ByteUtils.getLong(bytes, offset + 8) - 1;
+                long keyAddr = ByteUtils.getLong(bytes, offset), valAddr = ByteUtils.getLong(bytes, offset + 8) - 1;
 
-                if (keyAddr == -2 || (valAddr >= -2 && valAddr <= 9)) continue;
+                if (keyAddr == 0 || (valAddr >= -2 && valAddr <= 9)) continue;
 
                 Pair pair = super.pairs[current];
-                if (pair == null) super.pairs[current] = new Pair(API.readMemoryString(keyAddr), valAddr);
+                if (pair == null) super.pairs[current] = new Pair(readString(keyAddr), valAddr);
                 else if (pair.value != valAddr) {
                     removed[remove++] = pair.key;
-                    super.pairs[current].set(API.readMemoryString(keyAddr), valAddr);
+                    super.pairs[current].set(readString(keyAddr), valAddr);
                 }
                 current++;
             }
@@ -202,6 +203,10 @@ public abstract class PairArray extends SwfPtrCollection {
                 Lazy<Long> l = super.lazy.get(str);
                 if (l != null) l.send(0L);
             }
+        }
+
+        private String readString(long atom) {
+            return AtomKind.isString(atom) ? API.readString(atom & ByteUtils.ATOM_MASK) : "";
         }
 
         private long align8(long value) {

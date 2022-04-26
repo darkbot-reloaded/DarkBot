@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.swf;
 
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.core.api.util.DataBuffer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -90,11 +90,15 @@ public class ObjArray extends SwfPtrCollection {
         if (elements.length < size) elements = new long[Math.min((int) (size * 1.25), 8192)];
 
         long table = API.readMemoryLong(address + tableOffset) + bytesOffset;
-        byte[] bytes = API.readMemory(table, size * 8);
+        int tableSize = size * 8;
 
-        for (int i = 0, offset = 0; offset < bytes.length && i < size; offset += 8) {
-            long value = ByteUtils.getLong(bytes, offset);
-            elements[i++] = value & ByteUtils.ATOM_MASK; //not sure if we should skip 0 values
+        for (int i = 0, idx = 0; i < tableSize && idx < size; i += DataBuffer.MAX_CHUNK_SIZE) {
+            try (DataBuffer reader = API.readData(table + i, Math.min(DataBuffer.MAX_CHUNK_SIZE, tableSize - i))) {
+
+                while (reader.getAvailable() >= 8 && idx < size) {
+                    elements[idx++] = reader.getPointer();
+                }
+            }
         }
     }
 
