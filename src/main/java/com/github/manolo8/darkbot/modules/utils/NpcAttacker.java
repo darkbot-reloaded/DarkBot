@@ -273,7 +273,7 @@ public class NpcAttacker implements AttackAPI {
                     || !getCallerOr(attacker).hasExtraFlag(NpcExtra.USE_RSB)) return false;
 
             rsbItem = items.getItem(main.config.LOOT.RSB.KEY);
-            boolean isReady = rsbItem != null && rsbItem.isUsable();
+            boolean isReady = rsbItem != null && rsbItem.isUsable() && rsbItem.isReady();
 
             if (isReady && usedRsb < System.currentTimeMillis() - 1000) usedRsb = System.currentTimeMillis();
             return rsbItem != null && usedRsb > System.currentTimeMillis() - 50;

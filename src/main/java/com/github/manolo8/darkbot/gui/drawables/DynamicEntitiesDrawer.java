@@ -144,6 +144,8 @@ public class DynamicEntitiesDrawer implements Drawable {
     }
 
     private void drawEntity(MapGraphics mg, Locatable pos, boolean fill) {
-        mg.drawRectCentered(pos, fill ? 4 : 3, fill);
+        if (!fill) mg.drawRect(mg.toScreenPointX(pos.getX()) - 2,
+                mg.toScreenPointY(pos.getY()) - 2, 3, 3, false);
+        else mg.drawRectCentered(pos, 4, true);
     }
 }
