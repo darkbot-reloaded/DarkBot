@@ -119,7 +119,7 @@ public class LoginUtils {
             try {
                 usernameLogin(loginData, "lp");
             } catch (IOException ex) {
-                throw new LoginException("Failed to load frontpage");
+                throw new LoginException("Failed to load frontpage - domain not available?");
             }
         }
     }
@@ -136,7 +136,10 @@ public class LoginUtils {
             } catch (Throwable t) {
                 System.out.println("Captcha solver failed to resolve login captcha");
                 t.printStackTrace();
+                throw new LoginException("Captcha-Solver failed - check log");
             }
+        } else if (frontPage.contains("class=\"bgcdw_captcha\"")) {
+            throw new LoginException("reCaptcha detected - Captcha-Solver not configured");
         }
 
         String loginUrl = getLoginUrl(frontPage);
@@ -160,7 +163,7 @@ public class LoginUtils {
         HttpCookie cookie = cookieManager.getCookieStore().getCookies().stream()
                 .filter(c -> c.getName().equalsIgnoreCase("dosid"))
                 .filter(c -> c.getDomain().matches(".*\\d+.*"))
-                .findFirst().orElseThrow(() -> new WrongCredentialsException("Wrong credentials or unsolved reCaptcha"));
+                .findFirst().orElseThrow(() -> new WrongCredentialsException("Wrong credentials - check your username & password"));
 
         loginData.setSid(cookie.getValue(), cookie.getDomain());
     }
@@ -174,11 +177,11 @@ public class LoginUtils {
                         .lines()
                         .filter(l -> l.contains("flashembed("))
                         .findFirst()
-                        .orElseThrow(() -> new WrongCredentialsException("Failed to find flashEmbed vars")));
+                        .orElseThrow(() -> new WrongCredentialsException("Failed to find flashEmbed - try again")));
 
         Matcher m = DATA_PATTERN.matcher(flashEmbed);
         if (m.find()) loginData.setPreloader(m.group(1), replaceParameters(m.group(2)));
-        else throw new WrongCredentialsException("Can't parse flashEmbed vars");
+        else throw new WrongCredentialsException("Can't parse flashEmbed - try again");
     }
 
     private static String replaceParameters(String params) {
@@ -240,5 +243,9 @@ public class LoginUtils {
         }
     }
 
-
+    public static class MissingCaptchaResolverException extends LoginException {
+        public MissingCaptchaResolverException(String s) {
+            super(s);
+        }
+    }
 }

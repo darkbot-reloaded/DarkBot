@@ -100,7 +100,10 @@ public class LoginForm extends JPanel {
                 LoginUtils.findPreloader(loginData);
                 return loginData;
             } catch (Exception e) {
-                publish(new Message(true, "Failed to login!", IssueHandler.createDescription(e)));
+                int i = e.getMessage().indexOf("-");
+                String msg = i > 0 ? e.getMessage().substring(0, i) : e.getMessage();
+
+                publish(new Message(true, msg, IssueHandler.createDescription(e)));
                 failed = true;
             }
             return null;
