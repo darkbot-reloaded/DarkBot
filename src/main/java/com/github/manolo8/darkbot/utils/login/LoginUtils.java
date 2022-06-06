@@ -119,7 +119,7 @@ public class LoginUtils {
             try {
                 usernameLogin(loginData, "lp");
             } catch (IOException ex) {
-                throw new LoginException("Failed to load frontpage - domain not available?");
+                throw new LoginException("Failed to load frontpage", "Failed to load frontpage - domain not available?", ex);
             }
         }
     }
@@ -136,10 +136,10 @@ public class LoginUtils {
             } catch (Throwable t) {
                 System.out.println("Captcha solver failed to resolve login captcha");
                 t.printStackTrace();
-                throw new LoginException("Captcha-Solver failed - check log");
+                throw new LoginException("Captcha-Solver failed", "Captcha-Solver failed - check log", t);
             }
         } else if (frontPage.contains("class=\"bgcdw_captcha\"")) {
-            throw new LoginException("reCaptcha detected - Captcha-Solver not configured");
+            throw new LoginException("reCaptcha detected", "reCaptcha detected - Captcha-Solver not configured");
         }
 
         String loginUrl = getLoginUrl(frontPage);
@@ -163,7 +163,8 @@ public class LoginUtils {
         HttpCookie cookie = cookieManager.getCookieStore().getCookies().stream()
                 .filter(c -> c.getName().equalsIgnoreCase("dosid"))
                 .filter(c -> c.getDomain().matches(".*\\d+.*"))
-                .findFirst().orElseThrow(() -> new WrongCredentialsException("Wrong credentials - check your username & password"));
+                .findFirst().orElseThrow(() -> new WrongCredentialsException("Wrong credentials",
+                        "Wrong credentials - failed to find dosid cookie, check your username & password"));
 
         loginData.setSid(cookie.getValue(), cookie.getDomain());
     }
@@ -177,11 +178,13 @@ public class LoginUtils {
                         .lines()
                         .filter(l -> l.contains("flashembed("))
                         .findFirst()
-                        .orElseThrow(() -> new WrongCredentialsException("Failed to find flashEmbed - try again")));
+                        .orElseThrow(() -> new WrongCredentialsException("Failed to find flashEmbed",
+                                "Failed to find flashEmbed vars - try again")));
 
         Matcher m = DATA_PATTERN.matcher(flashEmbed);
         if (m.find()) loginData.setPreloader(m.group(1), replaceParameters(m.group(2)));
-        else throw new WrongCredentialsException("Can't parse flashEmbed - try again");
+        else throw new WrongCredentialsException("FlashEmbed parsing failed",
+                "Can't parse flashEmbed - try again");
     }
 
     private static String replaceParameters(String params) {
@@ -199,7 +202,7 @@ public class LoginUtils {
         Matcher match = LOGIN_PATTERN.matcher(in);
         if (match.find()) return match.group(1).replace("&amp;", "&");
 
-        throw new LoginException("Failed to get login URL in frontpage");
+        throw new LoginException("Failed to get login URL", "Failed to get login URL in frontpage");
     }
 
     public static Credentials loadCredentials() {
@@ -227,25 +230,23 @@ public class LoginUtils {
     }
 
     public static class LoginException extends RuntimeException {
-        public LoginException(String s) {
+        public final String titleMessage;
+
+        public LoginException(String titleMessage, String s) {
             super(s);
+            this.titleMessage = titleMessage;
+        }
+
+        public LoginException(String titleMessage, String s, Throwable cause) {
+            super(s, cause);
+            this.titleMessage = titleMessage;
         }
     }
 
     public static class WrongCredentialsException extends LoginException {
 
-        public WrongCredentialsException() {
-            this("Wrong login data");
-        }
-
-        public WrongCredentialsException(String s) {
-            super(s);
-        }
-    }
-
-    public static class MissingCaptchaResolverException extends LoginException {
-        public MissingCaptchaResolverException(String s) {
-            super(s);
+        public WrongCredentialsException(String titleMessage, String s) {
+            super(titleMessage, s);
         }
     }
 }

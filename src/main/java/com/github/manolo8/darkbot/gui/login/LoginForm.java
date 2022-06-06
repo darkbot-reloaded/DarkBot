@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import net.miginfocom.swing.MigLayout;
 
+import javax.net.ssl.SSLHandshakeException;
 import javax.swing.*;
 import java.util.List;
 
@@ -100,10 +101,13 @@ public class LoginForm extends JPanel {
                 LoginUtils.findPreloader(loginData);
                 return loginData;
             } catch (Exception e) {
-                int i = e.getMessage().indexOf("-");
-                String msg = i > 0 ? e.getMessage().substring(0, i) : e.getMessage();
+                if (e instanceof SSLHandshakeException) //?
+                    publish(new Message(true, "Too old Java!", IssueHandler.createDescription(e)));
+                else if (e instanceof LoginUtils.LoginException)
+                    publish(new Message(true, ((LoginUtils.LoginException) e).titleMessage, IssueHandler.createDescription(e)));
+                else
+                    publish(new Message(true, "Failed to login!", IssueHandler.createDescription(e)));
 
-                publish(new Message(true, msg, IssueHandler.createDescription(e)));
                 failed = true;
             }
             return null;

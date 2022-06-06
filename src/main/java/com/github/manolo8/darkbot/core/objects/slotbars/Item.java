@@ -171,7 +171,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
     }
 
     @Override
-    public eu.darkbot.api.game.items.@UnknownNullability ItemTimer getTimer() {
+    public eu.darkbot.api.game.items.ItemTimer getTimer() {
         return itemTimer.address == 0 ? null : itemTimer;
     }
 
