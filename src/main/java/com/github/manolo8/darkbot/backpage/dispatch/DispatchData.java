@@ -9,7 +9,7 @@ public class DispatchData {
     private final DataBuilder dataBuilder = new DataBuilder();
     private final Map<String, Retriever> retrievers = new LinkedHashMap<>();
     private final Map<String, InProgress> progressSlots = new LinkedHashMap<>();
-    private int permit, gateUnits, availableSlots, maxSlots;
+    private int permit, gateUnits, availableSlots, maxSlots, primeCoupons;
 
     public int getPermit() {
         return permit;
@@ -41,6 +41,14 @@ public class DispatchData {
 
     public void setMaxSlots(int maxSlots) {
         this.maxSlots = maxSlots;
+    }
+
+    public int getPrimeCoupons() {
+        return primeCoupons;
+    }
+
+    public void setPrimeCoupons(int primeCoupons) {
+        this.primeCoupons = primeCoupons;
     }
 
     public Map<String, Retriever> getRetrievers() {
@@ -98,6 +106,7 @@ public class DispatchData {
             r.setTier(m.group(4));
             if (m.group(5) != null) {
                 r.setCost(m.group(5) + " & " + m.group(6));
+                r.setCreditCost(0);
                 Matcher n = DISPATCH_COST.matcher(m.group(5));
                 if (n.find()) r.setUridiumCost(Integer.parseInt(n.group(1)));
 
@@ -107,6 +116,9 @@ public class DispatchData {
                 r.setCost(m.group(6));
                 Matcher n = DISPATCH_COST.matcher(m.group(6));
                 if (n.find()) r.setCreditCost(Integer.parseInt(n.group(1)));
+
+                r.setUridiumCost(0);
+                r.setPermitCost(0);
             }
             return true;
         }

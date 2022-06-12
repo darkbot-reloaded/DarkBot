@@ -45,6 +45,9 @@ public class DispatchManager {
     public boolean hireRetriever(Retriever retriever) {
         if (data.getAvailableSlots() <= 0) return false;
         //retriever.getCost(); // TODO: check cost
+        if(retriever.getCreditCost() > main.statsManager.credits || retriever.getUridiumCost() > main.statsManager.uridium || retriever.getPermitCost() > data.getPermit()){
+            return handleResponse("Hiring Failed", retriever.getId(), "Cost Requirement Not Met");
+        }
         try {
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "sendDispatch")
@@ -60,7 +63,8 @@ public class DispatchManager {
 
     public boolean collectInstant(InProgress progress) {
         try {
-            System.out.println("Collecting: Slot " + progress.getSlotId());
+            System.out.println("Collecting Instant: Slot " + progress.getSlotId());
+            if(data.getPrimeCoupons() == 0) return handleResponse("Instant Collect Failed", progress.getId(), "No Prime Coupon Available For Instant Collection");
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "instantComplete")
                     .setRawParam("dispatchId", progress.getId())
@@ -109,8 +113,9 @@ public class DispatchManager {
 
     private enum InfoReader {
         PERMIT("name=\"permit\" value=\"([0-9]+)\"", DispatchData::setPermit),
-        GATE_UNIT("name=\"permit\" value=\"([0-9]+)\"", DispatchData::setGateUnits),
+        GATE_UNIT("name=\"ggeu\" value=\"([0-9]+)\"", DispatchData::setGateUnits),
         SLOTS(":([0-9]+).*class=\"userCurrentMax\">([0-9]+)", DispatchData::setAvailableSlots, DispatchData::setMaxSlots),
+        PRIME_COUPON("name=\"quickcoupon\" value=\"([0-9]+)\"",DispatchData::setPrimeCoupons),
         ITEMS("<tr class=\"dispatchItemRow([\\S\\s]+?)</tr>", DispatchData::parseRow);
 
         private final Pattern regex;
