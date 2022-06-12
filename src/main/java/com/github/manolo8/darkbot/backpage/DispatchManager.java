@@ -58,6 +58,25 @@ public class DispatchManager {
         return false;
     }
 
+    public boolean collectInstant(InProgress progress) {
+        try {
+            System.out.println("Collecting: Slot " + progress.getSlotId());
+            String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
+                    .setRawParam("command", "instantComplete")
+                    .setRawParam("dispatchId", progress.getId())
+                    .setRawParam("dispatchRewardPackage", progress.getDispatchRewardPackage())
+                    .setRawParam("slot", progress.getSlotId())
+                    .getContent();
+
+            return handleResponse("Collected retriever", progress.getId(), response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Exception collecting dispatcher: " + e);
+        }
+        return false;
+    }
+
+
     public boolean collect(InProgress progress) {
         if (progress.getCollectable().equals("0")) return false;
         try {

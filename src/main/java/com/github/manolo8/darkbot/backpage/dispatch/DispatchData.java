@@ -74,6 +74,7 @@ public class DispatchData {
                 "dispatch_item_cost\">(?:\\s+(.+?)\\s+<br>)?(?:\\s+(.+?)\\s+<br>)", Pattern.DOTALL);
         private final Pattern PROGRESS_PATTERN = Pattern.compile("collectable=\"(.+?)\".*?" +
                 "dispatchId=\"(.+?)\".*?" +
+                "dispatchRewardPackage=\"(.+?)\".*?" +
                 "slotId=\"(.+?)\".*?" +
                 "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?", Pattern.DOTALL);
         private final Pattern DISPATCH_COST = Pattern.compile("(\\d+)", Pattern.DOTALL);
@@ -118,14 +119,15 @@ public class DispatchData {
             Matcher m = PROGRESS_PATTERN.matcher(string);
             if (!m.find()) return false;
 
-            String slotID = m.group(3);
+            String slotID = m.group(4);
             InProgress r = progressSlots.get(slotID);
             if (r == null) progressSlots.put(slotID, r = new InProgress());
 
             r.setCollectable(m.group(1));
+            r.setDispatchRewardPackage(m.group(3));
             r.setId(m.group(2));
             r.setSlotId(slotID);
-            r.setName(m.group(4));
+            r.setName(m.group(5));
             r.setForRemoval(false);
             return true;
         }
