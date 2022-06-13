@@ -133,9 +133,9 @@ public class LoginUtils {
         if (solver != null) {
             try {
                 extraPostParams = solver.solveCaptcha(url, frontPage);
-            } catch (Exception e) {
+            } catch (Throwable t) {
                 System.out.println("Captcha solver failed to resolve login captcha");
-                e.printStackTrace();
+                t.printStackTrace();
             }
         }
 
