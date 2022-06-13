@@ -119,7 +119,7 @@ public class LoginUtils {
             try {
                 usernameLogin(loginData, "lp");
             } catch (IOException ex) {
-                throw new LoginException("Failed to load frontpage");
+                throw new LoginException("Failed to load frontpage", "domain may not be available", ex);
             }
         }
     }
@@ -136,7 +136,10 @@ public class LoginUtils {
             } catch (Throwable t) {
                 System.out.println("Captcha solver failed to resolve login captcha");
                 t.printStackTrace();
+                throw new LoginException("Captcha-Solver failed", "check the logs for details", t);
             }
+        } else if (frontPage.contains("class=\"bgcdw_captcha\"")) {
+            throw new LoginException("reCaptcha detected", "Captcha-Solver not configured");
         }
 
         String loginUrl = getLoginUrl(frontPage);
@@ -160,7 +163,8 @@ public class LoginUtils {
         HttpCookie cookie = cookieManager.getCookieStore().getCookies().stream()
                 .filter(c -> c.getName().equalsIgnoreCase("dosid"))
                 .filter(c -> c.getDomain().matches(".*\\d+.*"))
-                .findFirst().orElseThrow(() -> new WrongCredentialsException("Wrong credentials or unsolved reCaptcha"));
+                .findFirst().orElseThrow(() -> new WrongCredentialsException("Wrong credentials",
+                        "failed to find dosid cookie, check your username & password"));
 
         loginData.setSid(cookie.getValue(), cookie.getDomain());
     }
@@ -174,11 +178,12 @@ public class LoginUtils {
                         .lines()
                         .filter(l -> l.contains("flashembed("))
                         .findFirst()
-                        .orElseThrow(() -> new WrongCredentialsException("Failed to find flashEmbed vars")));
+                        .orElseThrow(() ->
+                                new WrongCredentialsException("FlashEmbed not found", "try again later")));
 
         Matcher m = DATA_PATTERN.matcher(flashEmbed);
         if (m.find()) loginData.setPreloader(m.group(1), replaceParameters(m.group(2)));
-        else throw new WrongCredentialsException("Can't parse flashEmbed vars");
+        else throw new WrongCredentialsException("FlashEmbed parsing failed", "try again later");
     }
 
     private static String replaceParameters(String params) {
@@ -196,7 +201,7 @@ public class LoginUtils {
         Matcher match = LOGIN_PATTERN.matcher(in);
         if (match.find()) return match.group(1).replace("&amp;", "&");
 
-        throw new LoginException("Failed to get login URL in frontpage");
+        throw new LoginException("Failed to get login URL", "Failed to get login URL in frontpage");
     }
 
     public static Credentials loadCredentials() {
@@ -224,21 +229,27 @@ public class LoginUtils {
     }
 
     public static class LoginException extends RuntimeException {
-        public LoginException(String s) {
-            super(s);
+        private final String title;
+
+        public LoginException(String title, String message) {
+            super(message);
+            this.title = title;
+        }
+
+        public LoginException(String title, String message, Throwable cause) {
+            super(message, cause);
+            this.title = title;
+        }
+
+        public String getTitle() {
+            return title;
         }
     }
 
     public static class WrongCredentialsException extends LoginException {
 
-        public WrongCredentialsException() {
-            this("Wrong login data");
-        }
-
-        public WrongCredentialsException(String s) {
-            super(s);
+        public WrongCredentialsException(String title, String message) {
+            super(title, message);
         }
     }
-
-
 }

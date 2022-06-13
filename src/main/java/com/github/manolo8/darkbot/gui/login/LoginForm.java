@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import net.miginfocom.swing.MigLayout;
 
+import javax.net.ssl.SSLHandshakeException;
 import javax.swing.*;
 import java.util.List;
 
@@ -99,10 +100,14 @@ public class LoginForm extends JPanel {
                 publish(new Message(false, "Loading spacemap (2/2)", null));
                 LoginUtils.findPreloader(loginData);
                 return loginData;
+            } catch (SSLHandshakeException e) {
+                publish(new Message(true, "Unsupported java version", IssueHandler.createDescription(e)));
+            } catch (LoginUtils.LoginException e) {
+                publish(new Message(true, e.getTitle(), IssueHandler.createDescription(e)));
             } catch (Exception e) {
                 publish(new Message(true, "Failed to login!", IssueHandler.createDescription(e)));
-                failed = true;
             }
+            failed = true;
             return null;
         }
     }

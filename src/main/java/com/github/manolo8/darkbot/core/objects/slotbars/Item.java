@@ -136,7 +136,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
 
     @Override
     public boolean isUsable() {
-        return activatable && hasShortcut();
+        return isAvailable() && hasShortcut();
     }
 
     @Override
@@ -155,6 +155,11 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
     }
 
     @Override
+    public boolean isActivatable() {
+        return activatable;
+    }
+
+    @Override
     public Optional<eu.darkbot.api.game.items.ItemTimer> getItemTimer() {
         return itemTimer.address == ByteUtils.NULL ? Optional.empty() : Optional.of(itemTimer);
     }
@@ -162,6 +167,11 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
     @Override
     public long lastUseTime() {
         return lastUsed;
+    }
+
+    @Override
+    public eu.darkbot.api.game.items.ItemTimer getTimer() {
+        return itemTimer.address == 0 ? null : itemTimer;
     }
 
     public void setLastUsed(long lastUsed) {
@@ -194,7 +204,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
 
         public double elapsed, startTime, itemDelay, availableIn;
 
-        private Type timerType = Type.COOLING_DOWN;
+        private boolean isActivated = false;
 
         @Override
         public void update() {
@@ -214,8 +224,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
                 return;
             }
 
-            this.timerType = API.readString(Item.this.address, 88, 32).equals(ACTIVE_ITEM_STATE)
-                    ? Type.ACTIVATED : Type.COOLING_DOWN;
+            this.isActivated = API.readString(Item.this.address, 88, 32).equals(ACTIVE_ITEM_STATE);
 
             this.startTime = API.readMemoryDouble(address + 80);
             this.itemDelay = API.readMemoryDouble(address + 88);
@@ -229,12 +238,18 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
         }
 
         @Override
-        public Type getTimerType() {
-            return timerType;
+        public boolean isActivated() {
+            return isActivated;
+        }
+
+        @Deprecated
+        @Override
+        public double getTotalCoolingTime() {
+            return getTotalTime();
         }
 
         @Override
-        public double getTotalCoolingTime() {
+        public double getTotalTime() {
             return itemDelay;
         }
 
@@ -255,7 +270,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
                     ", startTime=" + startTime +
                     ", itemDelay=" + itemDelay +
                     ", availableIn=" + availableIn +
-                    ", timerType=" + timerType +
+                    ", timerType=" + (isActivated ? "activated" : "cooling down") +
                     '}';
         }
     }
@@ -272,6 +287,6 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
                 return selectableItem == item.selectableItem;
         }
 
-        return ((SelectableItem)o).getId().equals(getId());
+        return ((SelectableItem) o).getId().equals(getId());
     }
 }

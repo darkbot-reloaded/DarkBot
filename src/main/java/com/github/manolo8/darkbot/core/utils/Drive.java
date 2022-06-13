@@ -266,7 +266,7 @@ public class Drive implements MovementAPI {
     @Override
     public double getDistanceBetween(double x, double y, double ox, double oy) {
         Locatable previous = Locatable.of(x, y);
-        LinkedList<Locatable> path = pathFinder.createRote(previous, Locatable.of(x, y));
+        LinkedList<Locatable> path = pathFinder.createRote(previous, Locatable.of(ox, oy));
         double sum = 0;
         for (Locatable curr : path) {
             sum += previous.distanceTo(curr);

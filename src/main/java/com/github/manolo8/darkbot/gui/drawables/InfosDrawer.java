@@ -122,7 +122,26 @@ public class InfosDrawer implements Drawable {
 
         if (pet.isValid() && mg.hasDisplayFlag(DisplayFlag.SHOW_PET)) {
             pos = Point.of(10, mg.getHeight() - 52);
-            drawHealth(mg, pet.getHealth(), pos, (int) ((mg.getWidthMiddle() - 20) * 0.25), 6, 0);
+            int petHealthWidth = (int) ((mg.getWidthMiddle() - 20) * 0.25);
+
+            drawHealth(mg, pet.getHealth(), pos, petHealthWidth, 6, 0);
+
+            mg.setFont("small");
+            if (mg.hasDisplayFlag(DisplayFlag.HERO_NAME))
+                mg.drawString(10 + petHealthWidth /2, mg.getHeight() - 56,
+                        pet.getEntityInfo().getUsername(), MapGraphics.StringAlign.MID);
+
+            Lockable petTarget = pet.getTargetAs(Lockable.class);
+            if (petTarget != null && petTarget.isValid()) {
+                pos = Point.of(mg.getWidthMiddle() - petHealthWidth - 10, mg.getHeight() - 52);
+
+                drawHealth(mg, petTarget.getHealth(), pos, petHealthWidth, 6, 0);
+
+                if (petTarget instanceof Npc || petTarget.getEntityInfo().isEnemy()) mg.setColor("enemies");
+                else mg.setColor("allies");
+                mg.drawString(mg.getWidthMiddle() - 10 - petHealthWidth / 2, mg.getHeight() - 56,
+                        petTarget.getEntityInfo().getUsername(), MapGraphics.StringAlign.MID);
+            }
 
             PetAPI.PetStat fuel = pet.getStat(PetAPI.Stat.FUEL);
             if (fuel != null) {
