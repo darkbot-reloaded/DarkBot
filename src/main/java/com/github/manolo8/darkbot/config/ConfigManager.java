@@ -189,7 +189,6 @@ public class ConfigManager implements API.Singleton {
             System.out.println("Error enabling " + api + ", using no-op api");
             e.printStackTrace();
             ApiErrors.displayException(api, e);
-            config.BOT_SETTINGS.API_CONFIG.BROWSER_API = BrowserApi.NO_OP_API;
             return pluginApi.requireInstance(BrowserApi.NO_OP_API.clazz);
         }
     }

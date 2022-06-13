@@ -7,6 +7,8 @@ import eu.darkbot.api.DarkCef;
 import eu.darkbot.api.DarkMem;
 import eu.darkbot.api.utils.Inject;
 
+// Unused, never actually had a working implementation
+@Deprecated
 public class DarkCefAdapter extends GameAPIImpl<
         DarkCef,
         DarkCef,
