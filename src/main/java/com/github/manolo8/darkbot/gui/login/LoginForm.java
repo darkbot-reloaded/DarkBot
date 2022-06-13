@@ -100,16 +100,14 @@ public class LoginForm extends JPanel {
                 publish(new Message(false, "Loading spacemap (2/2)", null));
                 LoginUtils.findPreloader(loginData);
                 return loginData;
+            } catch (SSLHandshakeException e) {
+                publish(new Message(true, "Unsupported java version", IssueHandler.createDescription(e)));
+            } catch (LoginUtils.LoginException e) {
+                publish(new Message(true, e.getTitle(), IssueHandler.createDescription(e)));
             } catch (Exception e) {
-                if (e instanceof SSLHandshakeException) //?
-                    publish(new Message(true, "Too old Java!", IssueHandler.createDescription(e)));
-                else if (e instanceof LoginUtils.LoginException)
-                    publish(new Message(true, ((LoginUtils.LoginException) e).titleMessage, IssueHandler.createDescription(e)));
-                else
-                    publish(new Message(true, "Failed to login!", IssueHandler.createDescription(e)));
-
-                failed = true;
+                publish(new Message(true, "Failed to login!", IssueHandler.createDescription(e)));
             }
+            failed = true;
             return null;
         }
     }

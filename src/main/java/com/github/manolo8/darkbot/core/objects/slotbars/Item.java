@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.EnumMap;
 import java.util.HashSet;

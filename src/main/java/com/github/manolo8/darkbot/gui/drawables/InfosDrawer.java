@@ -128,7 +128,8 @@ public class InfosDrawer implements Drawable {
 
             mg.setFont("small");
             if (mg.hasDisplayFlag(DisplayFlag.HERO_NAME))
-                mg.drawString(10 + petHealthWidth /2, mg.getHeight() - 56, pet.getEntityInfo().getUsername(), MapGraphics.StringAlign.MID);
+                mg.drawString(10 + petHealthWidth /2, mg.getHeight() - 56,
+                        pet.getEntityInfo().getUsername(), MapGraphics.StringAlign.MID);
 
             Lockable petTarget = pet.getTargetAs(Lockable.class);
             if (petTarget != null && petTarget.isValid()) {
