@@ -11,7 +11,6 @@ import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -59,11 +58,11 @@ public class LoginUtils {
     }
 
     public static LoginData performAutoLogin(StartupParams params) {
-        String username = params.get(StartupParams.PropertyKey.USERNAME);
-        String password = params.get(StartupParams.PropertyKey.PASSWORD);
+        String username = params.getAutoLoginValue(StartupParams.PropertyKey.USERNAME);
+        String password = params.getAutoLoginValue(StartupParams.PropertyKey.PASSWORD);
 
         if (username != null && (password == null || password.isEmpty())) {
-            password = getPassword(username, params.getMasterPassword());
+            password = getPassword(username, params.getAutoLoginMasterPassword());
 
             if (password == null)
                 System.err.println("Password for user couldn't be retrieved. Check that the user exists and master password is correct.");
