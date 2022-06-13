@@ -19,14 +19,14 @@ public class OSUtil {
         return getCurrentOs().getBotDataPath();
     }
 
-    public static Path getDataPath(String... more) {
-        return Paths.get(getDataPath().toString(), more);
+    public static Path getDataPath(String first, String... more) {
+        return getDataPath().resolve(Paths.get(first, more));
     }
 
     public enum OS {
         WINDOWS("win", () -> Paths.get(System.getenv("APPDATA"))),
-        MACOS("mac", () -> Paths.get(System.getProperty("user.data"), "Library", "Application Support")),
-        LINUX("nix|nux|aix", () -> Paths.get(System.getProperty("user.data"), ".local", "share")),
+        MACOS("mac", () -> Paths.get(System.getProperty("user.home"), "Library", "Application Support")),
+        LINUX("nix|nux|aix", () -> Paths.get(System.getProperty("user.home"), ".local", "share")),
         //SOLARIS("sunos"),
         UNKNOWN(null, () -> Paths.get("cache")); //store data in (current folder -> cache)
 
