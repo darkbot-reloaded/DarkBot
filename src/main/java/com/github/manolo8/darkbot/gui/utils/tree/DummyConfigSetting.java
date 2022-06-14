@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Partially implements a parent config setting, leaving only getChildren missing implementation
@@ -71,5 +72,10 @@ public abstract class DummyConfigSetting<T> implements ConfigSetting.Parent<T> {
     @Override
     public ValueHandler<T> getHandler() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <V> V getOrCreateMetadata(String key, Supplier<V> builder) {
+        return builder.get();
     }
 }

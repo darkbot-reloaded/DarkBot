@@ -5,6 +5,7 @@ import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.managers.I18nAPI;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,10 +19,14 @@ public class EnumDropdownOptions<E extends Enum<E>> implements Dropdown.Options<
     private final String baseKey;
 
     public EnumDropdownOptions(PluginAPI api, PluginInfo context, Class<E> e) {
+        this(api, context, e, e.getAnnotation(Configuration.class).value());
+    }
+
+    public EnumDropdownOptions(PluginAPI api, PluginInfo context, Class<E> e, String baseKey) {
         this.i18n = api.requireAPI(I18nAPI.class);
         this.context = context;
-        this.options = Arrays.asList(e.getEnumConstants());
-        this.baseKey = e.getAnnotation(Configuration.class).value();
+        this.options = Arrays.asList(e.getEnumConstants());;
+        this.baseKey = baseKey;
     }
 
     @Override
@@ -30,7 +35,7 @@ public class EnumDropdownOptions<E extends Enum<E>> implements Dropdown.Options<
     }
 
     @Override
-    public String getText(E option) {
+    public @NotNull String getText(E option) {
         if (option == null) return "";
         String name = option.name().toLowerCase(Locale.ROOT);
         return i18n.getOrDefault(context, baseKey + "." + name, name);

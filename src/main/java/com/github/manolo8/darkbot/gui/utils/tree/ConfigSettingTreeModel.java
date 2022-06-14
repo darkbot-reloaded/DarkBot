@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.utils.tree;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.config.annotations.Visibility;
 
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -35,8 +36,12 @@ public class ConfigSettingTreeModel implements TreeModel {
         this.filter.setSearch(search);
     }
 
-    public boolean isFiltered() {
-        return !this.filter.isUnfiltered();
+    public void setVisibility(Visibility.Level level) {
+        this.filter.setVisibility(level);
+    }
+
+    public boolean isSearching() {
+        return this.filter.isSearching();
     }
 
     public void updateListeners() {

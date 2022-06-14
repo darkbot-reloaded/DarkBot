@@ -21,6 +21,8 @@ import eu.darkbot.api.config.annotations.Option;
 import eu.darkbot.api.config.annotations.Percentage;
 import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.annotations.Tag;
+import eu.darkbot.api.config.annotations.Visibility;
+import eu.darkbot.api.config.annotations.Visibility.Level;
 import eu.darkbot.api.game.enums.PetGear;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
@@ -90,23 +92,23 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             @Deprecated
             public long REVIVE_LOCATION = 1L;
             public @Option("config.general.safety.revive_location") @Dropdown ReviveLocation REVIVE = ReviveLocation.BASE;
-            public @Option @Number(min = 5, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
-            public @Option @Number(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
+            public @Option @Visibility(Level.INTERMEDIATE) @Number(min = 5, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
+            public @Option @Visibility(Level.INTERMEDIATE) @Number(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
         }
 
         public @Option Running RUNNING = new Running();
         public static class Running {
             public @Option boolean RUN_FROM_ENEMIES = true;
-            public @Option @Number(max = 24 * 60 * 60, step = 300) int REMEMBER_ENEMIES_FOR = 300;
+            public @Option @Visibility(Level.INTERMEDIATE) @Number(max = 24 * 60 * 60, step = 300) int REMEMBER_ENEMIES_FOR = 300;
             public @Option boolean RUN_FROM_ENEMIES_SIGHT = false;
             public @Option boolean STOP_RUNNING_NO_SIGHT = true;
-            public @Option @Number(min = 500, max = 20000, step = 500) int MAX_SIGHT_DISTANCE = 4000;
+            public @Option @Visibility(Level.INTERMEDIATE) @Number(min = 500, max = 20000, step = 500) int MAX_SIGHT_DISTANCE = 4000;
             public @Option Character SHIP_ABILITY;
-            public @Option @Number(max = 20000, step = 500) int SHIP_ABILITY_MIN = 1500;
-            public @Option @Number(max = 20000, step = 500) int RUN_FURTHEST_PORT = 1500;
+            public @Option @Visibility(Level.INTERMEDIATE) @Number(max = 20000, step = 500) int SHIP_ABILITY_MIN = 1500;
+            public @Option @Visibility(Level.INTERMEDIATE) @Number(max = 20000, step = 500) int RUN_FURTHEST_PORT = 1500;
         }
 
-        public @Option Roaming ROAMING = new Roaming();
+        public @Option @Visibility(Level.INTERMEDIATE) Roaming ROAMING = new Roaming();
         public static class Roaming {
             public @Option boolean KEEP = true;
             public @Option boolean SEQUENTIAL = false;
@@ -138,7 +140,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option Character KEY = '2';
             public @Option @Percentage double PERCENT = 0.8;
             public @Option @Number(min = 500, max = 1_000_000, step = 1000) int NPC_AMOUNT = 12000;
-            public @Option() Condition CONDITION;
+            public @Option @Visibility(Level.ADVANCED) Condition CONDITION;
         }
         public static class Rsb {
             public @Option boolean ENABLED = false;
@@ -146,9 +148,9 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Deprecated int AMMO_REFRESH = 3500;
         }
         public @Option Character AMMO_KEY = '1';
-        public @Option Character SHIP_ABILITY;
-        public @Option @Number(min = 50_000, max = 5_000_000, step = 50_000) int SHIP_ABILITY_MIN = 150_000;
-        public @Option @Number(max = 10, step = 1) int MAX_CIRCLE_ITERATIONS = 5;
+        public @Option @Visibility(Level.INTERMEDIATE) Character SHIP_ABILITY;
+        public @Option @Visibility(Level.INTERMEDIATE) @Number(min = 50_000, max = 5_000_000, step = 50_000) int SHIP_ABILITY_MIN = 150_000;
+        public @Option @Visibility(Level.ADVANCED) @Number(max = 10, step = 1) int MAX_CIRCLE_ITERATIONS = 5;
         public @Option boolean RUN_CONFIG_IN_CIRCLE = true;
 
         public @Option boolean GROUP_NPCS = true;
@@ -159,7 +161,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option Map<String, NpcInfo> NPC_INFOS = new HashMap<>();
         public transient Lazy<String> MODIFIED_NPC = new Lazy.NoCache<>();
 
-        public @Option @Number(min = 1000, max = 20000, step = 500) int NPC_DISTANCE_IGNORE = 3000;
+        public @Option @Visibility(Level.INTERMEDIATE) @Number(min = 1000, max = 20000, step = 500) int NPC_DISTANCE_IGNORE = 3000;
     }
 
     public @Option PetSettings PET = new PetSettings();
@@ -184,16 +186,16 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option @Number(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
         public @Option @Number(max = 60 * 12, step = 10) int PAUSE_FOR = 0;
         public @Option boolean RESET_REFRESH = true;
-        public @Option @Percentage double DRONE_REPAIR_PERCENTAGE = 0.9;
-        public @Option boolean HONOR_LOST_EXACT = true;
-        public @Option boolean LOG_CHAT = false;
-        public @Option boolean LOG_DEATHS = false;
-        public @Option boolean AVOID_MINES = true;
-        public @Option boolean USERNAME_ON_TITLE = false;
-        public @Option boolean AUTO_REFINE = false;
+        public @Option @Visibility(Level.INTERMEDIATE) @Percentage double DRONE_REPAIR_PERCENTAGE = 0.9;
+        public @Option @Visibility(Level.INTERMEDIATE) boolean HONOR_LOST_EXACT = true;
+        public @Option @Visibility(Level.INTERMEDIATE) boolean LOG_CHAT = false;
+        public @Option @Visibility(Level.INTERMEDIATE) boolean LOG_DEATHS = false;
+        public @Option @Visibility(Level.INTERMEDIATE) boolean AVOID_MINES = true;
+        public @Option @Visibility(Level.INTERMEDIATE) boolean USERNAME_ON_TITLE = false;
+        public @Option @Visibility(Level.ADVANCED) boolean AUTO_REFINE = false;
     }
 
-    public @Option BotSettings BOT_SETTINGS = new BotSettings();
+    public @Option @Visibility(Level.INTERMEDIATE) BotSettings BOT_SETTINGS = new BotSettings();
     public static class BotSettings {
         public @Option BotGui BOT_GUI = new BotGui();
         public static class BotGui {
@@ -202,7 +204,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
             public @Option boolean CONFIRM_EXIT = true;
             public @Option boolean SAVE_GUI_POS = false;
-            public @Option @Number(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
+            public @Option @Visibility(Level.ADVANCED) @Number(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
 
             public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
             public WindowPosition MAIN_GUI_WINDOW = new WindowPosition();
@@ -215,7 +217,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             }
         }
 
-        public @Option APIConfig API_CONFIG = new APIConfig();
+        public @Option @Visibility(Level.ADVANCED) APIConfig API_CONFIG = new APIConfig();
         public static class APIConfig {
             public @Option @Dropdown BrowserApi BROWSER_API = BrowserApi.DARK_BOAT;
             public @Option boolean FULLY_HIDE_API = true;
@@ -238,7 +240,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
                     HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA, SHOW_PET);
             public @Option @Number(max = 300, step = 1) int TRAIL_LENGTH = 15;
             public @Option boolean MAP_START_STOP = false;
-            public @Option("colors") ColorScheme cs = new ColorScheme();
+            public @Option("colors") @Visibility(Level.ADVANCED) ColorScheme cs = new ColorScheme();
         }
 
         public @Option CustomBackground CUSTOM_BACKGROUND = new CustomBackground();
@@ -253,8 +255,8 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public static class Other {
             public @Option boolean DISABLE_MASTER_PASSWORD = false;
             public @Option @Number(min = 10, max = 300) int ZONE_RESOLUTION = 30;
-            public @Option @Number(min = 10, max = 250) int MIN_TICK = 15;
-            public @Option boolean DEV_STUFF = false;
+            public @Option @Visibility(Level.ADVANCED) @Number(min = 10, max = 250) int MIN_TICK = 15;
+            public @Option @Visibility(Level.ADVANCED) boolean DEV_STUFF = false;
         }
     }
 

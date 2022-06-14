@@ -2,21 +2,22 @@ package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.config.tree.ConfigBuilder;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
-import com.github.manolo8.darkbot.gui.utils.UIUtils;
-import com.github.manolo8.darkbot.gui.utils.WidthEnforcedScrollPane;
-import com.github.manolo8.darkbot.gui.utils.tree.ConfigSettingTreeModel;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.gui.tree.ConfigTree;
 import com.github.manolo8.darkbot.gui.tree.EditorProvider;
+import com.github.manolo8.darkbot.gui.tree.utils.DropdownRenderer;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.gui.utils.WidthEnforcedScrollPane;
 import com.github.manolo8.darkbot.gui.utils.tree.CompoundConfigSetting;
+import com.github.manolo8.darkbot.gui.utils.tree.ConfigSettingTreeModel;
 import com.github.manolo8.darkbot.gui.utils.tree.PluginListConfigSetting;
 import com.github.manolo8.darkbot.gui.utils.tree.SimpleConfigSettingRenderer;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.config.annotations.Visibility;
 import net.miginfocom.swing.MigLayout;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -52,7 +53,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     private boolean packed = false; // If this is a packed config in a floating window
 
     public AdvancedConfig(PluginAPI api) {
-        super(new MigLayout("ins 0, gap 0, fill, wrap 1", "[]", "[][grow]"));
+        super(new MigLayout("ins 0, gap 0, fill", "[grow][]", "[][grow]"));
         this.api = api;
     }
 
@@ -117,7 +118,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
             tabsTree.getSelectionModel().addTreeSelectionListener(e -> {
                 if (configTree != null) configTree.stopEditing(); // Save any midway edition
 
-                if (treeModel.isFiltered()) scrollToPath(e.getPath());
+                if (treeModel.isSearching()) scrollToPath(e.getPath());
                 else if (lastSelection != e.getPath().getLastPathComponent())
                     treeModel.setRoot(lastSelection = (ConfigSetting.Parent<?>) e.getPath().getLastPathComponent());
             });
@@ -127,6 +128,9 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
             add(new SearchField(this::setSearch), "grow");
             setSearch("");
+
+            add(createVisibilityDropdown(), "grow, wrap");
+            setVisibility(Visibility.Level.BASIC);
 
             JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                     wrapInScrollPane(tabsTree, true),
@@ -145,12 +149,19 @@ public class AdvancedConfig extends JPanel implements PluginListener {
             tabsTree.addComponentListener(cl);
             splitPane.addComponentListener(cl);
 
-            add(splitPane, "grow");
+            add(splitPane, "grow, span");
         } else {
             add(setupUI());
         }
         this.revalidate();
         this.repaint();
+    }
+
+    private JComboBox<Visibility.Level> createVisibilityDropdown() {
+        JComboBox<Visibility.Level> result = new JComboBox<>(Visibility.Level.values());
+        result.addActionListener(a -> setVisibility((Visibility.Level) result.getSelectedItem()));
+        result.setRenderer(DropdownRenderer.ofEnum(api, Visibility.Level.class, "misc.visibility_level"));
+        return result;
     }
 
     private void scrollToPath(TreePath path) {
@@ -198,11 +209,17 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         setCorrectRoot();
     }
 
+    private void setVisibility(Visibility.Level visibility) {
+        treeModel.setVisibility(visibility);
+        tabsModel.setVisibility(visibility);
+        setCorrectRoot();
+    }
+
     private void setCorrectRoot() {
         TreePath currentSelection = tabsTree == null ? null : tabsTree.getSelectionPath();
 
         treeModel.setRoot(packed ? baseConfig :
-                treeModel.isFiltered() ?
+                treeModel.isSearching() ?
                         extendedConfig != null ? extendedConfig : baseConfig :
                         lastSelection != null ? lastSelection : baseConfig);
         tabsModel.setRoot(extendedConfig != null ? extendedConfig : baseConfig);
