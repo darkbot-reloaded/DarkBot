@@ -195,15 +195,15 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option @Visibility(Level.ADVANCED) boolean AUTO_REFINE = false;
     }
 
-    public @Option @Visibility(Level.INTERMEDIATE) BotSettings BOT_SETTINGS = new BotSettings();
+    public @Option BotSettings BOT_SETTINGS = new BotSettings();
     public static class BotSettings {
         public @Option BotGui BOT_GUI = new BotGui();
         public static class BotGui {
             @Option @Dropdown(options = LanguageSupplier.class)
             public Locale LOCALE = new Locale(Locale.getDefault().getLanguage());
 
-            public @Option boolean CONFIRM_EXIT = true;
-            public @Option boolean SAVE_GUI_POS = false;
+            public @Option @Visibility(Level.INTERMEDIATE) boolean CONFIRM_EXIT = true;
+            public @Option @Visibility(Level.INTERMEDIATE) boolean SAVE_GUI_POS = false;
             public @Option @Visibility(Level.ADVANCED) @Number(min = 1, max = 20, step = 1) int BUTTON_SIZE = 4;
 
             public boolean ALWAYS_ON_TOP = true; // No @Option. Edited via button
@@ -238,12 +238,12 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             @Option @Dropdown(multi = true)
             public Set<DisplayFlag> TOGGLE = EnumSet.of(
                     HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA, SHOW_PET);
-            public @Option @Number(max = 300, step = 1) int TRAIL_LENGTH = 15;
-            public @Option boolean MAP_START_STOP = false;
+            public @Option @Visibility(Level.INTERMEDIATE) @Number(max = 300, step = 1) int TRAIL_LENGTH = 15;
+            public @Option @Visibility(Level.INTERMEDIATE) boolean MAP_START_STOP = false;
             public @Option("colors") @Visibility(Level.ADVANCED) ColorScheme cs = new ColorScheme();
         }
 
-        public @Option CustomBackground CUSTOM_BACKGROUND = new CustomBackground();
+        public @Option @Visibility(Level.INTERMEDIATE) CustomBackground CUSTOM_BACKGROUND = new CustomBackground();
         public static class CustomBackground {
             public @Option boolean ENABLED = false;
             public @Option boolean USE_GAME_BACKGROUND = false;
@@ -251,7 +251,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option ImageWrapper IMAGE = new ImageWrapper();
         }
 
-        public @Option Other OTHER = new Other();
+        public @Option @Visibility(Level.INTERMEDIATE) Other OTHER = new Other();
         public static class Other {
             public @Option boolean DISABLE_MASTER_PASSWORD = false;
             public @Option @Number(min = 10, max = 300) int ZONE_RESOLUTION = 30;
