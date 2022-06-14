@@ -45,7 +45,9 @@ public class DispatchManager {
     public boolean hireRetriever(Retriever retriever) {
         if (data.getAvailableSlots() <= 0) return false;
         //retriever.getCost(); // TODO: check cost
-        if(retriever.getCreditCost() > main.statsManager.credits || retriever.getUridiumCost() > main.statsManager.uridium || retriever.getPermitCost() > data.getPermit()){
+        if (retriever.getCreditCost() > main.statsManager.credits || 
+                retriever.getUridiumCost() > main.statsManager.uridium || 
+                retriever.getPermitCost() > data.getPermit()) {
             return handleResponse("Hiring Failed", retriever.getId(), "Cost Requirement Not Met");
         }
         try {
