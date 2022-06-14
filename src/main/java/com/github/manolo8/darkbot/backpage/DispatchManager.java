@@ -66,7 +66,9 @@ public class DispatchManager {
     public boolean collectInstant(InProgress progress) {
         try {
             System.out.println("Collecting Instant: Slot " + progress.getSlotId());
-            if(data.getPrimeCoupons() == 0) return handleResponse("Instant Collect Failed", progress.getId(), "No Prime Coupon Available For Instant Collection");
+            if (data.getPrimeCoupons() == 0) 
+                return handleResponse("Instant Collect Failed", progress.getId(), 
+                        "No Prime Coupon Available For Instant Collection");
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "instantComplete")
                     .setRawParam("dispatchId", progress.getId())
