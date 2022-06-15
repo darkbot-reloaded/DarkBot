@@ -45,7 +45,9 @@ public class DispatchManager {
     public boolean hireRetriever(Retriever retriever) {
         if (data.getAvailableSlots() <= 0) return false;
         //retriever.getCost(); // TODO: check cost
-        if(retriever.getCreditCost() > main.statsManager.credits || retriever.getUridiumCost() > main.statsManager.uridium || retriever.getPermitCost() > data.getPermit()){
+        if (retriever.getCreditCost() > main.statsManager.credits || 
+                retriever.getUridiumCost() > main.statsManager.uridium || 
+                retriever.getPermitCost() > data.getPermit()) {
             return handleResponse("Hiring Failed", retriever.getId(), "Cost Requirement Not Met");
         }
         try {
@@ -64,8 +66,9 @@ public class DispatchManager {
     public boolean collectInstant(InProgress progress) {
         try {
             System.out.println("Collecting Instant: Slot " + progress.getSlotId());
-            if(data.getPrimeCoupons() == 0) return handleResponse("Instant Collect Failed", progress.getId(), "No Prime Coupon Available For Instant Collection");
-
+            if (data.getPrimeCoupons() == 0) 
+                return handleResponse("Instant Collect Failed", progress.getId(), 
+                        "No Prime Coupon Available For Instant Collection");
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "instantComplete")
                     .setRawParam("dispatchId", progress.getId())
