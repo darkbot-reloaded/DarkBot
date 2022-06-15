@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.backpage.dispatch;
 
 public class InProgress {
-    protected String slotId, id, name, collectable;
+    protected String slotId, id, name, collectable, dispatchRewardPackage;
     // Internal flag set to know if the item is already gone, and should be removed
     protected boolean forRemoval;
 
@@ -35,6 +35,14 @@ public class InProgress {
 
     public void setCollectable(String collectable) {
         this.collectable = collectable;
+    }
+
+    public String getDispatchRewardPackage() {
+        return dispatchRewardPackage;
+    }
+
+    public void setDispatchRewardPackage(String dispatchRewardPackage) {
+        this.dispatchRewardPackage = dispatchRewardPackage;
     }
 
     public boolean getForRemoval() {

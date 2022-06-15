@@ -9,7 +9,7 @@ public class DispatchData {
     private final DataBuilder dataBuilder = new DataBuilder();
     private final Map<String, Retriever> retrievers = new LinkedHashMap<>();
     private final Map<String, InProgress> progressSlots = new LinkedHashMap<>();
-    private int permit, gateUnits, availableSlots, maxSlots;
+    private int permit, gateUnits, availableSlots, maxSlots, primeCoupons;
 
     public int getPermit() {
         return permit;
@@ -43,6 +43,14 @@ public class DispatchData {
         this.maxSlots = maxSlots;
     }
 
+    public int getPrimeCoupons() {
+        return primeCoupons;
+    }
+
+    public void setPrimeCoupons(int primeCoupons) {
+        this.primeCoupons = primeCoupons;
+    }
+
     public Map<String, Retriever> getRetrievers() {
         return retrievers;
     }
@@ -74,6 +82,7 @@ public class DispatchData {
                 "dispatch_item_cost\">(?:\\s+(.+?)\\s+<br>)?(?:\\s+(.+?)\\s+<br>)", Pattern.DOTALL);
         private final Pattern PROGRESS_PATTERN = Pattern.compile("collectable=\"(.+?)\".*?" +
                 "dispatchId=\"(.+?)\".*?" +
+                "dispatchRewardPackage=\"(.+?)\".*?" +
                 "slotId=\"(.+?)\".*?" +
                 "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?", Pattern.DOTALL);
         private final Pattern DISPATCH_COST = Pattern.compile("(\\d+)", Pattern.DOTALL);
@@ -97,6 +106,7 @@ public class DispatchData {
             r.setTier(m.group(4));
             if (m.group(5) != null) {
                 r.setCost(m.group(5) + " & " + m.group(6));
+                r.setCreditCost(0);
                 Matcher n = DISPATCH_COST.matcher(m.group(5));
                 if (n.find()) r.setUridiumCost(Integer.parseInt(n.group(1)));
 
@@ -106,6 +116,9 @@ public class DispatchData {
                 r.setCost(m.group(6));
                 Matcher n = DISPATCH_COST.matcher(m.group(6));
                 if (n.find()) r.setCreditCost(Integer.parseInt(n.group(1)));
+
+                r.setUridiumCost(0);
+                r.setPermitCost(0);
             }
             return true;
         }
@@ -118,14 +131,15 @@ public class DispatchData {
             Matcher m = PROGRESS_PATTERN.matcher(string);
             if (!m.find()) return false;
 
-            String slotID = m.group(3);
+            String slotID = m.group(4);
             InProgress r = progressSlots.get(slotID);
             if (r == null) progressSlots.put(slotID, r = new InProgress());
 
             r.setCollectable(m.group(1));
+            r.setDispatchRewardPackage(m.group(3));
             r.setId(m.group(2));
             r.setSlotId(slotID);
-            r.setName(m.group(4));
+            r.setName(m.group(5));
             r.setForRemoval(false);
             return true;
         }
