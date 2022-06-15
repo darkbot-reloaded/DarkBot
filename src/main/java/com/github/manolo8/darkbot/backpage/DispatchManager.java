@@ -48,7 +48,8 @@ public class DispatchManager {
         if (retriever.getCreditCost() > main.statsManager.credits || 
                 retriever.getUridiumCost() > main.statsManager.uridium || 
                 retriever.getPermitCost() > data.getPermit()) {
-            return handleResponse("Hiring Failed", retriever.getId(), "Cost Requirement Not Met");
+            return handleResponse("Hiring Failed", retriever.getId(),
+                    "\"result\":\"ERROR\" Cost Requirement Not Met");
         }
         try {
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
@@ -68,7 +69,7 @@ public class DispatchManager {
             System.out.println("Collecting Instant: Slot " + progress.getSlotId());
             if (data.getPrimeCoupons() <= 0)
                 return handleResponse("Instant Collect Failed", progress.getId(), 
-                        "No Prime Coupon Available For Instant Collection");
+                        "\"result\":\"ERROR\" No Prime Coupon Available For Instant Collection");
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "instantComplete")
                     .setRawParam("dispatchId", progress.getId())
