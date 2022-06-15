@@ -30,6 +30,12 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         this.settings = settings;
     }
 
+    public boolean useItem(Character key) {
+        if (key == null) return false;
+        API.keyboardClick(key);
+        return true;
+    }
+
     @Override
     public void update() {
         this.categoryBar.update(API.readMemoryLong(address + 88));
@@ -70,8 +76,8 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     }
 
     private static final ItemFlag[] DEFAULT_ITEM_FLAGS = {ItemFlag.AVAILABLE, ItemFlag.READY, ItemFlag.USABLE};
-    @Override
-    public @NotNull ItemUseResult useItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags) {
+
+    public @NotNull ItemUseResult useItemInternal(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags) {
         Item item = getItem(selectableItem);
 
         if (item == null) return ItemUseResult.NOT_AVAILABLE;
@@ -79,6 +85,11 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         ItemUseResult itemUseResult = checkItemFlags(item, itemFlags);
         if (itemUseResult != null || (itemUseResult = checkItemFlags(item, DEFAULT_ITEM_FLAGS)) != null)
             return itemUseResult;
+
+        if (API.useItem(item)) {
+            return ItemUseResult.SUCCESS
+                    .ifSuccessful(r -> item.setLastUsed(System.currentTimeMillis()));
+        }
 
         SlotBarsProxy.Type slotBarType = item.getSlotBarType();
         int slotNumber = item.getFirstSlotNumber();
@@ -88,7 +99,13 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
 
         return ((!toggleProAction || settings.pressKeybind(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION))
                 && settings.pressKeybind(SettingsProxy.KeyBind.of(slotBarType, slotNumber))
-                ? ItemUseResult.SUCCESS : ItemUseResult.FAILED).ifSuccessful(r -> item.setLastUsed(System.currentTimeMillis()));
+                ? ItemUseResult.SUCCESS : ItemUseResult.FAILED)
+                .ifSuccessful(r -> item.setLastUsed(System.currentTimeMillis()));
+    }
+
+    @Override
+    public ItemUseResult useItem(@NotNull SelectableItem selectableItem, ItemFlag... itemFlags) {
+        return useItem(selectableItem, 500, itemFlags);
     }
 
     @Override
@@ -97,7 +114,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         if (item == null) return ItemUseResult.NOT_AVAILABLE;
         if (item.lastUseTime() + minWait > System.currentTimeMillis()) return ItemUseResult.RECENTLY_USED;
 
-        return useItem(item, itemFlags);
+        return useItemInternal(item, itemFlags);
     }
 
     @Override
@@ -132,9 +149,13 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     }
 
     private ItemUseResult checkItemFlags(Item item, ItemFlag... flags) {
-        for (ItemFlag flag : flags)
+        for (ItemFlag flag : flags) {
+            if (flag == ItemFlag.USABLE
+                    && API.isUseItemSupported()) continue;
+
             if (!flag.test(item))
                 return flag.getFailResult();
+        }
 
         return null;
     }

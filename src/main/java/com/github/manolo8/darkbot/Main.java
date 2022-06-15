@@ -355,6 +355,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         if (this.running == running) return;
         status.send(running);
         this.running = running;
+        API.setUserInput(!running);
     }
 
     private void onRunningToggle(boolean running) {

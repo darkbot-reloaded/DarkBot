@@ -1,12 +1,25 @@
 package com.github.manolo8.darkbot.utils;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class LibUtils {
 
     public static void loadLibrary(String library) {
         LibSetup.downloadLib(library + getExtension());
-        System.load(getLibPath(library));
+
+        Path libraryPath = getLibraryPath(library);
+        if (Files.exists(libraryPath))
+            System.load(libraryPath.toString());
+        else throw new UnsatisfiedLinkError("Library file does not exists! " + libraryPath);
+    }
+
+    public static Path getSharedLibrary(String library) {
+        Path lib = OSUtil.getDataPath("lib", library);
+        LibSetup.downloadLib(lib);
+
+        return lib;
     }
 
     /**
@@ -17,11 +30,14 @@ public class LibUtils {
         return Paths.get("lib", library + getExtension()).toAbsolutePath().toString();
     }
 
+    public static Path getLibraryPath(String library) {
+        return Paths.get("lib", library + getExtension()).toAbsolutePath();
+    }
+
     /**
      * @return Library extension based on OS
      */
     private static String getExtension() {
-        if (System.getProperty("os.name").toLowerCase().contains("win")) return ".dll";
-        else return ".so";
+        return "." + OSUtil.getCurrentOs().getLibraryExtension();
     }
 }

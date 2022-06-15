@@ -87,7 +87,7 @@ public class InfosDrawer implements Drawable {
         mg.drawString(mg.getWidthMiddle(), mg.getHeight() / 2 + 35, status, MapGraphics.StringAlign.MID);
 
         mg.setFont("small");
-        String info = i18n.get("gui.map.info", main.getVersion().toString(),
+        String info = i18n.get("gui.map.info", main.refreshes,
                 (main.isRunning() || !resetRefresh.getValue()
                         ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"),
                 Time.toString(refreshTime.getValue() * 60 * 1000L));
@@ -105,9 +105,14 @@ public class InfosDrawer implements Drawable {
             }
         }
 
-        mg.drawString(mg.getWidth() - 5, 12,
+        //for debug
+        mg.drawString(mg.getWidth() - 5, 12, String.format("%dMB heap, %dMB ram, %.2f cpu",
+                        Runtime.getRuntime().totalMemory() >> 20, Main.API.getMemoryUsage(), Main.API.getCpuUsage()),
+                MapGraphics.StringAlign.RIGHT);
+
+        mg.drawString(mg.getWidth() - 5, 26,
                 String.format("%.1ftick %dms ping", main.getTickTime(), stats.getPing()), MapGraphics.StringAlign.RIGHT);
-        mg.drawString(mg.getWidth() - 5, 26, "SID: " + main.backpage.sidStatus(), MapGraphics.StringAlign.RIGHT);
+        mg.drawString(mg.getWidth() - 5, 40, "SID: " + main.backpage.sidStatus(), MapGraphics.StringAlign.RIGHT);
     }
 
     public void drawMap(MapGraphics mg) {

@@ -66,6 +66,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
     }
 
     public void reset() {
+        this.addressInfo = 0;
         this.address = 0;
         this.visible = false;
         this.height = 0;
@@ -90,6 +91,12 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
     @Override
     public void hover(int plusX, int plusY) {
         API.mouseMove(x + plusX, y + plusY);
+    }
+
+    public void moveWindow(int newX, int newY) {
+        API.mouseDown(x + 50, y + 10);
+        API.mouseMove(newX + 50, newY + 10);
+        API.mouseUp(newX + 50, newY + 10);
     }
 
     public boolean show(boolean value) {

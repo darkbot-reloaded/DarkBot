@@ -3,13 +3,14 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.PlayerInfo;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.objects.group.GroupMember;
 import com.github.manolo8.darkbot.core.objects.group.Invite;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
-import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.GroupAPI;
+import eu.darkbot.api.utils.NativeAction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -148,12 +149,21 @@ public class GroupManager extends Gui implements GroupAPI {
     public void sendInvite(String username) {
         sendInvite(username, 60_000);
     }
+
     public void sendInvite(String username, long wait) {
-        click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
-        Time.sleep(100); // This should not be here, but will stay for now
-        API.sendText(username);
-        Time.sleep(500); // This should not be here, but will stay for now
-        click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
+        if (API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS)) {
+            API.pasteText(username,
+                    NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
+                    NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
+                    NativeAction.Mouse.CLICK.after(x + MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), y + getInvitingHeight()));
+        } else {
+            click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
+            click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
+//        Time.sleep(100); // This should not be here, but will stay for now
+            API.sendText(username);
+//        Time.sleep(500); // This should not be here, but will stay for now
+            click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
+        }
         pastInvites.put(username, System.currentTimeMillis() + wait); // Wait until re-invite
     }
 

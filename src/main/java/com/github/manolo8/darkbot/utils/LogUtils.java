@@ -96,7 +96,12 @@ public class LogUtils {
 
         @Override
         public void println(String string) {
-            super.println("[" + LocalDateTime.now().format(LOG_DATE) + "] " + string);
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            string = "[" + LocalDateTime.now().format(LOG_DATE)
+                    + (stack.length > 2 ? " | " + stack[2] : "")
+                    + "] " + string;
+
+            super.println(string);
         }
     }
 }

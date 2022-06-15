@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.gui.components.ExitConfirmation;
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -12,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -46,6 +49,7 @@ public class MainGui extends JFrame {
         setIconImage(ICON);
 
         setComponentPosition();
+        titleBar.setInfo("DarkBot: " + Main.VERSION);
 
         WindowUtils.setupUndecorated(this, mainPanel);
         setVisible(true);
@@ -54,6 +58,15 @@ public class MainGui extends JFrame {
         toFront();
         requestFocus();
         setAlwaysOnTop(main.config.BOT_SETTINGS.BOT_GUI.ALWAYS_ON_TOP);
+
+        if (Main.API.hasCapability(GameAPI.Capability.WINDOW_POSITION)) {
+            addComponentListener(new ComponentAdapter() {
+                public void componentMoved(ComponentEvent e) {
+                    if (main.config.BOT_SETTINGS.API_CONFIG.attachToBot)
+                        Main.API.setPosition((int) getBounds().getMaxX() - 6, (int) getBounds().getMinY());
+                }
+            });
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> main.configManager.saveConfig()));
     }

@@ -27,6 +27,7 @@ import eu.darkbot.api.game.entities.Mist;
 import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
+import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -148,15 +150,6 @@ public class EntityList extends Updatable implements EntitiesAPI {
         this.obstacles.removeIf(Obstacle::isRemoved);
     }
 
-    public void updatePing(Location location, NpcInfo info) {
-        fakeNpc.set(location, info);
-        boolean shouldBeNpc = location != null && info != null && fakeNpc.isPingAlive() &&
-                npcs.stream().noneMatch(n -> fakeNpc != n && n.npcInfo == info && n.locationInfo.distance(location) < 500);
-
-        if (!shouldBeNpc) npcs.remove(fakeNpc);
-        else if (!npcs.contains(fakeNpc)) npcs.add(fakeNpc);
-    }
-
     private void doInEachEntity(Consumer<Entity> consumer) {
         allEntities.forEach(entities -> entities.forEach(consumer));
     }
@@ -179,10 +172,34 @@ public class EntityList extends Updatable implements EntitiesAPI {
         }
     }
 
-    private void refreshRadius(boolean value) {
+    private void refreshRadius(boolean running) {
         synchronized (Main.UPDATE_LOCKER) {
-            if (value) doInEachEntity(entity -> entity.clickable.setRadius(0));
-            else doInEachEntity(entity -> entity.clickable.reset());
+            main.hero.pet.clickable.toggle(!running);
+            doInEachEntity(entity -> entity.clickable.toggle(!running));
+        }
+    }
+
+    private Location lastLocatorLocation = new Location();
+    private final Timer lastLocatorMatch = Timer.get(5_000);
+
+    public void updatePing(Location location, NpcInfo info) {
+        fakeNpc.set(location, info);
+        boolean shouldBeNpc = info != null && fakeNpc.isPingAlive() &&
+                npcs.stream().noneMatch(n -> fakeNpc != n && n.npcInfo == info && n.locationInfo.distance(fakeNpc) < 600);
+
+        if (!shouldBeNpc) {
+            if (!Objects.equals(lastLocatorLocation, location))
+                lastLocatorLocation = location == null ? null : location.copy();
+
+            lastLocatorMatch.activate();
+            npcs.remove(fakeNpc);
+        }
+        else {
+            if (location == null || (lastLocatorLocation != null
+                    && lastLocatorLocation.distance(location) < 100 && lastLocatorMatch.isActive()))
+                return;
+            
+            if (!npcs.contains(fakeNpc)) npcs.add(fakeNpc);
         }
     }
 

@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.extensions.features.decorators.ConfigurableDec
 import com.github.manolo8.darkbot.extensions.features.decorators.FeatureDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstallableDecorator;
 import com.github.manolo8.darkbot.extensions.features.decorators.InstructionProviderDecorator;
+import com.github.manolo8.darkbot.extensions.features.decorators.ListenerDecorator;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Configurable;
@@ -25,12 +26,14 @@ public class FeatureInstanceLoader {
     public FeatureInstanceLoader(PluginAPI api,
                                  InstallableDecorator installableDecorator,
                                  ConfigurableDecorator configurableDecorator,
+                                 ListenerDecorator listenerDecorator,
                                  InstructionProviderDecorator instructionProviderDecorator) {
         this.api = api;
 
         FEATURE_DECORATORS = Arrays.asList(
                 installableDecorator,
                 CONFIGURATION_DECORATOR = configurableDecorator,
+                listenerDecorator,
                 instructionProviderDecorator);
     }
 

@@ -52,6 +52,24 @@ public interface GameAPI {
         void setVisible(boolean visible);
 
         void setMinimized(boolean minimized);
+
+        void clearCache();
+        void emptyWorkingSet();
+        void setLocalProxy(int port);
+        void setPosition(int x, int y);
+        void setFlashOcxPath(String path);
+        void setUserInput(boolean enableInput);
+        void setClientSize(int width, int height);
+        void setMinClientSize(int width, int height);
+        void setTransparency(int transparency);
+        void setVolume(int volume); // 0 - 100
+
+        // LOW = 0, MEDIUM = 1, HIGH = 2, BEST = 3, AUTO_LOW = 4, AUTO_HIGH = 5
+        void setQuality(int quality);
+
+        enum GameQuality {
+            LOW, MEDIUM, HIGH, BEST, AUTO_LOW, AUTO_HIGH;
+        }
     }
 
     interface Memory extends Base {
@@ -132,13 +150,27 @@ public interface GameAPI {
 
         ALL_KEYBINDS_SUPPORT, // Support for key clicks like "ctrl"
 
+        PROXY,
+        WINDOW_POSITION,
+
+        HANDLER_CLEAR_CACHE,
+        HANDLER_CLEAR_RAM,
+        HANDLER_GAME_QUALITY,
+        HANDLER_VOLUME,
+        HANDLER_TRANSPARENCY,
+        HANDLER_CLIENT_SIZE,
+        HANDLER_MIN_CLIENT_SIZE,
+        HANDLER_FLASH_PATH,
+
+        DIRECT_USE_ITEM,
         DIRECT_LIMIT_FPS,
         DIRECT_ENTITY_LOCK,
         DIRECT_ENTITY_SELECT,
         DIRECT_MOVE_SHIP,
         DIRECT_COLLECT_BOX,
         DIRECT_REFINE,
-        DIRECT_CALL_METHOD;
+        DIRECT_CALL_METHOD,
+        DIRECT_POST_ACTIONS
     }
 
     interface DirectInteraction extends Base {
@@ -208,6 +240,39 @@ public interface GameAPI {
         @Override
         public void setMinimized(boolean minimized) {
         }
+
+        @Override
+        public void clearCache() {}
+
+        @Override
+        public void emptyWorkingSet() {}
+
+        @Override
+        public void setLocalProxy(int port) {}
+
+        @Override
+        public void setPosition(int x, int y) {}
+
+        @Override
+        public void setFlashOcxPath(String path) {}
+
+        @Override
+        public void setUserInput(boolean enableInput) {}
+
+        @Override
+        public void setMinClientSize(int width, int height) {}
+
+        @Override
+        public void setClientSize(int width, int height) {}
+
+        @Override
+        public void setTransparency(int transparency) {}
+
+        @Override
+        public void setVolume(int volume) {}
+
+        @Override
+        public void setQuality(int quality) {}
     }
 
     class NoOpMemory implements Memory {

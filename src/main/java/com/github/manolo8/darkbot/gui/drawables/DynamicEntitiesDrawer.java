@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.drawables;
 
-import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import eu.darkbot.api.config.types.DisplayFlag;
 import eu.darkbot.api.extensions.Draw;
@@ -14,9 +13,9 @@ import eu.darkbot.api.game.entities.Player;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.game.other.Movable;
-import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.api.managers.PetAPI;
 
 import java.util.Collection;
 
@@ -25,6 +24,7 @@ import java.util.Collection;
 public class DynamicEntitiesDrawer implements Drawable {
 
     private final HeroAPI hero;
+    private final PetAPI pet;
 
     private final Collection<? extends Npc> npcs;
     private final Collection<? extends Box> boxes;
@@ -32,8 +32,9 @@ public class DynamicEntitiesDrawer implements Drawable {
     private final Collection<? extends Pet> pets;
     private final Collection<? extends Player> players;
 
-    public DynamicEntitiesDrawer(HeroAPI hero, EntitiesAPI entities, ConfigAPI config) {
+    public DynamicEntitiesDrawer(HeroAPI hero, PetAPI pet, EntitiesAPI entities) {
         this.hero = hero;
+        this.pet = pet;
 
         this.boxes = entities.getBoxes();
         this.mines = entities.getMines();
@@ -76,20 +77,16 @@ public class DynamicEntitiesDrawer implements Drawable {
     private void drawNpcs(MapGraphics mg) {
         mg.setColor("npcs");
 
-        FakeNpc pingEntity = null;
-        for (Npc npc : npcs) {
-            if (npc instanceof FakeNpc)
-                pingEntity = (FakeNpc) npc;
-
+        for (Npc npc : npcs)
             drawEntity(mg, npc, npc.getInfo().getShouldKill());
-        }
 
-        if (pingEntity != null) {
-            mg.setColor("ping");
-            mg.drawOvalCentered(pingEntity, 15, true);
-            mg.setColor("ping_border");
-            mg.drawOvalCentered(pingEntity, 15, false);
-        }
+        pet.getLocatorNpcLoc()
+                .ifPresent(locator -> {
+                    mg.setColor("ping");
+                    mg.drawOvalCentered(locator, 16, true);
+                    mg.setColor("ping_border");
+                    mg.drawOvalCentered(locator, 16, false);
+                });
     }
 
     private void drawPlayers(MapGraphics mg) {

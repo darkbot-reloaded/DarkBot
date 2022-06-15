@@ -17,12 +17,16 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.core.utils.Location;
+import com.github.manolo8.darkbot.core.utils.pathfinder.PolygonImpl;
 import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.game.other.GameMap;
+import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Lockable;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -40,6 +45,7 @@ public class MapManager implements Manager, StarSystemAPI {
     private final StarManager starManager;
 
     public final EntityList entities;
+    private final ConfigAPI config;
 
     private long mapAddressStatic;
     private long viewAddressStatic;
@@ -48,6 +54,7 @@ public class MapManager implements Manager, StarSystemAPI {
     private long viewAddress;
     private long boundsAddress;
     public long eventAddress;
+    private long settings3DAddress;
 
     public static int id = -1;
     public Lazy<Map> mapChange = new Lazy.NoCache<>();
@@ -75,17 +82,21 @@ public class MapManager implements Manager, StarSystemAPI {
     private final Location pingLocationCache = new Location();
     public Location pingLocation = null;
 
+    private ConfigSetting<Boolean> disableRender;
+    private Consumer<Boolean> resetRender;
+
     public MapManager(Main main,
                       PluginAPI pluginAPI,
                       EventBrokerAPI eventBroker,
-                      StarManager starManager) {
+                      StarManager starManager,
+                      ConfigAPI config) {
         this.main = main;
         this.eventBroker = eventBroker;
         this.starManager = starManager;
 
         this.entities = pluginAPI.requireInstance(EntityList.class);
+        this.config = config;
     }
-
 
     @Override
     public void install(BotInstaller botInstaller) {
@@ -101,7 +112,18 @@ public class MapManager implements Manager, StarSystemAPI {
                 switchMap(starManager.byId(-1));
                 checkNextMap(-1);
             }
+
+            settings3DAddress = 0;
+            renderValidated = false;
+            long eventManagerClosure = ByteUtils.getClassClosure(API.readLong(eventAddress));
+            if (eventManagerClosure > 0xFFFF)
+                API.replaceInt(eventManagerClosure + 60, 45, -150); // set hero non-clickable radius to -200
         });
+
+        main.status.add(r -> renderValidated = false);
+
+        this.disableRender = config.requireConfig("bot_settings.api_config.disable_render");
+        this.disableRender.addListener(resetRender = b -> renderValidated = false);
     }
 
     public void tick() {
@@ -118,6 +140,7 @@ public class MapManager implements Manager, StarSystemAPI {
 
         updateBounds();
         checkMirror();
+        updateRender();
     }
 
     private void update(long address) {
@@ -137,6 +160,24 @@ public class MapManager implements Manager, StarSystemAPI {
             switchMap(main.starManager.byId(currMap));
 
         entities.update(address);
+    }
+
+    private boolean renderValidated = false;
+    private void updateRender() {
+        if (!is3DView || renderValidated) return;
+
+        if (settings3DAddress <= 0xFFFF) {
+            settings3DAddress = API.searchClassClosure(l -> ByteUtils.readObjectName(l).equals("Settings3D$"));
+            return;
+        }
+
+        if (ByteUtils.isScriptableObjectValid(settings3DAddress)) {
+            if (disableRender.getValue() && main.isRunning())
+                API.replaceInt(API.readLong(settings3DAddress, 0xf0) + 0x20, 1, 0);
+            else API.replaceInt(API.readLong(settings3DAddress, 0xf0) + 0x20, 0, 1);
+        }
+
+        renderValidated = true;
     }
 
     private int lastNextMap;
@@ -245,6 +286,7 @@ public class MapManager implements Manager, StarSystemAPI {
         if (viewAddress != temp) {
             viewAddress = temp;
 
+            renderValidated = false;
             is3DView = !main.settingsManager.is2DForced()
                        && ByteUtils.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
             boundsAddress = API.readMemoryLong(viewAddress + (is3DView ? 216 : 208));
@@ -267,26 +309,46 @@ public class MapManager implements Manager, StarSystemAPI {
         height = boundMaxY - boundY;
     }
 
-    public static class ViewBounds extends Updatable.Auto {
-        public double leftTopX, leftTopY;
-        public double rightTopX, rightTopY;
-        public double rightBotX, rightBotY;
-        public double leftBotX, leftBotY;
+    public static class ViewBounds {
+        private final UpdatableLocatable leftTop = new UpdatableLocatable();
+        private final UpdatableLocatable rightTop = new UpdatableLocatable();
+        private final UpdatableLocatable rightBot = new UpdatableLocatable();
+        private final UpdatableLocatable leftBot = new UpdatableLocatable();
 
-        @Override
-        public void update() {
-            this.leftTopX = API.readMemoryDouble(address + 80);
-            this.leftTopY = API.readMemoryDouble(address + 88);
-            this.rightTopX = API.readMemoryDouble(address + 96);
-            this.rightTopY = API.readMemoryDouble(address + 104);
-            this.rightBotX = API.readMemoryDouble(address + 112);
-            this.rightBotY = API.readMemoryDouble(address + 120);
-            this.leftBotX = API.readMemoryDouble(address + 128);
-            this.leftBotY = API.readMemoryDouble(address + 136);
+        public final PolygonImpl polygon = new PolygonImpl(leftTop, rightTop, rightBot, leftBot);
+
+        public void update(long address) {
+            this.leftTop.update(address + 80);
+            this.rightTop.update(address + 96);
+            this.rightBot.update(address + 112);
+            this.leftBot.update(address + 128);
+        }
+
+        private static class UpdatableLocatable extends Updatable.Auto implements Locatable {
+            private double x, y;
+
+            @Override
+            public void update() {
+                this.x = API.readMemoryDouble(address);
+                this.y = API.readMemoryDouble(address + 8);
+            }
+
+            @Override
+            public double getX() {
+                return x;
+            }
+
+            @Override
+            public double getY() {
+                return y;
+            }
         }
     }
 
     private Location getEnemyLocatorTarget() {
+        if (!main.hero.hasEffect(EffectManager.Effect.LOCATOR))
+            return null;
+
         long temp = API.readMemoryLong(minimapAddressStatic); // Minimap
         double minimapX = API.readMemoryInt(temp + 0xA8);
 

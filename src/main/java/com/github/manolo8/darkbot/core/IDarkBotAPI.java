@@ -1,8 +1,10 @@
 package com.github.manolo8.darkbot.core;
 
 import com.github.manolo8.darkbot.core.api.GameAPI;
+
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.OreAPI;
@@ -32,6 +34,8 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     default void keyboardClick(char btn) {
         rawKeyboardClick(Character.toUpperCase(btn));
     }
+    @Deprecated
+    void directKeyClick(Character character);
 
     void rawKeyboardClick(char btn);
 
@@ -130,6 +134,26 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     void refine(long refineUtilAddress, OreAPI.Ore ore, int amount);
 
     long callMethod(int index, long... arguments);
+    boolean useItem(Item item);
+    boolean isUseItemSupported();
+
+    void postActions(long... actions);
+    void pasteText(String text, long... actions);
+
+    // Handler API
+    void clearCache();
+    void emptyWorkingSet();
+    void setLocalProxy(int port);
+    void setPosition(int x, int y);
+    void setFlashOcxPath(String path);
+    void setUserInput(boolean enable);
+    void setClientSize(int width, int height);
+    void setMinClientSize(int width, int height);
+    void setTransparency(int transparency);
+    void setVolume(int volume); // 0 - 100
+
+    // LOW = 0, MEDIUM = 1, HIGH = 2, BEST = 3, AUTO_LOW = 4, AUTO_HIGH = 5
+    void setQuality(GameAPI.Handler.GameQuality quality);
 
     //MemoryAPI
     @Override

@@ -4,12 +4,15 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.utils.ClickPoint;
 import com.github.manolo8.darkbot.core.utils.Location;
+import com.github.manolo8.darkbot.core.utils.pathfinder.PolygonImpl;
+import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class MouseManager extends Thread {
 
     private final Object LOCK = new Object();
+    private final PolygonImpl viewPolygon;
     private ClickPoint clickPoint = new ClickPoint(0, 0);
     private Point point = new Point();
     private volatile boolean waiting = true;
@@ -21,6 +24,8 @@ public class MouseManager extends Thread {
         this.map = map;
         setDaemon(true);
         start();
+
+        viewPolygon = map.viewBounds.polygon;
     }
 
     public void clickCenter(boolean single, Location aim) {
@@ -45,14 +50,19 @@ public class MouseManager extends Thread {
 
 
     private ClickPoint pointCenter(Location aim) {
-        Location center = new Location(map.boundX + map.width / 2, map.boundY + map.height / 2);
+        RectangleImpl viewBounds = viewPolygon.getBounds();
+
+        Location center = new Location(viewBounds.getX() + (viewBounds.getWidth() / 2),
+                viewBounds.getY() + (viewBounds.getHeight() / 2));
         center.toAngle(center, center.angle(aim) + Math.random() * 0.2 - 0.1, 125 + Math.random() * 75);
         return pointLoc(center);
     }
 
     private ClickPoint pointLoc(Location loc) {
-        return new ClickPoint((int) ((loc.x - map.boundX) / (map.width) * (double) MapManager.clientWidth),
-                (int) ((loc.y - map.boundY) / (map.height) * (double) MapManager.clientHeight));
+        RectangleImpl viewBounds = viewPolygon.getBounds();
+
+        return new ClickPoint((int) ((loc.x - viewBounds.getX()) / (viewBounds.getWidth()) * (double) MapManager.clientWidth),
+                (int) ((loc.y - viewBounds.getY()) / (viewBounds.getHeight()) * (double) MapManager.clientHeight));
     }
 
     public final void run() {
