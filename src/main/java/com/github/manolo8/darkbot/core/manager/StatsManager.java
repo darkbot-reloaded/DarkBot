@@ -86,7 +86,7 @@ public class StatsManager implements Manager, StatsAPI {
     private void updateCredits(double credits) {
         double diff = credits - this.credits;
 
-        if (this.credits != 0 && diff > 0) {
+        if (this.credits != 0 && diff > 0 && main.isRunning()) {
             earnedCredits += diff;
         }
 
@@ -96,7 +96,7 @@ public class StatsManager implements Manager, StatsAPI {
     private void updateUridium(double uridium) {
         double diff = uridium - this.uridium;
 
-        if (this.uridium != 0 && diff > 0) {
+        if (this.uridium != 0 && diff > 0 && main.isRunning()) {
             earnedUridium += diff;
         }
 
@@ -105,14 +105,14 @@ public class StatsManager implements Manager, StatsAPI {
 
     private void updateExperience(double experience) {
         if (experience == 0) return;
-        if (this.experience != 0) earnedExperience += experience - this.experience;
+        if (this.experience != 0 && main.isRunning()) earnedExperience += experience - this.experience;
         this.experience = experience;
     }
 
     private void updateHonor(double honor) {
         if (honor == 0) return;
         double honorDiff = honor - this.honor;
-        if (this.honor != 0) earnedHonor += honorDiff;
+        if (this.honor != 0 && main.isRunning()) earnedHonor += honorDiff;
         this.honor = honor;
 
         if (honorDiff > -10_000) return;
