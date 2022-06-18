@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.login;
 
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import net.miginfocom.swing.MigLayout;
@@ -15,16 +16,16 @@ public class LoginForm extends JPanel {
     private final JTabbedPane tabbedPane = new JTabbedPane();
 
     private final JLabel infoLb = new JLabel("");
-    private final JButton loginBtn = new JButton("Log in");
+    private final JButton loginBtn = new JButton(I18n.get("gui.login.log_in.button"));
 
     private final LoginData loginData = new LoginData();
 
     public LoginForm() {
         super(new MigLayout("wrap 2, ins 0", "[]10px:push[]", "[]8px[]"));
-        tabbedPane.addTab("User & Pass", new UserLogin());
-        tabbedPane.addTab("SID login", new SidLogin());
+        tabbedPane.addTab(I18n.get("gui.login.user_pass"), new UserLogin());
+        tabbedPane.addTab(I18n.get("gui.login.sid"), new SidLogin());
         SavedLogins saved =  new SavedLogins(this);
-        tabbedPane.addTab("Saved", saved);
+        tabbedPane.addTab(I18n.get("gui.login.saved"), saved);
         tabbedPane.setEnabledAt(2, saved.isLoaded());
         if (saved.getLogins() > 0) tabbedPane.setSelectedComponent(saved);
 
@@ -65,7 +66,7 @@ public class LoginForm extends JPanel {
     protected synchronized void startLogin() {
         if (!canLogIn) return;
         loginBtn.setEnabled(canLogIn = false);
-        setInfoText(new Message(false, "Logging in (1/2)", null));
+        setInfoText(new Message(false, I18n.get("gui.login.info.logging_in"), null));
         new LoginTask().execute();
     }
 
@@ -90,22 +91,24 @@ public class LoginForm extends JPanel {
         @Override
         protected LoginData doInBackground() {
             try {
-                publish(new Message(false, "Logging in (1/2)", null));
+                publish(new Message(false, I18n.get("gui.login.info.logging_in"), null));
                 Message msg = ((LoginScreen) tabbedPane.getSelectedComponent()).tryLogin(loginData);
                 if (msg != null) {
                     publish(msg);
                     failed = true;
                     return null;
                 }
-                publish(new Message(false, "Loading spacemap (2/2)", null));
+                publish(new Message(false, I18n.get("gui.login.info.loading_spacemap"), null));
                 LoginUtils.findPreloader(loginData);
                 return loginData;
             } catch (SSLHandshakeException e) {
-                publish(new Message(true, "Unsupported java version", IssueHandler.createDescription(e)));
+                publish(new Message(true, I18n.get("gui.login.error.unsupported_java"),
+                        IssueHandler.createDescription(e)));
             } catch (LoginUtils.LoginException e) {
                 publish(new Message(true, e.getTitle(), IssueHandler.createDescription(e)));
             } catch (Exception e) {
-                publish(new Message(true, "Failed to login!", IssueHandler.createDescription(e)));
+                publish(new Message(true, I18n.get("gui.login.error.failed_login"),
+                        IssueHandler.createDescription(e)));
             }
             failed = true;
             return null;

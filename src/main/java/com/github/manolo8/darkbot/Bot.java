@@ -40,7 +40,7 @@ public class Bot {
         if (params.has(StartupParams.LaunchArg.NO_WARN)) return;
         String java = System.getProperty("java.version");
 
-        if (!java.startsWith("11.") && !java.startsWith("17.")) {
+        if (!java.startsWith("11.") && !java.startsWith("17.") && !java.equals("17")) {
             Popups.showMessageSync("Unsupported java version", new JOptionPane(
                     "You're currently using java version " + java + "\n" +
                     "This version is unsupported and may stop working on future bot releases.\n" +

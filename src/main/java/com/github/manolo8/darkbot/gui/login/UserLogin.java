@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.login;
 
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import net.miginfocom.swing.MigLayout;
@@ -7,13 +8,13 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 
 public class UserLogin extends JPanel implements LoginScreen {
-    private JTextField username = new JTextField(16), password = new JPasswordField(16);
+    private final JTextField username = new JTextField(16), password = new JPasswordField(16);
 
     public UserLogin() {
         super(new MigLayout("wrap 2", "[]8px:push[]", "push[][]push"));
-        add(new JLabel("Username"));
+        add(new JLabel(I18n.get("gui.login.user_pass.username")));
         add(username);
-        add(new JLabel("Password"));
+        add(new JLabel(I18n.get("gui.login.user_pass.password")));
         add(password);
     }
 
