@@ -52,7 +52,7 @@ public class DispatchManager {
         return false;
     }
 
-    public HashMap<String, Integer> getCollected(){
+    public Map<String, Integer> getCollected() {
         return collected;
     }
 
