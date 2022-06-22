@@ -22,8 +22,8 @@ public class DispatchManager {
     private final Main main;
     private final DispatchData data;
     private long lastDispatcherUpdate;
-    private final HashMap<String, Integer> collected;
-    private final HashMap<String, Integer> lastCollected;
+    private final Map<String, Integer> collected;
+    private final Map<String, Integer> lastCollected;
     private final Gson g;
 
     DispatchManager(Main main) {
