@@ -56,7 +56,7 @@ public class DispatchManager {
         return collected;
     }
 
-    public HashMap<String, Integer> getLastCollected(){
+    public Map<String, Integer> getLastCollected() {
         return lastCollected;
     }
 
