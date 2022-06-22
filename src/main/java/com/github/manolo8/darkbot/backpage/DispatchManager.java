@@ -123,7 +123,7 @@ public class DispatchManager {
 
     public boolean handleResponse(String type, String id, String response) {
         boolean failed = response.contains("\"result\":\"ERROR\"");
-        if(!failed){
+        if (!failed) {
             this.lastCollected.clear();
             JsonObject jsonObj = g.fromJson (response, JsonObject.class); //Converts the json string to JsonElement without POJO
             for(JsonElement item : jsonObj.get("rewardsLog").getAsJsonArray()){
