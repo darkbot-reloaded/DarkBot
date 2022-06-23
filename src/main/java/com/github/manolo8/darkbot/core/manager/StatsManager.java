@@ -53,14 +53,14 @@ public class StatsManager implements Manager, StatsAPI {
 
     public void tick() {
         if (address == 0) return;
-        updateCredits(API.readMemoryDouble(address + 296));
-        updateUridium(API.readMemoryDouble(address + 304));
-        //API.readMemoryDouble(address + 312); // Jackpot
-        updateExperience(API.readMemoryDouble(address + 320));
-        updateHonor(API.readMemoryDouble(address + 328));
+        updateCredits(API.readMemoryDouble(address + 312));
+        updateUridium(API.readMemoryDouble(address + 320));
+        //API.readMemoryDouble(address + 328); // Jackpot
+        updateExperience(API.readMemoryDouble(address + 336));
+        updateHonor(API.readMemoryDouble(address + 344));
 
-        deposit = API.readMemoryInt(API.readMemoryLong(address + 248) + 40);
-        depositTotal = API.readMemoryInt(API.readMemoryLong(address + 256) + 40);
+        deposit = API.readMemoryInt(API.readMemoryLong(address + 264) + 40);
+        depositTotal = API.readMemoryInt(API.readMemoryLong(address + 272) + 40);
 
         currentBox = API.readMemoryLong(address + 0xE8);
 
@@ -86,7 +86,7 @@ public class StatsManager implements Manager, StatsAPI {
     private void updateCredits(double credits) {
         double diff = credits - this.credits;
 
-        if (this.credits != 0 && diff > 0 && main.isRunning()) {
+        if (this.credits != 0 && diff > 0 && updateStats()) {
             earnedCredits += diff;
         }
 
@@ -96,7 +96,7 @@ public class StatsManager implements Manager, StatsAPI {
     private void updateUridium(double uridium) {
         double diff = uridium - this.uridium;
 
-        if (this.uridium != 0 && diff > 0 && main.isRunning()) {
+        if (this.uridium != 0 && diff > 0 && updateStats()) {
             earnedUridium += diff;
         }
 
@@ -105,14 +105,18 @@ public class StatsManager implements Manager, StatsAPI {
 
     private void updateExperience(double experience) {
         if (experience == 0) return;
-        if (this.experience != 0 && main.isRunning()) earnedExperience += experience - this.experience;
+        if (this.experience != 0 && updateStats()) {
+            earnedExperience += experience - this.experience;
+        }
         this.experience = experience;
     }
 
     private void updateHonor(double honor) {
         if (honor == 0) return;
         double honorDiff = honor - this.honor;
-        if (this.honor != 0 && main.isRunning()) earnedHonor += honorDiff;
+        if (this.honor != 0 && updateStats()) {
+            earnedHonor += honorDiff;
+        }
         this.honor = honor;
 
         if (honorDiff > -10_000) return;
@@ -124,6 +128,10 @@ public class StatsManager implements Manager, StatsAPI {
 
         if (!main.config.MISCELLANEOUS.HONOR_LOST_EXACT || isExact)
             main.setModule(new DisconnectModule(null, I18n.get("module.disconnect.reason.honor")));
+    }
+
+    private boolean updateStats() {
+        return main.isRunning() || main.config.MISCELLANEOUS.UPDATE_STATS_WHILE_PAUSED;
     }
 
     public long runningTime() {
