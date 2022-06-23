@@ -6,7 +6,11 @@ import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
 import com.github.manolo8.darkbot.utils.http.Method;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
@@ -18,10 +22,16 @@ public class DispatchManager {
     private final Main main;
     private final DispatchData data;
     private long lastDispatcherUpdate;
+    private final Map<String, Integer> collected;
+    private final Map<String, Integer> lastCollected;
+    private final Gson g;
 
     DispatchManager(Main main) {
         this.main = main;
         this.data = new DispatchData();
+        this.collected = new HashMap<>();
+        this.lastCollected = new HashMap<>();
+        this.g = new Gson();
     }
 
     public DispatchData getData() {
@@ -42,11 +52,19 @@ public class DispatchManager {
         return false;
     }
 
+    public Map<String, Integer> getCollected() {
+        return collected;
+    }
+
+    public Map<String, Integer> getLastCollected() {
+        return lastCollected;
+    }
+
     public boolean hireRetriever(Retriever retriever) {
         if (data.getAvailableSlots() <= 0) return false;
         //retriever.getCost(); // TODO: check cost
-        if (retriever.getCreditCost() > main.statsManager.credits || 
-                retriever.getUridiumCost() > main.statsManager.uridium || 
+        if (retriever.getCreditCost() > main.statsManager.credits ||
+                retriever.getUridiumCost() > main.statsManager.uridium ||
                 retriever.getPermitCost() > data.getPermit()) {
             return handleResponse("Hiring Failed", retriever.getId(),
                     "\"result\":\"ERROR\" Cost Requirement Not Met");
@@ -68,7 +86,7 @@ public class DispatchManager {
         try {
             System.out.println("Collecting Instant: Slot " + progress.getSlotId());
             if (data.getPrimeCoupons() <= 0)
-                return handleResponse("Instant Collect Failed", progress.getId(), 
+                return handleResponse("Instant Collect Failed", progress.getId(),
                         "\"result\":\"ERROR\" No Prime Coupon Available For Instant Collection");
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "instantComplete")
@@ -105,6 +123,18 @@ public class DispatchManager {
 
     public boolean handleResponse(String type, String id, String response) {
         boolean failed = response.contains("\"result\":\"ERROR\"");
+        if (!failed) {
+            this.lastCollected.clear();
+            JsonObject jsonObj = g.fromJson (response, JsonObject.class); //Converts the json string to JsonElement without POJO
+            for (JsonElement item : jsonObj.get("rewardsLog").getAsJsonArray()) {
+                String key = item.getAsJsonObject().get("lootId").getAsString();
+                this.collected.putIfAbsent(key, 0);
+                this.collected.put(key, this.collected.get(key)+item.getAsJsonObject().get("amount").getAsInt());
+
+                this.lastCollected.putIfAbsent(key, 0);
+                this.lastCollected.put(key, this.collected.get(key)+item.getAsJsonObject().get("amount").getAsInt());
+            }
+        }
         System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
         update(0);
         return !failed;
