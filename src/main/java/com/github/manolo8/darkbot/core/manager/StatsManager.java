@@ -64,7 +64,7 @@ public class StatsManager implements Manager, StatsAPI {
 
         currentBox = API.readMemoryLong(address + 0xE8);
 
-        sid = API.readMemoryStringFallback(API.readMemoryLong(address + 176), null);
+        sid = API.readMemoryStringFallback(API.readMemoryLong(address + 192), null);
         if (settingsAddress == 0) return;
         instance = API.readMemoryStringFallback(API.readMemoryLong(settingsAddress + 656), null);
     }
