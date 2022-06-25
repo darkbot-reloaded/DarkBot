@@ -127,14 +127,19 @@ public class DispatchManager {
         if (!failed) {
             this.lastCollected.clear();
             JsonObject jsonObj = g.fromJson (response, JsonObject.class); //Converts the json string to JsonElement without POJO
-            for (JsonElement item : jsonObj.get("rewardsLog").getAsJsonArray()) {
-                String key = item.getAsJsonObject().get("lootId").getAsString();
-                this.collected.putIfAbsent(key, 0);
-                this.collected.put(key, this.collected.get(key)+item.getAsJsonObject().get("amount").getAsInt());
+            if(jsonObj.has("rewardsLog")){
+                for (JsonElement item : jsonObj.get("rewardsLog").getAsJsonArray()) {
+                    if(item.getAsJsonObject().has("lootId")){
+                        String key = item.getAsJsonObject().get("lootId").getAsString();
+                        this.collected.putIfAbsent(key, 0);
+                        this.collected.put(key, this.collected.get(key) + item.getAsJsonObject().get("amount").getAsInt());
 
-                this.lastCollected.putIfAbsent(key, 0);
-                this.lastCollected.put(key, this.collected.get(key)+item.getAsJsonObject().get("amount").getAsInt());
+                        this.lastCollected.putIfAbsent(key, 0);
+                        this.lastCollected.put(key, this.collected.get(key) + item.getAsJsonObject().get("amount").getAsInt());
+                    }
+                }
             }
+
         }
         System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
         update(0);
