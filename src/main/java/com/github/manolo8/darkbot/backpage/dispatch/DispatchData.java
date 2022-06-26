@@ -76,15 +76,15 @@ public class DispatchData {
 
     public class DataBuilder {
         private final Pattern RETRIEVER_PATTERN = Pattern.compile("dispatchId=\"(.+?)\".*?" +
-                "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?" +
-                "dispatch_item_type\">\\s+(.+?)\\s+<.*?" +
-                "dispatch_item_tier\">\\s+(.+?)\\s+<.*?" +
-                "dispatch_item_cost\">(?:\\s+(.+?)\\s+<br>)?(?:\\s+(.+?)\\s+<br>)", Pattern.DOTALL);
+                "dispatch_item_name_col\"> ?(.+?) ?<.*?" +
+                "dispatch_item_type\"> ?(.+?) ?<.*?" +
+                "dispatch_item_tier\"> ?(.+?) ?<.*?" +
+                "dispatch_item_cost\"> ?(?:(.+?) ?<br>)? ?(.+?) ?<br>", Pattern.DOTALL);
         private final Pattern PROGRESS_PATTERN = Pattern.compile("collectable=\"(.+?)\".*?" +
                 "dispatchId=\"(.+?)\".*?" +
                 "dispatchRewardPackage=\"(.+?)\".*?" +
                 "slotId=\"(.+?)\".*?" +
-                "dispatch_item_name_col\">\\s+(.+?)\\s+<.*?", Pattern.DOTALL);
+                "dispatch_item_name_col\"> ?(.+?) ?<", Pattern.DOTALL);
         private final Pattern DISPATCH_COST = Pattern.compile("(\\d+)", Pattern.DOTALL);
 
         public boolean buildRetriever(String string) {
@@ -93,7 +93,7 @@ public class DispatchData {
                     !string.contains("dispatch_item_type") ||
                     !string.contains("dispatch_item_tier") ||
                     !string.contains("dispatch_item_cost")) return false;
-            Matcher m = RETRIEVER_PATTERN.matcher(string);
+            Matcher m = RETRIEVER_PATTERN.matcher(string.replaceAll("\\s+", " "));
             if (!m.find()) return false;
 
             String id = m.group(1);
@@ -128,7 +128,7 @@ public class DispatchData {
             if (!string.contains("dispatchRewardPackage") ||
                     !string.contains("slotId") ||
                     !string.contains("dispatch_item_name_col")) return false;
-            Matcher m = PROGRESS_PATTERN.matcher(string);
+            Matcher m = PROGRESS_PATTERN.matcher(string.replaceAll("\\s+", " "));
             if (!m.find()) return false;
 
             String slotID = m.group(4);
