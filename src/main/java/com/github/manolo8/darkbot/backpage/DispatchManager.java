@@ -63,12 +63,8 @@ public class DispatchManager {
 
     public boolean hireRetriever(Retriever retriever) {
         if (data.getAvailableSlots() <= 0) return false;
-        //retriever.getCost(); // TODO: check cost
-        if (retriever.getCreditCost() > main.statsManager.credits ||
-                retriever.getUridiumCost() > main.statsManager.uridium ||
-                retriever.getPermitCost() > data.getPermit()) {
-            return handleResponse("Hiring Failed", retriever.getId(),
-                    "\"result\":\"ERROR\" Cost Requirement Not Met");
+        if (retriever.getPermitCost() > data.getPermit()) {
+            return handleResponse("Cannot hire", retriever.getId(), "(ERROR) Not enough permits");
         }
         try {
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
@@ -87,8 +83,8 @@ public class DispatchManager {
         try {
             System.out.println("Collecting Instant: Slot " + progress.getSlotId());
             if (data.getPrimeCoupons() <= 0)
-                return handleResponse("Instant Collect Failed", progress.getId(),
-                        "\"result\":\"ERROR\" No Prime Coupon Available For Instant Collection");
+                return handleResponse("Cannot instant collect", progress.getId(),
+                        "(ERROR) No Prime Coupon available for instant collection");
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "instantComplete")
                     .setRawParam("dispatchId", progress.getId())
@@ -123,7 +119,7 @@ public class DispatchManager {
     }
 
     public boolean handleResponse(String type, String id, String response) {
-        boolean failed = response.contains("\"result\":\"ERROR\"");
+        boolean failed = response.contains("ERROR");
         if (!failed) {
             this.lastCollected.clear();
             JsonObject jsonObj = g.fromJson (response, JsonObject.class); //Converts the json string to JsonElement without POJO
