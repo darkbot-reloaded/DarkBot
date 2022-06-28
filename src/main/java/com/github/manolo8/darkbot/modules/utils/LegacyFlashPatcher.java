@@ -1,5 +1,8 @@
 package com.github.manolo8.darkbot.modules.utils;
 
+import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
+import com.github.manolo8.darkbot.core.api.DarkBoatHookAdapter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 
 import javax.swing.*;
@@ -18,10 +21,13 @@ public class LegacyFlashPatcher {
 
     private final List<Fixer> FIXERS = Arrays.asList(
             new FlashInstaller(),
-            new FlashConfigSetter()
-    );
+            new FlashConfigSetter());
 
     protected void runPatcher() {
+        if (!(Main.API instanceof DarkBoatAdapter || Main.API instanceof DarkBoatHookAdapter)) {
+            // Linux APIs or kekka player do not require this at all. Only darkboat requires it.
+            return;
+        }
         List<Fixer> needFixing = FIXERS.stream().filter(Fixer::needsFix).collect(Collectors.toList());
 
         if (needFixing.isEmpty()) return;
@@ -52,8 +58,22 @@ public class LegacyFlashPatcher {
         }
     }
 
+    protected void cleanupCache() {
+        try {
+            // Delete cookies
+            Runtime.getRuntime().exec("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 2");
+            // Delete temp files
+            Runtime.getRuntime().exec("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 8");
+            // Delete form data
+            Runtime.getRuntime().exec("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 16");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private interface Fixer {
         boolean needsFix();
+
         List<String> script();
     }
 
