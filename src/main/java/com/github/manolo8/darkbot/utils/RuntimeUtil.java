@@ -28,7 +28,7 @@ public class RuntimeUtil {
         if (command == null || command.length == 0)
             throw new IllegalArgumentException("Empty command");
 
-        if (!allowed.contains(command[0])) {
+        if (!isUserTriggered() && !allowed.contains(command[0])) {
             JCheckBox alwaysAllow = new JCheckBox("Always allow this command");
 
             String message = "A plugin is requesting to run the following program: \n" +
@@ -42,11 +42,28 @@ public class RuntimeUtil {
                     JOptionPane.WARNING_MESSAGE);
 
             if (result != JOptionPane.YES_OPTION) return false;
-            allowed.add(command[0]);
+            if (alwaysAllow.isSelected()) allowed.add(command[0]);
         }
 
         Runtime.getRuntime().exec(command);
         return true;
+    }
+
+    private static boolean isUserTriggered() {
+        if (!SwingUtilities.isEventDispatchThread()) return false;
+
+        boolean isUser = false;
+        for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+            String className = element.getClassName();
+
+            isUser |= className.equals("javax.swing.AbstractButton") && element.getMethodName().equals("doClick");
+            isUser &= className.startsWith("java.awt.") ||
+                    className.startsWith("javax.swing.") ||
+                    className.startsWith("java.security.");
+
+            System.out.println(className + "#" + element.getMethodName() + " \t " + isUser);
+        }
+        return isUser;
     }
 
 }
