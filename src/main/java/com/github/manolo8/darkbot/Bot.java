@@ -67,8 +67,8 @@ public class Bot {
         if (!java.startsWith("11.") && !java.startsWith("17.") && !java.equals("17")) {
             Popups.showMessageSync("Unsupported java version", new JOptionPane(
                     "You're currently using java version " + java + "\n" +
-                            "This version is unsupported and may stop working on future bot releases.\n" +
-                            "Please update to java 11 or java 17 to continue using future releases.",
+                    "This version is unsupported and may stop working on future bot releases.\n" +
+                    "Please update to java 11 or java 17 to continue using future releases.",
                     JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION));
         }
     }
