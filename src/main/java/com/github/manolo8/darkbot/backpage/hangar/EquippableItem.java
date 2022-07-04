@@ -15,6 +15,9 @@ public class EquippableItem extends Item {
     @SerializedName("SL") private int shieldLevel;
     @SerializedName("DL") private int damageLevel;
 
+    @SerializedName("SUS") private String shipUpgradeShips;
+    @SerializedName("SUM") private String shipUpgradeModifiers;
+
     public Map<String, String> getProperties() {
         return properties;
     }
@@ -42,6 +45,10 @@ public class EquippableItem extends Item {
     public int getDamageLevel() {
         return damageLevel;
     }
+
+    public String getShipUpgradeShips() { return shipUpgradeShips; }
+
+    public String getShipUpgradeModifiers() { return shipUpgradeModifiers; }
 
     @Override
     public String toString() {
