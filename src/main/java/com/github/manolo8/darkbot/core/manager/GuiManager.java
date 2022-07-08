@@ -48,6 +48,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final Gui quests;
     public final Gui minimap;
     public final Gui targetedOffers;
+    public final Gui monthlyDeluxe;
     public final LogoutGui logout;
     public final Gui eventProgress;
     public final Gui eternalGate;
@@ -61,8 +62,9 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
-        WAITING(gm -> gm.quests.lastUpdatedOver(5000) && gm.quests.visible),
-        MISSION_CLOSING(gm -> gm.quests.show(false)),
+        WAITING(gm -> (gm.quests.lastUpdatedOver(5000) && gm.quests.visible)
+                && (gm.monthlyDeluxe.lastUpdatedOver(5000) && gm.monthlyDeluxe.visible)),
+        MISSION_CLOSING(gm -> gm.quests.show(false) && gm.monthlyDeluxe.show(false)),
         CLICKING_AMMO(gm -> {
             API.keyboardClick(gm.main.config.LOOT.AMMO_KEY);
             return true;
@@ -99,6 +101,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.quests = register("quests");
         this.minimap = register("minimap");
         this.targetedOffers = register("targetedOffers", TargetedOfferGui.class);
+        this.monthlyDeluxe = register("monthly_deluxe");
         this.logout = register("logout", LogoutGui.class);
         this.eventProgress = register("eventProgress");
         this.eternalGate = register("eternal_gate");
