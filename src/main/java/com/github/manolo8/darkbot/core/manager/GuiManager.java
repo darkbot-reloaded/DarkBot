@@ -63,9 +63,9 @@ public class GuiManager implements Manager, GameScreenAPI {
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
         WAITING(gm -> (gm.quests.lastUpdatedOver(5000) && gm.quests.visible)
-                && (gm.monthlyDeluxe.lastUpdatedOver(5000) && gm.monthlyDeluxe.visible)),
-        MISSION_CLOSING(gm -> gm.quests.show(false)),
-        MONTHLY_CLOSING(gm -> gm.monthlyDeluxe.show(false)),
+                || (gm.monthlyDeluxe.lastUpdatedOver(5000) && gm.monthlyDeluxe.visible)),
+        MISSION_CLOSING(gm -> gm.quests.visible && gm.quests.show(false)),
+        MONTHLY_CLOSING(gm -> gm.monthlyDeluxe.visible && gm.monthlyDeluxe.show(false)),
         CLICKING_AMMO(gm -> {
             API.keyboardClick(gm.main.config.LOOT.AMMO_KEY);
             return true;
