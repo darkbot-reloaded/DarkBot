@@ -1,20 +1,41 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.managers.ConfigAPI;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class ConfigEntity {
 
-    public static ConfigEntity INSTANCE = new ConfigEntity();
+    public static ConfigEntity INSTANCE;
+
+    static {
+        INSTANCE = HeroManager.instance.main.pluginAPI.requireInstance(ConfigEntity.class);
+    }
+
+    private final ConfigAPI configAPI;
+    private final ConfigSetting<Map<String, NpcInfo>> npcInfos;
+    private final ConfigSetting<Map<String, BoxInfo>> boxInfos;
+
+    public ConfigEntity(ConfigAPI configAPI) {
+        this.configAPI = configAPI;
+        this.npcInfos = configAPI.requireConfig("loot.npc_infos");
+        this.boxInfos = configAPI.requireConfig("collect.box_infos");
+    }
+
     private Config config;
 
     public NpcInfo getOrCreateNpcInfo(String name) {
         int mapId = MapManager.id;
-        NpcInfo info = config.LOOT.NPC_INFOS.get(name);
+
+        Map<String, NpcInfo> npcs = npcInfos.getValue();
+        NpcInfo info = npcs.get(name);
         if (info == null) {
             info = new NpcInfo();
 
@@ -22,26 +43,27 @@ public class ConfigEntity {
             info.mapList.add(mapId);
 
             if (!name.isEmpty()) {
-                config.LOOT.NPC_INFOS.put(name, info);
-                config.LOOT.MODIFIED_NPC.send(name);
+                npcs.put(name, info);
 
+                npcInfos.setValue(npcs);
                 changed();
             }
         } else if (info.mapList.add(mapId)) {
+            npcInfos.setValue(npcs);
             changed();
-            config.LOOT.MODIFIED_NPC.send(name);
         }
         return info;
     }
 
     public BoxInfo getOrCreateBoxInfo(String name) {
-        BoxInfo info = config.COLLECT.BOX_INFOS.get(name);
+        Map<String, BoxInfo> boxes = boxInfos.getValue();
+        BoxInfo info = boxes.get(name);
         if (info == null) {
             info = new BoxInfo();
             if (!name.isEmpty()) {
-                config.COLLECT.BOX_INFOS.put(name, info);
-                config.COLLECT.ADDED_BOX.send(name);
+                boxes.put(name, info);
 
+                boxInfos.setValue(boxes);
                 changed();
             }
         }
