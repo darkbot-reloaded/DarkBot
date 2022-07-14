@@ -14,7 +14,6 @@ import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.util.OptionEditor;
-import eu.darkbot.api.config.util.ValueHandler;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -50,14 +49,22 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
 
     @Override
     public JComponent getEditorComponent(ConfigSetting<Map<String, Object>> table) {
-        if (this.setting != null) setting.removeListener(update);
+        throw new UnsupportedOperationException("isEditor is required");
+    }
+
+    @Override
+    public JComponent getEditorComponent(ConfigSetting<Map<String, Object>> table, boolean isEditor) {
+        if (isEditor && this.setting != null) setting.removeListener(update);
 
         this.setting = table;
         this.tableModel = table.getMetadata("table.tableModel");
         if (tableModel == null)
             throw new UnsupportedOperationException("Missing table model");
 
-        this.setting.addListener(update);
+        if (isEditor) this.setting.addListener(update);
+
+        // Update model with new data if applicable
+        this.tableModel.setConfig(table.getValue());
 
         return getComponent(table);
     }
@@ -137,8 +144,6 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
 
         // Set a default table size, implementers may override using a decorator
         outer.setPreferredSize(new Dimension(500, 270));
-        // Force an initial update on the model
-        tableModel.setConfig(this.setting.getValue());
 
         for (Class<? extends Table.Decorator<Object>> decorator : decorators)
                 api.requireInstance(decorator).handle(table, scrollPane, wrapper, this.setting);

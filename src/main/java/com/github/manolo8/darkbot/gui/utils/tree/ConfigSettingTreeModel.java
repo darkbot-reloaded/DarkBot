@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.annotations.Visibility;
 
+import javax.swing.*;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
@@ -113,21 +114,37 @@ public class ConfigSettingTreeModel implements TreeModel {
         setting.setValue(newValue); // calls fireNodeChanged internally via listener
     }
 
-    public void fireNodeChanged(ConfigSetting<?> setting) {
-        List<ConfigSetting<?>> path = new ArrayList<>();
-        do {
-            path.add(setting);
-        } while (setting != root && (setting = setting.getParent()) != null);
-        Collections.reverse(path);
-        fireNodeChanged(new TreePath(path.toArray(new ConfigSetting[0])));
-    }
+    public void fireNodeChanged(ConfigSetting<?> node) {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> fireNodeChanged(node));
+            return;
+        }
 
-    public void fireNodeChanged(TreePath path) {
+        TreePath path = getPathFor(node);
+
         TreeModelEvent event = new TreeModelEvent(this, path);
+
+        if (path.getParentPath() != null) {
+            TreePath parentPath = path.getParentPath();
+            int idx = getIndexOfChild(node.getParent(), node);
+            // Modified child is not even in the tree! maybe not visible atm?
+            if (idx == -1) return;
+            event = new TreeModelEvent(this, parentPath, new int[]{idx}, new Object[]{node});
+        }
         for (TreeModelListener listener : listeners) {
             listener.treeNodesChanged(event);
         }
         ConfigEntity.changed();
+    }
+
+    private TreePath getPathFor(ConfigSetting<?> node) {
+        ConfigSetting<?> parent = node;
+        List<ConfigSetting<?>> path = new ArrayList<>();
+        do {
+            path.add(parent);
+        } while (parent != root && (parent = parent.getParent()) != null);
+        Collections.reverse(path);
+        return new TreePath(path.toArray(new ConfigSetting[0]));
     }
 
     @Override
