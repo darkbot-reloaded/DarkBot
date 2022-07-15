@@ -46,9 +46,13 @@ public class EquippableItem extends Item {
         return damageLevel;
     }
 
-    public String getShipUpgradeShips() { return shipUpgradeShips; }
+    public String getShipUpgradeShips() {
+        return shipUpgradeShips;
+    }
 
-    public String getShipUpgradeModifiers() { return shipUpgradeModifiers; }
+    public String getShipUpgradeModifiers() {
+        return shipUpgradeModifiers;
+    }
 
     @Override
     public String toString() {
