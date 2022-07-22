@@ -26,10 +26,10 @@ import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
 public class TableEditor implements OptionEditor<Map<String, Object>> {
 
     private final PluginAPI api;
-    private final Map<ConfigSetting<Map<String, Object>>, JComponent[]> tableMap = new HashMap<>();
+    private static final Map<ConfigSetting<Map<String, Object>>, JComponent[]> tableMap = new WeakHashMap<>();
 
     private ConfigSetting<Map<String, Object>> setting;
     private GenericTableModel<Object> tableModel;
