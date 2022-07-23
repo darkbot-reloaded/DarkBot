@@ -99,7 +99,6 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.quests = register("quests");
         this.minimap = register("minimap");
         this.targetedOffers = register("targetedOffers", TargetedOfferGui.class);
-        this.monthlyDeluxe = register("monthly_deluxe");
         this.logout = register("logout", LogoutGui.class);
         this.eventProgress = register("eventProgress");
         this.eternalGate = register("eternal_gate");
