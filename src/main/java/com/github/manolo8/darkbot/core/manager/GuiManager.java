@@ -48,7 +48,6 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final Gui quests;
     public final Gui minimap;
     public final Gui targetedOffers;
-    public final Gui monthlyDeluxe;
     public final LogoutGui logout;
     public final Gui eventProgress;
     public final Gui eternalGate;
