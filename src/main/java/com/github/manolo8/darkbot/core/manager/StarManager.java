@@ -35,7 +35,8 @@ public class StarManager implements API.Singleton {
                 .addMap(-2, "Home Map").addPortal(0, 0, "1-1").addPortal(0, 0, "2-1").addPortal(0, 0, "3-1")
                 .addGG(-3, "GG Escort").accessOnlyBy(54, 10500, 6500, BASE_MAPS)
                 .addGG(-4, "GG Eternal").accessBy(54, BL_MAPS)
-                .addGG(-5, "Labyrinth").accessBy(83, HOME_MAPS);
+                .addGG(-5, "Labyrinth").accessBy(83, HOME_MAPS)
+                .addGG(-6, "GG Astral").accessOnlyBy(86, 10500, 5800, HOME_MAPS);
                 // MMO
         mapBuild.addMap(1, "1-1").addPortal(18500, 11500, "1-2").addPortal(10500, 6750, "Experiment Zone 1")
                 .addMap(2, "1-2").addPortal(2000, 2000, "1-1").addPortal(18500, 2000, "1-3").addPortal(18500, 11500, "1-4")
@@ -201,6 +202,9 @@ public class StarManager implements API.Singleton {
                 .addGG(464, "Eternal Blacklight", "GG ∞ BL")
                 .addGG(465, "Eternal Blacklight", "GG ∞ BL");
 
+        mapBuild.addGG(466, "Astral Ascension", "GG Astral")
+                .addGG(467, "Astral Ascension", "GG Astral")
+                .addGG(468, "Astral Ascension", "GG Astral");
         starSystem = mapBuild.build();
 
         //org.jgrapht.io.DOTExporter<Map, Portal> exporter = new org.jgrapht.io.DOTExporter<>(m -> (m.id < 0 ? "00" : "") + Math.abs(m.id), Map::toString, Portal::toString);
