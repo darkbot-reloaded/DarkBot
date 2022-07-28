@@ -8,36 +8,16 @@ import eu.darkbot.util.Popups;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.Optional;
+import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 
 public class Bot {
 
     public static void main(String[] args) throws IOException {
         // You can enable hardware acceleration via adding jvm arg: -Dsun.java2d.opengl=True
-
-        try {
-            Path dir = Paths.get(".\\logs");
-            Optional<Path> lastFilePath = Files.list(dir)
-                    .filter(f -> !Files.isDirectory(f))
-                    .max(Comparator.comparingLong(f -> f.toFile().lastModified()));
-
-            if (lastFilePath.isPresent()) {
-                File file = new File(lastFilePath.get().toString());
-                if (!file.renameTo(file)) {
-                    //maybe need popup that say that you cannot run from same jar multiple bot
-                    System.exit(2);
-                }
-            }
-        } catch (NoSuchFileException e) {
-            e.printStackTrace();
-        }
 
         if (System.console() == null
                 && Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")) {
@@ -56,8 +36,55 @@ public class Bot {
         LibSetup.setupLibraries();
         StartupParams params = new StartupParams(args);
 
+        checkUniqueInstance(params);
         checkJavaVersion(params);
         SwingUtilities.invokeLater(() -> new Main(params));
+    }
+
+    private static void checkUniqueInstance(StartupParams params) {
+        if (params.has(StartupParams.LaunchArg.NO_WARN)) return;
+
+        File path = new File("./");
+        File[] listFiles = path.listFiles(file -> file.getName().contains("pid"));
+        String currentPid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+
+        if (listFiles.length != 0) {
+            // Pid file exists
+            String filePid = listFiles[0].getName().split("_")[1];
+            try {
+                Runtime rt = Runtime.getRuntime();
+                Process pr = rt.exec("cmd /c tasklist /FI \"PID eq " + filePid + "\"");
+
+                InputStreamReader isReader = new InputStreamReader(pr.getInputStream());
+                BufferedReader bReader = new BufferedReader(isReader);
+                String strLine;
+                while ((strLine = bReader.readLine()) != null) {
+                    if (strLine.contains(filePid)) {
+                        break;
+                    }
+                }
+
+                if (strLine != null && strLine.contains(filePid)) {
+                    Popups.showMessageSync("Running from same folder detect", new JOptionPane(
+                            "You're currently running multiple bot from same folder" + "\n" +
+                            "This may can cause crash or unexpected problems.\n" +
+                            "Please create new folder for another instance of bot.",
+                            JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION));
+                } else {
+                    listFiles[0].renameTo(new File("pid_" + currentPid));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            // Pid file not exit
+            File pidFile = new File("pid_" + currentPid);
+            try {
+                pidFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static void checkJavaVersion(StartupParams params) {
