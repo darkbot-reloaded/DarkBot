@@ -8,11 +8,13 @@ import eu.darkbot.util.Popups;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Bot {
 
@@ -36,54 +38,40 @@ public class Bot {
         LibSetup.setupLibraries();
         StartupParams params = new StartupParams(args);
 
-        checkUniqueInstance(params);
+        checkUniqueInstance(params); //java 9
         checkJavaVersion(params);
         SwingUtilities.invokeLater(() -> new Main(params));
     }
 
-    private static void checkUniqueInstance(StartupParams params) {
+    private static void checkUniqueInstance(StartupParams params) throws IOException {
         if (params.has(StartupParams.LaunchArg.NO_WARN)) return;
 
-        File path = new File("./");
-        File[] listFiles = path.listFiles(file -> file.getName().contains("pid"));
-        String currentPid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+        Path filePath = Paths.get("curr.pid");
+        long currentPid = ProcessHandle.current().pid();
 
-        if (listFiles.length != 0) {
-            // Pid file exists
-            String filePid = listFiles[0].getName().split("_")[1];
-            try {
-                Runtime rt = Runtime.getRuntime();
-                Process pr = rt.exec("cmd /c tasklist /FI \"PID eq " + filePid + "\"");
+        if (Files.exists(filePath)) {
+            List<String> fileContent = new ArrayList<>(Files.readAllLines(filePath));
 
-                InputStreamReader isReader = new InputStreamReader(pr.getInputStream());
-                BufferedReader bReader = new BufferedReader(isReader);
-                String strLine;
-                while ((strLine = bReader.readLine()) != null) {
-                    if (strLine.contains(filePid)) {
+            if (fileContent.isEmpty()) {
+                Files.writeString(filePath, "\n" + currentPid, StandardOpenOption.APPEND);
+            } else {
+                for (int i = 0; i < fileContent.size(); i++) {
+                    if (ProcessHandle.of(Long.parseLong(fileContent.get(i))).isPresent()) {
+                        Files.writeString(filePath, "\n" + currentPid, StandardOpenOption.APPEND);
+                        Popups.showMessageSync("Multiple bot from same folder", new JOptionPane(
+                                "You're currently running multiple bot from same folder" + "\n" +
+                                "This may can cause crash or unexpected problems.\n" +
+                                "Please create new folder for another instance of bot.",
+                                JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION));
                         break;
+                    } else {
+                        if (i == fileContent.size() - 1)
+                            Files.writeString(filePath, String.valueOf(currentPid), StandardOpenOption.TRUNCATE_EXISTING);
                     }
                 }
-
-                if (strLine != null && strLine.contains(filePid)) {
-                    Popups.showMessageSync("Running from same folder detect", new JOptionPane(
-                            "You're currently running multiple bot from same folder" + "\n" +
-                            "This may can cause crash or unexpected problems.\n" +
-                            "Please create new folder for another instance of bot.",
-                            JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION));
-                } else {
-                    listFiles[0].renameTo(new File("pid_" + currentPid));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         } else {
-            // Pid file not exit
-            File pidFile = new File("pid_" + currentPid);
-            try {
-                pidFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Files.writeString(filePath, String.valueOf(currentPid), StandardOpenOption.CREATE);
         }
     }
 
