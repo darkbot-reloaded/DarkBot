@@ -50,7 +50,7 @@ public class Bot {
         long currentPid = ProcessHandle.current().pid();
 
         if (Files.exists(filePath)) {
-            List<String> fileContent = new ArrayList<>(Files.readAllLines(filePath));
+            List<String> fileContent = Files.readAllLines(filePath, StandardCharsets.UTF_8);
 
             if (!fileContent.isEmpty()) {
                 for (int i = 0; i < fileContent.size(); i++) {
