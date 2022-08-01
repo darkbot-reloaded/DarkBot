@@ -9,11 +9,11 @@ import eu.darkbot.util.Popups;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Bot {
@@ -50,23 +50,26 @@ public class Bot {
         long currentPid = ProcessHandle.current().pid();
 
         if (Files.exists(filePath)) {
-            List<String> fileContent = new ArrayList<>(Files.readAllLines(filePath));
+            List<String> fileContent = Files.readAllLines(filePath, StandardCharsets.UTF_8);
 
-            if (fileContent.isEmpty()) {
-                Files.writeString(filePath, "\n" + currentPid, StandardOpenOption.APPEND);
-            } else {
+            if (!fileContent.isEmpty()) {
                 for (int i = 0; i < fileContent.size(); i++) {
-                    if (ProcessHandle.of(Long.parseLong(fileContent.get(i))).isPresent()) {
-                        Files.writeString(filePath, "\n" + currentPid, StandardOpenOption.APPEND);
-                        Popups.showMessageSync("Multiple bot from same folder", new JOptionPane(
-                                "You're currently running multiple bot from same folder" + "\n" +
-                                "This may can cause crash or unexpected problems.\n" +
-                                "Please create new folder for another instance of bot.",
-                                JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION));
-                        break;
-                    } else {
-                        if (i == fileContent.size() - 1)
-                            Files.writeString(filePath, String.valueOf(currentPid), StandardOpenOption.TRUNCATE_EXISTING);
+                    try {
+                        if (ProcessHandle.of(Long.parseLong(fileContent.get(i))).isPresent()) {
+                            Files.writeString(filePath, "\n" + currentPid, StandardOpenOption.APPEND);
+                            Popups.showMessageSync("Multiple bots on the same folder", new JOptionPane(
+                                    "You're currently running multiple bot instances from the same folder.\n" +
+                                    "This can cause crash, unexpected problems, and some broken functionality.\n" +
+                                    "Please create a separate folder to run multiple instances.",
+                                    JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION));
+                            break;
+                        } else {
+                            if (i == fileContent.size() - 1)
+                                Files.writeString(filePath, String.valueOf(currentPid), StandardOpenOption.TRUNCATE_EXISTING);
+                        }
+                    } catch (java.lang.NumberFormatException e) {
+                        e.printStackTrace();
+                        Files.writeString(filePath, String.valueOf(currentPid), StandardOpenOption.TRUNCATE_EXISTING);
                     }
                 }
             }
