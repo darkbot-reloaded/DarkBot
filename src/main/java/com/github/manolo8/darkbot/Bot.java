@@ -52,9 +52,7 @@ public class Bot {
         if (Files.exists(filePath)) {
             List<String> fileContent = new ArrayList<>(Files.readAllLines(filePath));
 
-            if (fileContent.isEmpty()) {
-                Files.writeString(filePath, "\n" + currentPid, StandardOpenOption.APPEND);
-            } else {
+            if (!fileContent.isEmpty()) {
                 for (int i = 0; i < fileContent.size(); i++) {
                     if (ProcessHandle.of(Long.parseLong(fileContent.get(i))).isPresent()) {
                         Files.writeString(filePath, "\n" + currentPid, StandardOpenOption.APPEND);
