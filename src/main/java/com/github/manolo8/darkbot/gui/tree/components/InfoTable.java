@@ -8,11 +8,11 @@ import com.github.manolo8.darkbot.gui.tree.utils.TableSearchField;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.gui.utils.ToolTipHeader;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.table.TableCharEditor;
 import com.github.manolo8.darkbot.gui.utils.table.TableCharRenderer;
 import com.github.manolo8.darkbot.gui.utils.table.TableDoubleEditor;
-import com.github.manolo8.darkbot.gui.utils.ToolTipHeader;
-import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.table.TableDoubleRenderer;
 import net.miginfocom.swing.MigLayout;
 
@@ -132,7 +132,7 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
             String name = JOptionPane.showInputDialog(InfoTable.this.getComponent(), "Name (must be unique):", "New element", JOptionPane.QUESTION_MESSAGE);
             if (name == null) return;
             if (data.containsKey(name)) {
-                Popups.showMessageAsync("Error", "Name already in use", JOptionPane.ERROR_MESSAGE);
+                Popups.of("Error", "Name already in use", JOptionPane.ERROR_MESSAGE).showAsync();
                 return;
             }
             data.put(name, supplier.get());

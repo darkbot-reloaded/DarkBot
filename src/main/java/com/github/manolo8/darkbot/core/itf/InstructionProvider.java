@@ -32,8 +32,9 @@ public interface InstructionProvider extends eu.darkbot.api.extensions.Instructi
         Object display = instructionsComponent();
         if (display == null) display = instructions();
         if (display == null) return; // If both text & component are null, do nothing
-        Popups.showMessageAsync(I18n.get("module.instructions.title") + " - " + featureName,
-                display, JOptionPane.INFORMATION_MESSAGE);
+
+        Popups.of(I18n.get("module.instructions.title") + " - " + featureName, display, JOptionPane.INFORMATION_MESSAGE)
+                .showAsync();
     }
 
     /**

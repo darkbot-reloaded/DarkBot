@@ -11,13 +11,14 @@ public class ApiErrors {
     public static void displayException(BrowserApi api, Throwable error) {
         String message = getMessage(api);
         message = message == null ? "" : message + "<br><br>";
-        Popups.showMessageAsync(
-                "API failed to load",
-                "<html>" + message +
-                        "The API you had selected is not able to load.<br>" +
-                        "The bot will start on no-operation API, change it in the settings and restart.<br><br>" +
-                        "<strong>Exception:</strong><br>" + error.getLocalizedMessage(),
-                JOptionPane.ERROR_MESSAGE);
+        Popups.of(
+                        "API failed to load",
+                        "<html>" + message +
+                                "The API you had selected is not able to load.<br>" +
+                                "The bot will start on no-operation API, change it in the settings and restart.<br><br>" +
+                                "<strong>Exception:</strong><br>" + error.getLocalizedMessage(),
+                        JOptionPane.ERROR_MESSAGE)
+                .showAsync();
     }
 
     private static String getMessage(BrowserApi api) {

@@ -32,13 +32,13 @@ public class LegacyFlashPatcher {
 
         if (needFixing.isEmpty()) return;
 
-        Popups.showMessageSync("Flash installer & patcher",
-                new JOptionPane("Flash is nowadays uninstalled by default in windows updates.\n" +
-                        "Darkbot will need a one-time admin permission to install flash and make it work.\n" +
-                        "Accept on the next pop-up to run as admin to be able to continue using DarkBot.\n" +
-                        "After the script runs, refresh the game or restart the bot to make it work.\n",
-                        JOptionPane.INFORMATION_MESSAGE));
-
+        Popups.of("Flash installer & patcher",
+                        "Flash is nowadays uninstalled by default in windows updates.\n" +
+                                "Darkbot will need a one-time admin permission to install flash and make it work.\n" +
+                                "Accept on the next pop-up to run as admin to be able to continue using DarkBot.\n" +
+                                "After the script runs, refresh the game or restart the bot to make it work.\n",
+                        JOptionPane.INFORMATION_MESSAGE)
+                .showSync();
 
         List<String> script = new ArrayList<>();
         script.add("@echo off");

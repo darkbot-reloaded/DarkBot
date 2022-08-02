@@ -166,7 +166,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         this.pluginUpdater.scheduleUpdateChecker();
 
         if (configManager.getConfigFailed())
-            Popups.showMessageAsync("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE);
+            Popups.of("Error", I18n.get("bot.issue.config_load_failed"), JOptionPane.ERROR_MESSAGE).showAsync();
 
         API.createWindow();
         if (params.getAutoStart()) setRunning(true);
@@ -373,7 +373,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
             Module module = featureRegistry.getFeature(moduleId = config.GENERAL.CURRENT_MODULE, Module.class)
                 .orElseGet(() -> {
                     String name = moduleId.substring(moduleId.lastIndexOf(".") + 1);
-                    Popups.showMessageAsync("Error", I18n.get("bot.issue.module_load_failed", name), JOptionPane.ERROR_MESSAGE);
+                    Popups.of("Error", I18n.get("bot.issue.module_load_failed", name), JOptionPane.ERROR_MESSAGE).showAsync();
                     return new DummyModule();
                 });
             setModule(module, true);

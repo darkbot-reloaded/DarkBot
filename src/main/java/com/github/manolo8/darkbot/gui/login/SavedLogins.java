@@ -103,12 +103,13 @@ public class SavedLogins extends JPanel implements LoginScreen {
 
         JPasswordField pass = new JPasswordField(10);
 
-        JOptionPane pane = new JOptionPane(new Object[]{I18n.get("gui.login.saved.master_pwd.title"), pass},
-                JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-        Popups.showMessageSync(I18n.get("gui.login.saved.master_pwd.prompt"), pane);
-        Object result = pane.getValue();
+        int result = Popups.of(I18n.get("gui.login.saved.master_pwd.title"),
+                        new Object[]{I18n.get("gui.login.saved.master_pwd.prompt"), pass})
+                .optionType(JOptionPane.OK_CANCEL_OPTION)
+                .showOptionSync();
 
-        if (result instanceof Integer && (Integer) result == JOptionPane.YES_OPTION) return pass.getPassword();
+
+        if (result == JOptionPane.YES_OPTION) return pass.getPassword();
         return null;
     }
 

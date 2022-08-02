@@ -36,8 +36,8 @@ public class LoginForm extends JPanel {
         add(loginBtn, "gapright 8px");
     }
 
-    public void setDialog(JDialog dialog) {
-        dialog.getRootPane().setDefaultButton(loginBtn);
+    public JButton getLoginBtn() {
+        return loginBtn;
     }
 
     public LoginData getResult() {
