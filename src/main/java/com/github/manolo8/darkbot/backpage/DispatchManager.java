@@ -9,7 +9,10 @@ import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.intellij.lang.annotations.Language;
+
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +20,6 @@ import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.intellij.lang.annotations.Language;
 
 public class DispatchManager {
     private final Main main;
@@ -122,20 +124,20 @@ public class DispatchManager {
         boolean failed = response.contains("ERROR");
         if (!failed) {
             this.lastCollected.clear();
-            JsonObject jsonObj = g.fromJson (response, JsonObject.class); //Converts the json string to JsonElement without POJO
-            if(jsonObj.has("rewardsLog")){
-                for (JsonElement item : jsonObj.get("rewardsLog").getAsJsonArray()) {
-                    if(item.getAsJsonObject().has("lootId")){
-                        String key = item.getAsJsonObject().get("lootId").getAsString();
-                        this.collected.putIfAbsent(key, 0);
-                        this.collected.put(key, this.collected.get(key) + item.getAsJsonObject().get("amount").getAsInt());
+            JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
+            Iterable<JsonElement> rewardsLog = jsonObj.getAsJsonArray("rewardsLog");
+            if (rewardsLog == null) rewardsLog = Collections.emptyList();
 
-                        this.lastCollected.putIfAbsent(key, 0);
-                        this.lastCollected.put(key, this.collected.get(key) + item.getAsJsonObject().get("amount").getAsInt());
-                    }
-                }
+            for (JsonElement item : rewardsLog) {
+                JsonObject obj = item.getAsJsonObject();
+                if (!obj.has("lootId")) continue;
+
+                String key = obj.getAsJsonPrimitive("lootId").getAsString();
+                int amount = obj.getAsJsonPrimitive("amount").getAsInt();
+
+                this.collected.compute(key, (k, v) -> (v == null ? 0 : v) + amount);
+                this.lastCollected.compute(key, (k, v) -> (v == null ? 0 : v) + amount);
             }
-
         }
         System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
         update(0);
