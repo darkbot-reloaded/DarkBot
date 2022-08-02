@@ -49,8 +49,8 @@ public class PlayerManager extends JPanel {
             try {
                 editor.main.config.UNRESOLVED.add(new UnresolvedPlayer(Integer.parseInt(id.trim())));
             } catch (NumberFormatException ex) {
-                Popups.showMessageAsync(I18n.get("players.add_player.invalid_id"),
-                        I18n.get("players.add_player.invalid_id.no_number", id), JOptionPane.ERROR_MESSAGE);
+                Popups.of(I18n.get("players.add_player.invalid_id"),
+                        I18n.get("players.add_player.invalid_id.no_number", id), JOptionPane.ERROR_MESSAGE).showAsync();
             }
         }
 
@@ -63,8 +63,8 @@ public class PlayerManager extends JPanel {
 
         private void addSelectedPlayer() {
             if (editor.getPlayerInfoList().isSelectionEmpty()) {
-                Popups.showMessageAsync(I18n.get("players.add_player.selected.invalid_selection"),
-                        I18n.get("players.add_player.selected.invalid_selection.no_selected"), JOptionPane.ERROR_MESSAGE);
+                Popups.of(I18n.get("players.add_player.selected.invalid_selection"),
+                        I18n.get("players.add_player.selected.invalid_selection.no_selected"), JOptionPane.ERROR_MESSAGE).showAsync();
                 return;
             }
 

@@ -159,17 +159,18 @@ public class GameAPIImpl<
         if (hasCapability(GameAPI.Capability.ATTACH)) {
             PidSelector pidSelector = new PidSelector(window.getProcesses());
 
-            int result = JOptionPane.showOptionDialog(HeroManager.instance.main.getGui(), pidSelector,
-                    "Select flash process", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
-                    null, null, null);
+            int result = Popups.of("Select flash process", pidSelector, JOptionPane.QUESTION_MESSAGE)
+                    .optionType(JOptionPane.OK_CANCEL_OPTION)
+                    .parent(HeroManager.instance.main.getGui())
+                    .showOptionSync();
 
             if (result != JOptionPane.OK_OPTION) return;
 
             try {
                 this.pid = pidSelector.getPid();
             } catch (NumberFormatException e) {
-                Popups.showMessageAsync("Error, invalid PID",
-                        "Invalid PID, expected a number", JOptionPane.ERROR_MESSAGE);
+                Popups.of("Error, invalid PID",
+                        "Invalid PID, expected a number", JOptionPane.ERROR_MESSAGE).showAsync();
             }
 
             window.openProcess(this.pid);

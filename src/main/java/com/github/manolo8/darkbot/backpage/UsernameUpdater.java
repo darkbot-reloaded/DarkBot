@@ -16,7 +16,6 @@ import eu.darkbot.api.extensions.Task;
 import javax.swing.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,15 +63,15 @@ public class UsernameUpdater implements Task {
 
             int id = response.getId();
             if (!byId && (Objects.equals(response.url, "false") || id == -1)) {
-                Popups.showMessageAsync(I18n.get("gui.players.not_found.title"),
-                        I18n.get("gui.players.not_found.by_name", user.username), JOptionPane.WARNING_MESSAGE);
+                Popups.of(I18n.get("gui.players.not_found.title"),
+                        I18n.get("gui.players.not_found.by_name", user.username), JOptionPane.WARNING_MESSAGE).showAsync();
                 return; // Don't re-queue
             }
 
             if (byId && (response.userName == null || response.userName.isEmpty())) {
                 if (user.username != null) return; // Probably just updating the player, ignore
-                Popups.showMessageAsync(I18n.get("gui.players.not_found.title"),
-                        I18n.get("gui.players.not_found.by_id", user.userId), JOptionPane.WARNING_MESSAGE);
+                Popups.of(I18n.get("gui.players.not_found.title"),
+                        I18n.get("gui.players.not_found.by_id", user.userId), JOptionPane.WARNING_MESSAGE).showAsync();
                 return; // Don't re-queue
             }
 

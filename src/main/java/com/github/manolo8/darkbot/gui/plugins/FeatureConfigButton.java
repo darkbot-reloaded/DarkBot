@@ -31,10 +31,11 @@ public class FeatureConfigButton extends MainButton {
         JComponent instructions = getInstructions();
         if (instructions != null) paneMessage = new Object[]{instructions, paneMessage};
 
-        JOptionPane options = new JOptionPane(paneMessage,
-                JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
-        options.setBorder(BorderFactory.createEmptyBorder(0, 0, -4, 0));
-        Popups.showMessageSync(this, feature.getName(), options, null);
+        Popups.of(feature.getName(), paneMessage)
+                .options(new Object[]{})
+                .border(BorderFactory.createEmptyBorder(0, 0, -4, 0))
+                .parent(this)
+                .showSync();
     }
 
     private JComponent getInstructions() {

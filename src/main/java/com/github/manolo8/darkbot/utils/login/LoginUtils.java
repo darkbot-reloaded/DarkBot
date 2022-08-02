@@ -3,7 +3,10 @@ package com.github.manolo8.darkbot.utils.login;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.utils.*;
+import com.github.manolo8.darkbot.utils.CaptchaAPI;
+import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.IOUtils;
+import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 
@@ -44,10 +47,11 @@ public class LoginUtils {
 
         LoginForm panel = new LoginForm();
 
-        JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
-        pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
-
-        Popups.showMessageSync("Login", pane, panel::setDialog);
+        Popups.of("Login", panel)
+                .options(new Object[]{})
+                .border(BorderFactory.createEmptyBorder(0, 0, 5, 0))
+                .defaultButton(panel.getLoginBtn())
+                .showSync();
 
         LoginData loginData = panel.getResult();
         if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {

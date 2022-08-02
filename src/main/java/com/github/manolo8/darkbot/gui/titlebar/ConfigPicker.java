@@ -73,10 +73,10 @@ public class ConfigPicker extends JComboBox<String> {
         if (main.configManager.deleteConfig(config)) {
             model.removeElementAt(idx);
         } else {
-            Popups.showMessageAsync(
+            Popups.of(
                     "Error deleting config",
                     "Error deleting the config, check the logs for more info.",
-                    JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.ERROR_MESSAGE).showAsync();
         }
         showPopup();
     }
@@ -113,10 +113,10 @@ public class ConfigPicker extends JComboBox<String> {
 
             main.setConfig(Paths.get(name.getText()).getFileName().toString());
         } else {
-            Popups.showMessageAsync(
+            Popups.of(
                     "Error creating config",
                     "Error creating the config, check the logs for more info.",
-                    JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.ERROR_MESSAGE).showAsync();
         }
     }
 

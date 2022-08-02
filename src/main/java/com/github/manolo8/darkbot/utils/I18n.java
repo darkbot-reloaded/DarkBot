@@ -72,10 +72,11 @@ public class I18n {
         @Override
         public void accept(Locale loc) {
             if (I18n.setLocale(loc)) {
-                Popups.showMessageAsync(
-                        I18n.get("language.changed.title"),
-                        I18n.get("language.changed.content", loc.getDisplayName(loc),
-                                I18n.get("translation.credit")), JOptionPane.INFORMATION_MESSAGE);
+                Popups.of(
+                                I18n.get("language.changed.title"),
+                                I18n.get("language.changed.content", loc.getDisplayName(loc),
+                                        I18n.get("translation.credit")), JOptionPane.INFORMATION_MESSAGE)
+                        .showAsync();
             }
         }
     }

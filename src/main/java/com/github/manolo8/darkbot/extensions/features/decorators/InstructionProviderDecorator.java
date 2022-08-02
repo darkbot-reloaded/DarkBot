@@ -34,8 +34,8 @@ public class InstructionProviderDecorator extends FeatureDecorator<InstructionPr
             Object display = ip.instructionsComponent();
             if (display == null) display = ip.instructions();
             if (display == null) return; // If both text & component are null, do nothing
-            Popups.showMessageAsync(I18n.get("module.instructions.title") + " - " + name,
-                    display, JOptionPane.INFORMATION_MESSAGE);
+            Popups.of(I18n.get("module.instructions.title") + " - " + name, display, JOptionPane.INFORMATION_MESSAGE)
+                    .showAsync();
         }
     }
 
