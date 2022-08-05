@@ -8,6 +8,8 @@ import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
@@ -15,7 +17,15 @@ import java.util.Locale;
 @ValueData(name = "number", description = "Creates a number constant", example = "number(1.5)")
 public class NumberConstant implements Value<Number>, Parser {
 
-    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.ROOT);
+    private static final NumberFormat NUMBER_FORMAT;
+
+    static {
+        DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(Locale.ROOT);
+        symbols.setGroupingSeparator('_');
+
+        NUMBER_FORMAT = new DecimalFormat("###,###.##", symbols);
+    }
+
     public Number number;
 
     @Override
