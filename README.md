@@ -1,6 +1,6 @@
 # DarkBOT
 ## Changes 
-This version of darkbot has a built-in udp client that will send log on port 8015
+This version of darkbot has a built-in udp server that will send log on port 8015
 This also support multi-instance (It will add Process Id to make difference between instance)
 
 ## How to run:
