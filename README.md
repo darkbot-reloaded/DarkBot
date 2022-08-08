@@ -3,7 +3,7 @@
 This version of darkbot has a built-in udp client that will send log on port 8015
 This also support multi-instance (It will add Process Id to make difference between instance)
 
-How to run:
+## How to run:
 - Clone the repository
 - Get the latest full-release on darkbot's discord https://discord.gg/uXHnZJ9
 - Unzip the release in a known folder outside of the project
