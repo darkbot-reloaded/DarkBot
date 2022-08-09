@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.manager.GroupManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -61,7 +62,7 @@ public class PortalJumper {
             hero.drive.clickCenter(true, target.locationInfo.now);
             nextMoveClick = System.currentTimeMillis() + 10000;
         } else if (tryingToJumpSince != 0 && System.currentTimeMillis() > tryingToJumpSince + 120000) {
-            System.out.println("Triggering refresh: jumping portal took too long");
+            BetterLogUtils.getInstance().PrintLn("Triggering refresh: jumping portal took too long");
             tryingToJumpSince = 0;
             API.handleRefresh();
         }

@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.SystemUtils;
 import com.github.manolo8.darkbot.utils.debug.SWFUtils;
 import eu.darkbot.api.PluginAPI;
@@ -126,11 +127,11 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 else SystemUtils.openUrl(url);
             }));
             list.add(create(i18n.get(p + "reload"), e -> main.addTask(() -> {
-                System.out.println("Triggering refresh: user requested");
+                BetterLogUtils.getInstance().PrintLn("Triggering refresh: user requested");
                 try {
                     Main.API.handleRefresh();
                 } catch (Exception ex) {
-                    System.out.println("Exception handling user requested refresh:");
+                    BetterLogUtils.getInstance().PrintLn("Exception handling user requested refresh:");
                     ex.printStackTrace();
                 }
             })));

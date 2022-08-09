@@ -234,7 +234,7 @@ public class Http {
      *             String result = Http.create("https://example.com")
      *                     .consumeInputStream(IOUtils::read);
      *         } catch (IOException e) {
-     *             System.out.println("Something went wrong");
+     *             BetterLogUtils.getInstance().PrintLn("Something went wrong");
      *         }
      * }</pre>
      *

@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.config.utils.PlayerTagTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.utils.ApiErrors;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.google.gson.Gson;
@@ -186,7 +187,7 @@ public class ConfigManager implements API.Singleton {
             if (api == null) throw new IllegalArgumentException("No API has been set!");
             return pluginApi.requireInstance(api.clazz);
         } catch (Throwable e) {
-            System.out.println("Error enabling " + api + ", using no-op api");
+            BetterLogUtils.getInstance().PrintLn("Error enabling " + api + ", using no-op api");
             e.printStackTrace();
             ApiErrors.displayException(api, e);
             return pluginApi.requireInstance(BrowserApi.NO_OP_API.clazz);

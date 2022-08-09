@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +22,7 @@ public class LogUtils {
     public static final Path LOG_FOLDER = Paths.get("logs");
     public static final String START_TIME = LocalDateTime.now().format(FILENAME_DATE);
 
+
     public static void setOutputToFile() {
         if (!Files.exists(LOG_FOLDER)) createFolder();
         else removeOld();
@@ -29,7 +32,7 @@ public class LogUtils {
             System.setOut(output);
             System.setErr(output);
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            System.out.println("Failed to redirect logs, file not found:");
+            BetterLogUtils.getInstance().PrintLn("Failed to redirect logs, file not found:");
             e.printStackTrace();
         }
     }
@@ -53,7 +56,7 @@ public class LogUtils {
         try {
             Files.createDirectory(LOG_FOLDER);
         } catch (IOException e) {
-            System.out.println("Failed to create log folder");
+            BetterLogUtils.getInstance().PrintLn("Failed to create log folder");
             e.printStackTrace();
         }
     }
@@ -65,7 +68,7 @@ public class LogUtils {
                     .filter(p -> isBefore(p, keep))
                     .forEach(LogUtils::tryDelete);
         } catch (IOException e) {
-            System.out.println("Failed to remove old logs");
+            BetterLogUtils.getInstance().PrintLn("Failed to remove old logs");
             e.printStackTrace();
         }
     }
@@ -74,7 +77,7 @@ public class LogUtils {
         try {
             return Files.getLastModifiedTime(path).toInstant().isBefore(date);
         } catch (IOException e) {
-            System.out.println("Failed to determine log date, won't remove");
+            BetterLogUtils.getInstance().PrintLn("Failed to determine log date, won't remove");
             e.printStackTrace();
             return false;
         }
@@ -84,7 +87,7 @@ public class LogUtils {
         try {
             Files.delete(path);
         } catch (IOException e) {
-            System.out.println("Failed to delete log");
+            BetterLogUtils.getInstance().PrintLn("Failed to delete log");
             e.printStackTrace();
         }
     }
@@ -93,9 +96,10 @@ public class LogUtils {
         public PrintStreamWithDate(String logfile) throws FileNotFoundException, UnsupportedEncodingException {
             super(logfile, "UTF-8");
         }
-
+    
         @Override
         public void println(String string) {
+            BetterLogUtils.getInstance().PrintLn("["+ ProcessHandle.current().pid()+"]"+"[" + LocalDateTime.now().format(LOG_DATE) + "] " + string);
             super.println("[" + LocalDateTime.now().format(LOG_DATE) + "] " + string);
         }
     }

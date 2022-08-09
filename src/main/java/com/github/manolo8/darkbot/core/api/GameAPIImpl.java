@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.utils.PidSelector;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
@@ -89,20 +90,20 @@ public class GameAPIImpl<
 
     protected void reload() {
         if (loginData == null || loginData.getUsername() == null) {
-            System.out.println("Re-logging in is unsupported for this browser/API, or you logged in with SID");
+            BetterLogUtils.getInstance().PrintLn("Re-logging in is unsupported for this browser/API, or you logged in with SID");
             return;
         }
 
         if (lastFailedLogin + 30_000 > System.currentTimeMillis()) {
-            System.out.println("Last failed login was <30s ago, ignoring re-login attempt.");
+            BetterLogUtils.getInstance().PrintLn("Last failed login was <30s ago, ignoring re-login attempt.");
             return;
         }
 
         try {
-            System.out.println("Reloading, updating flash vars/preloader");
+            BetterLogUtils.getInstance().PrintLn("Reloading, updating flash vars/preloader");
             LoginUtils.findPreloader(loginData);
         } catch (IOException e) {
-            System.out.println("Failed to find preloader, aborting re-login");
+            BetterLogUtils.getInstance().PrintLn("Failed to find preloader, aborting re-login");
             e.printStackTrace();
             lastFailedLogin = System.currentTimeMillis();
         } catch (LoginUtils.WrongCredentialsException e) {
@@ -113,9 +114,9 @@ public class GameAPIImpl<
 
     protected void relogin() {
         try {
-            System.out.println("Re-logging in: Logging in (1/2)");
+            BetterLogUtils.getInstance().PrintLn("Re-logging in: Logging in (1/2)");
             LoginUtils.usernameLogin(loginData);
-            System.out.println("Re-logging in: Loading spacemap (2/2)");
+            BetterLogUtils.getInstance().PrintLn("Re-logging in: Loading spacemap (2/2)");
             LoginUtils.findPreloader(loginData);
         } catch (IOException e) {
             System.err.println("IOException trying to perform re-login, servers may be down");

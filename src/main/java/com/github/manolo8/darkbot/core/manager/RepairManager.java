@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.core.objects.swf.IntArray;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.extensions.features.handlers.ReviveSelectorHandler;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Feature;
@@ -103,7 +104,7 @@ public class RepairManager implements Manager, RepairAPI {
             String killerMessage = killerName == null || killerName.isEmpty()
                     ? "You were destroyed by a radiation/mine/unknown"
                     : "You have been destroyed by: " + killerName;
-            System.out.println(killerMessage);
+            BetterLogUtils.getInstance().PrintLn(killerMessage);
 
             if (ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.LOG_DEATHS)
                 writeToFile("deaths_" + LogUtils.START_TIME, formatLogMessage(killerMessage));

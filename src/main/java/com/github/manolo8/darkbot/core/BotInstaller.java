@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core;
 
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import eu.darkbot.api.API;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -121,6 +122,6 @@ public class BotInstaller implements API.Singleton {
 
         API.handleRefresh();
         timer = System.currentTimeMillis();
-        System.out.println("Triggering refresh: bot installer was invalid for too long");
+        BetterLogUtils.getInstance().PrintLn("Triggering refresh: bot installer was invalid for too long");
     }
 }

@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.Base64Utils;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
@@ -117,7 +118,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
                 try {
                     boolean checked = hangarManager.checkDrones();
 
-                    System.out.println("Checked/repaired drones, all successful: " + checked);
+                    BetterLogUtils.getInstance().PrintLn("Checked/repaired drones, all successful: " + checked);
 
                     checkDrones = !checked ? System.currentTimeMillis() + 30_000 : Long.MAX_VALUE;
                 } catch (Exception e) {

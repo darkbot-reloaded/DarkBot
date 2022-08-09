@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.objects.facades;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.managers.EventBrokerAPI;
@@ -38,7 +39,7 @@ public class LogMediator extends Updatable implements GameLogAPI, Listener {
 
     @EventHandler
     public void onLogMessage(LogMessageEvent e) {
-        System.out.println(e.getMessage());
+        BetterLogUtils.getInstance().PrintLn(e.getMessage());
         logs.send(e.getMessage());
     }
 

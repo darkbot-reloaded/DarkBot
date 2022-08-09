@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,7 +73,7 @@ public class TrayButton extends TitleBarButton<JFrame> {
         title.setEnabled(false);
         title.setDisabledIcon(UIUtils.getIcon("icon"));
         quit.addActionListener(l -> {
-            System.out.println("Tray icon exit button pressed, exiting");
+            BetterLogUtils.getInstance().PrintLn("Tray icon exit button pressed, exiting");
             System.exit(0);
         });
 

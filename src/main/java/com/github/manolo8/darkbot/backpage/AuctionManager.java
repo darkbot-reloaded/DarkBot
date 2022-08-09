@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.http.Method;
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -61,7 +62,7 @@ public class AuctionManager {
             return handleResponse("Bid on Item", auctionItem.getName(), response);
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Exception Bidding on Item: " + e);
+            BetterLogUtils.getInstance().PrintLn("Exception Bidding on Item: " + e);
         }
         return false;
     }
@@ -71,7 +72,7 @@ public class AuctionManager {
         boolean valid = false;
         if (m.find()) {
             valid = !m.group(2).contains("error");
-            System.out.println("AuctionManager: " + type + " (" + id + ") " + (valid ? "succeeded" : "failed") + " : " + m.group(1));
+            BetterLogUtils.getInstance().PrintLn("AuctionManager: " + type + " (" + id + ") " + (valid ? "succeeded" : "failed") + " : " + m.group(1));
         }
         return valid;
     }

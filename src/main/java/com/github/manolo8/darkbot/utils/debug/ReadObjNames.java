@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.utils.debug;
 
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -27,7 +29,7 @@ public class ReadObjNames {
     public static void of(long address, int maxOffset) {
         updateReplacements();
         String result = API.readMemoryString(address, 0x10, 0x28, 0x90);
-        System.out.println("\n==========[" + replacements.getOrDefault(result, result) + "]==========");
+        BetterLogUtils.getInstance().PrintLn("\n==========[" + replacements.getOrDefault(result, result) + "]==========");
 
         for (int offset = 0; offset < maxOffset; offset++) {
             long addr = API.readMemoryLong(address + offset);
@@ -53,7 +55,7 @@ public class ReadObjNames {
         String result = API.readMemoryStringFallback(address, null);
 
         if (result != null && !result.isEmpty())
-            System.out.println(formatString(replacements.getOrDefault(result, result), offset, isObject));
+            BetterLogUtils.getInstance().PrintLn(formatString(replacements.getOrDefault(result, result), offset, isObject));
     }
 
     private static String formatString(String s, int offset, boolean isObject) {
@@ -70,7 +72,7 @@ public class ReadObjNames {
                     .filter(s -> s.length == 2)
                     .collect(Collectors.toMap(s -> s[0], s -> s[1]));
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            BetterLogUtils.getInstance().PrintLn(e.getMessage());
         }
     }
 

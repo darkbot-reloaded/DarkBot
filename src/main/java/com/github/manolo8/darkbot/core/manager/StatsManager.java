@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.managers.StatsAPI;
 
@@ -121,10 +122,10 @@ public class StatsManager implements Manager, StatsAPI {
 
         if (honorDiff > -10_000) return;
 
-        System.out.println("Paused bot, lost " + honorDiff + " honor.");
+        BetterLogUtils.getInstance().PrintLn("Paused bot, lost " + honorDiff + " honor.");
         double friendlies = Math.log(Math.abs(honorDiff) / 100) / Math.log(2);
         boolean isExact = Math.abs(friendlies - Math.round(friendlies)) < 0.01;
-        System.out.println("Look like " + friendlies + " friendly kills, credible & pausing: " + isExact);
+        BetterLogUtils.getInstance().PrintLn("Look like " + friendlies + " friendly kills, credible & pausing: " + isExact);
 
         if (!main.config.MISCELLANEOUS.HONOR_LOST_EXACT || isExact)
             main.setModule(new DisconnectModule(null, I18n.get("module.disconnect.reason.honor")));

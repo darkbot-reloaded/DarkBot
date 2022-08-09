@@ -44,7 +44,7 @@ public class OSUtil {
                 if (os != null && Pattern.compile(os.pattern).matcher(osName).find())
                     return os;
 
-            System.out.println("Unknown OS! " + osName);
+            BetterLogUtils.getInstance().PrintLn("Unknown OS! " + osName);
             return UNKNOWN;
         }
 

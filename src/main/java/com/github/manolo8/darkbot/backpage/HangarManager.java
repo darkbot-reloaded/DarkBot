@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.backpage.hangar.Hangar;
 import com.github.manolo8.darkbot.backpage.hangar.HangarResponse;
 import com.github.manolo8.darkbot.core.itf.Tickable;
 import com.github.manolo8.darkbot.utils.Base64Utils;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
@@ -51,7 +52,7 @@ public class HangarManager implements Tickable {
                 lastHangarListUpdate = System.currentTimeMillis();
                 updateHangarListEvery = -1;
 
-                System.out.println("HangarList updated in: " + (System.currentTimeMillis() - timer) + "ms");
+                BetterLogUtils.getInstance().PrintLn("HangarList updated in: " + (System.currentTimeMillis() - timer) + "ms");
                 Time.sleep(500);
             }
 
@@ -62,7 +63,7 @@ public class HangarManager implements Tickable {
                 lastCurrentHangarUpdate = System.currentTimeMillis();
                 updateCurrentHangarEvery = -1;
 
-                System.out.println("CurrentHangar updated in: " + (System.currentTimeMillis() - timer) + "ms");
+                BetterLogUtils.getInstance().PrintLn("CurrentHangar updated in: " + (System.currentTimeMillis() - timer) + "ms");
             }
         } catch (Exception e) {
             e.printStackTrace();

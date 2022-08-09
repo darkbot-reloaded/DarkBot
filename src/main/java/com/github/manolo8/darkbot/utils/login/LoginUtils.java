@@ -3,10 +3,7 @@ package com.github.manolo8.darkbot.utils.login;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.utils.CaptchaAPI;
-import com.github.manolo8.darkbot.utils.I18n;
-import com.github.manolo8.darkbot.utils.IOUtils;
-import com.github.manolo8.darkbot.utils.StartupParams;
+import com.github.manolo8.darkbot.utils.*;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 
@@ -55,7 +52,7 @@ public class LoginUtils {
 
         LoginData loginData = panel.getResult();
         if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
-            System.out.println("Closed login panel, exited without logging in");
+            BetterLogUtils.getInstance().PrintLn("Closed login panel, exited without logging in");
             System.exit(0);
         }
         return loginData;
@@ -81,9 +78,9 @@ public class LoginUtils {
         loginData.setCredentials(username, password);
 
         try {
-            System.out.println("Auto logging in (1/2)");
+            BetterLogUtils.getInstance().PrintLn("Auto logging in (1/2)");
             usernameLogin(loginData);
-            System.out.println("Loading spacemap (2/2)");
+            BetterLogUtils.getInstance().PrintLn("Loading spacemap (2/2)");
             findPreloader(loginData);
         } catch (IOException e) {
             System.err.println("IOException trying to perform auto login, servers may be down");
@@ -138,7 +135,7 @@ public class LoginUtils {
             try {
                 extraPostParams = solver.solveCaptcha(url, frontPage);
             } catch (Throwable t) {
-                System.out.println("Captcha solver failed to resolve login captcha");
+                BetterLogUtils.getInstance().PrintLn("Captcha solver failed to resolve login captcha");
                 t.printStackTrace();
                 throw LoginException.translated("gui.login.error.captcha_fail", t);
             }

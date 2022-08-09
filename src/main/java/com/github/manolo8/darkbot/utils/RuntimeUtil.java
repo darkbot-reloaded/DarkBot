@@ -61,7 +61,7 @@ public class RuntimeUtil {
                     className.startsWith("javax.swing.") ||
                     className.startsWith("java.security.");
 
-            System.out.println(className + "#" + element.getMethodName() + " \t " + isUser);
+            BetterLogUtils.getInstance().PrintLn(className + "#" + element.getMethodName() + " \t " + isUser);
         }
         return isUser;
     }

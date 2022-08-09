@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.managers.GameScreenAPI;
@@ -160,7 +161,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         if (System.currentTimeMillis() - reconnectTime > 5000) {
             reconnectTime = System.currentTimeMillis();
             if (logout.visible) {
-                System.out.println("Triggering refresh: reconnect while logout is visible");
+                BetterLogUtils.getInstance().PrintLn("Triggering refresh: reconnect while logout is visible");
                 API.handleRefresh();
             } else {
                 gui.click(46, 180);
@@ -183,7 +184,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     private void checkInvalid() {
         if (System.currentTimeMillis() - validTime > 90_000 + (main.hero.map.id == -1 ? 180_000 : 0)) {
-            System.out.println("Triggering refresh: gui manger was invalid for too long. " +
+            BetterLogUtils.getInstance().PrintLn("Triggering refresh: gui manger was invalid for too long. " +
                     "(Make sure your hp fills up, equip an auto-repair CPU if you're missing one)");
             API.handleRefresh();
             validTime = System.currentTimeMillis();
@@ -202,7 +203,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         } else if (connecting.visible) {
 
             if (connecting.lastUpdatedOver(30000)) {
-                System.out.println("Triggering refresh: connection window stuck for too long");
+                BetterLogUtils.getInstance().PrintLn("Triggering refresh: connection window stuck for too long");
                 API.handleRefresh();
                 connecting.reset();
             }
@@ -244,7 +245,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         if (this.needRefresh && System.currentTimeMillis() - lastRepairAttempt > 5_000) {
             this.needRefresh = false;
             if (main.config.MISCELLANEOUS.REFRESH_AFTER_REVIVE) {
-                System.out.println("Triggering refresh: refreshing after death");
+                BetterLogUtils.getInstance().PrintLn("Triggering refresh: refreshing after death");
                 API.handleRefresh();
                 return false;
             }

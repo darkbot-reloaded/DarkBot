@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.api;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.manager.HookAdapter;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.DarkBoat;
 
@@ -41,7 +42,7 @@ public class DarkBoatHookAdapter extends GameAPIImpl<
     public void setMaxFps(int maxFps) {
         int version = window.getVersion();
         if (version >= 8) window.setMaxFps(maxFps);
-        else System.out.println("FPS limiting in darkboat is only available in version 8+, you are using version " + version);
+        else BetterLogUtils.getInstance().PrintLn("FPS limiting in darkboat is only available in version 8+, you are using version " + version);
     }
 
     @Override

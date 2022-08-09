@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.gui.components.ExitConfirmation;
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.Nullable;
@@ -93,7 +94,7 @@ public class MainGui extends JFrame {
     public void tryClose() {
         if (main.config.BOT_SETTINGS.BOT_GUI.CONFIRM_EXIT) exitConfirmation.setVisible(true);
         else {
-            System.out.println("Exit button pressed, exiting");
+            BetterLogUtils.getInstance().PrintLn("Exit button pressed, exiting");
             System.exit(0);
         }
     }

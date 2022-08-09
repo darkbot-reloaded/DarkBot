@@ -90,7 +90,7 @@ public class StartupParams implements API.Singleton {
         try (InputStreamReader reader = new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)) {
             p.load(reader);
         }
-        System.out.println("Loaded startup properties file");
+        BetterLogUtils.getInstance().PrintLn("Loaded startup properties file");
         return p;
     }
 

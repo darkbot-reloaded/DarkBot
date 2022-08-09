@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.utils.debug;
 
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -22,7 +24,7 @@ public class SWFUtils {
             }
             return;
         }
-        System.out.println("SWF not found, are you running the flash client?");
+        BetterLogUtils.getInstance().PrintLn("SWF not found, are you running the flash client?");
     }
 
 }

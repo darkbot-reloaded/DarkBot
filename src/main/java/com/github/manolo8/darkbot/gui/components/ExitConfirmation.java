@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.components;
 
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
@@ -34,7 +35,7 @@ public class ExitConfirmation extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Exit confirmation button pressed, exiting");
+            BetterLogUtils.getInstance().PrintLn("Exit confirmation button pressed, exiting");
             System.exit(0);
         }
     }

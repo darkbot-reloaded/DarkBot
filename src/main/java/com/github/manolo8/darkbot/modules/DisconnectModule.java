@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.modules.utils.SafetyFinder;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 
@@ -68,7 +69,7 @@ public class DisconnectModule extends TemporalModule {
         // Prevent bug where logout gets to 0 and doesn't log out, just force a reload
         if (System.currentTimeMillis() - logoutStart > 25_000) {
             logoutStart = System.currentTimeMillis() + 90_000;
-            System.out.println("Disconnect module, refreshing due to logout not finishing bug.");
+            BetterLogUtils.getInstance().PrintLn("Disconnect module, refreshing due to logout not finishing bug.");
             Main.API.handleRefresh();
         }
     }
@@ -86,7 +87,7 @@ public class DisconnectModule extends TemporalModule {
             }
         } else if (pauseUntil != null && System.currentTimeMillis() > pauseUntil - 10_000) {
             if (!refreshing) {
-                System.out.println("Disconnect module, refreshing after pause, getting back to work.");
+                BetterLogUtils.getInstance().PrintLn("Disconnect module, refreshing after pause, getting back to work.");
                 Main.API.handleRefresh();
                 refreshing = true;
             } else if (System.currentTimeMillis() > pauseUntil) {

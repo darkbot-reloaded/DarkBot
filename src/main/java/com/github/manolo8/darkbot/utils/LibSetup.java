@@ -38,7 +38,7 @@ public class LibSetup {
             libraries = Http.create(BASE_URL + "/libs.json")
                     .consumeInputStream(is -> Main.GSON.fromJson(IOUtils.read(is), LIB_LIST_TYPE));
         } catch (Exception e) {
-            System.out.println("Failed to download libraries file, this is safe to ignore if your libs are up-to-date");
+            BetterLogUtils.getInstance().PrintLn("Failed to download libraries file, this is safe to ignore if your libs are up-to-date");
             e.printStackTrace();
             return;
         }
@@ -61,13 +61,13 @@ public class LibSetup {
                 String sha = FileUtils.calcSHA256(libPath);
                 if (Objects.equals(sha, lib.sha256) || (lib.altSha256 != null && lib.altSha256.contains(sha))) return;
             } catch (IOException e) {
-                System.out.println("Exception checking library file SHA");
+                BetterLogUtils.getInstance().PrintLn("Exception checking library file SHA");
                 e.printStackTrace();
             }
         } else {
             FileUtils.ensureDirectoryExists(libPath.getParent());
         }
-        System.out.println("Downloading missing or outdated library file: " + lib.path);
+        BetterLogUtils.getInstance().PrintLn("Downloading missing or outdated library file: " + lib.path);
 
         try (InputStream is = new URL(lib.download).openConnection().getInputStream()) {
             Files.copy(is, libPath, StandardCopyOption.REPLACE_EXISTING);

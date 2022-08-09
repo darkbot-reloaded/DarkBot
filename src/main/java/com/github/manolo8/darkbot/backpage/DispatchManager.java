@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.backpage.dispatch.BiIntConsumer;
 import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -76,14 +77,14 @@ public class DispatchManager {
             return handleResponse("Hired dispatcher", retriever.getId(), response);
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Exception hiring dispatcher: " + e);
+            BetterLogUtils.getInstance().PrintLn("Exception hiring dispatcher: " + e);
         }
         return false;
     }
 
     public boolean collectInstant(InProgress progress) {
         try {
-            System.out.println("Collecting Instant: Slot " + progress.getSlotId());
+            BetterLogUtils.getInstance().PrintLn("Collecting Instant: Slot " + progress.getSlotId());
             if (data.getPrimeCoupons() <= 0)
                 return handleResponse("Cannot instant collect", progress.getId(),
                         "(ERROR) No Prime Coupon available for instant collection");
@@ -97,7 +98,7 @@ public class DispatchManager {
             return handleResponse("Collected retriever", progress.getId(), response);
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Exception collecting dispatcher: " + e);
+            BetterLogUtils.getInstance().PrintLn("Exception collecting dispatcher: " + e);
         }
         return false;
     }
@@ -106,7 +107,7 @@ public class DispatchManager {
     public boolean collect(InProgress progress) {
         if (progress.getCollectable().equals("0")) return false;
         try {
-            System.out.println("Collecting: Slot " + progress.getSlotId());
+            BetterLogUtils.getInstance().PrintLn("Collecting: Slot " + progress.getSlotId());
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "collectDispatch")
                     .setRawParam("slot", progress.getSlotId())
@@ -115,7 +116,7 @@ public class DispatchManager {
             return handleResponse("Collected retriever", progress.getId(), response);
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Exception collecting dispatcher: " + e);
+            BetterLogUtils.getInstance().PrintLn("Exception collecting dispatcher: " + e);
         }
         return false;
     }
@@ -139,7 +140,7 @@ public class DispatchManager {
                 this.lastCollected.compute(key, (k, v) -> (v == null ? 0 : v) + amount);
             }
         }
-        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
+        BetterLogUtils.getInstance().PrintLn(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
         update(0);
         return !failed;
     }

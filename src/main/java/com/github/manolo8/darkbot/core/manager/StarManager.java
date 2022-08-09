@@ -210,7 +210,7 @@ public class StarManager implements API.Singleton {
         //org.jgrapht.io.DOTExporter<Map, Portal> exporter = new org.jgrapht.io.DOTExporter<>(m -> (m.id < 0 ? "00" : "") + Math.abs(m.id), Map::toString, Portal::toString);
         //Writer writer = new StringWriter();
         //exporter.exportGraph(starSystem, writer);
-        //System.out.println(writer.toString());
+        //BetterLogUtils.getInstance().PrintLn(writer.toString());
     }
 
     public Portal getOrCreate(int id, int type, int x, int y) {

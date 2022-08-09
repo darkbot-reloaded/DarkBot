@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import eu.darkbot.api.API;
 import eu.darkbot.api.DarkHook;
 import eu.darkbot.api.PluginAPI;
@@ -52,7 +53,7 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
         try {
             return api.requireInstance(DarkHook.class);
         } catch (UnsatisfiedLinkError e) {
-            System.out.println("DarkHook could not be enabled as the dll is not present.");
+            BetterLogUtils.getInstance().PrintLn("DarkHook could not be enabled as the dll is not present.");
             e.printStackTrace();
             return null;
         }

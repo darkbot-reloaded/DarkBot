@@ -36,6 +36,7 @@ import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.modules.TemporalModule;
+import com.github.manolo8.darkbot.utils.BetterLogUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
@@ -292,10 +293,10 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
         lastRefresh = System.currentTimeMillis();
         if (config.MISCELLANEOUS.PAUSE_FOR > 0) {
-            System.out.println("Pausing (logging off): time arrived & module allows refresh");
+            BetterLogUtils.getInstance().PrintLn("Pausing (logging off): time arrived & module allows refresh");
             setModule(new DisconnectModule(config.MISCELLANEOUS.PAUSE_FOR * 60 * 1000L, I18n.get("module.disconnect.reason.break")));
         } else {
-            System.out.println("Triggering refresh: time arrived & module allows refresh");
+            BetterLogUtils.getInstance().PrintLn("Triggering refresh: time arrived & module allows refresh");
             API.handleRefresh();
         }
     }
