@@ -97,6 +97,31 @@ public class LogUtils {
         @Override
         public void println(String string) {
             super.println("[" + LocalDateTime.now().format(LOG_DATE) + "] " + string);
+            Path pathLogConfig = Paths.get("./logConfig.conf");
+            boolean allowUdpLogging = false;
+            if(Files.exists(pathLogConfig))
+            {
+                try {
+                    String content = Files.readAllLines(pathLogConfig).get(0);
+                    if (content.split("=")[1].equals("true"))
+                    {
+                        allowUdpLogging = true;
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else {
+                try {
+                    Files.write(pathLogConfig,"allow_udp_logs=false".getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (allowUdpLogging)
+            {
+                BetterLogUtils.getInstance().PrintLn(string);
+            }
         }
     }
 }
