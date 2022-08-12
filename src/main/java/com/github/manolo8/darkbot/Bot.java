@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -55,71 +56,58 @@ public class Bot {
         ProcessHandle.Info processInfo = processHandle.info();
         long currentStartTime = processInfo.startInstant().map(Instant::toEpochMilli).orElse(0L);
 
-        List<String> fileContent;
-        if (Files.exists(filePath)) {
-            fileContent = Files.readAllLines(filePath, StandardCharsets.UTF_8);
-            int count = 0;
-            for (String line : fileContent) {
-                try {
-                    long filePid = 0;
-                    long fileStartTime = 0;
-                    String[] fileSplit = line.split(" ");
-                    if (fileSplit.length == 2) {
-                        filePid = Long.parseLong(fileSplit[0]);
-                        fileStartTime = Long.parseLong(fileSplit[1]);
-                    }
-
-                    ProcessHandle externalProcessHandle = ProcessHandle.of(filePid).orElse(null);
-                    long externalStartTime = 0;
-                    if (externalProcessHandle != null) {
-                        ProcessHandle.Info ExternalProcessInfo = externalProcessHandle.info();
-                        externalStartTime = ExternalProcessInfo.startInstant().map(Instant::toEpochMilli).orElse(0L);
-                    }
-
-                    if (externalProcessHandle != null && externalStartTime == fileStartTime) {
-                        JButton proceed = new JButton("Proceed Anyways", UIUtils.getIcon("diagnostics"));
-                        JButton cancel = new JButton("Cancel");
-                        AtomicInteger result = new AtomicInteger(-1);
-
-                        proceed.addActionListener(a -> {
-                            SwingUtilities.getWindowAncestor(proceed).setVisible(false);
-                            result.set(0);
-                        });
-                        cancel.addActionListener(a -> {
-                            SwingUtilities.getWindowAncestor(cancel).setVisible(false);
-                            result.set(1);
-                        });
-
-                        Popups.of("Multiple bots on the same folder",
-                                        "You're currently running multiple bot instances from the same folder.\n" +
-                                                "This can cause crash, unexpected problems, and some broken functionality.\n" +
-                                                "Please create a separate folder to run multiple instances.",
-                                        JOptionPane.WARNING_MESSAGE)
-                                .options(new Object[]{proceed, cancel})
-                                .initialValue(cancel)
-                                .showOptionSync();
-
-                        if (result.get() == 1) {
-                            System.out.println("Reject multiple bot warning, closing bot");
-                            System.exit(0);
-                        } else {
-                            Files.writeString(filePath, "\n" + currentPid + " " + currentStartTime, StandardOpenOption.APPEND);
-                        }
-                        break;
-                    } else {
-                        if (count == fileContent.size() - 1)
-                            Files.writeString(filePath, currentPid + " " + currentStartTime, StandardOpenOption.TRUNCATE_EXISTING);
-                    }
-                } catch (java.lang.NumberFormatException e) {
-                    e.printStackTrace();
-                    Files.writeString(filePath, currentPid + " " + currentStartTime, StandardOpenOption.TRUNCATE_EXISTING);
+        List<String> fileContent = Files.exists(filePath) ? Files.readAllLines(filePath, StandardCharsets.UTF_8) : Collections.emptyList();
+        for (String line : fileContent) {
+            try {
+                long filePid = 0;
+                long fileStartTime = 0;
+                String[] fileSplit = line.split(" ");
+                if (fileSplit.length == 2) {
+                    filePid = Long.parseLong(fileSplit[0]);
+                    fileStartTime = Long.parseLong(fileSplit[1]);
                 }
-                count++;
-            }
 
-        } else {
-            Files.writeString(filePath, currentPid + " " + currentStartTime, StandardOpenOption.CREATE);
+                ProcessHandle externalProcessHandle = ProcessHandle.of(filePid).orElse(null);
+                long externalStartTime = 0;
+                if (externalProcessHandle != null) {
+                    ProcessHandle.Info ExternalProcessInfo = externalProcessHandle.info();
+                    externalStartTime = ExternalProcessInfo.startInstant().map(Instant::toEpochMilli).orElse(0L);
+                }
+
+                if (externalProcessHandle != null && externalStartTime == fileStartTime) {
+                    JButton proceed = new JButton("Proceed Anyways", UIUtils.getIcon("diagnostics"));
+                    JButton cancel = new JButton("Cancel");
+                    AtomicInteger result = new AtomicInteger(-1);
+
+                    proceed.addActionListener(a -> {
+                        SwingUtilities.getWindowAncestor(proceed).setVisible(false);
+                        result.set(0);
+                    });
+                    cancel.addActionListener(a -> {
+                        SwingUtilities.getWindowAncestor(cancel).setVisible(false);
+                        result.set(1);
+                    });
+
+                    Popups.of("Multiple bots on the same folder",
+                                    "You're currently running multiple bot instances from the same folder.\n" +
+                                    "This can cause crash, unexpected problems, and some broken functionality.\n" +
+                                    "Please create a separate folder to run multiple instances.",
+                                    JOptionPane.WARNING_MESSAGE)
+                            .options(new Object[]{proceed, cancel})
+                            .initialValue(cancel)
+                            .showOptionSync();
+
+                    if (result.get() == 1) {
+                        System.out.println("Reject multiple bot warning, closing bot");
+                        System.exit(0);
+                    }
+                    break;
+                }
+            } catch (java.lang.NumberFormatException e) {
+                e.printStackTrace();
+            }
         }
+        Files.writeString(filePath, currentPid + " " + currentStartTime, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     private static void checkJavaVersion(StartupParams params) {
