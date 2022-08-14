@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
@@ -75,8 +76,8 @@ public class Bot {
                 }
 
                 if (externalProcessHandle != null && externalStartTime == fileStartTime) {
-                    JButton proceed = new JButton("Proceed Anyways", UIUtils.getIcon("diagnostics"));
-                    JButton cancel = new JButton("Cancel");
+                    JButton proceed = new JButton(I18n.get("start.same_folder_warn.button.proceed"), UIUtils.getIcon("warning")); //TODO add warning icon
+                    JButton cancel = new JButton(I18n.get("start.same_folder_warn.button.cancel"));
                     AtomicInteger result = new AtomicInteger(-1);
 
                     proceed.addActionListener(a -> {
@@ -88,17 +89,15 @@ public class Bot {
                         result.set(1);
                     });
 
-                    Popups.of("Multiple bots on the same folder",
-                                    "You're currently running multiple bot instances from the same folder.\n" +
-                                    "This can cause crash, unexpected problems, and some broken functionality.\n" +
-                                    "Please create a separate folder to run multiple instances.",
+                    Popups.of(I18n.get("start.same_folder_warn.title"),
+                                    I18n.get("start.same_folder_warn.content"),
                                     JOptionPane.WARNING_MESSAGE)
                             .options(new Object[]{proceed, cancel})
                             .initialValue(cancel)
                             .showOptionSync();
 
                     if (result.get() == 1) {
-                        System.out.println("Reject multiple bot warning, closing bot");
+                        System.out.println(I18n.get("start.same_folder_warn.reject"));
                         System.exit(0);
                     }
                     break;
@@ -115,10 +114,8 @@ public class Bot {
         String java = System.getProperty("java.version");
 
         if (!java.startsWith("11.") && !java.startsWith("17.") && !java.equals("17")) {
-            Popups.showMessageSync("Unsupported java version", new JOptionPane(
-                    "You're currently using java version " + java + "\n" +
-                    "This version is unsupported and may stop working on future bot releases.\n" +
-                    "Please update to java 11 or java 17 to continue using future releases.",
+            Popups.showMessageSync(I18n.get("start.old_java_warn_title"), new JOptionPane(
+                    I18n.get("start.old_java_warn_content"),
                     JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION));
         }
     }
