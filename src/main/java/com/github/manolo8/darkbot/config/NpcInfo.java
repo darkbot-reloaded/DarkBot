@@ -124,8 +124,10 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
 
     public static String getId(Enum<?> flag) {
         // Legacy backwards compat. When using the new NpcFlag, check for old NpcExtra id
+        if (flag instanceof NpcExtra)
+            return ((NpcExtra) flag).getFlagKey();
         if (flag instanceof NpcFlag)
-            return NpcExtra.class.getCanonicalName() + flag.name();
+            return NpcExtra.of(flag.ordinal()).getFlagKey();
 
         return flag.getClass().getCanonicalName() + flag.name();
     }
