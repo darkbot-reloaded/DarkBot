@@ -124,7 +124,7 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
 
     // Keep a cache of the last searched id.
     // If called repeatedly in a loop for the same flag, it avoids allocations for the string concat of class + name.
-    private static String lastSearchedId;
+    private static String lastSearchedId = "";
 
     public static String getId(Enum<?> flag) {
         String lastId = NpcInfo.lastSearchedId;
@@ -135,7 +135,7 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
         String name = flag.name();
 
         if (lastId.length() == (className.length() + name.length()) &&
-                lastId.startsWith(className) && lastId.endsWith(className))
+                lastId.startsWith(className) && lastId.endsWith(name))
             return lastId;
 
         return lastSearchedId = className.concat(name);
