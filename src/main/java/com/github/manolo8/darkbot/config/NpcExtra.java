@@ -9,13 +9,6 @@ import java.util.Locale;
 public enum NpcExtra implements NpcExtraFlag {
     NO_CIRCLE, IGNORE_OWNERSHIP, IGNORE_ATTACKED, IGNORE_BOXES, AGGRESSIVE_FOLLOW, PASSIVE, ATTACK_SECOND, LEECH_ONLY, NO_SAB, USE_RSB, PET_LOCATOR;
 
-    private static final NpcExtra[] VALUES = values();
-    private final String flagKey;
-
-    NpcExtra() {
-        this.flagKey = getClass().getCanonicalName() + name();
-    }
-
     @Override
     public String getShortName() {
         return I18n.getOrDefault("config.loot.npc_table.extra." + name().toLowerCase(Locale.ROOT) + ".short", name());
@@ -29,14 +22,6 @@ public enum NpcExtra implements NpcExtraFlag {
     @Override
     public String getDescription() {
         return I18n.getOrDefault("config.loot.npc_table.extra." + name().toLowerCase(Locale.ROOT) + ".desc", name());
-    }
-
-    public String getFlagKey() {
-        return flagKey;
-    }
-
-    public static NpcExtra of(int ordinal) {
-        return VALUES[ordinal];
     }
 
     @Feature(name = "Legacy NpcExtra flag provider", description = "Provides default npc extra flags")
