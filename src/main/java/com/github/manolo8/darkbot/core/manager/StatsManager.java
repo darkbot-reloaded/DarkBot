@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StatsAPI;
 
 import java.time.Duration;
@@ -14,6 +15,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class StatsManager implements Manager, StatsAPI {
 
     private final Main main;
+    private final EventBrokerAPI eventBroker;
 
     private long address;
     private long settingsAddress;
@@ -39,8 +41,10 @@ public class StatsManager implements Manager, StatsAPI {
     public volatile String sid;
     public volatile String instance;
 
-    public StatsManager(Main main) {
+    public StatsManager(Main main, EventBrokerAPI eventBroker) {
         this.main = main;
+        this.eventBroker = eventBroker;
+
         this.main.status.add(this::toggle);
     }
 
@@ -161,6 +165,8 @@ public class StatsManager implements Manager, StatsAPI {
         earnedUridium = 0;
         earnedHonor = 0;
         earnedExperience = 0;
+
+        eventBroker.sendEvent(new StatsResetEvent());
     }
 
     @Override
