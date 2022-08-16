@@ -46,6 +46,17 @@ public class Bot {
         SwingUtilities.invokeLater(() -> new Main(params));
     }
 
+    static void checkJavaVersion(StartupParams params) {
+        if (params.has(StartupParams.LaunchArg.NO_WARN)) return;
+        String java = System.getProperty("java.version");
+
+        if (!java.startsWith("11.") && !java.startsWith("17.") && !java.equals("17")) {
+            Popups.showMessageSync(I18n.get("start.old_java_warn_title"), new JOptionPane(
+                    I18n.get("start.old_java_warn_content"),
+                    JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION));
+        }
+    }
+
     static void checkUniqueInstance(StartupParams params) {
         if (params.has(StartupParams.LaunchArg.NO_WARN)) return;
 
@@ -55,9 +66,9 @@ public class Bot {
         ProcessHandle.Info processInfo = processHandle.info();
         long currentStartTime = processInfo.startInstant().map(Instant::toEpochMilli).orElse(0L);
 
-        List<String> fileContent;
         try {
-            fileContent = Files.exists(filePath) ? Files.readAllLines(filePath, StandardCharsets.UTF_8) : Collections.emptyList();
+            List<String> fileContent = Files.exists(filePath) ?
+                    Files.readAllLines(filePath, StandardCharsets.UTF_8) : Collections.emptyList();
             for (String line : fileContent) {
                 try {
                     long filePid = 0;
@@ -76,7 +87,7 @@ public class Bot {
                     }
 
                     if (externalProcessHandle != null && externalStartTime == fileStartTime) {
-                        JButton proceed = new JButton(I18n.get("start.same_folder_warn.button.proceed"), UIUtils.getIcon("warning")); //TODO add warning icon
+                        JButton proceed = new JButton(I18n.get("start.same_folder_warn.button.proceed"), UIUtils.getIcon("warning"));
                         JButton cancel = new JButton(I18n.get("start.same_folder_warn.button.cancel"));
                         AtomicInteger result = new AtomicInteger(-1);
 
@@ -109,17 +120,6 @@ public class Bot {
             Files.writeString(filePath, currentPid + " " + currentStartTime, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    static void checkJavaVersion(StartupParams params) {
-        if (params.has(StartupParams.LaunchArg.NO_WARN)) return;
-        String java = System.getProperty("java.version");
-
-        if (!java.startsWith("11.") && !java.startsWith("17.") && !java.equals("17")) {
-            Popups.showMessageSync(I18n.get("start.old_java_warn_title"), new JOptionPane(
-                    I18n.get("start.old_java_warn_content"),
-                    JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION));
         }
     }
 }
