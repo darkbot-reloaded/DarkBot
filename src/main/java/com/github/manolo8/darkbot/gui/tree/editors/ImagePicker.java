@@ -2,17 +2,16 @@ package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.config.ImageWrapper;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
+import com.github.manolo8.darkbot.gui.utils.Strings;
+import com.github.manolo8.darkbot.gui.utils.window.FileChooserUtil;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.HeadlessException;
-import java.io.File;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
 
 public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
     private JFileChooser fc;
@@ -20,22 +19,9 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
 
     public ImagePicker() {
         addActionListener(e -> {
-            if (fc == null) {
-                String path = image == null ? new File(System.getProperty("user.dir")).getAbsolutePath() : image.getPath();
-                fc = new JFileChooser(path) {
-                    @Override
-                    protected JDialog createDialog(Component parent) throws HeadlessException {
-                        JDialog dialog = super.createDialog(parent);
-                        dialog.setAlwaysOnTop(true);
-                        return dialog;
-                    }
-                };
-                FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                        "Images Files", "png", "jpeg", "jpg", "gif");
-                fc.setFileFilter(filter);
-                fc.setAcceptAllFileFilterUsed(false);
-            }
-
+            if (fc == null) fc = FileChooserUtil.getChooser(image.getPath(),
+                    new FileNameExtensionFilter("Images Files", "png", "jpeg", "jpg", "gif"),
+                    false);
             if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 image.setPath(fc.getSelectedFile().getAbsolutePath());
                 setEditing(image);
@@ -46,13 +32,7 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
 
     @Override
     public void setText(String text) {
-        int sepIdx;
-        if (text != null && text.length() > 30 && (sepIdx = text.indexOf(File.separator, text.length() - 30)) != -1) {
-            super.setText(".." + text.substring(sepIdx));
-        } else {
-            super.setText(text);
-        }
-
+        super.setText(Strings.shortFileName(text));
         setPreferredSize(new Dimension(getFontMetrics(getFont()).stringWidth(getText()) + 32, 0));
     }
 

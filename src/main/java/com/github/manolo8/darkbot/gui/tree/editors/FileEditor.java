@@ -1,50 +1,37 @@
 package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
+import com.github.manolo8.darkbot.gui.utils.Strings;
+import com.github.manolo8.darkbot.gui.utils.window.FileChooserUtil;
 import com.google.gson.*;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
 
 import javax.swing.*;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.io.File;
 import java.lang.reflect.Type;
-import java.util.function.Consumer;
 
 public class FileEditor extends JButton implements OptionEditor<File> {
     private JFileChooser fc;
     private File file;
-    private final Consumer<JTree> stopEditing = JTree::stopEditing;
 
     public FileEditor() {
-        setFocusable(false);
-        addActionListener(e -> stopEditing.accept((JTree) SwingUtilities.getAncestorOfClass(JTree.class, FileEditor.this)));
         addActionListener(e -> {
-            if (fc == null) {
-                String path = file == null ? new File(System.getProperty("user.dir")).getAbsolutePath() : file.getPath();
-                fc = new JFileChooser(path) {
-                    @Override
-                    protected JDialog createDialog(Component parent) throws HeadlessException {
-                        JDialog dialog = super.createDialog(parent);
-                        dialog.setAlwaysOnTop(true);
-                        return dialog;
-                    }
-                };
+            if (fc == null) fc = FileChooserUtil.getChooser(file.getPath());
+            JTree tree = (JTree) SwingUtilities.getAncestorOfClass(JTree.class, FileEditor.this);
+            TreePath path = tree.getEditingPath();
+            if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                setEditing(fc.getSelectedFile());
+                tree.getModel().valueForPathChanged(path, getEditorValue());
             }
-            if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) setEditing(fc.getSelectedFile());
         });
-
     }
 
     @Override
     public void setText(String text) {
-        int sepIdx;
-        if (text != null && text.length() > 30 && (sepIdx = text.indexOf(File.separator, text.length() - 30)) != -1) {
-            super.setText(".." + text.substring(sepIdx));
-        } else {
-            super.setText(text);
-        }
-
+        super.setText(Strings.shortFileName(text));
         setPreferredSize(new Dimension(getFontMetrics(getFont()).stringWidth(getText()) + 32, 0));
     }
 
