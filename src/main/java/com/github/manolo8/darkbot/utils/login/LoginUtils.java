@@ -44,7 +44,7 @@ public class LoginUtils {
     }
 
     public static LoginData performUserLogin(StartupParams params) {
-        if (params.getAutoLogin()) return LoginUtils.performAutoLogin(params);
+        if (params.getAutoLogin()) return performAutoLogin(params.getAutologinInstance());
 
         LoginForm panel = new LoginForm();
 
@@ -62,42 +62,41 @@ public class LoginUtils {
         return loginData;
     }
 
-    public static LoginData performAutoLogin(StartupParams params) {
+    public static LoginData performAutoLogin(StartupParams.AutoLoginProps params) {
         String username = params.getAutoLoginValue(StartupParams.PropertyKey.USERNAME);
         String password = params.getAutoLoginValue(StartupParams.PropertyKey.PASSWORD);
         String server = params.getAutoLoginValue(StartupParams.PropertyKey.SERVER);
         String sid = params.getAutoLoginValue(StartupParams.PropertyKey.SID);
-        boolean isSidAutoLogin = !Strings.isEmpty(sid) && !Strings.isEmpty(server);
-        if (!isSidAutoLogin && username != null && Strings.isEmpty(password)) {
+        boolean isSidLogin = !Strings.isEmpty(sid) && !Strings.isEmpty(server);
+        if (!isSidLogin && username != null && Strings.isEmpty(password)) {
             password = getPassword(username, params.getAutoLoginMasterPassword());
 
             if (password == null)
                 System.err.println("Password for user couldn't be retrieved. Check that the user exists and master password is correct.");
         }
 
-        if (!isSidAutoLogin && (username == null || Strings.isEmpty(password))) {
-            System.err.println("Credentials file requires username and either a password or a master password");
+        if (!isSidLogin && (username == null || Strings.isEmpty(password))) {
+            System.err.println("Credentials file requires username & either a password or a master password, or/and server & sid");
             System.exit(-1);
         }
 
         LoginData loginData = new LoginData();
         loginData.setCredentials(username, password);
 
+        System.out.println("Attempt of auto logging using " + (isSidLogin?"server/SID":"login/password") + " in (1/2)");
+        if (isSidLogin) loginData.setSid(sid, server + ".darkorbit.com");
+        else usernameLogin(loginData);
+
         try {
-            if(isSidAutoLogin) loginData.setSid(sid, server + ".darkorbit.com");
-            else {
-                System.out.println("Auto logging in (1/2)");
-                usernameLogin(loginData);
-            }
             System.out.println("Loading spacemap (2/2)");
             findPreloader(loginData);
         } catch (IOException e) {
             System.err.println("IOException trying to perform auto login, servers may be down");
             e.printStackTrace();
         } catch (WrongCredentialsException e) {
-            if(isSidAutoLogin) {
-                System.err.println("Wrong SID");
-                params.clearAutoLoginProp(StartupParams.PropertyKey.SID);
+            if (isSidLogin) {
+                System.err.println("Expired SID in login properties file");
+                params.setAutoLoginProp(StartupParams.PropertyKey.SID, "");
                 return performAutoLogin(params);
             }
             System.err.println("Wrong credentials, check your username and password");
@@ -108,7 +107,11 @@ public class LoginUtils {
             System.exit(-1);
         }
 
-        if(!Strings.isEmpty(server) && !isSidAutoLogin) params.updateSidAndServer(loginData.getSid(), loginData.getUrl().split("\\.")[0]);
+        if (!Strings.isEmpty(server) && !isSidLogin) {
+            params.setAutoLoginProp(StartupParams.PropertyKey.SERVER, loginData.getUrl().split("\\.")[0]);
+            params.setAutoLoginProp(StartupParams.PropertyKey.SID, loginData.getSid());
+            params.updateLoginFile();
+        }
 
         return loginData;
     }

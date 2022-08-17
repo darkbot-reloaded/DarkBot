@@ -3,14 +3,12 @@ package com.github.manolo8.darkbot.utils;
 import eu.darkbot.api.API;
 import eu.darkbot.util.function.ThrowingFunction;
 
-import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -26,7 +24,7 @@ public class StartupParams implements API.Singleton {
          * with a username and either a password or a master-password.
          * Example usage: {@code -login C:\Users\Owner\login.properties}
          */
-        LOGIN(StartupParams::loadLoginProperties),
+        LOGIN(AutoLoginProps::new),
         START, /** Auto-start the bot */
         NO_OP, /** Run the bot in no-op mode (no-op api) */
         CONFIG(s -> s), /** Start the bot with a specific config */
@@ -72,22 +70,6 @@ public class StartupParams implements API.Singleton {
         }
     }
 
-    public void updateSidAndServer(String sid, String server) {
-        Properties login = (Properties) startupParams.get(LaunchArg.LOGIN);
-        Path path = new File(login.getProperty("SourceFile")).toPath();
-        login.setProperty(PropertyKey.SERVER.toString(), server);
-        login.setProperty(PropertyKey.SID.toString(), sid);
-
-        try {
-            Files.write(path, Arrays.stream(PropertyKey.values())
-                    .filter(x -> login.containsKey(x.toString()))
-                    .map(x -> x + "=" + getAutoLoginValue(x))
-                    .collect(Collectors.toList()), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private final Map<LaunchArg, Object> startupParams = new HashMap<>();
 
     public StartupParams(String[] args) throws IOException {
@@ -107,29 +89,8 @@ public class StartupParams implements API.Singleton {
         }
     }
 
-    /* Auto login */
-    private static Properties loadLoginProperties(String path) throws IOException {
-        Properties p = new Properties();
-        p.setProperty("SourceFile", path);
-        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)) {
-            p.load(reader);
-        }
-        System.out.println("Loaded startup properties file");
-        return p;
-    }
-
-    public String getAutoLoginValue(PropertyKey key) {
-        Properties p = (Properties) startupParams.get(LaunchArg.LOGIN);
-        return p.getProperty(key.toString());
-    }
-
-    public char[] getAutoLoginMasterPassword() {
-        String masterPassword = getAutoLoginValue(PropertyKey.MASTER_PASSWORD);
-        return masterPassword == null ? null : masterPassword.toCharArray();
-    }
-
-    public void clearAutoLoginProp(PropertyKey key) {
-        ((Properties) startupParams.get(LaunchArg.LOGIN)).setProperty(key.toString(), "");
+    public AutoLoginProps getAutologinInstance(){
+        return (AutoLoginProps) startupParams.getOrDefault(LaunchArg.LOGIN, null);
     }
 
     /* Other params */
@@ -162,5 +123,39 @@ public class StartupParams implements API.Singleton {
         return "StartupParams{" + startupParams.entrySet().stream()
                 .map(e -> e.getKey().toString() + "= " + e.getValue().toString())
                 .collect(Collectors.joining(","));
+    }
+
+    public static class AutoLoginProps {
+        private final String path;
+        private final Properties props;
+
+        private AutoLoginProps(String path) throws IOException {
+            this.path = path;
+            props = new Properties();
+            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)) {
+                props.load(reader);
+            }
+            System.out.println("Loaded startup properties file");
+        }
+        public String getAutoLoginValue(PropertyKey key) {
+            return props.getProperty(key.toString());
+        }
+
+        public char[] getAutoLoginMasterPassword() {
+            String masterPassword = getAutoLoginValue(PropertyKey.MASTER_PASSWORD);
+            return masterPassword == null ? null : masterPassword.toCharArray();
+        }
+
+        public void setAutoLoginProp(PropertyKey key, String val) {
+            props.setProperty(key.toString(), val);
+        }
+
+        public void updateLoginFile() {
+            try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(path), StandardCharsets.UTF_8)) {
+                props.store(writer, null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
