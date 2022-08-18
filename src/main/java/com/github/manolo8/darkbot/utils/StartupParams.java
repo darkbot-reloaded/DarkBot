@@ -63,7 +63,7 @@ public class StartupParams implements API.Singleton {
     }
 
     public enum PropertyKey {
-        USERNAME, PASSWORD, MASTER_PASSWORD, SERVER, SID;
+        USERNAME, PASSWORD, MASTER_PASSWORD, SERVER, SID, ALLOW_STORE_SID;
         @Override
         public String toString() {
             return this.name().toLowerCase(Locale.ROOT);

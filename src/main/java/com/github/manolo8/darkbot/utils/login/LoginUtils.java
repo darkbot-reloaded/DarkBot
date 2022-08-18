@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -83,11 +84,10 @@ public class LoginUtils {
         LoginData loginData = new LoginData();
         loginData.setCredentials(username, password);
 
-        System.out.println("Attempt of auto logging using " + (isSidLogin?"server/SID":"login/password") + " in (1/2)");
-        if (isSidLogin) loginData.setSid(sid, server + ".darkorbit.com");
-        else usernameLogin(loginData);
-
+        System.out.println("Auto logging in using " + (isSidLogin ? "server & SID" : "user & password") + " (1/2)");
         try {
+            if (isSidLogin) loginData.setSid(sid, server + ".darkorbit.com");
+            else usernameLogin(loginData);
             System.out.println("Loading spacemap (2/2)");
             findPreloader(loginData);
         } catch (IOException e) {
@@ -95,7 +95,7 @@ public class LoginUtils {
             e.printStackTrace();
         } catch (WrongCredentialsException e) {
             if (isSidLogin) {
-                System.err.println("Expired SID in login properties file");
+                System.err.println("Expired SID in login properties file, attempting re-connect with user & pass");
                 params.setAutoLoginProp(StartupParams.PropertyKey.SID, "");
                 return performAutoLogin(params);
             }
@@ -107,7 +107,7 @@ public class LoginUtils {
             System.exit(-1);
         }
 
-        if (!Strings.isEmpty(server) && !isSidLogin) {
+        if (!isSidLogin && Boolean.parseBoolean(params.getAutoLoginValue(StartupParams.PropertyKey.ALLOW_STORE_SID))) {
             params.setAutoLoginProp(StartupParams.PropertyKey.SERVER, loginData.getUrl().split("\\.")[0]);
             params.setAutoLoginProp(StartupParams.PropertyKey.SID, loginData.getSid());
             params.updateLoginFile();
