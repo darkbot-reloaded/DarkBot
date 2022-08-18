@@ -7,28 +7,20 @@ import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
-import eu.darkbot.api.extensions.RegisterFeature;
 import eu.darkbot.api.managers.ExtensionsAPI;
 import eu.darkbot.api.utils.Inject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 public class FeatureRegistry implements PluginListener, ExtensionsAPI {
@@ -73,30 +65,10 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
     @Override
     public void afterLoad() {
         pluginHandler.LOADED_PLUGINS.forEach(pl ->
-                getFeaturesList(pl)
+                Arrays.stream(pl.getDefinition().features)
                         .forEach(feature -> registerPluginFeature(pl, feature)));
         pluginHandler.LOADED_PLUGINS.sort((p1, p2) -> Boolean.compare(isDisabled(p1), isDisabled(p2)));
         registryHandler.update();
-    }
-
-    private List<String> getFeaturesList(Plugin plugin) {
-        if (plugin.getDefinition().features.length != 0) return Arrays.asList(plugin.getDefinition().features);
-        URLClassLoader loader = new URLClassLoader(new URL[]{plugin.getJar()});
-        List<String> features = new LinkedList<>();
-        try (JarFile jarFile = new JarFile(plugin.getFile())) {
-            Enumeration<JarEntry> e = jarFile.entries();
-            while (e.hasMoreElements()) {
-                JarEntry jarEntry = e.nextElement();
-                if (jarEntry.getName().endsWith(".class")) {
-                    String className = jarEntry.getName().replace("/", ".").replace(".class", "");
-                    if(loader.loadClass(className).isAnnotationPresent(RegisterFeature.class))
-                        features.add(className);
-                }
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return features;
     }
 
     private boolean isDisabled(Plugin plugin) {

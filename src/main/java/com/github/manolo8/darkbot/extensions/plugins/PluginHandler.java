@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.google.gson.Gson;
 import eu.darkbot.api.API;
+import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.ExtensionsAPI.PluginLifetimeEvent;
 import eu.darkbot.api.managers.ExtensionsAPI.PluginStage;
@@ -19,12 +20,15 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -199,6 +203,8 @@ public class PluginHandler implements API.Singleton {
             testUnique(plugin);
             testCompatibility(plugin);
             testSignature(plugin, jar);
+            if(plugin.getDefinition().features.length == 0)
+                plugin.getDefinition().features = fetchFeatureList(plugin, jar);
         }
     }
 
@@ -260,5 +266,22 @@ public class PluginHandler implements API.Singleton {
         }
     }
 
+    private String[] fetchFeatureList(Plugin plugin, JarFile jar) {
+        URLClassLoader loader = new URLClassLoader(new URL[]{ plugin.getJar() });
+        List<String> features = new ArrayList<>();
+        Enumeration<JarEntry> entries = jar.entries();
+        while (entries.hasMoreElements())
+            try {
+                JarEntry jarEntry = entries.nextElement();
+                if (jarEntry.getName().endsWith(".class")) {
+                    String className = jarEntry.getName().replace("/", ".").replace(".class", "");
+                    if(loader.loadClass(className).isAnnotationPresent(Feature.class))
+                        features.add(className);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        return features.toArray(new String[0]);
+    }
 
 }
