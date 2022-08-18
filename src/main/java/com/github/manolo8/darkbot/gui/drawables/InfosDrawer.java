@@ -92,8 +92,11 @@ public class InfosDrawer implements Drawable {
             String s = (main.isRunning() && main.repairManager.isDestroyed())
                     ? main.repairManager.getStatus()
                     : (main.tickingModule ? main.getModule().getStatus() : main.getModule().getStoppedStatus());
-
-            mg.drawString(5, 26, s, MapGraphics.StringAlign.LEFT);
+            if (s != null) {
+                int i = 12;
+                for (String line : s.split("\n"))
+                    mg.drawString(5, i+=14, line, MapGraphics.StringAlign.LEFT);    
+            }
         }
 
         mg.drawString(mg.getWidth() - 5, 12,
