@@ -11,7 +11,7 @@ public class FileChooserUtil {
     }
 
     public static JFileChooser getChooser(String path, FileNameExtensionFilter filter, boolean acceptAllFileFilter) {
-        if(path == null) path = new File(System.getProperty("user.dir")).getAbsolutePath();
+        if (path == null) path = new File(System.getProperty("user.dir")).getAbsolutePath();
         JFileChooser fc = new JFileChooser(path) {
             @Override
             protected JDialog createDialog(Component parent) throws HeadlessException {
@@ -21,7 +21,7 @@ public class FileChooserUtil {
             }
         };
 
-        if(filter != null) fc.setFileFilter(filter);
+        if (filter != null) fc.setFileFilter(filter);
         fc.setAcceptAllFileFilterUsed(acceptAllFileFilter);
         return fc;
     }

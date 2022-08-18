@@ -3,7 +3,13 @@ package com.github.manolo8.darkbot.gui.tree.editors;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.gui.utils.window.FileChooserUtil;
-import com.google.gson.*;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
 
@@ -56,7 +62,7 @@ public class FileEditor extends JButton implements OptionEditor<File> {
         return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
-    public static class JsonAdapter implements JsonSerializer<File>, JsonDeserializer<File>{
+    public static class JsonAdapter implements JsonSerializer<File>, JsonDeserializer<File> {
         @Override
         public File deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             return new File(jsonElement.getAsString());

@@ -19,7 +19,8 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
 
     public ImagePicker() {
         addActionListener(e -> {
-            if (fc == null) fc = FileChooserUtil.getChooser(image.getPath(),
+            if (fc == null)
+                fc = FileChooserUtil.getChooser(image.getPath(),
                     new FileNameExtensionFilter("Images Files", "png", "jpeg", "jpg", "gif"),
                     false);
             if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
