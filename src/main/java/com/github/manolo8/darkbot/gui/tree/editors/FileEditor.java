@@ -29,6 +29,7 @@ public class FileEditor extends JButton implements OptionEditor<File> {
             JTree tree = (JTree) SwingUtilities.getAncestorOfClass(JTree.class, FileEditor.this);
             TreePath path = tree.getEditingPath();
             if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                // FIXME: opening the file picker makes the tree lose focus, so cell can't save, meaning we have to force it.
                 setEditing(fc.getSelectedFile());
                 tree.getModel().valueForPathChanged(path, getEditorValue());
             }

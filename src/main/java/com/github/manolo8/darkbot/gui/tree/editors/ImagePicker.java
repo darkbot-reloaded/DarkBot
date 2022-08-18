@@ -24,6 +24,7 @@ public class ImagePicker extends JButton implements OptionEditor<ImageWrapper> {
                     new FileNameExtensionFilter("Images Files", "png", "jpeg", "jpg", "gif"),
                     false);
             if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                // FIXME: opening the file picker makes the tree lose focus, so cell save to existing object without possibility cancel changes.
                 image.setPath(fc.getSelectedFile().getAbsolutePath());
                 setEditing(image);
             }
