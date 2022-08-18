@@ -90,7 +90,7 @@ public class StartupParams implements API.Singleton {
         }
     }
 
-    public AutoLoginProps getAutoLoginProps(){
+    public AutoLoginProps getAutoLoginProps() {
         return (AutoLoginProps) startupParams.getOrDefault(LaunchArg.LOGIN, null);
     }
 
