@@ -21,6 +21,7 @@ import eu.darkbot.api.game.other.Health;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.game.other.LocationInfo;
+import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.utils.Inject;
 import eu.darkbot.api.utils.ItemNotEquippedException;
@@ -29,12 +30,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -51,6 +54,7 @@ public class PetManager extends Gui implements PetAPI {
     private final List<Ship> ships;
     private final Pet pet;
     private final PetGearSelectorHandler gearSelectorHandler;
+    private final EventBrokerAPI eventBroker;
 
     private long togglePetTime, selectModuleTime;
     private long activeUntil;
@@ -86,14 +90,14 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     public PetManager(Main main, MapManager mapManager, HeroManager hero,
-                      PetGearSelectorHandler gearSelectorHandler) {
+                      PetGearSelectorHandler gearSelectorHandler, EventBrokerAPI eventBroker) {
         this.main = main;
         this.ships = mapManager.entities.ships;
         this.pet = hero.pet;
         this.gearSelectorHandler = gearSelectorHandler;
+        this.eventBroker = eventBroker;
 
         PetGearSupplier.updateGears(gearList);
-
     }
 
     private PetGear getPetGearToUse() {
@@ -287,7 +291,7 @@ public class PetManager extends Gui implements PetAPI {
 
         long gearsSprite = getSpriteChild(address, -1);
         gearsArr.update(API.readMemoryLong(gearsSprite, 176, 224));
-        gearsArr.sync(gearList, Gear::new);
+        gearsArr.syncAndReport(gearList, Gear::new);
         if (modulesChanged()) {
             newGears.clear();
             for (Gear gear : gearList)
@@ -381,7 +385,9 @@ public class PetManager extends Gui implements PetAPI {
         if (locatorNpcList.getSize() < oldSize && validUntil > System.currentTimeMillis()) return;
 
         validUntil = System.currentTimeMillis() + 100;
-        locatorNpcList.sync(locatorList, Gear::new);
+        if (locatorNpcList.syncAndReport(locatorList, Gear::new)) {
+            eventBroker.sendEvent(new LocatorNpcListChangeEvent(getLocatorNpcs()));
+        }
     }
 
     private void updatePetStats(long elementsListAddress) {
@@ -412,19 +418,16 @@ public class PetManager extends Gui implements PetAPI {
         return gearOverride;
     }
 
-    public static class Gear extends Auto {
-        public int id, parentId;
-        public long check;
-        public String name, fuzzyName;
+    @Override
+    public @NotNull Collection<? extends NpcInfo> getLocatorNpcs() {
+        if (locatorList.isEmpty()) return Collections.emptyList();
 
-        @Override
-        public void update() {
-            this.id = API.readMemoryInt(address + 172);
-            this.parentId = API.readMemoryInt(address + 176); //assume, -1 if none
-            this.name = API.readMemoryString(API.readMemoryLong(address + 200));
-            this.fuzzyName = Strings.fuzzyMatcher(name);
-            this.check = API.readMemoryLong(address, 208, 152, 0x10);
-        }
+        return main.config.LOOT.NPC_INFOS.entrySet()
+                .stream()
+                .map(entry -> new NpcPick(entry.getKey(), entry.getValue()))
+                .filter(p -> p.gear != null)
+                .map(p -> p.npc)
+                .collect(Collectors.toList());
     }
 
     public class PetStats implements PetStat {
@@ -644,6 +647,28 @@ public class PetManager extends Gui implements PetAPI {
         if (petPing.isValid())
             return Optional.of(petPing.locationInfo);
         return Optional.empty();
+    }
+
+    public static class Gear extends Reporting {
+        public int id, parentId;
+        public long check;
+        public String name, fuzzyName;
+
+        @Override
+        public boolean updateAndReport() {
+            int id = API.readMemoryInt(address + 172);
+            int parentId = API.readMemoryInt(address + 176); //assume, -1 if none
+            String name = API.readMemoryString(API.readMemoryLong(address + 200));
+
+            if (this.id == id && this.parentId == parentId && this.name.equals(name)) return false;
+
+            this.id = id;
+            this.parentId = parentId;
+            this.name = name;
+            this.fuzzyName = Strings.fuzzyMatcher(name);
+            this.check = API.readMemoryLong(address, 208, 152, 0x10);
+            return true;
+        }
     }
 
     @Override
