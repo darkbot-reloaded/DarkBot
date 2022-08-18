@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.utils;
 
+import com.github.manolo8.darkbot.gui.utils.Strings;
 import eu.darkbot.api.API;
 import eu.darkbot.util.function.ThrowingFunction;
 
@@ -89,7 +90,7 @@ public class StartupParams implements API.Singleton {
         }
     }
 
-    public AutoLoginProps getAutologinInstance(){
+    public AutoLoginProps getAutoLoginProps(){
         return (AutoLoginProps) startupParams.getOrDefault(LaunchArg.LOGIN, null);
     }
 
@@ -125,34 +126,57 @@ public class StartupParams implements API.Singleton {
                 .collect(Collectors.joining(","));
     }
 
-    public static class AutoLoginProps {
+    public static class AutoLoginProps extends Properties {
         private final String path;
-        private final Properties props;
 
         private AutoLoginProps(String path) throws IOException {
             this.path = path;
-            props = new Properties();
             try (InputStreamReader reader = new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)) {
-                props.load(reader);
+                load(reader);
             }
             System.out.println("Loaded startup properties file");
         }
-        public String getAutoLoginValue(PropertyKey key) {
-            return props.getProperty(key.toString());
+
+        public String getUsername() {
+            return getProperty(PropertyKey.USERNAME.toString());
         }
 
-        public char[] getAutoLoginMasterPassword() {
-            String masterPassword = getAutoLoginValue(PropertyKey.MASTER_PASSWORD);
+        public String getPassword() {
+            return getProperty(PropertyKey.PASSWORD.toString());
+        }
+
+        public char[] getMasterPassword() {
+            String masterPassword = getProperty(PropertyKey.MASTER_PASSWORD.toString());
             return masterPassword == null ? null : masterPassword.toCharArray();
         }
 
-        public void setAutoLoginProp(PropertyKey key, String val) {
-            props.setProperty(key.toString(), val);
+        public String getServer() {
+            return getProperty(PropertyKey.SERVER.toString());
+        }
+
+        public String getSID() {
+            return getProperty(PropertyKey.SID.toString());
+        }
+
+        public boolean isAllowStoreSID() {
+            return Boolean.parseBoolean(getProperty(PropertyKey.ALLOW_STORE_SID.toString()));
+        }
+
+        public boolean isPossibleSIDLogin() {
+            return !Strings.isEmpty(getSID()) && !Strings.isEmpty(getServer());
+        }
+
+        public void setServer(String server) {
+            setProperty(PropertyKey.SERVER.toString(), server);
+        }
+
+        public void setSID(String sid) {
+            setProperty(PropertyKey.SID.toString(), sid);
         }
 
         public void updateLoginFile() {
             try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(path), StandardCharsets.UTF_8)) {
-                props.store(writer, null);
+                store(writer, null);
             } catch (IOException e) {
                 e.printStackTrace();
             }
