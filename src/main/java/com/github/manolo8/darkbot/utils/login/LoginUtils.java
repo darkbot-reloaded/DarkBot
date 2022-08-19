@@ -64,14 +64,14 @@ public class LoginUtils {
 
     public static LoginData performAutoLogin(StartupParams.AutoLoginProps params) {
         String password = params.getPassword();
-        if (!params.isPossibleSIDLogin() && params.getUsername() != null && Strings.isEmpty(password)) {
+        if (!params.shouldSIDLogin() && params.getUsername() != null && Strings.isEmpty(password)) {
             password = getPassword(params.getUsername(), params.getMasterPassword());
 
             if (password == null)
                 System.err.println("Password for user couldn't be retrieved. Check that the user exists and master password is correct.");
         }
 
-        if (!params.isPossibleSIDLogin() && (params.getUsername() == null || Strings.isEmpty(password))) {
+        if (!params.shouldSIDLogin() && (params.getUsername() == null || Strings.isEmpty(password))) {
             System.err.println("Credentials file requires username & either a password or a master password, or/and server & sid");
             System.exit(-1);
         }
@@ -79,9 +79,9 @@ public class LoginUtils {
         LoginData loginData = new LoginData();
         loginData.setCredentials(params.getUsername(), password);
 
-        System.out.println("Auto logging in using " + (params.isPossibleSIDLogin() ? "server & SID" : "user & password") + " (1/2)");
+        System.out.println("Auto logging in using " + (params.shouldSIDLogin() ? "server & SID" : "user & password") + " (1/2)");
         try {
-            if (params.isPossibleSIDLogin()) loginData.setSid(params.getSID(), params.getServer() + ".darkorbit.com");
+            if (params.shouldSIDLogin()) loginData.setSid(params.getSID(), params.getServer() + ".darkorbit.com");
             else usernameLogin(loginData);
             System.out.println("Loading spacemap (2/2)");
             findPreloader(loginData);
@@ -89,7 +89,7 @@ public class LoginUtils {
             System.err.println("IOException trying to perform auto login, servers may be down");
             e.printStackTrace();
         } catch (WrongCredentialsException e) {
-            if (params.isPossibleSIDLogin()) {
+            if (params.shouldSIDLogin()) {
                 System.err.println("Expired SID in login properties file, attempting re-connect with user & pass");
                 params.setSID("");
                 return performAutoLogin(params);
@@ -102,7 +102,7 @@ public class LoginUtils {
             System.exit(-1);
         }
 
-        if (!params.isPossibleSIDLogin() && params.isAllowStoreSID()) {
+        if (!params.shouldSIDLogin() && params.isAllowStoreSID()) {
             params.setServer(loginData.getUrl().split("\\.")[0]);
             params.setSID(loginData.getSid());
             params.updateLoginFile();

@@ -126,57 +126,67 @@ public class StartupParams implements API.Singleton {
                 .collect(Collectors.joining(","));
     }
 
-    public static class AutoLoginProps extends Properties {
+    public static class AutoLoginProps {
+        private final Properties prop;
         private final String path;
 
         private AutoLoginProps(String path) throws IOException {
+            this.prop = new Properties();
             this.path = path;
             try (InputStreamReader reader = new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)) {
-                load(reader);
+                prop.load(reader);
             }
             System.out.println("Loaded startup properties file");
         }
 
+        private String getProperty(PropertyKey key) {
+            return prop.getProperty(key.toString());
+        }
+
+        private void setProperty(PropertyKey key, String val) {
+            prop.setProperty(key.toString(), val);
+        }
+
         public String getUsername() {
-            return getProperty(PropertyKey.USERNAME.toString());
+            return getProperty(PropertyKey.USERNAME);
         }
 
         public String getPassword() {
-            return getProperty(PropertyKey.PASSWORD.toString());
+            return getProperty(PropertyKey.PASSWORD);
         }
 
         public char[] getMasterPassword() {
-            String masterPassword = getProperty(PropertyKey.MASTER_PASSWORD.toString());
+            String masterPassword = getProperty(PropertyKey.MASTER_PASSWORD);
             return masterPassword == null ? null : masterPassword.toCharArray();
         }
 
         public String getServer() {
-            return getProperty(PropertyKey.SERVER.toString());
+            return getProperty(PropertyKey.SERVER);
         }
 
         public String getSID() {
-            return getProperty(PropertyKey.SID.toString());
+            return getProperty(PropertyKey.SID);
         }
 
         public boolean isAllowStoreSID() {
-            return Boolean.parseBoolean(getProperty(PropertyKey.ALLOW_STORE_SID.toString()));
+            return Boolean.parseBoolean(getProperty(PropertyKey.ALLOW_STORE_SID));
         }
 
-        public boolean isPossibleSIDLogin() {
+        public boolean shouldSIDLogin() {
             return !Strings.isEmpty(getSID()) && !Strings.isEmpty(getServer());
         }
 
         public void setServer(String server) {
-            setProperty(PropertyKey.SERVER.toString(), server);
+            setProperty(PropertyKey.SERVER, server);
         }
 
         public void setSID(String sid) {
-            setProperty(PropertyKey.SID.toString(), sid);
+            setProperty(PropertyKey.SID, sid);
         }
 
         public void updateLoginFile() {
             try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(path), StandardCharsets.UTF_8)) {
-                store(writer, null);
+                prop.store(writer, null);
             } catch (IOException e) {
                 e.printStackTrace();
             }
