@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ColorEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ConditionEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.DropdownEditor;
+import com.github.manolo8.darkbot.gui.tree.editors.FileEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.FontEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ImagePicker;
 import com.github.manolo8.darkbot.gui.tree.editors.MultiDropdownEditor;
@@ -29,6 +30,7 @@ import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.utils.Inject;
 import java.awt.Color;
 import java.awt.Font;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -63,6 +65,7 @@ public class EditorProvider {
         defaultEditors.put(Color.class, ColorEditor.class);
         defaultEditors.put(Font.class, FontEditor.class);
         defaultEditors.put(String.class, StringEditor.class);
+        defaultEditors.put(File.class, FileEditor.class);
 
         defaultEditors.put(Condition.class, ConditionEditor.class);
         defaultEditors.put(com.github.manolo8.darkbot.config.actions.Condition.class, ConditionEditor.class);

@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
+@Deprecated
 public class JFileOpener extends JButton implements OptionEditor {
 
     private JFileChooser fc;
