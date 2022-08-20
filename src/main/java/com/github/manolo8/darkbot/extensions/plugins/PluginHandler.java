@@ -7,7 +7,6 @@ import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.google.gson.Gson;
 import eu.darkbot.api.API;
-import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.ExtensionsAPI.PluginLifetimeEvent;
 import eu.darkbot.api.managers.ExtensionsAPI.PluginStage;
@@ -268,20 +267,25 @@ public class PluginHandler implements API.Singleton {
 
     private String[] fetchFeatureList(Plugin plugin, JarFile jar) {
         URLClassLoader loader = new URLClassLoader(new URL[]{ plugin.getJar() });
-        List<String> features = new ArrayList<>();
         Enumeration<JarEntry> entries = jar.entries();
-        while (entries.hasMoreElements())
-            try {
-                JarEntry jarEntry = entries.nextElement();
-                if (jarEntry.getName().endsWith(".class")) {
-                    String className = jarEntry.getName().replace("/", ".").replace(".class", "");
-                    if(loader.loadClass(className).isAnnotationPresent(Feature.class))
-                        features.add(className);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        return features.toArray(new String[0]);
+        List<String> entryNames = new ArrayList<>();
+        String basePackage = plugin.getBasePackage() != null ? plugin.getBasePackage() : "";
+        while (entries.hasMoreElements()) entryNames.add(entries.nextElement().getName());
+        return entryNames.stream()
+                .filter(x -> x.endsWith(".class"))
+                .map(x -> x.replace("/", ".").replace(".class", ""))
+                .filter(x -> x.startsWith(basePackage))
+                .filter(x -> isFeature(loader, x))
+                .toArray(String[]::new);
     }
 
+    private boolean isFeature(ClassLoader loader, String path) {
+        try {
+            Class<?> clazz = loader.loadClass(path);
+            return clazz.isAnnotationPresent(eu.darkbot.api.extensions.Feature.class) ||
+                   clazz.isAnnotationPresent(com.github.manolo8.darkbot.extensions.features.Feature.class);
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 }
