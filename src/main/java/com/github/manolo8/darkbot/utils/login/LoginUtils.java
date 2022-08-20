@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.utils.login;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.utils.CaptchaAPI;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.IOUtils;
@@ -43,7 +44,7 @@ public class LoginUtils {
     }
 
     public static LoginData performUserLogin(StartupParams params) {
-        if (params.getAutoLogin()) return LoginUtils.performAutoLogin(params);
+        if (params.getAutoLogin()) return performAutoLogin(params.getAutoLoginProps());
 
         LoginForm panel = new LoginForm();
 
@@ -61,34 +62,38 @@ public class LoginUtils {
         return loginData;
     }
 
-    public static LoginData performAutoLogin(StartupParams params) {
-        String username = params.getAutoLoginValue(StartupParams.PropertyKey.USERNAME);
-        String password = params.getAutoLoginValue(StartupParams.PropertyKey.PASSWORD);
-
-        if (username != null && (password == null || password.isEmpty())) {
-            password = getPassword(username, params.getAutoLoginMasterPassword());
+    public static LoginData performAutoLogin(StartupParams.AutoLoginProps params) {
+        String password = params.getPassword();
+        if (!params.shouldSIDLogin() && params.getUsername() != null && Strings.isEmpty(password)) {
+            password = getPassword(params.getUsername(), params.getMasterPassword());
 
             if (password == null)
                 System.err.println("Password for user couldn't be retrieved. Check that the user exists and master password is correct.");
         }
 
-        if (username == null || password == null || password.isEmpty()) {
-            System.err.println("Credentials file requires username and either a password or a master password");
+        if (!params.shouldSIDLogin() && (params.getUsername() == null || Strings.isEmpty(password))) {
+            System.err.println("Credentials file requires username & either a password or a master password, or/and server & sid");
             System.exit(-1);
         }
 
         LoginData loginData = new LoginData();
-        loginData.setCredentials(username, password);
+        loginData.setCredentials(params.getUsername(), password);
 
+        System.out.println("Auto logging in using " + (params.shouldSIDLogin() ? "server & SID" : "user & password") + " (1/2)");
         try {
-            System.out.println("Auto logging in (1/2)");
-            usernameLogin(loginData);
+            if (params.shouldSIDLogin()) loginData.setSid(params.getSID(), params.getServer() + ".darkorbit.com");
+            else usernameLogin(loginData);
             System.out.println("Loading spacemap (2/2)");
             findPreloader(loginData);
         } catch (IOException e) {
             System.err.println("IOException trying to perform auto login, servers may be down");
             e.printStackTrace();
         } catch (WrongCredentialsException e) {
+            if (params.shouldSIDLogin()) {
+                System.err.println("Expired SID in login properties file, attempting re-connect with user & pass");
+                params.setSID("");
+                return performAutoLogin(params);
+            }
             System.err.println("Wrong credentials, check your username and password");
         }
 
@@ -96,6 +101,13 @@ public class LoginUtils {
             System.err.println("Could not find preloader url or parameters, exiting bot.");
             System.exit(-1);
         }
+
+        if (!params.shouldSIDLogin() && params.isAllowStoreSID()) {
+            params.setServer(loginData.getUrl().split("\\.")[0]);
+            params.setSID(loginData.getSid());
+            params.updateLoginFile();
+        }
+
         return loginData;
     }
 

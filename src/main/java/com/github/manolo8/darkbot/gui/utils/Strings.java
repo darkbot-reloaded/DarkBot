@@ -34,4 +34,14 @@ public class Strings {
                 .replaceAll("m[i1]m[e3][s5][i1][s5]", "mimesis");
     }
 
+    public static boolean isEmpty(String s) {
+        return s == null || s.isEmpty();
+    }
+
+    public static String shortFileName(String text) {
+        int sepIdx;
+        if (text != null && text.length() > 30 && (sepIdx = text.indexOf(File.separator, text.length() - 30)) != -1)
+            return ".." + text.substring(sepIdx);
+        else return text;
+    }
 }

@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.config.utils.FontAdapter;
 import com.github.manolo8.darkbot.config.utils.PlayerTagTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
+import com.github.manolo8.darkbot.gui.tree.editors.FileEditor;
 import com.github.manolo8.darkbot.utils.ApiErrors;
 import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
@@ -23,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -46,6 +48,7 @@ public class ConfigManager implements API.Singleton {
             .setLenient()
             .registerTypeAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeAdapter(Color.class, new ColorAdapter())
+            .registerTypeAdapter(File.class, new FileEditor.JsonAdapter())
             .registerTypeAdapter(Font.class, new FontAdapter())
             .registerTypeAdapter(ShipMode.class, (InstanceCreator<ShipMode>) type -> new Config.ShipConfig())
             .registerTypeAdapter(PercentRange.class, (InstanceCreator<PercentRange>) type -> new Config.PercentRange())
