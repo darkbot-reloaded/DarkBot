@@ -19,14 +19,16 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
@@ -164,11 +166,12 @@ public class PluginHandler implements API.Singleton {
     }
 
     private void loadPlugins(File[] pluginFiles, List<Plugin> previousPlugins) {
+        Map<Plugin, List<String>> pluginEntryNames = new HashMap<>();
         for (File pluginFile : pluginFiles) {
             Plugin pl = null;
             try {
                 pl = new Plugin(pluginFile, pluginFile.toURI().toURL());
-                loadPlugin(pl);
+                pluginEntryNames.put(pl, loadPlugin(pl));
 
                 // need to copy over previous update status and update issues or else they will be lost
                 int prevIndex = previousPlugins.indexOf(pl);
@@ -190,9 +193,19 @@ public class PluginHandler implements API.Singleton {
             }
         }
         PLUGIN_CLASS_LOADER = new PluginClassLoader(LOADED_PLUGINS.stream().map(Plugin::getJar).toArray(URL[]::new));
+        pluginEntryNames.entrySet().stream()
+                .filter(plugin -> LOADED_PLUGINS.contains(plugin.getKey()))
+                .forEach(plugin ->
+                        plugin.getKey().getDefinition().features = plugin.getValue().stream()
+                        .filter(file -> file.endsWith(".class"))
+                        .map(class_ -> class_.replace("/", ".").replace(".class", ""))
+                        .filter(class_ -> plugin.getKey().getBasePackage() == null || class_.startsWith(plugin.getKey().getBasePackage()))
+                        .filter(this::isFeature)
+                        .toArray(String[]::new)
+                );
     }
 
-    private void loadPlugin(Plugin plugin) throws IOException, PluginException {
+    private List<String> loadPlugin(Plugin plugin) throws IOException, PluginException {
         try (JarFile jar = new JarFile(plugin.getFile(), true)) {
             ZipEntry plJson = jar.getEntry("plugin.json");
             if (plJson == null) {
@@ -202,8 +215,11 @@ public class PluginHandler implements API.Singleton {
             testUnique(plugin);
             testCompatibility(plugin);
             testSignature(plugin, jar);
-            if(plugin.getDefinition().features.length == 0)
-                plugin.getDefinition().features = fetchFeatureList(plugin, jar);
+            if (plugin.getDefinition().features.length != 0) return Collections.emptyList();
+            Enumeration<JarEntry> entries = jar.entries();
+            List<String> entryNames = new ArrayList<>();
+            while (entries.hasMoreElements()) entryNames.add(entries.nextElement().getName());
+            return entryNames;
         }
     }
 
@@ -265,23 +281,9 @@ public class PluginHandler implements API.Singleton {
         }
     }
 
-    private String[] fetchFeatureList(Plugin plugin, JarFile jar) {
-        URLClassLoader loader = new URLClassLoader(new URL[]{ plugin.getJar() });
-        Enumeration<JarEntry> entries = jar.entries();
-        List<String> entryNames = new ArrayList<>();
-        String basePackage = plugin.getBasePackage() != null ? plugin.getBasePackage() : "";
-        while (entries.hasMoreElements()) entryNames.add(entries.nextElement().getName());
-        return entryNames.stream()
-                .filter(x -> x.endsWith(".class"))
-                .map(x -> x.replace("/", ".").replace(".class", ""))
-                .filter(x -> x.startsWith(basePackage))
-                .filter(x -> isFeature(loader, x))
-                .toArray(String[]::new);
-    }
-
-    private boolean isFeature(ClassLoader loader, String path) {
+    private boolean isFeature(String path) {
         try {
-            Class<?> clazz = loader.loadClass(path);
+            Class<?> clazz = PLUGIN_CLASS_LOADER.loadClass(path);
             return clazz.isAnnotationPresent(eu.darkbot.api.extensions.Feature.class) ||
                    clazz.isAnnotationPresent(com.github.manolo8.darkbot.extensions.features.Feature.class);
         } catch (ClassNotFoundException e) {
