@@ -4,12 +4,14 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
 import com.github.manolo8.darkbot.core.api.DarkBoatHookAdapter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.utils.FileUtils;
 
 import javax.swing.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -76,16 +78,11 @@ public class LegacyFlashPatcher {
         }
 
         public void ApplyPatch() {
-            File file = new File(FLASH_DIR.toUri());
-            file.mkdirs();
-            try (BufferedInputStream in = new BufferedInputStream(new URL("https://darkbot.eu/downloads/Flash.ocx").openStream());
-                 FileOutputStream out = new FileOutputStream(FLASH_OCX.toAbsolutePath().toFile())) {
-                final byte[] data = new byte[1024];
-                int count;
+            FileUtils.ensureDirectoryExists(FLASH_DIR);
 
-                while ((count = in.read(data, 0, 1024)) != -1) {
-                    out.write(data, 0, count);
-                }
+            try (InputStream in = new URL("https://darkbot.eu/downloads/Flash.ocx").openStream()) {
+                Files.copy(in, FLASH_OCX, StandardCopyOption.REPLACE_EXISTING);
+                Runtime.getRuntime().exec("\"" + REG_SVR.toAbsolutePath() + "\" \"" + FLASH_OCX.toAbsolutePath() + "\"");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -125,9 +122,8 @@ public class LegacyFlashPatcher {
             try {
                 Files.write(TMP_CONFIG, CONFIG_CONTENT);
 
-                File file = new File(FLASH_FOLDER.toUri());
-                file.mkdirs();
-                Files.move(Paths.get(TMP_CONFIG.toUri()), Paths.get(FLASH_CONFIG.toUri()), StandardCopyOption.REPLACE_EXISTING);
+                FileUtils.ensureDirectoryExists(FLASH_FOLDER);
+                Files.move(TMP_CONFIG, FLASH_CONFIG, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
