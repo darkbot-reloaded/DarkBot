@@ -6,18 +6,20 @@ import com.github.manolo8.darkbot.core.api.DarkBoatHookAdapter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 
 import javax.swing.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class LegacyFlashPatcher {
-
-    private static final Path TMP_SCRIPT = Paths.get("FlashPatcher.bat");
 
     private final List<Fixer> FIXERS = Arrays.asList(
             new FlashInstaller(),
@@ -38,24 +40,9 @@ public class LegacyFlashPatcher {
                                 "Accept on the next pop-up to run as admin to be able to continue using DarkBot.\n" +
                                 "After the script runs, refresh the game or restart the bot to make it work.\n",
                         JOptionPane.INFORMATION_MESSAGE)
-                .showSync();
+                .showSync(); //TODO translate text
 
-        List<String> script = new ArrayList<>();
-        script.add("@echo off");
-        script.add("chcp 65001");
-        for (Fixer fixer : needFixing) script.addAll(fixer.script());
-        script.add("echo Done! Restart the bot to make sure it works");
-        script.add("pause");
-        script.add("del \"" + TMP_SCRIPT.toAbsolutePath() + "\"");
-
-        try {
-            Files.write(TMP_SCRIPT, script);
-
-            Runtime.getRuntime().exec("powershell start -verb runas './FlashPatcher.bat'").waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+        for (Fixer fixer : needFixing) fixer.ApplyPatch(); //TODO make loop for force check if sha256 is ok
     }
 
     protected void cleanupCache() {
@@ -74,7 +61,7 @@ public class LegacyFlashPatcher {
     private interface Fixer {
         boolean needsFix();
 
-        List<String> script();
+        void ApplyPatch();
     }
 
     private static class FlashInstaller implements Fixer {
@@ -88,12 +75,20 @@ public class LegacyFlashPatcher {
             return !Files.exists(FLASH_DIR) || !Files.exists(FLASH_OCX);
         }
 
-        public List<String> script() {
-            return Arrays.asList(
-                    "echo \"Downloading & installing flash...\"",
-                    "mkdir \"" + FLASH_DIR.toAbsolutePath() + "\"",
-                    "curl -o \"" + FLASH_OCX.toAbsolutePath() + "\" \"https://darkbot.eu/downloads/Flash.ocx\"",
-                    "\"" + REG_SVR.toAbsolutePath() + "\"  \"" + FLASH_OCX.toAbsolutePath() + "\"");
+        public void ApplyPatch() {
+            File file = new File(FLASH_DIR.toUri());
+            file.mkdirs();
+            try (BufferedInputStream in = new BufferedInputStream(new URL("https://darkbot.eu/downloads/Flash.ocx").openStream());
+                 FileOutputStream out = new FileOutputStream(FLASH_OCX.toAbsolutePath().toFile())) {
+                final byte[] data = new byte[1024];
+                int count;
+
+                while ((count = in.read(data, 0, 1024)) != -1) {
+                    out.write(data, 0, count);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -126,17 +121,16 @@ public class LegacyFlashPatcher {
             }
         }
 
-        public List<String> script() {
+        public void ApplyPatch() {
             try {
                 Files.write(TMP_CONFIG, CONFIG_CONTENT);
+
+                File file = new File(FLASH_FOLDER.toUri());
+                file.mkdirs();
+                Files.move(Paths.get(TMP_CONFIG.toUri()), Paths.get(FLASH_CONFIG.toUri()), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
-            return Arrays.asList(
-                    "echo \"Updating flash configuration...\"",
-                    "mkdir \"" + FLASH_FOLDER.toAbsolutePath() + "\"",
-                    "move \"" + TMP_CONFIG.toAbsolutePath() + "\" \"" + FLASH_CONFIG.toAbsolutePath() + "\"");
         }
     }
 
