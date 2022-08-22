@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.FileUtils;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -52,8 +53,14 @@ public class LegacyFlashPatcher {
 
         try {
             Files.write(TMP_SCRIPT, script);
-
             Runtime.getRuntime().exec("powershell start -verb runas './FlashPatcher.bat'").waitFor();
+
+            File tmpFile = new File(TMP_SCRIPT.toUri());
+            if(tmpFile.delete()){
+                System.out.println("File deleted and patch applied");
+            } else {
+                System.out.println("Operation failed");
+            }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
