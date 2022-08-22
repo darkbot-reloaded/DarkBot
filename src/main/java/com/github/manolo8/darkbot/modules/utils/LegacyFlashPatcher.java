@@ -48,12 +48,15 @@ public class LegacyFlashPatcher {
 
         List<String> script = new ArrayList<>();
         script.add("@echo off");
+        //get admin rights
+        script.add("cd /d \"%~dp0\" && ( if exist \"%temp%\\getadmin.vbs\" del \"%temp%\\getadmin.vbs\" ) && fsutil dirty query %systemdrive% 1>nul 2>nul || (  echo Set UAC = CreateObject^(\"Shell.Application\"^) : UAC.ShellExecute \"cmd.exe\", \"/k cd \"\"%~sdp0\"\" && %~s0 %params%\", \"\", \"runas\", 1 >> \"%temp%\\getadmin.vbs\" && \"%temp%\\getadmin.vbs\" && exit /B )");
         script.add("chcp 65001");
+        script.add("exit");
         for (Fixer fixer : needFixing) script.addAll(fixer.script()); //TODO make loop for force check if sha256 is ok
 
         try {
             Files.write(TMP_SCRIPT, script);
-            Runtime.getRuntime().exec("powershell start -verb runas './FlashPatcher.bat'").waitFor();
+            Runtime.getRuntime().exec("powershell.exe start-process FlashPatcher.bat -Wait -NoNewWindow").waitFor();
 
             File tmpFile = new File(TMP_SCRIPT.toUri());
             if(tmpFile.delete()){
@@ -87,7 +90,6 @@ public class LegacyFlashPatcher {
     }
 
     private static class FlashInstaller implements Fixer {
-
         private static final Path
                 FLASH_DIR = Paths.get(System.getenv("APPDATA"), "DarkBot", "Flash"),
                 FLASH_OCX = FLASH_DIR.resolve("Flash.ocx"),
@@ -112,7 +114,6 @@ public class LegacyFlashPatcher {
     }
 
     private static class FlashConfigSetter implements Fixer {
-
         private static final Path
                 FLASH_FOLDER = Paths.get(System.getenv("WINDIR"), "SysWOW64", "Macromed", "Flash"),
                 FLASH_CONFIG = FLASH_FOLDER.resolve("mms.cfg"),
