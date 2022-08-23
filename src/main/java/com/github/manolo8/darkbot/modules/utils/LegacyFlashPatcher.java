@@ -48,15 +48,13 @@ public class LegacyFlashPatcher {
 
         List<String> script = new ArrayList<>();
         script.add("@echo off");
-        //get admin rights
-        script.add("cd /d \"%~dp0\" && ( if exist \"%temp%\\getadmin.vbs\" del \"%temp%\\getadmin.vbs\" ) && fsutil dirty query %systemdrive% 1>nul 2>nul || (  echo Set UAC = CreateObject^(\"Shell.Application\"^) : UAC.ShellExecute \"cmd.exe\", \"/k cd \"\"%~sdp0\"\" && %~s0 %params%\", \"\", \"runas\", 1 >> \"%temp%\\getadmin.vbs\" && \"%temp%\\getadmin.vbs\" && exit /B )");
         script.add("chcp 65001");
-        script.add("exit");
         for (Fixer fixer : needFixing) script.addAll(fixer.script()); //TODO make loop for force check if sha256 is ok
+        script.add("exit");
 
         try {
             Files.write(TMP_SCRIPT, script);
-            Runtime.getRuntime().exec("powershell.exe start-process FlashPatcher.bat -Wait -NoNewWindow").waitFor();
+            Runtime.getRuntime().exec("cmd.exe /c start /wait /b powershell Start -File 'FlashPatcher.bat' -Verb RunAs -Wait").waitFor();
 
             File tmpFile = new File(TMP_SCRIPT.toUri());
             if(tmpFile.delete()){
@@ -104,12 +102,13 @@ public class LegacyFlashPatcher {
 
             try (InputStream in = new URL("https://darkbot.eu/downloads/Flash.ocx").openStream()) {
                 Files.copy(in, FLASH_OCX, StandardCopyOption.REPLACE_EXISTING);
-                //need admin rights
-                //Runtime.getRuntime().exec("\"" + REG_SVR.toAbsolutePath() + "\" \"" + FLASH_OCX.toAbsolutePath() + "\"");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return Collections.singletonList("\"" + REG_SVR.toAbsolutePath() + "\"  \"" + FLASH_OCX.toAbsolutePath() + "\"");
+
+            return Arrays.asList(
+                    "echo \"Downloading & installing flash...\"",
+                    "\"" + REG_SVR.toAbsolutePath() + "\"  \"" + FLASH_OCX.toAbsolutePath() + "\"");
         }
     }
 
@@ -144,14 +143,12 @@ public class LegacyFlashPatcher {
         public List<String> script() {
             try {
                 Files.write(TMP_CONFIG, CONFIG_CONTENT);
-
-                //need admin rights
-                //FileUtils.ensureDirectoryExists(FLASH_FOLDER);
-                //Files.move(TMP_CONFIG, FLASH_CONFIG, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
             return Arrays.asList(
+                    "echo \"Updating flash configuration...\"",
                     "mkdir \"" + FLASH_FOLDER.toAbsolutePath() + "\"",
                     "move \"" + TMP_CONFIG.toAbsolutePath() + "\" \"" + FLASH_CONFIG.toAbsolutePath() + "\"");
         }
