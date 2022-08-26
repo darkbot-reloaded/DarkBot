@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
 import com.github.manolo8.darkbot.core.api.DarkBoatHookAdapter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.FileUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 
 import javax.swing.*;
 import java.io.File;
@@ -35,16 +36,13 @@ public class LegacyFlashPatcher {
             return;
         }
         List<Fixer> needFixing = FIXERS.stream().filter(Fixer::needsFix).collect(Collectors.toList());
+        Collections.reverse(needFixing); //for a better output in prompt if mms need fix too
 
         if (needFixing.isEmpty()) return;
 
-        Popups.of("Flash installer & patcher",
-                        "Flash is nowadays uninstalled by default in windows updates.\n" +
-                                "Darkbot will need a one-time admin permission to install flash and make it work.\n" +
-                                "Accept on the next pop-up to run as admin to be able to continue using DarkBot.\n" +
-                                "After the script runs, refresh the game or restart the bot to make it work.\n",
+        Popups.of(I18n.get("flash.fix.warn.title"), I18n.get("flash.fix.warn.content"),
                         JOptionPane.INFORMATION_MESSAGE)
-                .showSync(); //TODO translate text
+                .showSync();
 
         List<String> script = new ArrayList<>();
         script.add("@echo off");
@@ -54,13 +52,13 @@ public class LegacyFlashPatcher {
 
         try {
             Files.write(TMP_SCRIPT, script);
-            Runtime.getRuntime().exec("cmd.exe /c start /wait /b powershell Start -File 'FlashPatcher.bat' -Verb RunAs -Wait").waitFor();
+            Runtime.getRuntime().exec("powershell start -verb runas './FlashPatcher.bat' -wait").waitFor();
 
             File tmpFile = new File(TMP_SCRIPT.toUri());
             if(tmpFile.delete()){
-                System.out.println("File deleted and patch applied");
+                System.out.println("Tmp script deleted and patch applied");
             } else {
-                System.out.println("Operation failed");
+                System.out.println("Failed to delete tmp script");
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -107,7 +105,7 @@ public class LegacyFlashPatcher {
             }
 
             return Arrays.asList(
-                    "echo \"Downloading & installing flash...\"",
+                    "echo \"" + I18n.get("flash.fix.apply.patch_flash.content") + "\"",
                     "\"" + REG_SVR.toAbsolutePath() + "\"  \"" + FLASH_OCX.toAbsolutePath() + "\"");
         }
     }
@@ -117,7 +115,6 @@ public class LegacyFlashPatcher {
                 FLASH_FOLDER = Paths.get(System.getenv("WINDIR"), "SysWOW64", "Macromed", "Flash"),
                 FLASH_CONFIG = FLASH_FOLDER.resolve("mms.cfg"),
                 TMP_CONFIG = Paths.get("mms.cfg");
-
         private static final List<String> CONFIG_CONTENT = Arrays.asList(
                 "EnableAllowList=1",
                 "AllowListPreview=1",
@@ -148,7 +145,7 @@ public class LegacyFlashPatcher {
             }
 
             return Arrays.asList(
-                    "echo \"Updating flash configuration...\"",
+                    "echo \"" + I18n.get("flash.fix.apply.patch_mms.content") + "\"",
                     "mkdir \"" + FLASH_FOLDER.toAbsolutePath() + "\"",
                     "move \"" + TMP_CONFIG.toAbsolutePath() + "\" \"" + FLASH_CONFIG.toAbsolutePath() + "\"");
         }
