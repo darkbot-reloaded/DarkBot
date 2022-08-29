@@ -177,7 +177,6 @@ public class ConfigManager implements API.Singleton {
             // Didn't have any previous config, save this new one:
             if (!failedConfig) saveConfig(config, configFile, backupFile);
         }
-        ConfigEntity.INSTANCE.setConfig(config);
 
         return config;
     }

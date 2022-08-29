@@ -285,7 +285,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
         @Override
         public boolean isLeaf(Object node) {
-            if (super.isLeaf(node)) return true;
+            if (super.isLeaf(node)) return false;
             return ((ConfigSetting.Parent<?>) node).getChildren().values().stream().anyMatch(super::isLeaf);
         }
     }

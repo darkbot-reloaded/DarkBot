@@ -10,7 +10,11 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class ConfigSettingTreeModel implements TreeModel {
 
@@ -18,6 +22,9 @@ public class ConfigSettingTreeModel implements TreeModel {
     private final List<TreeModelListener> listeners = new ArrayList<>();
 
     private final TreeFilter filter;
+
+    @SuppressWarnings("rawtypes")
+    private final Map<ConfigSetting<?>, Consumer> changeListeners = new HashMap<>();
 
     public ConfigSettingTreeModel() {
         this(new TreeFilter());
@@ -28,8 +35,23 @@ public class ConfigSettingTreeModel implements TreeModel {
     }
 
     public void setRoot(ConfigSetting.Parent<?> root) {
+        if (this.root != root) {
+            changeListeners.forEach(ConfigSetting::removeListener);
+            changeListeners.clear();
+            setupValueChangeListeners("root", root);
+        }
         this.root = root;
         updateListeners();
+    }
+
+    protected <T> void setupValueChangeListeners(String key, ConfigSetting<T> setting) {
+        if (setting instanceof ConfigSetting.Parent) {
+            ((ConfigSetting.Parent<?>) setting).getChildren().forEach(this::setupValueChangeListeners);
+        } else if (isLeaf(setting)) {
+            Consumer<T> listener = v -> fireNodeChanged(setting);
+            setting.addListener(listener);
+            changeListeners.put(setting, listener);
+        }
     }
 
     public void setSearch(String search) {
@@ -88,8 +110,19 @@ public class ConfigSettingTreeModel implements TreeModel {
     @Override
     public void valueForPathChanged(TreePath path, Object newValue) {
         ConfigSetting<Object> setting = (ConfigSetting<Object>) path.getLastPathComponent();
-        setting.setValue(newValue);
+        setting.setValue(newValue); // calls fireNodeChanged internally via listener
+    }
 
+    public void fireNodeChanged(ConfigSetting<?> setting) {
+        List<ConfigSetting<?>> path = new ArrayList<>();
+        do {
+            path.add(setting);
+        } while (setting != root && (setting = setting.getParent()) != null);
+        Collections.reverse(path);
+        fireNodeChanged(new TreePath(path.toArray(new ConfigSetting[0])));
+    }
+
+    public void fireNodeChanged(TreePath path) {
         TreeModelEvent event = new TreeModelEvent(this, path);
         for (TreeModelListener listener : listeners) {
             listener.treeNodesChanged(event);
