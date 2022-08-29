@@ -40,6 +40,8 @@ public class ConfigHandler implements ConfigAPI, Listener {
     public void init() {
         this.configuration = builder.of(Config.class, "Configuration", null);
         this.configuration.setValue(loader.getConfig());
+
+        ConfigEntity.INSTANCE = pluginAPI.requireInstance(ConfigEntity.class);
     }
 
     public Config loadConfig(String configName) {
