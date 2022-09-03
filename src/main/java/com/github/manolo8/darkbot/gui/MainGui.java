@@ -21,6 +21,7 @@ public class MainGui extends JFrame {
     private final ConfigGui configGui;
 
     private final JPanel mainPanel = new JPanel();
+    private MainTitleBar titleBar;
     private ExitConfirmation exitConfirmation;
     private MapDrawer mapDrawer;
 
@@ -59,7 +60,7 @@ public class MainGui extends JFrame {
 
     private void setComponentPosition() {
         mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][][grow]"));
-        mainPanel.add(new MainTitleBar(main, this), "grow, span");
+        mainPanel.add(titleBar = new MainTitleBar(main, this), "grow, span");
         mainPanel.add(exitConfirmation = new ExitConfirmation(), "grow, span, hidemode 2");
         mainPanel.add(mapDrawer = new MapDrawer(main), "grow, span");
     }
