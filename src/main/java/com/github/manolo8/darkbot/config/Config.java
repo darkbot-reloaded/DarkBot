@@ -47,9 +47,9 @@ import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.GROU
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.GROUP_NAMES;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.HERO_NAME;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.HP_SHIELD_NUM;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.SHOW_PET;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.STATS_AREA;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.ZONES;
-import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.SHOW_PET;
 
 public class Config implements eu.darkbot.api.config.legacy.Config {
 
@@ -328,6 +328,15 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         }
     }
 
+    @Override
+    public eu.darkbot.api.config.types.BoxInfo getOrCreateBoxInfo(String name) {
+        return ConfigEntity.INSTANCE.getOrCreateBoxInfo(name);
+    }
+
+    @Override
+    public eu.darkbot.api.config.types.NpcInfo getOrCreateNpcInfo(String name) {
+        return ConfigEntity.INSTANCE.getOrCreateNpcInfo(name);
+    }
 
     @Override
     public Collection<? extends eu.darkbot.api.config.types.SafetyInfo> getSafeties(GameMap gameMap) {

@@ -47,6 +47,7 @@ import eu.darkbot.api.extensions.Installable;
 import eu.darkbot.api.extensions.Module;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.BotAPI;
+import eu.darkbot.api.managers.EventBrokerAPI;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -93,6 +94,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
     public final PluginUpdater pluginUpdater;
     public final FeatureRegistry featureRegistry;
     public final RepairManager repairManager;
+
+    private final EventBrokerAPI eventBroker;
 
     private final MainGui form;
     private final BotInstaller botInstaller;
@@ -143,7 +146,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
         this.backpage        = pluginAPI.requireInstance(BackpageManager.class);
         this.featureRegistry = pluginAPI.requireInstance(FeatureRegistry.class);
         this.repairManager   = pluginAPI.requireInstance(RepairManager.class);
-        this.botInstaller    = pluginAPI.requireInstance(BotInstaller.class);
+        this.botInstaller = pluginAPI.requireInstance(BotInstaller.class);
+        this.eventBroker = pluginAPI.requireAPI(EventBrokerAPI.class);
 
         API = configManager.getAPI(pluginAPI);
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
@@ -184,7 +188,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
             try {
                 tick();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
                 Time.sleep(1000);
             }
@@ -359,6 +363,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
         if (running && newModule instanceof TemporalModule) {
             moduleId = "(none)";
         }
+
+        eventBroker.sendEvent(new RunningToggleEvent(running));
 
         if (running) hero.pet.clickable.setRadius(0);
         else hero.pet.clickable.reset();

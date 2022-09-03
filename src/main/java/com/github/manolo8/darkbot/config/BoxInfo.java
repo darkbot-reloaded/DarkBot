@@ -17,12 +17,27 @@ public class BoxInfo implements eu.darkbot.api.config.types.BoxInfo {
     }
 
     @Override
+    public void setShouldCollect(boolean collect) {
+        this.collect = collect;
+    }
+
+    @Override
     public int getWaitTime() {
         return waitTime;
     }
 
     @Override
+    public void setWaitTime(int waitTime) {
+        this.waitTime = waitTime;
+    }
+
+    @Override
     public int getPriority() {
         return priority;
+    }
+
+    @Override
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 }

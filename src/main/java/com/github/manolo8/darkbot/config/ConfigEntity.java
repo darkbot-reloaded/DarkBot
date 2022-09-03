@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
 import eu.darkbot.api.config.ConfigSetting;
@@ -15,12 +14,12 @@ public class ConfigEntity {
 
     public static ConfigEntity INSTANCE;
 
-    private final ConfigAPI configAPI;
+    private final ConfigSetting<Config> root;
     private final ConfigSetting<Map<String, NpcInfo>> npcInfos;
     private final ConfigSetting<Map<String, BoxInfo>> boxInfos;
 
     public ConfigEntity(ConfigAPI configAPI) {
-        this.configAPI = configAPI;
+        this.root = configAPI.getConfigRoot();
         this.npcInfos = configAPI.requireConfig("loot.npc_infos");
         this.boxInfos = configAPI.requireConfig("collect.box_infos");
     }
@@ -109,10 +108,10 @@ public class ConfigEntity {
     }
 
     public Config getConfig() {
-        ConfigSetting<Config> c = configAPI.getConfigRoot();
-        return c.getValue();
+        return root.getValue();
     }
 
+    @Deprecated
     public void setConfig(Config config) {
     }
 
