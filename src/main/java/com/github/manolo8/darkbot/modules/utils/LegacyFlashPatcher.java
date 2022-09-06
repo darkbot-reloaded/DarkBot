@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.core.api.DarkBoatHookAdapter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.LibSetup;
 
 import javax.swing.*;
 import java.io.File;
@@ -30,11 +31,11 @@ public class LegacyFlashPatcher {
             new FlashInstaller(),
             new FlashConfigSetter());
 
-    protected void runPatcher() {
-        if (!(Main.API instanceof DarkBoatAdapter || Main.API instanceof DarkBoatHookAdapter)) {
+    public void runPatcher() {
+        /*if (!(Main.API instanceof DarkBoatAdapter || Main.API instanceof DarkBoatHookAdapter)) {
             // Linux APIs or kekka player do not require this at all. Only darkboat requires it.
             return;
-        }
+        }*/
         List<Fixer> needFixing = FIXERS.stream().filter(Fixer::needsFix).collect(Collectors.toList());
         Collections.reverse(needFixing); //for a better output in prompt if mms need fix too
 
@@ -92,7 +93,7 @@ public class LegacyFlashPatcher {
                 REG_SVR = Paths.get(System.getenv("WINDIR"), "SysWOW64", "regsvr32");
 
         public boolean needsFix() {
-            return !Files.exists(FLASH_DIR) || !Files.exists(FLASH_OCX);
+            return LibSetup.downloadLib("Flash.ocx", FLASH_OCX);
         }
 
         public List<String> script() {
