@@ -3,18 +3,18 @@ plugins {
     application
     `maven-publish`
 
-    id("com.github.johnrengelman.shadow") version "7.0.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
     id("org.beryx.runtime") version "1.12.7"
 }
 
 buildscript {
     dependencies {
-        classpath("com.guardsquare", "proguard-gradle", "7.1.1")
+        classpath("com.guardsquare", "proguard-gradle", "7.2.2")
     }
 }
 
 group = "eu.darkbot"
-version = "1.17.101"
+version = "1.17.108"
 description = "DarkBot"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 java.targetCompatibility = JavaVersion.VERSION_1_8
@@ -25,7 +25,7 @@ application {
 }
 
 repositories {
-    //mavenLocal()
+    mavenLocal()
     mavenCentral()
 
     maven { url = uri("https://jitpack.io") }
@@ -33,15 +33,19 @@ repositories {
 }
 
 dependencies {
-    implementation("eu.darkbot.DarkBotAPI:darkbot-impl:0.2.2")
-    implementation("com.google.code.gson:gson:2.8.9")
-    implementation("com.formdev:flatlaf:0.36")
-    implementation("com.miglayout:miglayout:3.7.4")
-    implementation("org.jgrapht:jgrapht-core:1.3.0")
-    implementation("org.mvel:mvel2:2.4.4.Final")
+    val apiVersion = "0.5.0"
 
-    compileOnly("org.jetbrains:annotations:23.0.0")
-    testCompileOnly("org.jgrapht:jgrapht-io:1.3.0")
+    // use this if you want to use local(mavenLocal) darkbot API
+    //implementation("eu.darkbot", "darkbot-impl", apiVersion)
+    implementation("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
+    implementation("com.google.code.gson", "gson", "2.8.9")
+    implementation("com.formdev", "flatlaf", "0.36")
+    implementation("com.miglayout", "miglayout", "3.7.4")
+    implementation("org.jgrapht", "jgrapht-core", "1.3.0")
+    implementation("org.mvel", "mvel2", "2.4.4.Final")
+
+    compileOnly("org.jetbrains", "annotations", "23.0.0")
+    testCompileOnly("org.jgrapht", "jgrapht-io", "1.3.0")
 }
 
 publishing {
@@ -83,6 +87,7 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
 //    finalizedBy(":proguard")
 //}
 
+// need to download WiX tools!
 runtime {
     //options.addAll("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
     modules.addAll(
