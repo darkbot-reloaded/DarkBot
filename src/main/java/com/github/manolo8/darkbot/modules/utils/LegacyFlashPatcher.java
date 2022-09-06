@@ -32,10 +32,10 @@ public class LegacyFlashPatcher {
             new FlashConfigSetter());
 
     public void runPatcher() {
-        /*if (!(Main.API instanceof DarkBoatAdapter || Main.API instanceof DarkBoatHookAdapter)) {
+        if (!(Main.API instanceof DarkBoatAdapter || Main.API instanceof DarkBoatHookAdapter)) {
             // Linux APIs or kekka player do not require this at all. Only darkboat requires it.
             return;
-        }*/
+        }
         List<Fixer> needFixing = FIXERS.stream().filter(Fixer::needsFix).collect(Collectors.toList());
         Collections.reverse(needFixing); //for a better output in prompt if mms need fix too
 
