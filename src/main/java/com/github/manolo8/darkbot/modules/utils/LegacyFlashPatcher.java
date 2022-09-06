@@ -31,7 +31,7 @@ public class LegacyFlashPatcher {
             new FlashInstaller(),
             new FlashConfigSetter());
 
-    public void runPatcher() {
+    protected void runPatcher() {
         if (!(Main.API instanceof DarkBoatAdapter || Main.API instanceof DarkBoatHookAdapter)) {
             // Linux APIs or kekka player do not require this at all. Only darkboat requires it.
             return;
