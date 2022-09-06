@@ -11,12 +11,9 @@ import com.github.manolo8.darkbot.utils.LibSetup;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,15 +45,16 @@ public class LegacyFlashPatcher {
         List<String> script = new ArrayList<>();
         script.add("@echo off");
         script.add("chcp 65001");
-        for (Fixer fixer : needFixing) script.addAll(fixer.script()); //TODO make loop for force check if sha256 is ok
+        for (Fixer fixer : needFixing) script.addAll(fixer.script());
         script.add("exit");
 
         try {
             Files.write(TMP_SCRIPT, script);
             Runtime.getRuntime().exec("powershell start -verb runas './FlashPatcher.bat' -wait").waitFor();
 
-            File tmpFile = new File(TMP_SCRIPT.toUri());
-            if(tmpFile.delete()){
+            File tmpScript = new File(TMP_SCRIPT.toUri());
+            File tmpDarkFlash = new File(TMP_SCRIPT.toUri());
+            if(tmpScript.delete() && tmpDarkFlash.delete()){
                 System.out.println("Tmp script deleted and patch applied");
             } else {
                 System.out.println("Failed to delete tmp script");
@@ -90,23 +88,20 @@ public class LegacyFlashPatcher {
         private static final Path
                 FLASH_DIR = Paths.get(System.getenv("APPDATA"), "DarkBot", "Flash"),
                 FLASH_OCX = FLASH_DIR.resolve("Flash.ocx"),
+                DARK_FLASH_OCX = Paths.get("", "lib", "DarkFlash.ocx"),
                 REG_SVR = Paths.get(System.getenv("WINDIR"), "SysWOW64", "regsvr32");
 
         public boolean needsFix() {
-            return LibSetup.downloadLib("Flash.ocx", FLASH_OCX);
+            return LibSetup.downloadLib("DarkFlash.ocx", FLASH_OCX);
         }
 
         public List<String> script() {
             FileUtils.ensureDirectoryExists(FLASH_DIR);
 
-            try (InputStream in = new URL("https://darkbot.eu/downloads/Flash.ocx").openStream()) {
-                Files.copy(in, FLASH_OCX, StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
             return Arrays.asList(
                     "echo \"" + I18n.get("flash.fix.apply.patch_flash.content") + "\"",
+                    "icacls \"" + FLASH_OCX + "\" /grant Everyone:M",
+                    "MOVE /Y \"" + DARK_FLASH_OCX.toAbsolutePath() + "\" " + "\"" + FLASH_OCX + "\"",
                     "\"" + REG_SVR.toAbsolutePath() + "\"  \"" + FLASH_OCX.toAbsolutePath() + "\"");
         }
     }
