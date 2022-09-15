@@ -72,7 +72,8 @@ public class EffectManager implements Manager, API.Singleton {
         REPAIR_BATTLE_BOT(12),
         /* LEVEL_UP(13), */
         LIGHTNING_ABILITY(14),
-        HEAL_RAY(15), // AEGIS_HP_REPAIR RAY
+        /** Hammerclaw or pet healing can use the same effect */
+        AEGIS_HEAL_RAY(15),
         NPC_ISH(16),
         /* RAGE(17),
         SKULL(18),
