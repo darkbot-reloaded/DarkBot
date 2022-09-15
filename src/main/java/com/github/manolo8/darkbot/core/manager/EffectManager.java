@@ -96,7 +96,8 @@ public class EffectManager implements Manager, API.Singleton {
         CITADEL_FORTIFY(35),
         CITADEL_DRAW_FIRE(36),
         CITADEL_PROTECTION(37),
-        PROTECTED(38),
+        /** A nearby citadel is casting protection on this ship */
+        CITADEL_PROTECTED(38),
         CITADEL_DRAW_FIRE_VICTIM(39),
         /* MOUSE_CURSOR_CHANGE(40), */
         WARP_ANIMATION(41), //Animation when changing ship
