@@ -66,7 +66,8 @@ public class EffectManager implements Manager, API.Singleton {
         SENTINEL_FORTRESS(6),
         /** Cyborg uses the same effect as venom for singularity */
         VENOM_SINGULARITY(7),
-        SABOTEUR(9),
+        /** When slowed down by saboteur or DCR-250 and similar */
+        SHIP_SLOWDOWN(9),
         /* SHIELD_1(10), */
         ENERGY_LEECH(11),
         REPAIR_BATTLE_BOT(12),
@@ -89,18 +90,21 @@ public class EffectManager implements Manager, API.Singleton {
         ABSORBATION_ELITE(28), */
         LEONOV_HOME_BONUS(29),
         SHIELD_ENGINEERING_SKILL(30),
-        CHARGE_SHIELD_RAY(31),
+        /** Hammerclaw healing can use the same effect */
+        AEGIS_SHIELD_RAY(31),
         /* MARKED_BY_BEACON(32),
         STANDALONE_RING_POD(33),
         DAMAGE_TRANSFER_RAY(34), */
         CITADEL_FORTIFY(35),
-        CITADEL_DRAW_FIRE(36),
+        /** CITADEL_DRAW_FIRE */
+        DRAW_FIRE(36),
         CITADEL_PROTECTION(37),
         /** A nearby citadel is casting protection on this ship */
         CITADEL_PROTECTED(38),
         CITADEL_DRAW_FIRE_VICTIM(39),
         /* MOUSE_CURSOR_CHANGE(40), */
-        WARP_ANIMATION(41), //Animation when changing ship
+        /** Animation when changing ship */
+        WARP_ANIMATION(41),
         /* INVASION_NPC(42),
         SOLAR_GLOW(43),
         SATURN_EVIL_GLOW(44),
@@ -108,7 +112,7 @@ public class EffectManager implements Manager, API.Singleton {
         EMERGENCY_REPAIR(46),
         CONSTRUCTION(47),
         SELF_HEAL(48), */
-        /** Used by several things to display a timer on the ship, like x, y and z */
+        /** Used by several things to display a timer on the ship, like when you use the NPC_NUKE Tech */
         COOLDOWN_TIMER(49),
         /* MODULE_LEVEL_UP(50),
         GHOST_NPC(51),
@@ -139,13 +143,15 @@ public class EffectManager implements Manager, API.Singleton {
         REPAIR_BOT(76),
         /* DOMINATION_ICON(77),
         CAMERA_DRONE_EFFECT(78),*/
-        ICY_CUBE_EFFECT(79), /* R-IC3 effect for example */
+        /** R-IC3 effect for example */
+        ICY_CUBE_EFFECT(79),
         MARKED_TARGET_BLUE(80),
         MARKED_TARGET_RED(81),
         /* SHIP_SPAWN(82),
         SHIP_DESPAWN(83), */
         ISH(84),
-        INFECTION(85), /* IM-01 effect for example */
+        /** IM-01 effect for example */
+        INFECTION(85),
         INFECTION_CURE(87),
         /* TA_CHAMPION(88),
         DISRUPTION(89),
