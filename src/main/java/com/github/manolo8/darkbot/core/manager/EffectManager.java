@@ -108,6 +108,7 @@ public class EffectManager implements Manager, API.Singleton {
         EMERGENCY_REPAIR(46),
         CONSTRUCTION(47),
         SELF_HEAL(48), */
+        /** Used by several things to display a timer on the ship, like x, y and z */
         COOLDOWN_TIMER(49),
         /* MODULE_LEVEL_UP(50),
         GHOST_NPC(51),
