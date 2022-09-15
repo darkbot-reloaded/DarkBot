@@ -37,7 +37,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Responsible for loading & saving configuration files
+ * Responsible for loading &amp; saving configuration files
  *
  * TODO: Rename to ConfigLoader
  */
