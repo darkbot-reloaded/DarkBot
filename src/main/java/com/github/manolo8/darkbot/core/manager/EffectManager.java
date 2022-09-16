@@ -162,8 +162,8 @@ public class EffectManager implements Manager, API.Singleton {
         PROMETHEUS_SHOT_LOADED(98),
         /* LONG_RANFE_LASER_EFFECT(100),
         MAYHEM_RAGE(287),
-        MAYHEM_WINNER(288),
-        PVP_PROTECTION(290), */
+        MAYHEM_WINNER(288), */
+        PVP_PROTECTION(290),
         BATTLE_REPAIR_BOT2(302),
         HECATE_PARTICLE_BEAM(303),
         /* SHIELD_2(304),
