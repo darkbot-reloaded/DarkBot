@@ -1,6 +1,5 @@
 plugins {
-    java
-    application
+    `java-library`
     `maven-publish`
 
     id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -37,8 +36,8 @@ dependencies {
 
     // use this if you want to use local(mavenLocal) darkbot API
     //implementation("eu.darkbot", "darkbot-impl", apiVersion)
-    implementation("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
-    implementation("com.google.code.gson", "gson", "2.8.9")
+    api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
+    api("com.google.code.gson", "gson", "2.8.9")
     implementation("com.formdev", "flatlaf", "0.36")
     implementation("com.miglayout", "miglayout", "3.7.4")
     implementation("org.jgrapht", "jgrapht-core", "1.3.0")
