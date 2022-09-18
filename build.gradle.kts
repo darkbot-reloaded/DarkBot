@@ -39,11 +39,11 @@ dependencies {
     api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
     api("com.google.code.gson", "gson", "2.8.9")
     implementation("com.formdev", "flatlaf", "0.36")
-    implementation("com.miglayout", "miglayout", "3.7.4")
+    api("com.miglayout", "miglayout", "3.7.4")
     implementation("org.jgrapht", "jgrapht-core", "1.3.0")
     implementation("org.mvel", "mvel2", "2.4.4.Final")
 
-    compileOnly("org.jetbrains", "annotations", "23.0.0")
+    api("org.jetbrains", "annotations", "23.0.0")
     testCompileOnly("org.jgrapht", "jgrapht-io", "1.3.0")
 }
 
