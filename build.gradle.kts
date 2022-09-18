@@ -56,7 +56,7 @@ publishing {
     }
 }
 
-tasks.withType<JavaCompile>() { options.encoding = "UTF-8" }
+tasks.withType<JavaCompile> { options.encoding = "UTF-8" }
 
 tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     allowaccessmodification()
@@ -82,6 +82,13 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     dependsOn(tasks.build)
 }
 
+tasks.wrapper {
+    gradleVersion = "7.5.1"
+
+    // without gradle javadocs and sources
+    distributionType = Wrapper.DistributionType.BIN
+}
+
 //will execute proguard task after build
 //tasks.build {
 //    finalizedBy(":proguard")
@@ -89,7 +96,7 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
 
 // need to download WiX tools!
 runtime {
-    //options.addAll("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
+    options.addAll("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
     modules.addAll(
         "java.desktop",
         "java.scripting",
