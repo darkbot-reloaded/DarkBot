@@ -1,6 +1,7 @@
 plugins {
     `java-library`
     `maven-publish`
+    application
 
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("org.beryx.runtime") version "1.12.7"
@@ -10,6 +11,13 @@ buildscript {
     dependencies {
         classpath("com.guardsquare", "proguard-gradle", "7.2.2")
     }
+}
+
+tasks.wrapper {
+    gradleVersion = "7.5.1"
+
+    // without gradle javadocs and sources
+    distributionType = Wrapper.DistributionType.BIN
 }
 
 group = "eu.darkbot"
@@ -38,12 +46,13 @@ dependencies {
     //implementation("eu.darkbot", "darkbot-impl", apiVersion)
     api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
     api("com.google.code.gson", "gson", "2.8.9")
-    implementation("com.formdev", "flatlaf", "0.36")
     api("com.miglayout", "miglayout", "3.7.4")
+    api("org.jetbrains", "annotations", "23.0.0")
+
+    implementation("com.formdev", "flatlaf", "0.36")
     implementation("org.jgrapht", "jgrapht-core", "1.3.0")
     implementation("org.mvel", "mvel2", "2.4.4.Final")
 
-    api("org.jetbrains", "annotations", "23.0.0")
     testCompileOnly("org.jgrapht", "jgrapht-io", "1.3.0")
 }
 
@@ -79,13 +88,6 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     }
 
     dependsOn(tasks.build)
-}
-
-tasks.wrapper {
-    gradleVersion = "7.5.1"
-
-    // without gradle javadocs and sources
-    distributionType = Wrapper.DistributionType.BIN
 }
 
 //will execute proguard task after build
