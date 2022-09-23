@@ -3,8 +3,9 @@ plugins {
     `maven-publish`
     application
 
-    id("com.github.johnrengelman.shadow") version "7.1.2"
     id("org.beryx.runtime") version "1.12.7"
+    id("edu.sc.seis.launch4j") version "2.5.3"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 buildscript {
@@ -13,11 +14,12 @@ buildscript {
     }
 }
 
-tasks.wrapper {
-    gradleVersion = "7.5.1"
+repositories {
+    mavenLocal()
+    mavenCentral()
 
-    // without gradle javadocs and sources
-    distributionType = Wrapper.DistributionType.BIN
+    maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://oss.jfrog.org/artifactory/oss-snapshot-local/com/formdev/") }
 }
 
 group = "eu.darkbot"
@@ -31,16 +33,16 @@ application {
     mainClass.set("com.github.manolo8.darkbot.Bot")
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
+publishing {
+    java.withSourcesJar()
 
-    maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://oss.jfrog.org/artifactory/oss-snapshot-local/com/formdev/") }
+    publications.create<MavenPublication>("maven") {
+        from(components["java"])
+    }
 }
 
 dependencies {
-    val apiVersion = "0.5.0"
+    val apiVersion = "0.5.1"
 
     // use this if you want to use local(mavenLocal) darkbot API
     //implementation("eu.darkbot", "darkbot-impl", apiVersion)
@@ -56,15 +58,14 @@ dependencies {
     testCompileOnly("org.jgrapht", "jgrapht-io", "1.3.0")
 }
 
-publishing {
-    java.withSourcesJar()
-
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
-    }
-}
-
 tasks.withType<JavaCompile> { options.encoding = "UTF-8" }
+
+tasks.wrapper {
+    gradleVersion = "7.5.1"
+
+    // without gradle javadocs and sources
+    distributionType = Wrapper.DistributionType.BIN
+}
 
 tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     allowaccessmodification()
@@ -88,6 +89,17 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     }
 
     dependsOn(tasks.build)
+}
+
+launch4j {
+    mainClassName = application.mainClass.get()
+    jarTask = project.tasks["proguard"]
+    icon = "$projectDir/icon.ico"
+
+    maxHeapSize = 150
+
+    copyConfigurable = listOf<Any>()
+    supportUrl = "https://darkbot.eu"
 }
 
 //will execute proguard task after build
