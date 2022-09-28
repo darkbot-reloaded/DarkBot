@@ -92,11 +92,14 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
 }
 
 launch4j {
-    mainClassName = application.mainClass.get()
+    productName = "DarkBot"
     jarTask = project.tasks["proguard"]
     icon = "$projectDir/icon.ico"
 
-    maxHeapSize = 150
+    maxHeapSize = 256
+    version = project.version.toString()
+
+    jreRuntimeBits = "64/32" // will prioritize 64bit jre/jdk
 
     copyConfigurable = listOf<Any>()
     supportUrl = "https://darkbot.eu"
