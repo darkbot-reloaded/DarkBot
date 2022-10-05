@@ -3,8 +3,8 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.objects.Map;
-import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.game.other.EntityInfo;
+import eu.darkbot.api.game.other.GameMap;
 
 import java.util.Optional;
 
@@ -60,7 +60,7 @@ public class Portal extends Entity implements eu.darkbot.api.game.entities.Porta
 
     @Override
     public String toString() {
-        if (!removed) return id + "(" + locationInfo.now + ")" + type;
+        if (!removed) return id + "(" + locationInfo.now + ")" + type + (target != null ? "[" + target + "]" : "");
         else return "(" + matcher.searchX + "," + matcher.searchY + ")" + matcher.searchType;
     }
 

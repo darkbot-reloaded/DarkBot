@@ -136,10 +136,10 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
         @Override
         public void update() {
-            laserAttacking = API.readMemoryLong(address + 64) != 0;
-            //if (!laserAttacking) return;
+            long targetPtr = API.readMemoryLong(address + 64);
+            laserAttacking = targetPtr != 0;
 
-            long entityPtr = API.readMemoryLong(address, 64, 32);
+            long entityPtr = laserAttacking ? API.readMemoryLong(targetPtr, 32) : 0;
 
             if (entityPtr == 0) targetedEntity = null;
             else if (targetedEntity == null || entityPtr != targetedEntity.address) {

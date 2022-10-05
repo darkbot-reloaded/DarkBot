@@ -14,6 +14,7 @@ public abstract class BaseSpot extends BasePoint {
     @Override
     public void update() {
         super.update();
+        clickable.update();
 
         if (locationInfo.isMoving()) ConfigEntity.INSTANCE.updateSafetyFor(this);
     }
