@@ -18,8 +18,8 @@ import static com.github.manolo8.darkbot.Main.API;
 public class EffectManager implements Manager, API.Singleton {
     private long mapAddressStatic;
 
-    private ObjArray effectsPtr = ObjArray.ofVector(true);
-    private Map<Long, List<Integer>> effects = new HashMap<>();
+    private final ObjArray effectsPtr = ObjArray.ofVector(true);
+    private final Map<Long, List<Integer>> effects = new HashMap<>();
 
     public EffectManager(Main main) {
     }
@@ -107,12 +107,13 @@ public class EffectManager implements Manager, API.Singleton {
         WARP_ANIMATION(41),
         /* INVASION_NPC(42),
         SOLAR_GLOW(43),
-        SATURN_EVIL_GLOW(44),
+        SATURN_EVIL_GLOW(44),*/
+        /** CBS deflector shield, prevents it being attacked */
         DEFLECTOR_SHIELD(45),
-        EMERGENCY_REPAIR(46),
+        /*EMERGENCY_REPAIR(46),
         CONSTRUCTION(47),
         SELF_HEAL(48), */
-        /** Used by several things to display a timer on the ship, like when you use the NPC_NUKE Tech */
+        /** Show a timer on the entity, eg: NPC_NUKE Tech, or CBS timer */
         COOLDOWN_TIMER(49),
         /* MODULE_LEVEL_UP(50),
         GHOST_NPC(51),
@@ -121,7 +122,7 @@ public class EffectManager implements Manager, API.Singleton {
         MODULE_INSTALL(54),
         MIRROR_CONTROLS(55), */
         STICKY_BOMB(56),
-        STICKY_BOMB_FLYING(57), 
+        STICKY_BOMB_FLYING(57),
         /* GLOWING_RING_EFFECT(58),
         POI_ZONE_EXPLOSION_EFFECT(59),
         POI_ZONE_EXPLOSION_EFFECT_CONTAINER(60),
@@ -197,6 +198,10 @@ public class EffectManager implements Manager, API.Singleton {
         /*APRILS_FOOLS_TRAILS(1337)*/;
 
         private final int id;
+
+        public int getId() {
+            return id;
+        }
 
         Effect(int id) {
             this.id = id;
