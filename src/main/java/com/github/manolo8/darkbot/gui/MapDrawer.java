@@ -55,7 +55,7 @@ public class MapDrawer extends JPanel {
 
     public MapDrawer(Main main) {
         this();
-        setBorder(UIUtils.getBorder());
+        setBorder(UIUtils.getUnfocusableBorder());
         setup(main);
 
         this.drawableHandler = main.pluginAPI.requireInstance(DrawableHandler.class);
