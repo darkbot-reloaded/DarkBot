@@ -27,7 +27,7 @@ public class ItemUtils {
 
         CategoryBar cb = main.facadeManager.slotBars.categoryBar;
 
-        return (category != null ? cb.get(category).items.stream() :
+        return (category != null ? cb.getItemStream(category) :
                 cb.categories.stream().flatMap(cat -> cat.items.stream()))
                 .filter(Item::hasShortcut)
                 .filter(item -> item.getSlotBarType() == k.getType())
