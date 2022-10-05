@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
+import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.utils.PidSelector;
 import com.github.manolo8.darkbot.gui.utils.Popups;
@@ -369,6 +371,12 @@ public class GameAPIImpl<
     @Override
     public void lockEntity(int id) {
         direct.lockEntity(id);
+    }
+
+    @Override
+    public void selectEntity(Entity entity) {
+        if (!entity.clickable.isInvalid())
+            direct.selectEntity(entity.clickable.address, BotInstaller.SCRIPT_OBJECT_VTABLE);
     }
 
     @Override

@@ -15,14 +15,15 @@ public class BotInstaller implements API.Singleton {
     private static final byte[] bytesToSettings =
             new byte[]{0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5};
 
-    public final Lazy<Boolean> invalid             = new Lazy<>(true);
+    public static long SCRIPT_OBJECT_VTABLE, STRING_OBJECT_VTABLE;
     public final Lazy<Long> mainApplicationAddress = new Lazy<>();
-    public final Lazy<Long> mainAddress            = new Lazy<>();
-    public final Lazy<Long> screenManagerAddress   = new Lazy<>();
-    public final Lazy<Long> guiManagerAddress      = new Lazy<>();
-    public final Lazy<Long> heroInfoAddress        = new Lazy<>();
-    public final Lazy<Long> settingsAddress        = new Lazy<>();
-
+    public final Lazy<Boolean> invalid = new Lazy<>(true);
+    public final Lazy<Long> mainAddress = new Lazy<>();
+    public final Lazy<Long> screenManagerAddress = new Lazy<>();
+    public final Lazy<Long> guiManagerAddress = new Lazy<>();
+    public final Lazy<Long> heroInfoAddress = new Lazy<>();
+    public final Lazy<Long> settingsAddress = new Lazy<>();
+    public final Lazy<Long> connectionManagerAddress = new Lazy<>();
     public static int SEP;
 
     private long timer;
@@ -47,6 +48,11 @@ public class BotInstaller implements API.Singleton {
 
         if (API.readMemoryLong(mainApplicationAddress.get() + 1344) == mainAddress.get()) {
             if (heroInfoAddress.get() == 0) checkUserData();
+
+            if (connectionManagerAddress.get() == 0) {
+                long connMgr = API.readMemoryLong(mainAddress.get() + 560);
+                if (connMgr != 0) connectionManagerAddress.send(connMgr);
+            }
             return false;
         }
 
@@ -55,7 +61,6 @@ public class BotInstaller implements API.Singleton {
     }
 
     private void checkUserData() {
-        // could use ID from flash vars here
         int heroId = API.readMemoryInt(API.readMemoryLong(screenManagerAddress.get() + 240) + 56);
         if (heroId == 0) return;
 
@@ -103,8 +108,13 @@ public class BotInstaller implements API.Singleton {
         if ((temp = API.readMemoryLong(mainAddress.get() + 512)) == 0) return true;
         this.guiManagerAddress.send(temp);
 
+        SCRIPT_OBJECT_VTABLE = API.readLong(screenManagerAddress.get());
+        // vtable -> traits -> core -> string cache -> cpp_vtable
+        STRING_OBJECT_VTABLE = API.readLong(screenManagerAddress.get(), 0x10, 0x28, 0x8, 0x3e8, 0x0);
+
         //reset address
         this.heroInfoAddress.send(0L);
+        this.connectionManagerAddress.send(0L);
         return false;
     }
 

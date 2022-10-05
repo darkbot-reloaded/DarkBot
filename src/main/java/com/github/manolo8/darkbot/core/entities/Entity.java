@@ -9,7 +9,6 @@ import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
-import eu.darkbot.api.game.entities.Ship;
 import eu.darkbot.api.game.other.Lockable;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,6 +58,7 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     }
 
     public boolean isInvalid(long mapAddress) {
+        if (address == 0) return true;
         int  id        = API.readMemoryInt(address + 56);
         long container = API.readMemoryLong(address + 96);
 
@@ -137,9 +137,12 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     public boolean trySelect(boolean tryAttack) {
         if (!isSelectable() || distanceTo(main.hero) > DEFAULT_CLICK_RADIUS) return false;
 
-        // Use direct locking, but only on things that can be locked (eg: boxes can't be locked)
+        // Use direct locking or selecting, depending on if it's lockable
         if (API.hasCapability(GameAPI.Capability.DIRECT_ENTITY_LOCK) && this instanceof Lockable) {
             API.lockEntity(id);
+        } else if (API.hasCapability(GameAPI.Capability.DIRECT_ENTITY_SELECT)) {
+            API.selectEntity(this);
+            if (tryAttack) API.selectEntity(this); // too small delay, but seems to work
         } else {
             clickable.setRadius(DEFAULT_CLICK_RADIUS);
             main.hero.drive.clickCenter(!tryAttack, locationInfo.now);

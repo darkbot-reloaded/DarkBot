@@ -1,12 +1,11 @@
 package com.github.manolo8.darkbot.core.objects;
 
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Clickable extends Updatable {
-
-    private long confirm;
 
     public int radius;
     public int priority;
@@ -39,13 +38,13 @@ public class Clickable extends Updatable {
     /**
      * @return prevent swf crash
      */
-    private boolean isInvalid() {
-        return defRadius <= 0 || address == 0 || API.readMemoryLong(address) != confirm;
+    public boolean isInvalid() {
+        return defRadius <= 0 || address == 0 || API.readMemoryLong(address) != BotInstaller.SCRIPT_OBJECT_VTABLE;
     }
 
     @Override
     public void update() {
-        if (address == 0 || API.readMemoryLong(address) != confirm) return;
+        if (address == 0 || API.readMemoryLong(address) != BotInstaller.SCRIPT_OBJECT_VTABLE) return;
         int oldRad = radius, oldPri = priority;
         this.radius = API.readMemoryInt(address + 40);
         this.priority = API.readMemoryInt(address + 44);
@@ -65,7 +64,6 @@ public class Clickable extends Updatable {
     public void update(long address) {
         super.update(address);
         if (address == 0) return;
-        this.confirm = API.readMemoryLong(address);
         this.radius = defRadius = API.readMemoryInt(address + 40);
         this.priority = defPriority = API.readMemoryInt(address + 44);
     }

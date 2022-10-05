@@ -107,10 +107,28 @@ public interface GameAPI {
         void mouseClick(int x, int y);
     }
 
+    enum Capability {
+        LOGIN,
+        ATTACH,
+        INITIALLY_SHOWN,
+        CREATE_WINDOW_THREAD,
+        BACKGROUND_ONLY,
+
+        DIRECT_LIMIT_FPS,
+        DIRECT_ENTITY_LOCK,
+        DIRECT_ENTITY_SELECT,
+        DIRECT_MOVE_SHIP,
+        DIRECT_COLLECT_BOX,
+        DIRECT_REFINE,
+        DIRECT_CALL_METHOD;
+    }
+
     interface DirectInteraction extends Base {
         void setMaxFps(int maxFps);
 
         void lockEntity(int id);
+
+        void selectEntity(long addr, long vtable);
 
         void moveShip(Locatable destination);
 
@@ -125,21 +143,6 @@ public interface GameAPI {
         }
     }
 
-    enum Capability {
-        LOGIN,
-        ATTACH,
-        INITIALLY_SHOWN,
-        CREATE_WINDOW_THREAD,
-        BACKGROUND_ONLY,
-
-        DIRECT_LIMIT_FPS,
-        DIRECT_ENTITY_LOCK,
-        DIRECT_MOVE_SHIP,
-        DIRECT_COLLECT_BOX,
-        DIRECT_REFINE,
-        DIRECT_CALL_METHOD;
-    }
-
     class NoOpWindow implements Window {
         @Override
         public int getVersion() {
@@ -147,7 +150,8 @@ public interface GameAPI {
         }
 
         @Override
-        public void createWindow() {}
+        public void createWindow() {
+        }
     }
 
     class NoOpHandler implements Handler {
@@ -314,6 +318,11 @@ public interface GameAPI {
 
         @Override
         public void lockEntity(int id) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void selectEntity(long addr, long vtable) {
             throw new UnsupportedOperationException();
         }
 

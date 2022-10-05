@@ -101,6 +101,11 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
     }
 
     @Override
+    public void selectEntity(long addr, long vtable) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void moveShip(Locatable dest) {
         checkEnabled("move ship");
         callMethodAsync(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.getX(), (long) dest.getY());
