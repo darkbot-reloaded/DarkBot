@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalBlacklightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.FrozenLabyrinthProxy;
+import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
@@ -43,6 +44,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final EternalBlacklightProxy blacklightGate;
     public final ChrominProxy chrominEvent;
     public final AstralGateProxy astralGate;
+    public final HighlightProxy highlight;
 
     public FacadeManager(PluginAPI pluginApi) {
         this.pluginAPI = pluginApi;
@@ -59,6 +61,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.blacklightGate = registerProxy("eternal_blacklight",     EternalBlacklightProxy.class);
         this.chrominEvent   = registerProxy("chrominEvent",           ChrominProxy.class);
         this.astralGate     = registerProxy("rogue_lite",             AstralGateProxy.class);
+        this.highlight      = registerProxy("HighlightProxy",         HighlightProxy.class);
     }
 
     public <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
