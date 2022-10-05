@@ -211,6 +211,8 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public WindowPosition MAIN_GUI_WINDOW = new WindowPosition();
             public WindowPosition CONFIG_GUI_WINDOW = new WindowPosition();
 
+            public Visibility.Level CONFIG_LEVEL = Level.BASIC;
+
             public static class WindowPosition {
                 // x and y refer to top left coordinates of window
                 public int x = Integer.MIN_VALUE, y = Integer.MIN_VALUE;
