@@ -69,7 +69,7 @@ tasks.wrapper {
 
 tasks.jar {
     manifest {
-        attributes["SplashScreen-Image"] = "splash_screen.png"
+        attributes["SplashScreen-Image"] = "icon.png"
     }
 }
 
