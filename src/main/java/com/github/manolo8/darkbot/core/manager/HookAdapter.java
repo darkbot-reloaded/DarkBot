@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.entities.Box;
 import eu.darkbot.api.API;
 import eu.darkbot.api.DarkHook;
 import eu.darkbot.api.PluginAPI;
@@ -112,9 +113,9 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
     }
 
     @Override
-    public void collectBox(Locatable dest, long boxAddr) {
+    public void collectBox(Box box) {
         checkEnabled("collect box");
-        callMethod(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.getX(), (long) dest.getY(), boxAddr);
+        callMethod(10, Main.API.readMemoryLong(staticEventAddress), (long) box.getX(), (long) box.getY(), box.address);
     }
 
     @Override

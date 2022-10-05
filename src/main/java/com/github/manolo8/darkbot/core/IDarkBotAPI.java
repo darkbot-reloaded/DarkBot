@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core;
 
 import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MemoryAPI;
@@ -122,7 +123,7 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     void moveShip(Locatable destination);
 
-    void collectBox(Locatable destination, long collectableAddress);
+    void collectBox(Box box);
 
     void refine(long refineUtilAddress, OreAPI.Ore ore, int amount);
 

@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
@@ -147,7 +148,7 @@ public interface GameAPI {
 
         void moveShip(Locatable destination);
 
-        void collectBox(Locatable destination, long collectableAddress);
+        void collectBox(Box box);
 
         void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount);
 
@@ -361,7 +362,7 @@ public interface GameAPI {
         }
 
         @Override
-        public void collectBox(Locatable destination, long collectableAddress) {
+        public void collectBox(Box box) {
             throw new UnsupportedOperationException();
         }
 

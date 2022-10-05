@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
+import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.utils.PidSelector;
@@ -421,8 +422,8 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void collectBox(Locatable destination, long collectableAddress) {
-        direct.collectBox(destination, collectableAddress);
+    public void collectBox(Box box) {
+        direct.collectBox(box);
     }
 
     @Override

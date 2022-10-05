@@ -45,7 +45,7 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
     @Override
     public boolean tryCollect() {
         if (API.hasCapability(GameAPI.Capability.DIRECT_COLLECT_BOX)) {
-            API.collectBox(this, this.address);
+            API.collectBox(this);
             setCollected();
             return true;
         }
