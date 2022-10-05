@@ -366,9 +366,6 @@ public class Main extends Thread implements PluginListener, BotAPI {
         }
 
         eventBroker.sendEvent(new RunningToggleEvent(running));
-
-        if (running) hero.pet.clickable.setRadius(0);
-        else hero.pet.clickable.reset();
     }
 
     public void setBehaviours(List<Behavior> behaviours) {

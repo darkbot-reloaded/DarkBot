@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.core;
 
 import com.github.manolo8.darkbot.core.api.GameAPI;
-
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
@@ -15,6 +14,7 @@ import java.util.function.LongPredicate;
 public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     void tick();
+    int getRefreshCount();
 
     void createWindow();
     void setSize(int width, int height);

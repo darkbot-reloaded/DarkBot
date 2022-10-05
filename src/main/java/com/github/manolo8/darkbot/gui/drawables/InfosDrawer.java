@@ -87,7 +87,7 @@ public class InfosDrawer implements Drawable {
         mg.drawString(mg.getWidthMiddle(), mg.getHeight() / 2 + 35, status, MapGraphics.StringAlign.MID);
 
         mg.setFont("small");
-        String info = i18n.get("gui.map.info", main.refreshes,
+        String info = i18n.get("gui.map.info", Main.API.getRefreshCount(),
                 (main.isRunning() || !resetRefresh.getValue()
                         ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"),
                 Time.toString(refreshTime.getValue() * 60 * 1000L));

@@ -59,6 +59,7 @@ public class GameAPIImpl<
     protected boolean initiallyShown;
     protected boolean autoHidden = false;
 
+    private int refreshCount = 0;
     protected long lastFailedLogin;
 
     protected Timer clearRamTimer = Timer.get(5 * Time.MINUTE);
@@ -154,6 +155,10 @@ public class GameAPIImpl<
         }
     }
 
+    @Override
+    public int getRefreshCount() {
+        return refreshCount;
+    }
     public boolean hasCapability(GameAPI.Capability capability) {
         return capabilities.contains(capability);
     }
@@ -428,7 +433,7 @@ public class GameAPIImpl<
             setData();
         }
 
-        HeroManager.instance.main.refreshes++;
+        refreshCount++;
         handler.reload();
 
         extraMemoryReader.resetCache();
