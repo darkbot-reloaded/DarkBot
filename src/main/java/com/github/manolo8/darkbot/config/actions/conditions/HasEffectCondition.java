@@ -29,10 +29,38 @@ public class HasEffectCondition implements Condition, Parser {
     }
 
     public enum Effect {
+        SOLACE_NANO_CLUSTER(3),
+        DIMINISHER_WEAKEN_SHIELDS(4),
+        SPECTRUM_PRISMATIC_SHIELD(5),
+        SENTINEL_FORTRESS(6),
+        /** Cyborg uses the same effect as venom for singularity */
+        VENOM_SINGULARITY(7),
+        /** When slowed down by saboteur or DCR-250 and similar */
+        SHIP_SLOWDOWN(9),
         LEECH(11),
+        LIGHTNING_ABILITY(14),
         NPC_ISH(16),
+        CITADEL_FORTIFY(35),
+        CITADEL_DRAW_FIRE(36),
+        CITADEL_PROTECTION(37),
+        CITADEL_PROTECTED(38),
+        CITADEL_DRAW_FIRE_VICTIM(39),
         STICKY_BOMB(56),
-        ISH(84);
+        ISH(84),
+        TARTARUS_SPEED_BOOST(92),
+        TARTARUS_RAPID_FIRE(93),
+        MIMESIS_PHASE_OUT(95),
+        PROMETHEUS_SHOT_LOADED(98),
+        DISRUPTOR_REDIRECT(320),
+        DISRUPTOR_SHIELD_DISARRAY(321),
+        DISRUPTOR_DDOL(322),
+        BERSERKER_SHIELD_LINK(323),
+        BERSERKER_BERSERK(324),
+        BERSERKER_REVENGE(325),
+        SOLARIS_INCINERATE(327),
+        HOLO_REVERSAL_SELF(343),
+        HOLO_ENEMY_REVERSAL(344),
+        CITADEL_PLUS_PRISMATIC_ENDURANCE(345);
 
         private final int id;
 
