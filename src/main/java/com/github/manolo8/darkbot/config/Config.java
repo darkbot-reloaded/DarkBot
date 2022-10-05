@@ -224,8 +224,10 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean FULLY_HIDE_API = true;
             public @Option boolean FORCE_GAME_LANGUAGE = false;
             public @Option boolean ENFORCE_HW_ACCEL = true;
-            //public @Option boolean USE_3D = false; // After reload with forced HW_ACCEL in 3D, cpu usage is really high
-            public @Option @Number(min = 1, max = 60) @Number.Disabled(value = 0, def = 30) int MAX_FPS = 0;
+            public @Option boolean USE_3D = false; // After reload with forced HW_ACCEL in 3D, cpu usage is really high
+            public @Option
+            @Number(min = 1, max = 60)
+            @Number.Disabled(value = 0, def = 30) int MAX_FPS = 0;
 
             @Option @Dropdown(multi = true)
             public Set<HookAdapter.Flag> DARK_HOOK_FLAGS = EnumSet.allOf(HookAdapter.Flag.class);

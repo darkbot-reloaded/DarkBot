@@ -7,7 +7,7 @@ import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.managers.WindowAPI;
 
-import java.util.function.Predicate;
+import java.util.function.LongPredicate;
 
 public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
@@ -19,6 +19,7 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     boolean isValid();
     boolean isInitiallyShown();
     long getMemoryUsage();
+    double getCpuUsage();
     String getVersion();
 
     void mouseMove(int x, int y);
@@ -92,8 +93,9 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     long[] queryMemoryInt(int value, int maxQuantity);
     long[] queryMemoryLong(long value, int maxQuantity);
     long[] queryMemory(byte[] query, int maxQuantity);
+    long queryMemory(byte... query);
 
-    long searchClassClosure(Predicate<Long> pattern);
+    long searchClassClosure(LongPredicate pattern);
 
     void setVisible(boolean visible);
     default void setMinimized(boolean minimized) {

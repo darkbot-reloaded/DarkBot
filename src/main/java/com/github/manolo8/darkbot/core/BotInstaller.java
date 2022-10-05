@@ -89,11 +89,10 @@ public class BotInstaller implements API.Singleton {
      */
     private boolean tryInstall() {
         if (!API.isValid()) return true;
-        long[] query;
         long temp;
 
-        if ((query = API.queryMemory(bytesToMainApplication, 1)).length != 1) return true;
-        this.mainApplicationAddress.send(query[0] - 228);
+        if ((temp = API.queryMemory(bytesToMainApplication)) == 0) return true;
+        this.mainApplicationAddress.send(temp - 228);
         BotInstaller.SEP = API.readMemoryInt(mainApplicationAddress.get() + 4);
 
         if ((temp = API.searchClassClosure(this::settingsPattern)) == 0) return true;

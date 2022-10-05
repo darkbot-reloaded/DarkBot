@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.core.api.GameAPI;
 import eu.darkbot.util.Timer;
 
 import java.nio.charset.StandardCharsets;
-import java.util.function.Predicate;
+import java.util.function.LongPredicate;
 
 public class ByteUtils {
 
@@ -232,11 +232,12 @@ public class ByteUtils {
 
         private final Timer timer = Timer.get(750);
         private byte[] tableData = null;
+
         /**
          * @author Alph4rd
          */
         @Override
-        public long searchClassClosure(Predicate<Long> pattern) {
+        public long searchClassClosure(LongPredicate pattern) {
             long mainAddress = botInstaller.mainApplicationAddress.get();
             if (mainAddress == 0) return 0;
 

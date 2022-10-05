@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.utils.PidSelector;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.StartupParams;
+import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.config.ConfigSetting;
@@ -19,7 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.function.LongPredicate;
 
 public class GameAPIImpl<
         W extends GameAPI.Window,
@@ -29,6 +30,7 @@ public class GameAPIImpl<
         I extends GameAPI.Interaction,
         D extends GameAPI.DirectInteraction> implements IDarkBotAPI {
 
+    private static final int BAD_PTR = 0xFFFF;
     private static final String FALLBACK_STRING = "ERROR";
 
     protected final StartupParams params;
@@ -79,10 +81,12 @@ public class GameAPIImpl<
         this.loginData = hasCapability(GameAPI.Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
         this.initiallyShown = hasCapability(GameAPI.Capability.INITIALLY_SHOWN) && !params.getAutoHide();
 
+        ConfigAPI config = HeroManager.instance.main.configHandler;
         if (hasCapability(GameAPI.Capability.DIRECT_LIMIT_FPS)) {
-            ConfigAPI config = HeroManager.instance.main.configHandler;
             ConfigSetting<Integer> maxFps = config.requireConfig("bot_settings.api_config.max_fps");
             maxFps.addListener(fpsLimitListener = this::setMaxFps);
+
+            HeroManager.instance.main.status.add(running -> setMaxFps(maxFps.getValue()));
             setMaxFps(maxFps.getValue());
         } else {
             this.fpsLimitListener = null;
@@ -123,7 +127,10 @@ public class GameAPIImpl<
             System.err.println("IOException trying to perform re-login, servers may be down");
             e.printStackTrace();
             lastFailedLogin = System.currentTimeMillis();
-        } catch (LoginUtils.WrongCredentialsException e) {
+        } catch (LoginUtils.CaptchaException e) {
+            System.err.println("Captcha detected & no Captcha-Solver is configured");
+            lastFailedLogin = System.currentTimeMillis() + Time.MINUTE * 5; // wait minimum 5:30m to next login attempt on refresh
+        } catch (LoginUtils.LoginException e) {
             System.err.println("Wrong credentials, check your username and password");
         }
     }
@@ -212,6 +219,11 @@ public class GameAPIImpl<
     }
 
     @Override
+    public double getCpuUsage() {
+        return handler.getCpuUsage();
+    }
+
+    @Override
     public void mouseMove(int x, int y) {
         interaction.mouseMove(x, y);
     }
@@ -243,77 +255,96 @@ public class GameAPIImpl<
 
     @Override
     public double readMemoryDouble(long address) {
+        if (address <= BAD_PTR) return 0;
         return memory.readDouble(address);
     }
 
     @Override
     public long readMemoryLong(long address) {
+        if (address <= BAD_PTR) return 0;
         return memory.readLong(address);
     }
 
     @Override
     public int readMemoryInt(long address) {
+        if (address <= BAD_PTR) return 0;
         return memory.readInt(address);
     }
 
     @Override
     public boolean readMemoryBoolean(long address) {
+        if (address <= BAD_PTR) return false;
         return memory.readBoolean(address);
     }
 
     @Override
     public String readMemoryString(long address) {
+        if (address <= BAD_PTR) return FALLBACK_STRING;
         return readMemoryStringFallback(address, FALLBACK_STRING);
     }
 
     @Override
     public String readMemoryStringFallback(long address, String fallback) {
+        if (address <= BAD_PTR) return fallback;
+
         String str = extraMemoryReader.readString(address);
         return str == null ? fallback : str;
     }
 
     @Override
     public byte[] readMemory(long address, int length) {
+        if (address <= BAD_PTR) return new byte[0];
         return memory.readBytes(address, length);
     }
 
     @Override
     public void readMemory(long address, byte[] buffer, int length) {
+        if (address <= BAD_PTR) {
+            Arrays.fill(buffer, 0, length, (byte) 0);
+            return;
+        }
         memory.readBytes(address, buffer, length);
     }
 
     @Override
     public void replaceInt(long address, int oldValue, int newValue) {
+        if (address <= BAD_PTR) return;
         memory.replaceInt(address, oldValue, newValue);
     }
 
     @Override
     public void replaceLong(long address, long oldValue, long newValue) {
+        if (address <= BAD_PTR) return;
         memory.replaceLong(address, oldValue, newValue);
     }
 
     @Override
     public void replaceDouble(long address, double oldValue, double newValue) {
+        if (address <= BAD_PTR) return;
         memory.replaceDouble(address, oldValue, newValue);
     }
 
     @Override
     public void replaceBoolean(long address, boolean oldValue, boolean newValue) {
+        if (address <= BAD_PTR) return;
         memory.replaceBoolean(address, oldValue, newValue);
     }
 
     @Override
     public void writeMemoryInt(long address, int value) {
+        if (address <= BAD_PTR) return;
         memory.writeInt(address, value);
     }
 
     @Override
     public void writeMemoryLong(long address, long value) {
+        if (address <= BAD_PTR) return;
         memory.writeLong(address, value);
     }
 
     @Override
     public void writeMemoryDouble(long address, double value) {
+        if (address <= BAD_PTR) return;
         memory.writeDouble(address, value);
     }
 
@@ -333,7 +364,12 @@ public class GameAPIImpl<
     }
 
     @Override
-    public long searchClassClosure(Predicate<Long> pattern) {
+    public long queryMemory(byte... query) {
+        return memory.queryBytes(query);
+    }
+
+    @Override
+    public long searchClassClosure(LongPredicate pattern) {
         return extraMemoryReader.searchClassClosure(pattern);
     }
 
