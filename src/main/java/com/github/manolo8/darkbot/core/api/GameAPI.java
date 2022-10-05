@@ -130,6 +130,8 @@ public interface GameAPI {
         CREATE_WINDOW_THREAD,
         BACKGROUND_ONLY,
 
+        ALL_KEYBINDS_SUPPORT, // Support for key clicks like "ctrl"
+
         DIRECT_LIMIT_FPS,
         DIRECT_ENTITY_LOCK,
         DIRECT_ENTITY_SELECT,
