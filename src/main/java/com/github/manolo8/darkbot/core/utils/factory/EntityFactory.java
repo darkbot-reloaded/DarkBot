@@ -49,7 +49,7 @@ public enum EntityFactory implements EntityBuilder {
     CBS_CONSTRUCTION(BattleStation::new, "cbs-construction"),
     CBS_MODULE      (BattleStation.Module::new, "wreck|module_.*"), // addr+112 moduleType string
     CBS_MODULE_CON  (BattleStation::new, "module-construction"),
-    CBS_STATION     (BattleStation::new, "battleStation"),
+    CBS_STATION     (BattleStation.Built::new, "battleStation"),
 
     POD_HEAL        (StaticEntity.PodHeal::new,         "pod_heal"),               // Aegis/hammerclaw healing pods
     BUFF_CAPSULE    (StaticEntity.BuffCapsule::new,     "buffCapsule_.*"),

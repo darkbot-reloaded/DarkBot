@@ -30,13 +30,7 @@ public class BattleStation
     @Override
     public void update() {
         super.update();
-
-        info.update();
-        health.update();
-        if (locationInfo.isMoving()) {
-            area.set(locationInfo.now, 1200);
-            ConfigEntity.INSTANCE.updateSafetyFor(this);
-        }
+        clickable.update();
     }
 
     @Override
@@ -66,17 +60,6 @@ public class BattleStation
     }
 
     @Override
-    public void update(long address) {
-        super.update(address);
-
-        hullId = API.readMemoryInt(address + 116);
-        info.update(API.readMemoryLong(address + 120));
-
-        health.update(findInTraits(TraitPattern::ofHealth));
-        lockPtr = findInTraits(TraitPattern::ofLockType);
-    }
-
-    @Override
     public AreaImpl getArea() {
         return area;
     }
@@ -95,6 +78,37 @@ public class BattleStation
     @Override
     public String toString() {
         return id + "," + hullId;
+    }
+
+    public static class Built extends BattleStation {
+
+        public Built(int id, long address) {
+            super(id, address);
+        }
+
+        @Override
+        public void update() {
+            super.update();
+
+            info.update();
+            health.update();
+            if (locationInfo.isMoving()) {
+                area.set(locationInfo.now, 1200);
+                ConfigEntity.INSTANCE.updateSafetyFor(this);
+            }
+        }
+
+        @Override
+        public void update(long address) {
+            super.update(address);
+
+            hullId = API.readMemoryInt(address + 116);
+            info.update(API.readMemoryLong(address + 120));
+
+            health.update(findInTraits(TraitPattern::ofHealth));
+            lockPtr = findInTraits(TraitPattern::ofLockType);
+        }
+
     }
 
     public static class Module
