@@ -86,14 +86,13 @@ public class DispatchData {
                 "dispatch_item_type\"> ?(.+?) ?<.*?" +
                 "dispatch_item_tier\"> ?(.+?) ?<.*?" +
                 "dispatch_item_cost\"> ?(?:(.+?) ?<br>)? ?(.+?) ?<br>", Pattern.DOTALL);
-        private final Pattern PROGRESS_PATTERN = Pattern.compile("collectable=\"(.+?)\".*?" +
+        private final Pattern PROGRESS_PATTERN = Pattern.compile("collectable=\"(\\d+)\".*?" +
                 "dispatchId=\"(.+?)\".*?" +
                 "dispatchRewardPackage=\"(.+?)\".*?" +
-                "slotId=\"(.+?)\".*?" +
+                "slotId=\"(\\d+)\".*?" +
                 "dispatch_item_name_col\"> ?(.+?) ?<", Pattern.DOTALL);
-
         private final Pattern GATE_PATTERN = Pattern.compile("gateId=\"(.+?)\".*?" +
-                " (collectable=\"(.+?)\")?.*?" +
+                " (collectable=\"(\\d+)\")?.*?" +
                 "dispatch_item_name_col\"> ?(.+?) ?<.*?" +
                 "dispatch_remaining_time_col\"> ?(.+?) ?<input.*?" +
                 "dispatch_item_cost\">(.+?)?<",Pattern.DOTALL);
@@ -167,7 +166,7 @@ public class DispatchData {
             if (gate == null) gates.put(gateId, gate = new Gate());
 
             gate.setId(gateId);
-            gate.setCollectable(m.group(2) != null ? m.group(2) : "0");
+            gate.setCollectable(m.group(3) != null ? m.group(3) : "0");
             gate.setName(m.group(4));
             gate.setTime(m.group(5).length() < 10 ? m.group(5) : "0");
             gate.setCost(m.group(6).length() > 5 ? m.group(6) : "0");

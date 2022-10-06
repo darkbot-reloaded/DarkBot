@@ -103,7 +103,18 @@ public class DispatchManager {
         return false;
     }
     public boolean hireGate(Gate gate){
-        if(this.main.backpage.galaxyManager.getGalaxyInfo().getGate(Integer.parseInt(gate.getId())).getCurrentWave() == 0) return handleResponse("Cannot hire ", gate.getName(), "(ERROR) Gate not started");
+        //check if another gate in progress or ready to collect
+        if(gate.getTime().equalsIgnoreCase("0") && gate.getCost().equalsIgnoreCase("0") && gate.getCollectable().equalsIgnoreCase("0")) return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start same Gate");
+
+        for(Gate g : data.getGates().values()) {
+            if (g.getCollectable().equalsIgnoreCase("1")) {
+                return handleResponse("Hire Gate", gate.getName(), "(ERROR) Another Gate is Ready to Collect, Can Not Start");
+            }
+            if (g.getTime().equalsIgnoreCase("0") && g.getCost().equalsIgnoreCase("0") && g.getCollectable().equalsIgnoreCase("0")) {
+                return handleResponse("Hire Gate", gate.getName(), "(ERROR) Another Gate in Progress, Can Not Start");
+            }
+        }
+
         if (data.getGateUnits() <= 0) return handleResponse("Cannot hire ", gate.getName(), "(ERROR) Not enough GGEU");
 
         try {
@@ -129,8 +140,8 @@ public class DispatchManager {
                     .getContent();
 
             gate.setCollectable("0");
-            gate.setTime("0");
-            gate.setCost("0");
+            gate.setTime("-1");
+            gate.setCost("-1");
 
             return handleResponse("Collected gate", gate.getName(), response);
         } catch (Exception e) {

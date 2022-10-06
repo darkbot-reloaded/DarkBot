@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.backpage.dispatch;
 
 public class Gate {
     protected String id, name, time, cost, collectable;
-    protected boolean forRemoval;
 
     public String getId() {
         return id;
