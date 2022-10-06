@@ -103,17 +103,7 @@ public class DispatchManager {
         return false;
     }
     public boolean hireGate(Gate gate){
-        //check if another gate in progress or ready to collect
-        if(gate.getInProgress()) return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start same Gate");
-
-        for(Gate g : data.getGates().values()) {
-            if (g.getCollectable().equalsIgnoreCase("1")) {
-                return handleResponse("Hire Gate", gate.getName(), "(ERROR) Another Gate is Ready to Collect, Can Not Start");
-            }
-            if (g.getInProgress()) {
-                return handleResponse("Hire Gate", gate.getName(), "(ERROR) Another Gate in Progress, Can Not Start");
-            }
-        }
+        if(gate.getInProgress()) return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start Same Gate");
 
         if (data.getGateUnits() <= 0) return handleResponse("Cannot hire ", gate.getName(), "(ERROR) Not enough GGEU");
 
