@@ -67,14 +67,14 @@ public class DispatchManager {
     public boolean hireRetriever(Retriever retriever) {
         if (data.getAvailableSlots() <= 0) return false;
         if (retriever.getPermitCost() > data.getPermit()) {
-            return handleResponse("Cannot hire", retriever.getId(), "(ERROR) Not enough permits");
+            return handleResponse("Hire Retriever", retriever.getId(), "(ERROR) Can Not Hire Retriever, Not enough permits");
         }
         try {
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "sendDispatch")
                     .setRawParam("dispatchId", retriever.getId())
                     .getContent();
-            return handleResponse("Hired dispatcher", retriever.getId(), response);
+            return handleResponse("Hired Dispatcher", retriever.getId(), response);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Exception hiring dispatcher: " + e);
@@ -86,8 +86,8 @@ public class DispatchManager {
         try {
             System.out.println("Collecting Instant: Slot " + progress.getSlotId());
             if (data.getPrimeCoupons() <= 0)
-                return handleResponse("Cannot instant collect", progress.getId(),
-                        "(ERROR) No Prime Coupon available for instant collection");
+                return handleResponse("Instant Collect", progress.getId(),
+                        "(ERROR) Can Not Instant Collect, No Prime Coupon available for instant collection");
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "instantComplete")
                     .setRawParam("dispatchId", progress.getId())
@@ -95,7 +95,7 @@ public class DispatchManager {
                     .setRawParam("slotId", progress.getSlotId())
                     .getContent();
 
-            return handleResponse("Collected retriever", progress.getId(), response);
+            return handleResponse("Collected Retriever", progress.getId(), response);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Exception collecting dispatcher: " + e);
@@ -105,7 +105,7 @@ public class DispatchManager {
     public boolean hireGate(Gate gate){
         if(gate.getInProgress()) return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start Same Gate");
 
-        if (data.getGateUnits() <= 0) return handleResponse("Cannot hire ", gate.getName(), "(ERROR) Not enough GGEU");
+        if (data.getGateUnits() <= 0) return handleResponse("Hire Gate ", gate.getName(), "(ERROR) Can not Hire Gate, Not enough GGEU");
 
         try {
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
@@ -129,12 +129,12 @@ public class DispatchManager {
                     .setRawParam("gateId", gate.getId())
                     .getContent();
 
+            gate.setInProgress(false);
             gate.setCollectable("0");
             gate.setTime("0");
             gate.setCost("0");
-            gate.setInProgress(false);
 
-            return handleResponse("Collected gate", gate.getName(), response);
+            return handleResponse("Collected Gate", gate.getName(), response);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Exception collecting dispatcher: " + e);
@@ -152,7 +152,7 @@ public class DispatchManager {
                     .setRawParam("slot", progress.getSlotId())
                     .getContent();
 
-            return handleResponse("Collected retriever", progress.getId(), response);
+            return handleResponse("Collected Retriever", progress.getId(), response);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Exception collecting dispatcher: " + e);
