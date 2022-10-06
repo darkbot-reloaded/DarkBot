@@ -1,7 +1,11 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.backpage.dispatch.*;
+import com.github.manolo8.darkbot.backpage.dispatch.BiIntConsumer;
+import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
+import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
+import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
+import com.github.manolo8.darkbot.backpage.dispatch.Gate;
 import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
