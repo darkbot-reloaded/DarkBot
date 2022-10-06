@@ -1,17 +1,13 @@
 package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
+import com.github.manolo8.darkbot.gui.tree.utils.SpinnerUtils;
 import com.github.manolo8.darkbot.gui.utils.SpinnerNumberMinMaxFix;
-import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
-import eu.darkbot.api.config.util.ValueHandler;
 
 import javax.swing.*;
-import javax.swing.text.NumberFormatter;
 import java.awt.*;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 
 public class PercentEditor extends JSpinner implements OptionEditor<Double> {
 
@@ -19,6 +15,7 @@ public class PercentEditor extends JSpinner implements OptionEditor<Double> {
         super(new SpinnerNumberMinMaxFix(0, 0d, 1d, 0.05d));
         setEditor(new JSpinner.NumberEditor(this, "0%"));
         ((DefaultEditor) getEditor()).getTextField().setColumns(3);
+        addChangeListener(a -> SpinnerUtils.setError(this, false));
     }
 
     @Override
@@ -26,6 +23,11 @@ public class PercentEditor extends JSpinner implements OptionEditor<Double> {
         setValue(percent.getValue());
         setEnabled(!Boolean.TRUE.equals(percent.getMetadata("readonly")));
         return this;
+    }
+
+    @Override
+    public boolean stopCellEditing() {
+        return SpinnerUtils.tryStopEditing(this);
     }
 
     @Override

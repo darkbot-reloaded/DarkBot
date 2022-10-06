@@ -2,19 +2,17 @@ package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.config.tree.handlers.NumberHandler;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
+import com.github.manolo8.darkbot.gui.tree.utils.SpinnerUtils;
 import com.github.manolo8.darkbot.gui.utils.SpinnerNumberMinMaxFix;
 import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
-import eu.darkbot.api.config.util.ValueHandler;
 
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class NumberEditor extends JPanel implements OptionEditor<Number> {
 
@@ -29,7 +27,10 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
         setOpaque(false);
 
         add(checkBox);
-        checkBox.addChangeListener(e -> spinner.setEnabled(checkBox.isSelected()));
+        checkBox.addChangeListener(e -> {
+            spinner.setEnabled(checkBox.isSelected());
+            SpinnerUtils.setError(spinner, false);
+        });
     }
 
     @Override
@@ -42,6 +43,11 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
 
         add(spinner); // Need to re-add because it's auto-removed if displayed alone
         return this;
+    }
+
+    @Override
+    public boolean stopCellEditing() {
+        return SpinnerUtils.tryStopEditing(spinner);
     }
 
     @Override
@@ -112,6 +118,7 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
             public NumberFormatEditor(String format) {
                 this.formatter = new NumberFormatter(new DecimalFormat(format));
                 this.editor = new JSpinner.NumberEditor(NumberSpinner.this, format);
+                this.editor.getTextField().setFocusLostBehavior(JFormattedTextField.COMMIT);
             }
         }
 
