@@ -104,13 +104,13 @@ public class DispatchManager {
     }
     public boolean hireGate(Gate gate){
         //check if another gate in progress or ready to collect
-        if(gate.getTime().equalsIgnoreCase("0") && gate.getCost().equalsIgnoreCase("0") && gate.getCollectable().equalsIgnoreCase("0")) return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start same Gate");
+        if(gate.getInProgress()) return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start same Gate");
 
         for(Gate g : data.getGates().values()) {
             if (g.getCollectable().equalsIgnoreCase("1")) {
                 return handleResponse("Hire Gate", gate.getName(), "(ERROR) Another Gate is Ready to Collect, Can Not Start");
             }
-            if (g.getTime().equalsIgnoreCase("0") && g.getCost().equalsIgnoreCase("0") && g.getCollectable().equalsIgnoreCase("0")) {
+            if (g.getInProgress()) {
                 return handleResponse("Hire Gate", gate.getName(), "(ERROR) Another Gate in Progress, Can Not Start");
             }
         }
@@ -140,8 +140,9 @@ public class DispatchManager {
                     .getContent();
 
             gate.setCollectable("0");
-            gate.setTime("-1");
-            gate.setCost("-1");
+            gate.setTime("0");
+            gate.setCost("0");
+            gate.setInProgress(false);
 
             return handleResponse("Collected gate", gate.getName(), response);
         } catch (Exception e) {
@@ -229,6 +230,8 @@ public class DispatchManager {
         public static boolean updateAll(String page, DispatchData data) {
             // Mark old in-progress for removal
             data.getInProgress().forEach((k, v) -> v.setForRemoval(true));
+            // Mark old gate already completed (that might have been completed by hand)
+            data.getGates().forEach((k,v) -> v.setInProgress(false));
             boolean updated = true;
             for (InfoReader reader : InfoReader.values()) {
                 updated &= reader.update(page, data);
