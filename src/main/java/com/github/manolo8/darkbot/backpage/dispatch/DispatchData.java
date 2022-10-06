@@ -9,6 +9,7 @@ public class DispatchData {
     private final DataBuilder dataBuilder = new DataBuilder();
     private final Map<String, Retriever> retrievers = new LinkedHashMap<>();
     private final Map<String, InProgress> progressSlots = new LinkedHashMap<>();
+    private final Map<String, Gate> gates = new LinkedHashMap<>();
     private int permit, gateUnits, availableSlots, maxSlots, primeCoupons;
 
     public int getPermit() {
@@ -59,9 +60,14 @@ public class DispatchData {
         return progressSlots;
     }
 
-    public void parseRow(String str) {
+    public Map<String, Gate> getGates(){
+        return gates;
+    }
+
+    public void parseRetrieverRow(String str) {
         if (dataBuilder.buildRetriever(str)) return;
         if (dataBuilder.buildInProgress(str)) return;
+        if (dataBuilder.buildGate(str)) return;
     }
 
     @Override
@@ -85,6 +91,12 @@ public class DispatchData {
                 "dispatchRewardPackage=\"(.+?)\".*?" +
                 "slotId=\"(.+?)\".*?" +
                 "dispatch_item_name_col\"> ?(.+?) ?<", Pattern.DOTALL);
+
+        private final Pattern GATE_PATTERN = Pattern.compile("gateId=\"(.+?)\".*?" +
+                " (collectable=\"(.+?)\")?.*?" +
+                "dispatch_item_name_col\"> ?(.+?) ?<.*?" +
+                "dispatch_remaining_time_col\"> ?(.+?) ?<input.*?" +
+                "dispatch_item_cost\">(.+?)?<",Pattern.DOTALL);
         private final Pattern DISPATCH_COST = Pattern.compile("(\\d+)", Pattern.DOTALL);
 
         public boolean buildRetriever(String string) {
@@ -141,6 +153,27 @@ public class DispatchData {
             r.setSlotId(slotID);
             r.setName(m.group(5));
             r.setForRemoval(false);
+            return true;
+        }
+
+        public boolean buildGate(String string){
+            if (string == null || string.isEmpty()) return false;
+            if (!string.contains("gateId")) return false;
+            Matcher m = GATE_PATTERN.matcher(string.replaceAll("\\s+", " "));
+            if (!m.find()) return false;
+
+            String gateId = m.group(1);
+            Gate gate = gates.get(gateId);
+            if (gate == null) gates.put(gateId, gate = new Gate());
+
+            gate.setId(gateId);
+            gate.setCollectable(m.group(2));
+            gate.setName(m.group(4));
+
+            gate.setTime(m.group(5).length() < 10 ? m.group(5) : "0");
+            gate.setCost(m.group(6).length() > 5 ? m.group(6) : "0");
+
+            gate.setForRemoval(false);
             return true;
         }
     }

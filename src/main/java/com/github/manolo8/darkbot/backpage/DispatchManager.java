@@ -1,10 +1,7 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.backpage.dispatch.BiIntConsumer;
-import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
-import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
-import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
+import com.github.manolo8.darkbot.backpage.dispatch.*;
 import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -102,6 +99,23 @@ public class DispatchManager {
         return false;
     }
 
+    public boolean collectGate(Gate gate){
+        if (gate.getCollectable().equals("0")) return false;
+        try {
+            System.out.println("Collecting: Slot " + gate.getName());
+            String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
+                    .setRawParam("command", "collectDispatch")
+                    .setRawParam("slot", gate.getId())
+                    .getContent();
+
+            return handleResponse("Collected gate", gate.getName(), response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Exception collecting dispatcher: " + e);
+        }
+        return false;
+    }
+
 
     public boolean collect(InProgress progress) {
         if (progress.getCollectable().equals("0")) return false;
@@ -155,7 +169,7 @@ public class DispatchManager {
         GATE_UNIT("name=\"ggeu\" value=\"([0-9]+)\"", DispatchData::setGateUnits),
         SLOTS(":([0-9]+).*class=\"userCurrentMax\">([0-9]+)", DispatchData::setAvailableSlots, DispatchData::setMaxSlots),
         PRIME_COUPON("name=\"quickcoupon\" value=\"([0-9]+)\"",DispatchData::setPrimeCoupons),
-        ITEMS("<tr class=\"dispatchItemRow([\\S\\s]+?)</tr>", DispatchData::parseRow);
+        ITEMS("<tr class=\"dispatchItemRow([\\S\\s]+?)</tr>", DispatchData::parseRetrieverRow);
 
         private final Pattern regex;
         private final List<BiConsumer<DispatchData, String>> consumers;
@@ -178,14 +192,16 @@ public class DispatchManager {
         }
 
         public static boolean updateAll(String page, DispatchData data) {
-            // Mark old in-progress for removal
+            // Mark old in-progress for removal and gates
             data.getInProgress().forEach((k, v) -> v.setForRemoval(true));
+            data.getGates().forEach((k, v) -> v.setForRemoval(true));
             boolean updated = true;
             for (InfoReader reader : InfoReader.values()) {
                 updated &= reader.update(page, data);
             }
             // Remove them if they have not gotten an update (they are collected already)
             data.getInProgress().values().removeIf(InProgress::getForRemoval);
+            data.getGates().values().removeIf(Gate::getForRemoval);
             return updated;
         }
 
