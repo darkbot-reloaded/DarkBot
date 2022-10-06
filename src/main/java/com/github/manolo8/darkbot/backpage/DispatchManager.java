@@ -102,11 +102,26 @@ public class DispatchManager {
         }
         return false;
     }
+    public boolean hireGate(Gate gate){
+        if (data.getGateUnits() <= 0) return handleResponse("Cannot start", gate.getId(), "(ERROR) Not enough GGEU");
 
+        try {
+            String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
+                    .setRawParam("command", "sendGateDispatch")
+                    .setRawParam("dispatchId", gate.getId())
+                    .getContent();
+            return handleResponse("Gate Started", gate.getName(), response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Exception dispatching gate: " + e);
+        }
+
+        return false;
+    }
     public boolean collectGate(Gate gate){
         if (gate.getCollectable().equals("0")) return false;
         try {
-            System.out.println("Collecting: Slot " + gate.getName());
+            System.out.println("Collecting: Gate " + gate.getName());
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "collectDispatch")
                     .setRawParam("slot", gate.getId())
