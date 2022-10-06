@@ -103,12 +103,13 @@ public class DispatchManager {
         return false;
     }
     public boolean hireGate(Gate gate){
-        if (data.getGateUnits() <= 0) return handleResponse("Cannot start", gate.getId(), "(ERROR) Not enough GGEU");
+        if(this.main.backpage.galaxyManager.getGalaxyInfo().getGate(Integer.parseInt(gate.getId())).getCurrentWave() == 0) return handleResponse("Cannot hire ", gate.getName(), "(ERROR) Gate not started");
+        if (data.getGateUnits() <= 0) return handleResponse("Cannot hire ", gate.getName(), "(ERROR) Not enough GGEU");
 
         try {
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "sendGateDispatch")
-                    .setRawParam("dispatchId", gate.getId())
+                    .setRawParam("gateId", gate.getId())
                     .getContent();
             return handleResponse("Gate Started", gate.getName(), response);
         } catch (Exception e) {
@@ -123,9 +124,13 @@ public class DispatchManager {
         try {
             System.out.println("Collecting: Gate " + gate.getName());
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
-                    .setRawParam("command", "collectDispatch")
-                    .setRawParam("slot", gate.getId())
+                    .setRawParam("command", "collectGateDispatch")
+                    .setRawParam("gateId", gate.getId())
                     .getContent();
+
+            gate.setCollectable("0");
+            gate.setTime("0");
+            gate.setCost("0");
 
             return handleResponse("Collected gate", gate.getName(), response);
         } catch (Exception e) {
@@ -211,16 +216,14 @@ public class DispatchManager {
         }
 
         public static boolean updateAll(String page, DispatchData data) {
-            // Mark old in-progress for removal and gates
+            // Mark old in-progress for removal
             data.getInProgress().forEach((k, v) -> v.setForRemoval(true));
-            data.getGates().forEach((k, v) -> v.setForRemoval(true));
             boolean updated = true;
             for (InfoReader reader : InfoReader.values()) {
                 updated &= reader.update(page, data);
             }
             // Remove them if they have not gotten an update (they are collected already)
             data.getInProgress().values().removeIf(InProgress::getForRemoval);
-            data.getGates().values().removeIf(Gate::getForRemoval);
             return updated;
         }
 

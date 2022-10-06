@@ -167,13 +167,11 @@ public class DispatchData {
             if (gate == null) gates.put(gateId, gate = new Gate());
 
             gate.setId(gateId);
-            gate.setCollectable(m.group(2));
+            gate.setCollectable(m.group(2) != null ? m.group(2) : "0");
             gate.setName(m.group(4));
-
             gate.setTime(m.group(5).length() < 10 ? m.group(5) : "0");
             gate.setCost(m.group(6).length() > 5 ? m.group(6) : "0");
 
-            gate.setForRemoval(false);
             return true;
         }
     }

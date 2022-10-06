@@ -44,14 +44,6 @@ public class Gate {
         this.collectable = collectable;
     }
 
-    public boolean getForRemoval() {
-        return this.forRemoval;
-    }
-
-    public void setForRemoval(boolean forRemoval) {
-        this.forRemoval = forRemoval;
-    }
-
     @Override
     public String toString() {
         return "Retriever{" +
