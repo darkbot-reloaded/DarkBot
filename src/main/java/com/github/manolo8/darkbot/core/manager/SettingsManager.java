@@ -36,8 +36,6 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
         this.config = API.readMemoryInt(address + 92);
 
         this.nextMap = API.readMemoryInt(address + 244);
-        this.main.mapManager.checkNextMap(nextMap);
-
         this.currMap = API.readMemoryInt(address + 248);
 
         this.force2d = API.readMemoryInt(address, 784, 0x20);

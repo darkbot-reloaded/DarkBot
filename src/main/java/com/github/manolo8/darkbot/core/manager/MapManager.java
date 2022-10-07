@@ -115,6 +115,8 @@ public class MapManager implements Manager, StarSystemAPI {
 
         updateBounds();
         checkMirror();
+
+        checkNextMap(main.settingsManager.nextMap);
     }
 
     private void update(long address) {
