@@ -11,6 +11,7 @@ import eu.darkbot.api.config.types.DisplayFlag;
 import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
+import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.game.other.Health;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.game.other.Point;
@@ -109,6 +110,11 @@ public class InfosDrawer implements Drawable {
         mg.setFont("big");
 
         String name = hero.getMap().getId() == -1 ? I18n.get("gui.map.loading") : hero.getMap().getName();
+
+        GameMap next = main.hero.nextMap;
+        if (next.getId() != -1 && next != hero.getMap()) // change with api method later
+            name += "→" + next.getName();
+
         mg.drawString(mg.getWidthMiddle(), mg.getHeight() / 2 - 5, name, MapGraphics.StringAlign.MID);
     }
 

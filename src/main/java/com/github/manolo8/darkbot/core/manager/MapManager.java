@@ -98,6 +98,7 @@ public class MapManager implements Manager, StarSystemAPI {
             if (invalid) {
                 entities.clear();
                 switchMap(starManager.byId(-1));
+                checkNextMap(-1);
             }
         });
     }
@@ -133,6 +134,11 @@ public class MapManager implements Manager, StarSystemAPI {
             switchMap(main.starManager.byId(currMap));
 
         entities.update(address);
+    }
+
+    public void checkNextMap(int next) {
+        if (next != main.hero.nextMap.id)
+            main.hero.nextMap = main.starManager.byId(next);
     }
 
     private void switchMap(Map next) {
