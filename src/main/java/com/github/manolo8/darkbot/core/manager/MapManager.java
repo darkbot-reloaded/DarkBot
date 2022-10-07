@@ -106,6 +106,7 @@ public class MapManager implements Manager, StarSystemAPI {
     public void tick() {
         long temp = API.readMemoryLong(mapAddressStatic);
 
+        checkNextMap(main.settingsManager.nextMap);
         if (mapAddress != temp) {
             update(temp);
         } else {
@@ -115,8 +116,6 @@ public class MapManager implements Manager, StarSystemAPI {
 
         updateBounds();
         checkMirror();
-
-        checkNextMap(main.settingsManager.nextMap);
     }
 
     private void update(long address) {
@@ -138,9 +137,10 @@ public class MapManager implements Manager, StarSystemAPI {
         entities.update(address);
     }
 
+    private int lastNextMap;
     public void checkNextMap(int next) {
-        if (next != main.hero.nextMap.id)
-            main.hero.nextMap = main.starManager.byId(next);
+        if (next != main.hero.nextMap.id && next != lastNextMap)
+            main.hero.nextMap = main.starManager.byId(lastNextMap = next);
     }
 
     private void switchMap(Map next) {
@@ -148,7 +148,7 @@ public class MapManager implements Manager, StarSystemAPI {
         if (old.getId() == next.getId()) return;
 
         id = next.getId();
-        main.hero.map = next;
+        main.hero.map = main.hero.nextMap = next;
 
         eventBroker.sendEvent(new MapChangeEvent(old, next));
 
