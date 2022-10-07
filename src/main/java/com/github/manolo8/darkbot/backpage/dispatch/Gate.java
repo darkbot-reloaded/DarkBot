@@ -3,7 +3,8 @@ package com.github.manolo8.darkbot.backpage.dispatch;
 public class Gate {
     protected String id, name, time, cost, collectable;
 
-    protected boolean inProgress;
+    protected boolean isAvailable, inProgress;
+
     public String getId() {
         return id;
     }
@@ -48,6 +49,10 @@ public class Gate {
 
     public void setInProgress(boolean inProgress){ this.inProgress = inProgress; }
 
+    public boolean getIsAvailable(){ return isAvailable; }
+
+    public void setIsAvailable(boolean isAvailable){ this.isAvailable = isAvailable; }
+
     @Override
     public String toString() {
         return "Retriever{" +
@@ -56,6 +61,7 @@ public class Gate {
                 "time=" + time +
                 "cost=" + cost +
                 "collectable=" + collectable +
+                "isAvailable" + isAvailable +
                 "inProgress=" + inProgress +
                 "}";
     }

@@ -103,6 +103,8 @@ public class DispatchManager {
         return false;
     }
     public boolean hireGate(Gate gate){
+        if(!gate.getIsAvailable()) return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate is Not Available, Can Not Start Same Gate");
+
         if(gate.getInProgress()) return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start Same Gate");
 
         if (data.getGateUnits() <= 0) return handleResponse("Hire Gate ", gate.getName(), "(ERROR) Can not Hire Gate, Not enough GGEU");
@@ -221,7 +223,7 @@ public class DispatchManager {
             // Mark old in-progress for removal
             data.getInProgress().forEach((k, v) -> v.setForRemoval(true));
             // Mark old gate already completed (that might have been completed by hand)
-            data.getGates().forEach((k,v) -> v.setInProgress(false));
+            data.getGates().forEach((k,v) -> v.setIsAvailable(false));
             boolean updated = true;
             for (InfoReader reader : InfoReader.values()) {
                 updated &= reader.update(page, data);
