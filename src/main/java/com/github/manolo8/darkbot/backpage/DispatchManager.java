@@ -65,11 +65,12 @@ public class DispatchManager {
     }
 
     public boolean hireRetriever(Retriever retriever) {
-        if (data.getAvailableSlots() <= 0) return false;
-        if (retriever.getPermitCost() > data.getPermit()) {
-            return handleResponse("Hire Retriever", retriever.getId(), "(ERROR) Can Not Hire Retriever, Not enough permits");
-        }
+        if (retriever == null) return false;
         try {
+            if (data.getAvailableSlots() <= 0) return false;
+            if (retriever.getPermitCost() > data.getPermit()) {
+                return handleResponse("Hire Retriever", retriever.getId(), "(ERROR) Can Not Hire Retriever, Not enough permits");
+            }
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "sendDispatch")
                     .setRawParam("dispatchId", retriever.getId())
@@ -83,6 +84,7 @@ public class DispatchManager {
     }
 
     public boolean collectInstant(InProgress progress) {
+        if (progress == null) return false;
         try {
             System.out.println("Collecting Instant: Slot " + progress.getSlotId());
             if (data.getPrimeCoupons() <= 0)
@@ -103,13 +105,18 @@ public class DispatchManager {
         return false;
     }
     public boolean hireGate(Gate gate){
-        if(!gate.getIsAvailable()) return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate is Not Available, Can Not Start Same Gate");
-
-        if(gate.getInProgress()) return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start Same Gate");
-
-        if (data.getGateUnits() <= 0) return handleResponse("Hire Gate ", gate.getName(), "(ERROR) Can not Hire Gate, Not enough GGEU");
-
+        if(gate == null) return false;
         try {
+            if(!gate.getIsAvailable()) {
+                return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate is Not Available, Can Not Start Same Gate");
+            }
+            if(gate.getInProgress()) {
+                return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start Same Gate");
+            }
+            if (data.getGateUnits() <= 0) {
+                return handleResponse("Hire Gate ", gate.getName(), "(ERROR) Can not Hire Gate, Not enough GGEU");
+            }
+
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "sendGateDispatch")
                     .setRawParam("gateId", gate.getId())
