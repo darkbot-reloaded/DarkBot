@@ -155,7 +155,7 @@ public class MapManager implements Manager, StarSystemAPI {
             return;
         }
         if (next != main.hero.nextCpuMap.getId() || main.hero.nextCpuMapDuration == 0) {
-            main.hero.nextCpuMapDuration = System.currentTimeMillis() + (duration * 1000L);
+            main.hero.nextCpuMapDuration = System.currentTimeMillis() + (duration * 1000L) + 500;
             main.hero.nextCpuMap = main.starManager.byId(next);
         }
     }

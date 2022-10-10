@@ -22,6 +22,8 @@ import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.managers.StatsAPI;
 import eu.darkbot.api.utils.Inject;
 
+import java.awt.*;
+import java.awt.geom.Arc2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -46,6 +48,8 @@ public class InfosDrawer implements Drawable {
 
     private final ConfigSetting<Boolean> resetRefresh;
     private final ConfigSetting<Integer> refreshTime;
+
+    private Arc2D countDown;
 
     public InfosDrawer(PluginAPI api) {
         this(api.requireInstance(Main.class), api.requireAPI(HeroAPI.class),
@@ -96,7 +100,7 @@ public class InfosDrawer implements Drawable {
             if (s != null) {
                 int i = 12;
                 for (String line : s.split("\n"))
-                    mg.drawString(5, i+=14, line, MapGraphics.StringAlign.LEFT);    
+                    mg.drawString(5, i += 14, line, MapGraphics.StringAlign.LEFT);
             }
         }
 
@@ -116,13 +120,22 @@ public class InfosDrawer implements Drawable {
         if (next.getId() != -1 && next != hero.getMap()) // change with api method later
             name += "→" + next.getName();
         else if (nextCpuMap.getId() != -1 && nextCpuMap != hero.getMap() && main.hero.nextCpuMapDuration != 0) {
-            long countdown = main.hero.nextCpuMapDuration - System.currentTimeMillis();
+            double countdown = (main.hero.nextCpuMapDuration - System.currentTimeMillis()) / 1000.0 / 10.0;
             if (countdown > 0) {
-                name += "→" + nextCpuMap.getName() + "[" + (int)Math.ceil(countdown / 1000d) + "]";
+                name += "→" + nextCpuMap.getName();
+
+                if (countDown == null) countDown = new Arc2D.Double();
+                countDown.setArcByCenter(mg.getWidthMiddle(), mg.getHeightMiddle() - 50,
+                        mg.getGraphics2D().getFontMetrics().getHeight() / 2.2,
+                        90, 360 * countdown, Arc2D.PIE);
+
+                mg.getGraphics2D().setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+                mg.getGraphics2D().fill(countDown);
+                mg.getGraphics2D().setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
             }
         }
 
-        mg.drawString(mg.getWidthMiddle(), mg.getHeight() / 2 - 5, name, MapGraphics.StringAlign.MID);
+        mg.drawString(mg.getWidthMiddle(), mg.getHeightMiddle() - 5, name, MapGraphics.StringAlign.MID);
     }
 
     private void drawHealth(MapGraphics mg) {
@@ -144,7 +157,7 @@ public class InfosDrawer implements Drawable {
 
             mg.setFont("small");
             if (mg.hasDisplayFlag(DisplayFlag.HERO_NAME))
-                mg.drawString(10 + petHealthWidth /2, mg.getHeight() - 56,
+                mg.drawString(10 + petHealthWidth / 2, mg.getHeight() - 56,
                         pet.getEntityInfo().getUsername(), MapGraphics.StringAlign.MID);
 
             Lockable petTarget = pet.getTargetAs(Lockable.class);
@@ -202,7 +215,7 @@ public class InfosDrawer implements Drawable {
         if (displayAmount) {
             mg.drawString(pos.x() + width / 2, pos.y() + height - 2,
                     HEALTH_FORMAT.format(health.getHull() + health.getHp())
-                    + "/" + HEALTH_FORMAT.format(totalMaxHealth), MapGraphics.StringAlign.MID);
+                            + "/" + HEALTH_FORMAT.format(totalMaxHealth), MapGraphics.StringAlign.MID);
         }
 
         if (health.getMaxShield() != 0) {
@@ -216,7 +229,7 @@ public class InfosDrawer implements Drawable {
             if (displayAmount) {
                 mg.drawString(pos.x() + width / 2, pos.y() + height + height - 2,
                         HEALTH_FORMAT.format(health.getShield())
-                        + "/" + HEALTH_FORMAT.format(health.getMaxShield()), MapGraphics.StringAlign.MID);
+                                + "/" + HEALTH_FORMAT.format(health.getMaxShield()), MapGraphics.StringAlign.MID);
             }
         }
     }

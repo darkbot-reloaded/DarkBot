@@ -18,13 +18,19 @@ public class SpaceMapWindowProxy extends Updatable implements API.Singleton {
 
         @Override
         public void update() {
-            if (address != 0) {
-                duration = Main.API.readInt(address + 32);
-                mapId = Main.API.readInt(address + 36);
-            } else {
+            if (address == 0) return;
+
+            duration = Main.API.readInt(address + 32);
+            mapId = Main.API.readInt(address + 36);
+        }
+
+        @Override
+        public void update(long address) {
+            if (this.address != 0 && address == 0) {
                 duration = 0;
                 mapId = 0;
             }
+            super.update(address);
         }
     }
 }
