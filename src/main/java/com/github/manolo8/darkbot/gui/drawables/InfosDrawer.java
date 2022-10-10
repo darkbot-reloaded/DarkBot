@@ -112,8 +112,15 @@ public class InfosDrawer implements Drawable {
         String name = hero.getMap().getId() == -1 ? I18n.get("gui.map.loading") : hero.getMap().getName();
 
         GameMap next = main.hero.nextMap;
+        GameMap nextCpuMap = main.hero.nextCpuMap;
         if (next.getId() != -1 && next != hero.getMap()) // change with api method later
             name += "→" + next.getName();
+        else if (nextCpuMap.getId() != -1 && nextCpuMap != hero.getMap() && main.hero.nextCpuMapDuration != 0) {
+            long countdown = main.hero.nextCpuMapDuration - System.currentTimeMillis();
+            if (countdown > 0) {
+                name += "→" + nextCpuMap.getName() + "[" + (int)Math.ceil(countdown / 1000d) + "]";
+            }
+        }
 
         mg.drawString(mg.getWidthMiddle(), mg.getHeight() / 2 - 5, name, MapGraphics.StringAlign.MID);
     }
