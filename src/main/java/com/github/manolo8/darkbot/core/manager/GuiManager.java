@@ -15,6 +15,7 @@ import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.managers.GameScreenAPI;
+import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -62,11 +63,13 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final OreTradeGui oreTrade;
     public final GroupManager group;
 
+    public final Timer loggedInTimer = Timer.get(15_000);
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
         WAITING(gm -> gm.main.hero.address != 0 && !gm.connecting.isVisible()),
-        CLICKING_AMMO(gm -> {
+        AFTER_LOGIN(gm -> {
             API.keyboardClick(gm.main.config.LOOT.AMMO_KEY);
+            gm.loggedInTimer.activate();
             return true;
         }),
         DONE(q -> false);
@@ -180,6 +183,10 @@ public class GuiManager implements Manager, GameScreenAPI {
                 gui.click(46, 180);
             }
         }
+    }
+
+    public boolean canJumpPortal() {
+        return loggedInTimer.isInactive();
     }
 
     public boolean tryRevive() {
