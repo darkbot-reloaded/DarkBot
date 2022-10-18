@@ -104,7 +104,8 @@ public class DispatchManager {
         }
         return false;
     }
-    public boolean hireGate(Gate gate){
+
+    public boolean hireGate(Gate gate) {
         if(gate == null) return false;
         try {
             if(!gate.getIsAvailable()) {
