@@ -172,7 +172,7 @@ public class DispatchData {
             gate.setCost(m.group(6).length() > 5 ? m.group(6) : "0");
 
             gate.setIsAvailable(true);
-            if(gate.getCollectable().equalsIgnoreCase("1") || (gate.getTime().equalsIgnoreCase("0") && gate.getCost().equalsIgnoreCase("0"))){
+            if (gate.getCollectable().equalsIgnoreCase("1") || (gate.getTime().equalsIgnoreCase("0") && gate.getCost().equalsIgnoreCase("0"))) {
                 gate.setInProgress(true);
             }
 
