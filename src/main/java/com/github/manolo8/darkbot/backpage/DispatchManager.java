@@ -108,7 +108,7 @@ public class DispatchManager {
     public boolean hireGate(Gate gate) {
         if (gate == null) return false;
         try {
-            if(!gate.getIsAvailable()) {
+            if (!gate.getIsAvailable()) {
                 return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate is Not Available, Can Not Start Same Gate");
             }
             if(gate.getInProgress()) {
