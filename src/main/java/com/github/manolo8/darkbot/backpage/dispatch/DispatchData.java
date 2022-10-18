@@ -155,7 +155,7 @@ public class DispatchData {
             return true;
         }
 
-        public boolean buildGate(String string){
+        public boolean buildGate(String string) {
             if (string == null || string.isEmpty()) return false;
             if (!string.contains("gateId")) return false;
             Matcher m = GATE_PATTERN.matcher(string.replaceAll("\\s+", " "));
