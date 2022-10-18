@@ -111,7 +111,7 @@ public class DispatchManager {
             if (!gate.getIsAvailable()) {
                 return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate is Not Available, Can Not Start Same Gate");
             }
-            if(gate.getInProgress()) {
+            if (gate.getInProgress()) {
                 return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start Same Gate");
             }
             if (data.getGateUnits() <= 0) {
