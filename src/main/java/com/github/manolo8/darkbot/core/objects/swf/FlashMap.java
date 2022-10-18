@@ -4,9 +4,9 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.Arrays;
@@ -25,18 +25,20 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
      * since identifiers are always interned strings, they can't be 0,
      * so we can use 0 as the empty value.
      */
-    private static final int EMPTY = 0x0;
+    private static final int EMPTY_ITEM = 0x0;
 
     // DELETED is stored as the key for deleted items
-    private static final int DELETED = 0x4;
+    private static final int DELETED_ITEM = 0x4;
 
-    private static final int kDontEnumBit = 0x01;
-    private static final int kHasDeletedItems = 0x02;
-    private static final int kHasIterIndex = 0x04;
+    private static final int DONT_ENUM_BIT = 0x01;
+    private static final int HAS_DELETED_ITEMS = 0x02;
+    private static final int HAS_ITER_INDEX = 0x04;
 
-    private static final int MAX_SIZE = 1024;
+    private static final int DICTIONARY_FLAG = 1 << 4;
+
+    private static final int MAX_SIZE = 2048;
     private static final int MAX_CAPACITY = MAX_SIZE * Long.BYTES * 2;
-    private static final byte[] BUFFER = new byte[MAX_CAPACITY];
+    private static final byte[] BUFFER = new byte[MAX_CAPACITY]; //32kb
 
     private final AtomKind keyKind;
     private final AtomKind valueKind;
@@ -50,7 +52,8 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
     private Entry[] entries;
 
     private long address;
-    private Map<K, ValueWrapper> updatables;
+    private EntrySet entrySet;
+    private Map<K, UpdatableWrapper> updatables;
 
     public FlashMap(Class<K> keyType, Class<V> valueType) {
         this.keyKind = AtomKind.of(keyType);
@@ -59,15 +62,17 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
         this.keyType = keyType;
         this.valueType = valueType;
         if (keyKind.isNotSupported() || valueKind.isNotSupported())
-            throw new IllegalArgumentException("Illegal java types!");
+            throw new UnsupportedOperationException("Provided java types are not supported!");
 
         this.keyUpdatable = Updatable.class.isAssignableFrom(keyType);
         this.valueUpdatable = Updatable.class.isAssignableFrom(valueType);
 
         if (keyUpdatable)
-            throw new IllegalArgumentException("Key as updatable is not supported!");
+            throw new UnsupportedOperationException("Key as updatable is not supported!");
+        if (valueUpdatable && Modifier.isAbstract(valueType.getModifiers()))
+            throw new UnsupportedOperationException("Abstract updatable value type is not supported!");
 
-        clear();
+        clearMap();
     }
 
     private static void updateIfChanged(Updatable u, long address) {
@@ -84,7 +89,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
         int tableOffset = API.readInt(traits, 236);
         if (tableOffset == 0) return;
 
-        boolean isDictionary = (API.readInt(traits, 248) & (1 << 4)) != 0;
+        boolean isDictionary = (API.readInt(traits, 248) & DICTIONARY_FLAG) != 0;
         if (isDictionary) {
             readHashTable(API.readLong(address + tableOffset) + 8); //read hash table ptr & skip cpp vtable
         } else {
@@ -95,7 +100,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
     @Override
     public void update(long address) {
         if (this.address != address) {
-            clear();
+            clearMap();
         }
 
         this.address = address;
@@ -104,6 +109,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
     private int getCapacity(int logCapacity, @SuppressWarnings("unused") boolean hasIterIndexes) {
         if (logCapacity <= 0) return 0;
 
+        // Math.pow(2, logCapacity - 1)
         logCapacity = 1 << (logCapacity - 1);
         //if (hasIterIndexes) logCapacity += 2; // for tests only
 
@@ -115,21 +121,23 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
         long atoms = (atomsAndFlags & ByteUtils.ATOM_MASK) + 8;
 
         int size = API.readMemoryInt(table + 8); // includes deleted items
-        int capacity = getCapacity(API.readMemoryInt(table + 12), (atomsAndFlags & kHasIterIndex) != 0);
+        int capacity = getCapacity(API.readMemoryInt(table + 12), (atomsAndFlags & HAS_ITER_INDEX) != 0);
 
         if (size <= 0 || size > MAX_SIZE || capacity <= 0 || capacity > MAX_CAPACITY) {
+            resetOldEntries(0);
+            resetUpdatablesIfNoRef();
             this.size = 0;
             return;
         }
-        if (entries.length < size) entries = Arrays.copyOf(entries, size);
+        if (entries.length < size) entries = Arrays.copyOf(entries, (int) Math.min(size * 1.25, MAX_SIZE));
 
         API.readMemory(atoms, BUFFER, capacity); //TODO add readLongs in API
         int currentSize = 0, realSize = 0;
         for (int offset = 0; offset < capacity && currentSize < size; offset += 8) {
             long keyAtom = ByteUtils.getLong(BUFFER, offset);
 
-            if (keyAtom == EMPTY) continue;
-            if (keyAtom == DELETED) {
+            if (keyAtom == EMPTY_ITEM) continue;
+            if (keyAtom == DELETED_ITEM) {
                 offset += 8;
                 currentSize++;
                 continue; // skip deleted pair
@@ -158,19 +166,13 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
             currentSize++;
         }
 
-        for (int i = realSize; i < this.size; i++) {
-            Entry entry = entries[i];
-            if (entry != null) entry.reset();
-        }
-
-        if (updatables != null)
-            updatables.forEach((k, wrapper) -> wrapper.resetIfNoReferences());
+        resetOldEntries(realSize);
+        resetUpdatablesIfNoRef();
 
         this.size = realSize;
     }
 
-    @Override
-    public void clear() {
+    public void clearMap() {
         this.size = 0;
         //noinspection unchecked
         this.entries = (Entry[]) Array.newInstance(Entry.class, 0);
@@ -178,10 +180,52 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
             updatables.forEach((k, wrapper) -> wrapper.resetReferences());
     }
 
+    public <T extends Updatable> T putUpdatable(K key, T updatable) {
+        if (!valueType.isInstance(updatable))
+            throw new UnsupportedOperationException("Given updatable is not instance of value type!");
+        if (updatables == null) updatables = new HashMap<>();
+        updatables.put(key, new UpdatableWrapper(updatable));
+
+        return updatable;
+    }
+
+    public Updatable removeUpdatable(K key) {
+        if (updatables == null) return null;
+        UpdatableWrapper v = updatables.remove(key);
+        return v == null ? null : v.value;
+    }
+
+    private int indexOf(Object key) {
+        for (int i = 0; i < size(); i++) {
+            Entry entry = entries[i];
+            if (entry.getKey() == null) continue;
+            if (entry.getKey().equals(key)) return i;
+        }
+
+        return -1;
+    }
+
+    private void resetOldEntries(int realSize) {
+        for (int i = realSize; i < size(); i++) {
+            Entry entry = entries[i];
+            if (entry != null) entry.reset();
+        }
+    }
+
+    private void resetUpdatablesIfNoRef() {
+        if (updatables != null)
+            updatables.forEach((k, wrapper) -> wrapper.resetIfNoReferences());
+    }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException();
+    }
+
     @NotNull
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
-        return new EntrySet();
+        return entrySet == null ? entrySet = new EntrySet() : entrySet;
     }
 
     @Override
@@ -192,61 +236,38 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
     @Override
     public V get(Object key) {
         int i = indexOf(key);
-        return i == -1 ? null : entries[i].value;
-    }
-
-    @Override
-    public V put(K key, V value) {
-        if (!valueUpdatable) throw new IllegalStateException("V Type must be Updatable!");
-        if (updatables == null) updatables = new HashMap<>();
-        updatables.put(key, new ValueWrapper(value));
-
-        return value;
+        return i == -1 ? null : entries[i].getValue();
     }
 
     @Override
     public V remove(Object key) {
-        if (updatables == null) return null;
-        ValueWrapper v = updatables.remove(key);
-        return v == null ? null : v.value;
+        throw new UnsupportedOperationException();
     }
 
-    private int indexOf(Object key) {
-        for (int i = 0; i < size(); i++) {
-            Entry entry = entries[i];
-            if (entry.getKey() == null) continue;
-            if (entry.key.equals(key)) return i;
-        }
-
-        return -1;
-    }
-
-    private class ValueWrapper {
-        private final V value;
+    private static class UpdatableWrapper {
+        private final Updatable value;
 
         private int references;
 
-        private ValueWrapper(V value) {
+        private UpdatableWrapper(Updatable value) {
             this.value = value;
         }
 
         private void resetIfNoReferences() {
             if (references <= 0)
-                updateIfChanged((Updatable) value, 0);
+                updateIfChanged(value, 0);
         }
 
         private void resetReferences() {
             references = 0;
         }
 
-        private @Nullable ValueWrapper removeReference() {
+        private void removeReference() {
             references--;
-            return null;
         }
 
-        private @NotNull ValueWrapper addReference() {
+        private void addReference() {
             references++;
-            return this;
         }
     }
 
@@ -256,7 +277,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
         private K key;
         private V value;
 
-        private ValueWrapper wrapper;
+        private UpdatableWrapper wrapper;
 
         public Entry() {
             if (keyUpdatable)
@@ -282,7 +303,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
             }
 
             if (wrapper != null) {
-                ((Updatable) wrapper.value).update();
+                wrapper.value.update();
             } else if (value instanceof Updatable) {
                 ((Updatable) value).update();
             }
@@ -299,7 +320,8 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
         }
 
         public V getValue() {
-            return wrapper == null ? value : wrapper.value;
+            //noinspection unchecked
+            return wrapper == null ? value : (V) wrapper.value;
         }
 
         @Override
@@ -310,22 +332,24 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
         private void setVal(V value) {
             if (keyKind != AtomKind.OBJECT && valueKind == AtomKind.OBJECT) {
 
-                ValueWrapper v = updatables == null ? null : updatables.get(key);
+                UpdatableWrapper v = updatables == null ? null : updatables.get(key);
                 if (v != null) {
                     if (v != wrapper) {
                         if (wrapper != null)
                             wrapper.removeReference();
 
-                        wrapper = v.addReference();
+                        v.addReference();
+                        wrapper = v;
                     }
                 } else if (wrapper != null) {
-                    this.wrapper = wrapper.removeReference();
+                    this.wrapper.removeReference();
+                    this.wrapper = null;
                 }
             }
 
             if (wrapper != null) {
-                updateIfChanged((Updatable) this.wrapper.value, (long) value);
-            } else if (value instanceof Updatable) {
+                updateIfChanged(this.wrapper.value, (long) value);
+            } else if (this.value instanceof Updatable) {
                 updateIfChanged((Updatable) this.value, (long) value);
             } else {
                 this.value = value;
@@ -340,13 +364,14 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
                 updateIfChanged((Updatable) value, 0);
 
             if (wrapper != null) {
-                wrapper = wrapper.removeReference();
+                this.wrapper.removeReference();
+                this.wrapper = null;
             }
         }
 
         @Override
         public String toString() {
-            return "Entry{" + "key=" + key + ", value=" + value + '}';
+            return "Entry{" + "key=" + key + ", value=" + getValue() + '}';
         }
     }
 
