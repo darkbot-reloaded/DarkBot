@@ -130,7 +130,8 @@ public class DispatchManager {
 
         return false;
     }
-    public boolean collectGate(Gate gate){
+
+    public boolean collectGate(Gate gate) {
         if (gate.getCollectable().equals("0")) return false;
         try {
             System.out.println("Collecting: Gate " + gate.getName());
