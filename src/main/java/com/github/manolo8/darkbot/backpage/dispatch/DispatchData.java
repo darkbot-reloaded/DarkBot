@@ -60,7 +60,7 @@ public class DispatchData {
         return progressSlots;
     }
 
-    public Map<String, Gate> getGates(){
+    public Map<String, Gate> getGates() {
         return gates;
     }
 
