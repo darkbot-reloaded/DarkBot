@@ -161,6 +161,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     }
 
     public void jumpPortal(Portal portal) {
+        if (!main.guiManager.canJumpPortal()) return;
         if (!portal.isValid()) return;
         if (System.currentTimeMillis() - portalTime < 500) return; // Minimum delay
         if ((System.currentTimeMillis() - portalTime > 20000 || isNotJumping(portal)) &&
