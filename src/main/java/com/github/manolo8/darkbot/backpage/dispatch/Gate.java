@@ -45,24 +45,32 @@ public class Gate {
         this.collectable = collectable;
     }
 
-    public boolean getInProgress(){ return inProgress; }
+    public boolean getInProgress() {
+        return inProgress;
+    }
 
-    public void setInProgress(boolean inProgress){ this.inProgress = inProgress; }
+    public void setInProgress(boolean inProgress) {
+        this.inProgress = inProgress;
+    }
 
-    public boolean getIsAvailable(){ return isAvailable; }
+    public boolean getIsAvailable() {
+        return isAvailable;
+    }
 
-    public void setIsAvailable(boolean isAvailable){ this.isAvailable = isAvailable; }
+    public void setIsAvailable(boolean isAvailable) {
+        this.isAvailable = isAvailable;
+    }
 
     @Override
     public String toString() {
         return "Retriever{" +
-                "id=" + id +
-                "name=" + name +
-                "time=" + time +
-                "cost=" + cost +
-                "collectable=" + collectable +
-                "isAvailable" + isAvailable +
-                "inProgress=" + inProgress +
-                "}";
+                " id=" + id +
+                ", name=" + name +
+                ", time=" + time +
+                ", cost=" + cost +
+                ", collectable=" + collectable +
+                ", isAvailable" + isAvailable +
+                ", inProgress=" + inProgress +
+                " }";
     }
 }

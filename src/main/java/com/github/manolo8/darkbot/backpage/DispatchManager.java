@@ -99,8 +99,8 @@ public class DispatchManager {
 
             return handleResponse("Collected Retriever", progress.getId(), response);
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Exception collecting dispatcher: " + e);
+            e.printStackTrace();
         }
         return false;
     }
