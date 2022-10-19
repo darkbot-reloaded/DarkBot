@@ -368,8 +368,7 @@ public class GuiManager implements Manager, GameScreenAPI {
                 if (closed[i]) continue;
 
                 Gui gui = managedGuis[i];
-                if (gui.lastUpdatedOver(5000) && gui.visible) {
-                    gui.show(false);
+                if (gui.lastUpdatedOver(5000) && gui.show(false)) {
                     closed[i] = true;
                 }
             }

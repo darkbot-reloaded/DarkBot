@@ -23,7 +23,7 @@ repositories {
 }
 
 group = "eu.darkbot"
-version = "1.17.108"
+version = "1.17.110"
 description = "DarkBot"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 java.targetCompatibility = JavaVersion.VERSION_1_8
@@ -42,7 +42,7 @@ publishing {
 }
 
 dependencies {
-    val apiVersion = "0.5.1"
+    val apiVersion = "0.5.2"
 
     // use this if you want to use local(mavenLocal) darkbot API
     //implementation("eu.darkbot", "darkbot-impl", apiVersion)
