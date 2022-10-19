@@ -12,21 +12,17 @@ import static com.github.manolo8.darkbot.Main.API;
 public class SettingsManager implements Manager, Tickable, API.Singleton {
 
     private final Main main;
-
-    private long address;
-
     public int config;
     public int force2d;
     public int nextMap;
     public int currMap;
-
     public int enemyCount;
     public boolean attackViaSlotbar;
-
+    public String lang, driver;
+    private long address;
+    private boolean driverNamePrinted;
     private long hudWrapper;
     private long uiWrapper;
-
-    public String lang, driver;
 
     public SettingsManager(Main main) {
         this.main = main;
@@ -34,7 +30,10 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
 
     @Override
     public void install(BotInstaller botInstaller) {
-        botInstaller.settingsAddress.add(value -> address = value);
+        botInstaller.settingsAddress.add(value -> {
+            address = value;
+            driverNamePrinted = false;
+        });
     }
 
     @Override
@@ -51,16 +50,24 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
         this.force2d = API.readMemoryInt(address, 784, 0x20);
 
         this.lang = API.readMemoryStringFallback(address, null, 640);
-        this.driver = API.readString(address, 432);
 
-        uiWrapper = Main.API.readLong(main.settingsManager.address, 864);
-        hudWrapper = Main.API.readLong(main.settingsManager.address, 856);
+        this.uiWrapper = Main.API.readLong(main.settingsManager.address, 864);
+        this.hudWrapper = Main.API.readLong(main.settingsManager.address, 856);
 
         // Enforce GPU capabilities support
 //        if (main.config.BOT_SETTINGS.API_CONFIG.ENFORCE_HW_ACCEL) {
 //            API.replaceInt(address + 332, 0, 1);
 //            API.replaceInt(address + 340, 0, 1);
 //        }
+
+        if (!driverNamePrinted) {
+            this.driver = API.readString(address, "", 432);
+
+            if (driver != null && !driver.isEmpty()) {
+                System.out.println("Game is using: " + driver + " | force2d: " + force2d);
+                driverNamePrinted = true;
+            }
+        }
     }
 
     public boolean is2DForced() {
@@ -71,14 +78,14 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
         return API.readBoolean(uiWrapper + 32);
     }
 
-    public boolean isHudVisible() {
-        return API.readBoolean(hudWrapper + 32);
-    }
-
     public void setUiVisible(boolean visible) {
         if (uiWrapper != 0) {
             API.callMethod(4, uiWrapper, visible ? 1 : 0);
         }
+    }
+
+    public boolean isHudVisible() {
+        return API.readBoolean(hudWrapper + 32);
     }
 
     public void setHudVisible(boolean visible) {
