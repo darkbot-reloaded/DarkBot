@@ -53,7 +53,8 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     private final ShipModeSelectorHandler shipModeHandler;
     private final MutableShipMode shipMode = new MutableShipMode();
 
-    public Map map, nextMap;
+    public long nextCpuMapDuration;
+    public Map map, nextMap, nextCpuMap;
 
     @Deprecated
     public Ship target;
@@ -87,7 +88,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
         this.pet.main = main;
-        this.map = this.nextMap = star.byId(-1);
+        this.map = this.nextMap = this.nextCpuMap = star.byId(-1);
 
         this.items = items;
 

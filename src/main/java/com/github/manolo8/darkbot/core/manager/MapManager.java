@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.Map;
+import com.github.manolo8.darkbot.core.objects.facades.SpaceMapWindowProxy;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.EntityList;
@@ -106,6 +107,7 @@ public class MapManager implements Manager, StarSystemAPI {
     public void tick() {
         long temp = API.readMemoryLong(mapAddressStatic);
 
+        checkJumpCpu();
         checkNextMap(main.settingsManager.nextMap);
         if (mapAddress != temp) {
             update(temp);
@@ -141,6 +143,21 @@ public class MapManager implements Manager, StarSystemAPI {
     public void checkNextMap(int next) {
         if (next != main.hero.nextMap.id && next != lastNextMap)
             main.hero.nextMap = main.starManager.byId(lastNextMap = next);
+    }
+
+    public void checkJumpCpu() {
+        SpaceMapWindowProxy spaceMapWindowProxy = main.facadeManager.spaceMapWindowProxy;
+        int next = spaceMapWindowProxy.jumpInfo.mapId;
+        int duration = spaceMapWindowProxy.jumpInfo.duration;
+
+        if (duration <= 0 || next <= 0) {
+            main.hero.nextCpuMapDuration = 0;
+            return;
+        }
+        if (next != main.hero.nextCpuMap.getId() || main.hero.nextCpuMapDuration == 0) {
+            main.hero.nextCpuMapDuration = System.currentTimeMillis() + (duration * 1000L) + 500;
+            main.hero.nextCpuMap = main.starManager.byId(next);
+        }
     }
 
     private void switchMap(Map next) {
