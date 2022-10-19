@@ -23,6 +23,9 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
     public int enemyCount;
     public boolean attackViaSlotbar;
 
+    private long hudWrapper;
+    private long uiWrapper;
+
     public String lang, driver;
 
     public SettingsManager(Main main) {
@@ -50,6 +53,8 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
         this.lang = API.readMemoryStringFallback(address, null, 640);
         this.driver = API.readString(address, 432);
 
+        uiWrapper = Main.API.readLong(main.settingsManager.address, 864);
+        hudWrapper = Main.API.readLong(main.settingsManager.address, 856);
 
         // Enforce GPU capabilities support
 //        if (main.config.BOT_SETTINGS.API_CONFIG.ENFORCE_HW_ACCEL) {
@@ -60,5 +65,25 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
 
     public boolean is2DForced() {
         return force2d == 1;
+    }
+
+    public boolean isUiVisible() {
+        return API.readBoolean(uiWrapper + 32);
+    }
+
+    public boolean isHudVisible() {
+        return API.readBoolean(hudWrapper + 32);
+    }
+
+    public void setUiVisible(boolean visible) {
+        if (uiWrapper != 0) {
+            API.callMethod(4, uiWrapper, visible ? 1 : 0);
+        }
+    }
+
+    public void setHudVisible(boolean visible) {
+        if (hudWrapper != 0) {
+            API.callMethod(4, hudWrapper, visible ? 1 : 0);
+        }
     }
 }

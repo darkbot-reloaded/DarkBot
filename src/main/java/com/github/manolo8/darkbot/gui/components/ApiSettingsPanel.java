@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.utils.FloatingDialog;
 import com.github.manolo8.darkbot.gui.utils.SpinnerNumberMinMaxFix;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -19,7 +20,7 @@ public class ApiSettingsPanel extends JPanel {
     private final Config.BotSettings.APIConfig apiConfig;
     private final JSpinner w, h;
 
-    public ApiSettingsPanel(Config.BotSettings.APIConfig display, JComponent parent) {
+    public ApiSettingsPanel(Main main, Config.BotSettings.APIConfig display, JComponent parent) {
         super(new MigLayout("wrap 6"));
         this.apiConfig = display;
 
@@ -30,6 +31,26 @@ public class ApiSettingsPanel extends JPanel {
             c.addItemListener(l -> apiConfig.attachToBot = l.getStateChange() == ItemEvent.SELECTED);
 
             add(new JLabel("Attach window: "), "span 3, align left");
+            add(c, "span 3");
+        }
+
+        if (Main.API.hasCapability(GameAPI.Capability.DIRECT_CALL_METHOD)) {
+            JCheckBox c = new JCheckBox();
+            c.setSelected(main.settingsManager.isUiVisible());
+
+            c.addItemListener(l -> main.settingsManager.setUiVisible(l.getStateChange() == ItemEvent.SELECTED));
+
+            add(new JLabel("Show GameUI: "), "span 3, align left");
+            add(c, "span 3");
+        }
+
+        if (Main.API.hasCapability(GameAPI.Capability.DIRECT_CALL_METHOD)) {
+            JCheckBox c = new JCheckBox();
+            c.setSelected(main.settingsManager.isHudVisible());
+
+            c.addItemListener(l -> main.settingsManager.setHudVisible(l.getStateChange() == ItemEvent.SELECTED));
+
+            add(new JLabel("Show GameHUD: "), "span 3, align left");
             add(c, "span 3");
         }
 
@@ -75,6 +96,16 @@ public class ApiSettingsPanel extends JPanel {
             s.setPreferredSize(new Dimension(90, 12));
 
             add(new JLabel("Game Quality: "), "span 3, align left");
+            add(s, "span 3, align right");
+        }
+
+        if (Main.API.hasCapability(GameAPI.Capability.DIRECT_CALL_METHOD)) {
+            JSlider s = new JSlider(1, 100);
+            s.setValue((int) Math.min(100, Math.max(1,  HeroManager.instance.main.mapManager.getZoom() * 100.0)));
+            s.addChangeListener(l -> main.mapManager.setZoom(s.getValue() / 100.0));
+            s.setPreferredSize(new Dimension(90, 12));
+
+            add(new JLabel("Game Zoom: "), "span 3, align left");
             add(s, "span 3, align right");
         }
 

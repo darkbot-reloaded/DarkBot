@@ -241,6 +241,38 @@ public class MapManager implements Manager, StarSystemAPI {
         }
     }
 
+    public double getZoom() {
+        if (is3DView) {
+            long zoomHolderInCam = Main.API.readLong(viewAddress, 216, 264, 104, 40);
+            if (zoomHolderInCam != 0)
+                return API.readDouble(zoomHolderInCam + 56);
+        } else {
+            long map = API.readLong(viewAddress + 208);
+            if (map != 0) {
+                return API.readDouble(map + 320);
+            }
+        }
+
+        return 1;
+    }
+
+    public void setZoom(double zoom) {
+        if (is3DView) {
+            long zoomHolderInCam = Main.API.readLong(viewAddress, 216, 264, 104, 40);
+
+            if (zoomHolderInCam != 0) {
+                if (API.readDouble(zoomHolderInCam + 56) != zoom)
+                    Main.API.callMethod(4, zoomHolderInCam, Double.doubleToLongBits(zoom));
+            }
+        } else {
+            long map = API.readLong(viewAddress + 208);
+            if (map != 0) {
+                API.writeDouble(map + 336, 0.1);
+                Main.API.callMethod(153, map, Double.doubleToLongBits(zoom), Double.doubleToLongBits(1));
+            }
+        }
+    }
+
     public ViewBounds viewBounds = new ViewBounds();
 
     // viewAddress
