@@ -51,6 +51,7 @@ public class DispatchManager {
             lastDispatcherUpdate = System.currentTimeMillis();
             return InfoReader.updateAll(page, data);
         } catch (Exception e) {
+            System.out.println("Exception updating dispatch data" + e);
             e.printStackTrace();
         }
         return false;
@@ -77,8 +78,8 @@ public class DispatchManager {
                     .getContent();
             return handleResponse("Hired Dispatcher", retriever.getId(), response);
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Exception hiring dispatcher: " + e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -124,8 +125,8 @@ public class DispatchManager {
                     .getContent();
             return handleResponse("Gate Started", gate.getName(), response);
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Exception dispatching gate: " + e);
+            e.printStackTrace();
         }
 
         return false;
@@ -147,8 +148,8 @@ public class DispatchManager {
 
             return handleResponse("Collected Gate", gate.getName(), response);
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Exception collecting dispatcher: " + e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -165,8 +166,8 @@ public class DispatchManager {
 
             return handleResponse("Collected Retriever", progress.getId(), response);
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Exception collecting dispatcher: " + e);
+            e.printStackTrace();
         }
         return false;
     }
