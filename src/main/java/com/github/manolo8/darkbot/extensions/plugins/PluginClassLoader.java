@@ -1,7 +1,5 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -43,15 +41,12 @@ public class PluginClassLoader extends URLClassLoader {
         if (PROTECTED.stream().anyMatch(p -> p.test(name)))
             throw new ClassNotFoundException(name + " is a protected class");
 
-        Class<?> result = super.loadClass(name, resolve);
-        if (result.getClassLoader() == this) {
-            for (Method m : result.getDeclaredMethods()) {
-                if (Modifier.isNative(m.getModifiers())) {
-                    throw new ClassNotFoundException(name + " is trying to use native code");
-                }
-            }
-        }
-        return result;
+        return super.loadClass(name, resolve);
+    }
+
+    @Override
+    protected String findLibrary(String libname) {
+        throw new SecurityException("Library loading is not allowed from plugins");
     }
 
 }
