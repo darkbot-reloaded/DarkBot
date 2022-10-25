@@ -147,6 +147,10 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 main.statsManager.resetValues();
                 main.repairManager.resetDeaths();
             }));
+
+            list.add(create("Open Hangar", e -> new FlashRunnerTask(main.backpage, (JMenuItem) e.getSource(), "Dock")));
+            list.add(create("Open GalaxyGate", e -> new FlashRunnerTask(main.backpage, (JMenuItem) e.getSource(), "GalaxyGates")));
+
             ConfigSetting<Config> root = config.getConfigRoot();
             if (root.getValue().BOT_SETTINGS.OTHER.DEV_STUFF) {
                 list.add(createSeparator("Dev stuff"));
