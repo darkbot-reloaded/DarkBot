@@ -141,7 +141,7 @@ public class MapManager implements Manager, StarSystemAPI {
 
     private int lastNextMap;
     public void checkNextMap(int next) {
-        if (next != main.hero.nextMap.id && next != lastNextMap)
+        if (next != lastNextMap)
             main.hero.nextMap = main.starManager.byId(lastNextMap = next);
     }
 
