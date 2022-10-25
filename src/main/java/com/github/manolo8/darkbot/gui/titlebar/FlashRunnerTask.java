@@ -16,9 +16,7 @@ public class FlashRunnerTask extends Thread {
     private static final Path RUNNER_PATH = Paths.get("lib", "KekkaRunner.exe");
     private static final Pattern PARAMS_PATTERN = Pattern.compile("src\":.\"([^\"]+).*width\":.(\\d+).*height\":.(\\d+).*(cdn[^}]+)");
 
-    static {
-        LibSetup.downloadLib(RUNNER_PATH.getFileName().toString());
-    }
+    private static boolean LIB_CHECKED = false;
 
     private final BackpageManager backpageManager;
     private final JMenuItem menuItem;
@@ -37,8 +35,18 @@ public class FlashRunnerTask extends Thread {
 
     @Override
     public void run() {
-        if (!backpageManager.isInstanceValid() || !menuItem.isEnabled() || Files.notExists(RUNNER_PATH)) return;
+        if (!backpageManager.isInstanceValid() || !menuItem.isEnabled()) return;
         menuItem.setEnabled(false);
+
+        if (!LIB_CHECKED) {
+            LibSetup.downloadLib(RUNNER_PATH.getFileName().toString());
+            LIB_CHECKED = true;
+        }
+
+        if (Files.notExists(RUNNER_PATH)) {
+            menuItem.setEnabled(true);
+            return;
+        }
 
         try {
             String content = backpageManager.getConnection("indexInternal.es?action=internal" + name, Method.GET).getContent();
