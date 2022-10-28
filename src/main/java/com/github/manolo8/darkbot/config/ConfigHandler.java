@@ -7,8 +7,6 @@ import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.google.gson.JsonElement;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
-import eu.darkbot.api.config.types.BoxInfo;
-import eu.darkbot.api.config.types.NpcInfo;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.Configurable;
@@ -40,6 +38,8 @@ public class ConfigHandler implements ConfigAPI, Listener {
     public void init() {
         this.configuration = builder.of(Config.class, "Configuration", null);
         this.configuration.setValue(loader.getConfig());
+
+        ConfigEntity.INSTANCE = pluginAPI.requireInstance(ConfigEntity.class);
     }
 
     public Config loadConfig(String configName) {
@@ -51,16 +51,6 @@ public class ConfigHandler implements ConfigAPI, Listener {
     @SuppressWarnings("unchecked")
     public <T> ConfigSetting.Parent<T> getConfigRoot() {
         return (ConfigSetting.Parent<T>) configuration;
-    }
-
-    @Override
-    public BoxInfo getOrCreateBoxInfo(String name) {
-        return ConfigEntity.INSTANCE.getOrCreateBoxInfo(name);
-    }
-
-    @Override
-    public NpcInfo getOrCreateNpcInfo(String name) {
-        return ConfigEntity.INSTANCE.getOrCreateNpcInfo(name);
     }
 
     public <T> ConfigSetting.Parent<T> getFeatureConfig(FeatureDefinition<?> fd) {

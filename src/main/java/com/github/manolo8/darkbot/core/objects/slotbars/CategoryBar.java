@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -39,6 +40,11 @@ public class CategoryBar extends MenuBar {
             if (id.equals(category.categoryId)) return category;
         }
         return null;
+    }
+
+    public Stream<Item> getItemStream(ItemCategory type) {
+        Category cat = get(type);
+        return cat == null ? Stream.empty() : cat.items.stream();
     }
 
     public boolean hasCategory(ItemCategory type) {

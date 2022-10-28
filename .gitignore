@@ -1,6 +1,9 @@
 /.idea
+/.gradle
+/build
 /target
 /test
 /out
 dependency-reduced-pom.xml
 *.iml
+*.json

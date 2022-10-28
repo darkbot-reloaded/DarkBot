@@ -75,7 +75,7 @@ public abstract class PairArray extends SwfPtrCollection {
 
     public Pair get(String key) {
         for (Pair pair : pairs)
-            if (pair.key != null && pair.key.equals(key))
+            if (pair != null && pair.key != null && pair.key.equals(key))
                 return pair;
 
         return null;
@@ -105,8 +105,8 @@ public abstract class PairArray extends SwfPtrCollection {
         }
 
         public String getKey(long addr) {
-            if (isInvalid(addr)) return null;
-            String key = API.readMemoryStringFallback(addr, null);
+            if (isInvalid(addr) || (addr & ByteUtils.ATOM_KIND) != ByteUtils.STRING_TYPE) return null;
+            String key = API.readMemoryStringFallback(addr & ByteUtils.ATOM_MASK, null);
             return key == null || key.isEmpty() ? null : key;
         }
 
@@ -138,7 +138,7 @@ public abstract class PairArray extends SwfPtrCollection {
             String key = null;
             offset = 8;
             for (int i = 0; offset < 8192 && i < size; offset += 8) {
-                if (key == null && (key = getKey(readLong(table, offset, expected) & ByteUtils.ATOM_MASK)) == null) continue;
+                if (key == null && (key = getKey(readLong(table, offset, expected))) == null) continue;
 
                 long value = readLong(table, offset += 8, expected);
                 if (isInvalid(value)) continue;
@@ -153,6 +153,7 @@ public abstract class PairArray extends SwfPtrCollection {
 
     private static class Dictionary extends PairArray {
         private String[] removed;
+        private static final byte[] BUFFER = new byte[4096];
 
         @Override
         public void update() {
@@ -174,11 +175,11 @@ public abstract class PairArray extends SwfPtrCollection {
                 super.pairs = Arrays.copyOf(super.pairs, size);
             }
 
-            byte[] bytes = API.readMemory(table, length);
+            API.readMemory(table, BUFFER, length);
 
             int current = 0, remove = 0;
             for (int offset = 0; offset < length && current < size; offset += 16) {
-                long keyAddr = ByteUtils.getLong(bytes, offset) - 2, valAddr = ByteUtils.getLong(bytes, offset + 8) - 1;
+                long keyAddr = ByteUtils.getLong(BUFFER, offset) - 2, valAddr = ByteUtils.getLong(BUFFER, offset + 8) - 1;
 
                 if (keyAddr == -2 || (valAddr >= -2 && valAddr <= 9)) continue;
 

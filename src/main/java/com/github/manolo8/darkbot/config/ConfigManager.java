@@ -37,7 +37,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Responsible for loading & saving configuration files
+ * Responsible for loading &amp; saving configuration files
  *
  * TODO: Rename to ConfigLoader
  */
@@ -177,7 +177,6 @@ public class ConfigManager implements API.Singleton {
             // Didn't have any previous config, save this new one:
             if (!failedConfig) saveConfig(config, configFile, backupFile);
         }
-        ConfigEntity.INSTANCE.setConfig(config);
 
         return config;
     }

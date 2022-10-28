@@ -1,13 +1,14 @@
 package com.github.manolo8.darkbot.core;
 
 import com.github.manolo8.darkbot.core.api.GameAPI;
-
+import com.github.manolo8.darkbot.core.entities.Box;
+import com.github.manolo8.darkbot.core.entities.Entity;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.managers.WindowAPI;
 
-import java.util.function.Predicate;
+import java.util.function.LongPredicate;
 
 public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
@@ -19,6 +20,7 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     boolean isValid();
     boolean isInitiallyShown();
     long getMemoryUsage();
+    double getCpuUsage();
     String getVersion();
 
     void mouseMove(int x, int y);
@@ -92,8 +94,9 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     long[] queryMemoryInt(int value, int maxQuantity);
     long[] queryMemoryLong(long value, int maxQuantity);
     long[] queryMemory(byte[] query, int maxQuantity);
+    long queryMemory(byte... query);
 
-    long searchClassClosure(Predicate<Long> pattern);
+    long searchClassClosure(LongPredicate pattern);
 
     void setVisible(boolean visible);
     default void setMinimized(boolean minimized) {
@@ -106,16 +109,24 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     }
 
     void handleRefresh();
+
     void resetCache();
 
     boolean hasCapability(GameAPI.Capability capability);
 
     // Direct game access
     void setMaxFps(int maxCps);
+
     void lockEntity(int id);
+
+    void selectEntity(Entity entity);
+
     void moveShip(Locatable destination);
-    void collectBox(Locatable destination, long collectableAddress);
+
+    void collectBox(Box box);
+
     void refine(long refineUtilAddress, OreAPI.Ore ore, int amount);
+
     long callMethod(int index, long... arguments);
 
     //MemoryAPI

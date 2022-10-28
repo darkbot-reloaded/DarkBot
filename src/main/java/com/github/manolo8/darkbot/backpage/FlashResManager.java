@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 /**
- * Responsible for searching & holding flash resource file, containing translations for in-game things
+ * Responsible for searching &amp; holding flash resource file, containing translations for in-game things
  * <p>
  * To be able to undo translations (convert a translated text into it's original translation id) in an efficient
  * manner we will substring all resources to the first N characters to be able to do an initial fast search.

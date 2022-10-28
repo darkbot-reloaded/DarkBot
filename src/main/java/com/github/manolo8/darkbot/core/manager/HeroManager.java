@@ -53,7 +53,8 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     private final ShipModeSelectorHandler shipModeHandler;
     private final MutableShipMode shipMode = new MutableShipMode();
 
-    public Map map;
+    public long nextCpuMapDuration;
+    public Map map, nextMap, nextCpuMap;
 
     @Deprecated
     public Ship target;
@@ -87,7 +88,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         main.status.add(drive::toggleRunning);
         this.pet = new Pet();
         this.pet.main = main;
-        this.map = star.byId(-1);
+        this.map = this.nextMap = this.nextCpuMap = star.byId(-1);
 
         this.items = items;
 
@@ -160,6 +161,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     }
 
     public void jumpPortal(Portal portal) {
+        if (!main.guiManager.canJumpPortal()) return;
         if (!portal.isValid()) return;
         if (System.currentTimeMillis() - portalTime < 500) return; // Minimum delay
         if ((System.currentTimeMillis() - portalTime > 20000 || isNotJumping(portal)) &&
@@ -281,6 +283,10 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     @Override
     public GameMap getMap() {
         return map;
+    }
+
+    public GameMap getNextMap() {
+        return nextMap;
     }
 
     @Override

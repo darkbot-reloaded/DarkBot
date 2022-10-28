@@ -47,6 +47,7 @@ public class ButtonListRenderer extends JPanel implements ListCellRenderer<Strin
         boolean isRollover = index == rolloverIndex;
         setBackground(isSelected && !isRollover ? list.getSelectionBackground() : list.getBackground());
         setForeground(isSelected && !isRollover ? list.getSelectionForeground() : list.getForeground());
+        name.setOpaque(false);
 
         button.setVisible(showButton.test(index));
         button.getModel().setRollover(index == rolloverIndex);

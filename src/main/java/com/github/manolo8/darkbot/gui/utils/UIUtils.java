@@ -2,12 +2,11 @@ package com.github.manolo8.darkbot.gui.utils;
 
 import com.formdev.flatlaf.ui.FlatBorder;
 import com.github.manolo8.darkbot.config.ConfigEntity;
-import java.awt.*;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.UIManager;
+
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
+import java.awt.*;
 
 public class UIUtils {
 
@@ -49,6 +48,10 @@ public class UIUtils {
 
     public static Border getBorder() {
         return new FlatBorder();
+    }
+
+    public static Border getUnfocusableBorder() {
+        return BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor"));
     }
 
     public static Color blendColor(Color color, int alpha) {

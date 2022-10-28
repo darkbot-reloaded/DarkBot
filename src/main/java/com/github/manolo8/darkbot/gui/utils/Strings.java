@@ -2,8 +2,14 @@ package com.github.manolo8.darkbot.gui.utils;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class Strings {
+    private static final Pattern NON_CHARACTER_REPLACEMENT = Pattern.compile("[^a-z0-9]");
+    private static final Pattern MIMESIS_REPLACEMENT = Pattern.compile("m[i1]m[e3][s5][i1][s5]");
+
+    private static final Pattern SIMPLIFY_NAME_MATCHES = Pattern.compile("^[^\\d]+\\d{1,3}$");
+    private static final Pattern SIMPLIFY_NAME_REPLACEMENT = Pattern.compile("\\d{1,3}$");
 
     public static String fileName(String path) {
         if (path == null || path.isEmpty()) return "-";
@@ -21,17 +27,18 @@ public class Strings {
     }
 
     public static String simplifyName(String name) {
-        if (!name.matches("^[^\\d]+\\d{1,3}$")) return name;
-        return name.replaceAll("\\d{1,3}$", " *");
+        if (!SIMPLIFY_NAME_MATCHES.matcher(name).matches()) return name;
+        return SIMPLIFY_NAME_REPLACEMENT.matcher(name).replaceAll(" *");
     }
 
     public static String fuzzyMatcher(String string) {
-        return string
+        string = string
                 .replace("x", "")
                 .replace("X", "")
-                .toLowerCase(Locale.ROOT)
-                .replaceAll("[^a-z0-9]", "")
-                .replaceAll("m[i1]m[e3][s5][i1][s5]", "mimesis");
+                .toLowerCase(Locale.ROOT);
+
+        string = NON_CHARACTER_REPLACEMENT.matcher(string).replaceAll("");
+        return MIMESIS_REPLACEMENT.matcher(string).replaceAll("mimesis");
     }
 
     public static boolean isEmpty(String s) {

@@ -131,7 +131,7 @@ public class PetManager extends Gui implements PetAPI {
         updatePetTarget();
         int moduleId = gearSupplier.get().getId();
 
-        if (target != null && !(target instanceof Npc) && target.playerInfo.isEnemy()) {
+        if (target != null && !(target instanceof Npc) && !target.playerInfo.isEnemy()) {
             moduleId = PetGear.PASSIVE.getId();
         }
 

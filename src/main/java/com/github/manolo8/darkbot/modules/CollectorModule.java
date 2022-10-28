@@ -131,7 +131,7 @@ public class CollectorModule implements Module {
         if (distance < (direct ? 800 : 250)) {
             drive.stop(false);
             if (direct) {
-                API.collectBox(current, current.address);
+                API.collectBox(current);
             } else {
                 current.clickable.setRadius(800);
                 drive.clickCenter(true, current.locationInfo.now);

@@ -10,6 +10,8 @@ import static com.github.manolo8.darkbot.Main.API;
  * Instead of VectorInt & ArrayInt
  */
 public class IntArray extends Updatable {
+    private static final byte[] BUFFER = new byte[1024 * 8];
+
     private final int sizeOffset, tableOffset, bytesOffset;
     private final boolean isArray, autoUpdatable;
 
@@ -72,10 +74,10 @@ public class IntArray extends Updatable {
         if (elements.length < size) elements = new int[(int) Math.min(size * 1.25, 1024)];
 
         long table = API.readMemoryLong(address + tableOffset) + bytesOffset;
-        byte[] data = API.readMemory(table, size * getOffset());
+        API.readMemory(table, BUFFER, size * getOffset());
 
         for (int i = 0, offset = 0; i < size; i++, offset += getOffset()) {
-            elements[i] = ByteUtils.getInt(data, offset) >> (isArray ? 3 : 0);
+            elements[i] = ByteUtils.getInt(BUFFER, offset) >> (isArray ? 3 : 0);
         }
     }
 

@@ -37,6 +37,7 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
         public BoosterCategory cat;
 
         private final ObjArray subBoostersArr = ObjArray.ofVector(true);
+        private final ObjArray attributesArr = ObjArray.ofVector(true);
 
         @Override
         public void update() {
@@ -52,6 +53,25 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
             for (int i = 0; i < subBoostersArr.getSize(); i++)
                 if ((curr = API.readMemoryDouble(subBoostersArr.get(i), 0x30, 0x38)) > 0 && curr < min) min = curr;
             this.cd = min;
+
+            if (cd != Double.POSITIVE_INFINITY && amount <= 0) {
+                double amount = 0;
+
+                for (int i = 0; i < subBoostersArr.getSize(); i++) {
+                    attributesArr.update(API.readLong(subBoostersArr.getPtr(i), 0x28, 0x40, 0x20, 0x88));
+
+                    for (int j = 0; j < attributesArr.getSize(); j++) {
+                        long attribute = attributesArr.getPtr(j);
+
+                        if (API.readLong(attribute + 0x20) == API.readLong(address + 0x20)) {
+                            amount += API.readDouble(attribute + 0x28);
+                            break;
+                        }
+                    }
+                }
+
+                this.amount = amount;
+            }
         }
 
         public String toSimpleString() {
@@ -86,6 +106,9 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
     private enum BoosterCategory {
         ABILITY_COOLDOWN_TIME   ("CD"    , new Color(0xFFC000)),
         DAMAGE                  ("DMG"   , new Color(0xFD0400)),
+        DAMAGE_PVP              ("DMG PVP", new Color(0xBD0805)),
+        DAMAGE_FACTIONS         ("DMG FAC", new Color(0x941311)),
+        DAMAGE_NPC              ("DMG NPC", new Color(0x7E0807)),
         EXPERIENCE_POINTS       ("EXP"   , new Color(0xF77800)),
         HITPOINTS               ("HP"    , new Color(0x049104)),
         HONOUR_POINTS           ("HON"   , new Color(0xFF8080)),
@@ -99,6 +122,9 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
         EVENT_AMOUNT            ("EVT AM", new Color(0x05B6E3)),
         EVENT_CHANCE            ("EVT CH", new Color(0x00C6EE)),
         SPECIAL_AMOUNT          ("SP AM" , new Color(0xFFFFFF)),
+        PET_EXP_BOOSTER         ("PET XP", new Color(0xF77800)),
+        LASER_HIT_CHANCE        ("LAS HC", new Color(0x0F6164)),
+        ROCKET_HIT_CHANCE       ("ROC HC", new Color(0x0B7E81)),
         UNKNOWN                 ("?"     , new Color(0x808080)) {
             @Override
             public String getSmall(String category) {

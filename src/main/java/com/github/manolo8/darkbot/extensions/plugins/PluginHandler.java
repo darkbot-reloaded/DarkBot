@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.utils.AuthAPI;
 import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.StreamUtils;
 import com.google.gson.Gson;
 import eu.darkbot.api.API;
 import eu.darkbot.api.managers.EventBrokerAPI;
@@ -24,8 +25,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
@@ -161,11 +165,12 @@ public class PluginHandler implements API.Singleton {
     }
 
     private void loadPlugins(File[] pluginFiles, List<Plugin> previousPlugins) {
+        Map<PluginDefinition, List<String>> pluginClasses = new HashMap<>();
         for (File pluginFile : pluginFiles) {
             Plugin pl = null;
             try {
                 pl = new Plugin(pluginFile, pluginFile.toURI().toURL());
-                loadPlugin(pl);
+                List<String> classes = loadPlugin(pl);
 
                 // need to copy over previous update status and update issues or else they will be lost
                 int prevIndex = previousPlugins.indexOf(pl);
@@ -176,8 +181,10 @@ public class PluginHandler implements API.Singleton {
                     pl.setUpdateDefinition(plugin.getUpdateDefinition());
                 }
 
-                if (pl.getIssues().canLoad()) LOADED_PLUGINS.add(pl);
-                else FAILED_PLUGINS.add(pl);
+                if (pl.getIssues().canLoad()) {
+                    LOADED_PLUGINS.add(pl);
+                    if (classes != null) pluginClasses.put(pl.getDefinition(), classes);
+                } else FAILED_PLUGINS.add(pl);
             } catch (PluginException e) {
                 LOADING_EXCEPTIONS.add(e);
                 e.printStackTrace();
@@ -187,9 +194,11 @@ public class PluginHandler implements API.Singleton {
             }
         }
         PLUGIN_CLASS_LOADER = new PluginClassLoader(LOADED_PLUGINS.stream().map(Plugin::getJar).toArray(URL[]::new));
+        pluginClasses.forEach((plDef, cls) ->
+                plDef.features = cls.stream().filter(this::isFeature).toArray(String[]::new));
     }
 
-    private void loadPlugin(Plugin plugin) throws IOException, PluginException {
+    private List<String> loadPlugin(Plugin plugin) throws IOException, PluginException {
         try (JarFile jar = new JarFile(plugin.getFile(), true)) {
             ZipEntry plJson = jar.getEntry("plugin.json");
             if (plJson == null) {
@@ -199,6 +208,14 @@ public class PluginHandler implements API.Singleton {
             testUnique(plugin);
             testCompatibility(plugin);
             testSignature(plugin, jar);
+            if (plugin.getDefinition().features.length != 0 || plugin.getBasePackage() == null) return null;
+            String basePackage = plugin.getBasePackage().replace('.', '/');
+            return StreamUtils.toStream(jar.entries())
+                    .map(ZipEntry::getName)
+                    .filter(name -> name.endsWith(".class"))
+                    .filter(name -> name.startsWith(basePackage))
+                    .map(path -> path.replace('/', '.').replace(".class", ""))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -260,5 +277,13 @@ public class PluginHandler implements API.Singleton {
         }
     }
 
-
+    private boolean isFeature(String path) {
+        try {
+            Class<?> clazz = PLUGIN_CLASS_LOADER.loadClass(path);
+            return clazz.isAnnotationPresent(eu.darkbot.api.extensions.Feature.class) ||
+                   clazz.isAnnotationPresent(com.github.manolo8.darkbot.extensions.features.Feature.class);
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 }

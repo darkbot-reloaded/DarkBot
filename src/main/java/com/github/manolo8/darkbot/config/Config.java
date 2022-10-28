@@ -47,9 +47,9 @@ import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.GROU
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.GROUP_NAMES;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.HERO_NAME;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.HP_SHIELD_NUM;
+import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.SHOW_PET;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.STATS_AREA;
 import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.ZONES;
-import static com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag.SHOW_PET;
 
 public class Config implements eu.darkbot.api.config.legacy.Config {
 
@@ -211,6 +211,8 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public WindowPosition MAIN_GUI_WINDOW = new WindowPosition();
             public WindowPosition CONFIG_GUI_WINDOW = new WindowPosition();
 
+            public Visibility.Level CONFIG_LEVEL = Level.BASIC;
+
             public static class WindowPosition {
                 // x and y refer to top left coordinates of window
                 public int x = Integer.MIN_VALUE, y = Integer.MIN_VALUE;
@@ -224,8 +226,10 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean FULLY_HIDE_API = true;
             public @Option boolean FORCE_GAME_LANGUAGE = false;
             public @Option boolean ENFORCE_HW_ACCEL = true;
-            //public @Option boolean USE_3D = false; // After reload with forced HW_ACCEL in 3D, cpu usage is really high
-            public @Option @Number(min = 1, max = 60) @Number.Disabled(value = 0, def = 30) int MAX_FPS = 0;
+            public @Option boolean USE_3D = false; // After reload with forced HW_ACCEL in 3D, cpu usage is really high
+            public @Option
+            @Number(min = 1, max = 60)
+            @Number.Disabled(value = 0, def = 30) int MAX_FPS = 0;
 
             @Option @Dropdown(multi = true)
             public Set<HookAdapter.Flag> DARK_HOOK_FLAGS = EnumSet.allOf(HookAdapter.Flag.class);
@@ -328,6 +332,15 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         }
     }
 
+    @Override
+    public eu.darkbot.api.config.types.BoxInfo getOrCreateBoxInfo(String name) {
+        return ConfigEntity.INSTANCE.getOrCreateBoxInfo(name);
+    }
+
+    @Override
+    public eu.darkbot.api.config.types.NpcInfo getOrCreateNpcInfo(String name) {
+        return ConfigEntity.INSTANCE.getOrCreateNpcInfo(name);
+    }
 
     @Override
     public Collection<? extends eu.darkbot.api.config.types.SafetyInfo> getSafeties(GameMap gameMap) {

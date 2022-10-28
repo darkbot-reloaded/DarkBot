@@ -15,8 +15,10 @@ import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.managers.GameScreenAPI;
+import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +48,8 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final Gui lostConnection;
     public final Gui connecting;
     public final Gui quests;
+    public final Gui monthlyDeluxe;
+    public final Gui returnLogin;
     public final Gui minimap;
     public final Gui targetedOffers;
     public final LogoutGui logout;
@@ -59,12 +63,13 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final OreTradeGui oreTrade;
     public final GroupManager group;
 
+    public final Timer loggedInTimer = Timer.get(15_000);
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
-        WAITING(gm -> gm.quests.lastUpdatedOver(5000) && gm.quests.visible),
-        MISSION_CLOSING(gm -> gm.quests.show(false)),
-        CLICKING_AMMO(gm -> {
+        WAITING(gm -> gm.main.hero.address != 0 && !gm.connecting.isVisible()),
+        AFTER_LOGIN(gm -> {
             API.keyboardClick(gm.main.config.LOOT.AMMO_KEY);
+            gm.loggedInTimer.activate();
             return true;
         }),
         DONE(q -> false);
@@ -74,6 +79,8 @@ public class GuiManager implements Manager, GameScreenAPI {
             this.canAdvance = next;
         }
     }
+
+    private final GuiCloser guiCloser;
 
     public int deaths;
 
@@ -97,6 +104,8 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.lostConnection = register("lost_connection");
         this.connecting = register("connection");
         this.quests = register("quests");
+        this.monthlyDeluxe = register("monthly_deluxe");
+        this.returnLogin = register("returnee_login");
         this.minimap = register("minimap");
         this.targetedOffers = register("targetedOffers", TargetedOfferGui.class);
         this.logout = register("logout", LogoutGui.class);
@@ -106,6 +115,8 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.astralGate = register("rogue_lite");
         this.astralSelection = register("rogue_lite_selection");
         this.refinement = register("refinement", RefinementGui.class);
+
+        this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }
 
     public Gui register(String key) {
@@ -127,6 +138,7 @@ public class GuiManager implements Manager, GameScreenAPI {
             if (!value) {
                 validTime = System.currentTimeMillis();
                 checks = LoadStatus.WAITING;
+                guiCloser.reset();
             }
             API.resetCache();
         });
@@ -137,6 +149,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
             registeredGuis.values().forEach(Gui::reset);
             checks = LoadStatus.WAITING;
+            guiCloser.reset();
         });
     }
 
@@ -151,6 +164,10 @@ public class GuiManager implements Manager, GameScreenAPI {
 
         if (checks != LoadStatus.DONE && checks.canAdvance.test(this))
             checks = LoadStatus.values()[checks.ordinal() + 1];
+
+        guiCloser.tick();
+
+        // GuiCloser closes just once per restart, targeted can appear after port jumps
         targetedOffers.show(false);
 
         this.deaths = repairManager.getDeathAmount();
@@ -166,6 +183,10 @@ public class GuiManager implements Manager, GameScreenAPI {
                 gui.click(46, 180);
             }
         }
+    }
+
+    public boolean canJumpPortal() {
+        return loggedInTimer.isInactive();
     }
 
     public boolean tryRevive() {
@@ -331,6 +352,32 @@ public class GuiManager implements Manager, GameScreenAPI {
         settingsProxy.getCharacterOf(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION)
                 .filter(c -> slotBarsProxy.proActionBar.address != 0 && slotBarsProxy.isProActionBarVisible() != visible)
                 .ifPresent(API::keyboardClick);
+    }
+
+    private static class GuiCloser {
+        private final Gui[] managedGuis;
+        private final boolean[] closed;
+
+        public GuiCloser(Gui... managedGuis) {
+            this.managedGuis = managedGuis;
+            this.closed = new boolean[managedGuis.length];
+        }
+
+        public void tick() {
+            for (int i = 0; i < managedGuis.length; i++) {
+                if (closed[i]) continue;
+
+                Gui gui = managedGuis[i];
+                if (gui.lastUpdatedOver(5000) && gui.show(false)) {
+                    closed[i] = true;
+                }
+            }
+        }
+
+        public void reset() {
+            Arrays.fill(closed, false);
+        }
+
     }
 
 }

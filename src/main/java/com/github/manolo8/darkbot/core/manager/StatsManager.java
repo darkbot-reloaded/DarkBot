@@ -57,18 +57,18 @@ public class StatsManager implements Manager, StatsAPI {
 
     public void tick() {
         if (address == 0) return;
-        updateCredits(API.readMemoryDouble(address + 312));
-        updateUridium(API.readMemoryDouble(address + 320));
-        //API.readMemoryDouble(address + 328); // Jackpot
-        updateExperience(API.readMemoryDouble(address + 336));
-        updateHonor(API.readMemoryDouble(address + 344));
+        updateCredits(API.readMemoryDouble(address + 320));
+        updateUridium(API.readMemoryDouble(address + 328));
+        //API.readMemoryDouble(address + 336); // Jackpot
+        updateExperience(API.readMemoryDouble(address + 344));
+        updateHonor(API.readMemoryDouble(address + 352));
 
-        deposit = API.readMemoryInt(API.readMemoryLong(address + 264) + 40);
-        depositTotal = API.readMemoryInt(API.readMemoryLong(address + 272) + 40);
+        deposit = API.readMemoryInt(API.readMemoryLong(address + 272) + 40);
+        depositTotal = API.readMemoryInt(API.readMemoryLong(address + 280) + 40);
 
-        currentBox = API.readMemoryLong(address + 0xE8);
+        //currentBox = API.readMemoryLong(address + 0xE8);
 
-        sid = API.readMemoryStringFallback(API.readMemoryLong(address + 192), null);
+        sid = API.readMemoryStringFallback(API.readMemoryLong(address + 200), null);
         if (settingsAddress == 0) return;
         instance = API.readMemoryStringFallback(API.readMemoryLong(settingsAddress + 656), null);
     }

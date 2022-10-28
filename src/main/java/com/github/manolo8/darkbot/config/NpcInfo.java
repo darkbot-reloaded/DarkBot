@@ -122,12 +122,23 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
         extra.set(getId(flag), active);
     }
 
-    public static String getId(Enum<?> flag) {
-        // Legacy backwards compat. When using the new NpcFlag, check for old NpcExtra id
-        if (flag instanceof NpcFlag)
-            return NpcExtra.class.getCanonicalName() + flag.name();
+    // Keep a cache of the last searched id.
+    // If called repeatedly in a loop for the same flag, it avoids allocations for the string concat of class + name.
+    private static String lastSearchedId = "";
 
-        return flag.getClass().getCanonicalName() + flag.name();
+    public static String getId(Enum<?> flag) {
+        String lastId = NpcInfo.lastSearchedId;
+
+        // Legacy backwards compat. When using the new NpcFlag, check for old NpcExtra id
+        String className = flag instanceof NpcFlag ? NpcExtra.class.getCanonicalName()
+                : flag.getClass().getCanonicalName();
+        String name = flag.name();
+
+        if (lastId.length() == (className.length() + name.length()) &&
+                lastId.startsWith(className) && lastId.endsWith(name))
+            return lastId;
+
+        return lastSearchedId = className.concat(name);
     }
 
     public static class ExtraNpcInfo {

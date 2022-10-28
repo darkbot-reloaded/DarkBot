@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.gui.tree;
 import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
-import com.github.manolo8.darkbot.gui.tree.components.JLabelField;
 import com.github.manolo8.darkbot.gui.tree.utils.FocusEventUtil;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.tree.PluginListConfigSetting;
@@ -50,7 +49,7 @@ public class TreeCell extends JPanel {
         add(component);
         if (isEditor) {
             add(new EditorButton(UIUtils.getIcon("tick"),
-                    "Save edition\nDefault if you click outside the editor" ,JTree::stopEditing));
+                    "Save edition\nDefault if you click outside the editor", JTree::stopEditing));
             add(new EditorButton(UIUtils.getIcon("cross"),
                     "Cancel edition\nCan also be triggered by ESC", JTree::cancelEditing));
         }
@@ -73,7 +72,7 @@ public class TreeCell extends JPanel {
                     this.editor = editor;
                     this.legacyEditor = null;
 
-                    replaceComponent(editor.getEditorComponent(setting));
+                    replaceComponent(editor.getEditorComponent(setting, isEditor));
                 } else {
                     ConfigField cf = new ConfigField(setting);
                     this.editor = null;

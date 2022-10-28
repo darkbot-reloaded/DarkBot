@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.extensions.plugins;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -43,6 +42,11 @@ public class PluginClassLoader extends URLClassLoader {
             throw new ClassNotFoundException(name + " is a protected class");
 
         return super.loadClass(name, resolve);
+    }
+
+    @Override
+    protected String findLibrary(String libname) {
+        throw new SecurityException("Library loading is not allowed from plugins");
     }
 
 }

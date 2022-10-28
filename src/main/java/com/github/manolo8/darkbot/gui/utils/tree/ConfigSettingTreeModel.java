@@ -4,13 +4,18 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.annotations.Visibility;
 
+import javax.swing.*;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class ConfigSettingTreeModel implements TreeModel {
 
@@ -18,6 +23,9 @@ public class ConfigSettingTreeModel implements TreeModel {
     private final List<TreeModelListener> listeners = new ArrayList<>();
 
     private final TreeFilter filter;
+
+    @SuppressWarnings("rawtypes")
+    private final Map<ConfigSetting<?>, Consumer> changeListeners = new HashMap<>();
 
     public ConfigSettingTreeModel() {
         this(new TreeFilter());
@@ -28,8 +36,23 @@ public class ConfigSettingTreeModel implements TreeModel {
     }
 
     public void setRoot(ConfigSetting.Parent<?> root) {
+        if (this.root != root) {
+            changeListeners.forEach(ConfigSetting::removeListener);
+            changeListeners.clear();
+            setupValueChangeListeners("root", root);
+        }
         this.root = root;
         updateListeners();
+    }
+
+    protected <T> void setupValueChangeListeners(String key, ConfigSetting<T> setting) {
+        if (setting instanceof ConfigSetting.Parent) {
+            ((ConfigSetting.Parent<?>) setting).getChildren().forEach(this::setupValueChangeListeners);
+        } else if (isLeaf(setting)) {
+            Consumer<T> listener = v -> fireNodeChanged(setting);
+            setting.addListener(listener);
+            changeListeners.put(setting, listener);
+        }
     }
 
     public void setSearch(String search) {
@@ -88,13 +111,40 @@ public class ConfigSettingTreeModel implements TreeModel {
     @Override
     public void valueForPathChanged(TreePath path, Object newValue) {
         ConfigSetting<Object> setting = (ConfigSetting<Object>) path.getLastPathComponent();
-        setting.setValue(newValue);
+        setting.setValue(newValue); // calls fireNodeChanged internally via listener
+    }
+
+    public void fireNodeChanged(ConfigSetting<?> node) {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> fireNodeChanged(node));
+            return;
+        }
+
+        TreePath path = getPathFor(node);
 
         TreeModelEvent event = new TreeModelEvent(this, path);
+
+        if (path.getParentPath() != null) {
+            TreePath parentPath = path.getParentPath();
+            int idx = getIndexOfChild(node.getParent(), node);
+            // Modified child is not even in the tree! maybe not visible atm?
+            if (idx == -1) return;
+            event = new TreeModelEvent(this, parentPath, new int[]{idx}, new Object[]{node});
+        }
         for (TreeModelListener listener : listeners) {
             listener.treeNodesChanged(event);
         }
         ConfigEntity.changed();
+    }
+
+    private TreePath getPathFor(ConfigSetting<?> node) {
+        ConfigSetting<?> parent = node;
+        List<ConfigSetting<?>> path = new ArrayList<>();
+        do {
+            path.add(parent);
+        } while (parent != root && (parent = parent.getParent()) != null);
+        Collections.reverse(path);
+        return new TreePath(path.toArray(new ConfigSetting[0]));
     }
 
     @Override

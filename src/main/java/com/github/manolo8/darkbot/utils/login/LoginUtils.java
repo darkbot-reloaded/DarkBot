@@ -131,6 +131,8 @@ public class LoginUtils {
     public static void usernameLogin(LoginData loginData) {
         try {
             usernameLogin(loginData, "www");
+        } catch (CaptchaException ex) {
+            throw ex;
         } catch (Exception e) {
             try {
                 usernameLogin(loginData, "lp");
@@ -155,7 +157,7 @@ public class LoginUtils {
                 throw LoginException.translated("gui.login.error.captcha_fail", t);
             }
         } else if (frontPage.contains("class=\"bgcdw_captcha\"")) {
-            throw LoginException.translated("gui.login.error.captcha");
+            throw CaptchaException.translated("gui.login.error.captcha");
         }
 
         String loginUrl = getLoginUrl(frontPage);
@@ -203,7 +205,7 @@ public class LoginUtils {
 
     private static String replaceParameters(String params) {
         // update it here so on refresh can be used 2d or 3d
-        //FORCED_PARAMS.put("display2d", ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.USE_3D ? "1" : "2");
+        FORCED_PARAMS.put("display2d", ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.USE_3D ? "1" : "2");
 
         params = params.replaceAll("\"", "").replaceAll(",", "&").replaceAll(": ", "=");
         for (Map.Entry<String, String> replaces : FORCED_PARAMS.entrySet()) {
@@ -277,6 +279,25 @@ public class LoginUtils {
 
         public static WrongCredentialsException translated(String key) {
             return new WrongCredentialsException(I18n.get(key), I18n.get(key + ".desc"));
+        }
+    }
+
+    public static class CaptchaException extends LoginException {
+
+        public CaptchaException(String title, String message) {
+            super(title, message);
+        }
+
+        public CaptchaException(String title, String message, Throwable cause) {
+            super(title, message, cause);
+        }
+
+        public static CaptchaException translated(String key) {
+            return new CaptchaException(I18n.get(key), I18n.get(key + ".desc"));
+        }
+
+        public static CaptchaException translated(String key, Throwable cause) {
+            return new CaptchaException(I18n.get(key), I18n.get(key + ".desc"), cause);
         }
     }
 }

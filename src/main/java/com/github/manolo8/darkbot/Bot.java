@@ -15,8 +15,8 @@ public class Bot {
     public static void main(String[] args) throws IOException {
         // You can enable hardware acceleration via adding jvm arg: -Dsun.java2d.opengl=True
 
-        if (System.console() == null
-                && Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")) {
+        String path = Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        if (System.console() == null && (path.endsWith(".jar") || path.endsWith(".exe"))) {
             LogUtils.setOutputToFile();
         }
         try {
@@ -33,6 +33,8 @@ public class Bot {
         StartupParams params = new StartupParams(args);
 
         checkJavaVersion(params);
+
+        System.out.println("Starting DarkBot " + Main.VERSION);
         SwingUtilities.invokeLater(() -> new Main(params));
     }
 

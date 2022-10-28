@@ -6,7 +6,7 @@ import com.github.manolo8.darkbot.core.api.GameAPI;
 import eu.darkbot.util.Timer;
 
 import java.nio.charset.StandardCharsets;
-import java.util.function.Predicate;
+import java.util.function.LongPredicate;
 
 public class ByteUtils {
 
@@ -47,9 +47,13 @@ public class ByteUtils {
      *
      * A mask that will remove atom constant bits:
      */
-    public static final long ATOM_MASK = ~0b111L;
     @Deprecated // Use ATOM_MASK instead.
     public static final long FIX = ~0b111L;
+    public static final long ATOM_KIND = 0b111L;
+    public static final long ATOM_MASK = ~ATOM_KIND;
+
+    public static final int OBJECT_TYPE = 0b001;
+    public static final int STRING_TYPE = 0b010;
 
     /**
      * Constant value which means that reference to the object,
@@ -232,11 +236,12 @@ public class ByteUtils {
 
         private final Timer timer = Timer.get(750);
         private byte[] tableData = null;
+
         /**
          * @author Alph4rd
          */
         @Override
-        public long searchClassClosure(Predicate<Long> pattern) {
+        public long searchClassClosure(LongPredicate pattern) {
             long mainAddress = botInstaller.mainApplicationAddress.get();
             if (mainAddress == 0) return 0;
 

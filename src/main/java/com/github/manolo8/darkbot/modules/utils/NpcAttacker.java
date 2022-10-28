@@ -3,7 +3,7 @@ package com.github.manolo8.darkbot.modules.utils;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.NpcExtra;
-import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static com.github.manolo8.darkbot.Main.API;
-import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.*;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.ATTACK_LASER;
 
 public class NpcAttacker implements AttackAPI {
 
@@ -154,7 +154,8 @@ public class NpcAttacker implements AttackAPI {
         laserTime = System.currentTimeMillis() + minWait;
         isAttacking = Math.max(isAttacking, laserTime + bugTime);
         if (normal) API.keyboardClick(lastShot = getAttackKey());
-        else if (API instanceof DarkBoatAdapter) API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
+        else if (API.hasCapability(GameAPI.Capability.ALL_KEYBINDS_SUPPORT))
+            API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
         else target.trySelect(true);
     }
 
@@ -221,7 +222,8 @@ public class NpcAttacker implements AttackAPI {
         if (System.currentTimeMillis() < laserTime) return;
         if (isAttacking()) {
             laserTime = System.currentTimeMillis() + 1500;
-            if (API instanceof DarkBoatAdapter) API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
+            if (API.hasCapability(GameAPI.Capability.ALL_KEYBINDS_SUPPORT))
+                API.keyboardClick(keybinds.getCharCode(ATTACK_LASER));
             else API.keyboardClick(getPreviousAttackKey());
         }
     }

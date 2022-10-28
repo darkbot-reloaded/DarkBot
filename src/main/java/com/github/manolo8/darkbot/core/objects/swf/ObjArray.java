@@ -9,6 +9,9 @@ import static com.github.manolo8.darkbot.Main.API;
  * Instead of ArrayObj, VectorPtr & SpriteArray
  */
 public class ObjArray extends SwfPtrCollection {
+    private static final int MAX_SIZE = 8192;
+    private static final byte[] BUFFER = new byte[8192 * 8]; //64kb
+
     private final int sizeOffset, tableOffset, bytesOffset;
     private final boolean autoUpdatable;
 
@@ -86,14 +89,15 @@ public class ObjArray extends SwfPtrCollection {
     public void update() {
         size = API.readMemoryInt(address + sizeOffset);
 
-        if (size < 0 || size > 8192 || address == 0) return;
-        if (elements.length < size) elements = new long[Math.min((int) (size * 1.25), 8192)];
+        if (size < 0 || size > MAX_SIZE || address == 0) return;
+        if (elements.length < size) elements = new long[Math.min((int) (size * 1.25), MAX_SIZE)];
 
         long table = API.readMemoryLong(address + tableOffset) + bytesOffset;
-        byte[] bytes = API.readMemory(table, size * 8);
+        int length = size * 8;
+        API.readMemory(table, BUFFER, length);
 
-        for (int i = 0, offset = 0; offset < bytes.length && i < size; offset += 8) {
-            long value = ByteUtils.getLong(bytes, offset);
+        for (int i = 0, offset = 0; offset < length && i < size; offset += 8) {
+            long value = ByteUtils.getLong(BUFFER, offset);
             elements[i++] = value & ByteUtils.ATOM_MASK; //not sure if we should skip 0 values
         }
     }

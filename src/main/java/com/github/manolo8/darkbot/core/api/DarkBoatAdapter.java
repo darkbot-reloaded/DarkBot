@@ -23,7 +23,9 @@ public class DarkBoatAdapter extends GameAPIImpl<
                 di,
                 GameAPI.Capability.LOGIN,
                 GameAPI.Capability.INITIALLY_SHOWN,
-                GameAPI.Capability.CREATE_WINDOW_THREAD, GameAPI.Capability.DIRECT_LIMIT_FPS);
+                GameAPI.Capability.ALL_KEYBINDS_SUPPORT,
+                GameAPI.Capability.CREATE_WINDOW_THREAD,
+                GameAPI.Capability.DIRECT_LIMIT_FPS);
     }
 
     @Override

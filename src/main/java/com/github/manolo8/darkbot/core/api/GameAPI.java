@@ -1,10 +1,11 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
 
-import java.util.function.Predicate;
+import java.util.function.LongPredicate;
 
 public interface GameAPI {
 
@@ -37,12 +38,19 @@ public interface GameAPI {
 
     interface Handler extends Base {
         boolean isValid();
+
         long getMemoryUsage();
+
+        default double getCpuUsage() {
+            return 0;
+        }
 
         void reload();
 
         void setSize(int width, int height);
+
         void setVisible(boolean visible);
+
         void setMinimized(boolean minimized);
     }
 
@@ -60,7 +68,10 @@ public interface GameAPI {
         }
 
         default long readLong(long address, int... offsets) {
-            for (int offset : offsets) address = readLong(address + offset);
+            for (int offset : offsets) {
+                if (address <= 0xFFFF) return 0;
+                address = readLong(address + offset);
+            }
             return address;
         }
 
@@ -79,22 +90,27 @@ public interface GameAPI {
         void replaceDouble (long address, double  oldValue, double  newValue);
         void replaceBoolean(long address, boolean oldValue, boolean newValue);
 
-        void writeInt      (long address, int     value);
-        void writeLong     (long address, long    value);
-        void writeDouble   (long address, double  value);
-        void writeBoolean  (long address, boolean value);
-        void writeBytes    (long address, byte... bytes);
+        void writeInt(long address, int value);
+        void writeLong(long address, long value);
+        void writeDouble(long address, double value);
+        void writeBoolean(long address, boolean value);
+        void writeBytes(long address, byte... bytes);
 
-        long[] queryInt    (int    value  , int maxSize);
-        long[] queryLong   (long   value  , int maxSize);
-        long[] queryBytes  (byte[] pattern, int maxSize);
+        long[] queryInt(int value, int maxSize);
+        long[] queryLong(long value, int maxSize);
+        long[] queryBytes(byte[] pattern, int maxSize);
+
+        default long queryBytes(byte... pattern) {
+            long[] values = queryBytes(pattern, 1);
+            return values.length == 1 ? values[0] : 0;
+        }
     }
 
     interface ExtraMemoryReader extends Base {
         String readString(long address);
         void resetCache();
 
-        long searchClassClosure(Predicate<Long> pattern);
+        long searchClassClosure(LongPredicate pattern);
     }
 
     interface Interaction extends Base {
@@ -107,14 +123,34 @@ public interface GameAPI {
         void mouseClick(int x, int y);
     }
 
+    enum Capability {
+        LOGIN,
+        ATTACH,
+        INITIALLY_SHOWN,
+        CREATE_WINDOW_THREAD,
+        BACKGROUND_ONLY,
+
+        ALL_KEYBINDS_SUPPORT, // Support for key clicks like "ctrl"
+
+        DIRECT_LIMIT_FPS,
+        DIRECT_ENTITY_LOCK,
+        DIRECT_ENTITY_SELECT,
+        DIRECT_MOVE_SHIP,
+        DIRECT_COLLECT_BOX,
+        DIRECT_REFINE,
+        DIRECT_CALL_METHOD;
+    }
+
     interface DirectInteraction extends Base {
         void setMaxFps(int maxFps);
 
         void lockEntity(int id);
 
+        void selectEntity(long addr, long vtable);
+
         void moveShip(Locatable destination);
 
-        void collectBox(Locatable destination, long collectableAddress);
+        void collectBox(Box box);
 
         void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount);
 
@@ -125,21 +161,6 @@ public interface GameAPI {
         }
     }
 
-    enum Capability {
-        LOGIN,
-        ATTACH,
-        INITIALLY_SHOWN,
-        CREATE_WINDOW_THREAD,
-        BACKGROUND_ONLY,
-
-        DIRECT_LIMIT_FPS,
-        DIRECT_ENTITY_LOCK,
-        DIRECT_MOVE_SHIP,
-        DIRECT_COLLECT_BOX,
-        DIRECT_REFINE,
-        DIRECT_CALL_METHOD;
-    }
-
     class NoOpWindow implements Window {
         @Override
         public int getVersion() {
@@ -147,7 +168,8 @@ public interface GameAPI {
         }
 
         @Override
-        public void createWindow() {}
+        public void createWindow() {
+        }
     }
 
     class NoOpHandler implements Handler {
@@ -167,16 +189,25 @@ public interface GameAPI {
         }
 
         @Override
-        public void reload() {}
+        public double getCpuUsage() {
+            return 0;
+        }
 
         @Override
-        public void setSize(int width, int height) {}
+        public void reload() {
+        }
 
         @Override
-        public void setVisible(boolean visible) {}
+        public void setSize(int width, int height) {
+        }
 
         @Override
-        public void setMinimized(boolean minimized) {}
+        public void setVisible(boolean visible) {
+        }
+
+        @Override
+        public void setMinimized(boolean minimized) {
+        }
     }
 
     class NoOpMemory implements Memory {
@@ -263,7 +294,7 @@ public interface GameAPI {
         }
 
         @Override
-        public long searchClassClosure(Predicate<Long> pattern) {
+        public long searchClassClosure(LongPredicate pattern) {
             return 0;
         }
 
@@ -318,6 +349,11 @@ public interface GameAPI {
         }
 
         @Override
+        public void selectEntity(long addr, long vtable) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public void moveShip(Locatable destination) {
             throw new UnsupportedOperationException();
         }
@@ -328,7 +364,7 @@ public interface GameAPI {
         }
 
         @Override
-        public void collectBox(Locatable destination, long collectableAddress) {
+        public void collectBox(Box box) {
             throw new UnsupportedOperationException();
         }
 
