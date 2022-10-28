@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,8 +24,8 @@ public class LegacyFlashPatcher {
     private static final Path TMP_SCRIPT = Paths.get("FlashPatcher.bat");
 
     private final List<Fixer> FIXERS = Arrays.asList(
-            new FlashInstaller(),
-            new FlashConfigSetter());
+            new FlashConfigSetter(),
+            new FlashInstaller());
 
     protected void runPatcher() {
         if (!(Main.API instanceof DarkBoatAdapter || Main.API instanceof DarkBoatHookAdapter)) {
@@ -34,7 +33,6 @@ public class LegacyFlashPatcher {
             return;
         }
         List<Fixer> needFixing = FIXERS.stream().filter(Fixer::needsFix).collect(Collectors.toList());
-        Collections.reverse(needFixing); //for a better output in prompt if mms need fix too
 
         if (needFixing.isEmpty()) return;
 
@@ -54,7 +52,7 @@ public class LegacyFlashPatcher {
 
             File tmpScript = new File(TMP_SCRIPT.toUri());
             File tmpDarkFlash = new File(TMP_SCRIPT.toUri());
-            if(tmpScript.delete() && tmpDarkFlash.delete()){
+            if (tmpScript.delete() && tmpDarkFlash.delete()) {
                 System.out.println("Tmp script deleted and patch applied");
             } else {
                 System.out.println("Failed to delete tmp script");
@@ -88,7 +86,7 @@ public class LegacyFlashPatcher {
         private static final Path
                 FLASH_DIR = Paths.get(System.getenv("APPDATA"), "DarkBot", "Flash"),
                 FLASH_OCX = FLASH_DIR.resolve("Flash.ocx"),
-                DARK_FLASH_OCX = Paths.get("", "lib", "DarkFlash.ocx"),
+                LIB_FLASH_OCX = Paths.get("lib", "DarkFlash.ocx"),
                 REG_SVR = Paths.get(System.getenv("WINDIR"), "SysWOW64", "regsvr32");
 
         public boolean needsFix() {
@@ -101,7 +99,7 @@ public class LegacyFlashPatcher {
             return Arrays.asList(
                     "echo \"" + I18n.get("flash.fix.apply.patch_flash.content") + "\"",
                     "icacls \"" + FLASH_OCX + "\" /grant Everyone:M",
-                    "MOVE /Y \"" + DARK_FLASH_OCX.toAbsolutePath() + "\" " + "\"" + FLASH_OCX + "\"",
+                    "MOVE /Y \"" + LIB_FLASH_OCX.toAbsolutePath() + "\" " + "\"" + FLASH_OCX + "\"",
                     "\"" + REG_SVR.toAbsolutePath() + "\"  \"" + FLASH_OCX.toAbsolutePath() + "\"");
         }
     }
@@ -146,5 +144,4 @@ public class LegacyFlashPatcher {
                     "move \"" + TMP_CONFIG.toAbsolutePath() + "\" \"" + FLASH_CONFIG.toAbsolutePath() + "\"");
         }
     }
-
 }

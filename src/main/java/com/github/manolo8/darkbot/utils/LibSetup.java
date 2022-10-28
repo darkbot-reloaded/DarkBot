@@ -4,7 +4,7 @@ package com.github.manolo8.darkbot.utils;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.google.gson.reflect.TypeToken;
-import com.sun.istack.internal.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
