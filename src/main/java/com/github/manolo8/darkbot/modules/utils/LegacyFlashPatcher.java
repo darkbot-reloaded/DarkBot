@@ -44,19 +44,12 @@ public class LegacyFlashPatcher {
         script.add("@echo off");
         script.add("chcp 65001");
         for (Fixer fixer : needFixing) script.addAll(fixer.script());
+        script.add("del \"" + TMP_SCRIPT.toAbsolutePath() + "\"");
         script.add("exit");
 
         try {
             Files.write(TMP_SCRIPT, script);
             Runtime.getRuntime().exec("powershell start -verb runas './FlashPatcher.bat' -wait").waitFor();
-
-            File tmpScript = new File(TMP_SCRIPT.toUri());
-            File tmpDarkFlash = new File(TMP_SCRIPT.toUri());
-            if (tmpScript.delete() && tmpDarkFlash.delete()) {
-                System.out.println("Tmp script deleted and patch applied");
-            } else {
-                System.out.println("Failed to delete tmp script");
-            }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
