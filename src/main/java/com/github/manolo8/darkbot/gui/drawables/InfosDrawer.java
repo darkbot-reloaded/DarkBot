@@ -79,7 +79,8 @@ public class InfosDrawer implements Drawable {
 
     private void drawInfos(MapGraphics mg) {
         mg.setColor("text_dark");
-
+        
+        mg.setFont("small");
         String status = i18n.get((main.isRunning() ? "gui.map.running" : "gui.map.waiting"),
                 Time.toString(stats.getRunningTime().toMillis()));
 
