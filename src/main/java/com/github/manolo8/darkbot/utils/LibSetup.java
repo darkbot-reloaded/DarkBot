@@ -4,6 +4,7 @@ package com.github.manolo8.darkbot.utils;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.google.gson.reflect.TypeToken;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,22 +45,26 @@ public class LibSetup {
         }
 
         for (Lib lib : libraries.values()) {
-            if (lib.auto) downloadLib(lib);
+            if (lib.auto) downloadLib(lib, null);
         }
     }
 
-    public static void downloadLib(String path) {
-        downloadLib(libraries.get(path));
+    public static boolean downloadLib(String path) {
+        return downloadLib(libraries.get(path), null);
     }
 
-    public static void downloadLib(Lib lib) {
-        if (lib == null) return;
-        Path libPath = Paths.get(lib.path);
+    public static boolean downloadLib(String path, @Nullable Path libPath) {
+        return downloadLib(libraries.get(path), libPath);
+    }
+
+    public static boolean downloadLib(Lib lib, @Nullable Path libPath) {
+        if (lib == null) return false;
+        if (libPath == null) libPath = Paths.get(lib.path);
 
         if (Files.exists(libPath)) {
             try {
                 String sha = FileUtils.calcSHA256(libPath);
-                if (Objects.equals(sha, lib.sha256) || (lib.altSha256 != null && lib.altSha256.contains(sha))) return;
+                if (Objects.equals(sha, lib.sha256) || (lib.altSha256 != null && lib.altSha256.contains(sha))) return false;
             } catch (IOException e) {
                 System.out.println("Exception checking library file SHA");
                 e.printStackTrace();
@@ -70,11 +75,13 @@ public class LibSetup {
         System.out.println("Downloading missing or outdated library file: " + lib.path);
 
         try (InputStream is = new URL(lib.download).openConnection().getInputStream()) {
-            Files.copy(is, libPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(is, Paths.get(lib.path), StandardCopyOption.REPLACE_EXISTING);
+            return true;
         } catch (IOException e) {
             System.err.println("Failed to download library file: " + lib.path + " from " + lib.download);
             e.printStackTrace();
         }
+        return false;
     }
 
     /**

@@ -4,8 +4,12 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
 import com.github.manolo8.darkbot.core.api.DarkBoatHookAdapter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.utils.FileUtils;
+import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.LibSetup;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,8 +24,8 @@ public class LegacyFlashPatcher {
     private static final Path TMP_SCRIPT = Paths.get("FlashPatcher.bat");
 
     private final List<Fixer> FIXERS = Arrays.asList(
-            new FlashInstaller(),
-            new FlashConfigSetter());
+            new FlashConfigSetter(),
+            new FlashInstaller());
 
     protected void runPatcher() {
         if (!(Main.API instanceof DarkBoatAdapter || Main.API instanceof DarkBoatHookAdapter)) {
@@ -32,11 +36,7 @@ public class LegacyFlashPatcher {
 
         if (needFixing.isEmpty()) return;
 
-        Popups.of("Flash installer & patcher",
-                        "Flash is nowadays uninstalled by default in windows updates.\n" +
-                                "Darkbot will need a one-time admin permission to install flash and make it work.\n" +
-                                "Accept on the next pop-up to run as admin to be able to continue using DarkBot.\n" +
-                                "After the script runs, refresh the game or restart the bot to make it work.\n",
+        Popups.of(I18n.get("flash.fix.warn.title"), I18n.get("flash.fix.warn.content"),
                         JOptionPane.INFORMATION_MESSAGE)
                 .showSync();
 
@@ -44,14 +44,12 @@ public class LegacyFlashPatcher {
         script.add("@echo off");
         script.add("chcp 65001");
         for (Fixer fixer : needFixing) script.addAll(fixer.script());
-        script.add("echo Done! Restart the bot to make sure it works");
-        script.add("pause");
         script.add("del \"" + TMP_SCRIPT.toAbsolutePath() + "\"");
+        script.add("exit");
 
         try {
             Files.write(TMP_SCRIPT, script);
-
-            Runtime.getRuntime().exec("powershell start -verb runas './FlashPatcher.bat'").waitFor();
+            Runtime.getRuntime().exec("powershell start -verb runas './FlashPatcher.bat' -wait").waitFor();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -81,18 +79,20 @@ public class LegacyFlashPatcher {
         private static final Path
                 FLASH_DIR = Paths.get(System.getenv("APPDATA"), "DarkBot", "Flash"),
                 FLASH_OCX = FLASH_DIR.resolve("Flash.ocx"),
+                LIB_FLASH_OCX = Paths.get("lib", "DarkFlash.ocx"),
                 REG_SVR = Paths.get(System.getenv("WINDIR"), "SysWOW64", "regsvr32");
 
-
         public boolean needsFix() {
-            return !Files.exists(FLASH_DIR) || !Files.exists(FLASH_OCX);
+            return LibSetup.downloadLib("DarkFlash.ocx", FLASH_OCX);
         }
 
         public List<String> script() {
+            FileUtils.ensureDirectoryExists(FLASH_DIR);
+
             return Arrays.asList(
-                    "echo \"Downloading & installing flash...\"",
-                    "mkdir \"" + FLASH_DIR.toAbsolutePath() + "\"",
-                    "curl -o \"" + FLASH_OCX.toAbsolutePath() + "\" \"https://darkbot.eu/downloads/Flash.ocx\"",
+                    "echo \"" + I18n.get("flash.fix.apply.patch_flash.content") + "\"",
+                    "icacls \"" + FLASH_OCX + "\" /grant Everyone:M",
+                    "MOVE /Y \"" + LIB_FLASH_OCX.toAbsolutePath() + "\" " + "\"" + FLASH_OCX + "\"",
                     "\"" + REG_SVR.toAbsolutePath() + "\"  \"" + FLASH_OCX.toAbsolutePath() + "\"");
         }
     }
@@ -102,8 +102,6 @@ public class LegacyFlashPatcher {
                 FLASH_FOLDER = Paths.get(System.getenv("WINDIR"), "SysWOW64", "Macromed", "Flash"),
                 FLASH_CONFIG = FLASH_FOLDER.resolve("mms.cfg"),
                 TMP_CONFIG = Paths.get("mms.cfg");
-
-
         private static final List<String> CONFIG_CONTENT = Arrays.asList(
                 "EnableAllowList=1",
                 "AllowListPreview=1",
@@ -134,10 +132,9 @@ public class LegacyFlashPatcher {
             }
 
             return Arrays.asList(
-                    "echo \"Updating flash configuration...\"",
+                    "echo \"" + I18n.get("flash.fix.apply.patch_mms.content") + "\"",
                     "mkdir \"" + FLASH_FOLDER.toAbsolutePath() + "\"",
                     "move \"" + TMP_CONFIG.toAbsolutePath() + "\" \"" + FLASH_CONFIG.toAbsolutePath() + "\"");
         }
     }
-
 }
