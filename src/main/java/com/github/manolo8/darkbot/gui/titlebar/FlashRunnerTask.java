@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.titlebar;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.http.Method;
@@ -19,15 +20,17 @@ public class FlashRunnerTask extends Thread {
     private static boolean LIB_CHECKED = false;
 
     private final String name;
+    private final Main main;
     private final BackpageManager backpageManager;
     private final Consumer<Boolean> onComplete;
 
-    public FlashRunnerTask(String name, BackpageManager backpageManager, Consumer<Boolean> onComplete) {
+    public FlashRunnerTask(String name, Main main, Consumer<Boolean> onComplete) {
         super("FlashRunner: " + name);
         this.setDaemon(true);
 
         this.name = name;
-        this.backpageManager = backpageManager;
+        this.main = main;
+        this.backpageManager = main.backpage;
         this.onComplete = onComplete;
 
         start();
@@ -62,7 +65,7 @@ public class FlashRunnerTask extends Thread {
                             "--movie", movie,
                             "--width", width,
                             "--height", height,
-                            "--name", name,
+                            "--name", name + " | " + main.hero.playerInfo.getUsername(),
                             //todo add flash path
                             "--vars", vars) //vars must be last, ProcessBuilder weirdly handles space?
                             .start().waitFor();

@@ -151,14 +151,14 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             list.add(create("Open Hangar", e -> {
                 JComponent component = (JComponent) e.getSource();
                 component.setEnabled(false);
-                new FlashRunnerTask("Dock", main.backpage,
+                new FlashRunnerTask("Dock", main,
                         result -> SwingUtilities.invokeLater(() -> component.setEnabled(true)));
             }));
 
             list.add(create("Open GalaxyGate", e -> {
                 JComponent component = (JComponent) e.getSource();
                 component.setEnabled(false);
-                new FlashRunnerTask("GalaxyGates", main.backpage,
+                new FlashRunnerTask("GalaxyGates", main,
                         result -> SwingUtilities.invokeLater(() -> component.setEnabled(true)));
             }));
 
