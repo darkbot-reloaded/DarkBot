@@ -9,11 +9,24 @@ import eu.darkbot.util.Popups;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.net.URLClassLoader;
+import java.security.AllPermission;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.Permissions;
+import java.security.Policy;
+import java.security.ProtectionDomain;
 
 public class Bot {
 
     public static void main(String[] args) throws IOException {
         // You can enable hardware acceleration via adding jvm arg: -Dsun.java2d.opengl=True
+        try {
+            setupSecurityPolicy();
+        } catch (Exception e) {
+            System.out.println("Failed to setup security policy:");
+            e.printStackTrace();
+        }
 
         String path = Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         if (System.console() == null && (path.endsWith(".jar") || path.endsWith(".exe"))) {
@@ -49,6 +62,32 @@ public class Bot {
                     "Please update to java 11 or java 17 to continue using future releases.",
                     JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION));
         }
+    }
+
+    private static void setupSecurityPolicy() {
+        Policy.setPolicy(new Policy() {
+            @Override
+            public PermissionCollection getPermissions(ProtectionDomain domain) {
+                // Externally loaded classes get no permissions
+                if (domain.getClassLoader() instanceof URLClassLoader) return new Permissions();
+
+                // Stuff from other loaders gets permissions
+                Permissions permissions = new Permissions();
+                permissions.add(new AllPermission());
+                return permissions;
+            }
+        });
+        System.setSecurityManager(new SecurityManager() {
+            @Override
+            public void checkPermission(Permission perm) {
+                if (perm.getName().equals("setPolicy") || perm.getName().equals("setSecurityManager"))
+                    throw new SecurityException(perm.toString());
+
+                // Enforce permissions for runtime or security purposes, ignore everything else.
+                if (perm.getName().startsWith("loadLibrary.") ||
+                        perm.getName().equals("createClassLoader")) super.checkPermission(perm);
+            }
+        });
     }
 
 }

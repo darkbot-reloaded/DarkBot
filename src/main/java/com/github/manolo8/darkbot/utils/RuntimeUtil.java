@@ -60,8 +60,6 @@ public class RuntimeUtil {
             isUser &= className.startsWith("java.awt.") ||
                     className.startsWith("javax.swing.") ||
                     className.startsWith("java.security.");
-
-            System.out.println(className + "#" + element.getMethodName() + " \t " + isUser);
         }
         return isUser;
     }
