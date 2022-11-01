@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.core.utils.Drive;
 import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.OreAPI;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class OreTradeGui extends Gui implements OreAPI {
 
@@ -60,7 +61,7 @@ public class OreTradeGui extends Gui implements OreAPI {
     }
 
     @Override
-    public boolean showTrade(boolean show, @NotNull Station.Refinery tradePoint) {
+    public boolean showTrade(boolean show, @Nullable Station.Refinery tradePoint) {
         return showTrade(show, (BasePoint) tradePoint);
     }
 }
