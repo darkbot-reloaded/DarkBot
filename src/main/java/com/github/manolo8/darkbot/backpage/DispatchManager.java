@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.backpage.dispatch.BiIntConsumer;
 import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
+import com.github.manolo8.darkbot.backpage.dispatch.Gate;
 import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -50,6 +51,7 @@ public class DispatchManager {
             lastDispatcherUpdate = System.currentTimeMillis();
             return InfoReader.updateAll(page, data);
         } catch (Exception e) {
+            System.out.println("Exception updating dispatch data" + e);
             e.printStackTrace();
         }
         return false;
@@ -64,29 +66,31 @@ public class DispatchManager {
     }
 
     public boolean hireRetriever(Retriever retriever) {
-        if (data.getAvailableSlots() <= 0) return false;
-        if (retriever.getPermitCost() > data.getPermit()) {
-            return handleResponse("Cannot hire", retriever.getId(), "(ERROR) Not enough permits");
-        }
+        if (retriever == null) return false;
         try {
+            if (data.getAvailableSlots() <= 0) return false;
+            if (retriever.getPermitCost() > data.getPermit()) {
+                return handleResponse("Hire Retriever", retriever.getId(), "(ERROR) Can Not Hire Retriever, Not enough permits");
+            }
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "sendDispatch")
                     .setRawParam("dispatchId", retriever.getId())
                     .getContent();
-            return handleResponse("Hired dispatcher", retriever.getId(), response);
+            return handleResponse("Hired Dispatcher", retriever.getId(), response);
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Exception hiring dispatcher: " + e);
+            e.printStackTrace();
         }
         return false;
     }
 
     public boolean collectInstant(InProgress progress) {
+        if (progress == null) return false;
         try {
             System.out.println("Collecting Instant: Slot " + progress.getSlotId());
             if (data.getPrimeCoupons() <= 0)
-                return handleResponse("Cannot instant collect", progress.getId(),
-                        "(ERROR) No Prime Coupon available for instant collection");
+                return handleResponse("Instant Collect", progress.getId(),
+                        "(ERROR) Can Not Instant Collect, No Prime Coupon available for instant collection");
             String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
                     .setRawParam("command", "instantComplete")
                     .setRawParam("dispatchId", progress.getId())
@@ -94,10 +98,58 @@ public class DispatchManager {
                     .setRawParam("slotId", progress.getSlotId())
                     .getContent();
 
-            return handleResponse("Collected retriever", progress.getId(), response);
+            return handleResponse("Collected Retriever", progress.getId(), response);
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Exception collecting dispatcher: " + e);
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean hireGate(Gate gate) {
+        if (gate == null) return false;
+        try {
+            if (!gate.getIsAvailable()) {
+                return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate is Not Available, Can Not Start Same Gate");
+            }
+            if (gate.getInProgress()) {
+                return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start Same Gate");
+            }
+            if (data.getGateUnits() <= 0) {
+                return handleResponse("Hire Gate ", gate.getName(), "(ERROR) Can not Hire Gate, Not enough GGEU");
+            }
+
+            String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
+                    .setRawParam("command", "sendGateDispatch")
+                    .setRawParam("gateId", gate.getId())
+                    .getContent();
+            return handleResponse("Gate Started", gate.getName(), response);
+        } catch (Exception e) {
+            System.out.println("Exception dispatching gate: " + e);
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean collectGate(Gate gate) {
+        if (gate.getCollectable().equals("0")) return false;
+        try {
+            System.out.println("Collecting: Gate " + gate.getName());
+            String response = main.backpage.getConnection("ajax/dispatch.php", Method.POST)
+                    .setRawParam("command", "collectGateDispatch")
+                    .setRawParam("gateId", gate.getId())
+                    .getContent();
+
+            gate.setInProgress(false);
+            gate.setCollectable("0");
+            gate.setTime("0");
+            gate.setCost("0");
+
+            return handleResponse("Collected Gate", gate.getName(), response);
+        } catch (Exception e) {
+            System.out.println("Exception collecting dispatcher: " + e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -112,10 +164,10 @@ public class DispatchManager {
                     .setRawParam("slot", progress.getSlotId())
                     .getContent();
 
-            return handleResponse("Collected retriever", progress.getId(), response);
+            return handleResponse("Collected Retriever", progress.getId(), response);
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Exception collecting dispatcher: " + e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -155,7 +207,7 @@ public class DispatchManager {
         GATE_UNIT("name=\"ggeu\" value=\"([0-9]+)\"", DispatchData::setGateUnits),
         SLOTS(":([0-9]+).*class=\"userCurrentMax\">([0-9]+)", DispatchData::setAvailableSlots, DispatchData::setMaxSlots),
         PRIME_COUPON("name=\"quickcoupon\" value=\"([0-9]+)\"",DispatchData::setPrimeCoupons),
-        ITEMS("<tr class=\"dispatchItemRow([\\S\\s]+?)</tr>", DispatchData::parseRow);
+        ITEMS("<tr class=\"dispatchItemRow([\\S\\s]+?)</tr>", DispatchData::parseRetrieverRow);
 
         private final Pattern regex;
         private final List<BiConsumer<DispatchData, String>> consumers;
@@ -180,6 +232,8 @@ public class DispatchManager {
         public static boolean updateAll(String page, DispatchData data) {
             // Mark old in-progress for removal
             data.getInProgress().forEach((k, v) -> v.setForRemoval(true));
+            // Mark old gate already completed (that might have been completed by hand)
+            data.getGates().forEach((k,v) -> v.setIsAvailable(false));
             boolean updated = true;
             for (InfoReader reader : InfoReader.values()) {
                 updated &= reader.update(page, data);

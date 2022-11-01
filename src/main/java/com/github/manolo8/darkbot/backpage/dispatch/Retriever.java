@@ -74,12 +74,12 @@ public class Retriever {
     @Override
     public String toString() {
         return "Retriever{" +
-                "id=" + id +
-                "name=" + name +
-                "type=" + type +
-                "tier=" + tier +
-                "cost=" + cost +
-                "}";
+                " id=" + id +
+                ", name=" + name +
+                ", type=" + type +
+                ", tier=" + tier +
+                ", cost=" + cost +
+                " }";
     }
 
     public static class Cost {

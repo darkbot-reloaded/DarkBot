@@ -56,10 +56,10 @@ public class InProgress {
     @Override
     public String toString() {
         return "Retriever{" +
-                "slotID=" + slotId +
-                "id=" + id +
-                "name=" + name +
-                "collectable=" + collectable +
-                "}";
+                " slotID=" + slotId +
+                ", id=" + id +
+                ", name=" + name +
+                ", collectable=" + collectable +
+                " }";
     }
 }
