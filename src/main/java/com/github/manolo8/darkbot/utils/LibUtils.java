@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class LibUtils {
+    private static Path FLASH_OCX_PATH = null;
 
     public static void loadLibrary(String library) {
         LibSetup.downloadLib(library + getExtension());
@@ -13,6 +14,15 @@ public class LibUtils {
         if (Files.exists(libraryPath))
             System.load(libraryPath.toString());
         else throw new UnsatisfiedLinkError("Library file does not exists! " + libraryPath);
+    }
+
+    public static Path getFlashOcxPath() {
+        if (FLASH_OCX_PATH == null) {
+            String ocxName = "DarkFlash" + (OSUtil.isWindows7OrLess() ? "-W7" : "") + ".ocx";
+            FLASH_OCX_PATH = LibUtils.getSharedLibrary(ocxName);
+        }
+
+        return FLASH_OCX_PATH;
     }
 
     public static Path getSharedLibrary(String library) {

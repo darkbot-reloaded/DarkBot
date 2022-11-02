@@ -108,9 +108,8 @@ public class GameAPIImpl<
                 new KekkaPlayerProxyServer(handler).start();
         }
 
-        if (hasCapability(GameAPI.Capability.HANDLER_FLASH_PATH) && OSUtil.getCurrentOs() == OSUtil.OS.WINDOWS) {
-            String ocxName = "DarkFlash" + (OSUtil.isWindows7OrLess() ? "-W7" : "") + ".ocx";
-            setFlashOcxPath(LibUtils.getSharedLibrary(ocxName).toString());
+        if (hasCapability(GameAPI.Capability.HANDLER_FLASH_PATH) && OSUtil.isWindows()) {
+            setFlashOcxPath(LibUtils.getFlashOcxPath().toString());
         }
 
         if (hasCapability(GameAPI.Capability.HANDLER_MIN_CLIENT_SIZE)) {

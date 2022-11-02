@@ -23,6 +23,18 @@ public class OSUtil {
         return getDataPath().resolve(Paths.get(first, more));
     }
 
+    public static boolean isWindows() {
+        return getCurrentOs() == OS.WINDOWS;
+    }
+
+    public static boolean isLinux() {
+        return getCurrentOs() == OS.LINUX;
+    }
+
+    public static boolean isMacOS() {
+        return getCurrentOs() == OS.MACOS;
+    }
+
     // assume that on failure is not a Windows 7
     public static boolean isWindows7OrLess() {
         if (getCurrentOs() != OS.WINDOWS) return false;

@@ -53,7 +53,7 @@ public class LibSetup {
     }
 
     public static boolean downloadLib(Path path) {
-        return downloadLib(path.getFileName().toString());
+        return downloadLib(path.getFileName().toString(), path);
     }
 
     public static boolean downloadLib(String path) {
@@ -83,10 +83,10 @@ public class LibSetup {
         } else {
             FileUtils.ensureDirectoryExists(libPath.getParent());
         }
-        System.out.println("Downloading missing or outdated library file: " + lib.path);
+        System.out.println("Downloading missing or outdated library file: " + libPath);
 
         try (InputStream is = new URL(lib.download).openConnection().getInputStream()) {
-            Files.copy(is, Paths.get(lib.path), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(is, libPath, StandardCopyOption.REPLACE_EXISTING);
             return true;
         } catch (IOException e) {
             System.err.println("Failed to download library file: " + lib.path + " from " + lib.download);
