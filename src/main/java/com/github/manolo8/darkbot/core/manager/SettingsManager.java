@@ -80,7 +80,7 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
 
     public void setUiVisible(boolean visible) {
         if (uiWrapper != 0) {
-            API.callMethod(4, uiWrapper, visible ? 1 : 0);
+            API.callMethodAsync(4, uiWrapper, visible ? 1 : 0);
         }
     }
 
@@ -90,7 +90,7 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
 
     public void setHudVisible(boolean visible) {
         if (hudWrapper != 0) {
-            API.callMethod(4, hudWrapper, visible ? 1 : 0);
+            API.callMethodAsync(4, hudWrapper, visible ? 1 : 0);
         }
     }
 }

@@ -8,6 +8,7 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.managers.WindowAPI;
+import org.intellij.lang.annotations.Language;
 
 import java.util.function.LongPredicate;
 
@@ -134,6 +135,7 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     void refine(long refineUtilAddress, OreAPI.Ore ore, int amount);
 
     long callMethod(int index, long... arguments);
+    boolean callMethodAsync(int index, long... arguments);
     boolean useItem(Item item);
     boolean isUseItemSupported();
 
@@ -141,7 +143,7 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     void pasteText(String text, long... actions);
 
     // Handler API
-    void clearCache();
+    void clearCache(@Language("RegExp") String pattern);
     void emptyWorkingSet();
     void setLocalProxy(int port);
     void setPosition(int x, int y);

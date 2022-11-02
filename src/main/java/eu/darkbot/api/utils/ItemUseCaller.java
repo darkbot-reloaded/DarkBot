@@ -58,10 +58,7 @@ public class ItemUseCaller {
                         && (API.readLong(v + 72) == 0 || API.readInt(v + 72) != 3));
 
         if (useItemCommandClosure != 0) {
-            if (API.readLong(useItemCommandClosure + 72) == 0) {
-                API.callMethod(5, useItemCommandClosure); // getInstance();
-            }
-            useItemCommand = API.readLong(useItemCommandClosure + 72);
+            useItemCommand = API.callMethod(5, useItemCommandClosure); // getInstance();
 
         } else if (nextKeyClick.tryActivate()) {
             // item use command not found, try to click current formation to create instance

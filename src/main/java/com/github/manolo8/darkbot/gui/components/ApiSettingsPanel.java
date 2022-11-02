@@ -15,6 +15,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 
+import static com.github.manolo8.darkbot.Main.API;
+
 public class ApiSettingsPanel extends JPanel {
 
     private final Config.BotSettings.APIConfig apiConfig;
@@ -56,7 +58,7 @@ public class ApiSettingsPanel extends JPanel {
 
         if (Main.API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE)) {
             JButton b = new JButton("Clear Cache");
-            b.addActionListener(l -> Main.API.clearCache());
+            b.addActionListener(l -> API.clearCache("(preloader|main).swf"));
             add(b, "span 3, grow");
         }
 

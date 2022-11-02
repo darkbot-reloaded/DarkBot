@@ -8,7 +8,7 @@ import eu.darkbot.api.config.annotations.Configuration;
 @Configuration("browser_api")
 public enum BrowserApi {
     DARK_BOAT(KekkaPlayerAdapter.class),
-    DARK_BOAT_HOOK(KekkaPlayerHookAdapter.class),
+    //DARK_BOAT_HOOK(KekkaPlayerHookAdapter.class),
     BACKPAGE_ONLY(BackpageAdapter.class),
     NO_OP_API(NoopAPIAdapter.class),
     DARK_MEM_API(DarkMemAdapter.class);

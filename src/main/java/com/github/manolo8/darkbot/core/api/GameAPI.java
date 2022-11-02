@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
+import org.intellij.lang.annotations.Language;
 
 import java.util.function.LongPredicate;
 
@@ -53,7 +54,7 @@ public interface GameAPI {
 
         void setMinimized(boolean minimized);
 
-        void clearCache();
+        void clearCache(@Language("RegExp") String pattern);
         void emptyWorkingSet();
         void setLocalProxy(int port);
         void setPosition(int x, int y);
@@ -178,7 +179,7 @@ public interface GameAPI {
 
         void lockEntity(int id);
 
-        void selectEntity(long addr, long vtable);
+        void selectEntity(long clickableAddress, long scriptObjectVtable);
 
         void moveShip(Locatable destination);
 
@@ -242,7 +243,7 @@ public interface GameAPI {
         }
 
         @Override
-        public void clearCache() {}
+        public void clearCache(@Language("RegExp") String pattern) {}
 
         @Override
         public void emptyWorkingSet() {}
@@ -414,7 +415,7 @@ public interface GameAPI {
         }
 
         @Override
-        public void selectEntity(long addr, long vtable) {
+        public void selectEntity(long clickableAddress, long scriptObjectVtable) {
             throw new UnsupportedOperationException();
         }
 

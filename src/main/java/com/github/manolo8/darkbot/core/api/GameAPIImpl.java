@@ -20,6 +20,7 @@ import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.util.Timer;
 import eu.darkbot.utils.KekkaPlayerProxyServer;
+import org.intellij.lang.annotations.Language;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -482,6 +483,11 @@ public class GameAPIImpl<
     }
 
     @Override
+    public boolean callMethodAsync(int index, long... arguments) {
+        return direct.callMethodAsync(index, arguments);
+    }
+
+    @Override
     public boolean useItem(Item item) {
         return false;
     }
@@ -502,8 +508,8 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void clearCache() {
-        handler.clearCache();
+    public void clearCache(@Language("RegExp") String pattern) {
+        handler.clearCache(pattern);
     }
 
     @Override

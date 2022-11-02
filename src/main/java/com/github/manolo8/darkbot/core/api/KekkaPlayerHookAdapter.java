@@ -1,3 +1,4 @@
+/*
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.BotInstaller;
@@ -112,4 +113,4 @@ public class KekkaPlayerHookAdapter extends GameAPIImpl<
         return super.hasCapability(capability);
     }
 
-}
+}*/

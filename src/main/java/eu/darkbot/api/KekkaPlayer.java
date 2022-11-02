@@ -2,6 +2,7 @@ package eu.darkbot.api;
 
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.LibUtils;
+import org.intellij.lang.annotations.Language;
 
 public class KekkaPlayer implements GameAPI.Window, GameAPI.Handler, GameAPI.Memory, GameAPI.Interaction, API.Singleton {
 
@@ -9,10 +10,14 @@ public class KekkaPlayer implements GameAPI.Window, GameAPI.Handler, GameAPI.Mem
         LibUtils.loadLibrary("KekkaPlayer");
     }
 
+    // last read time of internet file - GetTickCount64()
+    public native long lastInternetReadTime();
+    public native void refine(long refineUtilAddress, int oreId, int amount);
     public native boolean useItem(long screenManager, String check, int methodIdx, long... args);
 
+    //sync, also is called from window message loop instead from flash method like async version
     public native long callMethodSync(int methodIdx, long... args);
-    //async only
+    //async
     public native boolean callMethod(long screenManager, int methodIdx, long... args);
 
     public native void selectEntity(long clickableAddress, long confirmAddress, boolean doubleClick);
@@ -24,7 +29,7 @@ public class KekkaPlayer implements GameAPI.Window, GameAPI.Handler, GameAPI.Mem
 
     // Returns true when game(main.swf) is fully loaded (green start button)
     public native boolean isValid();
-    public native void    clearCache();
+    public native void    clearCache(@Language("RegExp") String pattern);
     public native void    emptyWorkingSet();
 
     // 0 = disabled - game reload is needed. Blocks "deltadna.net" & "eventstream" requests by default

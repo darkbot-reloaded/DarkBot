@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.KekkaPlayer;
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.utils.ItemUseCaller;
 
 public class KekkaPlayerAdapter extends GameAPIImpl<
@@ -18,7 +19,6 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         KekkaPlayer,
         KekkaPlayerAdapter.KekkaPlayerDirectInteraction> {
 
-    private final BotInstaller botInstaller;
     private final ItemUseCaller itemUseCaller;
 
     public KekkaPlayerAdapter(StartupParams params, KekkaPlayerDirectInteraction di, KekkaPlayer kekkaPlayer,
@@ -51,8 +51,8 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
                 GameAPI.Capability.DIRECT_COLLECT_BOX,
                 GameAPI.Capability.DIRECT_POST_ACTIONS,
                 GameAPI.Capability.DIRECT_CALL_METHOD,
+                GameAPI.Capability.DIRECT_REFINE,
                 GameAPI.Capability.DIRECT_USE_ITEM);
-        this.botInstaller = botInstaller;
         this.itemUseCaller = itemUseCaller;
     }
 
@@ -60,26 +60,6 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
     public void tick() {
         super.tick();
         itemUseCaller.tick();
-    }
-
-    @Override
-    public void selectEntity(Entity entity) {
-        window.selectEntity(entity.clickable.address, BotInstaller.SCRIPT_OBJECT_VTABLE, false);
-    }
-
-    @Override
-    public void moveShip(Locatable destination) {
-        window.moveShip(botInstaller.screenManagerAddress.get(), (long) destination.getX(), (long) destination.getY(), 0);
-    }
-
-    @Override
-    public void collectBox(Box box) {
-        window.moveShip(botInstaller.screenManagerAddress.get(), (long) box.getX(), (long) box.getY(), box.address);
-    }
-
-    @Override
-    public long callMethod(int index, long... arguments) {
-        return window.callMethod(botInstaller.screenManagerAddress.get(), index, arguments) ? 1 : 0;
     }
 
     @Override
@@ -114,15 +94,48 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
 
     public static class KekkaPlayerDirectInteraction extends GameAPI.NoOpDirectInteraction {
         private final KekkaPlayer kekkaPlayer;
+        private final BotInstaller botInstaller;
 
-        public KekkaPlayerDirectInteraction(KekkaPlayer KekkaPlayer) {
+        public KekkaPlayerDirectInteraction(KekkaPlayer KekkaPlayer, BotInstaller botInstaller) {
             this.kekkaPlayer = KekkaPlayer;
+            this.botInstaller = botInstaller;
         }
 
         @Override
         public void setMaxFps(int maxFps) {
             kekkaPlayer.setMaxFps(maxFps);
         }
+
+        @Override
+        public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
+            kekkaPlayer.refine(refineUtilAddress, oreType.getId(), amount);
+        }
+
+        @Override
+        public boolean callMethodAsync(int index, long... arguments) {
+            return kekkaPlayer.callMethod(botInstaller.screenManagerAddress.get(), index, arguments);
+        }
+
+        @Override
+        public void selectEntity(long clickableAddress, long scriptObjectVtable) {
+            kekkaPlayer.selectEntity(clickableAddress, scriptObjectVtable, false);
+        }
+
+        @Override
+        public void moveShip(Locatable destination) {
+            kekkaPlayer.moveShip(botInstaller.screenManagerAddress.get(), (long) destination.getX(), (long) destination.getY(), 0);
+        }
+
+        @Override
+        public void collectBox(Box box) {
+            kekkaPlayer.moveShip(botInstaller.screenManagerAddress.get(), (long) box.getX(), (long) box.getY(), box.address);
+        }
+
+        @Override
+        public long callMethod(int index, long... arguments) {
+            return kekkaPlayer.callMethodSync(index, arguments);
+        }
+
     }
 
 }

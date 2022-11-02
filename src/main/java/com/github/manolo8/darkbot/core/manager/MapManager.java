@@ -262,13 +262,13 @@ public class MapManager implements Manager, StarSystemAPI {
 
             if (zoomHolderInCam != 0) {
                 if (API.readDouble(zoomHolderInCam + 56) != zoom)
-                    Main.API.callMethod(4, zoomHolderInCam, Double.doubleToLongBits(zoom));
+                    Main.API.callMethodAsync(4, zoomHolderInCam, Double.doubleToLongBits(zoom));
             }
         } else {
             long map = API.readLong(viewAddress + 208);
             if (map != 0) {
                 API.writeDouble(map + 336, 0.1);
-                Main.API.callMethod(153, map, Double.doubleToLongBits(zoom), Double.doubleToLongBits(1));
+                Main.API.callMethodAsync(153, map, Double.doubleToLongBits(zoom), Double.doubleToLongBits(1));
             }
         }
     }

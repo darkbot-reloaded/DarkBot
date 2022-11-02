@@ -106,8 +106,12 @@ public class InfosDrawer implements Drawable {
         }
 
         //for debug
-        mg.drawString(mg.getWidth() - 5, 12, String.format("%dMB heap, %dMB ram, %.2f cpu",
-                        Runtime.getRuntime().totalMemory() >> 20, Main.API.getMemoryUsage(), Main.API.getCpuUsage()),
+        mg.drawString(mg.getWidth() - 5, 12,
+                String.format("%dMB heap, %d|%dMB ram, %.2f cpu",
+                        Runtime.getRuntime().totalMemory() >> 20,
+                        main.facadeManager.stats.getMemory(),
+                        Main.API.getMemoryUsage(),
+                        Main.API.getCpuUsage()),
                 MapGraphics.StringAlign.RIGHT);
 
         mg.drawString(mg.getWidth() - 5, 26,

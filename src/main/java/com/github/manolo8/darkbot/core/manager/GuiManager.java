@@ -217,7 +217,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
             if (main.config.BOT_SETTINGS.API_CONFIG.CLEAR_CACHE_ON_STUCK &&
                     API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE))
-                API.clearCache();
+                API.clearCache("(preloader|main).swf");
 
             API.handleRefresh();
             validTime = System.currentTimeMillis();

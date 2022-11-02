@@ -46,7 +46,7 @@ public class BotInstaller implements API.Singleton {
             return true;
         }
 
-        if (API.readMemoryLong(mainApplicationAddress.get() + 1344) == mainAddress.get()) {
+        if (API.isValid() && API.readMemoryLong(mainApplicationAddress.get() + 1344) == mainAddress.get()) {
             if (heroInfoAddress.get() == 0) checkUserData();
 
             if (connectionManagerAddress.get() == 0) {

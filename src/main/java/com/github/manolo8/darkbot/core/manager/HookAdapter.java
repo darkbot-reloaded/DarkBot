@@ -102,7 +102,7 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
     }
 
     @Override
-    public void selectEntity(long addr, long vtable) {
+    public void selectEntity(long clickableAddress, long scriptObjectVtable) {
         throw new UnsupportedOperationException();
     }
 

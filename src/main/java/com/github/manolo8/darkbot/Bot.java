@@ -48,7 +48,8 @@ public class Bot {
         checkJavaVersion(params);
 
         System.out.println("Starting DarkBot " + Main.VERSION);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> System.out.println("DarkBot shutdown peacefully!")));
+        Runtime.getRuntime().addShutdownHook(new Thread(() ->
+                new Throwable("DarkBot shutdown peacefully!").printStackTrace()));
 
         SwingUtilities.invokeLater(() -> new Main(params));
     }
