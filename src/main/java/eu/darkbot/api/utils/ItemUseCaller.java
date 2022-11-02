@@ -32,9 +32,7 @@ public class ItemUseCaller {
 
     public boolean useItem(Item item) {
         if (checkUsable()) {
-            API.replaceInt(useItemCommand + 36, 0, 1); // Flag - double-click on category bar
             kekkaPlayer.useItem(screenManager, item.getId(), 18, connectionManager, useItemCommand);
-
             return true;
         }
 
