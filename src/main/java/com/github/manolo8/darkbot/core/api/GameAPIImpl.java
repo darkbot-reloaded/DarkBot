@@ -112,6 +112,10 @@ public class GameAPIImpl<
             String ocxName = "DarkFlash" + (OSUtil.isWindows7OrLess() ? "-W7" : "") + ".ocx";
             setFlashOcxPath(LibUtils.getSharedLibrary(ocxName).toString());
         }
+
+        if (hasCapability(GameAPI.Capability.HANDLER_MIN_CLIENT_SIZE)) {
+            setMinClientSize(800, 600); // API window can be smaller, but game client cannot
+        }
     }
 
     protected void reload() {
