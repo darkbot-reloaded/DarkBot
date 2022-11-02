@@ -89,7 +89,7 @@ public class LibSetup {
             Files.copy(is, libPath, StandardCopyOption.REPLACE_EXISTING);
             return true;
         } catch (IOException e) {
-            System.err.println("Failed to download library file: " + lib.path + " from " + lib.download);
+            System.err.println("Failed to download library file: " + libPath + " from " + lib.download);
             e.printStackTrace();
         }
         return false;
