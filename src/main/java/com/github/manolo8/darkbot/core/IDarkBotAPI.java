@@ -110,6 +110,8 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     void handleRefresh();
 
+    void handleRelogin();
+
     void resetCache();
 
     boolean hasCapability(GameAPI.Capability capability);

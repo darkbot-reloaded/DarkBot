@@ -401,6 +401,12 @@ public class GameAPIImpl<
     }
 
     @Override
+    public void handleRelogin() {
+        if (hasCapability(GameAPI.Capability.LOGIN))
+            relogin();
+    }
+
+    @Override
     public void setMaxFps(int maxFps) {
         direct.setMaxFps(maxFps);
     }
