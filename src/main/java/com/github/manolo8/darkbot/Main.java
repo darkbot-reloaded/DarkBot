@@ -129,6 +129,10 @@ public class Main extends Thread implements PluginListener, BotAPI {
         // 4: Generate the actual config
         this.configHandler = pluginAPI.requireInstance(ConfigHandler.class);
 
+        // These need to be delayed until post-initialization so translated strings are available
+        Bot.checkJavaVersion(params);
+        Bot.checkUniqueInstance(params); //method require min java 9
+
         VerifierChecker.getAuthApi().setupAuth();
         this.pluginAPI.addInstance(VerifierChecker.getAuthApi());
 
@@ -432,5 +436,4 @@ public class Main extends Thread implements PluginListener, BotAPI {
     public Module getModule() {
         return newModule;
     }
-
 }
