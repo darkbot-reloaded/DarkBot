@@ -232,14 +232,15 @@ public class DispatchManager {
         public static boolean updateAll(String page, DispatchData data) {
             // Mark old in-progress for removal
             data.getInProgress().forEach((k, v) -> v.setForRemoval(true));
-            // Mark old gate already completed (that might have been completed by hand)
-            data.getGates().forEach((k,v) -> v.setIsAvailable(false));
+            // Mark old gate for removal
+            data.getGates().forEach((k,v) -> v.setForRemoval(false));
             boolean updated = true;
             for (InfoReader reader : InfoReader.values()) {
                 updated &= reader.update(page, data);
             }
             // Remove them if they have not gotten an update (they are collected already)
             data.getInProgress().values().removeIf(InProgress::getForRemoval);
+            data.getGates().values().removeIf(Gate::getForRemoval);
             return updated;
         }
 

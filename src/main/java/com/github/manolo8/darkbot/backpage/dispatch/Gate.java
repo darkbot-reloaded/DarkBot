@@ -3,7 +3,7 @@ package com.github.manolo8.darkbot.backpage.dispatch;
 public class Gate {
     protected String id, name, time, cost, collectable;
 
-    protected boolean isAvailable, inProgress;
+    protected boolean isAvailable, inProgress, forRemoval;
 
     public String getId() {
         return id;
@@ -59,6 +59,14 @@ public class Gate {
 
     public void setIsAvailable(boolean isAvailable) {
         this.isAvailable = isAvailable;
+    }
+
+    public boolean getForRemoval() {
+        return this.forRemoval;
+    }
+
+    public void setForRemoval(boolean forRemoval) {
+        this.forRemoval = forRemoval;
     }
 
     @Override

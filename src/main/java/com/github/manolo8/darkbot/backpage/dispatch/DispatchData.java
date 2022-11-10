@@ -175,7 +175,7 @@ public class DispatchData {
             if (gate.getCollectable().equalsIgnoreCase("1") || (gate.getTime().equalsIgnoreCase("0") && gate.getCost().equalsIgnoreCase("0"))) {
                 gate.setInProgress(true);
             }
-
+            gate.setForRemoval(false);
             return true;
         }
     }
