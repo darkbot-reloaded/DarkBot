@@ -7,6 +7,8 @@ public class AuctionItems {
     protected String id, lootId, name, itemType;
     protected long highestBidderId, currentBid, ownBid, instantBuy;
 
+    protected boolean forRemoval;
+
     public Type getAuctionType() {
         return type;
     }
@@ -77,6 +79,14 @@ public class AuctionItems {
 
     public void setInstantBuy(long instantBuy) {
         this.instantBuy = instantBuy;
+    }
+
+    public boolean getForRemoval() {
+        return this.forRemoval;
+    }
+
+    public void setForRemoval(boolean forRemoval) {
+        this.forRemoval = forRemoval;
     }
 
     @Override
