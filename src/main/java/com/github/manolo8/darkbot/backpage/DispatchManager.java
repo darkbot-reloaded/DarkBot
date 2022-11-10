@@ -233,7 +233,7 @@ public class DispatchManager {
             // Mark old in-progress for removal
             data.getInProgress().forEach((k, v) -> v.setForRemoval(true));
             // Mark old gate for removal
-            data.getGates().forEach((k,v) -> v.setForRemoval(false));
+            data.getGates().forEach((k,v) -> v.setForRemoval(true));
             boolean updated = true;
             for (InfoReader reader : InfoReader.values()) {
                 updated &= reader.update(page, data);
