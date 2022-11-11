@@ -16,6 +16,7 @@ import java.security.PermissionCollection;
 import java.security.Permissions;
 import java.security.Policy;
 import java.security.ProtectionDomain;
+import java.util.Arrays;
 
 public class Bot {
 
@@ -30,7 +31,8 @@ public class Bot {
 
         String path = Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         if (System.console() == null && (path.endsWith(".jar") || path.endsWith(".exe"))) {
-            LogUtils.setOutputToFile();
+            if (Arrays.stream(args).noneMatch(x -> x.equalsIgnoreCase("MDEBUG")))
+                LogUtils.setOutputToFile();
         }
         try {
             UIManager.getFont("Label.font"); // Prevents a linux crash
