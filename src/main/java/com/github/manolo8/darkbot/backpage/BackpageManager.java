@@ -275,6 +275,11 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     @Override
+    public int getSidStatus() {
+        return sidStatus;
+    }
+
+    @Override
     public String getSid() {
         return sid;
     }
