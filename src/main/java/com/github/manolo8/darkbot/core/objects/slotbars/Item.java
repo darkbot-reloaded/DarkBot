@@ -175,6 +175,10 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
         return itemTimer.address == 0 ? null : itemTimer;
     }
 
+    public void setItemUsed() {
+        setLastUsed(System.currentTimeMillis());
+    }
+
     public void setLastUsed(long lastUsed) {
         this.lastUsed = lastUsed;
     }
@@ -278,7 +282,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
+        if (this == o || selectableItem != null && selectableItem == o) return true;
         if (!(o instanceof SelectableItem)) return false;
 
         if (o instanceof Item) {

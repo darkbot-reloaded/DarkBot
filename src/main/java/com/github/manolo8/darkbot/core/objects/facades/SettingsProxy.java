@@ -34,7 +34,8 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
     public boolean pressKeybind(KeyBind keyBind) {
         Character charCode = getCharCode(Objects.requireNonNull(keyBind, "KeyBind is null!"));
         if (charCode == null) {
-            main.guiManager.settingsGui.revalidateKeyBinds();
+            if (isReady())
+                main.guiManager.settingsGui.revalidateKeyBinds();
             return false;
         }
 
@@ -54,6 +55,10 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
                 return KeyBind.of(i);
 
         return null;
+    }
+
+    private boolean isReady() {
+        return keycodesDictionary.getSize() > 30;
     }
 
     @Nullable

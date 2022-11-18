@@ -57,7 +57,7 @@ import java.util.Objects;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 111 alpha 5");
+    public static final Version VERSION      = new Version("1.13.17 beta 111 alpha 6");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -195,7 +195,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
             avgTick = ((avgTick * 9) + (System.currentTimeMillis() - time)) / 10;
 
-            Time.sleepMax(time, botInstaller.invalid.get() ? 1000 :
+            Time.sleepMax(time, botInstaller.invalid.get() ? 250 :
                     Math.max(config.BOT_SETTINGS.OTHER.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
         }
     }

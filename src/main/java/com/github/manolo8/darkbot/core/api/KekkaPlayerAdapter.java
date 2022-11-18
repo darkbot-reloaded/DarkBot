@@ -54,6 +54,9 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
                 GameAPI.Capability.DIRECT_REFINE,
                 GameAPI.Capability.DIRECT_USE_ITEM);
         this.itemUseCaller = itemUseCaller;
+
+        // 10 seconds after each reload
+        botInstaller.invalid.add(v -> clearRamTimer.activate(10_000));
     }
 
     @Override

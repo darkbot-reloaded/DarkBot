@@ -11,6 +11,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.security.AllPermission;
+import java.security.CodeSource;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
@@ -78,6 +79,11 @@ public class Bot {
                 Permissions permissions = new Permissions();
                 permissions.add(new AllPermission());
                 return permissions;
+            }
+
+            @Override
+            public PermissionCollection getPermissions(CodeSource codesource) {
+                return new Permissions();
             }
         });
         System.setSecurityManager(new SecurityManager() {

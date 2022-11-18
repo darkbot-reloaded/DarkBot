@@ -65,7 +65,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
 
     @Override
     public Collection<? extends eu.darkbot.api.game.items.Item> getItems(@NotNull ItemCategory itemCategory) {
-        return categoryBar.get(itemCategory).items;
+        return categoryBar.getItems(itemCategory);
     }
 
     @Override
@@ -87,8 +87,8 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
             return itemUseResult;
 
         if (API.useItem(item)) {
-            return ItemUseResult.SUCCESS
-                    .ifSuccessful(r -> item.setLastUsed(System.currentTimeMillis()));
+            item.setItemUsed();
+            return ItemUseResult.SUCCESS;
         }
 
         SlotBarsProxy.Type slotBarType = item.getSlotBarType();
@@ -100,7 +100,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         return ((!toggleProAction || settings.pressKeybind(SettingsProxy.KeyBind.TOGGLE_PRO_ACTION))
                 && settings.pressKeybind(SettingsProxy.KeyBind.of(slotBarType, slotNumber))
                 ? ItemUseResult.SUCCESS : ItemUseResult.FAILED)
-                .ifSuccessful(r -> item.setLastUsed(System.currentTimeMillis()));
+                .ifSuccessful(r -> item.setItemUsed());
     }
 
     @Override
