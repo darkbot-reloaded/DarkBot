@@ -226,6 +226,7 @@ public class GameAPIImpl<
     protected void setData() {
         String url = "https://" + loginData.getUrl() + "/", sid = "dosid=" + loginData.getSid();
 
+        System.out.println(loginData);
         window.setData(url, sid, loginData.getPreloaderUrl(), loginData.getParams());
     }
 
@@ -461,8 +462,7 @@ public class GameAPIImpl<
 
     @Override
     public void selectEntity(Entity entity) {
-        if (!entity.clickable.isInvalid())
-            direct.selectEntity(entity.clickable.address, BotInstaller.SCRIPT_OBJECT_VTABLE);
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
@@ -7,9 +8,16 @@ import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.KekkaPlayer;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.utils.ItemUseCaller;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class KekkaPlayerAdapter extends GameAPIImpl<
         KekkaPlayer,
@@ -18,11 +26,14 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         ByteUtils.ExtraMemoryReader,
         KekkaPlayer,
         KekkaPlayerAdapter.KekkaPlayerDirectInteraction> {
+    private static final String SELECT_MAP_ASSET = "MapAssetNotificationTRY_TO_SELECT_MAPASSET";
 
+    private final BotInstaller botInstaller;
     private final ItemUseCaller itemUseCaller;
+    private final Consumer<Map<String, Config.BotSettings.APIConfig.PatternInfo>> listener = this::setBlockingPatterns;
 
     public KekkaPlayerAdapter(StartupParams params, KekkaPlayerDirectInteraction di, KekkaPlayer kekkaPlayer,
-                              BotInstaller botInstaller, ItemUseCaller itemUseCaller) {
+                              BotInstaller botInstaller, ItemUseCaller itemUseCaller, ConfigAPI config) {
         super(params,
                 kekkaPlayer,
                 kekkaPlayer,
@@ -53,10 +64,15 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
                 GameAPI.Capability.DIRECT_CALL_METHOD,
                 GameAPI.Capability.DIRECT_REFINE,
                 GameAPI.Capability.DIRECT_USE_ITEM);
+        this.botInstaller = botInstaller;
         this.itemUseCaller = itemUseCaller;
 
         // 10 seconds after each reload
         botInstaller.invalid.add(v -> clearRamTimer.activate(10_000));
+
+        ConfigSetting<Map<String, Config.BotSettings.APIConfig.PatternInfo>> c = config.requireConfig("bot_settings.api_config.block_patterns");
+        listener.accept(c.getValue());
+        c.addListener(listener);
     }
 
     @Override
@@ -93,6 +109,42 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
     @Override
     public String getVersion() {
         return "KekkaPlayer-" + window.getVersion();
+    }
+
+    @Override
+    public void selectEntity(Entity entity) {
+        if (!entity.clickable.isInvalid())
+            sendNotification(SELECT_MAP_ASSET,
+                    entity.getId(), (int) entity.getX(), (int) entity.getY(),
+                    100, 100, 100, 100, //todo
+                    entity.clickable.defRadius);
+    }
+
+    public void setBlockingPatterns(Map<String, Config.BotSettings.APIConfig.PatternInfo> map) {
+        List<String> l = new ArrayList<>();
+        map.forEach((key, value) -> {
+            if (value.enable && value.regex != null && !value.regex.isEmpty()) {
+                l.add(value.regex);
+                l.add(value.filePath == null ? "" : value.filePath);
+            }
+        });
+
+        window.setBlockingPatterns(l.toArray(new String[0]));
+    }
+
+    private long tagInteger(long value) {
+        return (value << 3) | 6;
+    }
+
+    private void sendNotification(String notification, int... args) {
+        if (botInstaller.screenManagerAddress.get() == 0) return;
+
+        long[] tagged = new long[args.length];
+        for (int i = 0; i < args.length; i++) {
+            tagged[i] = tagInteger(args[i]);
+        }
+
+        window.sendNotification(botInstaller.screenManagerAddress.get(), notification, tagged);
     }
 
     public static class KekkaPlayerDirectInteraction extends GameAPI.NoOpDirectInteraction {

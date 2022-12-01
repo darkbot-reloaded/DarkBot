@@ -10,8 +10,14 @@ public class KekkaPlayer implements GameAPI.Window, GameAPI.Handler, GameAPI.Mem
         LibUtils.loadLibrary("KekkaPlayer");
     }
 
-    // last read time of internet file - GetTickCount64()
-    public native long lastInternetReadTime();
+    public native boolean sendNotification(long screenManager, String notification, long... arrayArgs);
+
+    // [pattern] = file(may be empty but not null)
+    public native void setBlockingPatterns(String... blockingEntryPatterns);
+
+    public native long lastClientReadTime(); // last socket read time
+    public native long lastInternetReadTime(); // last read time of internet file - GetTickCount64()
+
     public native void refine(long refineUtilAddress, int oreId, int amount);
     public native boolean useItem(long screenManager, String check, int methodIdx, long... args);
 

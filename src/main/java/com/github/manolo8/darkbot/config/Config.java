@@ -16,7 +16,9 @@ import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.utils.NpcTableModel;
 import com.github.manolo8.darkbot.gui.tree.utils.TableHelpers;
+import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Dropdown;
+import eu.darkbot.api.config.annotations.Number;
 import eu.darkbot.api.config.annotations.Number;
 import eu.darkbot.api.config.annotations.Option;
 import eu.darkbot.api.config.annotations.Percentage;
@@ -242,6 +244,16 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public boolean attachToBot = false;
             public GameAPI.Handler.GameQuality gameQuality = GameAPI.Handler.GameQuality.LOW;
             public transient int transparency = 100, volume = 100, clientWidth = width, clientHeight = height;
+
+            @Table(controls = {Table.Control.SEARCH, Table.Control.ADD, Table.Control.REMOVE})
+            public @Option @Visibility(Level.ADVANCED) Map<String, PatternInfo> BLOCK_PATTERNS = new HashMap<>();
+
+            @Configuration("config.bot_settings.api_config.block_patterns")
+            public static class PatternInfo {
+                public String regex = "";
+                public String filePath = "";
+                public boolean enable = true;
+            }
         }
 
         public @Option MapDisplay MAP_DISPLAY = new MapDisplay();

@@ -43,11 +43,13 @@ public class ConstantEntitiesDrawer implements Drawable {
 
     public void drawBattleStations(MapGraphics mg) {
         for (BattleStation bs : battleStations) {
-            if (bs.getHullId() == 0) mg.setColor("meteroid");
+            if (!(bs instanceof BattleStation.Module) && bs.getHullId() == 0) mg.setColor("meteroid");
             else if (bs.getEntityInfo().isEnemy()) mg.setColor("enemies");
             else mg.setColor("allies");
 
-            if (bs.getHullId() >= 0 && bs.getHullId() < 255) {
+            if (bs instanceof BattleStation.Module) {
+                mg.drawRectCentered(bs, 3, false);
+            } else {
                 mg.drawOvalCentered(bs, 11, 9, true);
 
 
@@ -56,8 +58,6 @@ public class ConstantEntitiesDrawer implements Drawable {
 //                    mg.drawOvalCentered(bs, 30, 25, false);
 //                }
             }
-
-            else mg.drawRectCentered(bs, 3, false);
         }
     }
 

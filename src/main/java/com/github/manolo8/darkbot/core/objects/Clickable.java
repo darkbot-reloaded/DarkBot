@@ -14,30 +14,39 @@ public class Clickable extends Updatable {
     public int defRadius = -1;
     public int defPriority = -1;
 
+    public void click() {
+        if (!isInvalid() && enabled)
+            API.callMethodAsync(8, address);
+    }
+
+    @Deprecated
     public void toggle(boolean clickable) {
-        if (clickable) reset();
-        else setRadius(0);
+//        if (clickable) reset();
+//        else setRadius(0);
     }
 
+    @Deprecated
     public void setPriority(int priority) {
-        if (this.priority == priority || isInvalid()) return;
-        if (defPriority == -1) this.defPriority = this.priority;
-        API.replaceInt(address + 44, this.priority, this.priority = priority);
+//        if (this.priority == priority || isInvalid()) return;
+//        if (defPriority == -1) this.defPriority = this.priority;
+//        API.replaceInt(address + 44, this.priority, this.priority = priority);
     }
 
+    @Deprecated
     public void setRadius(int radius) {
-        if (this.radius == radius || isInvalid()) return;
-        if (defRadius == -1) this.defRadius = this.radius;
-        if (defRadius <= 0) return;
-        API.replaceInt(address + 40, this.radius, this.radius = radius);
+//        if (this.radius == radius || isInvalid()) return;
+//        if (defRadius == -1) this.defRadius = this.radius;
+//        if (defRadius <= 0) return;
+//        API.replaceInt(address + 40, this.radius, this.radius = radius);
     }
 
+    @Deprecated
     public void reset() {
-        if (isInvalid()) return;
-        if (defRadius != -1 && defRadius != radius)
-            API.replaceInt(address + 40, radius, radius = defRadius);
-        if (defRadius != -1 && defPriority != priority)
-            API.replaceInt(address + 44, priority, priority = defPriority);
+//        if (isInvalid()) return;
+//        if (defRadius != radius)
+//            API.replaceInt(address + 40, radius, radius = defRadius);
+//        if (defPriority != priority)
+//            API.replaceInt(address + 44, priority, priority = defPriority);
     }
 
     /**
@@ -50,23 +59,27 @@ public class Clickable extends Updatable {
     @Override
     public void update() {
         if (address == 0 || API.readMemoryLong(address) != BotInstaller.SCRIPT_OBJECT_VTABLE) return;
-        int oldRad = radius, oldPri = priority;
-        int newRadius = API.readMemoryInt(address + 40);
 
-        this.priority = API.readMemoryInt(address + 44);
+        this.radius = this.defRadius = API.readMemoryInt(address + 40);
+        this.priority = this.defPriority = API.readMemoryInt(address + 44);
         this.enabled = API.readMemoryBoolean(address, 64, 32);
-
-        if (newRadius < 1000) {
-            radius = newRadius;
-            if (radius != oldRad) {
-                if (oldRad != defRadius) defRadius = radius;
-                setRadius(oldRad);
-            }
-        }
-        if (priority != oldPri) {
-            if (oldPri != defPriority) defPriority = priority;
-            setPriority(oldPri);
-        }
+//        int oldRad = radius, oldPri = priority;
+//        int newRadius = API.readMemoryInt(address + 40);
+//
+//        this.priority = API.readMemoryInt(address + 44);
+//        this.enabled = API.readMemoryBoolean(address, 64, 32);
+//
+//        if (newRadius < 1000) {
+//            radius = newRadius;
+//            if (radius != oldRad) {
+//                if (oldRad != defRadius) defRadius = radius;
+//                setRadius(oldRad);
+//            }
+//        }
+//        if (priority != oldPri) {
+//            if (oldPri != defPriority) defPriority = priority;
+//            setPriority(oldPri);
+//        }
     }
 
     @Override
