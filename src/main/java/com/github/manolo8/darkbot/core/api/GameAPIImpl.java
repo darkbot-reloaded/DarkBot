@@ -226,7 +226,6 @@ public class GameAPIImpl<
     protected void setData() {
         String url = "https://" + loginData.getUrl() + "/", sid = "dosid=" + loginData.getSid();
 
-        System.out.println(loginData);
         window.setData(url, sid, loginData.getPreloaderUrl(), loginData.getParams());
     }
 
