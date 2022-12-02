@@ -118,6 +118,11 @@ public class ByteUtils {
         return b;
     }
 
+    public static long tagInteger(long value) {
+        return (value << 3) | 6;
+    }
+
+
     public static boolean isScriptableObjectValid(long scriptableObject) {
         // contains references count & GC flags
         int composite = Main.API.readInt(scriptableObject + 8);

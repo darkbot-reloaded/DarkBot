@@ -273,6 +273,22 @@ public class MapManager implements Manager, StarSystemAPI {
         }
     }
 
+    private boolean wasEntityAction = false;
+    public boolean mapClick(boolean isEntityAction) {
+        long eventManager = Main.API.readLong(eventAddress);
+        if (eventManager > 0) {
+            boolean enabled = !API.readBoolean(eventManager + 36); // are clicks enabled?
+            if (enabled) {
+                if (isEntityAction || wasEntityAction) {
+                    API.callMethodAsync(26, eventManager);
+                    wasEntityAction = isEntityAction;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     public ViewBounds viewBounds = new ViewBounds();
 
     // viewAddress

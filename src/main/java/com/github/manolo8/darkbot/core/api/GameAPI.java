@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.entities.Box;
+import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
@@ -179,7 +180,7 @@ public interface GameAPI {
 
         void lockEntity(int id);
 
-        void selectEntity(long clickableAddress, long scriptObjectVtable);
+        void selectEntity(Entity entity);
 
         void moveShip(Locatable destination);
 
@@ -415,7 +416,7 @@ public interface GameAPI {
         }
 
         @Override
-        public void selectEntity(long clickableAddress, long scriptObjectVtable) {
+        public void selectEntity(Entity entity) {
             throw new UnsupportedOperationException();
         }
 

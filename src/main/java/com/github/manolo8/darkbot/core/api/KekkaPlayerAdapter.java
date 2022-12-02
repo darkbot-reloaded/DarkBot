@@ -28,7 +28,6 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         KekkaPlayerAdapter.KekkaPlayerDirectInteraction> {
     private static final String SELECT_MAP_ASSET = "MapAssetNotificationTRY_TO_SELECT_MAPASSET";
 
-    private final BotInstaller botInstaller;
     private final ItemUseCaller itemUseCaller;
     private final Consumer<Map<String, Config.BotSettings.APIConfig.PatternInfo>> listener = this::setBlockingPatterns;
 
@@ -64,7 +63,6 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
                 GameAPI.Capability.DIRECT_CALL_METHOD,
                 GameAPI.Capability.DIRECT_REFINE,
                 GameAPI.Capability.DIRECT_USE_ITEM);
-        this.botInstaller = botInstaller;
         this.itemUseCaller = itemUseCaller;
 
         // 10 seconds after each reload
@@ -111,15 +109,6 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         return "KekkaPlayer-" + window.getVersion();
     }
 
-    @Override
-    public void selectEntity(Entity entity) {
-        if (!entity.clickable.isInvalid())
-            sendNotification(SELECT_MAP_ASSET,
-                    entity.getId(), (int) entity.getX(), (int) entity.getY(),
-                    100, 100, 100, 100, //todo
-                    entity.clickable.defRadius);
-    }
-
     public void setBlockingPatterns(Map<String, Config.BotSettings.APIConfig.PatternInfo> map) {
         List<String> l = new ArrayList<>();
         map.forEach((key, value) -> {
@@ -130,21 +119,6 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         });
 
         window.setBlockingPatterns(l.toArray(new String[0]));
-    }
-
-    private long tagInteger(long value) {
-        return (value << 3) | 6;
-    }
-
-    private void sendNotification(String notification, int... args) {
-        if (botInstaller.screenManagerAddress.get() == 0) return;
-
-        long[] tagged = new long[args.length];
-        for (int i = 0; i < args.length; i++) {
-            tagged[i] = tagInteger(args[i]);
-        }
-
-        window.sendNotification(botInstaller.screenManagerAddress.get(), notification, tagged);
     }
 
     public static class KekkaPlayerDirectInteraction extends GameAPI.NoOpDirectInteraction {
@@ -172,8 +146,12 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         }
 
         @Override
-        public void selectEntity(long clickableAddress, long scriptObjectVtable) {
-            kekkaPlayer.selectEntity(clickableAddress, scriptObjectVtable, false);
+        public void selectEntity(Entity entity) {
+            if (!entity.clickable.isInvalid())
+                sendNotification(SELECT_MAP_ASSET,
+                        entity.getId(), (int) entity.getX(), (int) entity.getY(),
+                        100, 100, 100, 100, //todo
+                        entity.clickable.defRadius);
         }
 
         @Override
@@ -191,6 +169,16 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
             return kekkaPlayer.callMethodSync(index, arguments);
         }
 
+        private void sendNotification(String notification, int... args) {
+            if (botInstaller.screenManagerAddress.get() == 0) return;
+
+            long[] tagged = new long[args.length];
+            for (int i = 0; i < args.length; i++) {
+                tagged[i] = ByteUtils.tagInteger(args[i]);
+            }
+
+            kekkaPlayer.sendNotification(botInstaller.screenManagerAddress.get(), notification, tagged);
+        }
     }
 
 }

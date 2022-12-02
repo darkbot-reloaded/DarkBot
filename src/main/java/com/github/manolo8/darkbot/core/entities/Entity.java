@@ -137,14 +137,7 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     public boolean trySelect(boolean tryAttack) {
         if (!isSelectable() || distanceTo(main.hero) > DEFAULT_CLICK_RADIUS) return false;
 
-        if (this instanceof Lockable) {
-            //assuming that selectEntity selects only ships & is supported by every API
-            //actually this should be called on every entity with LockType trait
-            API.selectEntity(this);
-        } else {
-            clickable.click();
-        }
-
+        API.selectEntity(this);
         return true; // We assume it was successful
     }
 

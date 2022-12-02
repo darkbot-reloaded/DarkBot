@@ -1,10 +1,10 @@
 package com.github.manolo8.darkbot.core.api;
 
-import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.gui.utils.PidSelector;
 import com.github.manolo8.darkbot.gui.utils.Popups;
@@ -16,6 +16,7 @@ import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.util.Timer;
@@ -65,6 +66,8 @@ public class GameAPIImpl<
 
     protected Timer clearRamTimer = Timer.get(5 * Time.MINUTE);
 
+    private final MapManager mapManager;
+
     public GameAPIImpl(StartupParams params,
                        W window, H handler, M memory, E extraMemoryReader, I interaction, D direct,
                        GameAPI.Capability... capabilityArr) {
@@ -90,6 +93,8 @@ public class GameAPIImpl<
 
         this.loginData = hasCapability(GameAPI.Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
         this.initiallyShown = hasCapability(GameAPI.Capability.INITIALLY_SHOWN) && !params.getAutoHide();
+
+        this.mapManager = HeroManager.instance.main.mapManager;
 
         ConfigAPI config = HeroManager.instance.main.configHandler;
         if (hasCapability(GameAPI.Capability.DIRECT_LIMIT_FPS)) {
@@ -459,19 +464,32 @@ public class GameAPIImpl<
         direct.lockEntity(id);
     }
 
+    private boolean wasMoveShipAction = false;
     @Override
     public void selectEntity(Entity entity) {
-        throw new UnsupportedOperationException();
+        if (mapManager.mapClick(true)) {
+            if (entity instanceof Lockable) {
+                //assuming that selectEntity selects only ships & is supported by every API
+                //actually this should be called on every entity with LockType trait
+                direct.selectEntity(entity);
+            } else {
+                entity.clickable.click();
+            }
+        }
     }
 
     @Override
     public void moveShip(Locatable destination) {
-        direct.moveShip(destination);
+        if (mapManager.mapClick(false)) {
+            direct.moveShip(destination);
+        }
     }
 
     @Override
     public void collectBox(Box box) {
-        direct.collectBox(box);
+        if (mapManager.mapClick(true)) {
+            direct.collectBox(box);
+        }
     }
 
     @Override
