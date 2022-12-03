@@ -237,7 +237,7 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     private void clickToggleStatus() {
-        if (System.currentTimeMillis() - this.togglePetTime > 5000L) {
+        if (System.currentTimeMillis() - this.togglePetTime > 2000L) {
             click(MAIN_BUTTON_X, MODULE_Y);
             this.selection = ModuleStatus.NOTHING;
             this.togglePetTime = System.currentTimeMillis();
