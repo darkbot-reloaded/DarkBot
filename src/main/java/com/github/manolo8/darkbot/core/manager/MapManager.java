@@ -115,9 +115,6 @@ public class MapManager implements Manager, StarSystemAPI {
 
             settings3DAddress = 0;
             renderValidated = false;
-            long eventManagerClosure = ByteUtils.getClassClosure(API.readLong(eventAddress));
-            if (eventManagerClosure > 0xFFFF)
-                API.replaceInt(eventManagerClosure + 60, 45, -150); // set hero non-clickable radius to -200
         });
 
         main.status.add(r -> renderValidated = false);

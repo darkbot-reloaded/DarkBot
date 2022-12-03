@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
-import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
@@ -28,7 +27,6 @@ import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.utils.Inject;
 import eu.darkbot.api.utils.ItemNotEquippedException;
-import eu.darkbot.api.utils.NativeAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -248,45 +246,13 @@ public class PetManager extends Gui implements PetAPI {
 
     private void selectModule(int moduleId, int submoduleIdx) {
         if (System.currentTimeMillis() < this.selectModuleTime) return;
-        this.selectModuleTime = System.currentTimeMillis() + 1000;
+        Gear gear = submoduleIdx == -1 ? gearList.get(moduleIdToIndex(moduleId)) : locatorList.get(submoduleIdx);
 
-        if (API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS)) {
-            if (submoduleIdx == -1)
-                API.postActions(
-                        NativeAction.Mouse.CLICK.of(x + MODULES_X_MAX - 5, y + MODULE_Y),
-                        NativeAction.Mouse.CLICK.of(x + MODULES_X_MAX - 30, y + getModuleY(moduleId, true)));
-            else
-                API.postActions(
-                        NativeAction.Mouse.CLICK.of(x + MODULES_X_MAX - 5, y + MODULE_Y),
-                        NativeAction.Mouse.MOVE.of(x + MODULES_X_MAX - 30, y + getModuleY(moduleId, true)),
-                        NativeAction.Mouse.CLICK.of(x + MODULES_X_MAX + 50,
-                                y + MODULE_Y + SUBMODULE_HEIGHT + locatorTab.y() + locatorList.get(submoduleIdx).y()));
-
-            selection = ModuleStatus.SELECTED;
-        } else {
-            switch (selection) {
-                case SELECTED:
-                case NOTHING:
-                    click(MODULES_X_MAX - 5, MODULE_Y);
-                    selection = ModuleStatus.DROPDOWN;
-                    break;
-                case DROPDOWN:
-                    if (submoduleIdx != -1) {
-                        hover(MODULES_X_MAX - 30, getModuleY(moduleId, true));
-                        selection = ModuleStatus.SUB_DROPDOWN;
-                    } else {
-                        click(MODULES_X_MAX - 30, getModuleY(moduleId, true));
-                        selection = ModuleStatus.SELECTED;
-                    }
-                    break;
-                case SUB_DROPDOWN:
-                    selection = ModuleStatus.SELECTED;
-                    if (submoduleIdx != -1)
-                        click(MODULES_X_MAX + 50, getModuleY(moduleId, false) + (SUBMODULE_HEIGHT * submoduleIdx));
-            }
-
-            if (selection == ModuleStatus.SELECTED)
-                this.selectModuleTime = System.currentTimeMillis() + 3000;
+        if (gear != null) {
+            long gearsSprite = getSpriteChild(address, -1);
+            gear.setModule(gearsSprite);
+            this.selection = ModuleStatus.SELECTED;
+            this.selectModuleTime = System.currentTimeMillis() + 1000;
         }
     }
 
@@ -703,6 +669,11 @@ public class PetManager extends Gui implements PetAPI {
         @Override
         public double getY() {
             return sprite.getY();
+        }
+
+        public void setModule(long gearsSprite) {
+            Main.API.callMethodAsync(148, address);
+            Main.API.callMethodAsync(152, Main.API.readLong(gearsSprite, 176)); //to hide gears list
         }
     }
 
