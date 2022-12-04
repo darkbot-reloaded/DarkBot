@@ -368,6 +368,8 @@ public class MapManager implements Manager, StarSystemAPI {
             this.rightTop.update(address + 96);
             this.rightBot.update(address + 112);
             this.leftBot.update(address + 128);
+
+            this.polygon.invalidateBounds();
         }
 
         private static class UpdatableLocatable extends Updatable.Auto implements Locatable {
