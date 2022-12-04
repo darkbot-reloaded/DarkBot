@@ -29,6 +29,7 @@ import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
+import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -270,15 +271,15 @@ public class MapManager implements Manager, StarSystemAPI {
         }
     }
 
-    private boolean wasEntityAction = true;
+    private final Timer lastMove = Timer.getRandom(1000, 8000);
     public boolean mapClick(boolean isEntityAction) {
         long eventManager = Main.API.readLong(eventAddress);
         if (eventManager > 0) {
             boolean enabled = !API.readBoolean(eventManager + 36); // are clicks enabled?
             if (enabled) {
-                if (isEntityAction || wasEntityAction) {
-                    API.callMethodAsync(26, eventManager);
-                    wasEntityAction = isEntityAction;
+                if (isEntityAction || lastMove.tryActivate()) {
+                    API.callMethodChecked(false, "23(26)008431800",26, eventManager);
+                    if (isEntityAction) lastMove.disarm();
                 }
                 return true;
             }

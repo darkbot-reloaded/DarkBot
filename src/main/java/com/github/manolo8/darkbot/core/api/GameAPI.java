@@ -190,6 +190,10 @@ public interface GameAPI {
 
         long callMethod(int index, long... arguments);
 
+        default boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments) {
+            throw new UnsupportedOperationException();
+        }
+
         default boolean callMethodAsync(int index, long... arguments) {
             throw new UnsupportedOperationException();
         }

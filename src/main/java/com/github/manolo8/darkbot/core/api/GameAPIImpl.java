@@ -502,6 +502,11 @@ public class GameAPIImpl<
     }
 
     @Override
+    public boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments) {
+        return direct.callMethodChecked(checkName, signature, index, arguments);
+    }
+
+    @Override
     public boolean callMethodAsync(int index, long... arguments) {
         return direct.callMethodAsync(index, arguments);
     }

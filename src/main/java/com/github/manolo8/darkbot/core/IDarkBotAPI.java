@@ -135,6 +135,7 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     void refine(long refineUtilAddress, OreAPI.Ore ore, int amount);
 
     long callMethod(int index, long... arguments);
+    boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments);
     boolean callMethodAsync(int index, long... arguments);
     boolean useItem(Item item);
     boolean isUseItemSupported();

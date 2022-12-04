@@ -19,8 +19,10 @@ import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.utils.ItemUseCaller;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class KekkaPlayerAdapter extends GameAPIImpl<
@@ -125,13 +127,59 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         window.setBlockingPatterns(result.toArray(new String[0]));
     }
 
+    private static class NativeMethodSignature {
+        private int index;
+        private long address;
+
+        private NativeMethodSignature(int index, long address) {
+            this.index = index;
+            this.address = address;
+        }
+
+        private void set(int index, long address) {
+            this.index = index;
+            this.address = address;
+        }
+
+        private boolean isInvalid() {
+            return this.index <= 2 || this.address <= 0xFFFF;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            NativeMethodSignature that = (NativeMethodSignature) o;
+
+            if (index != that.index) return false;
+            return address == that.address;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = index;
+            result = 31 * result + (int) (address ^ (address >>> 32));
+            return result;
+        }
+
+        private NativeMethodSignature copy() {
+            return new NativeMethodSignature(index, address);
+        }
+    }
+
     public static class KekkaPlayerDirectInteraction extends GameAPI.NoOpDirectInteraction {
         private final KekkaPlayer kekkaPlayer;
         private final BotInstaller botInstaller;
 
+        private final NativeMethodSignature cache = new NativeMethodSignature(0, 0);
+        private final Set<NativeMethodSignature> methodSignatureCache = new HashSet<>();
+
         public KekkaPlayerDirectInteraction(KekkaPlayer KekkaPlayer, BotInstaller botInstaller) {
             this.kekkaPlayer = KekkaPlayer;
             this.botInstaller = botInstaller;
+
+            botInstaller.invalid.add(v -> methodSignatureCache.clear());
         }
 
         @Override
@@ -142,6 +190,20 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         @Override
         public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
             kekkaPlayer.refine(refineUtilAddress, oreType.getId(), amount);
+        }
+
+        @Override
+        public boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments) {
+            cache.set(index, arguments[0]);
+            if (cache.isInvalid()) return false;
+            if (!methodSignatureCache.contains(cache)) {
+                int ret = kekkaPlayer.checkMethodSignature(cache.address, cache.index, checkName, signature);
+
+                if (ret == 1) methodSignatureCache.add(cache.copy());
+                else throw new NoSuchMethodError(signature);
+            }
+
+            return callMethodAsync(index, arguments);
         }
 
         @Override
