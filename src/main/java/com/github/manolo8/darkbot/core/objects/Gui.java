@@ -118,7 +118,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
     }
 
     public void toggleVisibility() {
-        API.callMethodAsync(183, address);
+        API.callMethodChecked(true, "23(toggleVisibility)(2626?)1116321600", 183, address);
     }
 
     /**

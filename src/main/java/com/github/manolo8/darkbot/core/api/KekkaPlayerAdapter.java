@@ -168,6 +168,12 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         }
     }
 
+    public static class InvalidNativeSignature extends Error {
+        public InvalidNativeSignature(String message) {
+            super(message);
+        }
+    }
+
     public static class KekkaPlayerDirectInteraction extends GameAPI.NoOpDirectInteraction {
         private final KekkaPlayer kekkaPlayer;
         private final BotInstaller botInstaller;
@@ -197,10 +203,13 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
             cache.set(index, arguments[0]);
             if (cache.isInvalid()) return false;
             if (!methodSignatureCache.contains(cache)) {
+                // -1 or -2 == memory read error, 0 == invalid signature, 1 == valid
                 int ret = kekkaPlayer.checkMethodSignature(cache.address, cache.index, checkName, signature);
 
                 if (ret == 1) methodSignatureCache.add(cache.copy());
-                else throw new NoSuchMethodError(signature);
+                else {
+                    throw new InvalidNativeSignature("Invalid flash method signature! " + signature);
+                }
             }
 
             return callMethodAsync(index, arguments);

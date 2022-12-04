@@ -246,7 +246,14 @@ public class PetManager extends Gui implements PetAPI {
 
     private void selectModule(int moduleId, int submoduleIdx) {
         if (System.currentTimeMillis() < this.selectModuleTime) return;
-        Gear gear = submoduleIdx == -1 ? gearList.get(moduleIdToIndex(moduleId)) : locatorList.get(submoduleIdx);
+
+        Gear gear = null;
+        if (submoduleIdx == -1) {
+            int moduleIdx = moduleIdToIndex(moduleId);
+            if (moduleIdx < gearList.size()) gear = gearList.get(moduleIdx);
+        } else {
+            gear = locatorList.get(submoduleIdx);
+        }
 
         if (gear != null) {
             long gearsSprite = getSpriteChild(address, -1);
@@ -672,8 +679,10 @@ public class PetManager extends Gui implements PetAPI {
         }
 
         public void setModule(long gearsSprite) {
-            Main.API.callMethodAsync(148, address);
-            Main.API.callMethodAsync(152, Main.API.readLong(gearsSprite, 176)); //to hide gears list
+            Main.API.callMethodChecked(true, "23(handleClick)(2626)1016321600", 148, address);
+
+            //to hide gears list
+            Main.API.callMethodChecked(true, "23(hide)(26)008211400", 152, Main.API.readLong(gearsSprite, 176));
         }
     }
 

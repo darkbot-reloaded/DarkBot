@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.KekkaPlayerAdapter;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.FacadeManager;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
@@ -271,6 +272,9 @@ public class Main extends Thread implements PluginListener, BotAPI {
             try {
                 if (running) newModule.onTickModule();
                 else newModule.onTickStopped();
+            } catch (KekkaPlayerAdapter.InvalidNativeSignature e) {
+                e.printStackTrace();
+                setRunning(false);
             } catch (Throwable e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(newModule);
                 if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
@@ -279,6 +283,9 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 try {
                     if (running) behaviour.onTickBehavior();
                     else behaviour.onStoppedBehavior();
+                } catch (KekkaPlayerAdapter.InvalidNativeSignature e) {
+                    e.printStackTrace();
+                    setRunning(false);
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
