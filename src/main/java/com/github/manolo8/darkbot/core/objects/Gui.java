@@ -102,14 +102,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
     private boolean changeCloseClick;
     public boolean show(boolean value) {
         if (trySetShowing(value)) {
-            if (value) {
-                clickMinimized();
-            } else {
-                if (changeCloseClick || !clickMinimized())
-                    click(5, 5);
-
-                changeCloseClick = !changeCloseClick;
-            }
+            toggleVisibility();
             return false;
         }
         return value == visible && isAnimationDone();
@@ -122,6 +115,10 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
         }
 
         return false;
+    }
+
+    public void toggleVisibility() {
+        API.callMethodAsync(183, address);
     }
 
     /**
