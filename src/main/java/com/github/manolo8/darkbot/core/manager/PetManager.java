@@ -682,7 +682,8 @@ public class PetManager extends Gui implements PetAPI {
             Main.API.callMethodChecked(true, "23(handleClick)(2626)1016321600", 148, address);
 
             //to hide gears list
-            Main.API.callMethodChecked(true, "23(hide)(26)008211400", 152, Main.API.readLong(gearsSprite, 176));
+            Main.API.callMethodChecked(true, "23(hide)(26)008211400",
+                    152, Main.API.readLong(gearsSprite, 176));
         }
     }
 

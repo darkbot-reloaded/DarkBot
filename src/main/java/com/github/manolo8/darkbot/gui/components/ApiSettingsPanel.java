@@ -58,7 +58,7 @@ public class ApiSettingsPanel extends JPanel {
 
         if (Main.API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE)) {
             JButton b = new JButton("Clear Cache");
-            b.addActionListener(l -> API.clearCache("(preloader|main|loadingscreen).swf"));
+            b.addActionListener(l -> API.clearCache(".*"));
             add(b, "span 3, grow");
         }
 
