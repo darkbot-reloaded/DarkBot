@@ -464,7 +464,6 @@ public class GameAPIImpl<
         direct.lockEntity(id);
     }
 
-    private boolean wasMoveShipAction = false;
     @Override
     public void selectEntity(Entity entity) {
         if (mapManager.mapClick(true)) {

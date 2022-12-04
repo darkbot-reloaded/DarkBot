@@ -19,7 +19,6 @@ import com.github.manolo8.darkbot.gui.tree.utils.TableHelpers;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.config.annotations.Number;
-import eu.darkbot.api.config.annotations.Number;
 import eu.darkbot.api.config.annotations.Option;
 import eu.darkbot.api.config.annotations.Percentage;
 import eu.darkbot.api.config.annotations.Table;
@@ -245,8 +244,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public GameAPI.Handler.GameQuality gameQuality = GameAPI.Handler.GameQuality.LOW;
             public transient int transparency = 100, volume = 100, clientWidth = width, clientHeight = height;
 
-            @Table(controls = {Table.Control.SEARCH, Table.Control.ADD, Table.Control.REMOVE})
-            public @Option @Visibility(Level.ADVANCED) Map<String, PatternInfo> BLOCK_PATTERNS = new HashMap<>();
+            public @Option @Table @Visibility(Level.DEVELOPER) Map<String, PatternInfo> BLOCK_PATTERNS = new HashMap<>();
 
             @Configuration("config.bot_settings.api_config.block_patterns")
             public static class PatternInfo {
@@ -278,7 +276,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public static class Other {
             public @Option boolean DISABLE_MASTER_PASSWORD = false;
             public @Option @Number(min = 10, max = 300) int ZONE_RESOLUTION = 30;
-            public @Option @Visibility(Level.ADVANCED) @Number(min = 10, max = 250) int MIN_TICK = 15;
+            public @Option @Visibility(Level.DEVELOPER) @Number(min = 10, max = 250) int MIN_TICK = 15;
             public @Option @Visibility(Level.ADVANCED) boolean DEV_STUFF = false;
         }
     }

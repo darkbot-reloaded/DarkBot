@@ -270,7 +270,7 @@ public class MapManager implements Manager, StarSystemAPI {
         }
     }
 
-    private boolean wasEntityAction = false;
+    private boolean wasEntityAction = true;
     public boolean mapClick(boolean isEntityAction) {
         long eventManager = Main.API.readLong(eventAddress);
         if (eventManager > 0) {

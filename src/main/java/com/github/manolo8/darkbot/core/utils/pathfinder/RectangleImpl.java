@@ -141,6 +141,14 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
         return maxY;
     }
 
+    public double getCenterX() {
+        return (minX + maxX) / 2;
+    }
+
+    public double getCenterY() {
+        return (minX + maxX) / 2;
+    }
+
     @Override
     public boolean intersectsLine(double x1, double y1, double x2, double y2) {
         if (x1 < x2 && Area.linesIntersect(x1, y1, x2, y2, minX, minY, minX, maxY))

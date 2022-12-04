@@ -61,8 +61,8 @@ public class MouseManager extends Thread {
     private ClickPoint pointLoc(Location loc) {
         RectangleImpl viewBounds = viewPolygon.getBounds();
 
-        return new ClickPoint((int) ((loc.x - viewBounds.getX()) / (viewBounds.getWidth()) * (double) MapManager.clientWidth),
-                (int) ((loc.y - viewBounds.getY()) / (viewBounds.getHeight()) * (double) MapManager.clientHeight));
+        return new ClickPoint((int) ((loc.x - viewBounds.getX()) / viewBounds.getWidth() * (double) MapManager.clientWidth),
+                (int) ((loc.y - viewBounds.getY()) / viewBounds.getHeight() * (double) MapManager.clientHeight));
     }
 
     public final void run() {
