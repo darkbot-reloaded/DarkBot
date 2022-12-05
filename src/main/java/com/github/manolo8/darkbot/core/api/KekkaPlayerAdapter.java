@@ -87,7 +87,11 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
 
     @Override
     public boolean useItem(Item item) {
-        return itemUseCaller.useItem(item);
+        if (direct.checkSignature(true, "23(sendRequest)(2626)1016221500",
+                18, direct.botInstaller.connectionManagerAddress.get()))
+            return itemUseCaller.useItem(item);
+
+        return false;
     }
 
     @Override
@@ -127,47 +131,6 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         window.setBlockingPatterns(result.toArray(new String[0]));
     }
 
-    private static class NativeMethodSignature {
-        private int index;
-        private long address;
-
-        private NativeMethodSignature(int index, long address) {
-            this.index = index;
-            this.address = address;
-        }
-
-        private void set(int index, long address) {
-            this.index = index;
-            this.address = address;
-        }
-
-        private boolean isInvalid() {
-            return this.index <= 2 || this.address <= 0xFFFF;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            NativeMethodSignature that = (NativeMethodSignature) o;
-
-            if (index != that.index) return false;
-            return address == that.address;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = index;
-            result = 31 * result + (int) (address ^ (address >>> 32));
-            return result;
-        }
-
-        private NativeMethodSignature copy() {
-            return new NativeMethodSignature(index, address);
-        }
-    }
-
     public static class InvalidNativeSignature extends Error {
         public InvalidNativeSignature(String message) {
             super(message);
@@ -178,8 +141,7 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         private final KekkaPlayer kekkaPlayer;
         private final BotInstaller botInstaller;
 
-        private final NativeMethodSignature cache = new NativeMethodSignature(0, 0);
-        private final Set<NativeMethodSignature> methodSignatureCache = new HashSet<>();
+        private final Set<String> methodSignatureCache = new HashSet<>();
 
         public KekkaPlayerDirectInteraction(KekkaPlayer KekkaPlayer, BotInstaller botInstaller) {
             this.kekkaPlayer = KekkaPlayer;
@@ -200,19 +162,10 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
 
         @Override
         public boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments) {
-            cache.set(index, arguments[0]);
-            if (cache.isInvalid()) return false;
-            if (!methodSignatureCache.contains(cache)) {
-                // -1 or -2 == memory read error, 0 == invalid signature, 1 == valid
-                int ret = kekkaPlayer.checkMethodSignature(cache.address, cache.index, checkName, signature);
+            if (checkSignature(checkName, signature, index, arguments[0]))
+                return callMethodAsync(index, arguments);
 
-                if (ret == 1) methodSignatureCache.add(cache.copy());
-                else {
-                    throw new InvalidNativeSignature("Invalid flash method signature! " + signature);
-                }
-            }
-
-            return callMethodAsync(index, arguments);
+            return false;
         }
 
         @Override
@@ -275,12 +228,14 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
 
         @Override
         public void moveShip(Locatable destination) {
-            kekkaPlayer.moveShip(botInstaller.screenManagerAddress.get(), (long) destination.getX(), (long) destination.getY(), 0);
+            if (checkGotoMethod())
+                kekkaPlayer.moveShip(botInstaller.screenManagerAddress.get(), (long) destination.getX(), (long) destination.getY(), 0);
         }
 
         @Override
         public void collectBox(Box box) {
-            kekkaPlayer.moveShip(botInstaller.screenManagerAddress.get(), (long) box.getX(), (long) box.getY(), box.address);
+            if (checkGotoMethod())
+                kekkaPlayer.moveShip(botInstaller.screenManagerAddress.get(), (long) box.getX(), (long) box.getY(), box.address);
         }
 
         @Override
@@ -288,17 +243,44 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
             return kekkaPlayer.callMethodSync(index, arguments);
         }
 
+        private boolean checkGotoMethod() {
+            String signature = "26(267726?2?)42407911700";
+            if (methodSignatureCache.contains(signature)) return true;
+
+            long eventManager = kekkaPlayer.readLong(botInstaller.screenManagerAddress.get(), 200);
+            return checkSignature(false, signature, 10, eventManager);
+        }
+
+        private boolean checkSignature(boolean checkName, String signature, int index, long object) {
+            if (index <= 2 || object <= 0xFFFF) return false;
+            if (!methodSignatureCache.contains(signature)) {
+                // -1 or -2 == memory read error, 0 == invalid signature, 1 == valid
+                int ret = kekkaPlayer.checkMethodSignature(object, index, checkName, signature);
+
+                if (ret == 1) methodSignatureCache.add(signature);
+                else {
+                    throw new InvalidNativeSignature("Invalid flash method signature! " + signature);
+                }
+            }
+
+            return true;
+        }
+
         private void sendSelectMapAsset(int entityId,
                                         int entityX, int entityY,
                                         int mouseX, int mouseY,
                                         int entityScreenX, int entityScreenY,
                                         int entityRadius) {
-            sendNotification(SELECT_MAP_ASSET,
-                    entityId,
-                    entityX, entityY,
-                    mouseX, mouseY,
-                    entityScreenX, entityScreenY,
-                    entityRadius);
+
+            String signature = "23(sendNotification)(261613?16?)32325411000";
+            if (methodSignatureCache.contains(signature) || checkSignature(true, signature,
+                    8, kekkaPlayer.readLong(botInstaller.screenManagerAddress.get(), 168)))
+                sendNotification(SELECT_MAP_ASSET,
+                        entityId,
+                        entityX, entityY,
+                        mouseX, mouseY,
+                        entityScreenX, entityScreenY,
+                        entityRadius);
         }
 
         private void sendNotification(String notification, int... args) {

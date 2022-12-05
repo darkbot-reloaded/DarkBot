@@ -513,7 +513,7 @@ public class GameAPIImpl<
 
     @Override
     public boolean useItem(Item item) {
-        return false;
+        throw new UnsupportedOperationException("useItem not implemented!");
     }
 
     @Override
