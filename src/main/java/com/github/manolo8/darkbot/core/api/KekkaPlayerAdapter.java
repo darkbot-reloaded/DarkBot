@@ -258,9 +258,9 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
                 int ret = kekkaPlayer.checkMethodSignature(object, index, checkName, signature);
 
                 if (ret == 1) methodSignatureCache.add(signature);
-                else {
+                else if (ret == 0) {
                     throw new InvalidNativeSignature("Invalid flash method signature! " + signature);
-                }
+                } else return false;
             }
 
             return true;
