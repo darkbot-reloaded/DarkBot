@@ -57,14 +57,14 @@ public class StatsManager implements Manager, StatsAPI {
 
     public void tick() {
         if (address == 0) return;
-        updateCredits(API.readMemoryDouble(address + 320));
-        updateUridium(API.readMemoryDouble(address + 328));
+        updateCredits(API.readMemoryDouble(address + 352));
+        updateUridium(API.readMemoryDouble(address + 360));
         //API.readMemoryDouble(address + 336); // Jackpot
-        updateExperience(API.readMemoryDouble(address + 344));
-        updateHonor(API.readMemoryDouble(address + 352));
+        updateExperience(API.readMemoryDouble(address + 376));
+        updateHonor(API.readMemoryDouble(address + 384));
 
-        deposit = API.readMemoryInt(API.readMemoryLong(address + 272) + 40);
-        depositTotal = API.readMemoryInt(API.readMemoryLong(address + 280) + 40);
+        deposit = API.readMemoryInt(API.readMemoryLong(address + 304) + 40);
+        depositTotal = API.readMemoryInt(API.readMemoryLong(address + 312) + 40);
 
         //currentBox = API.readMemoryLong(address + 0xE8);
 
