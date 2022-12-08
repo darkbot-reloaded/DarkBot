@@ -60,7 +60,7 @@ public class DynamicEntitiesDrawer implements Drawable {
         mg.setColor("boxes");
 
         for (Box box : boxes) {
-            drawEntity(mg, box, box.getInfo().shouldCollect());
+            drawBox(mg, box, box.getInfo().shouldCollect());
 
             if (mg.hasDisplayFlag(DisplayFlag.RESOURCE_NAMES))
                 mg.drawString(box, box.getTypeName(), -5, MapGraphics.StringAlign.MID);
@@ -71,14 +71,14 @@ public class DynamicEntitiesDrawer implements Drawable {
         mg.setColor("mines");
 
         for (Mine mine : mines)
-            drawEntity(mg, mine, true);
+            drawBox(mg, mine, true);
     }
 
     private void drawNpcs(MapGraphics mg) {
         mg.setColor("npcs");
 
         for (Npc npc : npcs)
-            drawEntity(mg, npc, npc.getInfo().getShouldKill());
+            drawShip(mg, npc, npc.getInfo().getShouldKill());
 
         pet.getLocatorNpcLoc()
                 .ifPresent(locator -> {
@@ -93,7 +93,7 @@ public class DynamicEntitiesDrawer implements Drawable {
         for (Player player : players) {
             boolean isEnemy = player.getEntityInfo().isEnemy();
             mg.setColor(isEnemy ? "enemies" : "allies");
-            drawEntity(mg, player, false);
+            drawShip(mg, player, false);
 
             if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
                 mg.drawString(player, player.getEntityInfo().getUsername(), -5, MapGraphics.StringAlign.MID);
@@ -103,7 +103,7 @@ public class DynamicEntitiesDrawer implements Drawable {
     private void drawPets(MapGraphics mg) {
         for (Pet pet : pets) {
             mg.setColor(pet.getEntityInfo().isEnemy() ? "enemies" : "allies");
-            drawEntity(mg, pet, false);
+            drawShip(mg, pet, false);
 
             if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
                 mg.drawString(pet, pet.getEntityInfo().getUsername(), -5, MapGraphics.StringAlign.MID);
@@ -136,11 +136,17 @@ public class DynamicEntitiesDrawer implements Drawable {
             }
 
             mg.setColor("target");
-            mg.drawRectCentered(target, 4, true);
+            mg.drawRectCentered(target, 5, true);
         }
     }
 
-    private void drawEntity(MapGraphics mg, Locatable pos, boolean fill) {
+    private void drawShip(MapGraphics mg, Locatable pos, boolean fill) {
+        if (!fill) mg.drawRect(mg.toScreenPointX(pos.getX()) - 2,
+                mg.toScreenPointY(pos.getY()) - 2, 4, 4, false);
+        else mg.drawRectCentered(pos, 5, true);
+    }
+
+    private void drawBox(MapGraphics mg, Locatable pos, boolean fill) {
         if (!fill) mg.drawRect(mg.toScreenPointX(pos.getX()) - 2,
                 mg.toScreenPointY(pos.getY()) - 2, 3, 3, false);
         else mg.drawRectCentered(pos, 4, true);
