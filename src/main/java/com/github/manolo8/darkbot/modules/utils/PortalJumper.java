@@ -11,7 +11,7 @@ public class PortalJumper {
     private final eu.darkbot.shared.utils.PortalJumper jumper;
 
     public PortalJumper(HeroManager hero) {
-        this.jumper = new eu.darkbot.shared.utils.PortalJumper(hero.drive, hero.main.guiManager.group);
+        this.jumper = new eu.darkbot.shared.utils.PortalJumper(hero.main.pluginAPI);
     }
 
     public void reset() {
