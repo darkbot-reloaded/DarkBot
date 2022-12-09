@@ -66,6 +66,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
     }
 
     public void reset() {
+        this.addressInfo = 0;
         this.address = 0;
         this.visible = false;
         this.height = 0;
@@ -92,12 +93,32 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
         API.mouseMove(x + plusX, y + plusY);
     }
 
+    public void moveWindow(int newX, int newY) {
+        API.mouseDown(x + 50, y + 10);
+        API.mouseMove(newX + 50, newY + 10);
+        API.mouseUp(newX + 50, newY + 10);
+    }
+
+    private boolean changeCloseClick;
     public boolean show(boolean value) {
         if (trySetShowing(value)) {
-            if (minimized.address != 0) API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
+            toggleVisibility();
             return false;
         }
         return value == visible && isAnimationDone();
+    }
+
+    private boolean clickMinimized() {
+        if (minimized.address != 0) {
+            API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
+            return true;
+        }
+
+        return false;
+    }
+
+    public void toggleVisibility() {
+        API.callMethodChecked(true, "23(toggleVisibility)(2626?)1116321600", 183, address);
     }
 
     /**

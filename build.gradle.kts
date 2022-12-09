@@ -42,7 +42,7 @@ publishing {
 }
 
 dependencies {
-    val apiVersion = "0.5.2"
+    val apiVersion = "0.5.4"
 
     // use this if you want to use local(mavenLocal) darkbot API
     //implementation("eu.darkbot", "darkbot-impl", apiVersion)
@@ -51,7 +51,7 @@ dependencies {
     api("com.miglayout", "miglayout", "3.7.4")
     api("org.jetbrains", "annotations", "23.0.0")
 
-    implementation("com.formdev", "flatlaf", "0.36")
+    implementation("com.formdev", "flatlaf", "2.5")
     implementation("org.jgrapht", "jgrapht-core", "1.3.0")
     implementation("org.mvel", "mvel2", "2.4.4.Final")
 
@@ -65,6 +65,12 @@ tasks.wrapper {
 
     // without gradle javadocs and sources
     distributionType = Wrapper.DistributionType.BIN
+}
+
+tasks.jar {
+    manifest {
+        attributes["SplashScreen-Image"] = "icon.png"
+    }
 }
 
 tasks.register<proguard.gradle.ProGuardTask>("proguard") {

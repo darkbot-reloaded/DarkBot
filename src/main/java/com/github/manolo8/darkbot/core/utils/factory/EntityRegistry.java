@@ -52,7 +52,7 @@ public class EntityRegistry {
         entity.added(main);
         entity.update();
 
-        if (main.isRunning()) entity.clickable.setRadius(0);
+        //if (main.isRunning()) entity.clickable.setRadius(0);
 
         if (type instanceof EntityFactory)
             listeners.getOrDefault(type, fallback).send(entity);

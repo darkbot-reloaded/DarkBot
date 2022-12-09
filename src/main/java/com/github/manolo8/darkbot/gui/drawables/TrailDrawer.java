@@ -51,6 +51,7 @@ public class TrailDrawer implements Drawable {
 
         if (positions.isEmpty()) return;
 
+        Stroke stroke = mg.getGraphics2D().getStroke();
         mg.getGraphics2D().setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
         List<List<Location>> paths = Line.getSmoothedPaths(positions.values());
 
@@ -63,6 +64,6 @@ public class TrailDrawer implements Drawable {
                 last = point;
             }
         }
-        mg.getGraphics2D().setStroke(new BasicStroke());
+        mg.getGraphics2D().setStroke(stroke);
     }
 }

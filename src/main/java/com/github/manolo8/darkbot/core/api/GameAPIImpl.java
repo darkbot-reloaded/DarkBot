@@ -1,20 +1,27 @@
 package com.github.manolo8.darkbot.core.api;
 
-import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.gui.utils.PidSelector;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.utils.LibUtils;
+import com.github.manolo8.darkbot.utils.OSUtil;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.OreAPI;
+import eu.darkbot.util.Timer;
+import eu.darkbot.utils.KekkaPlayerProxyServer;
+import org.intellij.lang.annotations.Language;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -54,7 +61,12 @@ public class GameAPIImpl<
     protected boolean initiallyShown;
     protected boolean autoHidden = false;
 
+    private int refreshCount = 0;
     protected long lastFailedLogin;
+
+    protected Timer clearRamTimer = Timer.get(5 * Time.MINUTE);
+
+    private final MapManager mapManager;
 
     public GameAPIImpl(StartupParams params,
                        W window, H handler, M memory, E extraMemoryReader, I interaction, D direct,
@@ -82,6 +94,8 @@ public class GameAPIImpl<
         this.loginData = hasCapability(GameAPI.Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
         this.initiallyShown = hasCapability(GameAPI.Capability.INITIALLY_SHOWN) && !params.getAutoHide();
 
+        this.mapManager = HeroManager.instance.main.mapManager;
+
         ConfigAPI config = HeroManager.instance.main.configHandler;
         if (hasCapability(GameAPI.Capability.DIRECT_LIMIT_FPS)) {
             ConfigSetting<Integer> maxFps = config.requireConfig("bot_settings.api_config.max_fps");
@@ -91,6 +105,20 @@ public class GameAPIImpl<
             setMaxFps(maxFps.getValue());
         } else {
             this.fpsLimitListener = null;
+        }
+
+        if (hasCapability(GameAPI.Capability.PROXY)) {
+            ConfigSetting<Boolean> useProxy = config.requireConfig("bot_settings.api_config.use_proxy");
+            if (useProxy.getValue() || OSUtil.isWindows7OrLess())
+                new KekkaPlayerProxyServer(handler).start();
+        }
+
+        if (hasCapability(GameAPI.Capability.HANDLER_FLASH_PATH) && OSUtil.isWindows()) {
+            setFlashOcxPath(LibUtils.getFlashOcxPath().toString());
+        }
+
+        if (hasCapability(GameAPI.Capability.HANDLER_MIN_CLIENT_SIZE)) {
+            setMinClientSize(800, 600); // API window can be smaller, but game client cannot
         }
     }
 
@@ -136,6 +164,10 @@ public class GameAPIImpl<
         }
     }
 
+    @Override
+    public int getRefreshCount() {
+        return refreshCount;
+    }
     public boolean hasCapability(GameAPI.Capability capability) {
         return capabilities.contains(capability);
     }
@@ -153,6 +185,9 @@ public class GameAPIImpl<
         extraMemoryReader.tick();
         interaction.tick();
         direct.tick();
+
+        if (hasCapability(GameAPI.Capability.HANDLER_CLEAR_RAM) && clearRamTimer.tryActivate())
+            emptyWorkingSet();
     }
 
     @Override
@@ -185,7 +220,7 @@ public class GameAPIImpl<
 
             window.openProcess(this.pid);
         } else if (hasCapability(GameAPI.Capability.CREATE_WINDOW_THREAD)) {
-            Thread apiThread = new Thread(window::createWindow);
+            Thread apiThread = new Thread(window::createWindow, "API thread");
             apiThread.setDaemon(true);
             apiThread.start();
         } else {
@@ -244,9 +279,14 @@ public class GameAPIImpl<
         interaction.mouseClick(x, y);
     }
 
+    private char lastChar;
+    private final Timer keyClickTimer = Timer.get(500);
     @Override
-    public void rawKeyboardClick(char btn) {
-        interaction.keyClick(btn);
+    public void rawKeyboardClick(char btn, boolean deduplicate) {
+        if (!deduplicate || (lastChar != btn || keyClickTimer.isInactive())) {
+            interaction.keyClick(lastChar = btn);
+            keyClickTimer.activate();
+        }
     }
 
     @Override
@@ -395,6 +435,8 @@ public class GameAPIImpl<
             reload();
             setData();
         }
+
+        refreshCount++;
         handler.reload();
 
         extraMemoryReader.resetCache();
@@ -408,7 +450,7 @@ public class GameAPIImpl<
 
     @Override
     public void setMaxFps(int maxFps) {
-        direct.setMaxFps(maxFps);
+        direct.setMaxFps(HeroManager.instance.main.isRunning() ? maxFps : 0);
     }
 
     @Override
@@ -418,18 +460,29 @@ public class GameAPIImpl<
 
     @Override
     public void selectEntity(Entity entity) {
-        if (!entity.clickable.isInvalid())
-            direct.selectEntity(entity.clickable.address, BotInstaller.SCRIPT_OBJECT_VTABLE);
+        if (mapManager.mapClick(true)) {
+            if (entity instanceof Lockable) {
+                //assuming that selectEntity selects only ships & is supported by every API
+                //actually this should be called on every entity with LockType trait
+                direct.selectEntity(entity);
+            } else {
+                entity.clickable.click();
+            }
+        }
     }
 
     @Override
     public void moveShip(Locatable destination) {
-        direct.moveShip(destination);
+        if (mapManager.mapClick(false)) {
+            direct.moveShip(destination);
+        }
     }
 
     @Override
     public void collectBox(Box box) {
-        direct.collectBox(box);
+        if (mapManager.mapClick(true)) {
+            direct.collectBox(box);
+        }
     }
 
     @Override
@@ -442,4 +495,88 @@ public class GameAPIImpl<
         return direct.callMethod(index, arguments);
     }
 
+    @Override
+    public boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments) {
+        return direct.callMethodChecked(checkName, signature, index, arguments);
+    }
+
+    @Override
+    public boolean callMethodAsync(int index, long... arguments) {
+        return direct.callMethodAsync(index, arguments);
+    }
+
+    @Override
+    public boolean useItem(Item item) {
+        throw new UnsupportedOperationException("useItem not implemented!");
+    }
+
+    @Override
+    public boolean isUseItemSupported() {
+        return false;
+    }
+
+    @Override
+    public void postActions(long... actions) {
+        throw new UnsupportedOperationException("postActions not implemented!");
+    }
+
+    @Override
+    public void pasteText(String text, long... actions) {
+        throw new UnsupportedOperationException("pasteText not implemented!");
+    }
+
+    @Override
+    public void clearCache(@Language("RegExp") String pattern) {
+        handler.clearCache(pattern);
+    }
+
+    @Override
+    public void emptyWorkingSet() {
+        handler.emptyWorkingSet();
+    }
+
+    @Override
+    public void setLocalProxy(int port) {
+        handler.setLocalProxy(port);
+    }
+
+    @Override
+    public void setPosition(int x, int y) {
+        handler.setPosition(x, y);
+    }
+
+    @Override
+    public void setFlashOcxPath(String path) {
+        handler.setFlashOcxPath(path);
+    }
+
+    @Override
+    public void setUserInput(boolean enable) {
+        handler.setUserInput(enable);
+    }
+
+    @Override
+    public void setClientSize(int width, int height) {
+        handler.setClientSize(width, height);
+    }
+
+    @Override
+    public void setMinClientSize(int width, int height) {
+        handler.setMinClientSize(width, height);
+    }
+
+    @Override
+    public void setTransparency(int transparency) {
+        handler.setTransparency(transparency);
+    }
+
+    @Override
+    public void setVolume(int volume) {
+        handler.setVolume(volume);
+    }
+
+    @Override
+    public void setQuality(GameAPI.Handler.GameQuality quality) {
+        handler.setQuality(quality.ordinal());
+    }
 }

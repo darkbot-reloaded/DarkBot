@@ -2,22 +2,20 @@ package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
-import com.github.manolo8.darkbot.utils.LibSetup;
+import com.github.manolo8.darkbot.utils.LibUtils;
 import com.github.manolo8.darkbot.utils.http.Method;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FlashRunnerTask extends Thread {
-    private static final Path RUNNER_PATH = Paths.get("lib", "KekkaRunner.exe");
     private static final Pattern PARAMS_PATTERN = Pattern.compile("src\":.\"([^\"]+).*width\":.(\\d+).*height\":.(\\d+).*(cdn[^}]+)");
 
-    private static boolean LIB_CHECKED = false;
+    private static Path RUNNER_PATH = null;
 
     private final String name;
     private final Main main;
@@ -40,10 +38,8 @@ public class FlashRunnerTask extends Thread {
     public void run() {
         boolean result = false;
 
-        if (!LIB_CHECKED) {
-            LibSetup.downloadLib(RUNNER_PATH.getFileName().toString());
-            LIB_CHECKED = true;
-        }
+        if (RUNNER_PATH == null)
+            RUNNER_PATH = LibUtils.getSharedLibrary("KekkaRunner.exe");
 
         if (backpageManager.isInstanceValid() && Files.exists(RUNNER_PATH)) {
             try {
@@ -66,7 +62,7 @@ public class FlashRunnerTask extends Thread {
                             "--width", width,
                             "--height", height,
                             "--name", name + " | " + main.hero.playerInfo.getUsername(),
-                            //todo add flash path
+                            "--flash", LibUtils.getFlashOcxPath().toString(),
                             "--vars", vars) //vars must be last, ProcessBuilder weirdly handles space?
                             .start().waitFor();
 

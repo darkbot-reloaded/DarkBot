@@ -117,6 +117,11 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
     }
 
     @Override
+    public boolean isEmpty() {
+        return size() <= 0;
+    }
+
+    @Override
     public double getX() {
         return minX;
     }
@@ -134,6 +139,14 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
     @Override
     public double getY2() {
         return maxY;
+    }
+
+    public double getCenterX() {
+        return (minX + maxX) / 2;
+    }
+
+    public double getCenterY() {
+        return (minX + maxX) / 2;
     }
 
     @Override

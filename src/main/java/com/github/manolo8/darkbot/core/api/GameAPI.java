@@ -1,9 +1,11 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.core.entities.Box;
+import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
+import org.intellij.lang.annotations.Language;
 
 import java.util.function.LongPredicate;
 
@@ -52,6 +54,23 @@ public interface GameAPI {
         void setVisible(boolean visible);
 
         void setMinimized(boolean minimized);
+
+        default void clearCache(@Language("RegExp") String pattern) {}
+        default void emptyWorkingSet() {}
+        default void setLocalProxy(int port) {}
+        default void setPosition(int x, int y) {}
+        default void setFlashOcxPath(String path) {}
+        default void setUserInput(boolean enableInput) {}
+        default void setClientSize(int width, int height) {}
+        default void setMinClientSize(int width, int height) {}
+        default void setTransparency(int transparency) {}
+        default void setVolume(int volume) {} // 0 - 100
+        // LOW = 0, MEDIUM = 1, HIGH = 2, BEST = 3, AUTO_LOW = 4, AUTO_HIGH = 5
+        default void setQuality(int quality) {}
+
+        enum GameQuality {
+            LOW, MEDIUM, HIGH, BEST, AUTO_LOW, AUTO_HIGH;
+        }
     }
 
     interface Memory extends Base {
@@ -132,13 +151,27 @@ public interface GameAPI {
 
         ALL_KEYBINDS_SUPPORT, // Support for key clicks like "ctrl"
 
+        PROXY,
+        WINDOW_POSITION,
+
+        HANDLER_CLEAR_CACHE,
+        HANDLER_CLEAR_RAM,
+        HANDLER_GAME_QUALITY,
+        HANDLER_VOLUME,
+        HANDLER_TRANSPARENCY,
+        HANDLER_CLIENT_SIZE,
+        HANDLER_MIN_CLIENT_SIZE,
+        HANDLER_FLASH_PATH,
+
+        DIRECT_USE_ITEM,
         DIRECT_LIMIT_FPS,
         DIRECT_ENTITY_LOCK,
         DIRECT_ENTITY_SELECT,
         DIRECT_MOVE_SHIP,
         DIRECT_COLLECT_BOX,
         DIRECT_REFINE,
-        DIRECT_CALL_METHOD;
+        DIRECT_CALL_METHOD,
+        DIRECT_POST_ACTIONS
     }
 
     interface DirectInteraction extends Base {
@@ -146,7 +179,7 @@ public interface GameAPI {
 
         void lockEntity(int id);
 
-        void selectEntity(long addr, long vtable);
+        void selectEntity(Entity entity);
 
         void moveShip(Locatable destination);
 
@@ -155,6 +188,10 @@ public interface GameAPI {
         void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount);
 
         long callMethod(int index, long... arguments);
+
+        default boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments) {
+            throw new UnsupportedOperationException();
+        }
 
         default boolean callMethodAsync(int index, long... arguments) {
             throw new UnsupportedOperationException();
@@ -349,7 +386,7 @@ public interface GameAPI {
         }
 
         @Override
-        public void selectEntity(long addr, long vtable) {
+        public void selectEntity(Entity entity) {
             throw new UnsupportedOperationException();
         }
 

@@ -29,7 +29,7 @@ public class VisibilityButton extends TitleBarToggleButton<JFrame> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!SwingUtilities.isRightMouseButton(e)) return;
-                new ApiSettingsPanel(main.config.BOT_SETTINGS.API_CONFIG, VisibilityButton.this);
+                new ApiSettingsPanel(main, main.config.BOT_SETTINGS.API_CONFIG, VisibilityButton.this);
             }
         });
     }

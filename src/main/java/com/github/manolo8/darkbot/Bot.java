@@ -11,6 +11,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.security.AllPermission;
+import java.security.CodeSource;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
@@ -48,6 +49,10 @@ public class Bot {
         checkJavaVersion(params);
 
         System.out.println("Starting DarkBot " + Main.VERSION);
+        //noinspection ThrowableNotThrown
+        Runtime.getRuntime().addShutdownHook(new Thread(() ->
+                new Throwable("DarkBot shutdown peacefully!").printStackTrace()));
+
         SwingUtilities.invokeLater(() -> new Main(params));
     }
 
@@ -75,6 +80,11 @@ public class Bot {
                 Permissions permissions = new Permissions();
                 permissions.add(new AllPermission());
                 return permissions;
+            }
+
+            @Override
+            public PermissionCollection getPermissions(CodeSource codesource) {
+                return new Permissions();
             }
         });
         System.setSecurityManager(new SecurityManager() {

@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.utils;
 
-
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.google.gson.reflect.TypeToken;
@@ -49,12 +48,24 @@ public class LibSetup {
         }
     }
 
+    private static Lib getLib(String path) {
+        return libraries != null ? libraries.get(path) : null;
+    }
+
+    public static boolean downloadLib(Path path) {
+        return downloadLib(path.getFileName().toString(), path);
+    }
+
     public static boolean downloadLib(String path) {
-        return downloadLib(libraries.get(path), null);
+        return downloadLib(getLib(path));
     }
 
     public static boolean downloadLib(String path, @Nullable Path libPath) {
-        return downloadLib(libraries.get(path), libPath);
+        return downloadLib(getLib(path), libPath);
+    }
+
+    public static boolean downloadLib(Lib lib) {
+        return downloadLib(lib, null);
     }
 
     public static boolean downloadLib(Lib lib, @Nullable Path libPath) {
@@ -72,13 +83,13 @@ public class LibSetup {
         } else {
             FileUtils.ensureDirectoryExists(libPath.getParent());
         }
-        System.out.println("Downloading missing or outdated library file: " + lib.path);
+        System.out.println("Downloading missing or outdated library file: " + libPath);
 
         try (InputStream is = new URL(lib.download).openConnection().getInputStream()) {
-            Files.copy(is, Paths.get(lib.path), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(is, libPath, StandardCopyOption.REPLACE_EXISTING);
             return true;
         } catch (IOException e) {
-            System.err.println("Failed to download library file: " + lib.path + " from " + lib.download);
+            System.err.println("Failed to download library file: " + libPath + " from " + lib.download);
             e.printStackTrace();
         }
         return false;

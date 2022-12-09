@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
+import com.github.manolo8.darkbot.core.entities.Entity;
 import eu.darkbot.api.API;
 import eu.darkbot.api.DarkHook;
 import eu.darkbot.api.PluginAPI;
@@ -102,7 +103,7 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
     }
 
     @Override
-    public void selectEntity(long addr, long vtable) {
+    public void selectEntity(Entity entity) {
         throw new UnsupportedOperationException();
     }
 

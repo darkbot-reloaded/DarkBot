@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.InvalidNativeSignature;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.FacadeManager;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
@@ -57,7 +58,7 @@ import java.util.Objects;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 110");
+    public static final Version VERSION      = new Version("1.13.17 beta 111 alpha 7");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -195,7 +196,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
             avgTick = ((avgTick * 9) + (System.currentTimeMillis() - time)) / 10;
 
-            Time.sleepMax(time, botInstaller.invalid.get() ? 1000 :
+            Time.sleepMax(time, botInstaller.invalid.get() ? 250 :
                     Math.max(config.BOT_SETTINGS.OTHER.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
         }
     }
@@ -271,6 +272,9 @@ public class Main extends Thread implements PluginListener, BotAPI {
             try {
                 if (running) newModule.onTickModule();
                 else newModule.onTickStopped();
+            } catch (InvalidNativeSignature e) {
+                e.printStackTrace();
+                setRunning(false);
             } catch (Throwable e) {
                 FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(newModule);
                 if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
@@ -279,6 +283,9 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 try {
                     if (running) behaviour.onTickBehavior();
                     else behaviour.onStoppedBehavior();
+                } catch (InvalidNativeSignature e) {
+                    e.printStackTrace();
+                    setRunning(false);
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
@@ -355,6 +362,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         if (this.running == running) return;
         status.send(running);
         this.running = running;
+        API.setUserInput(!running);
     }
 
     private void onRunningToggle(boolean running) {
@@ -365,9 +373,6 @@ public class Main extends Thread implements PluginListener, BotAPI {
         }
 
         eventBroker.sendEvent(new RunningToggleEvent(running));
-
-        if (running) hero.pet.clickable.setRadius(0);
-        else hero.pet.clickable.reset();
     }
 
     public void setBehaviours(List<Behavior> behaviours) {

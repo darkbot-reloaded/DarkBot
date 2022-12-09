@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.drawables;
 
+import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
@@ -42,14 +43,15 @@ public class ConstantEntitiesDrawer implements Drawable {
 
     public void drawBattleStations(MapGraphics mg) {
         for (BattleStation bs : battleStations) {
-            if (bs.getHullId() == 0) mg.setColor("meteroid");
+            if (!(bs instanceof BattleStation.Module) && bs.getHullId() == 0) mg.setColor("meteroid");
             else if (bs.getEntityInfo().isEnemy()) mg.setColor("enemies");
             else mg.setColor("allies");
 
-            if (bs.getHullId() >= 0 && bs.getHullId() < 255)
+            if (bs instanceof BattleStation.Module) {
+                mg.drawRectCentered(bs, 3, false);
+            } else {
                 mg.drawOvalCentered(bs, 11, 9, true);
-
-            else mg.drawRectCentered(bs, 3, false);
+            }
         }
     }
 

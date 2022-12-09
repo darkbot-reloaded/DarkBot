@@ -126,19 +126,8 @@ public class CollectorModule implements Module {
     private void collectBox() {
         double distance = hero.locationInfo.distance(current);
 
-
-        boolean direct = API.hasCapability(GameAPI.Capability.DIRECT_COLLECT_BOX);
-        if (distance < (direct ? 800 : 250)) {
-            drive.stop(false);
-            if (direct) {
-                API.collectBox(current);
-            } else {
-                current.clickable.setRadius(800);
-                drive.clickCenter(true, current.locationInfo.now);
-                current.clickable.setRadius(0);
-            }
-
-            current.setCollected();
+        if (distance < 250) {
+            current.tryCollect();
 
             waiting = System.currentTimeMillis() + current.boxInfo.waitTime
                     + Math.min(1_000, current.getRetries() * 100) // Add 100ms per retry, max 1 second
