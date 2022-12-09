@@ -83,8 +83,7 @@ public class LegacyFlashPatcher {
                 REG_SVR = Paths.get(System.getenv("WINDIR"), "SysWOW64", "regsvr32");
 
         public boolean needsFix() {
-            String ocxName = "DarkFlash" + (OSUtil.isWindows7OrLess() ? "-W7" : "") + ".ocx";
-            return LibSetup.downloadLib(ocxName, FLASH_OCX);
+            return LibSetup.downloadLib("DarkFlash.ocx", LIB_FLASH_OCX);
         }
 
         public List<String> script() {

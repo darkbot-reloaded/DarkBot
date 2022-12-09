@@ -1,14 +1,21 @@
 package com.github.manolo8.darkbot.config.types.suppliers;
 
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.core.api.*;
+import com.github.manolo8.darkbot.core.api.BackpageAdapter;
+import com.github.manolo8.darkbot.core.api.DarkMemAdapter;
+import com.github.manolo8.darkbot.core.api.KekkaPlayerAdapter;
+import com.github.manolo8.darkbot.core.api.NoopAPIAdapter;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import eu.darkbot.api.config.annotations.Configuration;
 
+import java.lang.reflect.Type;
 
 @Configuration("browser_api")
 public enum BrowserApi {
-    DARK_BOAT(KekkaPlayerAdapter.class),
-    //DARK_BOAT_HOOK(KekkaPlayerHookAdapter.class),
+    KEKKA_PLAYER(KekkaPlayerAdapter.class),
     BACKPAGE_ONLY(BackpageAdapter.class),
     NO_OP_API(NoopAPIAdapter.class),
     DARK_MEM_API(DarkMemAdapter.class);
@@ -18,6 +25,18 @@ public enum BrowserApi {
 
     BrowserApi(Class<? extends IDarkBotAPI> clazz) {
         this.clazz = clazz;
+    }
+
+    public static class BrowserApiDeserializer implements JsonDeserializer<BrowserApi> {
+
+        @Override
+        public BrowserApi deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            String s = json.getAsString();
+            if (s.startsWith("DARK_BOAT"))
+                return KEKKA_PLAYER;
+
+            return BrowserApi.valueOf(s);
+        }
     }
 
 }

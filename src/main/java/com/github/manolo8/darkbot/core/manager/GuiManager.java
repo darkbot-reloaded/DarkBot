@@ -73,8 +73,8 @@ public class GuiManager implements Manager, GameScreenAPI {
     private enum LoadStatus {
         WAITING(gm -> gm.main.hero.address != 0 && !gm.connecting.isVisible()),
         AFTER_LOGIN(gm -> {
-            API.directKeyClick(gm.main.config.LOOT.AMMO_KEY);
-            API.directKeyClick(gm.main.config.LOOT.AMMO_KEY);
+            API.rawKeyboardClick(gm.main.config.LOOT.AMMO_KEY, false);
+            API.rawKeyboardClick(gm.main.config.LOOT.AMMO_KEY, false);
             gm.loggedInTimer.activate();
             return true;
         }),

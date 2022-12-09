@@ -51,12 +51,6 @@ public class ConstantEntitiesDrawer implements Drawable {
                 mg.drawRectCentered(bs, 3, false);
             } else {
                 mg.drawOvalCentered(bs, 11, 9, true);
-
-
-//                if (bs.hasEffect(EffectManager.Effect.DEFLECTOR_SHIELD.getId())) {
-//                    mg.setColor("meteroid");
-//                    mg.drawOvalCentered(bs, 30, 25, false);
-//                }
             }
         }
     }

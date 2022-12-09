@@ -131,12 +131,6 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         window.setBlockingPatterns(result.toArray(new String[0]));
     }
 
-    public static class InvalidNativeSignature extends Error {
-        public InvalidNativeSignature(String message) {
-            super(message);
-        }
-    }
-
     public static class KekkaPlayerDirectInteraction extends GameAPI.NoOpDirectInteraction {
         private final KekkaPlayer kekkaPlayer;
         private final BotInstaller botInstaller;

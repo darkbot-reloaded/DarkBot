@@ -24,33 +24,15 @@ public class Clickable extends Updatable {
     }
 
     @Deprecated
-    public void toggle(boolean clickable) {
-//        if (clickable) reset();
-//        else setRadius(0);
-    }
-
-    @Deprecated
     public void setPriority(int priority) {
-//        if (this.priority == priority || isInvalid()) return;
-//        if (defPriority == -1) this.defPriority = this.priority;
-//        API.replaceInt(address + 44, this.priority, this.priority = priority);
     }
 
     @Deprecated
     public void setRadius(int radius) {
-//        if (this.radius == radius || isInvalid()) return;
-//        if (defRadius == -1) this.defRadius = this.radius;
-//        if (defRadius <= 0) return;
-//        API.replaceInt(address + 40, this.radius, this.radius = radius);
     }
 
     @Deprecated
     public void reset() {
-//        if (isInvalid()) return;
-//        if (defRadius != radius)
-//            API.replaceInt(address + 40, radius, radius = defRadius);
-//        if (defPriority != priority)
-//            API.replaceInt(address + 44, priority, priority = defPriority);
     }
 
     /**
@@ -67,23 +49,6 @@ public class Clickable extends Updatable {
         this.radius = this.defRadius = API.readMemoryInt(address + 40);
         this.priority = this.defPriority = API.readMemoryInt(address + 44);
         this.enabled = API.readMemoryBoolean(address, 64, 32);
-//        int oldRad = radius, oldPri = priority;
-//        int newRadius = API.readMemoryInt(address + 40);
-//
-//        this.priority = API.readMemoryInt(address + 44);
-//        this.enabled = API.readMemoryBoolean(address, 64, 32);
-//
-//        if (newRadius < 1000) {
-//            radius = newRadius;
-//            if (radius != oldRad) {
-//                if (oldRad != defRadius) defRadius = radius;
-//                setRadius(oldRad);
-//            }
-//        }
-//        if (priority != oldPri) {
-//            if (oldPri != defPriority) defPriority = priority;
-//            setPriority(oldPri);
-//        }
     }
 
     @Override

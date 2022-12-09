@@ -282,17 +282,11 @@ public class GameAPIImpl<
     private char lastChar;
     private final Timer keyClickTimer = Timer.get(500);
     @Override
-    public void rawKeyboardClick(char btn) {
-        if (lastChar != btn || keyClickTimer.isInactive()) {
+    public void rawKeyboardClick(char btn, boolean deduplicate) {
+        if (!deduplicate || (lastChar != btn || keyClickTimer.isInactive())) {
             interaction.keyClick(lastChar = btn);
             keyClickTimer.activate();
         }
-    }
-
-    @Override
-    public void directKeyClick(Character character) {
-        if (character != null)
-            interaction.keyClick(character);
     }
 
     @Override

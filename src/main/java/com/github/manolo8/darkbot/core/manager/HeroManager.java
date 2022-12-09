@@ -136,11 +136,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
                     .filter(entity -> entity.address == targetPtr)
                     .findAny().orElse(null);
 
-        if (lastTarget != target) {
-            setLocalTarget(target);
-            if (target == null)
-                System.out.println("Set local target to null!");
-        }
+        if (lastTarget != target) setLocalTarget(target);
     }
 
     @Override
@@ -226,13 +222,10 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         if (this.config == config) {
             if (this.formationChar == formation) return true;
 
-            if (formation != null) {
-                SelectableItem.Formation f = Optional.ofNullable(items.getItem(formation, ItemCategory.DRONE_FORMATIONS))
+            if (formation != null)
+                return Optional.ofNullable(items.getItem(formation, ItemCategory.DRONE_FORMATIONS))
                         .map(i -> i.getAs(SelectableItem.Formation.class))
-                        .orElse(null);
-
-                return getFormation() == f;
-            }
+                        .map(f -> f == getFormation()).orElse(false);
         }
 
         return false;
@@ -248,7 +241,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     }
 
     private void setConfigAndFormation(ShipMode mode) {
-        if (mode.getConfiguration() != null && mode.getConfiguration() == Configuration.UNKNOWN)
+        if (mode.getConfiguration() == Configuration.UNKNOWN)
             throw new IllegalStateException("Passed UNKNOWN configuration! Use only FIRST or SECOND, " +
                     "last supplier used: " + shipModeHandler.getLastUsedSupplier().getClass());
 

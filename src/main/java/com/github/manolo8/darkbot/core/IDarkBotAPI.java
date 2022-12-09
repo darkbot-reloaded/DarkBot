@@ -35,10 +35,12 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     default void keyboardClick(char btn) {
         rawKeyboardClick(Character.toUpperCase(btn));
     }
-    @Deprecated
-    void directKeyClick(Character character);
 
-    void rawKeyboardClick(char btn);
+    void rawKeyboardClick(char btn, boolean deduplicate);
+
+    default void rawKeyboardClick(char btn) {
+        rawKeyboardClick(btn, true);
+    }
 
     default void keyboardClick(Character ch) {
         if (ch != null) rawKeyboardClick(ch);
@@ -138,8 +140,11 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments);
     boolean callMethodAsync(int index, long... arguments);
     boolean useItem(Item item);
+
+    // checks if useItem() is supported and ready to use
     boolean isUseItemSupported();
 
+    // post actions (mouse clicks, key clicks or any other window message) see NativeAction
     void postActions(long... actions);
     void pasteText(String text, long... actions);
 

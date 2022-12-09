@@ -173,10 +173,6 @@ public class EntityList extends Updatable implements EntitiesAPI {
     }
 
     private void refreshRadius(boolean running) {
-        synchronized (Main.UPDATE_LOCKER) {
-            main.hero.pet.clickable.toggle(!running);
-            doInEachEntity(entity -> entity.clickable.toggle(!running));
-        }
     }
 
     private Location lastLocatorLocation = new Location();
@@ -193,12 +189,11 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
             lastLocatorMatch.activate();
             npcs.remove(fakeNpc);
-        }
-        else {
+        } else {
             if (location == null || (lastLocatorLocation != null
                     && lastLocatorLocation.distance(location) < 100 && lastLocatorMatch.isActive()))
                 return;
-            
+
             if (!npcs.contains(fakeNpc)) npcs.add(fakeNpc);
         }
     }

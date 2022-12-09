@@ -97,8 +97,15 @@ public class LogUtils {
         @Override
         public void println(String string) {
             StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            String path = null;
+            if (stack.length > 2) {
+                path = stack[2].toString();
+                path = path.replace("com.github.manolo8.darkbot", "db");
+                path = path.replace("eu.darkbot.api", "api");
+            }
+
             string = "[" + LocalDateTime.now().format(LOG_DATE)
-                    + (stack.length > 2 ? " | " + stack[2] : "")
+                    + (path != null ? " | " + path : "")
                     + "] " + string;
 
             super.println(string);
