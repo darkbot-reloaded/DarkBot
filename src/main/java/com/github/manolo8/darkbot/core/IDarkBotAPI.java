@@ -31,24 +31,32 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     void mouseUp(int x, int y);
     void mouseClick(int x, int y);
 
+    // Left for legacy purposes who may still use it, prefer keyboardClick(Character)
     @Deprecated
     default void keyboardClick(char btn) {
-        rawKeyboardClick(Character.toUpperCase(btn));
+        rawKeyboardClick(Character.toUpperCase(btn), true);
     }
 
-    void rawKeyboardClick(char btn, boolean deduplicate);
-
+    // Left for legacy purposes who may still use it, prefer keyboardClick(Character)
+    @Deprecated
     default void rawKeyboardClick(char btn) {
         rawKeyboardClick(btn, true);
     }
 
+    // Internal, prefer using keyboardClick instead
+    void rawKeyboardClick(char btn, boolean deduplicate);
+
     default void keyboardClick(Character ch) {
-        if (ch != null) rawKeyboardClick(ch);
+        keyboardClick(ch, true);
+    }
+
+    default void keyboardClick(Character ch, boolean deduplicate) {
+        if (ch != null) rawKeyboardClick(ch, deduplicate);
     }
 
     @Override
     default void keyClick(int keyCode) {
-        rawKeyboardClick((char) keyCode);
+        rawKeyboardClick((char) keyCode, true);
     }
 
     void sendText(String string);

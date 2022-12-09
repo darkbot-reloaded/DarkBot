@@ -8,7 +8,6 @@ import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.MouseManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
-import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.Locatable;
@@ -53,7 +52,7 @@ public class Drive implements MovementAPI {
     public void checkMove() {
         this.heroLoc = main.hero.locationInfo;
 
-        // Path-finder changed and bot is already traveling, re-create route
+        // Pathfinder changed and bot is already traveling, re-create route
         if (endLoc != null && pathFinder.changed() && tempDest == null) tempDest = endLoc;
 
         boolean newPath = tempDest != null;
@@ -155,6 +154,7 @@ public class Drive implements MovementAPI {
         if (!paths.isEmpty()) paths = new LinkedList<>();
     }
 
+    @Deprecated
     public void clickCenter(boolean single, Location aim) {
         mouse.clickCenter(single, aim);
     }
@@ -228,7 +228,7 @@ public class Drive implements MovementAPI {
     }
 
     @Override
-    public void jumpPortal(Portal portal) {
+    public void jumpPortal(@NotNull Portal portal) {
         main.hero.jumpPortal(portal);
     }
 

@@ -36,7 +36,10 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
-import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.*;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.ATTACK_LASER;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.ATTACK_ROCKET;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.JUMP_GATE;
+import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyBind.TOGGLE_CONFIG;
 
 public class HeroManager extends Player implements Manager, HeroAPI {
 
@@ -161,17 +164,22 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     }
 
     private boolean clickPortal;
+    private Portal lastPortal;
     public void jumpPortal(Portal portal) {
         if (!main.guiManager.canJumpPortal()) return;
         if (!portal.isValid()) return;
-        if (System.currentTimeMillis() - portalTime < 500) return; // Minimum delay
-        if ((System.currentTimeMillis() - portalTime > 20000 || isNotJumping(portal)) &&
+        long timeSinceLastJump = System.currentTimeMillis() - portalTime;
+        if (timeSinceLastJump < 500) return; // Minimum delay
+        if ((timeSinceLastJump > 20000 || isNotJumping(portal)) &&
                 (portal.isSelectable() || portals.stream().noneMatch(p -> p != portal && p.isSelectable()))) {
+
+            // If we tried to jump the same portal under 30s ago, try to toggle between click/key
+            clickPortal = lastPortal == portal && timeSinceLastJump < 30_000 && portal.isSelectable() && !clickPortal;
 
             if (clickPortal) portal.trySelect(false);
             else keybinds.pressKeybind(JUMP_GATE);
 
-            clickPortal = !clickPortal;
+            lastPortal = portal;
             portalTime = System.currentTimeMillis();
         }
     }

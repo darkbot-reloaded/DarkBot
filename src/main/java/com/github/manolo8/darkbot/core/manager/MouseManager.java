@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 
 import static com.github.manolo8.darkbot.Main.API;
 
+@Deprecated
 public class MouseManager extends Thread {
 
     private final Object LOCK = new Object();
