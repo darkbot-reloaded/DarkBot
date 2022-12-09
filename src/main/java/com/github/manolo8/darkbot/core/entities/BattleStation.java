@@ -116,6 +116,7 @@ public class BattleStation
             implements eu.darkbot.api.game.entities.BattleStation.Module {
 
         private String moduleId;
+        private long moduleIdTemp;
 
         public Module(int id, long address) {
             super(id, address);
@@ -124,7 +125,23 @@ public class BattleStation
         @Override
         public void update(long address) {
             super.update(address);
-            this.moduleId = API.readMemoryString(address, 112);
+            this.moduleIdTemp = API.readLong(address + 112);
+            this.moduleId = API.readMemoryString(moduleIdTemp);
+
+            info.update(API.readMemoryLong(address + 120));
+            health.update(findInTraits(TraitPattern::ofHealth));
+            lockPtr = findInTraits(TraitPattern::ofLockType);
+        }
+
+        @Override
+        public void update() {
+            if (API.readLong(address + 112) != moduleIdTemp) {
+                update(address); // module type can change on the fly
+            }
+
+            super.update();
+            info.update();
+            health.update();
         }
 
         @Override
