@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.gui.utils.PidSelector;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.LibUtils;
@@ -40,7 +41,6 @@ public class GameAPIImpl<
         I extends GameAPI.Interaction,
         D extends GameAPI.DirectInteraction> implements IDarkBotAPI {
 
-    private static final int BAD_PTR = 0xFFFF;
     private static final String FALLBACK_STRING = "ERROR";
 
     protected final StartupParams params;
@@ -298,37 +298,37 @@ public class GameAPIImpl<
 
     @Override
     public double readMemoryDouble(long address) {
-        if (address <= BAD_PTR) return 0;
+        if (!ByteUtils.isValidPtr(address)) return 0;
         return memory.readDouble(address);
     }
 
     @Override
     public long readMemoryLong(long address) {
-        if (address <= BAD_PTR) return 0;
+        if (!ByteUtils.isValidPtr(address)) return 0;
         return memory.readLong(address);
     }
 
     @Override
     public int readMemoryInt(long address) {
-        if (address <= BAD_PTR) return 0;
+        if (!ByteUtils.isValidPtr(address)) return 0;
         return memory.readInt(address);
     }
 
     @Override
     public boolean readMemoryBoolean(long address) {
-        if (address <= BAD_PTR) return false;
+        if (!ByteUtils.isValidPtr(address)) return false;
         return memory.readBoolean(address);
     }
 
     @Override
     public String readMemoryString(long address) {
-        if (address <= BAD_PTR) return FALLBACK_STRING;
+        if (!ByteUtils.isValidPtr(address)) return FALLBACK_STRING;
         return readMemoryStringFallback(address, FALLBACK_STRING);
     }
 
     @Override
     public String readMemoryStringFallback(long address, String fallback) {
-        if (address <= BAD_PTR) return fallback;
+        if (!ByteUtils.isValidPtr(address)) return fallback;
 
         String str = extraMemoryReader.readString(address);
         return str == null ? fallback : str;
@@ -336,13 +336,13 @@ public class GameAPIImpl<
 
     @Override
     public byte[] readMemory(long address, int length) {
-        if (address <= BAD_PTR) return new byte[0];
+        if (!ByteUtils.isValidPtr(address)) return new byte[0];
         return memory.readBytes(address, length);
     }
 
     @Override
     public void readMemory(long address, byte[] buffer, int length) {
-        if (address <= BAD_PTR) {
+        if (!ByteUtils.isValidPtr(address)) {
             Arrays.fill(buffer, 0, length, (byte) 0);
             return;
         }
@@ -351,43 +351,43 @@ public class GameAPIImpl<
 
     @Override
     public void replaceInt(long address, int oldValue, int newValue) {
-        if (address <= BAD_PTR) return;
+        if (!ByteUtils.isValidPtr(address)) return;
         memory.replaceInt(address, oldValue, newValue);
     }
 
     @Override
     public void replaceLong(long address, long oldValue, long newValue) {
-        if (address <= BAD_PTR) return;
+        if (!ByteUtils.isValidPtr(address)) return;
         memory.replaceLong(address, oldValue, newValue);
     }
 
     @Override
     public void replaceDouble(long address, double oldValue, double newValue) {
-        if (address <= BAD_PTR) return;
+        if (!ByteUtils.isValidPtr(address)) return;
         memory.replaceDouble(address, oldValue, newValue);
     }
 
     @Override
     public void replaceBoolean(long address, boolean oldValue, boolean newValue) {
-        if (address <= BAD_PTR) return;
+        if (!ByteUtils.isValidPtr(address)) return;
         memory.replaceBoolean(address, oldValue, newValue);
     }
 
     @Override
     public void writeMemoryInt(long address, int value) {
-        if (address <= BAD_PTR) return;
+        if (!ByteUtils.isValidPtr(address)) return;
         memory.writeInt(address, value);
     }
 
     @Override
     public void writeMemoryLong(long address, long value) {
-        if (address <= BAD_PTR) return;
+        if (!ByteUtils.isValidPtr(address)) return;
         memory.writeLong(address, value);
     }
 
     @Override
     public void writeMemoryDouble(long address, double value) {
-        if (address <= BAD_PTR) return;
+        if (!ByteUtils.isValidPtr(address)) return;
         memory.writeDouble(address, value);
     }
 
@@ -468,11 +468,11 @@ public class GameAPIImpl<
                 //actually this should be called on every entity with LockType trait
 
                 if (mapManager.isTarget(entity)) return;
-                if (!(entity instanceof Ship) || entity instanceof MapNpc) {
-                    if (!mapManager.setTarget(entity.address)) {
-                        return;
-                    }
-                } /*else mapManager.setTarget(0);*/
+
+                // MapNpc (eg: LoW relay) can't be locked normally, try to use setTarget instead
+                if ((!(entity instanceof Ship) || entity instanceof MapNpc) && !mapManager.setTarget(entity.address)) {
+                    return;
+                }
 
                 direct.selectEntity(entity);
             } else {

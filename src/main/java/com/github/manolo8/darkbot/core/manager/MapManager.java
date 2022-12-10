@@ -164,7 +164,7 @@ public class MapManager implements Manager, StarSystemAPI {
     private void updateRender() {
         if (!is3DView || renderValidated) return;
 
-        if (settings3DAddress <= 0xFFFF) {
+        if (!ByteUtils.isValidPtr(settings3DAddress)) {
             settings3DAddress = API.searchClassClosure(l -> ByteUtils.readObjectName(l).equals("Settings3D$"));
             return;
         }
@@ -460,7 +460,7 @@ public class MapManager implements Manager, StarSystemAPI {
 
     public boolean setTarget(long entity) {
         long targetWrapper = API.readLong(mapAddress + 120);
-        if (targetWrapper > 0xFFFF) {
+        if (ByteUtils.isValidPtr(targetWrapper)) {
             return API.callMethodChecked(true, "23(set target)(2626)1016221500", 4, targetWrapper, entity);
         }
         return false;

@@ -246,7 +246,7 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         }
 
         private boolean checkSignature(boolean checkName, String signature, int index, long object) {
-            if (index <= 2 || object <= 0xFFFF) return false;
+            if (index <= 2 || !ByteUtils.isValidPtr(object)) return false;
             if (!methodSignatureCache.contains(signature)) {
                 // -1 or -2 == memory read error, 0 == invalid signature, 1 == valid
                 int ret = kekkaPlayer.checkMethodSignature(object, index, checkName, signature);
