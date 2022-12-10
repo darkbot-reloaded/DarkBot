@@ -31,9 +31,9 @@ public class SettingsGui extends Gui implements API.Singleton {
 
     @Override
     public void update() {
-        if (!main.isRunning()) return;
         super.update();
 
+        if (!main.isRunning()) return;
         if (Main.API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS) && (reset || !assignKeyBindTimer.isArmed())) {
             if (show(true)) {
                 Main.API.postActions(assignKeyBinds(!reset, fake));

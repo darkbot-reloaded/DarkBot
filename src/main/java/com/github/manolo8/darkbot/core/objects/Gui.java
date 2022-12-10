@@ -15,7 +15,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
     protected final Point size = new Point();
     protected final Point minimized = new Point();
 
-    public long addressInfo;
+    public long addressInfo, featureWindowDefinition;
     public boolean visible;
 
     public int x;
@@ -29,6 +29,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
 
     private ObjArray tempArray;
     private ObjArray tempChildArray;
+    private boolean minimizable;
 
     public void update() {
         if (address == 0) return;
@@ -52,6 +53,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
         // API.readMemoryBoolean(addressInfo + 48); // show on top
 
         isTweening = API.readMemoryBoolean(address + 0xC4);
+        minimizable = API.readBoolean(featureWindowDefinition + 40);
     }
 
     @Override
@@ -61,6 +63,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
         } else {
             super.update(address);
             this.addressInfo = API.readMemoryLong(address + 496);
+            this.featureWindowDefinition = API.readLong(addressInfo + 88);
             this.update = System.currentTimeMillis();
         }
     }
@@ -99,22 +102,24 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
         API.mouseUp(newX + 50, newY + 10);
     }
 
-    private boolean changeCloseClick;
     public boolean show(boolean value) {
         if (trySetShowing(value)) {
-            toggleVisibility();
+            if (minimizable) toggleVisibility();
+            else legacyToggle(value);
+
             return false;
         }
         return value == visible && isAnimationDone();
     }
 
-    private boolean clickMinimized() {
-        if (minimized.address != 0) {
-            API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
-            return true;
-        }
+    protected void legacyToggle(boolean show) {
+        if (show || minimized.address != 0) clickMinimized();
+        else click(5, 5);
+    }
 
-        return false;
+    private void clickMinimized() {
+        if (minimized.address != 0)
+            API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
     }
 
     public void toggleVisibility() {
