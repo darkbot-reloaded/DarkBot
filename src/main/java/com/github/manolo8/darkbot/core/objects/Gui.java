@@ -102,11 +102,9 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
         API.mouseUp(newX + 50, newY + 10);
     }
 
-    private boolean changeCloseClick;
     public boolean show(boolean value) {
         if (trySetShowing(value)) {
-            if (minimizable)
-                toggleVisibility();
+            if (minimizable) toggleVisibility();
             else legacyToggle(value);
 
             return false;
@@ -115,22 +113,13 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
     }
 
     protected void legacyToggle(boolean show) {
-        if (show) clickMinimized();
-        else {
-            if (changeCloseClick || !clickMinimized()) {
-                click(5, 5);
-                changeCloseClick = !changeCloseClick;
-            }
-        }
+        if (show || minimized.address != 0) clickMinimized();
+        else click(5, 5);
     }
 
-    private boolean clickMinimized() {
-        if (minimized.address != 0) {
+    private void clickMinimized() {
+        if (minimized.address != 0)
             API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
-            return true;
-        }
-
-        return false;
     }
 
     public void toggleVisibility() {

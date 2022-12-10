@@ -27,18 +27,19 @@ public class LogoutGui extends Gui {
     @Override
     public boolean show(boolean value) {
         if (value) lastShown = System.currentTimeMillis();
-        if (value) {
+        return super.show(value);
+    }
+
+    @Override
+    protected void legacyToggle(boolean show) {
+        if (show) {
             Character charCode = settingsProxy.getCharCode(SettingsProxy.KeyBind.LOGOUT);
-            if (charCode != null){
-                if (trySetShowing(true)) {
-                    Main.API.keyboardClick(charCode);
-                    return false;
-                }
-                return visible && isAnimationDone();
-            } else {
-                settingsProxy.pressKeybind(SettingsProxy.KeyBind.LOGOUT); // to trigger keybinds reset
+            if (charCode != null) {
+                Main.API.keyboardClick(charCode);
+                return;
             }
         }
-        return super.show(value);
+
+        super.legacyToggle(show);
     }
 }
