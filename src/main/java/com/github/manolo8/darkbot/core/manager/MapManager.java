@@ -455,6 +455,14 @@ public class MapManager implements Manager, StarSystemAPI {
         return API.readMemoryLong(API.readMemoryLong(mapAddress + 120) + 40) == entity.address;
     }
 
+    public boolean setTarget(long entity) {
+        long targetWrapper = API.readLong(mapAddress + 120);
+        if (targetWrapper > 0xFFFF) {
+            return API.callMethodChecked(true, "23(set target)(2626)1016221500", 4, targetWrapper, entity);
+        }
+        return false;
+    }
+
     public boolean isOutOfMap(double x, double y) {
         return x < 0 || y < 0 || x > internalWidth || y > internalHeight;
     }

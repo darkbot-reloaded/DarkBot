@@ -3,6 +3,8 @@ package com.github.manolo8.darkbot.core.api;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.MapNpc;
+import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
@@ -464,6 +466,14 @@ public class GameAPIImpl<
             if (entity instanceof Lockable) {
                 //assuming that selectEntity selects only ships & is supported by every API
                 //actually this should be called on every entity with LockType trait
+
+                if (mapManager.isTarget(entity)) return;
+                if (!(entity instanceof Ship) || entity instanceof MapNpc) {
+                    if (!mapManager.setTarget(entity.address)) {
+                        return;
+                    }
+                } /*else mapManager.setTarget(0);*/
+
                 direct.selectEntity(entity);
             } else {
                 entity.clickable.click();
