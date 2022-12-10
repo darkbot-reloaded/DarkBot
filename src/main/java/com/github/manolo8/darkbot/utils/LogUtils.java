@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.regex.Pattern;
 
 public class LogUtils {
     public static final DateTimeFormatter LOG_DATE = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
@@ -89,6 +90,8 @@ public class LogUtils {
         }
     }
 
+    private static final Pattern SID_PATTERN = Pattern.compile("sid=[a-z0-9]{32}");
+
     private static class PrintStreamWithDate extends PrintStream {
         public PrintStreamWithDate(String logfile) throws FileNotFoundException, UnsupportedEncodingException {
             super(logfile, "UTF-8");
@@ -99,9 +102,10 @@ public class LogUtils {
             StackTraceElement[] stack = Thread.currentThread().getStackTrace();
             String path = null;
             if (stack.length > 2) {
-                path = stack[2].toString();
-                path = path.replace("com.github.manolo8.darkbot", "db");
-                path = path.replace("eu.darkbot.api", "api");
+                path = stack[2].toString()
+                        .replace("com.github.manolo8.darkbot", "db")
+                        .replace("eu.darkbot.api", "api");
+                path = SID_PATTERN.matcher(path).replaceAll("sid=...");
             }
 
             string = "[" + LocalDateTime.now().format(LOG_DATE)
