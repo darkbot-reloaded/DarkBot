@@ -273,6 +273,9 @@ public class MapManager implements Manager, StarSystemAPI {
 
     private final Timer lastMove = Timer.getRandom(1000, 8000);
     public boolean mapClick(boolean isEntityAction) {
+        if (main.repairManager.isDestroyed() || main.guiManager.connecting.visible
+                || main.guiManager.lostConnection.visible) return false;
+
         long eventManager = Main.API.readLong(eventAddress);
         if (eventManager > 0) {
             boolean enabled = !API.readBoolean(eventManager + 36); // are clicks enabled?
