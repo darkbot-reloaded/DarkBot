@@ -54,6 +54,7 @@ dependencies {
     implementation("com.formdev", "flatlaf", "2.5")
     implementation("org.jgrapht", "jgrapht-core", "1.3.0")
     implementation("org.mvel", "mvel2", "2.4.4.Final")
+    implementation("commons-io", "commons-io", "2.11.0")
 
     testCompileOnly("org.jgrapht", "jgrapht-io", "1.3.0")
 }
