@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.utils;
 
+import org.apache.commons.io.output.TeeOutputStream;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,12 +26,32 @@ public class LogUtils {
         if (!Files.exists(LOG_FOLDER)) createFolder();
         else removeOld();
 
-        try {
+        /*try {
             PrintStream output = getLogger();
             System.setOut(output);
             System.setErr(output);
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             System.out.println("Failed to redirect logs, file not found:");
+            e.printStackTrace();
+        }*/
+        try {
+            getLogger();
+            FileOutputStream fileOutputStream = new FileOutputStream("logs/" + START_TIME + ".log");
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    fileOutputStream.flush();
+                } catch (Throwable t) {
+                    // Ignore
+                }
+            }, "Shutdown hook Thread flushing " + "logs/" + START_TIME + ".log"));
+            //Printing System.out and System.err in console and in file
+            TeeOutputStream sysOut = new TeeOutputStream(System.out, fileOutputStream);
+            TeeOutputStream sysErr = new TeeOutputStream(System.err, fileOutputStream);
+            PrintStream printStreamOut = new PrintStream(sysOut, true, "UTF-8");
+            PrintStream printStreamErr = new PrintStream(sysErr, true);
+            System.setOut(printStreamOut);
+            System.setErr(printStreamErr);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
