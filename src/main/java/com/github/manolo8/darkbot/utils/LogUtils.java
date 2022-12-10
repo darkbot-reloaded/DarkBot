@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.utils;
 
-import org.apache.commons.io.output.TeeOutputStream;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -35,23 +35,17 @@ public class LogUtils {
             e.printStackTrace();
         }*/
         try {
-            getLogger();
-            FileOutputStream fileOutputStream = new FileOutputStream("logs/" + START_TIME + ".log");
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    fileOutputStream.flush();
-                } catch (Throwable t) {
-                    // Ignore
-                }
-            }, "Shutdown hook Thread flushing " + "logs/" + START_TIME + ".log"));
-            //Printing System.out and System.err in console and in file
-            TeeOutputStream sysOut = new TeeOutputStream(System.out, fileOutputStream);
-            TeeOutputStream sysErr = new TeeOutputStream(System.err, fileOutputStream);
-            PrintStream printStreamOut = new PrintStream(sysOut, true, "UTF-8");
-            PrintStream printStreamErr = new PrintStream(sysErr, true);
-            System.setOut(printStreamOut);
-            System.setErr(printStreamErr);
-        } catch (Exception e) {
+            FileOutputStream fileOut = new FileOutputStream("logs/" + START_TIME + ".log");
+
+            MultiOutputStream multiOut = new MultiOutputStream(System.out, fileOut);
+            MultiOutputStream multiErr = new MultiOutputStream(System.err, fileOut);
+
+            PrintStream stdout = new PrintStream(multiOut, true, "UTF-8");
+            PrintStream stderr = new PrintStream(multiErr, true, "UTF-8");
+
+            System.setOut(stdout);
+            System.setErr(stderr);
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
@@ -112,6 +106,7 @@ public class LogUtils {
     }
 
     private static class PrintStreamWithDate extends PrintStream {
+
         public PrintStreamWithDate(String logfile) throws FileNotFoundException, UnsupportedEncodingException {
             super(logfile, "UTF-8");
         }
@@ -131,6 +126,44 @@ public class LogUtils {
                     + "] " + string;
 
             super.println(string);
+        }
+    }
+
+    public static class MultiOutputStream extends OutputStream {
+        OutputStream[] outputStreams;
+
+        public MultiOutputStream(OutputStream... outputStreams) {
+            this.outputStreams = outputStreams;
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            for (OutputStream out : outputStreams)
+                out.write(b);
+        }
+
+        @Override
+        public void write(byte @NotNull [] b) throws IOException {
+            for (OutputStream out : outputStreams)
+                out.write(b);
+        }
+
+        @Override
+        public void write(byte @NotNull [] b, int off, int len) throws IOException {
+            for (OutputStream out : outputStreams)
+                out.write(b, off, len);
+        }
+
+        @Override
+        public void flush() throws IOException {
+            for (OutputStream out : outputStreams)
+                out.flush();
+        }
+
+        @Override
+        public void close() throws IOException {
+            for (OutputStream out : outputStreams)
+                out.close();
         }
     }
 }
