@@ -29,10 +29,10 @@ public class Bot {
             e.printStackTrace();
         }
 
-        //String path = Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        //if (System.console() == null && (path.endsWith(".jar") || path.endsWith(".exe"))) {
-        LogUtils.setOutputToFile();
-        //}
+        String path = Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        if (System.console() == null && (path.endsWith(".jar") || path.endsWith(".exe"))) {
+            LogUtils.setOutputToFile();
+        }
         try {
             UIManager.getFont("Label.font"); // Prevents a linux crash
             UIManager.setLookAndFeel(new FlatDarkLaf());
