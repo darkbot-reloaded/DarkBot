@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.api;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
 import org.intellij.lang.annotations.Language;
@@ -88,7 +89,7 @@ public interface GameAPI {
 
         default long readLong(long address, int... offsets) {
             for (int offset : offsets) {
-                if (address <= 0xFFFF) return 0;
+                if (!ByteUtils.isValidPtr(address)) return 0;
                 address = readLong(address + offset);
             }
             return address;

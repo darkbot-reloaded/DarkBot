@@ -164,7 +164,7 @@ public class MapManager implements Manager, StarSystemAPI {
     private void updateRender() {
         if (!is3DView || renderValidated) return;
 
-        if (settings3DAddress <= 0xFFFF) {
+        if (!ByteUtils.isValidPtr(settings3DAddress)) {
             settings3DAddress = API.searchClassClosure(l -> ByteUtils.readObjectName(l).equals("Settings3D$"));
             return;
         }
@@ -273,6 +273,9 @@ public class MapManager implements Manager, StarSystemAPI {
 
     private final Timer lastMove = Timer.getRandom(1000, 8000);
     public boolean mapClick(boolean isEntityAction) {
+        if (main.repairManager.isDestroyed() || main.guiManager.connecting.visible
+                || main.guiManager.lostConnection.visible) return false;
+
         long eventManager = Main.API.readLong(eventAddress);
         if (eventManager > 0) {
             boolean enabled = !API.readBoolean(eventManager + 36); // are clicks enabled?
@@ -453,6 +456,14 @@ public class MapManager implements Manager, StarSystemAPI {
 
     public boolean isTarget(Entity entity) {
         return API.readMemoryLong(API.readMemoryLong(mapAddress + 120) + 40) == entity.address;
+    }
+
+    public boolean setTarget(long entity) {
+        long targetWrapper = API.readLong(mapAddress + 120);
+        if (ByteUtils.isValidPtr(targetWrapper)) {
+            return API.callMethodChecked(true, "23(set target)(2626)1016221500", 4, targetWrapper, entity);
+        }
+        return false;
     }
 
     public boolean isOutOfMap(double x, double y) {

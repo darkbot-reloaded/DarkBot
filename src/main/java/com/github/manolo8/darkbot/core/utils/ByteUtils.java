@@ -56,6 +56,8 @@ public class ByteUtils {
     public static final int OBJECT_TYPE = 0b001;
     public static final int STRING_TYPE = 0b010;
 
+    public static final int BAD_PTR = 0xFFFF;
+
     /**
      * Constant value which means that reference to the object,
      * is invalid/doesn't exists and shouldn't be updated.
@@ -118,12 +120,16 @@ public class ByteUtils {
         return b;
     }
 
+    public static boolean isValidPtr(long ptr) {
+        return ptr > BAD_PTR;
+    }
+
     public static long tagInteger(long value) {
         return (value << 3) | 6;
     }
 
-
     public static boolean isScriptableObjectValid(long scriptableObject) {
+        if (!isValidPtr(scriptableObject)) return false;
         // contains references count & GC flags
         int composite = Main.API.readInt(scriptableObject + 8);
         return composite > 0;
@@ -238,7 +244,7 @@ public class ByteUtils {
         private final StrLocation CACHED = new StrLocation();
 
         public String readString(long address) {
-            if (address <= 0xFFFF || !isScriptableObjectValid(address)) return null;
+            if (!isScriptableObjectValid(address)) return null;
             if (Main.API.readLong(address) != BotInstaller.STRING_OBJECT_VTABLE)
                 return null;
             CACHED.setAddress(address);

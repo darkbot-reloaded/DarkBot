@@ -2,6 +2,7 @@ package eu.darkbot.api.utils;
 
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.KekkaPlayer;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.HeroItemsAPI;
@@ -40,11 +41,11 @@ public class ItemUseCaller {
     }
 
     public boolean checkUsable() {
-        return connectionManager > 0xFFFF && screenManager > 0xFFFF && checkItemCommand();
+        return ByteUtils.isValidPtr(connectionManager) && ByteUtils.isValidPtr(screenManager) && checkItemCommand();
     }
 
     private boolean checkItemCommand() {
-        if (useItemCommand > 0xFFFF) return true;
+        if (ByteUtils.isValidPtr(useItemCommand)) return true;
 
         long useItemCommandClosure = API.searchClassClosure(v ->
                 API.readInt(v + 48) == 0
@@ -64,11 +65,11 @@ public class ItemUseCaller {
         }
 
         nextCommandCheck.activate();
-        return useItemCommand > 0xFFFF;
+        return ByteUtils.isValidPtr(useItemCommand);
     }
 
     public void tick() {
-        if (useItemCommand <= 0xFFFF && nextCommandCheck.isInactive())
+        if (!ByteUtils.isValidPtr(useItemCommand) && nextCommandCheck.isInactive())
             checkItemCommand();
     }
 }
