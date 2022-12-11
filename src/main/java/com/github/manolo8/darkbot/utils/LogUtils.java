@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.utils;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,7 +15,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 
 public class LogUtils {
     public static final DateTimeFormatter LOG_DATE = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
@@ -163,12 +161,12 @@ public class LogUtils {
                     + (path != null ? " | " + path : "")
                     + "] ";
 
-            for (OutputStream out : outputStreams){
+            for (OutputStream out : outputStreams) {
                 if (count == 1)
                     out.write(string.getBytes());
                 out.write(b, off, len);
             }
-            count ++;
+            count++;
             if (count > 1)
                 count = 0;
         }
