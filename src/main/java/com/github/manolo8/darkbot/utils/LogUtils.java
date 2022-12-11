@@ -122,7 +122,7 @@ public class LogUtils {
     }
 
     public static class MultiOutputStream extends OutputStream {
-        OutputStream[] outputStreams;
+        private final OutputStream[] outputStreams;
         int count = 0;
 
         public MultiOutputStream(OutputStream... outputStreams) {
@@ -136,13 +136,13 @@ public class LogUtils {
         }
 
         @Override
-        public void write(byte @NotNull [] b) throws IOException {
+        public void write(@NotNull byte [] b) throws IOException {
             for (OutputStream out : outputStreams)
                 out.write(b);
         }
 
         @Override
-        public void write(byte @NotNull [] b, int off, int len) throws IOException {
+        public void write(@NotNull byte [] b, int off, int len) throws IOException {
             StackTraceElement[] stack = Thread.currentThread().getStackTrace();
             String path = null;
             if (stack.length > 2) {
