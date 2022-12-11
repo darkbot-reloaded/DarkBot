@@ -26,7 +26,7 @@ public class ApiErrors {
             return "You're using a <strong>removed API</strong>, use the recommended API!";
         if (api == BrowserApi.NO_OP_API)
             return "Error loading the no-op api, how did this happen?";
-        if (api != (OSUtil.isLinux() ? BrowserApi.TANOS_API : BrowserApi.KEKKA_PLAYER))
+        if (api != OSUtil.getDefaultAPI())
             return "You're using an <strong>unsupported API</strong>, use the recommended API!";
 
         String bits = System.getProperty("sun.arch.data.model");

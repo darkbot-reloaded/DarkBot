@@ -36,7 +36,7 @@ public enum BrowserApi {
         public BrowserApi deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             String s = json.getAsString();
             if (s.startsWith("DARK_BOAT"))
-                return OSUtil.isLinux() ? TANOS_API : KEKKA_PLAYER;
+                return OSUtil.getDefaultAPI();
             return BrowserApi.valueOf(s);
         }
     }
