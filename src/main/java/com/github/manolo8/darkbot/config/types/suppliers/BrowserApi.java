@@ -3,9 +3,9 @@ package com.github.manolo8.darkbot.config.types.suppliers;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.api.BackpageAdapter;
 import com.github.manolo8.darkbot.core.api.DarkMemAdapter;
-import com.github.manolo8.darkbot.core.api.TanosAdapter;
 import com.github.manolo8.darkbot.core.api.KekkaPlayerAdapter;
 import com.github.manolo8.darkbot.core.api.NoopAPIAdapter;
+import com.github.manolo8.darkbot.core.api.TanosAdapter;
 import com.github.manolo8.darkbot.utils.OSUtil;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -30,16 +30,16 @@ public enum BrowserApi {
         this.clazz = clazz;
     }
 
-    public static class BrowserApiDeserializer implements JsonDeserializer<BrowserApi> {
+    public static class Deserializer implements JsonDeserializer<BrowserApi> {
 
         @Override
         public BrowserApi deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             String s = json.getAsString();
             if (s.startsWith("DARK_BOAT"))
                 return OSUtil.getDefaultAPI();
+
             return BrowserApi.valueOf(s);
         }
     }
+
 }
-
-

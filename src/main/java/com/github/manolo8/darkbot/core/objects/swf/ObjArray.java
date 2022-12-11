@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.objects.swf;
 
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.utils.Offsets;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -55,7 +56,7 @@ public class ObjArray extends SwfPtrCollection {
     }
 
     public static ObjArray ofSprite(boolean autoUpdatable) {
-        return new ObjArray(0x020, 0x10, 0x8, autoUpdatable);
+        return new ObjArray(0x18 + Offsets.SPRITE_OFFSET, 0x8 + Offsets.SPRITE_OFFSET, 0x8, autoUpdatable);
     }
 
     /**
@@ -109,6 +110,6 @@ public class ObjArray extends SwfPtrCollection {
     }
 
     private boolean isSprite() {
-        return this.sizeOffset == 0x20;
+        return this.sizeOffset == (0x18 + Offsets.SPRITE_OFFSET);
     }
 }

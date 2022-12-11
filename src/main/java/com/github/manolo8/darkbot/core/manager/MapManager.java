@@ -19,6 +19,7 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.core.utils.Location;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PolygonImpl;
 import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
+import com.github.manolo8.darkbot.utils.Offsets;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.game.entities.Portal;
@@ -341,8 +342,8 @@ public class MapManager implements Manager, StarSystemAPI {
             boundsAddress = API.readMemoryLong(viewAddress + (is3DView ? 216 : 208));
         }
 
-        clientWidth = API.readMemoryInt(boundsAddress + 0xa8);
-        clientHeight = API.readMemoryInt(boundsAddress + 0xac);
+        clientWidth = API.readMemoryInt(boundsAddress + 0xA8);
+        clientHeight = API.readMemoryInt(boundsAddress + 0xAC);
 
         long updated = API.readMemoryLong(boundsAddress + (is3DView ? 320 : 280));
         updated = API.readMemoryLong(updated + 112);
@@ -421,7 +422,7 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     private boolean findMarker(long spriteArray, double scale, Location result) {
-        int size = API.readMemoryInt(spriteArray, 0x40, 0x20);
+        int size = API.readMemoryInt(spriteArray, 0x40, 0x18 + Offsets.SPRITE_OFFSET);
         // Always try to iterate at least once.
         // With 0 or 1 elements, it seems to be implemented as a singleton and size isn't updated.
         // With 2 or more elements, it's a linked list of elements to follow at 0x18.
@@ -447,10 +448,10 @@ public class MapManager implements Manager, StarSystemAPI {
         // Ignore if 0,0, or further away from the center of the map than corner in manhattan distance
         if ((x == 0 && y == 0) || result.distance(halfWidth, halfHeight) > halfWidth + halfHeight) return false;
 
-        String name = API.readMemoryString(API.readMemoryLong(sprite, 0x1d0, 0x10, 0x28, 0x90));
+        String name = API.readMemoryString(API.readMemoryLong(sprite, 0x1B8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
         if (name != null && name.equals("minimapmarker")) return true;
 
-        String pointer = API.readMemoryString(API.readMemoryLong(sprite, 0xe0, 0x10, 0x28, 0x90));
+        String pointer = API.readMemoryString(API.readMemoryLong(sprite, 0xD8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
         return pointer == null || !pointer.equals("minimapPointer");
     }
 

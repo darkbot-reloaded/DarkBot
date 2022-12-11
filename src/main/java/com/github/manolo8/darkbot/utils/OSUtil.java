@@ -23,7 +23,10 @@ public class OSUtil {
     public static Path getDataPath(String first, String... more) {
         return getDataPath().resolve(Paths.get(first, more));
     }
-    public static BrowserApi getDefaultAPI() { return OSUtil.isLinux() ? BrowserApi.TANOS_API : BrowserApi.KEKKA_PLAYER; }
+
+    public static BrowserApi getDefaultAPI() {
+        return OSUtil.isLinux() ? BrowserApi.TANOS_API : BrowserApi.KEKKA_PLAYER;
+    }
 
     public static boolean isWindows() {
         return getCurrentOs() == OS.WINDOWS;

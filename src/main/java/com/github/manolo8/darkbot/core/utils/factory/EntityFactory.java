@@ -24,7 +24,7 @@ import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
 import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
 import com.github.manolo8.darkbot.core.entities.bases.QuestGiver;
 import com.github.manolo8.darkbot.core.manager.StarManager;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.utils.Offsets;
 import org.intellij.lang.annotations.Language;
 
 import java.util.function.BiFunction;
@@ -122,18 +122,13 @@ public enum EntityFactory implements EntityBuilder {
     }
 
     public static EntityBuilder find(long address) {
-        String assetId = getAssetId(address);
+        String assetId = Offsets.getEntityAssetId(address);
 
         for (EntityFactory type : EntityFactory.values()) {
             if (type.typeMatcher.test(assetId, address)) return type;
         }
 
         return (id, addr) -> new Unknown(id, addr, assetId);
-    }
-
-    private static String getAssetId(long address) {
-        long trait = API.readMemoryLong(address, 0x30, 0x30, 0x10) & ByteUtils.ATOM_MASK;
-        return API.readMemoryString(trait, 0x40, 0x20, 0x18, 0x10, 0x10, 0x18).trim();
     }
 
     private static String getZoneKey(long address) {
