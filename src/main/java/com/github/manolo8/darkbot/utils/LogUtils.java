@@ -125,6 +125,7 @@ public class LogUtils {
 
     public static class MultiOutputStream extends OutputStream {
         OutputStream[] outputStreams;
+        int count = 0;
 
         public MultiOutputStream(OutputStream... outputStreams) {
             this.outputStreams = outputStreams;
@@ -147,26 +148,29 @@ public class LogUtils {
             StackTraceElement[] stack = Thread.currentThread().getStackTrace();
             String path = null;
             if (stack.length > 2) {
-                path = stack[2].toString();
-                path = path.replace("com.github.manolo8.darkbot", "db");
-                path = path.replace("eu.darkbot.api", "api");
+                try {
+                    path = stack[10].toString();
+                    path = path.replace("com.github.manolo8.darkbot", "db");
+                    path = path.replace("eu.darkbot.api", "api");
+                } catch (java.lang.IndexOutOfBoundsException e) {
+                    path = stack[9].toString();
+                    path = path.replace("com.github.manolo8.darkbot", "db");
+                    path = path.replace("eu.darkbot.api", "api");
+                }
             }
 
             String string = "[" + LocalDateTime.now().format(LOG_DATE)
                     + (path != null ? " | " + path : "")
                     + "] ";
 
-            for (byte out : string.getBytes()){
-                outputStreams[0].write(out);
-            }
-
-            for (byte out : string.getBytes()){
-                outputStreams[1].write(out);
-            }
-
             for (OutputStream out : outputStreams){
+                if (count == 1)
+                    out.write(string.getBytes());
                 out.write(b, off, len);
             }
+            count ++;
+            if (count > 1)
+                count = 0;
         }
 
         @Override
