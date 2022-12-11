@@ -43,6 +43,9 @@ public class BotInstaller implements API.Singleton {
 
     public boolean isInvalid() {
         if (invalid.get()) {
+            if (!invalidTimer.isArmed())
+                invalidTimer.activate(); //activate timer on first loading
+
             checkInvalid();
             invalid.send(tryInstall());
             return true;
