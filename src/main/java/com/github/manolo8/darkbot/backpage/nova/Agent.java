@@ -124,7 +124,7 @@ public class Agent {
 
     public class DismissCost {
         private String item;
-        private String amount;
+        private int amount;
 
         public String getItem() {
             return item;
@@ -134,11 +134,11 @@ public class Agent {
             this.item = item;
         }
 
-        public String getAmount() {
+        public int getAmount() {
             return amount;
         }
 
-        public void setAmount(String amount) {
+        public void setAmount(int amount) {
             this.amount = amount;
         }
     }
@@ -238,14 +238,14 @@ public class Agent {
     }
 
     public class Cost {
-        private Integer amount;
+        private int amount;
         private String item;
 
-        public Integer getAmount() {
+        public int getAmount() {
             return amount;
         }
 
-        public void setAmount(Integer amount) {
+        public void setAmount(int amount) {
             this.amount = amount;
         }
 
@@ -259,15 +259,15 @@ public class Agent {
     }
 
     public class Upgrade {
-        private Integer level;
+        private int level;
         private double modifier;
         private List<Cost> cost = new ArrayList<Cost>();
 
-        public Integer getLevel() {
+        public int getLevel() {
             return level;
         }
 
-        public void setLevel(Integer level) {
+        public void setLevel(int level) {
             this.level = level;
         }
 

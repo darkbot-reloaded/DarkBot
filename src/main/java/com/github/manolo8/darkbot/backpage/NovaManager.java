@@ -52,7 +52,7 @@ public class NovaManager {
 
         JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
-            this.data.setActiveCaptainId(jsonObj.get("activeCaptainId").getAsString());
+            this.data.setActiveCaptainId(jsonObj.get("activeCaptainId").getAsString().isEmpty() ? 0 : jsonObj.get("activeCaptainId").getAsInt());
         }else {
             System.out.println("NovaManager: " + response);
         }
@@ -66,7 +66,7 @@ public class NovaManager {
 
         JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
-            this.data.setResourceAmount(jsonObj.get("item").getAsJsonObject().get("amount").getAsString());
+            this.data.setResourceAmount(jsonObj.get("item").getAsJsonObject().get("amount").getAsInt());
         } else {
             System.out.println("NovaManager: " + response);
         }

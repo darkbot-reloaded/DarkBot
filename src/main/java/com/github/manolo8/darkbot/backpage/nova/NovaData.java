@@ -4,23 +4,23 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class NovaData {
-    private String activeCaptainId;
-    private String resourceAmount;
+    private int activeCaptainId;
+    private int resourceAmount;
     private final Map<Integer, Agent> rosterList = new LinkedHashMap<>();
 
-    public String getActiveCaptainId() {
+    public int getActiveCaptainId() {
         return activeCaptainId;
     }
 
-    public void setActiveCaptainId(String activeCaptainId) {
+    public void setActiveCaptainId(int activeCaptainId) {
         this.activeCaptainId = activeCaptainId;
     }
 
-    public String getResourceAmount() {
+    public int getResourceAmount() {
         return resourceAmount;
     }
 
-    public void setResourceAmount(String resourceAmount) {
+    public void setResourceAmount(int resourceAmount) {
         this.resourceAmount = resourceAmount;
     }
 
