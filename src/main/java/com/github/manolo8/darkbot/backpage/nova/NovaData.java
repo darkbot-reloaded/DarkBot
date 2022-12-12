@@ -6,7 +6,7 @@ import java.util.Map;
 public class NovaData {
     private String activeCaptainId;
     private String resourceAmount;
-    private final Map<String, Agent> rosterList = new LinkedHashMap<>();
+    private final Map<Integer, Agent> rosterList = new LinkedHashMap<>();
 
     public String getActiveCaptainId() {
         return activeCaptainId;
@@ -24,7 +24,7 @@ public class NovaData {
         this.resourceAmount = resourceAmount;
     }
 
-    public Map<String, Agent> getRosterList() {
+    public Map<Integer, Agent> getRosterList() {
         return rosterList;
     }
 
@@ -36,7 +36,7 @@ public class NovaData {
         this.rosterList.put(agent.getCaptainId(), agent);
     }
 
-    public void removeAgent(String id) {
+    public void removeAgent(int id) {
         this.rosterList.remove(id);
     }
 }

@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Agent {
-    private String captainId;
+    private int captainId;
     private String captainTypeId;
     private String name;
-    private String energy;
-    private String energyMax;
-    private String energyFullTime;
+    private int energy;
+    private int energyMax;
+    private long energyFullTime;
     private List<Perk> perks = new ArrayList<Perk>();
     private Boolean equipped;
     private DismissCost dismissCost;
-    private String regenAmount;
-    private String regenRate;
+    private int regenAmount;
+    private double regenRate;
     private String desc;
     private boolean forRemoval;
 
@@ -26,11 +26,11 @@ public class Agent {
         this.forRemoval = forRemoval;
     }
 
-    public String getCaptainId() {
+    public int getCaptainId() {
         return captainId;
     }
 
-    public void setCaptainId(String captainId) {
+    public void setCaptainId(int captainId) {
         this.captainId = captainId;
     }
 
@@ -50,27 +50,27 @@ public class Agent {
         this.name = name;
     }
 
-    public String getEnergy() {
+    public int getEnergy() {
         return energy;
     }
 
-    public void setEnergy(String energy) {
+    public void setEnergy(int energy) {
         this.energy = energy;
     }
 
-    public String getEnergyMax() {
+    public int getEnergyMax() {
         return energyMax;
     }
 
-    public void setEnergyMax(String energyMax) {
+    public void setEnergyMax(int energyMax) {
         this.energyMax = energyMax;
     }
 
-    public String getEnergyFullTime() {
+    public long getEnergyFullTime() {
         return energyFullTime;
     }
 
-    public void setEnergyFullTime(String energyFullTime) {
+    public void setEnergyFullTime(long energyFullTime) {
         this.energyFullTime = energyFullTime;
     }
 
@@ -98,19 +98,19 @@ public class Agent {
         this.dismissCost = dismissCost;
     }
 
-    public String getRegenAmount() {
+    public int getRegenAmount() {
         return regenAmount;
     }
 
-    public void setRegenAmount(String regenAmount) {
+    public void setRegenAmount(int regenAmount) {
         this.regenAmount = regenAmount;
     }
 
-    public String getRegenRate() {
+    public double getRegenRate() {
         return regenRate;
     }
 
-    public void setRegenRate(String regenRate) {
+    public void setRegenRate(double regenRate) {
         this.regenRate = regenRate;
     }
 
@@ -144,22 +144,22 @@ public class Agent {
     }
 
     public class Perk {
-        private String perkId;
+        private int perkId;
         private String perkTypeId;
-        private Integer level;
-        private Integer levelMax;
-        private String drain;
+        private int level;
+        private int levelMax;
+        private int drain;
         private double modifier;
         private String name;
         private String desc;
         private String drainDesc;
         private List<Upgrade> upgrades = new ArrayList<Upgrade>();
 
-        public String getPerkId() {
+        public int getPerkId() {
             return perkId;
         }
 
-        public void setPerkId(String perkId) {
+        public void setPerkId(int perkId) {
             this.perkId = perkId;
         }
 
@@ -171,27 +171,27 @@ public class Agent {
             this.perkTypeId = perkTypeId;
         }
 
-        public Integer getLevel() {
+        public int getLevel() {
             return level;
         }
 
-        public void setLevel(Integer level) {
+        public void setLevel(int level) {
             this.level = level;
         }
 
-        public Integer getLevelMax() {
+        public int getLevelMax() {
             return levelMax;
         }
 
-        public void setLevelMax(Integer levelMax) {
+        public void setLevelMax(int levelMax) {
             this.levelMax = levelMax;
         }
 
-        public String getDrain() {
+        public int getDrain() {
             return drain;
         }
 
-        public void setDrain(String drain) {
+        public void setDrain(int drain) {
             this.drain = drain;
         }
 

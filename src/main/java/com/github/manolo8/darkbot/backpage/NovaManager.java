@@ -104,7 +104,7 @@ public class NovaManager {
         return false;
     }
 
-    public boolean dismissAgent(String id) throws IOException {
+    public boolean dismissAgent(int id) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
                 .setRawParam("command", "dismissCaptain")
                 .setRawParam("captainId", id)
@@ -155,10 +155,10 @@ public class NovaManager {
         return null;
     }
 
-    public boolean upgradePerkDetail(Agent agent, Agent.Perk perk, int upgradeLevel) throws IOException {
+    public boolean upgradeAgentPerk(Agent agent, Agent.Perk perk, int upgradeLevel) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
                 .setRawParam("command", "upgradePerk")
-                .setRawParam("captainId", agent.getCaptainTypeId())
+                .setRawParam("captainId", agent.getCaptainId())
                 .setRawParam("perkId", perk.getPerkId())
                 .setRawParam("upgradeLevel", upgradeLevel)
                 .getContent();
