@@ -23,7 +23,7 @@ public class AuctionManager {
         return data;
     }
 
-    public boolean update(int expiryTime) {
+    public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;
             String page = backpageManager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();

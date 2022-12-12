@@ -20,7 +20,7 @@ public class NovaManager {
         this.g = new Gson();
     }
 
-    public boolean update(int expiryTime) {
+    public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastNovaUpdate + expiryTime) return false;
 

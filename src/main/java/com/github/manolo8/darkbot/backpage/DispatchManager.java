@@ -41,7 +41,7 @@ public class DispatchManager {
         return data;
     }
 
-    public boolean update(int expiryTime) {
+    public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
             String page = backpageManager.getConnection("indexInternal.es?action=internalDispatch", Method.GET).getContent();
