@@ -43,6 +43,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     public final GalaxyManager galaxyManager;
     public final DispatchManager dispatchManager;
     public final AuctionManager auctionManager;
+    public final NovaManager novaManager;
 
     protected final Main main;
     protected String sid, instance;
@@ -64,10 +65,11 @@ public class BackpageManager extends Thread implements BackpageAPI {
         super("BackpageManager");
         this.main = main;
         this.legacyHangarManager = new LegacyHangarManager(main, this);
-        this.hangarManager = new HangarManager(main, this);
-        this.galaxyManager = new GalaxyManager(this);
-        this.dispatchManager = new DispatchManager(main);
-        this.auctionManager = new AuctionManager(main, this);
+        this.hangarManager = new HangarManager(this);
+        this.galaxyManager = new GalaxyManager(main);
+        this.dispatchManager = new DispatchManager(this);
+        this.auctionManager = new AuctionManager(this);
+        this.novaManager = new NovaManager(this);
 
         setDaemon(true);
     }

@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.backpage;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.entities.Drone;
 import com.github.manolo8.darkbot.backpage.entities.Item;
 import com.github.manolo8.darkbot.backpage.entities.ItemInfo;
@@ -23,8 +22,6 @@ public class HangarManager implements Tickable {
 
     @Deprecated
     private final LegacyHangarManager legacyHangarManager;
-
-    private final Main main;
     private final BackpageManager backpage;
 
     private HangarResponse hangarList;
@@ -34,8 +31,7 @@ public class HangarManager implements Tickable {
     private long lastHangarListUpdate, lastCurrentHangarUpdate;
 
 
-    public HangarManager(Main main, BackpageManager backpage) {
-        this.main = main;
+    public HangarManager(BackpageManager backpage) {
         this.backpage = backpage;
 
         this.legacyHangarManager = backpage.legacyHangarManager;
