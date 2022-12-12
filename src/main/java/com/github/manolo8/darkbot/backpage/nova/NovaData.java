@@ -28,7 +28,7 @@ public class NovaData {
         return rosterList;
     }
 
-    public Agent getAgent(String id) {
+    public Agent getAgent(int id) {
         return this.rosterList.get(id);
     }
 
