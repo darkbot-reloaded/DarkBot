@@ -53,6 +53,8 @@ public class NovaManager {
         JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             this.data.setActiveCaptainId(jsonObj.get("activeCaptainId").getAsString());
+        }else {
+            System.out.println("NovaManager: " + response);
         }
 
     }
