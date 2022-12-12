@@ -89,7 +89,7 @@ public class NovaManager {
         }
     }
 
-    public boolean equipAgent(String id) throws IOException {
+    public boolean equipAgent(int id) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
                 .setRawParam("command", "updateActiveCaptain")
                 .setRawParam("captainId", id)
