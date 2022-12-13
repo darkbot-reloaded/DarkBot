@@ -218,6 +218,11 @@ public class Drive implements MovementAPI {
         return !paths.isEmpty() || heroLoc.isMoving();
     }
 
+    @Override
+    public boolean isMoving(long inTime) {
+        return lastMoved + inTime >= System.currentTimeMillis();
+    }
+
     public Location movingTo() {
         return endLoc == null ? heroLoc.now.copy() : endLoc.copy();
     }

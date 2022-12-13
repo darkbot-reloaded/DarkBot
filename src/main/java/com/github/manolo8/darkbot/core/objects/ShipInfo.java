@@ -21,6 +21,9 @@ public class ShipInfo extends Updatable {
     private Location pastDestination;
     private final LocationInfo entityLocation;
 
+    private long lastMovement;
+    private boolean moving;
+
     public ShipInfo(LocationInfo entityLocation) {
         this.entityLocation = entityLocation;
     }
@@ -47,6 +50,8 @@ public class ShipInfo extends Updatable {
         destination.update();
 
         updateSpeedAndAngle();
+        moving = destination.isInitialized() && entityLocation.distanceTo(destination) > 0;
+        if (moving) lastMovement = System.currentTimeMillis();
     }
 
     private void updateSpeedAndAngle() {
@@ -71,5 +76,13 @@ public class ShipInfo extends Updatable {
 
         if (predictedSpeed == 0) predictedSpeed = newSpeed;
         else predictedSpeed = predictedSpeed * 0.75 + newSpeed * 0.25;
+    }
+
+    public boolean isMoving() {
+        return moving;
+    }
+
+    public boolean isMoving(long time) {
+        return lastMovement + time >= System.currentTimeMillis();
     }
 }

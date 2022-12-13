@@ -62,7 +62,7 @@ public class ObstacleHandler implements Iterable<AreaImpl> {
     }
 
     private void rebuildAreas() {
-        if (obstacles == null || map.avoided == null) return;
+        if (map.avoided == null) return;
         avoided = map.avoided;
 
         double cellSize = 1d / avoided.resolution,

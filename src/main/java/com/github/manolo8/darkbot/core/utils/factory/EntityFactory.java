@@ -45,7 +45,7 @@ public enum EntityFactory implements EntityBuilder {
     NPC_BEACON      (MapNpc::new,        "npc-beacon.*"),
     SPACE_BALL      (SpaceBall::new,     "mapIcon_spaceball"),
 
-    CBS_ASTEROID    (BattleStation::new, "asteroid"),
+    CBS_ASTEROID    (BattleStation.Asteroid::new, "asteroid"),
     CBS_CONSTRUCTION(BattleStation::new, "cbs-construction"),
     CBS_MODULE      (BattleStation.Module::new, "wreck|module_.*"), // addr+112 moduleType string
     CBS_MODULE_CON  (BattleStation::new, "module-construction"),

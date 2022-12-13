@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.entities;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.objects.Health;
@@ -8,6 +9,7 @@ import com.github.manolo8.darkbot.core.utils.TraitPattern;
 import com.github.manolo8.darkbot.core.utils.pathfinder.AreaImpl;
 import com.github.manolo8.darkbot.core.utils.pathfinder.CircleImpl;
 import eu.darkbot.api.game.other.EntityInfo;
+import org.jetbrains.annotations.Nullable;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -19,6 +21,8 @@ public class BattleStation
     public Health health = new Health();
     public CircleImpl area = new CircleImpl(0, 0, 1200);
     public int hullId;
+
+    protected final Ship.Target target = new Ship.Target();
 
     public BattleStation(int id, long address) {
         super(id);
@@ -80,7 +84,17 @@ public class BattleStation
         return id + "," + hullId;
     }
 
-    public static class Built extends BattleStation {
+    public static class Asteroid extends BattleStation implements eu.darkbot.api.game.entities.BattleStation.Asteroid {
+
+        public Asteroid(int id, long address) {
+            super(id, address);
+        }
+    }
+
+    public static class Built extends BattleStation implements eu.darkbot.api.game.entities.BattleStation.Hull {
+
+        private int deflectorId;
+        private double deflectorExpansion,hullExpansion;
 
         public Built(int id, long address) {
             super(id, address);
@@ -102,13 +116,31 @@ public class BattleStation
         public void update(long address) {
             super.update(address);
 
+            deflectorId = API.readInt(address + 112);
             hullId = API.readMemoryInt(address + 116);
             info.update(API.readMemoryLong(address + 120));
+
+            deflectorExpansion = API.readDouble(address + 136);
+            hullExpansion = API.readDouble(address + 144);
 
             health.update(findInTraits(TraitPattern::ofHealth));
             lockPtr = findInTraits(TraitPattern::ofLockType);
         }
 
+        @Override
+        public double getHullExpansion() {
+            return hullExpansion;
+        }
+
+        @Override
+        public int getDeflectorShieldId() {
+            return deflectorId;
+        }
+
+        @Override
+        public double getDeflectorShieldExpansion() {
+            return deflectorExpansion;
+        }
     }
 
     public static class Module
@@ -117,6 +149,7 @@ public class BattleStation
 
         private String moduleId;
         private long moduleIdTemp;
+        private Type moduleType;
 
         public Module(int id, long address) {
             super(id, address);
@@ -127,10 +160,13 @@ public class BattleStation
             super.update(address);
             this.moduleIdTemp = API.readLong(address + 112);
             this.moduleId = API.readMemoryString(moduleIdTemp);
+            this.moduleType = Type.of(moduleId);
 
             info.update(API.readMemoryLong(address + 120));
             health.update(findInTraits(TraitPattern::ofHealth));
             lockPtr = findInTraits(TraitPattern::ofLockType);
+
+            target.update(findInTraits(ptr -> API.readMemoryString(ptr, 48, 32).startsWith("attack")));
         }
 
         @Override
@@ -142,11 +178,33 @@ public class BattleStation
             super.update();
             info.update();
             health.update();
+            target.update();
         }
 
         @Override
         public String getModuleId() {
             return moduleId;
+        }
+
+        @Override
+        public Type getType() {
+            return moduleType;
+        }
+
+        @Override
+        public void added(Main main) {
+            super.added(main);
+            target.added(main);
+        }
+
+        @Override
+        public @Nullable eu.darkbot.api.game.entities.Entity getTarget() {
+            return target.targetedEntity;
+        }
+
+        @Override
+        public boolean isAttacking() {
+            return target.laserAttacking;
         }
     }
 }

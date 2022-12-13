@@ -587,6 +587,16 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
+    public boolean isMoving() {
+        return pet.isMoving();
+    }
+
+    @Override
+    public boolean isMoving(long inTime) {
+        return pet.isMoving(inTime);
+    }
+
+    @Override
     public int getSpeed() {
         return pet.getSpeed();
     }

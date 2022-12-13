@@ -155,15 +155,26 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
     }
 
     public boolean canMove(double x, double y) {
-        return obstacleHandler.stream().noneMatch(a -> a.containsPoint(x, y));
+        for (AreaImpl area : obstacleHandler) {
+            if (area.containsPoint(x, y))
+                return false;
+        }
+        return true;
     }
 
     private AreaImpl areaTo(Locatable point) {
-        return obstacleHandler.stream().filter(a -> a.containsPoint(point.getX(), point.getY())).findAny().orElse(null);
+        for (AreaImpl area : obstacleHandler) {
+            if (area.containsPoint(point.getX(), point.getY()))
+                return area;
+        }
+        return null;
     }
 
     boolean hasLineOfSight(Locatable point1, Locatable point2) {
-        return obstacleHandler.stream().noneMatch(a -> a.intersectsLine(point1, point2));
+        for (AreaImpl area : obstacleHandler) {
+            if (area.intersectsLine(point1, point2))
+                return false;
+        }
+        return true;
     }
-
 }
