@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.backpage.nova.Agent;
 import com.github.manolo8.darkbot.backpage.nova.NovaData;
+import com.github.manolo8.darkbot.backpage.nova.Perk;
 import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -11,8 +12,8 @@ import java.io.IOException;
 public class NovaManager {
     private final BackpageManager backpageManager;
     private final NovaData data;
-    private long lastNovaUpdate;
     private final Gson g;
+    private long lastNovaUpdate;
 
     public NovaManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
@@ -53,7 +54,7 @@ public class NovaManager {
         JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             this.data.setActiveCaptainId(jsonObj.get("activeCaptainId").getAsString().isEmpty() ? 0 : jsonObj.get("activeCaptainId").getAsInt());
-        }else {
+        } else {
             System.out.println("NovaManager: " + response);
         }
 
@@ -140,7 +141,7 @@ public class NovaManager {
         return false;
     }
 
-    public Agent.Perk getPerkDetail(Agent agent, Agent.Perk perk) throws IOException {
+    public Perk getPerkDetail(Agent agent, Perk perk) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
                 .setRawParam("command", "getPerkUpgradeDetail")
                 .setRawParam("captainId", agent.getCaptainId())
@@ -150,14 +151,14 @@ public class NovaManager {
         JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             String resp = jsonObj.get("perk").toString();
-            return g.fromJson(resp, Agent.Perk.class);
+            return g.fromJson(resp, Perk.class);
         } else {
             System.out.println("NovaManager: " + response);
         }
         return null;
     }
 
-    public boolean upgradeAgentPerk(Agent agent, Agent.Perk perk, int upgradeLevel) throws IOException {
+    public boolean upgradeAgentPerk(Agent agent, Perk perk, int upgradeLevel) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
                 .setRawParam("command", "upgradePerk")
                 .setRawParam("captainId", agent.getCaptainId())

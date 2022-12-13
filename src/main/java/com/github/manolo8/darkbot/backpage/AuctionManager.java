@@ -23,6 +23,11 @@ public class AuctionManager {
         return data;
     }
 
+    @Deprecated
+    public boolean update(int expiryTime) {
+        return this.update((long) expiryTime);
+    }
+
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;

@@ -4,9 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class NovaData {
+    private final Map<Integer, Agent> rosterList = new LinkedHashMap<>();
     private int activeCaptainId;
     private int resourceAmount;
-    private final Map<Integer, Agent> rosterList = new LinkedHashMap<>();
 
     public int getActiveCaptainId() {
         return activeCaptainId;
