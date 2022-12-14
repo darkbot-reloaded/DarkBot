@@ -537,6 +537,7 @@ public class GameAPIImpl<
 
     @Override
     public void clearCache(@Language("RegExp") String pattern) {
+        System.out.println("Clearing cache: " + pattern);
         handler.clearCache(pattern);
     }
 

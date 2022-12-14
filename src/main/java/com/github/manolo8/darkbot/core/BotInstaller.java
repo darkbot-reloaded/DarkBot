@@ -1,8 +1,10 @@
 package com.github.manolo8.darkbot.core;
 
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import eu.darkbot.api.API;
+import eu.darkbot.util.Timer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -26,11 +28,11 @@ public class BotInstaller implements API.Singleton {
     public final Lazy<Long> connectionManagerAddress = new Lazy<>();
     public static int SEP;
 
-    private long timer;
+    private final Timer invalidTimer = Timer.get(150_000); // 2.5min
 
     public BotInstaller() {
         this.invalid.add(value -> {
-            if (value) timer = System.currentTimeMillis();
+            if (value) invalidTimer.activate();
         });
     }
 
@@ -41,6 +43,9 @@ public class BotInstaller implements API.Singleton {
 
     public boolean isInvalid() {
         if (invalid.get()) {
+            if (!invalidTimer.isArmed())
+                invalidTimer.activate(); //activate timer on first loading
+
             checkInvalid();
             invalid.send(tryInstall());
             return true;
@@ -126,10 +131,12 @@ public class BotInstaller implements API.Singleton {
     }
 
     private void checkInvalid() {
-        if (timer == 0 || System.currentTimeMillis() - timer < 180000) return;
+        if (invalidTimer.tryDisarm()) {
+            if (API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE))
+                API.clearCache(".*");
 
-        API.handleRefresh();
-        timer = System.currentTimeMillis();
-        System.out.println("Triggering refresh: bot installer was invalid for too long");
+            API.handleRefresh();
+            System.out.println("Triggering refresh: bot installer was invalid for too long");
+        }
     }
 }
