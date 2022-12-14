@@ -101,6 +101,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option Running RUNNING = new Running();
         public static class Running {
             public @Option boolean RUN_FROM_ENEMIES = true;
+            public @Option @Tag(Tag.Default.NONE) PlayerTag ENEMIES_TAG = null;
             public @Option @Visibility(Level.INTERMEDIATE) @Number(max = 24 * 60 * 60, step = 300) int REMEMBER_ENEMIES_FOR = 300;
             public @Option boolean RUN_FROM_ENEMIES_SIGHT = false;
             public @Option boolean STOP_RUNNING_NO_SIGHT = true;
