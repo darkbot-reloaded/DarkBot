@@ -151,6 +151,7 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
 
     @Override
     public boolean intersectsLine(double x1, double y1, double x2, double y2) {
+        // Source (adapted): https://stackoverflow.com/a/42435277
         double minimumX = x1;
         double maximumX = x2;
 
