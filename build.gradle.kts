@@ -42,7 +42,7 @@ publishing {
 }
 
 dependencies {
-    val apiVersion = "0.5.4"
+    val apiVersion = "0.5.5"
 
     // use this if you want to use local(mavenLocal) darkbot API
     //implementation("eu.darkbot", "darkbot-impl", apiVersion)
