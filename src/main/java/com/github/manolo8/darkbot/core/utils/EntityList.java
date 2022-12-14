@@ -86,8 +86,6 @@ public class EntityList extends Updatable implements EntitiesAPI {
             unknown.add(e);
             eventBroker.sendEvent(new EntityCreateEvent(e));
         });
-
-        //this.main.status.add(this::refreshRadius);
     }
 
     @Override

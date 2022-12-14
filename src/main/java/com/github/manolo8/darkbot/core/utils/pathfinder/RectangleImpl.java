@@ -151,14 +151,39 @@ public class RectangleImpl extends AreaImpl implements Area.Rectangle {
 
     @Override
     public boolean intersectsLine(double x1, double y1, double x2, double y2) {
-        if (x1 < x2 && Area.linesIntersect(x1, y1, x2, y2, minX, minY, minX, maxY))
-            return true;
-        else if (x1 > x2 && Area.linesIntersect(x1, y1, x2, y2, maxX, minY, maxX, maxY))
-            return true;
-        else if (y1 < y2 && Area.linesIntersect(x1, y1, x2, y2, minX, minY, maxX, minY))
-            return true;
-        else
-            return y1 > y2 && Area.linesIntersect(x1, y1, x2, y2, minX, maxY, maxX, maxY);
-    }
+        // Source (adapted): https://stackoverflow.com/a/42435277
+        double minimumX = x1;
+        double maximumX = x2;
 
+        if (x1 > x2) {
+            minimumX = x2;
+            maximumX = x1;
+        }
+
+        if (maximumX > maxX) maximumX = maxX;
+        if (minimumX < minX) minimumX = minX;
+
+        if (minimumX > maximumX) return false;
+
+        double minimumY = y1;
+        double maximumY = y2;
+
+        double dx = x2 - x1;
+        if (Math.abs(dx) > 0.0000001) {
+            double a = (y2 - y1) / dx;
+            double b = y1 - a * x1;
+            minimumY = a * minimumX + b;
+            maximumY = a * maximumX + b;
+        }
+
+        if (minimumY > maximumY) {
+            double temp = maximumY;
+            maximumY = minimumY;
+            minimumY = temp;
+        }
+
+        if (maximumY > maxY) maximumY = maxY;
+        if (minimumY < minY) minimumY = minY;
+        return !(minimumY > maximumY);
+    }
 }

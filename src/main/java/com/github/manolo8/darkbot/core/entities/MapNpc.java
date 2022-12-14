@@ -12,4 +12,8 @@ public class MapNpc extends Npc {
         clickable.update();
     }
 
+    @Override
+    public boolean isMoving() {
+        return locationInfo.isMoving();
+    }
 }

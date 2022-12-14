@@ -84,12 +84,13 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         instance = this;
 
         this.main = super.main = main;
+        added(main);
         this.settings = settingsManager;
         this.keybinds = facadeManager.settings;
         this.portals = mapManager.entities.getPortals();
         this.drive = drive;
         main.status.add(drive::toggleRunning);
-        this.pet = new Pet();
+        this.pet = new Pet(main);
         this.pet.main = main;
         this.map = this.nextMap = this.nextCpuMap = star.byId(-1);
 
