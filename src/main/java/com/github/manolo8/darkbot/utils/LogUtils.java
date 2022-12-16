@@ -2,6 +2,8 @@ package com.github.manolo8.darkbot.utils;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedOutputStream;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,16 +29,11 @@ public class LogUtils {
         else removeOld();
 
         try {
-            FileOutputStream fileOut = new FileOutputStream("logs/" + START_TIME + ".log");
-
-            MultiOutputStream multiOut = new MultiOutputStream(System.out, fileOut);
-            MultiOutputStream multiErr = new MultiOutputStream(System.err, fileOut);
-
-            PrintStream stdout = new PrintStream(multiOut, true, "UTF-8");
-            PrintStream stderr = new PrintStream(multiErr, true, "UTF-8");
-
-            System.setOut(stdout);
-            System.setErr(stderr);
+            OutputStream console = new FileOutputStream(FileDescriptor.out);
+            OutputStream file = new FileOutputStream("logs/" + START_TIME + ".log");
+            OutputStream multi = new MultiOutputStream(console, file);
+            OutputStream buffered = new BufferedOutputStream(multi, 128);
+            PrintStream printStream = new PrintStreamWithDate(buffered.toString());
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
