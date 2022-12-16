@@ -34,6 +34,9 @@ public class LogUtils {
             OutputStream multi = new MultiOutputStream(console, file);
             OutputStream buffered = new BufferedOutputStream(multi, 128);
             PrintStream printStream = new PrintStreamWithDate(buffered.toString());
+
+            System.setOut(printStream);
+            System.setErr(printStream);
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -140,32 +143,8 @@ public class LogUtils {
 
         @Override
         public void write(@NotNull byte [] b, int off, int len) throws IOException {
-            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-            String path = null;
-            if (stack.length > 2) {
-                try {
-                    path = stack[10].toString();
-                    path = path.replace("com.github.manolo8.darkbot", "db");
-                    path = path.replace("eu.darkbot.api", "api");
-                } catch (java.lang.IndexOutOfBoundsException e) {
-                    path = stack[9].toString();
-                    path = path.replace("com.github.manolo8.darkbot", "db");
-                    path = path.replace("eu.darkbot.api", "api");
-                }
-            }
-
-            String string = "[" + LocalDateTime.now().format(LOG_DATE)
-                    + (path != null ? " | " + path : "")
-                    + "] ";
-
-            for (OutputStream out : outputStreams) {
-                if (count == 1)
-                    out.write(string.getBytes());
+            for (OutputStream out : outputStreams)
                 out.write(b, off, len);
-            }
-            count++;
-            if (count > 1)
-                count = 0;
         }
 
         @Override
