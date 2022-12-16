@@ -27,7 +27,7 @@ public class NovaManager {
 
             data.getRosterList().forEach((k, v) -> v.setForRemoval(true));
 
-            updateActiveCaptain();
+            updateActiveCaptain(0);
             updateResource();
             updateRosterList();
 
@@ -45,20 +45,32 @@ public class NovaManager {
         return this.data;
     }
 
-    private void updateActiveCaptain() throws IOException {
+
+    /**
+     * This method is used to unequip, equip and get current captain
+     * @param id
+     * @throws IOException
+     */
+    public boolean updateActiveCaptain(int id) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
                 .setRawParam("command", "updateActiveCaptain")
-                .setRawParam("captainId", "")
+                .setRawParam("captainId", id == 0 ? "" : id)
                 .getContent();
 
         JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             this.data.setActiveCaptainId(jsonObj.get("activeCaptainId").getAsString().isEmpty() ? 0 : jsonObj.get("activeCaptainId").getAsInt());
+            return true;
         } else {
             System.out.println("NovaManager: " + response);
         }
-
+        return false;
     }
+
+    /**
+     * Method to get resources count
+     * @throws IOException
+     */
 
     private void updateResource() throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
@@ -72,6 +84,11 @@ public class NovaManager {
             System.out.println("NovaManager: " + response);
         }
     }
+
+    /**
+     * Method to get list of Nova Agent/Captain
+     * @throws IOException
+     */
 
     private void updateRosterList() throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
@@ -92,20 +109,13 @@ public class NovaManager {
         }
     }
 
-    public boolean equipAgent(int id) throws IOException {
-        String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
-                .setRawParam("command", "updateActiveCaptain")
-                .setRawParam("captainId", id)
-                .getContent();
-        this.update(0);
-        JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
-        if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
-            return true;
-        } else {
-            System.out.println("NovaManager: " + response);
-        }
-        return false;
-    }
+
+    /**
+     * Method to dismiss Nova Agent/Captain
+     * @param id
+     * @return
+     * @throws IOException
+     */
 
     public boolean dismissAgent(int id) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
@@ -121,6 +131,13 @@ public class NovaManager {
         }
         return false;
     }
+
+    /**
+     * Method to buy Nova Agent/Captain
+     * @param amount
+     * @return
+     * @throws IOException
+     */
 
     public boolean buyNova(int amount) throws IOException {
         String response = backpageManager.getConnection("ajax/shop.php", Method.POST)
@@ -141,6 +158,13 @@ public class NovaManager {
         return false;
     }
 
+    /**
+     * Method to get Nova Agent/Captain's perk upgrade details
+     * @param agent
+     * @param perk
+     * @return
+     * @throws IOException
+     */
     public Perk getPerkDetail(Agent agent, Perk perk) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
                 .setRawParam("command", "getPerkUpgradeDetail")
@@ -157,6 +181,15 @@ public class NovaManager {
         }
         return null;
     }
+
+    /**
+     * Method to upgrade Nova Agent/Captain Specific Perk
+     * @param agent
+     * @param perk
+     * @param upgradeLevel
+     * @return
+     * @throws IOException
+     */
 
     public boolean upgradeAgentPerk(Agent agent, Perk perk, int upgradeLevel) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
