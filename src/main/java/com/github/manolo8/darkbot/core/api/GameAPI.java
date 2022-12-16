@@ -69,6 +69,10 @@ public interface GameAPI {
         // LOW = 0, MEDIUM = 1, HIGH = 2, BEST = 3, AUTO_LOW = 4, AUTO_HIGH = 5
         default void setQuality(int quality) {}
 
+        default long lastInternetReadTime() {
+            return 0;
+        }
+
         enum GameQuality {
             LOW, MEDIUM, HIGH, BEST, AUTO_LOW, AUTO_HIGH;
         }
@@ -163,6 +167,7 @@ public interface GameAPI {
         HANDLER_CLIENT_SIZE,
         HANDLER_MIN_CLIENT_SIZE,
         HANDLER_FLASH_PATH,
+        HANDLER_INTERNET_READ_TIME,
 
         DIRECT_USE_ITEM,
         DIRECT_LIMIT_FPS,

@@ -171,6 +171,8 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     // LOW = 0, MEDIUM = 1, HIGH = 2, BEST = 3, AUTO_LOW = 4, AUTO_HIGH = 5
     void setQuality(GameAPI.Handler.GameQuality quality);
 
+    long lastInternetReadTime();
+
     //MemoryAPI
     @Override
     default int readInt(long address) {

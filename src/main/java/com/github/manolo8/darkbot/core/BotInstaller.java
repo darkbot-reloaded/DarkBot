@@ -28,11 +28,11 @@ public class BotInstaller implements API.Singleton {
     public final Lazy<Long> connectionManagerAddress = new Lazy<>();
     public static int SEP;
 
-    private final Timer invalidTimer = Timer.get(150_000); // 2.5min
+    private final Timer invalidTimer = Timer.get();
 
     public BotInstaller() {
         this.invalid.add(value -> {
-            if (value) invalidTimer.activate();
+            if (!value) invalidTimer.disarm();
         });
     }
 
@@ -43,9 +43,6 @@ public class BotInstaller implements API.Singleton {
 
     public boolean isInvalid() {
         if (invalid.get()) {
-            if (!invalidTimer.isArmed())
-                invalidTimer.activate(); //activate timer on first loading
-
             checkInvalid();
             invalid.send(tryInstall());
             return true;
@@ -130,13 +127,24 @@ public class BotInstaller implements API.Singleton {
         // address + 280 - starts old pattern here
     }
 
+    private long lastInternetRead;
     private void checkInvalid() {
+        if (API.hasCapability(GameAPI.Capability.HANDLER_INTERNET_READ_TIME)) {
+            long lastRead = API.lastInternetReadTime();
+            if (lastInternetRead != lastRead) {
+                lastInternetRead = lastRead;
+                invalidTimer.activate(20_000);
+            } else if (!invalidTimer.isArmed()) invalidTimer.activate(20_000);
+
+        } else if (!invalidTimer.isArmed()) invalidTimer.activate(150_000); // 2.5 min
+
+        // timer is disarmed on refresh and on valid tick
         if (invalidTimer.tryDisarm()) {
             if (API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE))
                 API.clearCache(".*");
 
             API.handleRefresh();
-            System.out.println("Triggering refresh: bot installer was invalid for too long");
+            System.out.println("Triggering refresh: stuck at loading screen for too long!");
         }
     }
 }

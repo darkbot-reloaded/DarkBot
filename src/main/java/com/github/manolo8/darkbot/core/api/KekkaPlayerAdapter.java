@@ -62,6 +62,7 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
                 GameAPI.Capability.HANDLER_MIN_CLIENT_SIZE,
                 GameAPI.Capability.ALL_KEYBINDS_SUPPORT,
                 GameAPI.Capability.HANDLER_FLASH_PATH,
+                GameAPI.Capability.HANDLER_INTERNET_READ_TIME,
                 GameAPI.Capability.DIRECT_ENTITY_SELECT,
                 GameAPI.Capability.DIRECT_MOVE_SHIP,
                 GameAPI.Capability.DIRECT_COLLECT_BOX,

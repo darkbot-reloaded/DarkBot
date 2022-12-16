@@ -215,10 +215,7 @@ public class GuiManager implements Manager, GameScreenAPI {
             System.out.println("Triggering refresh: gui manger was invalid for too long. " +
                     "(Make sure your hp fills up, equip an auto-repair CPU if you're missing one)");
 
-            if (main.config.BOT_SETTINGS.API_CONFIG.CLEAR_CACHE_ON_STUCK &&
-                    API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE))
-                API.clearCache(".*"); //(preloader|main|loadingscreen).swf
-
+            clearCache();
             API.handleRefresh();
             validTime = System.currentTimeMillis();
         }
@@ -237,6 +234,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
             if (connecting.lastUpdatedOver(30000)) {
                 System.out.println("Triggering refresh: connection window stuck for too long");
+                clearCache();
                 API.handleRefresh();
                 connecting.reset();
             }
@@ -296,6 +294,12 @@ public class GuiManager implements Manager, GameScreenAPI {
         checkInvalid();
 
         return main.hero.locationInfo.isLoaded();
+    }
+
+    private void clearCache() {
+        if (main.config.BOT_SETTINGS.API_CONFIG.CLEAR_CACHE_ON_STUCK &&
+                API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE))
+            API.clearCache(".*");
     }
 
     @Override

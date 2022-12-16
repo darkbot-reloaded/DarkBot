@@ -17,8 +17,11 @@ public abstract class TemporalModule implements Module {
     }
 
     protected void goBack() {
-        main.setModule(this.back);
+        if (this.back instanceof eu.darkbot.api.extensions.TemporalModule) {
+            ((eu.darkbot.api.extensions.TemporalModule) this.back).goBack();
+        } else {
+            main.setModule(this.back);
+        }
         back = null;
     }
-
 }

@@ -590,4 +590,9 @@ public class GameAPIImpl<
     public void setQuality(GameAPI.Handler.GameQuality quality) {
         handler.setQuality(quality.ordinal());
     }
+
+    @Override
+    public long lastInternetReadTime() {
+        return handler.lastInternetReadTime();
+    }
 }
