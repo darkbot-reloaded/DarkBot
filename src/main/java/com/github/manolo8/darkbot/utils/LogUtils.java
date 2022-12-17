@@ -24,19 +24,26 @@ public class LogUtils {
     public static final Path LOG_FOLDER = Paths.get("logs");
     public static final String START_TIME = LocalDateTime.now().format(FILENAME_DATE);
 
-    public static void setOutputToFile() {
+    public static void setOutputToFileAndConsole() {
         if (!Files.exists(LOG_FOLDER)) createFolder();
         else removeOld();
 
         try {
-            OutputStream console = new FileOutputStream(FileDescriptor.out);
-            OutputStream file = new FileOutputStream("logs/" + START_TIME + ".log");
-            OutputStream multi = new MultiOutputStream(console, file);
-            OutputStream buffered = new BufferedOutputStream(multi, 128);
-            PrintStream printStream = new PrintStreamWithDate(buffered.toString());
+            OutputStream consoleOut = new FileOutputStream(FileDescriptor.out);
+            OutputStream consoleErr = new FileOutputStream(FileDescriptor.err);
 
-            System.setOut(printStream);
-            System.setErr(printStream);
+            OutputStream file = new FileOutputStream("logs/" + START_TIME + ".log");
+
+            OutputStream multiOut = new MultiOutputStream(consoleOut, file);
+            OutputStream bufferedOut = new BufferedOutputStream(multiOut, 128);
+            PrintStream printStreamOut = new PrintStreamWithDate(bufferedOut);
+
+            OutputStream multiErr = new MultiOutputStream(consoleErr, file);
+            OutputStream bufferedErr = new BufferedOutputStream(multiErr, 128);
+            PrintStream printStreamErr = new PrintStreamWithDate(bufferedErr);
+
+            System.setOut(printStreamOut);
+            System.setErr(printStreamErr);
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -51,10 +58,6 @@ public class LogUtils {
             e.printStackTrace();
             return null;
         }
-    }
-
-    private static PrintStream getLogger() throws FileNotFoundException, UnsupportedEncodingException {
-        return new PrintStreamWithDate("logs/" + START_TIME + ".log");
     }
 
     private static void createFolder() {
@@ -99,8 +102,8 @@ public class LogUtils {
 
     private static class PrintStreamWithDate extends PrintStream {
 
-        public PrintStreamWithDate(String logfile) throws FileNotFoundException, UnsupportedEncodingException {
-            super(logfile, "UTF-8");
+        public PrintStreamWithDate(OutputStream downstream) throws FileNotFoundException, UnsupportedEncodingException {
+            super(downstream, true, "UTF-8");
         }
 
         @Override
@@ -136,13 +139,13 @@ public class LogUtils {
         }
 
         @Override
-        public void write(@NotNull byte [] b) throws IOException {
+        public void write(@NotNull byte[] b) throws IOException {
             for (OutputStream out : outputStreams)
                 out.write(b);
         }
 
         @Override
-        public void write(@NotNull byte [] b, int off, int len) throws IOException {
+        public void write(@NotNull byte[] b, int off, int len) throws IOException {
             for (OutputStream out : outputStreams)
                 out.write(b, off, len);
         }
