@@ -34,6 +34,10 @@ public class LoginData {
         return url;
     }
 
+    public String getFullUrl() {
+        return "https://" + getUrl() + "/";
+    }
+
     public String getPreloaderUrl() {
         return preloaderUrl;
     }

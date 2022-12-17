@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
+import com.github.manolo8.darkbot.utils.login.LoginData;
 import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.BackpageAPI;
 import eu.darkbot.util.Timer;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public class BackpageManager extends Thread implements BackpageAPI {
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
     protected static final String[] ACTIONS = new String[]{
@@ -146,10 +148,21 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     private boolean isInvalid() {
-        this.sid = main.statsManager.sid;
-        if (!Objects.equals(this.instance, main.statsManager.instance)) {
-            this.instance = main.statsManager.instance;
-            this.instanceURI = tryParse(this.instance);
+        if (loginData != null && loginData.isPresent()) {
+            LoginData ld = loginData.get();
+
+            this.sid = ld.getSid();
+            if (!Objects.equals(this.instance, ld.getFullUrl())) {
+                this.instance = ld.getFullUrl();
+                this.instanceURI = tryParse(this.instance);
+            }
+
+        } else {
+            this.sid = main.statsManager.sid;
+            if (!Objects.equals(this.instance, main.statsManager.instance)) {
+                this.instance = main.statsManager.instance;
+                this.instanceURI = tryParse(this.instance);
+            }
         }
         return sid == null || instance == null || sid.isEmpty() || instance.isEmpty();
     }
@@ -297,5 +310,13 @@ public class BackpageManager extends Thread implements BackpageAPI {
     @Override
     public Optional<String> findReloadToken(@NotNull String body) {
         return Optional.ofNullable(getReloadToken(body));
+    }
+
+    private Optional<LoginData> loginData;
+    public void setLoginData(LoginData loginData) {
+        if (this.loginData != null)
+            throw new IllegalStateException("LoginData can be assigned only once!");
+
+        this.loginData = Optional.ofNullable(loginData);
     }
 }
