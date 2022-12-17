@@ -58,6 +58,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
     protected long checkDrones = Long.MAX_VALUE;
     protected int sidStatus = -1;
 
+    private Optional<LoginData> loginData;
+
     public BackpageManager(Main main) {
         super("BackpageManager");
         this.main = main;
@@ -141,6 +143,13 @@ public class BackpageManager extends Thread implements BackpageAPI {
                 }
             }
         }
+    }
+
+    public void setLoginData(LoginData loginData) {
+        if (this.loginData != null)
+            throw new IllegalStateException("LoginData can be assigned only once!");
+
+        this.loginData = Optional.ofNullable(loginData);
     }
 
     public void checkDronesAfterKill() {
@@ -310,13 +319,5 @@ public class BackpageManager extends Thread implements BackpageAPI {
     @Override
     public Optional<String> findReloadToken(@NotNull String body) {
         return Optional.ofNullable(getReloadToken(body));
-    }
-
-    private Optional<LoginData> loginData;
-    public void setLoginData(LoginData loginData) {
-        if (this.loginData != null)
-            throw new IllegalStateException("LoginData can be assigned only once!");
-
-        this.loginData = Optional.ofNullable(loginData);
     }
 }
