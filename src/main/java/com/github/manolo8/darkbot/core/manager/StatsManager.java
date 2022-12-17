@@ -28,6 +28,7 @@ public class StatsManager implements Manager, StatsAPI {
     public double honor;
     public int deposit;
     public int depositTotal;
+    public int userId;
 
     private long started = System.currentTimeMillis();
     private long runningTime = 1;
@@ -50,6 +51,7 @@ public class StatsManager implements Manager, StatsAPI {
 
     @Override
     public void install(BotInstaller botInstaller) {
+        botInstaller.invalid.add(value -> userId = 0);
         botInstaller.heroInfoAddress.add(value -> address = value);
         botInstaller.settingsAddress.add(value -> settingsAddress = value);
     }
@@ -69,6 +71,7 @@ public class StatsManager implements Manager, StatsAPI {
         //currentBox = API.readMemoryLong(address + 0xE8);
 
         sid = API.readMemoryStringFallback(API.readMemoryLong(address + 200), null);
+        userId = API.readInt(address + 48);
         if (settingsAddress == 0) return;
         instance = API.readMemoryStringFallback(API.readMemoryLong(settingsAddress + 656), null);
     }

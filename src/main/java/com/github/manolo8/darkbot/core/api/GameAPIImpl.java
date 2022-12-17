@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
@@ -92,18 +93,20 @@ public class GameAPIImpl<
                 interaction.getVersion() + "i" +
                 direct.getVersion() + "d";
 
+        Main main = HeroManager.instance.main;
 
         this.loginData = hasCapability(GameAPI.Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
+        main.backpage.setLoginData(loginData);
+
         this.initiallyShown = hasCapability(GameAPI.Capability.INITIALLY_SHOWN) && !params.getAutoHide();
+        this.mapManager = main.mapManager;
 
-        this.mapManager = HeroManager.instance.main.mapManager;
-
-        ConfigAPI config = HeroManager.instance.main.configHandler;
+        ConfigAPI config = main.configHandler;
         if (hasCapability(GameAPI.Capability.DIRECT_LIMIT_FPS)) {
             ConfigSetting<Integer> maxFps = config.requireConfig("bot_settings.api_config.max_fps");
             maxFps.addListener(fpsLimitListener = this::setMaxFps);
 
-            HeroManager.instance.main.status.add(running -> setMaxFps(maxFps.getValue()));
+            main.status.add(running -> setMaxFps(maxFps.getValue()));
             setMaxFps(maxFps.getValue());
         } else {
             this.fpsLimitListener = null;
