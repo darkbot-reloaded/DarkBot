@@ -1,6 +1,12 @@
 package com.github.manolo8.darkbot.utils.login;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class LoginData {
+    private static final Pattern USER_ID_PATTERN = Pattern.compile("userID=(\\d+)");
+
+    private int userId;
     private String username, password, sid, url, fullUrl, preloaderUrl, params;
 
     public void setCredentials(String username, String password) {
@@ -17,6 +23,15 @@ public class LoginData {
     public void setPreloader(String preloaderUrl, String params) {
         this.preloaderUrl = preloaderUrl;
         this.params = params;
+
+        Matcher matcher = USER_ID_PATTERN.matcher(params);
+        if (matcher.find()) {
+            try {
+                userId = Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException ignored) {
+                userId = 0;
+            }
+        }
     }
 
     public String getUsername() {
@@ -45,6 +60,10 @@ public class LoginData {
 
     public String getParams() {
         return params;
+    }
+
+    public int getUserId() {
+        return userId;
     }
 
     @Override
