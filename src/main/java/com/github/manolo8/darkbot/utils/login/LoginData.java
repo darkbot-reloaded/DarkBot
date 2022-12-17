@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.utils.login;
 
 public class LoginData {
-    private String username, password, sid, url, preloaderUrl, params;
+    private String username, password, sid, url, fullUrl, preloaderUrl, params;
 
     public void setCredentials(String username, String password) {
         this.username = username;
@@ -11,6 +11,7 @@ public class LoginData {
     public void setSid(String sid, String url) {
         this.sid = sid;
         this.url = url;
+        this.fullUrl = "https://" + url + "/";
     }
 
     public void setPreloader(String preloaderUrl, String params) {
@@ -35,7 +36,7 @@ public class LoginData {
     }
 
     public String getFullUrl() {
-        return "https://" + getUrl() + "/";
+        return fullUrl;
     }
 
     public String getPreloaderUrl() {
