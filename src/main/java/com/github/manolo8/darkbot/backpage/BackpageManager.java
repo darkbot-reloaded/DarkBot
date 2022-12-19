@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
-import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
@@ -21,8 +20,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -235,15 +234,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
                 .addSupplier(() -> lastRequest = System.currentTimeMillis());
     }
 
+    @Deprecated
     public String getDataInventory(String params) {
-        try {
-            return getConnection(params, Method.GET, 2500)
-                    .setRawHeader("Content-Type", "application/x-www-form-urlencoded")
-                    .consumeInputStream(Base64Utils::decode);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return legacyHangarManager.getDataInventory(params);
     }
 
     public String getReloadToken(InputStream input) {
@@ -324,6 +317,10 @@ public class BackpageManager extends Thread implements BackpageAPI {
     @Override
     public Instant getLastRequestTime() {
         return Instant.ofEpochMilli(lastRequest);
+    }
+
+    public void updateLastRequestTime() {
+        lastRequest = System.currentTimeMillis();
     }
 
     @Override

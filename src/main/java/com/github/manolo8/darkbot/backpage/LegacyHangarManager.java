@@ -1,18 +1,10 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.backpage.entities.Drone;
-import com.github.manolo8.darkbot.backpage.entities.Hangar;
-import com.github.manolo8.darkbot.backpage.entities.Item;
-import com.github.manolo8.darkbot.backpage.entities.ItemInfo;
-import com.github.manolo8.darkbot.backpage.entities.ShipInfo;
+import com.github.manolo8.darkbot.backpage.entities.*;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.http.Method;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
@@ -52,6 +44,17 @@ public class LegacyHangarManager {
         this.items = new ArrayList<>();
         this.itemInfos = new ArrayList<>();
         this.shipInfos = new ArrayList<>();
+    }
+
+    public String getDataInventory(String params) {
+        try {
+            return backpageManager.getConnection(params, Method.GET, 2500)
+                    .setRawHeader("Content-Type", "application/x-www-form-urlencoded")
+                    .consumeInputStream(Base64Utils::decode);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public boolean changeHangar(String hangarId) {
