@@ -319,6 +319,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
         return Instant.ofEpochMilli(lastRequest);
     }
 
+    @Override
     public void updateLastRequestTime() {
         lastRequest = System.currentTimeMillis();
     }

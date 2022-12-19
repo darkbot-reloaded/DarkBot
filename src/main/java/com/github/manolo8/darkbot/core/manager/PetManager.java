@@ -632,6 +632,11 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
+    public PetGear getGear() {
+        return currentModule == null ? null : PetGear.of(currentModule.id);
+    }
+
+    @Override
     public void setGear(Integer gearId) throws ItemNotEquippedException {
         if (gearId != null && !hasGear(gearId))
             throw new ItemNotEquippedException(PetGear.of(gearId), "Gear #" + gearId);
@@ -641,7 +646,7 @@ public class PetManager extends Gui implements PetAPI {
 
     @Override
     public void setGear(@Nullable PetGear petGear) throws ItemNotEquippedException {
-        PetAPI.super.setGear(petGear);
+        setGear(petGear != null ? petGear.getId() : null);
     }
 
     @Override
