@@ -23,5 +23,4 @@ public abstract class TemporalModule implements Module, eu.darkbot.api.extension
         main.setModule(this.back);
         back = null;
     }
-
 }
