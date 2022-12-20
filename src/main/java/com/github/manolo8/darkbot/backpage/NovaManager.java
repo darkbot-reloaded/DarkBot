@@ -199,7 +199,7 @@ public class NovaManager {
                 .setRawParam("upgradeLevel", upgradeLevel)
                 .getContent();
         this.update(0);
-        JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
+        JsonObject jsonObj = g.fromJson(response, JsonObject.class);
         return jsonObj.get("result").getAsString().equalsIgnoreCase("OK");
     }
 }
