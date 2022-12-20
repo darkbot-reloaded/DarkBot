@@ -34,7 +34,7 @@ public class DispatchManager {
         this.data = new DispatchData();
         this.collected = new HashMap<>();
         this.lastCollected = new HashMap<>();
-        this.g = new Gson();
+        this.g = backpageManager.getGson();
     }
 
     public DispatchData getData() {

@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
 import com.github.manolo8.darkbot.utils.login.LoginData;
+import com.google.gson.Gson;
 import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.BackpageAPI;
 import eu.darkbot.util.Timer;
@@ -61,15 +62,18 @@ public class BackpageManager extends Thread implements BackpageAPI {
     private int userId;
     private Optional<LoginData> loginData;
 
+    private Gson gson;
+
     public BackpageManager(Main main) {
         super("BackpageManager");
         this.main = main;
         this.legacyHangarManager = new LegacyHangarManager(main, this);
         this.hangarManager = new HangarManager(this);
-        this.galaxyManager = new GalaxyManager(main);
+        this.galaxyManager = new GalaxyManager(this);
         this.dispatchManager = new DispatchManager(this);
         this.auctionManager = new AuctionManager(this);
         this.novaManager = new NovaManager(this);
+        gson = new Gson();
 
         setDaemon(true);
     }
@@ -286,6 +290,11 @@ public class BackpageManager extends Thread implements BackpageAPI {
             default:
                 return sidStatus + "";
         }
+    }
+
+    public Gson getGson(){
+        if(gson == null) gson = new Gson();
+        return gson;
     }
 
     @Override

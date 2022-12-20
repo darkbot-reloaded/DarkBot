@@ -18,7 +18,7 @@ import java.io.InputStream;
 import java.util.List;
 
 public class HangarManager implements Tickable {
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
     @Deprecated
     private final LegacyHangarManager legacyHangarManager;
@@ -33,7 +33,7 @@ public class HangarManager implements Tickable {
 
     public HangarManager(BackpageManager backpage) {
         this.backpage = backpage;
-
+        this.gson = backpage.getGson();
         this.legacyHangarManager = backpage.legacyHangarManager;
     }
 

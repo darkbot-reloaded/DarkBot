@@ -18,7 +18,7 @@ public class NovaManager {
     public NovaManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
         this.data = new NovaData();
-        this.g = new Gson();
+        this.g = backpageManager.getGson();
     }
 
     public boolean update(long expiryTime) {
