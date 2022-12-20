@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,13 +61,15 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     private int userId;
     private Optional<LoginData> loginData;
+    private static final Random random = new Random();
+    private static Character[] chars = {'a', 'b', 'c', 'd', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
     public BackpageManager(Main main) {
         super("BackpageManager");
         this.main = main;
         this.legacyHangarManager = new LegacyHangarManager(main, this);
         this.hangarManager = new HangarManager(this);
-        this.galaxyManager = new GalaxyManager(main);
+        this.galaxyManager = new GalaxyManager(this);
         this.dispatchManager = new DispatchManager(this);
         this.auctionManager = new AuctionManager(this);
         this.novaManager = new NovaManager(this);
@@ -270,6 +273,14 @@ public class BackpageManager extends Thread implements BackpageAPI {
         return sidStat() + (sidStatus != SidStatus.NO_SID && sidStatus != 302 ?
                 " " + Time.toString(System.currentTimeMillis() - sidLastUpdate) + "/" +
                         Time.toString(sidNextUpdate - sidLastUpdate) : "");
+    }
+
+    public String generateReloadToken(){
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < 32; i++) {
+            result.append(chars[random.nextInt(chars.length)]);
+        }
+        return result.toString();
     }
 
     private String sidStat() {
