@@ -49,17 +49,17 @@ public class AuctionManager {
     public boolean bidItem(AuctionItems auctionItem, long amount) {
         try {
             String token = backpageManager.getConnection("indexInternal.es", Method.GET)
-                    .setRawParam("action", "internalAuction")
+                    .setParam("action", "internalAuction")
                     .consumeInputStream(backpageManager::getReloadToken);
             String response = backpageManager.getConnection("indexInternal.es", Method.POST)
-                    .setRawParam("action", "internalAuction")
-                    .setRawParam("reloadToken", token)
-                    .setRawParam("auctionType", auctionItem.getAuctionType().getId())
-                    .setRawParam("subAction", "bid")
-                    .setRawParam("lootId", auctionItem.getLootId())
-                    .setRawParam("itemId", auctionItem.getId())
-                    .setRawParam("credits", String.valueOf(amount))
-                    .setRawParam("auction_buy_button", "BID")
+                    .setParam("action", "internalAuction")
+                    .setParam("reloadToken", token)
+                    .setParam("auctionType", auctionItem.getAuctionType().getId())
+                    .setParam("subAction", "bid")
+                    .setParam("lootId", auctionItem.getLootId())
+                    .setParam("itemId", auctionItem.getId())
+                    .setParam("credits", String.valueOf(amount))
+                    .setParam("auction_buy_button", "BID")
                     .getContent();
             return handleResponse("Bid on Item", auctionItem.getName(), response);
         } catch (Exception e) {

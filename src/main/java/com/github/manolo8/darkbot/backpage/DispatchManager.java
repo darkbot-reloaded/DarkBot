@@ -77,8 +77,8 @@ public class DispatchManager {
                 return handleResponse("Hire Retriever", retriever.getId(), "(ERROR) Can Not Hire Retriever, Not enough permits");
             }
             String response = backpageManager.getConnection("ajax/dispatch.php", Method.POST)
-                    .setRawParam("command", "sendDispatch")
-                    .setRawParam("dispatchId", retriever.getId())
+                    .setParam("command", "sendDispatch")
+                    .setParam("dispatchId", retriever.getId())
                     .getContent();
             return handleResponse("Hired Dispatcher", retriever.getId(), response);
         } catch (Exception e) {
@@ -96,10 +96,10 @@ public class DispatchManager {
                 return handleResponse("Instant Collect", progress.getId(),
                         "(ERROR) Can Not Instant Collect, No Prime Coupon available for instant collection");
             String response = backpageManager.getConnection("ajax/dispatch.php", Method.POST)
-                    .setRawParam("command", "instantComplete")
-                    .setRawParam("dispatchId", progress.getId())
-                    .setRawParam("dispatchRewardPackage", progress.getDispatchRewardPackage())
-                    .setRawParam("slotId", progress.getSlotId())
+                    .setParam("command", "instantComplete")
+                    .setParam("dispatchId", progress.getId())
+                    .setParam("dispatchRewardPackage", progress.getDispatchRewardPackage())
+                    .setParam("slotId", progress.getSlotId())
                     .getContent();
 
             return handleResponse("Collected Retriever", progress.getId(), response);
@@ -121,8 +121,8 @@ public class DispatchManager {
             }
 
             String response = backpageManager.getConnection("ajax/dispatch.php", Method.POST)
-                    .setRawParam("command", "sendGateDispatch")
-                    .setRawParam("gateId", gate.getId())
+                    .setParam("command", "sendGateDispatch")
+                    .setParam("gateId", gate.getId())
                     .getContent();
             return handleResponse("Gate Started", gate.getName(), response);
         } catch (Exception e) {
@@ -138,8 +138,8 @@ public class DispatchManager {
         try {
             System.out.println("Collecting: Gate " + gate.getName());
             String response = backpageManager.getConnection("ajax/dispatch.php", Method.POST)
-                    .setRawParam("command", "collectGateDispatch")
-                    .setRawParam("gateId", gate.getId())
+                    .setParam("command", "collectGateDispatch")
+                    .setParam("gateId", gate.getId())
                     .getContent();
 
             gate.setInProgress(false);
@@ -161,8 +161,8 @@ public class DispatchManager {
         try {
             System.out.println("Collecting: Slot " + progress.getSlotId());
             String response = backpageManager.getConnection("ajax/dispatch.php", Method.POST)
-                    .setRawParam("command", "collectDispatch")
-                    .setRawParam("slot", progress.getSlotId())
+                    .setParam("command", "collectDispatch")
+                    .setParam("slot", progress.getSlotId())
                     .getContent();
 
             return handleResponse("Collected Retriever", progress.getId(), response);

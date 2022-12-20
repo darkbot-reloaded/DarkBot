@@ -292,8 +292,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
         }
     }
 
-    public Gson getGson(){
-        if(gson == null) gson = new Gson();
+    public Gson getGson() {
+        if (gson == null) gson = new Gson();
         return gson;
     }
 

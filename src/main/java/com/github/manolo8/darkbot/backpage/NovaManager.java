@@ -45,16 +45,10 @@ public class NovaManager {
         return this.data;
     }
 
-
-    /**
-     * This method is used to unequip, equip and get current captain
-     * @param id
-     * @throws IOException
-     */
-    public boolean updateActiveCaptain(int id) throws IOException {
+    public boolean updateActiveCaptain(int captainId) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
-                .setRawParam("command", "updateActiveCaptain")
-                .setRawParam("captainId", id == 0 ? "" : id)
+                .setParam("command", "updateActiveCaptain")
+                .setParam("captainId", captainId == 0 ? "" : captainId)
                 .getContent();
 
         JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
@@ -67,14 +61,9 @@ public class NovaManager {
         return false;
     }
 
-    /**
-     * Method to get resources count
-     * @throws IOException
-     */
-
     private void updateResource() throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
-                .setRawParam("command", "getResources")
+                .setParam("command", "getResources")
                 .getContent();
 
         JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
@@ -85,14 +74,9 @@ public class NovaManager {
         }
     }
 
-    /**
-     * Method to get list of Nova Agent/Captain
-     * @throws IOException
-     */
-
     private void updateRosterList() throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
-                .setRawParam("command", "getRosterList")
+                .setParam("command", "getRosterList")
                 .getContent();
 
         JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
@@ -109,18 +93,10 @@ public class NovaManager {
         }
     }
 
-
-    /**
-     * Method to dismiss Nova Agent/Captain
-     * @param id
-     * @return
-     * @throws IOException
-     */
-
-    public boolean dismissAgent(int id) throws IOException {
+    public boolean dismissAgent(int captainId) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
-                .setRawParam("command", "dismissCaptain")
-                .setRawParam("captainId", id)
+                .setParam("command", "dismissCaptain")
+                .setParam("captainId", captainId)
                 .getContent();
         this.update(0);
         JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
@@ -132,21 +108,14 @@ public class NovaManager {
         return false;
     }
 
-    /**
-     * Method to buy Nova Agent/Captain
-     * @param amount
-     * @return
-     * @throws IOException
-     */
-
     public boolean buyNova(int amount) throws IOException {
         String response = backpageManager.getConnection("ajax/shop.php", Method.POST)
-                .setRawParam("action", "purchase")
-                .setRawParam("category", "special")
-                .setRawParam("itemId", "captain_captain-generic")
-                .setRawParam("amount", amount)
-                .setRawParam("level", "")
-                .setRawParam("selectedName", "")
+                .setParam("action", "purchase")
+                .setParam("category", "special")
+                .setParam("itemId", "captain_captain-generic")
+                .setParam("amount", amount)
+                .setParam("level", "")
+                .setParam("selectedName", "")
                 .getContent();
         this.update(0);
         JsonObject jsonObj = g.fromJson(response, JsonObject.class);
@@ -158,18 +127,11 @@ public class NovaManager {
         return false;
     }
 
-    /**
-     * Method to get Nova Agent/Captain's perk upgrade details
-     * @param agent
-     * @param perk
-     * @return
-     * @throws IOException
-     */
     public Perk getPerkDetail(Agent agent, Perk perk) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
-                .setRawParam("command", "getPerkUpgradeDetail")
-                .setRawParam("captainId", agent.getCaptainId())
-                .setRawParam("perkId", perk.getPerkId())
+                .setParam("command", "getPerkUpgradeDetail")
+                .setParam("captainId", agent.getCaptainId())
+                .setParam("perkId", perk.getPerkId())
                 .getContent();
 
         JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
@@ -182,24 +144,20 @@ public class NovaManager {
         return null;
     }
 
-    /**
-     * Method to upgrade Nova Agent/Captain Specific Perk
-     * @param agent
-     * @param perk
-     * @param upgradeLevel
-     * @return
-     * @throws IOException
-     */
-
     public boolean upgradeAgentPerk(Agent agent, Perk perk, int upgradeLevel) throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
-                .setRawParam("command", "upgradePerk")
-                .setRawParam("captainId", agent.getCaptainId())
-                .setRawParam("perkId", perk.getPerkId())
-                .setRawParam("upgradeLevel", upgradeLevel)
+                .setParam("command", "upgradePerk")
+                .setParam("captainId", agent.getCaptainId())
+                .setParam("perkId", perk.getPerkId())
+                .setParam("upgradeLevel", upgradeLevel)
                 .getContent();
         this.update(0);
         JsonObject jsonObj = g.fromJson(response, JsonObject.class);
-        return jsonObj.get("result").getAsString().equalsIgnoreCase("OK");
+        if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
+            return true;
+        } else {
+            System.out.println("NovaManager: " + response);
+        }
+        return false;
     }
 }
