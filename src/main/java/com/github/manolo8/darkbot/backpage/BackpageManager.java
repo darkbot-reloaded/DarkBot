@@ -62,7 +62,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     private int userId;
     private Optional<LoginData> loginData;
 
-    private Gson gson;
+    private final Gson gson = new Gson();
 
     public BackpageManager(Main main) {
         super("BackpageManager");
