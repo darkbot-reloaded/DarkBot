@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,23 +30,28 @@ public class LogUtils {
         else removeOld();
 
         try {
-            OutputStream consoleOut = new FileOutputStream(FileDescriptor.out);
-            OutputStream consoleErr = new FileOutputStream(FileDescriptor.err);
+            OutputStream fileLogger = new FileOutputStream("logs/" + START_TIME + ".log");
 
-            OutputStream file = new FileOutputStream("logs/" + START_TIME + ".log");
-
-            OutputStream multiOut = new MultiOutputStream(consoleOut, file);
-            OutputStream bufferedOut = new BufferedOutputStream(multiOut, 128);
-            PrintStream printStreamOut = new PrintStreamWithDate(bufferedOut);
-
-            OutputStream multiErr = new MultiOutputStream(consoleErr, file);
-            OutputStream bufferedErr = new BufferedOutputStream(multiErr, 128);
-            PrintStream printStreamErr = new PrintStreamWithDate(bufferedErr);
-
-            System.setOut(printStreamOut);
-            System.setErr(printStreamErr);
-        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            System.setOut(createPrintStream(new FileOutputStream(FileDescriptor.out), fileLogger));
+            System.setErr(createPrintStream(new FileOutputStream(FileDescriptor.err), fileLogger));
+        } catch (FileNotFoundException e) {
+            System.out.println("Failed to redirect logs, file not found: " + "logs/" + START_TIME + ".log");
             e.printStackTrace();
+        }
+    }
+
+    private static PrintStream createPrintStream(FileOutputStream multi, OutputStream fileLogger) {
+        OutputStream multiOut = new MultiOutputStream(multi, fileLogger);
+        OutputStream bufferedOut = new BufferedOutputStream(multiOut, 128);
+
+        try {
+            if (System.getProperty("file.encoding").equals(Charset.defaultCharset().toString()))
+                return new PrintStreamWithDate(bufferedOut, "UTF-8");
+            else
+                return new PrintStreamWithDate(bufferedOut);
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("UTF-8 not supported");
+            return new PrintStreamWithDate(bufferedOut);
         }
     }
 
@@ -102,8 +108,12 @@ public class LogUtils {
 
     private static class PrintStreamWithDate extends PrintStream {
 
-        public PrintStreamWithDate(OutputStream downstream) throws FileNotFoundException, UnsupportedEncodingException {
-            super(downstream, true, "UTF-8");
+        public PrintStreamWithDate(OutputStream downstream, String encoding) throws UnsupportedEncodingException {
+            super(downstream, true, encoding);
+        }
+
+        public PrintStreamWithDate(OutputStream downstream) {
+            super(downstream, true);
         }
 
         @Override
@@ -126,7 +136,6 @@ public class LogUtils {
 
     public static class MultiOutputStream extends OutputStream {
         private final OutputStream[] outputStreams;
-        int count = 0;
 
         public MultiOutputStream(OutputStream... outputStreams) {
             this.outputStreams = outputStreams;
@@ -134,32 +143,52 @@ public class LogUtils {
 
         @Override
         public void write(int b) throws IOException {
-            for (OutputStream out : outputStreams)
-                out.write(b);
+            try {
+                for (OutputStream out : outputStreams)
+                    out.write(b);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
         public void write(@NotNull byte[] b) throws IOException {
-            for (OutputStream out : outputStreams)
-                out.write(b);
+            try {
+                for (OutputStream out : outputStreams)
+                    out.write(b);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
         public void write(@NotNull byte[] b, int off, int len) throws IOException {
-            for (OutputStream out : outputStreams)
-                out.write(b, off, len);
+            try {
+                for (OutputStream out : outputStreams)
+                    out.write(b, off, len);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
-        public void flush() throws IOException {
-            for (OutputStream out : outputStreams)
-                out.flush();
+        public void flush() {
+            try {
+                for (OutputStream out : outputStreams)
+                    out.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
         public void close() throws IOException {
-            for (OutputStream out : outputStreams)
-                out.close();
+            try {
+                for (OutputStream out : outputStreams)
+                    out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
