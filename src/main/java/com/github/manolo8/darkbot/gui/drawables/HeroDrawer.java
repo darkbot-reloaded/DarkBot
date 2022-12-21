@@ -27,18 +27,18 @@ public class HeroDrawer implements Drawable {
     }
 
     @Override
-    public void onDraw(MapGraphics mg) {
+    public void onDrawRadiation(MapGraphics mg, MapGraphics rad) {
         drawConfiguration(mg);
 
         if (!hero.isValid() || !hero.getLocationInfo().isInitialized()) return;
 
-        drawHeroDestination(mg);
+        drawHeroDestination(rad);
 
-        mg.setColor("hero");
-        mg.drawOvalCentered(hero, 8, true);
+        rad.setColor("hero");
+        rad.drawOvalCentered(hero, 8, true);
 
-        drawScreenBounds(mg);
-        drawPet(mg);
+        drawScreenBounds(rad);
+        drawPet(rad);
     }
 
     private void drawConfiguration(MapGraphics mg) {

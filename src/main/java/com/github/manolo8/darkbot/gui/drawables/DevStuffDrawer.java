@@ -46,35 +46,35 @@ public class DevStuffDrawer implements Drawable {
     }
 
     @Override
-    public void onDraw(MapGraphics mg) {
+    public void onDrawRadiation(MapGraphics mg, MapGraphics rad) {
         if (!showDevStuff.getValue()) return;
 
-        mg.setColor("unknown");
+        rad.setColor("unknown");
         for (Entity entity : unknown) {
-            mg.drawRectCentered(entity, 3, false);
+            rad.drawRectCentered(entity, 3, false);
         }
 
-        mg.setColor(PATH_COLOR);
+        rad.setColor(PATH_COLOR);
         for (PathPoint point : ((HeroManager) hero).drive.pathFinder.getPathPoints()) {
             for (PathPoint other : point.lineOfSight) {
-                mg.drawLine(mg.toScreenPointX(point.x),
-                        mg.toScreenPointY(point.y),
-                        mg.toScreenPointX(point.x + (other.x - point.x) / 3),
-                        mg.toScreenPointY(point.y + (other.y - point.y) / 3));
+                rad.drawLine(rad.toScreenPointX(point.x),
+                        rad.toScreenPointY(point.y),
+                        rad.toScreenPointX(point.x + (other.x - point.x) / 3),
+                        rad.toScreenPointY(point.y + (other.y - point.y) / 3));
             }
         }
 
-        mg.setColor("unknown");
+        rad.setColor("unknown");
         for (Locatable point : drive.pathFinder.getPathPoints()) {
-            mg.drawRectCentered(point, 3, true);
+            rad.drawRectCentered(point, 3, true);
         }
 
-        mg.setFont("tiny");
-        mg.setColor("text");
+        rad.setFont("tiny");
+        rad.setColor("text");
         entities.getAll().stream()
                 .filter(e -> e.getId() > 150_000_000 && e.getId() < 160_000_000 || e instanceof Mine || e instanceof Ship)
                 .filter(e -> e.getLocationInfo().isInitialized())
-                .forEach(e -> mg.drawBackgroundedText(e, e.toString(), -4, MapGraphics.StringAlign.MID));
+                .forEach(e -> rad.drawBackgroundedText(e, e.toString(), -4, MapGraphics.StringAlign.MID));
 
         Point p = Point.of(mg.getWidthMiddle() - 20, mg.getHeight() - 40);
 

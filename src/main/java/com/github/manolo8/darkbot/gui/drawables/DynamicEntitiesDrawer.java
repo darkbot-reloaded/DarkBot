@@ -44,16 +44,16 @@ public class DynamicEntitiesDrawer implements Drawable {
     }
 
     @Override
-    public void onDraw(MapGraphics mg) {
-        drawBoxes(mg);
-        drawMines(mg);
+    public void onDrawRadiation(MapGraphics mg, MapGraphics rad) {
+        drawBoxes(rad);
+        drawMines(rad);
 
-        drawDestinations(mg);
-        drawNpcs(mg);
-        drawPets(mg);
-        drawPlayers(mg);
+        drawDestinations(rad);
+        drawNpcs(rad);
+        drawPets(rad);
+        drawPlayers(rad);
 
-        drawHeroTarget(mg);
+        drawHeroTarget(rad);
     }
 
     private void drawBoxes(MapGraphics mg) {
@@ -115,13 +115,19 @@ public class DynamicEntitiesDrawer implements Drawable {
 
         mg.setColor("going");
         for (Player player : players)
-            player.getDestination().ifPresent(dest -> mg.drawLine(player, dest));
+            player.getDestination()
+                    .filter(dest -> player.distanceTo(dest) > 10)
+                    .ifPresent(dest -> mg.drawLine(player, dest));
 
         for (Pet pet : pets)
-            pet.getDestination().ifPresent(dest -> mg.drawLine(pet, dest));
+            pet.getDestination()
+                    .filter(dest -> pet.distanceTo(dest) > 10)
+                    .ifPresent(dest -> mg.drawLine(pet, dest));
 
         for (Npc npc : npcs)
-            npc.getDestination().ifPresent(dest -> mg.drawLine(npc, dest));
+            npc.getDestination()
+                    .filter(dest -> npc.distanceTo(dest) > 10)
+                    .ifPresent(dest -> mg.drawLine(npc, dest));
     }
 
     private void drawHeroTarget(MapGraphics mg) {
@@ -129,26 +135,34 @@ public class DynamicEntitiesDrawer implements Drawable {
 
         if (target != null && target.isValid()) {
             if (target instanceof Movable) {
-                ((Movable) target).getDestination().ifPresent(destination -> {
-                    mg.setColor("going");
-                    mg.drawLine(target, destination);
-                });
+                ((Movable) target).getDestination()
+                        .filter(dest -> target.distanceTo(dest) > 10)
+                        .ifPresent(destination -> {
+                            mg.setColor("going");
+                            mg.drawLine(target, destination);
+                        });
             }
 
             mg.setColor("target");
-            mg.drawRectCentered(target, 5, true);
+            mg.drawOvalCentered(target, 7, true);
         }
     }
 
     private void drawShip(MapGraphics mg, Locatable pos, boolean fill) {
-        if (!fill) mg.drawRect(mg.toScreenPointX(pos.getX()) - 2,
-                mg.toScreenPointY(pos.getY()) - 2, 4, 4, false);
-        else mg.drawRectCentered(pos, 5, true);
+//        if (!fill) mg.drawRect(mg.toScreenPointX(pos.getX()) - 2,
+//                mg.toScreenPointY(pos.getY()) - 2, 4, 4, false);
+//        else mg.drawRectCentered(pos, 5, true);
+
+        if (fill) mg.drawOvalCentered(pos, 7, true);
+        else mg.drawOvalCentered(pos, 6, false);
     }
 
     private void drawBox(MapGraphics mg, Locatable pos, boolean fill) {
-        if (!fill) mg.drawRect(mg.toScreenPointX(pos.getX()) - 2,
-                mg.toScreenPointY(pos.getY()) - 2, 3, 3, false);
-        else mg.drawRectCentered(pos, 4, true);
+//        if (!fill) mg.drawRect(mg.toScreenPointX(pos.getX()) - 2,
+//                mg.toScreenPointY(pos.getY()) - 2, 4, 4, false);
+//        else mg.drawRectCentered(pos, 5, true);
+
+        if (fill) mg.drawOvalCentered(pos, 6, true);
+        else mg.drawOvalCentered(pos, 5, false);
     }
 }

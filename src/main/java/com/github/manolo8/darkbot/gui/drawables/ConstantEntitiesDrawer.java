@@ -27,10 +27,10 @@ public class ConstantEntitiesDrawer implements Drawable {
     }
 
     @Override
-    public void onDraw(MapGraphics mg) {
-        drawPortals(mg);
-        drawBattleStations(mg);
-        drawStations(mg);
+    public void onDrawRadiation(MapGraphics mg, MapGraphics rad) {
+        drawPortals(rad);
+        drawBattleStations(rad);
+        drawStations(rad);
     }
 
     public void drawPortals(MapGraphics mg) {
@@ -67,9 +67,8 @@ public class ConstantEntitiesDrawer implements Drawable {
                 int size = station instanceof Station.Headquarter ? 3500
                         : station instanceof Station.HomeBase ? 3000 : 1000;
 
-                mg.drawOvalCentered(station, mg.toScreenPointX(size), mg.toScreenPointY(size), true);
+                mg.drawOvalCentered(station, size / mg.getScaleX(), size / mg.getScaleY(), true);
             }
-
         }
     }
 }

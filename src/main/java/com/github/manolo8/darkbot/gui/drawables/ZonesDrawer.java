@@ -47,9 +47,9 @@ public class ZonesDrawer implements Drawable {
     }
 
     @Override
-    public void onDraw(MapGraphics mg) {
-        drawZones(mg);
-        drawCustomZones(mg);
+    public void onDrawRadiation(MapGraphics mg, MapGraphics rad) {
+        drawZones(rad);
+        drawCustomZones(rad);
     }
 
     public void drawZones(MapGraphics mg) {
@@ -120,16 +120,16 @@ public class ZonesDrawer implements Drawable {
     public void drawSafeZone(MapGraphics mg, SafetyInfo safetyInfo) {
         if (safetyInfo == null) return;
 
-        mg.drawOvalCentered(safetyInfo, mg.toScreenPointX(safetyInfo.getDiameter()),
-                mg.toScreenPointY(safetyInfo.getDiameter()), true);
+        mg.drawOvalCentered(safetyInfo, safetyInfo.getDiameter() / mg.getScaleX(),
+                safetyInfo.getDiameter() / mg.getScaleY(), true);
     }
 
     private int gridToMapX(MapGraphics mg, int x) {
-        return x * mg.getWidth() / zoneResolution.getValue();
+        return (int) (mg.toScreenPointX(0) + x * mg.getWidth() / zoneResolution.getValue());
     }
 
     private int gridToMapY(MapGraphics mg, int y) {
-        return y * mg.getHeight() / zoneResolution.getValue();
+        return (int) (mg.toScreenPointY(0) + y * mg.getHeight() / zoneResolution.getValue());
     }
 
 }
