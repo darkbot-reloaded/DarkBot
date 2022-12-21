@@ -45,7 +45,7 @@ public class LogUtils {
         OutputStream bufferedOut = new BufferedOutputStream(multiOut, 128);
 
         try {
-            if (System.getProperty("file.encoding").equals(Charset.defaultCharset().toString()))
+            if (Charset.forName(System.getProperty("file.encoding")).equals(Charset.forName(System.getProperty("sun.jnu.encoding"))))
                 return new PrintStreamWithDate(bufferedOut, "UTF-8");
             else
                 return new PrintStreamWithDate(bufferedOut);
