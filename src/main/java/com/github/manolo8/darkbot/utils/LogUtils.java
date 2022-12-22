@@ -34,25 +34,18 @@ public class LogUtils {
 
             System.setOut(createPrintStream(new FileOutputStream(FileDescriptor.out), fileLogger));
             System.setErr(createPrintStream(new FileOutputStream(FileDescriptor.err), fileLogger));
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
             System.out.println("Failed to redirect logs, file not found: " + "logs/" + START_TIME + ".log");
             e.printStackTrace();
         }
     }
 
-    private static PrintStream createPrintStream(FileOutputStream multi, OutputStream fileLogger) {
+    private static PrintStream createPrintStream(FileOutputStream multi, OutputStream fileLogger) throws UnsupportedEncodingException {
         OutputStream multiOut = new MultiOutputStream(multi, fileLogger);
         OutputStream bufferedOut = new BufferedOutputStream(multiOut, 128);
 
-        try {
-            if (Charset.forName(System.getProperty("file.encoding")).equals(Charset.forName(System.getProperty("sun.jnu.encoding"))))
-                return new PrintStreamWithDate(bufferedOut, "UTF-8");
-            else
-                return new PrintStreamWithDate(bufferedOut);
-        } catch (UnsupportedEncodingException e) {
-            System.out.println("UTF-8 not supported");
-            return new PrintStreamWithDate(bufferedOut);
-        }
+        String enc = System.getProperty("sun.stdout.encoding");
+        return enc != null ? new PrintStreamWithDate(bufferedOut, enc) : new PrintStreamWithDate(bufferedOut);
     }
 
     public static OutputStream createLogFile(String filename) {
@@ -143,52 +136,52 @@ public class LogUtils {
 
         @Override
         public void write(int b) throws IOException {
-            try {
-                for (OutputStream out : outputStreams)
+            for (OutputStream out : outputStreams)
+                try {
                     out.write(b);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
 
         @Override
         public void write(@NotNull byte[] b) throws IOException {
-            try {
-                for (OutputStream out : outputStreams)
+            for (OutputStream out : outputStreams)
+                try {
                     out.write(b);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
 
         @Override
         public void write(@NotNull byte[] b, int off, int len) throws IOException {
-            try {
-                for (OutputStream out : outputStreams)
+            for (OutputStream out : outputStreams)
+                try {
                     out.write(b, off, len);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
 
         @Override
         public void flush() {
-            try {
-                for (OutputStream out : outputStreams)
+            for (OutputStream out : outputStreams)
+                try {
                     out.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
 
         @Override
         public void close() throws IOException {
-            try {
-                for (OutputStream out : outputStreams)
+            for (OutputStream out : outputStreams)
+                try {
                     out.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
     }
 }
