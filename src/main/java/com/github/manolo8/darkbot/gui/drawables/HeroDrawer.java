@@ -35,7 +35,7 @@ public class HeroDrawer implements Drawable {
         drawHeroDestination(mg);
 
         mg.setColor("hero");
-        mg.drawOvalCentered(hero, 8, true);
+        mg.drawOvalCentered(hero, 8f, true);
 
         drawScreenBounds(mg);
         drawPet(mg);
@@ -73,10 +73,10 @@ public class HeroDrawer implements Drawable {
     private void drawPet(MapGraphics mg) {
         hero.getPet().ifPresent(pet -> {
             mg.setColor("pet");
-            mg.drawRectCentered(pet, 6.0, true);
+            mg.drawOvalCentered(pet, 8f, true);
 
             mg.setColor("pet_in");
-            mg.drawRectCentered(pet, 4.0, true);
+            mg.drawOvalCentered(pet, 6f, true);
         });
     }
 }

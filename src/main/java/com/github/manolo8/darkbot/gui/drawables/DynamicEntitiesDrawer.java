@@ -83,9 +83,9 @@ public class DynamicEntitiesDrawer implements Drawable {
         pet.getLocatorNpcLoc()
                 .ifPresent(locator -> {
                     mg.setColor("ping");
-                    mg.drawOvalCentered(locator, 16.0, true);
+                    mg.drawOvalCentered(locator, 16f, true);
                     mg.setColor("ping_border");
-                    mg.drawOvalCentered(locator, 16.0, false);
+                    mg.drawOvalCentered(locator, 16f, false);
                 });
     }
 
@@ -144,7 +144,7 @@ public class DynamicEntitiesDrawer implements Drawable {
             }
 
             mg.setColor("target");
-            mg.drawOvalCentered(target, 7.0, true);
+            mg.drawOvalCentered(target, 6f, true);
         }
     }
 
@@ -153,8 +153,8 @@ public class DynamicEntitiesDrawer implements Drawable {
 //                mg.toScreenPointY(pos.getY()) - 2, 4, 4, false);
 //        else mg.drawRectCentered(pos, 5, true);
 
-        if (fill) mg.drawOvalCentered(pos, 7.0, true);
-        else mg.drawOvalCentered(pos, 6.0, false);
+        if (fill) mg.drawOvalCentered(pos, 7f, true);
+        else mg.drawOvalCentered(pos, 6f, false);
     }
 
     private void drawBox(MapGraphics mg, Locatable pos, boolean fill) {
@@ -162,7 +162,7 @@ public class DynamicEntitiesDrawer implements Drawable {
 //                mg.toScreenPointY(pos.getY()) - 2, 4, 4, false);
 //        else mg.drawRectCentered(pos, 5, true);
 
-        if (fill) mg.drawOvalCentered(pos, 6.0, true);
-        else mg.drawOvalCentered(pos, 5.0, false);
+        if (fill) mg.drawOvalCentered(pos, 6f, true);
+        else mg.drawOvalCentered(pos, 5f, false);
     }
 }

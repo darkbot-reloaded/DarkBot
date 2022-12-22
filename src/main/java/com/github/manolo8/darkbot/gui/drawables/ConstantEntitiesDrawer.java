@@ -36,7 +36,7 @@ public class ConstantEntitiesDrawer implements Drawable {
         mg.setColor("portals");
 
         for (Portal portal : portals) {
-            mg.drawOvalCentered(portal, 12, false);
+            mg.drawOvalCentered(portal, 12f, false);
         }
     }
 
