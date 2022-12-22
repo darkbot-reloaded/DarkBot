@@ -12,13 +12,13 @@ import java.io.IOException;
 public class NovaManager {
     private final BackpageManager backpageManager;
     private final NovaData data;
-    private final Gson g;
+    private final Gson gson;
     private long lastNovaUpdate;
 
     public NovaManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
         this.data = new NovaData();
-        this.g = backpageManager.getGson();
+        this.gson = backpageManager.getGson();
     }
 
     public boolean update(long expiryTime) {
@@ -51,7 +51,7 @@ public class NovaManager {
                 .setParam("captainId", captainId == 0 ? "" : captainId)
                 .getContent();
 
-        JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
+        JsonObject jsonObj = gson.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             this.data.setActiveCaptainId(jsonObj.get("activeCaptainId").getAsString().isEmpty() ? 0 : jsonObj.get("activeCaptainId").getAsInt());
             return true;
@@ -66,7 +66,7 @@ public class NovaManager {
                 .setParam("command", "getResources")
                 .getContent();
 
-        JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
+        JsonObject jsonObj = gson.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             this.data.setResourceAmount(jsonObj.get("item").getAsJsonObject().get("amount").getAsInt());
         } else {
@@ -79,11 +79,11 @@ public class NovaManager {
                 .setParam("command", "getRosterList")
                 .getContent();
 
-        JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
+        JsonObject jsonObj = gson.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
 
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             String resp = jsonObj.getAsJsonArray("rosterList").toString();
-            Agent[] rosterList = g.fromJson(resp, Agent[].class);
+            Agent[] rosterList = gson.fromJson(resp, Agent[].class);
 
             for (Agent agent : rosterList) {
                 this.data.addAgent(agent);
@@ -99,7 +99,7 @@ public class NovaManager {
                 .setParam("captainId", captainId)
                 .getContent();
         this.update(0);
-        JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
+        JsonObject jsonObj = gson.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             return true;
         } else {
@@ -118,7 +118,7 @@ public class NovaManager {
                 .setParam("selectedName", "")
                 .getContent();
         this.update(0);
-        JsonObject jsonObj = g.fromJson(response, JsonObject.class);
+        JsonObject jsonObj = gson.fromJson(response, JsonObject.class);
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("success")) {
             return true;
         } else {
@@ -134,10 +134,10 @@ public class NovaManager {
                 .setParam("perkId", perk.getPerkId())
                 .getContent();
 
-        JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
+        JsonObject jsonObj = gson.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             String resp = jsonObj.get("perk").toString();
-            return g.fromJson(resp, Perk.class);
+            return gson.fromJson(resp, Perk.class);
         } else {
             System.out.println("NovaManager: " + response);
         }
@@ -152,7 +152,7 @@ public class NovaManager {
                 .setParam("upgradeLevel", upgradeLevel)
                 .getContent();
         this.update(0);
-        JsonObject jsonObj = g.fromJson(response, JsonObject.class);
+        JsonObject jsonObj = gson.fromJson(response, JsonObject.class);
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             return true;
         } else {

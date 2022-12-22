@@ -73,7 +73,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
         this.dispatchManager = new DispatchManager(this);
         this.auctionManager = new AuctionManager(this);
         this.novaManager = new NovaManager(this);
-        gson = new Gson();
 
         setDaemon(true);
     }
@@ -293,7 +292,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public Gson getGson() {
-        if (gson == null) gson = new Gson();
         return gson;
     }
 
