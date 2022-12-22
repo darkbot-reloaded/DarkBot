@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.drawables;
 
-import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
@@ -27,10 +26,10 @@ public class ConstantEntitiesDrawer implements Drawable {
     }
 
     @Override
-    public void onDrawRadiation(MapGraphics mg, MapGraphics rad) {
-        drawPortals(rad);
-        drawBattleStations(rad);
-        drawStations(rad);
+    public void onDraw(MapGraphics mg) {
+        drawPortals(mg);
+        drawBattleStations(mg);
+        drawStations(mg);
     }
 
     public void drawPortals(MapGraphics mg) {
@@ -43,14 +42,14 @@ public class ConstantEntitiesDrawer implements Drawable {
 
     public void drawBattleStations(MapGraphics mg) {
         for (BattleStation bs : battleStations) {
-            if (!(bs instanceof BattleStation.Module) && bs.getHullId() == 0) mg.setColor("meteroid");
+            if (bs instanceof BattleStation.Asteroid) mg.setColor("meteroid");
             else if (bs.getEntityInfo().isEnemy()) mg.setColor("enemies");
             else mg.setColor("allies");
 
             if (bs instanceof BattleStation.Module) {
-                mg.drawRectCentered(bs, 3, false);
+                mg.drawRectCentered(bs, 3f, false);
             } else {
-                mg.drawOvalCentered(bs, 11, 9, true);
+                mg.drawOvalCentered(bs, 11f, 9f, true);
             }
         }
     }
@@ -59,7 +58,7 @@ public class ConstantEntitiesDrawer implements Drawable {
         for (Station station : stations) {
             if (station instanceof Station.Turret) {
                 mg.setColor("bases");
-                mg.drawOvalCentered(station, 2, true);
+                mg.drawOvalCentered(station, 2f, true);
 
             } else {
                 mg.setColor("base_spots");

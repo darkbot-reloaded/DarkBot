@@ -27,18 +27,18 @@ public class HeroDrawer implements Drawable {
     }
 
     @Override
-    public void onDrawRadiation(MapGraphics mg, MapGraphics rad) {
+    public void onDraw(MapGraphics mg) {
         drawConfiguration(mg);
 
         if (!hero.isValid() || !hero.getLocationInfo().isInitialized()) return;
 
-        drawHeroDestination(rad);
+        drawHeroDestination(mg);
 
-        rad.setColor("hero");
-        rad.drawOvalCentered(hero, 8, true);
+        mg.setColor("hero");
+        mg.drawOvalCentered(hero, 8, true);
 
-        drawScreenBounds(rad);
-        drawPet(rad);
+        drawScreenBounds(mg);
+        drawPet(mg);
     }
 
     private void drawConfiguration(MapGraphics mg) {
@@ -73,10 +73,10 @@ public class HeroDrawer implements Drawable {
     private void drawPet(MapGraphics mg) {
         hero.getPet().ifPresent(pet -> {
             mg.setColor("pet");
-            mg.drawRectCentered(pet, 6, true);
+            mg.drawRectCentered(pet, 6.0, true);
 
             mg.setColor("pet_in");
-            mg.drawRectCentered(pet, 4, true);
+            mg.drawRectCentered(pet, 4.0, true);
         });
     }
 }

@@ -53,8 +53,6 @@ public class MapDrawer extends JPanel {
     private GameMap lastMap;
     private Image backgroundImage;
 
-    private RadiationScalingMapGraphics radMapGraphics;
-
     public MapDrawer() {
         addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent evt) {
@@ -84,7 +82,7 @@ public class MapDrawer extends JPanel {
                     main.setRunning(!main.isRunning());
                     repaint();
 
-                } else main.hero.drive.move(radMapGraphics.locFromClick(e));
+                } else main.hero.drive.move(mapGraphics.locFromClick(e));
             }
         });
 
@@ -93,7 +91,7 @@ public class MapDrawer extends JPanel {
             public void mouseDragged(MouseEvent e) {
                 if (main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) return;
 
-                main.hero.drive.move(radMapGraphics.locFromClick(e));
+                main.hero.drive.move(mapGraphics.locFromClick(e));
             }
         });
     }
@@ -101,16 +99,13 @@ public class MapDrawer extends JPanel {
     public void setup(Main main) {
         this.main = main;
         this.mapGraphics = main.pluginAPI.requireInstance(MapGraphicsImpl.class);
-        this.radMapGraphics = main.pluginAPI.requireInstance(RadiationScalingMapGraphics.class);
     }
 
     protected void onPaint() {
-        radMapGraphics.onPaint();
         drawBackgroundImage();
 
         for (Drawable drawable : drawableHandler.getDrawables()) {
             drawable.onDraw(mapGraphics);
-            drawable.onDrawRadiation(mapGraphics, radMapGraphics);
         }
 
         // just ensure that is drawn always last
@@ -121,18 +116,14 @@ public class MapDrawer extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         if (main == null) return;
-        Graphics2D g2 = (Graphics2D) g;
-        g2.addRenderingHints(RENDERING_HINTS);
 
-        mapGraphics.setup(g2, getWidth(), getHeight());
-        radMapGraphics.setup(g2, getWidth(), getHeight());
+        mapGraphics.setup(g, getWidth(), getHeight());
 
         synchronized (Main.UPDATE_LOCKER) {
             onPaint();
         }
 
         mapGraphics.dispose();
-        radMapGraphics.dispose();
     }
 
     private void drawBackgroundImage() {
@@ -198,6 +189,7 @@ public class MapDrawer extends JPanel {
         protected final ConfigSetting<ColorScheme> cs;
         protected final ConfigSetting<ColorScheme.Fonts> fonts;
         protected final ConfigSetting<Set<DisplayFlag>> displayFlags;
+        protected final ConfigSetting<Double> radiationScale;
 
         protected final Rectangle2D rect = new Rectangle2D.Double();
         protected final Ellipse2D ellipse = new Ellipse2D.Double();
@@ -205,8 +197,10 @@ public class MapDrawer extends JPanel {
         protected final Line2D line = new Line2D.Double();
 
         protected Graphics2D g2;
-        protected int width, widthMid, height, heightMid, startX, startY;
-        protected double scaleX, scaleY;
+        protected int width, widthMid, height, heightMid;
+        protected double scaleX, scaleY, gameX, gameY;
+
+        protected int x, y;
 
         public MapGraphicsImpl(StarSystemAPI star, ConfigAPI config) {
             this.config = config;
@@ -215,9 +209,10 @@ public class MapDrawer extends JPanel {
             this.cs = config.requireConfig("bot_settings.map_display.cs");
             this.fonts = config.requireConfig("bot_settings.map_display.cs.fonts");
             this.displayFlags = config.requireConfig("bot_settings.map_display.toggle");
+            this.radiationScale = config.requireConfig("bot_settings.map_display.radiation_scale");
         }
 
-        public void setup(Graphics2D g2, int width, int height) {
+        public void setup(Graphics g2, int width, int height) {
             this.width = width;
             this.height = height;
             this.widthMid = width / 2;
@@ -226,16 +221,49 @@ public class MapDrawer extends JPanel {
             this.scaleX = mapBounds.getWidth() / width;
             this.scaleY = mapBounds.getHeight() / height;
 
-            this.g2 = g2; //graphics.create();
+            this.g2 = (Graphics2D) g2;
+            this.g2.addRenderingHints(RENDERING_HINTS);
+
+            double scale = getRadScale();
+            if (scale > 0) {
+                x = (int) ((mapBounds.getWidth() / 2 * scale) / (mapBounds.getWidth() / width));
+                y = (int) ((mapBounds.getHeight() / 2 * scale) / (mapBounds.getHeight() / height));
+
+                int w = width - x * 2;
+                int h = height - y * 2;
+
+                scaleX = mapBounds.getWidth() / w;
+                scaleY = mapBounds.getHeight() / h;
+
+                gameX = x * getScaleX();
+                gameY = y * getScaleY();
+
+                setColor("radiation");
+                getGraphics2D().fillRect(0, 0, width, height);
+                setColor("background");
+                getGraphics2D().fillRect(x, y, w, h);
+                setColor("unknown");
+                getGraphics2D().drawRect(x, y, w, h);
+            } else {
+                x = y = 0;
+                gameX = gameY = 0;
+                scaleX = mapBounds.getWidth() / width;
+                scaleY = mapBounds.getHeight() / height;
+                setColor("background");
+                getGraphics2D().fillRect(0, 0, width, height);
+            }
         }
 
         public void dispose() {
             g2 = null;
         }
 
-        public void onPaint() {
-            setColor("background");
-            getGraphics2D().fillRect(0, 0, getWidth(), getHeight());
+        protected double getRadScale() {
+            return radiationScale.getValue();
+        }
+
+        protected Locatable locFromClick(MouseEvent e) {
+            return Locatable.of((e.getX() - x) * getScaleX(), (e.getY() - y) * getScaleY());
         }
 
         @Override
@@ -291,22 +319,22 @@ public class MapDrawer extends JPanel {
 
         @Override
         public double toScreenPointX(double gameX) {
-            return (gameX / scaleX);
+            return x + gameX / scaleX;
         }
 
         @Override
         public double toScreenPointY(double gameY) {
-            return (gameY / scaleY);
+            return y + gameY / scaleY;
         }
 
         @Override
         public double toGameLocationX(double screenX) {
-            return screenX * scaleX;
+            return gameX + screenX * scaleX;
         }
 
         @Override
         public double toGameLocationY(double screenY) {
-            return screenY * scaleY;
+            return gameY + screenY * scaleY;
         }
 
         @Override
@@ -337,74 +365,20 @@ public class MapDrawer extends JPanel {
             }
             path.closePath();
 
-            if (type == PolyType.DRAW_POLYGON || type == PolyType.DRAW_POLYLINE) g2.draw(path);
-            else if (type == PolyType.FILL_POLYGON) g2.fill(path);
+            switch (type) {
+                case DRAW_POLYGON:
+                case DRAW_POLYLINE:
+                    g2.draw(path);
+                    break;
+                case FILL_POLYGON:
+                    g2.fill(path);
+            }
         }
 
         @Override
         public void drawLine(double x1, double y1, double x2, double y2) {
             line.setLine(x1, y1, x2, y2);
             g2.draw(line);
-        }
-    }
-
-    public static class RadiationScalingMapGraphics extends MapGraphicsImpl {
-        private final ConfigSetting<Double> radiationScale;
-        private double gameStartX, gameStartY;
-
-        private int componentWidth, componentHeight;
-
-        public RadiationScalingMapGraphics(StarSystemAPI star, ConfigAPI config) {
-            super(star, config);
-            this.radiationScale = config.requireConfig("bot_settings.map_display.radiation_scale");
-        }
-
-        @Override
-        public void setup(Graphics2D g2, int width, int height) {
-            componentWidth = width;
-            componentHeight = height;
-
-            startX = (int) ((mapBounds.getWidth() / 2 * radiationScale.getValue()) / (mapBounds.getWidth() / width));
-            startY = (int) ((mapBounds.getHeight() / 2 * radiationScale.getValue()) / (mapBounds.getHeight() / height));
-
-            super.setup(g2, width - startX * 2, height - startY * 2);
-
-            gameStartX = startX * getScaleX();
-            gameStartY = startY * getScaleY();
-        }
-
-        @Override
-        public void onPaint() {
-            setColor("radiation");
-            getGraphics2D().fillRect(0, 0, componentWidth, componentHeight);
-            setColor("background");
-            getGraphics2D().fillRect(startX, startY, getWidth(), getHeight());
-            setColor("unknown");
-            getGraphics2D().drawRect(startX, startY, getWidth(), getHeight());
-        }
-
-        @Override
-        public double toScreenPointX(double gameX) {
-            return startX + super.toScreenPointX(gameX);
-        }
-
-        @Override
-        public double toScreenPointY(double gameY) {
-            return startY + super.toScreenPointY(gameY);
-        }
-
-        @Override
-        public double toGameLocationX(double screenX) {
-            return gameStartX + super.toGameLocationX(screenX);
-        }
-
-        @Override
-        public double toGameLocationY(double screenY) {
-            return gameStartY + super.toGameLocationY(screenY);
-        }
-
-        protected Locatable locFromClick(MouseEvent e) {
-            return Locatable.of((e.getX() - startX) * getScaleX(),(e.getY() - startY) * getScaleY());
         }
     }
 }

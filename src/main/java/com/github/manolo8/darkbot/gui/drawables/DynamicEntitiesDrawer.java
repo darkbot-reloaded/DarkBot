@@ -44,16 +44,16 @@ public class DynamicEntitiesDrawer implements Drawable {
     }
 
     @Override
-    public void onDrawRadiation(MapGraphics mg, MapGraphics rad) {
-        drawBoxes(rad);
-        drawMines(rad);
+    public void onDraw(MapGraphics mg) {
+        drawBoxes(mg);
+        drawMines(mg);
 
-        drawDestinations(rad);
-        drawNpcs(rad);
-        drawPets(rad);
-        drawPlayers(rad);
+        drawDestinations(mg);
+        drawNpcs(mg);
+        drawPets(mg);
+        drawPlayers(mg);
 
-        drawHeroTarget(rad);
+        drawHeroTarget(mg);
     }
 
     private void drawBoxes(MapGraphics mg) {
@@ -83,9 +83,9 @@ public class DynamicEntitiesDrawer implements Drawable {
         pet.getLocatorNpcLoc()
                 .ifPresent(locator -> {
                     mg.setColor("ping");
-                    mg.drawOvalCentered(locator, 16, true);
+                    mg.drawOvalCentered(locator, 16.0, true);
                     mg.setColor("ping_border");
-                    mg.drawOvalCentered(locator, 16, false);
+                    mg.drawOvalCentered(locator, 16.0, false);
                 });
     }
 
@@ -144,7 +144,7 @@ public class DynamicEntitiesDrawer implements Drawable {
             }
 
             mg.setColor("target");
-            mg.drawOvalCentered(target, 7, true);
+            mg.drawOvalCentered(target, 7.0, true);
         }
     }
 
@@ -153,8 +153,8 @@ public class DynamicEntitiesDrawer implements Drawable {
 //                mg.toScreenPointY(pos.getY()) - 2, 4, 4, false);
 //        else mg.drawRectCentered(pos, 5, true);
 
-        if (fill) mg.drawOvalCentered(pos, 7, true);
-        else mg.drawOvalCentered(pos, 6, false);
+        if (fill) mg.drawOvalCentered(pos, 7.0, true);
+        else mg.drawOvalCentered(pos, 6.0, false);
     }
 
     private void drawBox(MapGraphics mg, Locatable pos, boolean fill) {
@@ -162,7 +162,7 @@ public class DynamicEntitiesDrawer implements Drawable {
 //                mg.toScreenPointY(pos.getY()) - 2, 4, 4, false);
 //        else mg.drawRectCentered(pos, 5, true);
 
-        if (fill) mg.drawOvalCentered(pos, 6, true);
-        else mg.drawOvalCentered(pos, 5, false);
+        if (fill) mg.drawOvalCentered(pos, 6.0, true);
+        else mg.drawOvalCentered(pos, 5.0, false);
     }
 }

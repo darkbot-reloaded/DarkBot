@@ -35,8 +35,8 @@ public class TrailDrawer implements Drawable {
     }
 
     @Override
-    public void onDrawRadiation(MapGraphics mg, MapGraphics rad) {
-        drawTrail(rad);
+    public void onDraw(MapGraphics mg) {
+        drawTrail(mg);
     }
 
     private void drawTrail(MapGraphics mg) {
