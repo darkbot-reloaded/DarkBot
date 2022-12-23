@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatSystemProperties;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
@@ -33,6 +34,10 @@ public class Bot {
 
         try {
             UIManager.getFont("Label.font"); // Prevents a linux crash
+
+            // Prevent FlatLaf using a custom window decoration & library
+            System.setProperty(FlatSystemProperties.USE_WINDOW_DECORATIONS, "false");
+
             UIManager.setLookAndFeel(new FlatDarkLaf());
             UIManager.put("Button.arc", 0);
             UIManager.put("Component.arc", 0);
