@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StatsAPI;
 
@@ -31,7 +32,7 @@ public class StatsManager implements Manager, StatsAPI {
     public int userId;
 
     private long started = System.currentTimeMillis();
-    private long runningTime = 1;
+    private long runningTime = Time.SECOND; // Assume running for 1 second by default
     private boolean lastStatus;
 
     public double earnedCredits;
@@ -145,29 +146,35 @@ public class StatsManager implements Manager, StatsAPI {
         return runningTime + (lastStatus ? (System.currentTimeMillis() - started) : 0);
     }
 
+    public double runningHours() {
+        // Intentionally lose millisecond precision, in hopes of better double precision.
+        long runningSeconds = runningTime / 1000;
+        return runningSeconds / 3600d;
+    }
+
     public double earnedCredits() {
-        return earnedCredits / ((double) runningTime() / 3600000);
+        return earnedCredits / runningHours();
     }
 
     public double earnedUridium() {
-        return earnedUridium / ((double) runningTime() / 3600000);
+        return earnedUridium / runningHours();
     }
 
     public double earnedExperience() {
-        return earnedExperience / ((double) runningTime() / 3600000);
+        return earnedExperience / runningHours();
     }
 
     public double earnedHonor() {
-        return earnedHonor / ((double) runningTime() / 3600000);
+        return earnedHonor / runningHours();
     }
 
     public void resetValues() {
-        started = System.currentTimeMillis();
-        runningTime = 1;
-        earnedCredits = 0;
-        earnedUridium = 0;
-        earnedHonor = 0;
-        earnedExperience = 0;
+        this.started = System.currentTimeMillis();
+        this.runningTime = Time.SECOND;
+        this.earnedCredits = 0;
+        this.earnedUridium = 0;
+        this.earnedHonor = 0;
+        this.earnedExperience = 0;
 
         eventBroker.sendEvent(new StatsResetEvent());
     }
