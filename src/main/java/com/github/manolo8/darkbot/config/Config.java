@@ -16,6 +16,7 @@ import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.utils.NpcTableModel;
 import com.github.manolo8.darkbot.gui.tree.utils.TableHelpers;
+import com.github.manolo8.darkbot.utils.OSUtil;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.config.annotations.Number;
@@ -225,7 +226,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         public @Option @Visibility(Level.ADVANCED) APIConfig API_CONFIG = new APIConfig();
         public static class APIConfig {
-            public @Option @Dropdown BrowserApi BROWSER_API = BrowserApi.KEKKA_PLAYER;
+            public @Option @Dropdown BrowserApi BROWSER_API = OSUtil.getDefaultAPI();
             public @Option boolean FULLY_HIDE_API = true;
             public @Option boolean FORCE_GAME_LANGUAGE = false;
             public @Option boolean ENFORCE_HW_ACCEL = true;
