@@ -45,8 +45,8 @@ dependencies {
     val apiVersion = "0.5.8"
 
     // use this if you want to use local(mavenLocal) darkbot API
-    api("eu.darkbot", "darkbot-impl", apiVersion)
-    //api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
+    //api("eu.darkbot", "darkbot-impl", apiVersion)
+    api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
     api("com.google.code.gson", "gson", "2.8.9")
     api("com.miglayout", "miglayout", "3.7.4")
     api("org.jetbrains", "annotations", "23.0.0")

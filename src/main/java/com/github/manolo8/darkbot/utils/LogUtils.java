@@ -117,8 +117,6 @@ public class LogUtils {
 
     private static class PrintStreamWithDate extends PrintStream {
 
-        private final boolean printingTrace = false;
-
         public PrintStreamWithDate(OutputStream downstream, String encoding) throws UnsupportedEncodingException {
             super(downstream, true, encoding);
         }
