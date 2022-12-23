@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.utils;
 
+import com.github.manolo8.darkbot.Bot;
 import com.github.manolo8.darkbot.utils.itf.ThrowingConsumer;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,8 +40,18 @@ public class LogUtils {
     }
 
     private static PrintStream createPrintStream(FileDescriptor descriptor, OutputStream fileLogger, String enc) {
-        OutputStream multiOut = new MultiOutputStream(new FileOutputStream(descriptor), fileLogger);
-        OutputStream bufferedOut = new BufferedOutputStream(multiOut, 128);
+        OutputStream sink;
+
+        String path = Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        if (System.console() == null && (path.endsWith(".jar") || path.endsWith(".exe"))) {
+            // No console and running from jar/exe. Assume user just wants logfiles.
+            sink = fileLogger;
+        } else {
+            // There's a console, or running from IDE, split output both ways (stdout/err & file)
+            sink = new MultiOutputStream(new FileOutputStream(descriptor), fileLogger);
+        }
+
+        OutputStream bufferedOut = new BufferedOutputStream(sink, 128);
 
         if (enc != null) {
             try {
