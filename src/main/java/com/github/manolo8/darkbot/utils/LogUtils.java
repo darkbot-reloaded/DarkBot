@@ -117,6 +117,8 @@ public class LogUtils {
 
     private static class PrintStreamWithDate extends PrintStream {
 
+        private final boolean printingTrace = false;
+
         public PrintStreamWithDate(OutputStream downstream, String encoding) throws UnsupportedEncodingException {
             super(downstream, true, encoding);
         }
@@ -127,20 +129,29 @@ public class LogUtils {
 
         @Override
         public void println(String string) {
-            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-            String path = null;
-            if (stack.length > 2) {
-                path = stack[2].toString()
-                        .replace("com.github.manolo8.darkbot", "db")
-                        .replace("eu.darkbot.api", "api");
-                path = SID_PATTERN.matcher(path).replaceAll("sid=...");
+            synchronized (this) {
+                StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+                String path = null;
+                if (stack.length > 2) {
+                    path = stack[2].toString()
+                            .replace("com.github.manolo8.darkbot", "db")
+                            .replace("eu.darkbot.api", "api");
+                    path = SID_PATTERN.matcher(path).replaceAll("sid=...");
+                }
+
+                string = "[" + LocalDateTime.now().format(LOG_DATE)
+                        + (path != null ? " | " + path : "")
+                        + "] " + string;
+
+                super.println(string);
             }
+        }
 
-            string = "[" + LocalDateTime.now().format(LOG_DATE)
-                    + (path != null ? " | " + path : "")
-                    + "] " + string;
-
-            super.println(string);
+        @Override
+        public void println(Object object) {
+            synchronized (this) {
+                super.println(SID_PATTERN.matcher(String.valueOf(object)).replaceAll("sid=..."));
+            }
         }
     }
 
