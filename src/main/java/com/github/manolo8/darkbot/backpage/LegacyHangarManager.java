@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 @Deprecated
 public class LegacyHangarManager {
 
-    private static final Gson GSON = new Gson();
+    private final Gson GSON;
     private static final JsonParser JSON_PARSER = new JsonParser();
     private static final Type DRONE_LIST = new TypeToken<List<Drone>>(){}.getType();
     private static final Type ITEMINFO_LIST = new TypeToken<List<ItemInfo>>(){}.getType();
@@ -44,6 +44,7 @@ public class LegacyHangarManager {
         this.items = new ArrayList<>();
         this.itemInfos = new ArrayList<>();
         this.shipInfos = new ArrayList<>();
+        this.GSON = backpageManager.getGson();
     }
 
     public String getDataInventory(String params) {
