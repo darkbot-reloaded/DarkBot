@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.utils;
 
+import com.github.manolo8.darkbot.utils.itf.ThrowingConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedOutputStream;
@@ -24,27 +25,28 @@ public class LogUtils {
     public static final Path LOG_FOLDER = Paths.get("logs");
     public static final String START_TIME = LocalDateTime.now().format(FILENAME_DATE);
 
-    public static void setOutputToFileAndConsole() {
+    public static void setupLogOutput() {
         if (!Files.exists(LOG_FOLDER)) createFolder();
         else removeOld();
 
-        try {
-            OutputStream fileLogger = new FileOutputStream("logs/" + START_TIME + ".log");
+        OutputStream fileLogger = createLogFile(START_TIME);
+        if (fileLogger == null) return;
 
-            System.setOut(createPrintStream(new FileOutputStream(FileDescriptor.out), fileLogger));
-            System.setErr(createPrintStream(new FileOutputStream(FileDescriptor.err), fileLogger));
-        } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            System.out.println("Failed to redirect logs, file not found: " + "logs/" + START_TIME + ".log");
-            e.printStackTrace();
-        }
+        System.setOut(createPrintStream(FileDescriptor.out, fileLogger, System.getProperty("sun.stdout.encoding")));
+        System.setErr(createPrintStream(FileDescriptor.err, fileLogger, System.getProperty("sun.stderr.encoding")));
+
     }
 
-    private static PrintStream createPrintStream(FileOutputStream multi, OutputStream fileLogger) throws UnsupportedEncodingException {
-        OutputStream multiOut = new MultiOutputStream(multi, fileLogger);
+    private static PrintStream createPrintStream(FileDescriptor descriptor, OutputStream fileLogger, String enc) {
+        OutputStream multiOut = new MultiOutputStream(new FileOutputStream(descriptor), fileLogger);
         OutputStream bufferedOut = new BufferedOutputStream(multiOut, 128);
 
-        String enc = System.getProperty("sun.stdout.encoding");
-        return enc != null ? new PrintStreamWithDate(bufferedOut, enc) : new PrintStreamWithDate(bufferedOut);
+        if (enc != null) {
+            try {
+                return new PrintStreamWithDate(bufferedOut, enc);
+            } catch (UnsupportedEncodingException ignore) {}
+        }
+        return new PrintStreamWithDate(bufferedOut);
     }
 
     public static OutputStream createLogFile(String filename) {
@@ -53,6 +55,7 @@ public class LogUtils {
         try {
             return new FileOutputStream(fileName, true);
         } catch (FileNotFoundException e) {
+            System.out.println("Failed to create log file");
             e.printStackTrace();
             return null;
         }
@@ -135,52 +138,44 @@ public class LogUtils {
 
         @Override
         public void write(int b) throws IOException {
-            for (OutputStream out : outputStreams)
-                try {
-                    out.write(b);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            redirect(out -> out.write(b));
         }
 
         @Override
-        public void write(@NotNull byte[] b) throws IOException {
-            for (OutputStream out : outputStreams)
-                try {
-                    out.write(b);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        public void write(byte @NotNull [] b) throws IOException {
+            redirect(out -> out.write(b));
         }
 
         @Override
-        public void write(@NotNull byte[] b, int off, int len) throws IOException {
-            for (OutputStream out : outputStreams)
-                try {
-                    out.write(b, off, len);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        public void write(byte @NotNull [] b, int off, int len) throws IOException {
+            redirect(out -> out.write(b, off, len));
         }
 
         @Override
-        public void flush() {
-            for (OutputStream out : outputStreams)
-                try {
-                    out.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        public void flush() throws IOException {
+            redirect(OutputStream::flush);
         }
 
         @Override
         public void close() throws IOException {
-            for (OutputStream out : outputStreams)
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            redirect(OutputStream::close);
         }
+
+        private void redirect(ThrowingConsumer<OutputStream, IOException> consumer) throws IOException {
+            IOException lastEx = null;
+            for (OutputStream out : outputStreams) {
+                try {
+                    consumer.accept(out);
+                } catch (IOException e) {
+                    // If any previous exception exists, print it as we'll replace it.
+                    if (lastEx != null)
+                        lastEx.printStackTrace();
+                    lastEx = e;
+                }
+            }
+            // Throw whatever the last exception was, if any
+            if (lastEx != null) throw lastEx;
+        }
+
     }
 }

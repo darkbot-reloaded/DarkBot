@@ -29,7 +29,7 @@ public class Bot {
             e.printStackTrace();
         }
 
-        LogUtils.setOutputToFileAndConsole();
+        LogUtils.setupLogOutput();
 
         try {
             UIManager.getFont("Label.font"); // Prevents a linux crash
