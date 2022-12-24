@@ -68,6 +68,9 @@ public class RecyclingQueue<T> implements SizedIterable<T> {
     public T add() {
         Node newNode = getNode();
         if (first == null) {
+            // When list becomes empty (first = null), last maintains the last node
+            // Make sure the previous last node connects to the new head
+            if (last != null) last.next = newNode;
             first = last = newNode;
             if (original == null) original = first;
         } else {
@@ -81,10 +84,6 @@ public class RecyclingQueue<T> implements SizedIterable<T> {
         if (first == null)
             throw new NoSuchElementException();
         first = first.next;
-
-        // Whole list has been cleared
-        if (first == null) last = null;
-
         size--;
         purge();
     }

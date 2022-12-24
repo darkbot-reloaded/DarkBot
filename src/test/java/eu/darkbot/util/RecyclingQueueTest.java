@@ -16,23 +16,26 @@ public class RecyclingQueueTest {
         Assert.assertThrows(NoSuchElementException.class, queue::remove);
 
         queue.add().val = 1;
-        Assert.assertEquals(1, queue.size());
+        queue.add().val = 2;
+        Assert.assertEquals(2, queue.size());
 
+        queue.remove();
         queue.remove();
         Assert.assertEquals(0, queue.size());
         Assert.assertThrows(NoSuchElementException.class, queue::get);
         Assert.assertThrows(NoSuchElementException.class, queue::remove);
 
-        // Ensure it recycles the value
+        // Ensure it recycles the values
         Assert.assertEquals(1, queue.add().val);
+        Assert.assertEquals(2, queue.add().val);
 
-        for (int i = 2; i <= 10; i++)
-            queue.add().val = i;
-        Assert.assertEquals(10, queue.size());
+        // Assert a new node will be fresh
+        Assert.assertEquals(0, queue.add().val);
+
+        Assert.assertEquals(3, queue.size());
 
         queue.remove();
-        Assert.assertEquals(9, queue.size());
-
+        Assert.assertEquals(2, queue.size());
 
         // Ensure it recycles the value
         Assert.assertEquals(1, queue.add().val);
