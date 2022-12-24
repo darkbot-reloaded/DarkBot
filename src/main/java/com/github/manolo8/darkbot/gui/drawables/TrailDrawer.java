@@ -44,7 +44,7 @@ public class TrailDrawer implements Drawable {
 
         if (distance > 500) {
             last.setTo(hero);
-        } else if (distance > 100) {
+        } else if (distance > 10) {
             positions.add().init(last, last.setTo(hero));
         }
 

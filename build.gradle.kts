@@ -55,6 +55,7 @@ dependencies {
     implementation("org.jgrapht", "jgrapht-core", "1.3.0")
     implementation("org.mvel", "mvel2", "2.4.4.Final")
 
+    testImplementation("junit:junit:4.13.1")
     testCompileOnly("org.jgrapht", "jgrapht-io", "1.3.0")
 }
 
