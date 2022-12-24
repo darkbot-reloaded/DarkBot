@@ -56,7 +56,13 @@ public class RecyclingQueue<T> implements SizedIterable<T> {
     }
 
     private Node getNode() {
-        if (original == null || original == last) return new Node();
+        // Cannot recycle, gotta make a new node
+        if (original == first) {
+            Node newNode = new Node();
+            // First initialization ever, set the original
+            if (original == null) original = newNode;
+            return newNode;
+        }
 
         Node node = original;
         original = node.next;
@@ -66,7 +72,7 @@ public class RecyclingQueue<T> implements SizedIterable<T> {
 
     public T add() {
         Node newNode = getNode();
-        if (first == null) original = last = first = newNode;
+        if (first == null) last = first = newNode;
         else last = last.next = newNode;
         size++;
         return last.value;

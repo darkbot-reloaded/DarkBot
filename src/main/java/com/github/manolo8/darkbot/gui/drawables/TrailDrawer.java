@@ -48,7 +48,7 @@ public class TrailDrawer implements Drawable {
             positions.add().init(last, last.setTo(hero));
         }
 
-        long removeBefore = System.currentTimeMillis() - trailLength.getValue() * 1000L;
+        long removeBefore = System.currentTimeMillis() - (trailLength.getValue() * 1000L);
         while (!positions.isEmpty()) {
             Line line = positions.get();
             if (line.getTime() > removeBefore) break;
