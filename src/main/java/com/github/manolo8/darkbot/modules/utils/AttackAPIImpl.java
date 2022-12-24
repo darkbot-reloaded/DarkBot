@@ -8,7 +8,6 @@ import com.github.manolo8.darkbot.core.manager.SettingsManager;
 import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.extensions.features.handlers.LaserSelectorHandler;
 import com.github.manolo8.darkbot.utils.MathUtils;
-import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.game.enums.EntityEffect;
@@ -109,14 +108,10 @@ public class AttackAPIImpl extends AbstractAttackImpl implements Listener {
     public void tryLockAndAttack() {
         super.tryLockAndAttack();
 
-        /*if (lastTarget != target) {
-            lastTarget = target;
-            buggedTimer.activate();
-            highLightTimer.disarm();
-        }*/
-
-        if ((isAttacking() && ((target.hasEffect(EntityEffect.NPC_ISH) || target.hasEffect(EntityEffect.ISH))
-                || target.getHealth().hpDecreasedIn(3_000)))
+        if (isAttacking() &&
+                (target.hasEffect(EntityEffect.NPC_ISH)
+                        || target.hasEffect(EntityEffect.ISH)
+                        || target.getHealth().hpDecreasedIn(3_000))
                 || hero.distanceTo(target) > 1_000)
             buggedTimer.activate();
     }
