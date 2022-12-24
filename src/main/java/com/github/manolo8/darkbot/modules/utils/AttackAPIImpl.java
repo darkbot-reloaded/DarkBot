@@ -108,12 +108,13 @@ public class AttackAPIImpl extends AbstractAttackImpl implements Listener {
     public void tryLockAndAttack() {
         super.tryLockAndAttack();
 
-        if (isAttacking() &&
-                (target.hasEffect(EntityEffect.NPC_ISH)
+        if (!hasTarget()) return;
+        if (hero.distanceTo(target) > 1_000 || (isAttacking() && (
+                target.hasEffect(EntityEffect.NPC_ISH)
                         || target.hasEffect(EntityEffect.ISH)
-                        || target.getHealth().hpDecreasedIn(3_000))
-                || hero.distanceTo(target) > 1_000)
+                        || target.getHealth().hpDecreasedIn(3_000)))) {
             buggedTimer.activate();
+        }
     }
 
     @Override
