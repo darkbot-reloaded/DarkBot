@@ -26,14 +26,15 @@ public class NovaManager {
             if (System.currentTimeMillis() <= lastNovaUpdate + expiryTime) return false;
             data.getRosterList().forEach((k, v) -> v.setForRemoval(true));
 
-            updateActiveCaptain(0);
-            updateResource();
-            if (updateRosterList()) {
+            boolean updated = updateActiveCaptain(0);
+            updated &= updateResource();
+            boolean rosterUpdated = updateRosterList();
+            if (rosterUpdated) {
                 data.getRosterList().values().removeIf(Agent::getForRemoval);
             }
             lastNovaUpdate = System.currentTimeMillis();
 
-            return true;
+            return updated && rosterUpdated;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -88,11 +89,11 @@ public class NovaManager {
             for (Agent agent : rosterList) {
                 this.data.addAgent(agent);
             }
-            return false;
+            return true;
         } else {
             System.out.println("NovaManager: " + response);
         }
-        return true;
+        return false;
     }
 
     public boolean dismissAgent(int captainId) throws IOException {
