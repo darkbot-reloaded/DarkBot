@@ -45,8 +45,8 @@ dependencies {
     val apiVersion = "0.6.0"
 
     // use this if you want to use local(mavenLocal) darkbot API
-    api("eu.darkbot", "darkbot-impl", apiVersion)
-    //api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
+    //api("eu.darkbot", "darkbot-impl", apiVersion)
+    api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
     api("com.google.code.gson", "gson", "2.8.9")
     api("com.miglayout", "miglayout", "3.7.4")
     api("org.jetbrains", "annotations", "23.0.0")
@@ -55,7 +55,7 @@ dependencies {
     implementation("org.jgrapht", "jgrapht-core", "1.3.0")
     implementation("org.mvel", "mvel2", "2.4.4.Final")
 
-    testImplementation("junit:junit:4.13.1")
+    testImplementation("junit:junit:4.13.2")
     testCompileOnly("org.jgrapht", "jgrapht-io", "1.3.0")
 }
 
