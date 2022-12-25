@@ -1,53 +1,67 @@
 package com.github.manolo8.darkbot.gui.trail;
 
+import com.github.manolo8.darkbot.utils.data.SizedIterable;
+import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * A method to smooth a hand-drawn line based on the McMaster
- * line smoothing algorithm
- *
+ * line smoothing algorithm.
+ * <br>
  * Heavily modified version, based on the implementation by:
  * @author Derek Springer
- * @link https://12inchpianist.com/2010/07/30/line-smoothing-in-java/
+ * @link <a href="https://12inchpianist.com/2010/07/30/line-smoothing-in-java/">...</a>
  */
 public class Line {
+    private long time;
     private final Location from, to;
-    private Location fromCopy, toCopy;
+    private final Location fromCopy, toCopy;
 
-    public Line(Location from, Location to) {
-        this.from = from;
-        this.to = to;
+    public Line() {
+        this.from = Location.of(0, 0);
+        this.to = Location.of(0, 0);
+        this.fromCopy = Location.of(0, 0);
+        this.toCopy = Location.of(0, 0);
+    }
+
+    public void init(Locatable from, Locatable to) {
+        this.time = System.currentTimeMillis();
+        this.from.setTo(from);
+        this.to.setTo(to);
+    }
+
+    public long getTime() {
+        return time;
     }
 
     private Location getFrom() {
-        return fromCopy == null ? fromCopy = from.copy() : fromCopy.setTo(from.getX(), from.getY());
+        return fromCopy.setTo(from.getX(), from.getY());
     }
 
     private Location getTo() {
-        return toCopy == null ? toCopy = to.copy() : toCopy.setTo(to.getX(), to.getY());
+        return toCopy.setTo(to.getX(), to.getY());
     }
 
-    public static List<List<Location>> getSmoothedPaths(Collection<Line> lines) {
+    public static List<List<Location>> getSmoothedPaths(SizedIterable<Line> lines) {
         return getPaths(lines).stream().map(Line::smoothPath).collect(Collectors.toList());
     }
 
     /**
      * Split a single list of lines in N paths
      */
-    private static List<List<Location>> getPaths(Collection<Line> lines) {
+    private static List<List<Location>> getPaths(SizedIterable<Line> lines) {
         List<List<Location>> paths = new ArrayList<>();
 
         List<Location> current = null;
         Line last = null;
 
         for (Line line : lines) {
-            if (last == null || last.to != line.from) {
-                paths.add(current = new ArrayList<>());
+            if (last == null || last.to.equals(line.from)) {
+                paths.add(current = new ArrayList<>(lines.size() + 1));
                 current.add(line.getFrom());
             }
             last = line;
