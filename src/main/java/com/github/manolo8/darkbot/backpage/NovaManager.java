@@ -24,18 +24,16 @@ public class NovaManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastNovaUpdate + expiryTime) return false;
-
             data.getRosterList().forEach((k, v) -> v.setForRemoval(true));
 
-            boolean updatedSuccess = updateActiveCaptain(0);
-            updatedSuccess &= updateResource();
-            updatedSuccess &= updateRosterList();
-            if (updatedSuccess) {
+            updateActiveCaptain(0);
+            updateResource();
+            if (updateRosterList()) {
                 data.getRosterList().values().removeIf(Agent::getForRemoval);
             }
             lastNovaUpdate = System.currentTimeMillis();
 
-            return updatedSuccess;
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }

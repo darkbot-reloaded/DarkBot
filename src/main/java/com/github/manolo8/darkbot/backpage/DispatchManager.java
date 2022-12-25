@@ -173,7 +173,7 @@ public class DispatchManager {
         return false;
     }
 
-    public boolean handleResponse(String type, String id, String response) {
+    private boolean handleResponse(String type, String id, String response) {
         boolean failed = response.contains("ERROR");
         if (!failed) {
             this.lastCollected.clear();
