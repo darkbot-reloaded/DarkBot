@@ -27,14 +27,15 @@ public class NovaManager {
 
             data.getRosterList().forEach((k, v) -> v.setForRemoval(true));
 
-            updateActiveCaptain(0);
-            updateResource();
-            updateRosterList();
-
-            data.getRosterList().values().removeIf(Agent::getForRemoval);
+            boolean updatedSuccess = updateActiveCaptain(0);
+            updatedSuccess &= updateResource();
+            updatedSuccess &= updateRosterList();
+            if (updatedSuccess) {
+                data.getRosterList().values().removeIf(Agent::getForRemoval);
+            }
             lastNovaUpdate = System.currentTimeMillis();
 
-            return true;
+            return updatedSuccess;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -61,7 +62,7 @@ public class NovaManager {
         return false;
     }
 
-    private void updateResource() throws IOException {
+    private boolean updateResource() throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
                 .setParam("command", "getResources")
                 .getContent();
@@ -69,12 +70,14 @@ public class NovaManager {
         JsonObject jsonObj = gson.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             this.data.setResourceAmount(jsonObj.get("item").getAsJsonObject().get("amount").getAsInt());
+            return true;
         } else {
             System.out.println("NovaManager: " + response);
         }
+        return false;
     }
 
-    private void updateRosterList() throws IOException {
+    private boolean updateRosterList() throws IOException {
         String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
                 .setParam("command", "getRosterList")
                 .getContent();
@@ -84,13 +87,14 @@ public class NovaManager {
         if (jsonObj.get("result").getAsString().equalsIgnoreCase("OK")) {
             String resp = jsonObj.getAsJsonArray("rosterList").toString();
             Agent[] rosterList = gson.fromJson(resp, Agent[].class);
-
             for (Agent agent : rosterList) {
                 this.data.addAgent(agent);
             }
+            return false;
         } else {
             System.out.println("NovaManager: " + response);
         }
+        return true;
     }
 
     public boolean dismissAgent(int captainId) throws IOException {
