@@ -55,13 +55,13 @@ public class RecyclingQueue<T> implements SizedIterable<T> {
         this.supplier = supplier;
     }
 
+    @NotNull
     private Node getNode() {
         // Cannot recycle, either both are null, or nothing left to recycle
         if (original == first) return new Node();
 
         Node node = original;
         original = node.next;
-        node.next = null;
         return node;
     }
 
@@ -76,6 +76,8 @@ public class RecyclingQueue<T> implements SizedIterable<T> {
         } else {
             last = last.next = newNode;
         }
+        // Ensure we un-link last node, ensures we don't make loops in the chain
+        last.next = null;
         size++;
         return last.value;
     }
