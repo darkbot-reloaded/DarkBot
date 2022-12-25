@@ -193,7 +193,7 @@ public class MapDrawer extends JPanel {
 
         protected final Rectangle2D rect = new Rectangle2D.Double();
         protected final Ellipse2D ellipse = new Ellipse2D.Double();
-        protected final Path2D path = new Path2D.Double();
+        protected final Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
         protected final Line2D line = new Line2D.Double();
 
         protected Graphics2D g2;
@@ -226,8 +226,8 @@ public class MapDrawer extends JPanel {
 
             double scale = getRadScale();
             if (scale > 0) {
-                x = (int) ((mapBounds.getWidth() / 2 * scale) / (mapBounds.getWidth() / width));
-                y = (int) ((mapBounds.getHeight() / 2 * scale) / (mapBounds.getHeight() / height));
+                x = (int) (scale * width / 2);
+                y = (int) (scale * height / 2);
 
                 int w = width - x * 2;
                 int h = height - y * 2;
@@ -363,7 +363,8 @@ public class MapDrawer extends JPanel {
                     first = false;
                 } else path.lineTo(point.getX(), point.getY());
             }
-            path.closePath();
+            if (type != PolyType.DRAW_POLYLINE)
+                path.closePath();
 
             switch (type) {
                 case DRAW_POLYGON:

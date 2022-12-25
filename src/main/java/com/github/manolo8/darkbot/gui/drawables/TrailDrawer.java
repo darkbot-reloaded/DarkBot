@@ -44,8 +44,9 @@ public class TrailDrawer implements Drawable {
 
         if (distance > 500) {
             last.setTo(hero);
-        } else if (distance > 10) {
-            positions.add().init(last, last.setTo(hero));
+        } else if (distance > 25) {
+            positions.add().init(last, hero);
+            last.setTo(hero);
         }
 
         long removeBefore = System.currentTimeMillis() - (trailLength.getValue() * 1000L);
@@ -70,6 +71,8 @@ public class TrailDrawer implements Drawable {
                 last = point;
             }
         }
+
+        if (distance > 50) mg.drawLine(this.last, hero);
         mg.getGraphics2D().setStroke(stroke);
     }
 }
