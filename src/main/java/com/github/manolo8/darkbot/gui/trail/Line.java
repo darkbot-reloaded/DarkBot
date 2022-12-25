@@ -60,8 +60,8 @@ public class Line {
         Line last = null;
 
         for (Line line : lines) {
-            if (last == null || last.to != line.from) {
-                paths.add(current = new ArrayList<>(lines.size()));
+            if (last == null || last.to.equals(line.from)) {
+                paths.add(current = new ArrayList<>(lines.size() + 1));
                 current.add(line.getFrom());
             }
             last = line;
