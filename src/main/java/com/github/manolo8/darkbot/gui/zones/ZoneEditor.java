@@ -192,8 +192,8 @@ public class ZoneEditor extends MapDrawer implements Listener {
         }
 
         @Override
-        protected double getRadScale() {
-            return 0;
+        protected double getMapZoom() {
+            return 1;
         }
     }
 }

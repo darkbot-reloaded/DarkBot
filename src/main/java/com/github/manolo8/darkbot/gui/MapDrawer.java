@@ -189,7 +189,7 @@ public class MapDrawer extends JPanel {
         protected final ConfigSetting<ColorScheme> cs;
         protected final ConfigSetting<ColorScheme.Fonts> fonts;
         protected final ConfigSetting<Set<DisplayFlag>> displayFlags;
-        protected final ConfigSetting<Double> radiationScale;
+        protected final ConfigSetting<Double> mapZoom;
 
         protected final Rectangle2D rect = new Rectangle2D.Double();
         protected final Ellipse2D ellipse = new Ellipse2D.Double();
@@ -197,10 +197,8 @@ public class MapDrawer extends JPanel {
         protected final Line2D line = new Line2D.Double();
 
         protected Graphics2D g2;
-        protected int width, widthMid, height, heightMid;
-        protected double scaleX, scaleY, gameX, gameY;
-
-        protected int x, y;
+        protected int width, widthMid, height, heightMid, offsetX, offsetY;
+        protected double scaleX, scaleY, invertedScaleX, invertedScaleY, gameOffsetX, gameOffsetY;
 
         public MapGraphicsImpl(StarSystemAPI star, ConfigAPI config) {
             this.config = config;
@@ -209,7 +207,7 @@ public class MapDrawer extends JPanel {
             this.cs = config.requireConfig("bot_settings.map_display.cs");
             this.fonts = config.requireConfig("bot_settings.map_display.cs.fonts");
             this.displayFlags = config.requireConfig("bot_settings.map_display.toggle");
-            this.radiationScale = config.requireConfig("bot_settings.map_display.radiation_scale");
+            this.mapZoom = config.requireConfig("bot_settings.map_display.map_zoom");
         }
 
         public void setup(Graphics g2, int width, int height) {
@@ -218,37 +216,33 @@ public class MapDrawer extends JPanel {
             this.widthMid = width / 2;
             this.heightMid = height / 2;
 
-            this.scaleX = mapBounds.getWidth() / width;
-            this.scaleY = mapBounds.getHeight() / height;
-
             this.g2 = (Graphics2D) g2;
             this.g2.addRenderingHints(RENDERING_HINTS);
 
-            double scale = getRadScale();
-            if (scale > 0) {
-                x = (int) (scale * width / 2);
-                y = (int) (scale * height / 2);
+            double mapZoom = getMapZoom();
+            if (mapZoom < 1) {
+                int w = (int) (width * mapZoom);
+                int h = (int) (height * mapZoom);
 
-                int w = width - x * 2;
-                int h = height - y * 2;
+                offsetX = (width - w) / 2;
+                offsetY = (height - h) / 2;
 
-                scaleX = mapBounds.getWidth() / w;
-                scaleY = mapBounds.getHeight() / h;
+                scale(w, h);
 
-                gameX = x * getScaleX();
-                gameY = y * getScaleY();
+                gameOffsetX = offsetX * getScaleX();
+                gameOffsetY = offsetY * getScaleY();
 
                 setColor("radiation");
                 getGraphics2D().fillRect(0, 0, width, height);
                 setColor("background");
-                getGraphics2D().fillRect(x, y, w, h);
+                getGraphics2D().fillRect(offsetX, offsetY, w, h);
                 setColor("unknown");
-                getGraphics2D().drawRect(x, y, w, h);
+                getGraphics2D().drawRect(offsetX, offsetY, w, h);
             } else {
-                x = y = 0;
-                gameX = gameY = 0;
-                scaleX = mapBounds.getWidth() / width;
-                scaleY = mapBounds.getHeight() / height;
+                offsetX = offsetY = 0;
+                gameOffsetX = gameOffsetY = 0;
+                scale(width, height);
+
                 setColor("background");
                 getGraphics2D().fillRect(0, 0, width, height);
             }
@@ -258,12 +252,25 @@ public class MapDrawer extends JPanel {
             g2 = null;
         }
 
-        protected double getRadScale() {
-            return radiationScale.getValue();
+        // 0-1 -> 0-100%
+        protected double getMapZoom() {
+            return mapZoom.getValue();
         }
 
         protected Locatable locFromClick(MouseEvent e) {
-            return Locatable.of((e.getX() - x) * getScaleX(), (e.getY() - y) * getScaleY());
+            return Locatable.of((e.getX() - offsetX) * getScaleX(), (e.getY() - offsetY) * getScaleY());
+        }
+
+        private void scale(int width, int height) {
+            scaleX = mapBounds.getWidth() / width;
+            scaleY = mapBounds.getHeight() / height;
+            invertedScaleX = 1.0 / scaleX;
+            invertedScaleY = 1.0 / scaleY;
+        }
+
+        private void drawShape(Shape shape, boolean fill) {
+            if (fill) g2.fill(shape);
+            else g2.draw(shape);
         }
 
         @Override
@@ -319,41 +326,39 @@ public class MapDrawer extends JPanel {
 
         @Override
         public double toScreenPointX(double gameX) {
-            return x + gameX / scaleX;
+            return offsetX + gameX * invertedScaleX;
         }
 
         @Override
         public double toScreenPointY(double gameY) {
-            return y + gameY / scaleY;
+            return offsetY + gameY * invertedScaleY;
         }
 
         @Override
         public double toGameLocationX(double screenX) {
-            return gameX + screenX * scaleX;
+            return gameOffsetX + screenX * scaleX;
         }
 
         @Override
         public double toGameLocationY(double screenY) {
-            return gameY + screenY * scaleY;
+            return gameOffsetY + screenY * scaleY;
         }
 
         @Override
         public void drawRect(double x, double y, double width, double height, boolean fill) {
             rect.setRect(x, y, width, height);
-            if (fill) g2.fill(rect);
-            else g2.draw(rect);
+            drawShape(rect, fill);
         }
 
         @Override
         public void drawOval(double x, double y, double width, double height, boolean fill) {
             ellipse.setFrame(x, y, width, height);
-            if (fill) g2.fill(ellipse);
-            else g2.draw(ellipse);
+            drawShape(ellipse, fill);
         }
 
         @Override
         public void drawPoly(PolyType type, @NotNull Point... points) {
-            if (points.length == 0) return;
+            if (points.length < 2) return;
 
             path.reset();
             boolean first = true;
@@ -366,14 +371,7 @@ public class MapDrawer extends JPanel {
             if (type != PolyType.DRAW_POLYLINE)
                 path.closePath();
 
-            switch (type) {
-                case DRAW_POLYGON:
-                case DRAW_POLYLINE:
-                    g2.draw(path);
-                    break;
-                case FILL_POLYGON:
-                    g2.fill(path);
-            }
+            drawShape(path, type == PolyType.FILL_POLYGON);
         }
 
         @Override

@@ -258,7 +258,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         public @Option MapDisplay MAP_DISPLAY = new MapDisplay();
         public static class MapDisplay {
-            public @Option @Percentage double RADIATION_SCALE = 0;
+            public @Option @Percentage double MAP_ZOOM = 1;
 
             @Option @Dropdown(multi = true)
             public Set<DisplayFlag> TOGGLE = EnumSet.of(
