@@ -198,7 +198,7 @@ public class MapDrawer extends JPanel {
 
         protected Graphics2D g2;
         protected int width, widthMid, height, heightMid, offsetX, offsetY;
-        protected double scaleX, scaleY, invertedScaleX, invertedScaleY, gameOffsetX, gameOffsetY;
+        protected double scaleX, scaleY, invertedScaleX, invertedScaleY;
 
         public MapGraphicsImpl(StarSystemAPI star, ConfigAPI config) {
             this.config = config;
@@ -229,9 +229,6 @@ public class MapDrawer extends JPanel {
 
                 scale(w, h);
 
-                gameOffsetX = offsetX * getScaleX();
-                gameOffsetY = offsetY * getScaleY();
-
                 setColor("radiation");
                 getGraphics2D().fillRect(0, 0, width, height);
                 setColor("background");
@@ -240,7 +237,6 @@ public class MapDrawer extends JPanel {
                 getGraphics2D().drawRect(offsetX, offsetY, w, h);
             } else {
                 offsetX = offsetY = 0;
-                gameOffsetX = gameOffsetY = 0;
                 scale(width, height);
 
                 setColor("background");
@@ -336,12 +332,12 @@ public class MapDrawer extends JPanel {
 
         @Override
         public double toGameLocationX(double screenX) {
-            return gameOffsetX + screenX * scaleX;
+            return (screenX - offsetX) * scaleX;
         }
 
         @Override
         public double toGameLocationY(double screenY) {
-            return gameOffsetY + screenY * scaleY;
+            return (screenY - offsetY) * scaleY;
         }
 
         @Override
