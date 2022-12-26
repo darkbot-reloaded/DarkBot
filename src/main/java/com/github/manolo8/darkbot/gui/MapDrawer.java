@@ -254,7 +254,7 @@ public class MapDrawer extends JPanel {
         }
 
         protected Locatable locFromClick(MouseEvent e) {
-            return Locatable.of((e.getX() - offsetX) * getScaleX(), (e.getY() - offsetY) * getScaleY());
+            return toGameLocation(e.getX(), e.getY());
         }
 
         private void scale(int width, int height) {
