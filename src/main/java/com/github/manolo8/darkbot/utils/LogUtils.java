@@ -1,13 +1,12 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.Bot;
-import com.github.manolo8.darkbot.utils.itf.ThrowingConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedOutputStream;
-import java.io.FileDescriptor;
+import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -26,6 +25,7 @@ public class LogUtils {
     public static final DateTimeFormatter FILENAME_DATE = DateTimeFormatter.ofPattern("uuuu-MM-dd_HH-mm-ss_SSS");
     public static final Path LOG_FOLDER = Paths.get("logs");
     public static final String START_TIME = LocalDateTime.now().format(FILENAME_DATE);
+    private static final Pattern SID_PATTERN = Pattern.compile("sid=[a-z0-9]{32}");
 
     public static void setupLogOutput() {
         if (!Files.exists(LOG_FOLDER)) createFolder();
@@ -34,24 +34,13 @@ public class LogUtils {
         OutputStream fileLogger = createLogFile(START_TIME);
         if (fileLogger == null) return;
 
-        System.setOut(createPrintStream(FileDescriptor.out, fileLogger, System.getProperty("sun.stdout.encoding")));
-        System.setErr(createPrintStream(FileDescriptor.err, fileLogger, System.getProperty("sun.stderr.encoding")));
+        System.setOut(createPrintStream(System.out, fileLogger, System.getProperty("sun.stdout.encoding")));
+        System.setErr(createPrintStream(System.err, fileLogger, System.getProperty("sun.stderr.encoding")));
 
     }
 
-    private static PrintStream createPrintStream(FileDescriptor descriptor, OutputStream fileLogger, String enc) {
-        OutputStream sink;
-
-        String path = Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        if (System.console() == null && (path.endsWith(".jar") || path.endsWith(".exe"))) {
-            // No console and running from jar/exe. Assume user just wants logfiles.
-            sink = fileLogger;
-        } else {
-            // There's a console, or running from IDE, split output both ways (stdout/err & file)
-            sink = new MultiOutputStream(new FileOutputStream(descriptor), fileLogger);
-        }
-
-        OutputStream bufferedOut = new BufferedOutputStream(sink, 128);
+    private static PrintStream createPrintStream(PrintStream out, OutputStream fileLogger, String enc) {
+        OutputStream bufferedOut = new BufferedOutputStream(new MultiOutputStream(out, fileLogger), 128);
 
         if (enc != null) {
             try {
@@ -113,8 +102,6 @@ public class LogUtils {
         }
     }
 
-    private static final Pattern SID_PATTERN = Pattern.compile("sid=[a-z0-9]{32}");
-
     private static class PrintStreamWithDate extends PrintStream {
 
         public PrintStreamWithDate(OutputStream downstream, String encoding) throws UnsupportedEncodingException {
@@ -153,53 +140,129 @@ public class LogUtils {
         }
     }
 
-    public static class MultiOutputStream extends OutputStream {
-        private final OutputStream[] outputStreams;
+    public static class MultiOutputStream extends FakeMultiOutputStream {
 
-        public MultiOutputStream(OutputStream... outputStreams) {
-            this.outputStreams = outputStreams;
+        OutputStream second;
+
+        public MultiOutputStream(OutputStream out, OutputStream second) {
+            super(out);
+            this.second = second;
         }
 
         @Override
-        public void write(int b) throws IOException {
-            redirect(out -> out.write(b));
+        public synchronized void write(int b) throws IOException {
+            super.write(b);
+            second.write(b);
         }
 
         @Override
-        public void write(byte @NotNull [] b) throws IOException {
-            redirect(out -> out.write(b));
+        public synchronized void write(byte @NotNull [] b) throws IOException {
+            super.write(b);
+            second.write(b);
         }
 
         @Override
-        public void write(byte @NotNull [] b, int off, int len) throws IOException {
-            redirect(out -> out.write(b, off, len));
+        public synchronized void write(byte @NotNull [] b, int off, int len) throws IOException {
+            super.write(b, off, len);
+            second.write(b, off, len);
         }
 
         @Override
-        public void flush() throws IOException {
-            redirect(OutputStream::flush);
+        public synchronized void flush() throws IOException {
+            super.flush();
+            second.flush();
+        }
+
+        @Override
+        public synchronized void close() throws IOException {
+            try {
+                super.close();
+            } finally {
+                second.close();
+            }
+        }
+    }
+
+    public static class FakeMultiOutputStream extends FilterOutputStream {
+
+        public FakeMultiOutputStream(final OutputStream proxy) {
+            super(proxy);
+        }
+
+        @SuppressWarnings("unused") // Possibly thrown from subclasses.
+        protected void afterWrite(final int n) throws IOException {
+            // noop
+        }
+
+        @SuppressWarnings("unused") // Possibly thrown from subclasses.
+        protected void beforeWrite(final int n) throws IOException {
+            // noop
         }
 
         @Override
         public void close() throws IOException {
-            redirect(OutputStream::close);
+            close(out);
         }
 
-        private void redirect(ThrowingConsumer<OutputStream, IOException> consumer) throws IOException {
-            IOException lastEx = null;
-            for (OutputStream out : outputStreams) {
+        @Override
+        public void flush() throws IOException {
+            try {
+                out.flush();
+            } catch (final IOException e) {
+                handleIOException(e);
+            }
+        }
+
+        protected void handleIOException(final IOException e) throws IOException {
+            throw e;
+        }
+
+        @Override
+        public void write(final byte @NotNull [] bts) throws IOException {
+            try {
+                final int len = length(bts);
+                beforeWrite(len);
+                out.write(bts);
+                afterWrite(len);
+            } catch (final IOException e) {
+                handleIOException(e);
+            }
+        }
+
+        @Override
+        public void write(final byte @NotNull [] bts, final int st, final int end) throws IOException {
+            try {
+                beforeWrite(end);
+                out.write(bts, st, end);
+                afterWrite(end);
+            } catch (final IOException e) {
+                handleIOException(e);
+            }
+        }
+
+        @Override
+        public void write(final int idx) throws IOException {
+            try {
+                beforeWrite(1);
+                out.write(idx);
+                afterWrite(1);
+            } catch (final IOException e) {
+                handleIOException(e);
+            }
+        }
+
+        public static void close(final Closeable closeable) throws IOException {
+            if (closeable != null) {
                 try {
-                    consumer.accept(out);
-                } catch (IOException e) {
-                    // If any previous exception exists, print it as we'll replace it.
-                    if (lastEx != null)
-                        lastEx.printStackTrace();
-                    lastEx = e;
+                    closeable.close();
+                } catch (final IOException e) {
+                    e.printStackTrace();
                 }
             }
-            // Throw whatever the last exception was, if any
-            if (lastEx != null) throw lastEx;
         }
 
+        public static int length(final byte[] array) {
+            return array == null ? 0 : array.length;
+        }
     }
 }
