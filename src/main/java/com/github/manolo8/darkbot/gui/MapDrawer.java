@@ -82,7 +82,7 @@ public class MapDrawer extends JPanel {
                     main.setRunning(!main.isRunning());
                     repaint();
 
-                } else main.hero.drive.move(mapGraphics.locFromClick(e));
+                } else main.hero.drive.move(mapGraphics.toGameLocation(e));
             }
         });
 
@@ -91,7 +91,7 @@ public class MapDrawer extends JPanel {
             public void mouseDragged(MouseEvent e) {
                 if (main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) return;
 
-                main.hero.drive.move(mapGraphics.locFromClick(e));
+                main.hero.drive.move(mapGraphics.toGameLocation(e));
             }
         });
     }
@@ -253,7 +253,7 @@ public class MapDrawer extends JPanel {
             return mapZoom.getValue();
         }
 
-        protected Locatable locFromClick(MouseEvent e) {
+        protected Locatable toGameLocation(MouseEvent e) {
             return toGameLocation(e.getX(), e.getY());
         }
 
