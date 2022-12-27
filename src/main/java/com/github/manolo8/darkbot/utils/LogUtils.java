@@ -1,11 +1,6 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.Bot;
-import com.github.manolo8.darkbot.utils.itf.ThrowingConsumer;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.BufferedOutputStream;
-import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -26,6 +21,7 @@ public class LogUtils {
     public static final DateTimeFormatter FILENAME_DATE = DateTimeFormatter.ofPattern("uuuu-MM-dd_HH-mm-ss_SSS");
     public static final Path LOG_FOLDER = Paths.get("logs");
     public static final String START_TIME = LocalDateTime.now().format(FILENAME_DATE);
+    private static final Pattern SID_PATTERN = Pattern.compile("sid=[a-z0-9]{32}");
 
     public static void setupLogOutput() {
         if (!Files.exists(LOG_FOLDER)) createFolder();
@@ -34,24 +30,13 @@ public class LogUtils {
         OutputStream fileLogger = createLogFile(START_TIME);
         if (fileLogger == null) return;
 
-        System.setOut(createPrintStream(FileDescriptor.out, fileLogger, System.getProperty("sun.stdout.encoding")));
-        System.setErr(createPrintStream(FileDescriptor.err, fileLogger, System.getProperty("sun.stderr.encoding")));
+        System.setOut(createPrintStream(System.out, fileLogger, System.getProperty("sun.stdout.encoding")));
+        System.setErr(createPrintStream(System.err, fileLogger, System.getProperty("sun.stderr.encoding")));
 
     }
 
-    private static PrintStream createPrintStream(FileDescriptor descriptor, OutputStream fileLogger, String enc) {
-        OutputStream sink;
-
-        String path = Bot.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        if (System.console() == null && (path.endsWith(".jar") || path.endsWith(".exe"))) {
-            // No console and running from jar/exe. Assume user just wants logfiles.
-            sink = fileLogger;
-        } else {
-            // There's a console, or running from IDE, split output both ways (stdout/err & file)
-            sink = new MultiOutputStream(new FileOutputStream(descriptor), fileLogger);
-        }
-
-        OutputStream bufferedOut = new BufferedOutputStream(sink, 128);
+    private static PrintStream createPrintStream(PrintStream out, OutputStream fileLogger, String enc) {
+        OutputStream bufferedOut = new BufferedOutputStream(new MultiOutputStream(out, fileLogger), 128);
 
         if (enc != null) {
             try {
@@ -113,8 +98,6 @@ public class LogUtils {
         }
     }
 
-    private static final Pattern SID_PATTERN = Pattern.compile("sid=[a-z0-9]{32}");
-
     private static class PrintStreamWithDate extends PrintStream {
 
         public PrintStreamWithDate(OutputStream downstream, String encoding) throws UnsupportedEncodingException {
@@ -153,53 +136,4 @@ public class LogUtils {
         }
     }
 
-    public static class MultiOutputStream extends OutputStream {
-        private final OutputStream[] outputStreams;
-
-        public MultiOutputStream(OutputStream... outputStreams) {
-            this.outputStreams = outputStreams;
-        }
-
-        @Override
-        public void write(int b) throws IOException {
-            redirect(out -> out.write(b));
-        }
-
-        @Override
-        public void write(byte @NotNull [] b) throws IOException {
-            redirect(out -> out.write(b));
-        }
-
-        @Override
-        public void write(byte @NotNull [] b, int off, int len) throws IOException {
-            redirect(out -> out.write(b, off, len));
-        }
-
-        @Override
-        public void flush() throws IOException {
-            redirect(OutputStream::flush);
-        }
-
-        @Override
-        public void close() throws IOException {
-            redirect(OutputStream::close);
-        }
-
-        private void redirect(ThrowingConsumer<OutputStream, IOException> consumer) throws IOException {
-            IOException lastEx = null;
-            for (OutputStream out : outputStreams) {
-                try {
-                    consumer.accept(out);
-                } catch (IOException e) {
-                    // If any previous exception exists, print it as we'll replace it.
-                    if (lastEx != null)
-                        lastEx.printStackTrace();
-                    lastEx = e;
-                }
-            }
-            // Throw whatever the last exception was, if any
-            if (lastEx != null) throw lastEx;
-        }
-
-    }
 }
