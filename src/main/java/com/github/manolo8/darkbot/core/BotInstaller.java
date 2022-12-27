@@ -129,22 +129,24 @@ public class BotInstaller implements API.Singleton {
 
     private long lastInternetRead;
     private void checkInvalid() {
-        if (API.hasCapability(GameAPI.Capability.HANDLER_INTERNET_READ_TIME)) {
-            long lastRead = API.lastInternetReadTime();
-            if (lastInternetRead != lastRead) {
-                lastInternetRead = lastRead;
-                invalidTimer.activate(20_000);
-            } else if (!invalidTimer.isArmed()) invalidTimer.activate(20_000);
+        if (API.hasCapability(GameAPI.Capability.LOGIN)) {
+            if (API.hasCapability(GameAPI.Capability.HANDLER_INTERNET_READ_TIME)) {
+                long lastRead = API.lastInternetReadTime();
+                if (lastInternetRead != lastRead) {
+                    lastInternetRead = lastRead;
+                    invalidTimer.activate(20_000);
+                } else if (!invalidTimer.isArmed()) invalidTimer.activate(20_000);
 
-        } else if (!invalidTimer.isArmed()) invalidTimer.activate(150_000); // 2.5 min
+            } else if (!invalidTimer.isArmed()) invalidTimer.activate(150_000); // 2.5 min
 
-        // timer is disarmed on refresh and on valid tick
-        if (invalidTimer.tryDisarm()) {
-            if (API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE))
-                API.clearCache(".*");
+            // timer is disarmed on refresh and on valid tick
+            if (invalidTimer.tryDisarm()) {
+                if (API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE))
+                    API.clearCache(".*");
 
-            API.handleRefresh();
-            System.out.println("Triggering refresh: stuck at loading screen for too long!");
+                API.handleRefresh();
+                System.out.println("Triggering refresh: stuck at loading screen for too long!");
+            }
         }
     }
 }
