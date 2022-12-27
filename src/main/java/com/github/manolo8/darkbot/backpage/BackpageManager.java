@@ -99,11 +99,12 @@ public class BackpageManager extends Thread implements BackpageAPI {
                 }
             }
 
-            // For backpage-only apis we don't need to care about the running ship, can just arbitrarily refresh
-            if (Main.API.hasCapability(GameAPI.Capability.BACKGROUND_ONLY)
+            // For backpage-only apis that support login, we can just arbitrarily refresh
+            if (Main.API.hasCapability(GameAPI.Capability.LOGIN) &&
+                    Main.API.hasCapability(GameAPI.Capability.BACKGROUND_ONLY)
                     && (isInvalid() || sidStatus == 302)
                     && refreshTimer.tryActivate()) {
-                Main.API.handleRefresh();
+                Main.API.handleRelogin();
                 continue;
             }
 

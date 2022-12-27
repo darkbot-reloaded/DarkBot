@@ -129,6 +129,9 @@ public class BotInstaller implements API.Singleton {
 
     private long lastInternetRead;
     private void checkInvalid() {
+        // Background only api ignores invalid checks
+        if (API.hasCapability(GameAPI.Capability.BACKGROUND_ONLY)) return;
+
         if (API.hasCapability(GameAPI.Capability.HANDLER_INTERNET_READ_TIME)) {
             long lastRead = API.lastInternetReadTime();
             if (lastInternetRead != lastRead) {
