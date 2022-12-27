@@ -155,6 +155,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
             throw new IllegalStateException("LoginData can be assigned only once!");
 
         this.loginData = Optional.ofNullable(loginData);
+        this.isInvalid();
     }
 
     public void checkDronesAfterKill() {
@@ -162,13 +163,11 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     private boolean isInvalid() {
-        int userId = main.statsManager.userId;
         if (loginData != null && loginData.isPresent()) {
             LoginData ld = loginData.get();
 
             this.sid = ld.getSid();
-
-            if (userId == 0) userId = ld.getUserId();
+            this.userId = ld.getUserId();
             if (!Objects.equals(this.instance, ld.getFullUrl())) {
                 this.instance = ld.getFullUrl();
                 this.instanceURI = tryParse(this.instance);
@@ -176,12 +175,12 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
         } else {
             this.sid = main.statsManager.sid;
+            this.userId = main.statsManager.userId;
             if (!Objects.equals(this.instance, main.statsManager.instance)) {
                 this.instance = main.statsManager.instance;
                 this.instanceURI = tryParse(this.instance);
             }
         }
-        this.userId = userId;
         return sid == null || instance == null || sid.isEmpty() || instance.isEmpty() || this.userId == 0;
     }
 

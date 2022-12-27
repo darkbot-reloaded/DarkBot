@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.backpage;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.entities.galaxy.GalaxyGate;
 import com.github.manolo8.darkbot.backpage.entities.galaxy.GalaxyInfo;
 import com.github.manolo8.darkbot.utils.http.Http;
@@ -17,7 +16,7 @@ public class GalaxyManager {
     private final GalaxyInfo galaxyInfo;
     private long lastGatesUpdate;
 
-    GalaxyManager(BackpageManager backpage) {
+    public GalaxyManager(BackpageManager backpage) {
         this.backpage = backpage;
         this.galaxyInfo = new GalaxyInfo();
     }
