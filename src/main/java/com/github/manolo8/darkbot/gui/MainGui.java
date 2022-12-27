@@ -15,6 +15,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -68,7 +69,14 @@ public class MainGui extends JFrame {
             });
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> main.configManager.saveConfig()));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                main.pluginHandler.PLUGIN_CLASS_LOADER.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            main.configManager.saveConfig();
+        }));
     }
 
     private void setComponentPosition() {
