@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.backpage.FlashResManager;
 import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.extensions.features.handlers.DrawableHandler;
-import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
@@ -35,8 +34,6 @@ public class MapDrawer extends JPanel {
     private static final RenderingHints RENDERING_HINTS =
             new RenderingHints(new HashMap<RenderingHints.Key, Object>() {{
                 put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-                put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                put(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
                 put(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
                 put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
             }});
@@ -65,11 +62,12 @@ public class MapDrawer extends JPanel {
                 repaint();
             }
         });
+
+        setUI(null);
     }
 
     public MapDrawer(Main main) {
         this();
-        setBorder(UIUtils.getUnfocusableBorder());
         setup(main);
 
         this.drawableHandler = main.pluginAPI.requireInstance(DrawableHandler.class);
@@ -200,6 +198,8 @@ public class MapDrawer extends JPanel {
         protected int width, widthMid, height, heightMid, offsetX, offsetY;
         protected double scaleX, scaleY, invertedScaleX, invertedScaleY;
 
+        protected boolean accuracyEnabled;
+
         public MapGraphicsImpl(StarSystemAPI star, ConfigAPI config) {
             this.config = config;
             this.mapBounds = star.getCurrentMapBounds();
@@ -210,14 +210,17 @@ public class MapDrawer extends JPanel {
             this.mapZoom = config.requireConfig("bot_settings.map_display.map_zoom");
         }
 
-        public void setup(Graphics g2, int width, int height) {
+        public void setup(Graphics graphics, int width, int height) {
             this.width = width;
             this.height = height;
             this.widthMid = width / 2;
             this.heightMid = height / 2;
 
-            this.g2 = (Graphics2D) g2;
+            this.accuracyEnabled = false;
+
+            this.g2 = (Graphics2D) graphics;
             this.g2.addRenderingHints(RENDERING_HINTS);
+            this.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
 
             double mapZoom = getMapZoom();
             if (mapZoom < 1) {
@@ -242,6 +245,10 @@ public class MapDrawer extends JPanel {
                 setColor("background");
                 getGraphics2D().fillRect(0, 0, width, height);
             }
+
+            setSubPixelAccuracy(true);
+            getGraphics2D().setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+            getGraphics2D().setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
 
         public void dispose() {
@@ -267,6 +274,15 @@ public class MapDrawer extends JPanel {
         private void drawShape(Shape shape, boolean fill) {
             if (fill) g2.fill(shape);
             else g2.draw(shape);
+        }
+
+        private void setSubPixelAccuracy(boolean enable) {
+            if (accuracyEnabled == enable) return;
+            accuracyEnabled = enable;
+
+            // in jdk17, java internally checks rendering hint instance but not sure about other versions
+            g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+                    enable ? RenderingHints.VALUE_STROKE_PURE : RenderingHints.VALUE_STROKE_DEFAULT);
         }
 
         @Override
@@ -331,6 +347,16 @@ public class MapDrawer extends JPanel {
         }
 
         @Override
+        public double toScreenSizeW(double gameW) {
+            return gameW * invertedScaleX;
+        }
+
+        @Override
+        public double toScreenSizeH(double gameH) {
+            return gameH * invertedScaleY;
+        }
+
+        @Override
         public double toGameLocationX(double screenX) {
             return (screenX - offsetX) * scaleX;
         }
@@ -342,18 +368,21 @@ public class MapDrawer extends JPanel {
 
         @Override
         public void drawRect(double x, double y, double width, double height, boolean fill) {
+            setSubPixelAccuracy(fill || (width > 10 && height > 10));
             rect.setRect(x, y, width, height);
             drawShape(rect, fill);
         }
 
         @Override
         public void drawOval(double x, double y, double width, double height, boolean fill) {
+            setSubPixelAccuracy(true);
             ellipse.setFrame(x, y, width, height);
             drawShape(ellipse, fill);
         }
 
         @Override
         public void drawPoly(PolyType type, @NotNull Point... points) {
+            setSubPixelAccuracy(true);
             if (points.length < 2) return;
 
             path.reset();
@@ -372,6 +401,7 @@ public class MapDrawer extends JPanel {
 
         @Override
         public void drawLine(double x1, double y1, double x2, double y2) {
+            setSubPixelAccuracy(true);
             line.setLine(x1, y1, x2, y2);
             g2.draw(line);
         }

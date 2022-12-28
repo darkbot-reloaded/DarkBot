@@ -33,6 +33,7 @@ import java.text.NumberFormat;
 public class InfosDrawer implements Drawable {
 
     private static final NumberFormat HEALTH_FORMAT;
+    private static final NumberFormat TWO_PLACES_FORMAT = new DecimalFormat("0.00");
 
     static {
         DecimalFormatSymbols sym = new DecimalFormatSymbols();
@@ -77,6 +78,17 @@ public class InfosDrawer implements Drawable {
         drawHealth(mg);
     }
 
+    private String getSysInfo() {
+        return (Runtime.getRuntime().totalMemory() >> 20) + "MB heap, " +
+                main.facadeManager.stats.getMemory() + '|' +
+                Main.API.getMemoryUsage() + "MB ram, " +
+                TWO_PLACES_FORMAT.format(Main.API.getCpuUsage()) + " cpu";
+    }
+
+    private String getTickInfo() {
+        return TWO_PLACES_FORMAT.format(main.getTickTime()) + "tick " + stats.getPing() + "ms ping";
+    }
+
     private void drawInfos(MapGraphics mg) {
         mg.setColor("text_dark");
         
@@ -105,17 +117,8 @@ public class InfosDrawer implements Drawable {
             }
         }
 
-        //for debug
-        mg.drawString(mg.getWidth() - 5, 12,
-                String.format("%dMB heap, %d|%dMB ram, %.2f cpu",
-                        Runtime.getRuntime().totalMemory() >> 20,
-                        main.facadeManager.stats.getMemory(),
-                        Main.API.getMemoryUsage(),
-                        Main.API.getCpuUsage()),
-                MapGraphics.StringAlign.RIGHT);
-
-        mg.drawString(mg.getWidth() - 5, 26,
-                String.format("%.1ftick %dms ping", main.getTickTime(), stats.getPing()), MapGraphics.StringAlign.RIGHT);
+        mg.drawString(mg.getWidth() - 5, 12, getSysInfo(), MapGraphics.StringAlign.RIGHT);
+        mg.drawString(mg.getWidth() - 5, 26, getTickInfo(), MapGraphics.StringAlign.RIGHT);
         mg.drawString(mg.getWidth() - 5, 40, "SID: " + main.backpage.sidStatus(), MapGraphics.StringAlign.RIGHT);
     }
 
@@ -141,7 +144,7 @@ public class InfosDrawer implements Drawable {
 
                 mg.getGraphics2D().setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
                 mg.getGraphics2D().fill(countDown);
-                mg.getGraphics2D().setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+                mg.getGraphics2D().setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
             }
         }
 

@@ -36,7 +36,7 @@ public class ConstantEntitiesDrawer implements Drawable {
         mg.setColor("portals");
 
         for (Portal portal : portals) {
-            mg.drawOvalCentered(portal, 12f, false);
+            mg.drawOvalCentered(portal, 12.0, false);
         }
     }
 
@@ -47,9 +47,9 @@ public class ConstantEntitiesDrawer implements Drawable {
             else mg.setColor("allies");
 
             if (bs instanceof BattleStation.Module) {
-                mg.drawRectCentered(bs, 3f, false);
+                mg.drawRectCentered(bs, 3.0, false);
             } else {
-                mg.drawOvalCentered(bs, 11f, 9f, true);
+                mg.drawOvalCentered(bs, 11.0, 9.0, true);
             }
         }
     }
@@ -58,7 +58,7 @@ public class ConstantEntitiesDrawer implements Drawable {
         for (Station station : stations) {
             if (station instanceof Station.Turret) {
                 mg.setColor("bases");
-                mg.drawOvalCentered(station, 2f, true);
+                mg.drawOvalCentered(station, 2.0, true);
 
             } else {
                 mg.setColor("base_spots");

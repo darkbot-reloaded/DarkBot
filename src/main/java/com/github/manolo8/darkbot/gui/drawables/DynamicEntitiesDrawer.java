@@ -1,18 +1,20 @@
 package com.github.manolo8.darkbot.gui.drawables;
 
 import com.github.manolo8.darkbot.extensions.features.Feature;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.types.DisplayFlag;
 import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.entities.Box;
+import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.entities.Mine;
 import eu.darkbot.api.game.entities.Npc;
 import eu.darkbot.api.game.entities.Pet;
 import eu.darkbot.api.game.entities.Player;
-import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.game.other.Movable;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.PetAPI;
@@ -26,15 +28,19 @@ public class DynamicEntitiesDrawer implements Drawable {
     private final HeroAPI hero;
     private final PetAPI pet;
 
+    private final ConfigSetting<Boolean> roundEntities;
+
     private final Collection<? extends Npc> npcs;
     private final Collection<? extends Box> boxes;
     private final Collection<? extends Mine> mines;
     private final Collection<? extends Pet> pets;
     private final Collection<? extends Player> players;
 
-    public DynamicEntitiesDrawer(HeroAPI hero, PetAPI pet, EntitiesAPI entities) {
+    public DynamicEntitiesDrawer(HeroAPI hero, PetAPI pet, ConfigAPI config, EntitiesAPI entities) {
         this.hero = hero;
         this.pet = pet;
+
+        this.roundEntities = config.requireConfig("bot_settings.map_display.round_entities");
 
         this.boxes = entities.getBoxes();
         this.mines = entities.getMines();
@@ -60,7 +66,7 @@ public class DynamicEntitiesDrawer implements Drawable {
         mg.setColor("boxes");
 
         for (Box box : boxes) {
-            drawBox(mg, box, box.getInfo().shouldCollect());
+            drawEntity(mg, box, 3, box.getInfo().shouldCollect());
 
             if (mg.hasDisplayFlag(DisplayFlag.RESOURCE_NAMES))
                 mg.drawString(box, box.getTypeName(), -5, MapGraphics.StringAlign.MID);
@@ -71,21 +77,21 @@ public class DynamicEntitiesDrawer implements Drawable {
         mg.setColor("mines");
 
         for (Mine mine : mines)
-            drawBox(mg, mine, true);
+            drawEntity(mg, mine, 3, true);
     }
 
     private void drawNpcs(MapGraphics mg) {
         mg.setColor("npcs");
 
         for (Npc npc : npcs)
-            drawShip(mg, npc, npc.getInfo().getShouldKill());
+            drawEntity(mg, npc, 4, npc.getInfo().getShouldKill());
 
         pet.getLocatorNpcLoc()
                 .ifPresent(locator -> {
                     mg.setColor("ping");
-                    mg.drawOvalCentered(locator, 16f, true);
+                    mg.drawOvalCentered(locator, 16.0, true);
                     mg.setColor("ping_border");
-                    mg.drawOvalCentered(locator, 16f, false);
+                    mg.drawOvalCentered(locator, 16.0, false);
                 });
     }
 
@@ -93,7 +99,7 @@ public class DynamicEntitiesDrawer implements Drawable {
         for (Player player : players) {
             boolean isEnemy = player.getEntityInfo().isEnemy();
             mg.setColor(isEnemy ? "enemies" : "allies");
-            drawShip(mg, player, false);
+            drawEntity(mg, player, 4, false);
 
             if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
                 mg.drawString(player, player.getEntityInfo().getUsername(), -5, MapGraphics.StringAlign.MID);
@@ -103,7 +109,7 @@ public class DynamicEntitiesDrawer implements Drawable {
     private void drawPets(MapGraphics mg) {
         for (Pet pet : pets) {
             mg.setColor(pet.getEntityInfo().isEnemy() ? "enemies" : "allies");
-            drawShip(mg, pet, false);
+            drawEntity(mg, pet, 4, false);
 
             if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
                 mg.drawString(pet, pet.getEntityInfo().getUsername(), -5, MapGraphics.StringAlign.MID);
@@ -144,25 +150,15 @@ public class DynamicEntitiesDrawer implements Drawable {
             }
 
             mg.setColor("target");
-            mg.drawOvalCentered(target, 6f, true);
+            drawEntity(mg, target, 4, true);
         }
     }
 
-    private void drawShip(MapGraphics mg, Locatable pos, boolean fill) {
-//        if (!fill) mg.drawRect(mg.toScreenPointX(pos.getX()) - 2,
-//                mg.toScreenPointY(pos.getY()) - 2, 4, 4, false);
-//        else mg.drawRectCentered(pos, 5, true);
+    private void drawEntity(MapGraphics mg, Entity entity, double size, boolean fill) {
+        if (fill) size += 1;
 
-        if (fill) mg.drawOvalCentered(pos, 7f, true);
-        else mg.drawOvalCentered(pos, 6f, false);
-    }
-
-    private void drawBox(MapGraphics mg, Locatable pos, boolean fill) {
-//        if (!fill) mg.drawRect(mg.toScreenPointX(pos.getX()) - 2,
-//                mg.toScreenPointY(pos.getY()) - 2, 4, 4, false);
-//        else mg.drawRectCentered(pos, 5, true);
-
-        if (fill) mg.drawOvalCentered(pos, 6f, true);
-        else mg.drawOvalCentered(pos, 5f, false);
+        if (roundEntities.getValue())
+            mg.drawOvalCentered(entity, size + 2, fill);
+        else mg.drawRectCentered(entity, size, fill);
     }
 }

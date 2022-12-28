@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.objects.facades;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.gui.utils.CachedFormatter;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.BoosterAPI;
 
@@ -35,6 +36,8 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
         public double amount, cd;
         public String category, name;
         public BoosterCategory cat;
+
+        private final CachedFormatter simpleStringFmt = CachedFormatter.ofPattern("%3s %2.0f%% %s");
 
         private final ObjArray subBoostersArr = ObjArray.ofVector(true);
         private final ObjArray attributesArr = ObjArray.ofVector(true);
@@ -75,7 +78,7 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
         }
 
         public String toSimpleString() {
-            return String.format("%3s %2.0f%% %s", Time.secondsToShort(cd), amount, cat.getSmall(category));
+            return simpleStringFmt.format(Time.secondsToShort(cd), amount, cat.getSmall(category));
         }
 
         public Color getColor() {

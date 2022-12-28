@@ -67,7 +67,7 @@ class SafetiesDisplay extends MapDrawer {
             zonesDrawer.drawSafeZone(mg, closest);
 
             mg.setColor("safety_editor.zone_solid");
-            mg.drawOvalCentered(closest, closest.diameter() / mg.getScaleX(), closest.diameter() / mg.getScaleY(), false);
+            mg.drawOvalCentered(closest, mg.toScreenSizeW(closest.diameter()), mg.toScreenSizeH(closest.diameter()), false);
         }
 
         if (editor.editing != null) {

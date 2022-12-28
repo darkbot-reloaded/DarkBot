@@ -72,7 +72,6 @@ public class TrailDrawer implements Drawable {
             }
         }
 
-        if (distance > 50) mg.drawLine(this.last, hero);
         mg.getGraphics2D().setStroke(stroke);
     }
 }

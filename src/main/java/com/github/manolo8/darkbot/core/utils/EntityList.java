@@ -130,19 +130,18 @@ public class EntityList extends Updatable implements EntitiesAPI {
         main.hero.pet.removed = main.hero.pet.isInvalid(address);
 
         for (List<? extends Entity> entities : allEntities) {
-            // Remove invalid entities and update valid ones
-            entities.removeIf(entity -> {
+            for (int i = entities.size() - 1; i >= 0; i--) {
+                Entity entity = entities.get(i);
                 if (entity.isInvalid(address) || entity.address == main.hero.address || entity.address == main.hero.pet.address) {
+                    entities.remove(i);
                     ids.remove(entity.id);
                     entity.removed();
 
                     if (entities != ships)
                         eventBroker.sendEvent(new EntityRemoveEvent(entity));
-                    return true;
-                } 
-                entity.update();
-                return false;
-            });
+
+                } else entity.update();
+            }
         }
 
         this.obstacles.removeIf(Obstacle::isRemoved);
