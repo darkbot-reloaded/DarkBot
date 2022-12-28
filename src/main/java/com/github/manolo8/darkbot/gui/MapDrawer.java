@@ -62,8 +62,6 @@ public class MapDrawer extends JPanel {
                 repaint();
             }
         });
-
-        setUI(null);
     }
 
     public MapDrawer(Main main) {
