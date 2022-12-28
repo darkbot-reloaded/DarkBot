@@ -150,11 +150,16 @@ public class DynamicEntitiesDrawer implements Drawable {
             }
 
             mg.setColor("target");
-            drawEntity(mg, target, 4, true);
+            drawEntity(mg, target, 4, true, true);
         }
     }
 
     private void drawEntity(MapGraphics mg, Entity entity, double size, boolean fill) {
+        drawEntity(mg, entity, size, fill, false);
+    }
+
+    private void drawEntity(MapGraphics mg, Entity entity, double size, boolean fill, boolean target) {
+        if (!target && entity == hero.getLocalTarget()) return; // don't paint entity from loop if is a target
         if (fill) size += 1;
 
         if (roundEntities.getValue())
