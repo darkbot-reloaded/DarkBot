@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -130,10 +131,10 @@ public class EntityList extends Updatable implements EntitiesAPI {
         main.hero.pet.removed = main.hero.pet.isInvalid(address);
 
         for (List<? extends Entity> entities : allEntities) {
-            for (int i = entities.size() - 1; i >= 0; i--) {
-                Entity entity = entities.get(i);
+            for (Iterator<? extends Entity> it = entities.iterator(); it.hasNext();) {
+                Entity entity = it.next();
                 if (entity.isInvalid(address) || entity.address == main.hero.address || entity.address == main.hero.pet.address) {
-                    entities.remove(i);
+                    it.remove();
                     ids.remove(entity.id);
                     entity.removed();
 

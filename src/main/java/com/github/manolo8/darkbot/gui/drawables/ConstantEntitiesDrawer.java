@@ -66,7 +66,7 @@ public class ConstantEntitiesDrawer implements Drawable {
                 int size = station instanceof Station.Headquarter ? 3500
                         : station instanceof Station.HomeBase ? 3000 : 1000;
 
-                mg.drawOvalCentered(station, size / mg.getScaleX(), size / mg.getScaleY(), true);
+                mg.drawOvalCentered(station, mg.toScreenSizeW(size), mg.toScreenSizeH(size), true);
             }
         }
     }

@@ -124,8 +124,8 @@ public class ZonesDrawer implements Drawable {
     public void drawSafeZone(MapGraphics mg, SafetyInfo safetyInfo) {
         if (safetyInfo == null) return;
 
-        mg.drawOvalCentered(safetyInfo, safetyInfo.getDiameter() / mg.getScaleX(),
-                safetyInfo.getDiameter() / mg.getScaleY(), true);
+        mg.drawOvalCentered(safetyInfo, mg.toScreenSizeW(safetyInfo.getDiameter()),
+                mg.toScreenSizeH(safetyInfo.getDiameter()), true);
     }
 
     private int gridToMapX(MapGraphics mg, int x, int width) {
