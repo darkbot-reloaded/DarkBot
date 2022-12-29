@@ -3,13 +3,12 @@ package com.github.manolo8.darkbot.gui.titlebar;
 import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
-public class DragArea extends JPanel implements SimpleMouseListener {
+public class DragArea extends JComponent implements SimpleMouseListener {
 
     private final JFrame frame;
 
@@ -18,6 +17,10 @@ public class DragArea extends JPanel implements SimpleMouseListener {
 
     DragArea(JFrame frame) {
         this.frame = frame;
+
+        setMinimumSize(new Dimension(0, 0));
+        setPreferredSize(new Dimension(0, 0));
+        setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
 
         setBorder(UIUtils.getPartialBorder(1, 0, 1, 0));
         addMouseListener(this);
@@ -53,14 +56,17 @@ public class DragArea extends JPanel implements SimpleMouseListener {
         if (e.getClickCount() == 2) WindowUtils.toggleMaximized(frame);
     }
 
-    public static class Info extends DragArea {
+    public static class Info extends Box.Filler {
 
         private final JLabel info = new JLabel();
 
-        Info(JFrame frame) {
-            super(frame);
-            setLayout(new MigLayout("ins 0", "push[]push", "push[]push"));
-            add(this.info, "grow");
+        Info() {
+            super(new Dimension(0, 0),
+                    new Dimension(0, 0),
+                    new Dimension(Short.MAX_VALUE, 100));
+            setLayout(new BorderLayout());
+            add(this.info, BorderLayout.CENTER);
+            info.setHorizontalAlignment(SwingConstants.CENTER);
         }
 
         public void setInfo(String info) {

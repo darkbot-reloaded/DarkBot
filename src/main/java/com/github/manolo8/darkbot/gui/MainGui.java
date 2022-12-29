@@ -80,8 +80,10 @@ public class MainGui extends JFrame {
     }
 
     private void setComponentPosition() {
-        mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][][grow]"));
-        mainPanel.add(titleBar = new MainTitleBar(main, this), "grow, span");
+        mainPanel.setBorder(UIUtils.getBorder());
+        mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][grow]"));
+
+        setJMenuBar(titleBar = new MainTitleBar(main, this));
         mainPanel.add(exitConfirmation = new ExitConfirmation(), "grow, span, hidemode 2");
         mainPanel.add(mapDrawer = new MapDrawer(main), "grow, span");
     }

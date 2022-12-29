@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.ui.FlatNativeWindowBorder;
+import com.formdev.flatlaf.util.SystemInfo;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
@@ -34,6 +35,14 @@ public class Bot {
 
         try {
             UIManager.getFont("Label.font"); // Prevents a linux crash
+            // Avoid title being shown
+            UIManager.put("TitlePane.titleMargins", new Insets(0, Short.MAX_VALUE, 0, 0));
+
+            if (SystemInfo.isLinux ) {
+                // enable custom window decorations
+                JFrame.setDefaultLookAndFeelDecorated( true );
+                JDialog.setDefaultLookAndFeelDecorated( true );
+            }
 
             // Load necessary native libraries
             FlatNativeWindowBorder.isSupported();
