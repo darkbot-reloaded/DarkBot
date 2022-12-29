@@ -92,12 +92,16 @@ public class ZonesDrawer implements Drawable {
 
     public void drawCustomZone(MapGraphics mg, ZoneInfo zoneInfo) {
         if (zoneInfo == null) return;
+
+        Area.Rectangle mapBounds = starSystem.getCurrentMapBounds();
+        int width = (int) mg.toScreenSizeW(mapBounds.getWidth());
+        int height = (int) mg.toScreenSizeH(mapBounds.getHeight());
         for (int x = 0; x < zoneInfo.getResolution(); x++) {
             for (int y = 0; y < zoneInfo.getResolution(); y++) {
                 if (!zoneInfo.get(x, y)) continue;
 
-                Point pos = Point.of(gridToMapX(mg, x), gridToMapY(mg, y));
-                mg.drawRect(pos, gridToMapX(mg, x + 1) - pos.x(), gridToMapY(mg, y + 1) - pos.y(), true);
+                Point pos = Point.of(gridToMapX(mg, x, width), gridToMapY(mg, y, height));
+                mg.drawRect(pos, gridToMapX(mg, x + 1, width) - pos.x(), gridToMapY(mg, y + 1, height) - pos.y(), true);
             }
         }
     }
@@ -120,16 +124,15 @@ public class ZonesDrawer implements Drawable {
     public void drawSafeZone(MapGraphics mg, SafetyInfo safetyInfo) {
         if (safetyInfo == null) return;
 
-        mg.drawOvalCentered(safetyInfo, mg.toScreenPointX(safetyInfo.getDiameter()),
-                mg.toScreenPointY(safetyInfo.getDiameter()), true);
+        mg.drawOvalCentered(safetyInfo, mg.toScreenSizeW(safetyInfo.getDiameter()),
+                mg.toScreenSizeH(safetyInfo.getDiameter()), true);
     }
 
-    private int gridToMapX(MapGraphics mg, int x) {
-        return x * mg.getWidth() / zoneResolution.getValue();
+    private int gridToMapX(MapGraphics mg, int x, int width) {
+        return (int) (mg.toScreenPointX(0) + x * width / zoneResolution.getValue());
     }
 
-    private int gridToMapY(MapGraphics mg, int y) {
-        return y * mg.getHeight() / zoneResolution.getValue();
+    private int gridToMapY(MapGraphics mg, int y, int height) {
+        return (int) (mg.toScreenPointY(0) + y * height / zoneResolution.getValue());
     }
-
 }

@@ -71,6 +71,7 @@ public class TrailDrawer implements Drawable {
                 last = point;
             }
         }
+
         mg.getGraphics2D().setStroke(stroke);
     }
 }

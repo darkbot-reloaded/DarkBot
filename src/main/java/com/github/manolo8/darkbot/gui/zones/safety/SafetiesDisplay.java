@@ -6,9 +6,9 @@ import com.github.manolo8.darkbot.gui.MapDrawer;
 import com.github.manolo8.darkbot.gui.drawables.ConstantEntitiesDrawer;
 import com.github.manolo8.darkbot.gui.drawables.InfosDrawer;
 import com.github.manolo8.darkbot.gui.drawables.ZonesDrawer;
+import com.github.manolo8.darkbot.gui.zones.ZoneEditor;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Locatable;
-import eu.darkbot.api.game.other.Point;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -43,7 +43,8 @@ class SafetiesDisplay extends MapDrawer {
 
     @Override
     public void setup(Main main) {
-        super.setup(main);
+        this.main = main;
+        this.mapGraphics = main.pluginAPI.requireInstance(ZoneEditor.FixedScaleMapGraphicsImpl.class);
 
         this.infosDrawer = main.pluginAPI.requireInstance(InfosDrawer.class);
         this.zonesDrawer = main.pluginAPI.requireInstance(ZonesDrawer.class);
@@ -66,9 +67,7 @@ class SafetiesDisplay extends MapDrawer {
             zonesDrawer.drawSafeZone(mg, closest);
 
             mg.setColor("safety_editor.zone_solid");
-
-            Point size = mg.toScreenPoint(closest.diameter(), closest.diameter());
-            mg.drawOvalCentered(closest, size.x(), size.y(), false);
+            mg.drawOvalCentered(closest, mg.toScreenSizeW(closest.diameter()), mg.toScreenSizeH(closest.diameter()), false);
         }
 
         if (editor.editing != null) {

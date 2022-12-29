@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 public class ColorScheme {
 
     public @Option @Col(alpha = false) Color BACKGROUND = new Color(0x263238);
+    public @Option @Col(alpha = false) Color RADIATION = new Color(0x372638);
     public @Option Color TEXT = new Color(0xF2F2F2);
     public @Option Color TEXT_DARK = new Color(0xBBBBBB);
     public @Option Color GOING = new Color(0x8F9BFF);

@@ -80,6 +80,7 @@ public class MainGui extends JFrame {
     }
 
     private void setComponentPosition() {
+        mainPanel.setBorder(UIUtils.getBorder());
         mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][][grow]"));
         mainPanel.add(titleBar = new MainTitleBar(main, this), "grow, span");
         mainPanel.add(exitConfirmation = new ExitConfirmation(), "grow, span, hidemode 2");

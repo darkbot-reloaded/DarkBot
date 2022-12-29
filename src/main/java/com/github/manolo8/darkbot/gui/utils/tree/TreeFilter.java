@@ -65,7 +65,7 @@ public class TreeFilter implements Predicate<ConfigSetting<?>> {
     }
 
     public boolean isUnfiltered() {
-        return !isSearching() && visibility == Visibility.Level.ADVANCED;
+        return !isSearching() && visibility == Visibility.Level.DEVELOPER;
     }
 
     @Override
