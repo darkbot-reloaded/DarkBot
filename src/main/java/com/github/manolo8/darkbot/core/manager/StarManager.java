@@ -159,22 +159,22 @@ public class StarManager implements API.Singleton {
                 .addMap(423, "WarGame 4", "WG").addMap(424, "WarGame 5", "WG").addMap(425, "WarGame 6", "WG");
 
                 // Frozen laberynth
-        mapBuild.addMap(430, "ATLAS A"  ).exitBy(55)
-                .addMap(431, "ATLAS B"  ).exitBy(55)
-                .addMap(432, "ATLAS C"  ).exitBy(55)
-                .addMap(433, "Cygni"    ).exitBy(55)
-                .addMap(434, "Helvetios").exitBy(55)
-                .addMap(435, "Eridani"  ).exitBy(55)
-                .addMap(436, "Sirius"   ).exitBy(55)
-                .addMap(437, "Sadatoni" ).exitBy(55)
-                .addMap(438, "Persei"   ).exitBy(55)
-                .addMap(439, "Volantis" ).exitBy(55)
-                .addMap(440, "Alcyone"  ).exitBy(55)
-                .addMap(441, "Auriga"   ).exitBy(55)
-                .addMap(442, "Bootes"   ).exitBy(55)
-                .addMap(443, "Aquila"   ).exitBy(55)
-                .addMap(444, "Orion"    ).exitBy(55)
-                .addMap(445, "Maia"     ).exitBy(55);
+        mapBuild.addGG(430, "ATLAS A"  ).exitBy(55)
+                .addGG(431, "ATLAS B"  ).exitBy(55)
+                .addGG(432, "ATLAS C"  ).exitBy(55)
+                .addGG(433, "Cygni"    ).exitBy(55)
+                .addGG(434, "Helvetios").exitBy(55)
+                .addGG(435, "Eridani"  ).exitBy(55)
+                .addGG(436, "Sirius"   ).exitBy(55)
+                .addGG(437, "Sadatoni" ).exitBy(55)
+                .addGG(438, "Persei"   ).exitBy(55)
+                .addGG(439, "Volantis" ).exitBy(55)
+                .addGG(440, "Alcyone"  ).exitBy(55)
+                .addGG(441, "Auriga"   ).exitBy(55)
+                .addGG(442, "Bootes"   ).exitBy(55)
+                .addGG(443, "Aquila"   ).exitBy(55)
+                .addGG(444, "Orion"    ).exitBy(55)
+                .addGG(445, "Maia"     ).exitBy(55);
         /*
                 // Mimesis escort maps
         mapBuild.addGG(430, "Escort VRU 1", "ESC-V1").exitBy(1)
