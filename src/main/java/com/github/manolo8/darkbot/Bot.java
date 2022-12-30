@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.ui.FlatNativeWindowBorder;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.github.manolo8.darkbot.utils.LibSetup;
@@ -37,6 +38,8 @@ public class Bot {
             UIManager.getFont("Label.font"); // Prevents a linux crash
             // Avoid title being shown
             UIManager.put("TitlePane.titleMargins", new Insets(0, Short.MAX_VALUE, 0, 0));
+            UIManager.put("TitlePane.showIcon", false);
+            UIManager.put("TitlePane.noIconLeftGap", 0);
 
             if (SystemInfo.isLinux ) {
                 // enable custom window decorations
@@ -52,6 +55,8 @@ public class Bot {
             UIManager.put("Component.arc", 0);
             UIManager.put("Button.default.boldText", false);
             UIManager.put("Table.cellFocusColor", new Color(0, 0, 0, 160));
+
+            FlatInspector.install( "ctrl shift alt X" );
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }

@@ -5,38 +5,39 @@ import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
 
-    private final DragArea.Info info;
+    private final Info info;
 
     public MainTitleBar(Main main, MainGui frame) {
-        JToolBar leftTools = new JToolBar();
-        leftTools.add(new ExtraButton(main, frame), "grow");
-        leftTools.add(new ConfigButton(frame), "grow");
-        leftTools.add(new StatsButton(frame), "grow, hidemode 2");
-        leftTools.add(new StartButton(main, frame), "grow");
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        setBorder(BorderFactory.createEmptyBorder());
 
-        JToolBar rightTools = new JToolBar();
-        rightTools.add(new HookButton(frame), "grow, hidemode 2");
-        rightTools.add(new DiagnosticsButton(main, frame), "grow");
-        rightTools.add(new VisibilityButton(main, frame), "grow");
-        rightTools.add(new PinButton(frame), "grow");
-        rightTools.add(new TrayButton(main, frame), "grow, hidemode 2");
-        //rightTools.add(new MinimizeButton(frame), "grow");
-        //rightTools.add(new MaximizeButton(frame), "grow");
-        //rightTools.add(new CloseButton(frame), "grow");
+        add(new ExtraButton(main, frame));
+        add(new ConfigButton(frame));
+        add(new StatsButton(frame));
+        add(new StartButton(main, frame));
 
-        add(leftTools);
-        add(this.info = new DragArea.Info());
-        add(rightTools);
+        add(Box.createHorizontalGlue());
+        add(this.info = new Info());
+        add(Box.createHorizontalGlue());
 
-        setMargin(new Insets(0,0,0,0));
+        add(new HookButton(frame));
+        add(new DiagnosticsButton(main, frame));
+        add(new VisibilityButton(main, frame));
+        add(new PinButton(frame));
+        add(new TrayButton(main, frame));
     }
 
     public void setInfo(String info) {
-        this.info.setInfo(info);
+        this.info.setText(info);
+    }
+
+    private static class Info extends JLabel {
+        public Info() {
+            setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        }
     }
 
 }

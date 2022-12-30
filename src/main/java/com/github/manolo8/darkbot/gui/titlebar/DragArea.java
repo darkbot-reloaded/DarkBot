@@ -56,21 +56,4 @@ public class DragArea extends JComponent implements SimpleMouseListener {
         if (e.getClickCount() == 2) WindowUtils.toggleMaximized(frame);
     }
 
-    public static class Info extends Box.Filler {
-
-        private final JLabel info = new JLabel();
-
-        Info() {
-            super(new Dimension(0, 0),
-                    new Dimension(0, 0),
-                    new Dimension(Short.MAX_VALUE, 100));
-            setLayout(new BorderLayout());
-            add(this.info, BorderLayout.CENTER);
-            info.setHorizontalAlignment(SwingConstants.CENTER);
-        }
-
-        public void setInfo(String info) {
-            this.info.setText(info);
-        }
-    }
 }

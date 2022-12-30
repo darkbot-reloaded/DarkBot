@@ -9,7 +9,6 @@ public class HideButton extends TitleBarButton<JFrame> {
 
     HideButton(JFrame frame) {
         super(UIUtils.getIcon("close"), frame);
-        super.actionColor = UIUtils.RED;
     }
 
     @Override
