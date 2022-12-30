@@ -44,7 +44,14 @@ public class LoginUtils {
     }
 
     public static LoginData performUserLogin(StartupParams params) {
-        if (params.getAutoLogin()) return performAutoLogin(params.getAutoLoginProps());
+        if (params.getAutoLogin()) {
+            try {
+                return performAutoLogin(params.getAutoLoginProps());
+            } catch (LoginException e) {
+                System.err.println("Failed to perform autologin, falling back to login panel");
+                e.printStackTrace();
+            }
+        }
 
         LoginForm panel = new LoginForm();
 
