@@ -120,8 +120,11 @@ public class Bot {
         // support windows 7 too
         @Override
         public boolean getSupportsWindowDecorations() {
-            return !SystemInfo.isProjector && !SystemInfo.isWebswing && !SystemInfo.isWinPE
-                    && (!SystemInfo.isWindows_10_orLater || !FlatNativeWindowBorder.isSupported());
+            if (SystemInfo.isProjector || SystemInfo.isWebswing || SystemInfo.isWinPE)
+                return false;
+
+            // return true if native border isn't supported
+            return !(SystemInfo.isWindows_10_orLater && FlatNativeWindowBorder.isSupported());
         }
     }
 }
