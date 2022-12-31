@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.utils;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.github.manolo8.darkbot.gui.tree.components.JLabelField;
 
 import javax.swing.*;
@@ -29,13 +30,27 @@ public class ButtonListRenderer extends JPanel implements ListCellRenderer<Strin
         this.buttonClick = buttonClick;
 
         button = new JButton(icon);
-        button.setBorder(BorderFactory.createEmptyBorder());
         button.setFocusable(false);
         button.setRolloverEnabled(false);
         button.setOpaque(true);
-        button.setSize(24, 24);
+        button.setPreferredSize(new Dimension(24, 24));
+        button.putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS);
+
+        setPreferredSize(new Dimension(0, 24));
+        setMaximumSize(new Dimension(300, 24));
+        name.setBorder(BorderFactory.createEmptyBorder(0, 5, 0 ,0));
 
         add(button, BorderLayout.EAST);
+    }
+
+    @Override
+    public Insets getInsets() {
+        return new Insets(0,0,0,0);
+    }
+
+    @Override
+    public Insets getInsets(Insets insets) {
+        return getInsets();
     }
 
     @Override

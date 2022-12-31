@@ -29,19 +29,19 @@ public class DragArea extends JComponent implements SimpleMouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        Point dragAreaLoc = getLocationOnScreen();
+        Point frameLoc = frame.getLocationOnScreen();
         Point clickLoc = e.getLocationOnScreen();
-        internalX = (clickLoc.x - dragAreaLoc.x) / (double) getWidth();
-        internalY = (clickLoc.y - dragAreaLoc.y) / (double) getHeight();
+        internalX = (clickLoc.x - frameLoc.x) / (double) frame.getWidth();
+        internalY = (clickLoc.y - frameLoc.y) / (double) frame.getHeight();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         WindowUtils.setMaximized(frame, false);
 
-        Point clickLoc = e.getLocationOnScreen();
-        Point dragAreaLoc = getLocation();
-        frame.setLocation(clickLoc.x - (int)(internalX * getWidth()) - dragAreaLoc.x, clickLoc.y - (int) (internalY * getHeight()) - dragAreaLoc.y);
+        Point mouseLoc = e.getLocationOnScreen();
+        frame.setLocation(mouseLoc.x - (int)(internalX * frame.getWidth()),
+                mouseLoc.y - (int) (internalY * frame.getHeight()));
     }
 
     @Override

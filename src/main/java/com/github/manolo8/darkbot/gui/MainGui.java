@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.api.GameAPI;
@@ -33,6 +34,8 @@ public class MainGui extends JFrame {
 
     public MainGui(Main main) throws HeadlessException {
         super("DarkBot");
+        getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_ICON, false);
+        getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_TITLE, false);
 
         this.configGui = new ConfigGui(main);
         configGui.setIconImage(ICON);
@@ -49,7 +52,7 @@ public class MainGui extends JFrame {
         setIconImage(ICON);
 
         setComponentPosition();
-        titleBar.setInfo("DarkBot: " + Main.VERSION);
+        titleBar.setInfo("DarkBot " + Main.VERSION);
 
         setVisible(true);
 
@@ -80,7 +83,7 @@ public class MainGui extends JFrame {
     private void setComponentPosition() {
         setJMenuBar(titleBar = new MainTitleBar(main, this));
 
-        setLayout(new BorderLayout(0, 0));
+        setLayout(new BorderLayout());
         add(exitConfirmation = new ExitConfirmation(), BorderLayout.NORTH);
         add(mapDrawer = new MapDrawer(main), BorderLayout.CENTER);
     }

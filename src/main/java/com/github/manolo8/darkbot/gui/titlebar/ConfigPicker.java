@@ -10,6 +10,7 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.ComboPopup;
+import java.awt.*;
 import java.nio.file.Paths;
 
 public class ConfigPicker extends JComboBox<String> {
@@ -19,6 +20,13 @@ public class ConfigPicker extends JComboBox<String> {
 
     public ConfigPicker() {
         setUI(new FlatComboBoxUI() {
+            @Override
+            protected Dimension getDisplaySize() {
+                Dimension size = super.getDisplaySize();
+                size.width += 16;
+                return size;
+            }
+
             @Override
             protected ComboPopup createPopup() {
                 return new FlatComboBoxUI.FlatComboPopup(ConfigPicker.this) {
@@ -39,6 +47,11 @@ public class ConfigPicker extends JComboBox<String> {
                 idx -> idx > 0 && getSelectedIndex() != idx);
 
         setRenderer(renderer);
+
+        setMinimumSize(new Dimension(40, 0));
+        setPreferredSize(new Dimension(100, 0));
+        setMaximumSize(new Dimension(140, Short.MAX_VALUE));
+        setBorder(BorderFactory.createEmptyBorder());
 
         ComboPopup popup = (ComboPopup) getAccessibleContext().getAccessibleChild(0);
         JList<?> list = popup.getList();

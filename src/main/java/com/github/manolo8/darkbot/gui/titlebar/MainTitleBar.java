@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
 
@@ -19,9 +20,7 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
         add(new StatsButton(frame));
         add(new StartButton(main, frame));
 
-        add(Box.createHorizontalGlue());
         add(this.info = new Info());
-        add(Box.createHorizontalGlue());
 
         add(new HookButton(frame));
         add(new DiagnosticsButton(main, frame));
@@ -31,13 +30,21 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
     }
 
     public void setInfo(String info) {
-        this.info.setText(info);
+        this.info.label.setText(info);
     }
 
-    private static class Info extends JLabel {
-        public Info() {
+    private static class Info extends Box.Filler {
+
+        private final JLabel label = new JLabel();
+
+        Info() {
+            super(new Dimension(20, 0), new Dimension(120, 0), new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+            setLayout(new BorderLayout());
             setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+            add(this.label, BorderLayout.CENTER);
+            label.setHorizontalAlignment(SwingConstants.CENTER);
         }
+
     }
 
 }

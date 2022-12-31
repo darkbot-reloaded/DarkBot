@@ -36,9 +36,8 @@ public class Bot {
 
         try {
             UIManager.getFont("Label.font"); // Prevents a linux crash
-            // Avoid title being shown
-            UIManager.put("TitlePane.titleMargins", new Insets(0, Short.MAX_VALUE, 0, 0));
-            UIManager.put("TitlePane.showIcon", false);
+
+            // Set no padding when icon is removed
             UIManager.put("TitlePane.noIconLeftGap", 0);
 
             if (SystemInfo.isLinux ) {
