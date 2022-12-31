@@ -33,7 +33,7 @@ public class MapDrawer extends JPanel {
 
     private static final RenderingHints RENDERING_HINTS =
             new RenderingHints(new HashMap<RenderingHints.Key, Object>() {{
-                put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                //put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 put(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
                 put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
             }});
