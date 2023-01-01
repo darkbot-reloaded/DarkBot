@@ -16,12 +16,12 @@ import java.util.regex.Pattern;
 @EqualsAndHashCode
 public class Version implements eu.darkbot.api.utils.Version {
     private static final Pattern VERSION = Pattern.compile("" +
-            "([^0-9]*[0-9]+)" + // Major
-            "(\\.([0-9]+))?" + // Minor
-            "(\\.([0-9]+))?" + // Patch
-            "(\\.([0-9]+))?" + // Revision
-            "( ?b(eta)? ?([0-9]+)?)?" + // Beta
-            "( ?a(lpha) ?([0-9]+)?)?"); // Alpha
+            "(?<major>[^0-9]*[0-9]+)" +
+            "(\\.(?<minor>[0-9]+))?" +
+            "(\\.(?<patch>[0-9]+))?" +
+            "(\\.(?<revision>[0-9]+))?" +
+            "(?<beta> ?b(eta)? ?(?<betanum>[0-9]+)?)?" +
+            "(?<alpha> ?a(lpha) ?(?<alphanum>[0-9]+)?)?");
 
     private final String version;
     private final int major, minor, patch, revision, beta, alpha;
@@ -29,13 +29,13 @@ public class Version implements eu.darkbot.api.utils.Version {
     public Version(String version) {
         Matcher matcher = VERSION.matcher(version);
         if (!matcher.matches()) throw new IllegalArgumentException("Couldn't parse version " + version);
-        this.major = Integer.parseInt(matcher.group(1));
-        this.minor = getInt(matcher, 2);
-        this.patch = getInt(matcher, 4);
-        this.revision = getInt(matcher, 6);
+        this.major = Integer.parseInt(matcher.group("major"));
+        this.minor = getInt(matcher, "minor");
+        this.patch = getInt(matcher, "patch");
+        this.revision = getInt(matcher, "revision");
 
-        int beta = getInt(matcher, 9);
-        int alpha = getInt(matcher, 12);
+        int beta = getOptionalInt(matcher, "beta");
+        int alpha = getOptionalInt(matcher, "alpha");
         this.beta = beta == -1 && alpha == -1 ? Integer.MAX_VALUE : beta;
         this.alpha = alpha == -1 ? Integer.MAX_VALUE : alpha;
         this.version = getVersionString();
@@ -55,10 +55,16 @@ public class Version implements eu.darkbot.api.utils.Version {
         this.version = getVersionString();
     }
 
-    private int getInt(Matcher m, int find) {
-        if (m.group(find) == null) return -1;
-        String num = m.group(find + 1);
-        return num == null ? 0 : Integer.parseInt(m.group(find + 1));
+    private static int getInt(Matcher m, String groupName) {
+        String result = m.group(groupName);
+        return result == null ? -1 : Integer.parseInt(result);
+    }
+
+    private static int getOptionalInt(Matcher m, String groupName) {
+        String result = m.group(groupName);
+        if (result == null) return -1;
+        String num = m.group(groupName + "num");
+        return num == null ? 0 : Integer.parseInt(num);
     }
 
     public boolean isBeta() {

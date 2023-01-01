@@ -37,7 +37,7 @@ public class PluginUpdateHeader extends JPanel {
         this.pluginHandler = main.pluginHandler;
         this.pluginUpdater = main.pluginUpdater;
 
-        add(this.title = new JLabel(), "grow");
+        add(this.title = new JLabel(), "grow, wmin 300px");
         add(this.updateAllButton = new UpdateAllButton(), "hidemode 2");
         add(this.checkUpdateButton = new CheckUpdateButton());
         add(this.progressBar = new JProgressBar(), "hidemode 2, dock south, spanx");

@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
+import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.ui.FlatNativeWindowBorder;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.github.manolo8.darkbot.utils.LibSetup;
@@ -55,6 +56,7 @@ public class Bot {
             UIManager.put("Table.cellFocusColor", new Color(0, 0, 0, 160));
 
             FlatInspector.install( "ctrl shift alt X" );
+            FlatUIDefaultsInspector.install("ctrl shift alt I");
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }

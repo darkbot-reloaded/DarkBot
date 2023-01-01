@@ -1,30 +1,35 @@
 package com.github.manolo8.darkbot.gui.zones;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.gui.components.TabbedPane;
 import com.github.manolo8.darkbot.gui.zones.safety.SafetiesEditor;
-import net.miginfocom.swing.MigLayout;
+import com.github.manolo8.darkbot.utils.I18n;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.awt.*;
 
-public class ZonesEditor extends JPanel {
-
-    private TabbedPane tabbedPane = new TabbedPane();
-    private ZoneEditor preferredZones = new ZoneEditor();
-    private ZoneEditor avoidedZones = new ZoneEditor();
-    private SafetiesEditor safeEditor = new SafetiesEditor();
+public class ZonesEditor extends JTabbedPane {
+    private final ZoneEditor preferredZones = new ZoneEditor();
+    private final ZoneEditor avoidedZones = new ZoneEditor();
+    private final SafetiesEditor safeEditor = new SafetiesEditor();
 
     public ZonesEditor() {
-        super(new MigLayout("ins 0, gap 0, wrap 3", "[grow][grow][grow]", "[][grow]"));
-        tabbedPane.setBorder(null);
+        putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_FILL);
+        putClientProperty(FlatClientProperties.TABBED_PANE_TAB_HEIGHT, 25);
 
-        tabbedPane.addTab(null, "tabs.preferred_zones", preferredZones);
-        tabbedPane.addTab(null, "tabs.avoided_zones", avoidedZones);
-        tabbedPane.addTab(null, "tabs.safety_places", safeEditor);
+        addTab("tabs.preferred_zones", preferredZones);
+        addTab("tabs.avoided_zones", avoidedZones);
+        addTab("tabs.safety_places", safeEditor);
+    }
 
-        tabbedPane.getHeader().forEach(tab -> this.add(tab, "grow"));
-        add(tabbedPane, "span 3, grow");
+    @Override
+    public void addTab(@NotNull String key, Component component) {
+        String title = I18n.getOrDefault(key, null);
+        String description = I18n.getOrDefault(key + ".desc", null);
+
+        super.addTab(title, null, component, description);
     }
 
     public void setup(Main main) {

@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.components;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.github.manolo8.darkbot.utils.I18n;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,11 +15,8 @@ public class TabbedPane extends JPanel {
 
     private Tab current;
 
-    private List<JComponent> header = new ArrayList<>();
-
-    public List<JComponent> getHeader() {
-        return header;
-    }
+    @Getter
+    private final List<JComponent> header = new ArrayList<>();
 
     public TabbedPane() {
         super(new BorderLayout());
@@ -56,7 +54,6 @@ public class TabbedPane extends JPanel {
 
         private Tab(Icon icon, String key, JComponent component) {
             super(I18n.getOrDefault(key, null), icon);
-            setFocusPainted(false);
 
             String description = key == null ? null : I18n.getOrDefault(key + ".desc", null);
             if (description != null) setToolTipText(description);
