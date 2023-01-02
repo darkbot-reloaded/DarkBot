@@ -1,8 +1,9 @@
 plugins {
-    `java-library`
-    `maven-publish`
-    application
+    id("org.gradle.java-library")
+    id("org.gradle.maven-publish")
+    id("org.gradle.application")
 
+    id("io.freefair.lombok") version "6.6.1"
     id("org.beryx.runtime") version "1.12.7"
     id("edu.sc.seis.launch4j") version "2.5.3"
     id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -23,10 +24,10 @@ repositories {
 }
 
 group = "eu.darkbot"
-version = "1.17.115"
+version = "1.117"
 description = "DarkBot"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
-java.targetCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_11
+java.targetCompatibility = JavaVersion.VERSION_11
 
 application {
     applicationName = "DarkBot"
@@ -47,15 +48,14 @@ dependencies {
     // use this if you want to use local(mavenLocal) darkbot API
     //api("eu.darkbot", "darkbot-impl", apiVersion)
     api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
+
     api("com.google.code.gson", "gson", "2.8.9")
     api("com.miglayout", "miglayout", "3.7.4")
-    api("org.jetbrains", "annotations", "23.0.0")
+    api("com.formdev", "flatlaf", "3.0")
+    //api("com.formdev", "flatlaf-extras", "3.0")
+    api("org.jgrapht", "jgrapht-core", "1.3.0")
 
-    implementation("com.formdev", "flatlaf", "2.5")
-    implementation("org.jgrapht", "jgrapht-core", "1.3.0")
-    implementation("org.mvel", "mvel2", "2.4.4.Final")
-
-    testCompileOnly("org.jgrapht", "jgrapht-io", "1.3.0")
+    compileOnly("org.jetbrains", "annotations", "23.0.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
     testImplementation("org.mockito:mockito-core:4.10.0")

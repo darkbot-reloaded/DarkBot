@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.ui.FlatNativeWindowBorder;
+import com.formdev.flatlaf.util.SystemInfo;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
@@ -35,14 +36,26 @@ public class Bot {
         try {
             UIManager.getFont("Label.font"); // Prevents a linux crash
 
+            // Set no padding when icon is removed
+            UIManager.put("TitlePane.noIconLeftGap", 0);
+            UIManager.put("OptionPane.showIcon", true);
+
+            // enable custom window decorations - need on w7 also
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JDialog.setDefaultLookAndFeelDecorated(true);
+
             // Load necessary native libraries
             FlatNativeWindowBorder.isSupported();
 
-            UIManager.setLookAndFeel(new FlatDarkLaf());
+            UIManager.setLookAndFeel(new DarkLaf());
             UIManager.put("Button.arc", 0);
             UIManager.put("Component.arc", 0);
             UIManager.put("Button.default.boldText", false);
             UIManager.put("Table.cellFocusColor", new Color(0, 0, 0, 160));
+
+            // Not recommended to keep for production
+            //FlatInspector.install("ctrl shift alt X");
+            //FlatUIDefaultsInspector.install("ctrl shift alt I");
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
@@ -103,4 +116,16 @@ public class Bot {
         });
     }
 
+    public static class DarkLaf extends FlatDarkLaf {
+
+        // support windows 7 too
+        @Override
+        public boolean getSupportsWindowDecorations() {
+            if (SystemInfo.isProjector || SystemInfo.isWebswing || SystemInfo.isWinPE)
+                return false;
+
+            // return true if native border isn't supported
+            return !(SystemInfo.isWindows_10_orLater && FlatNativeWindowBorder.isSupported());
+        }
+    }
 }

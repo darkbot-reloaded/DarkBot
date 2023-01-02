@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ExtraButton extends TitleBarToggleButton<JFrame> {
+public class ExtraButton extends TitleBarButton<JFrame> {
 
     private final Main main;
     private final JPopupMenu extraOptions = new JPopupMenu("Extra Options");
@@ -102,7 +102,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
     @Override
     public void actionPerformed(ActionEvent e) {
         rebuild(main);
-        if (isSelected()) extraOptions.show(this, 0, getHeight() - 1);
+        extraOptions.show(this, 0, getHeight() - 1);
     }
 
     @Feature(name = "Extra menu default provider", description = "Provides default extra buttons")

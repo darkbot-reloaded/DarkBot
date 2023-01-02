@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.backpage.FlashResManager;
 import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.extensions.features.handlers.DrawableHandler;
-import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
@@ -25,7 +24,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -33,11 +32,9 @@ import java.util.concurrent.Future;
 public class MapDrawer extends JPanel {
 
     private static final RenderingHints RENDERING_HINTS =
-            new RenderingHints(new HashMap<RenderingHints.Key, Object>() {{
-                put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-                put(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-                put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-            }});
+            new RenderingHints(Map.of(
+                RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON,
+                RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON));
 
     public MapGraphicsImpl mapGraphics;
     public boolean hovering;
@@ -67,7 +64,6 @@ public class MapDrawer extends JPanel {
 
     public MapDrawer(Main main) {
         this();
-        setBorder(UIUtils.getPartialBorder(0, 1, 1, 1));
         setup(main);
 
         this.drawableHandler = main.pluginAPI.requireInstance(DrawableHandler.class);

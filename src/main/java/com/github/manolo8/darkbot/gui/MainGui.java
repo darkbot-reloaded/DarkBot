@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.api.GameAPI;
@@ -8,13 +9,13 @@ import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
 import eu.darkbot.api.config.ConfigSetting;
-import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -24,7 +25,6 @@ public class MainGui extends JFrame {
     private final Main main;
     private final ConfigGui configGui;
 
-    private final JPanel mainPanel = new JPanel();
     private MainTitleBar titleBar;
     private ExitConfirmation exitConfirmation;
     private MapDrawer mapDrawer;
@@ -34,6 +34,8 @@ public class MainGui extends JFrame {
 
     public MainGui(Main main) throws HeadlessException {
         super("DarkBot");
+        getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_ICON, false);
+        getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_TITLE, false);
 
         this.configGui = new ConfigGui(main);
         configGui.setIconImage(ICON);
@@ -42,7 +44,7 @@ public class MainGui extends JFrame {
 
         ToolTipManager.sharedInstance().setInitialDelay(350);
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         Config.BotSettings.BotGui guiConfig = main.config.BOT_SETTINGS.BOT_GUI;
         WindowUtils.setWindowSize(this, guiConfig.SAVE_GUI_POS, guiConfig.MAIN_GUI_WINDOW);
@@ -50,9 +52,8 @@ public class MainGui extends JFrame {
         setIconImage(ICON);
 
         setComponentPosition();
-        titleBar.setInfo("DarkBot: " + Main.VERSION);
+        titleBar.setInfo("DarkBot " + Main.VERSION);
 
-        WindowUtils.setupUndecorated(this, mainPanel);
         setVisible(true);
 
         setAlwaysOnTop(true);
@@ -80,10 +81,11 @@ public class MainGui extends JFrame {
     }
 
     private void setComponentPosition() {
-        mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][][grow]"));
-        mainPanel.add(titleBar = new MainTitleBar(main, this), "grow, span");
-        mainPanel.add(exitConfirmation = new ExitConfirmation(), "grow, span, hidemode 2");
-        mainPanel.add(mapDrawer = new MapDrawer(main), "grow, span");
+        setJMenuBar(titleBar = new MainTitleBar(main, this));
+
+        setLayout(new BorderLayout());
+        add(exitConfirmation = new ExitConfirmation(), BorderLayout.NORTH);
+        add(mapDrawer = new MapDrawer(main), BorderLayout.CENTER);
     }
 
     public void addConfigVisibilityListener(Consumer<Boolean> listener) {
@@ -112,14 +114,6 @@ public class MainGui extends JFrame {
         configGui.setComponentData();
     }
 
-    public void tryClose() {
-        if (main.config.BOT_SETTINGS.BOT_GUI.CONFIRM_EXIT) exitConfirmation.setVisible(true);
-        else {
-            System.out.println("Exit button pressed, exiting");
-            System.exit(0);
-        }
-    }
-
     @Override
     public void setTitle(String title) {
         if (!Objects.equals(getTitle(), title)) super.setTitle(title);
@@ -132,6 +126,19 @@ public class MainGui extends JFrame {
         else setTitle("DarkBot");
 
         mapDrawer.repaint();
+    }
+
+    @Override
+    protected void processWindowEvent(final WindowEvent e) {
+        super.processWindowEvent(e);
+
+        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+            if (main.config.BOT_SETTINGS.BOT_GUI.CONFIRM_EXIT) exitConfirmation.setVisible(true);
+            else {
+                System.out.println("Exit button pressed, exiting");
+                System.exit(0);
+            }
+        }
     }
 
 }
