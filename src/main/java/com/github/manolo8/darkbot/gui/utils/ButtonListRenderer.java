@@ -38,19 +38,9 @@ public class ButtonListRenderer extends JPanel implements ListCellRenderer<Strin
 
         setPreferredSize(new Dimension(0, 24));
         setMaximumSize(new Dimension(300, 24));
-        name.setBorder(BorderFactory.createEmptyBorder(0, 5, 0 ,0));
+        name.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
         add(button, BorderLayout.EAST);
-    }
-
-    @Override
-    public Insets getInsets() {
-        return new Insets(0,0,0,0);
-    }
-
-    @Override
-    public Insets getInsets(Insets insets) {
-        return getInsets();
     }
 
     @Override

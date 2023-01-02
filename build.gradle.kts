@@ -52,7 +52,7 @@ dependencies {
     api("com.google.code.gson", "gson", "2.8.9")
     api("com.miglayout", "miglayout", "3.7.4")
     api("com.formdev", "flatlaf", "3.0")
-    api("com.formdev", "flatlaf-extras", "3.0")
+    //api("com.formdev", "flatlaf-extras", "3.0")
     api("org.jgrapht", "jgrapht-core", "1.3.0")
 
     compileOnly("org.jetbrains", "annotations", "23.0.0")

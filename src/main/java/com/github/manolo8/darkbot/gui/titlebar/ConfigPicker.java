@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.gui.titlebar;
 
-import com.formdev.flatlaf.extras.components.FlatComboBox;
 import com.formdev.flatlaf.ui.FlatComboBoxUI;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.utils.ButtonListRenderer;
@@ -17,7 +16,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.nio.file.Paths;
 
-public class ConfigPicker extends FlatComboBox<String> {
+public class ConfigPicker extends JComboBox<String> {
 
     private Main main;
     private final ButtonListRenderer renderer;
@@ -137,6 +136,7 @@ public class ConfigPicker extends FlatComboBox<String> {
             this.buttonBackground = null;
             this.focusedBackground = UIManager.getColor("TabbedPane.focusColor");
             this.hoverColor = UIManager.getColor("TabbedPane.hoverColor");
+            this.padding.top = this.padding.bottom = this.padding.left = this.padding.right = 0;
         }
 
         public Color getBackground(boolean enabled) {
@@ -225,8 +225,8 @@ public class ConfigPicker extends FlatComboBox<String> {
                     // Use whole list when creating popup bounds
                     setPrototypeDisplayValue(null);
                     Rectangle rectangle = super.computePopupBounds( px, py, pw, ph );
-                    // Extra space for the buttons
-                    rectangle.width += 16;
+                    // Extra space for the buttons, min width to fix "Add new" being wider
+                    rectangle.width = Math.max(rectangle.width + 16, 100);
                     setPrototypeDisplayValue((String) getSelectedItem());
                     return rectangle;
                 }

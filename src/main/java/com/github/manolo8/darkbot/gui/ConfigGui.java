@@ -39,12 +39,10 @@ public class ConfigGui extends JFrame {
 
     public ConfigGui(Main main) throws HeadlessException {
         super("DarkBot Configuration");
+        this.main = main;
+
         getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_ICON, false);
         getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_TITLE, false);
-        //getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_MAXIMIZE, false);
-        //getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_ICONIFFY, false);
-
-        this.main = main;
 
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize(640, 480);

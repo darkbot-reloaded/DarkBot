@@ -22,7 +22,6 @@ public class ConfigTitleBar extends JMenuBar implements SimpleMouseListener {
                 new Dimension(Short.MAX_VALUE, Short.MAX_VALUE)));
         add(plugins);
         add(new PluginReloadButton(frame, main.pluginHandler));
-        //add(new HideButton(frame));
     }
 
 }
