@@ -31,6 +31,7 @@ public class MainGui extends JFrame {
 
     public static final Image ICON = UIUtils.getImage("icon");
     public static final int DEFAULT_WIDTH = 640, DEFAULT_HEIGHT = 480;
+    private int lastTick;
 
     public MainGui(Main main) throws HeadlessException {
         super("DarkBot");
@@ -125,7 +126,9 @@ public class MainGui extends JFrame {
         }
         else setTitle("DarkBot");
 
-        mapDrawer.repaint();
+        if ((lastTick++ % main.config.BOT_SETTINGS.MAP_DISPLAY.REFRESH_DELAY) == 0) {
+            mapDrawer.repaint();
+        }
     }
 
     @Override

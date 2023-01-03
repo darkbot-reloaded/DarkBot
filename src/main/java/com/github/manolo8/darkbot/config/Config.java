@@ -258,13 +258,13 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         public @Option MapDisplay MAP_DISPLAY = new MapDisplay();
         public static class MapDisplay {
-            public @Option @Visibility(Level.INTERMEDIATE) boolean ROUND_ENTITIES = false;
-            public @Option @Visibility(Level.INTERMEDIATE) @Percentage double MAP_ZOOM = 1;
-
             @Option @Dropdown(multi = true)
             public Set<DisplayFlag> TOGGLE = EnumSet.of(
                     HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA, SHOW_PET);
             public @Option @Visibility(Level.INTERMEDIATE) @Number(max = 300, step = 1) int TRAIL_LENGTH = 15;
+            public @Option @Visibility(Level.INTERMEDIATE) boolean ROUND_ENTITIES = false;
+            public @Option @Visibility(Level.INTERMEDIATE) @Percentage double MAP_ZOOM = 1;
+            public @Option @Visibility(Level.ADVANCED) @Number(min = 1, step = 1, max = 25) int REFRESH_DELAY = 1;
             public @Option @Visibility(Level.INTERMEDIATE) boolean MAP_START_STOP = false;
             public @Option("colors") @Visibility(Level.ADVANCED) ColorScheme cs = new ColorScheme();
         }
