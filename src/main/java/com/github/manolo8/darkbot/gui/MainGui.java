@@ -65,7 +65,7 @@ public class MainGui extends JFrame {
             addComponentListener(new ComponentAdapter() {
                 public void componentMoved(ComponentEvent e) {
                     if (main.config.BOT_SETTINGS.API_CONFIG.attachToBot)
-                        Main.API.setPosition((int) getBounds().getMaxX() - 6, (int) getBounds().getMinY());
+                        Main.API.setPosition((int) getBounds().getMaxX() - 15, (int) getBounds().getMinY());
                 }
             });
         }
@@ -96,6 +96,7 @@ public class MainGui extends JFrame {
         boolean open = !configGui.isVisible();
         configGui.setVisible(open);
         if (open) {
+            configGui.setState(NORMAL); // bring the window if was minimized
             configGui.setAlwaysOnTop(this.isAlwaysOnTop());
             configGui.toFront();
         }
@@ -133,7 +134,11 @@ public class MainGui extends JFrame {
         super.processWindowEvent(e);
 
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-            if (main.config.BOT_SETTINGS.BOT_GUI.CONFIRM_EXIT) exitConfirmation.setVisible(true);
+            // if is minimized close without confirmation
+            if (main.config.BOT_SETTINGS.BOT_GUI.CONFIRM_EXIT && getState() == NORMAL) {
+                toFront(); // bring to front if possible
+                exitConfirmation.setVisible(true);
+            }
             else {
                 System.out.println("Exit button pressed, exiting");
                 System.exit(0);

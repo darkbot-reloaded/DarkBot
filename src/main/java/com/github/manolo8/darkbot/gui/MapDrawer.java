@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.backpage.FlashResManager;
 import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.extensions.features.handlers.DrawableHandler;
+import com.github.manolo8.darkbot.gui.titlebar.RefreshButton;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
@@ -14,6 +15,7 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Point;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
+import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -52,12 +54,14 @@ public class MapDrawer extends JPanel {
         addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent evt) {
                 hovering = true;
-                repaint();
+                if (main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP)
+                    repaint();
             }
 
             public void mouseExited(MouseEvent evt) {
                 hovering = false;
-                repaint();
+                if (main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP)
+                    repaint();
             }
         });
     }
@@ -88,6 +92,9 @@ public class MapDrawer extends JPanel {
                 main.hero.drive.move(mapGraphics.toGameLocation(e));
             }
         });
+
+        setLayout(new MigLayout("insets 0px"));
+        add(new RefreshButton(), "gapx 5px");
     }
 
     public void setup(Main main) {
@@ -215,7 +222,6 @@ public class MapDrawer extends JPanel {
             this.accuracyEnabled = false;
 
             this.g2 = (Graphics2D) graphics;
-            this.g2.addRenderingHints(RENDERING_HINTS);
             this.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
 
             double mapZoom = getMapZoom();
@@ -243,8 +249,8 @@ public class MapDrawer extends JPanel {
             }
 
             setSubPixelAccuracy(true);
+            getGraphics2D().addRenderingHints(RENDERING_HINTS);
             getGraphics2D().setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
-            getGraphics2D().setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
 
         public void dispose() {

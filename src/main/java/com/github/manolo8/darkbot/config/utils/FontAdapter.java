@@ -16,10 +16,12 @@ public class FontAdapter implements JsonSerializer<Font>, JsonDeserializer<Font>
 
         public Font deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             if (json.isJsonPrimitive()) {
-                String[] parts = json.getAsString().split(":", 2);
-                if (parts.length != 2)
+                String[] parts = json.getAsString().split(":", 3);
+                if (parts.length != 2 && parts.length != 3)
                     throw new JsonParseException("Invalid font definition in config");
-                return new Font(parts[1], Font.PLAIN, Integer.parseInt(parts[0]));
+
+                int type = parts.length == 2 ? Font.PLAIN : Integer.parseInt(parts[2]);
+                return new Font(parts[1], type, Integer.parseInt(parts[0]));
             }
 
             // Parse pre-adapter format, stored as json object
@@ -34,7 +36,7 @@ public class FontAdapter implements JsonSerializer<Font>, JsonDeserializer<Font>
         }
 
         public JsonElement serialize(Font src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(src.getSize() + ":" + src.getName());
+            return new JsonPrimitive(src.getSize() + ":" + src.getName() + ":" + src.getStyle());
         }
 
 }
