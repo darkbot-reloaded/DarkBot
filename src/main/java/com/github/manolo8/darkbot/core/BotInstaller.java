@@ -136,8 +136,8 @@ public class BotInstaller implements API.Singleton {
             long lastRead = API.lastInternetReadTime();
             if (lastInternetRead != lastRead) {
                 lastInternetRead = lastRead;
-                invalidTimer.activate(20_000);
-            } else if (!invalidTimer.isArmed()) invalidTimer.activate(20_000);
+                invalidTimer.activate(60_000); // decrypting of main.swf can be tough
+            } else if (!invalidTimer.isArmed()) invalidTimer.activate(60_000);
 
         } else if (!invalidTimer.isArmed()) invalidTimer.activate(150_000); // 2.5 min
 
