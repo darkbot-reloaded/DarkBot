@@ -56,7 +56,7 @@ public class LoginUtils {
         LoginForm panel = new LoginForm();
 
         Popups.of("Login", panel)
-                .options(new Object[]{})
+                .options()
                 .border(BorderFactory.createEmptyBorder(0, 0, 5, 0))
                 .defaultButton(panel.getLoginBtn())
                 .showSync();

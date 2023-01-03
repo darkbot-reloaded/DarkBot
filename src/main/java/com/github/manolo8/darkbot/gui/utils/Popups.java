@@ -125,7 +125,7 @@ public class Popups {
             return this;
         }
 
-        public Builder options(Object[] options) {
+        public Builder options(Object... options) {
             ensureNonBuilt();
             this.options = options;
             return this;
