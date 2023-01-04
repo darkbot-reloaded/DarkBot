@@ -27,13 +27,16 @@ import eu.darkbot.api.game.entities.Mist;
 import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
+import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -84,8 +87,6 @@ public class EntityList extends Updatable implements EntitiesAPI {
             unknown.add(e);
             eventBroker.sendEvent(new EntityCreateEvent(e));
         });
-
-        this.main.status.add(this::refreshRadius);
     }
 
     @Override
@@ -130,31 +131,21 @@ public class EntityList extends Updatable implements EntitiesAPI {
         main.hero.pet.removed = main.hero.pet.isInvalid(address);
 
         for (List<? extends Entity> entities : allEntities) {
-            // Remove invalid entities and update valid ones
-            entities.removeIf(entity -> {
+            for (Iterator<? extends Entity> it = entities.iterator(); it.hasNext();) {
+                Entity entity = it.next();
                 if (entity.isInvalid(address) || entity.address == main.hero.address || entity.address == main.hero.pet.address) {
+                    it.remove();
                     ids.remove(entity.id);
                     entity.removed();
 
                     if (entities != ships)
                         eventBroker.sendEvent(new EntityRemoveEvent(entity));
-                    return true;
-                } 
-                entity.update();
-                return false;
-            });
+
+                } else entity.update();
+            }
         }
 
         this.obstacles.removeIf(Obstacle::isRemoved);
-    }
-
-    public void updatePing(Location location, NpcInfo info) {
-        fakeNpc.set(location, info);
-        boolean shouldBeNpc = location != null && info != null && fakeNpc.isPingAlive() &&
-                npcs.stream().noneMatch(n -> fakeNpc != n && n.npcInfo == info && n.locationInfo.distance(location) < 500);
-
-        if (!shouldBeNpc) npcs.remove(fakeNpc);
-        else if (!npcs.contains(fakeNpc)) npcs.add(fakeNpc);
     }
 
     private void doInEachEntity(Consumer<Entity> consumer) {
@@ -179,10 +170,29 @@ public class EntityList extends Updatable implements EntitiesAPI {
         }
     }
 
-    private void refreshRadius(boolean value) {
-        synchronized (Main.UPDATE_LOCKER) {
-            if (value) doInEachEntity(entity -> entity.clickable.setRadius(0));
-            else doInEachEntity(entity -> entity.clickable.reset());
+    private void refreshRadius(boolean running) {
+    }
+
+    private Location lastLocatorLocation = new Location();
+    private final Timer lastLocatorMatch = Timer.get(5_000);
+
+    public void updatePing(Location location, NpcInfo info) {
+        fakeNpc.set(location, info);
+        boolean shouldBeNpc = info != null && fakeNpc.isPingAlive() &&
+                npcs.stream().noneMatch(n -> fakeNpc != n && n.npcInfo == info && n.locationInfo.distance(fakeNpc) < 600);
+
+        if (!shouldBeNpc) {
+            if (!Objects.equals(lastLocatorLocation, location))
+                lastLocatorLocation = location == null ? null : location.copy();
+
+            lastLocatorMatch.activate();
+            npcs.remove(fakeNpc);
+        } else {
+            if (location == null || (lastLocatorLocation != null
+                    && lastLocatorLocation.distance(location) < 100 && lastLocatorMatch.isActive()))
+                return;
+
+            if (!npcs.contains(fakeNpc)) npcs.add(fakeNpc);
         }
     }
 

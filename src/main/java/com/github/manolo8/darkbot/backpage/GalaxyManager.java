@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.backpage;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.entities.galaxy.GalaxyGate;
 import com.github.manolo8.darkbot.backpage.entities.galaxy.GalaxyInfo;
 import com.github.manolo8.darkbot.utils.http.Http;
@@ -13,12 +12,12 @@ import java.io.InputStream;
 
 public class GalaxyManager {
 
-    private final Main main;
+    private final BackpageManager backpage;
     private final GalaxyInfo galaxyInfo;
     private long lastGatesUpdate;
 
-    GalaxyManager(Main main) {
-        this.main = main;
+    public GalaxyManager(BackpageManager backpage) {
+        this.backpage = backpage;
         this.galaxyInfo = new GalaxyInfo();
     }
 
@@ -102,15 +101,15 @@ public class GalaxyManager {
     }
 
     private String getLink(String action, boolean isInverted) {
-        return "flashinput/galaxyGates.php?userID=" + main.hero.id
-                + (isInverted ? "&sid=" + main.statsManager.sid + "&action=" + action
-                : "&action=" + action + "&sid=" + main.statsManager.sid);
+        return "flashinput/galaxyGates.php?userID=" + backpage.getUserId()
+                + (isInverted ? "&sid=" + backpage.getSid() + "&action=" + action
+                : "&action=" + action + "&sid=" + backpage.getSid());
     }
 
     private Boolean handleRequest(String params, int expiryTime, int minWait) {
         if (System.currentTimeMillis() <= lastGatesUpdate + expiryTime) return null;
         try {
-            Document doc = getDocument(main.backpage.getConnection(params, Method.GET, minWait));
+            Document doc = getDocument(backpage.getConnection(params, Method.GET, minWait));
 
             if (doc == null) return false;
 

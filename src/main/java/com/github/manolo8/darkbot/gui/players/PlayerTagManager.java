@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.players;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.PlayerTag;
 import com.github.manolo8.darkbot.gui.utils.PopupButton;
@@ -21,8 +22,8 @@ public class PlayerTagManager extends JPanel {
         super(new MigLayout("ins 0, gap 0", "[][][]"));
         this.editor = editor;
 
-        add(new TagButton(UIUtils.getIcon("add"), null, editor::addTagToPlayers, "Add new tag", true, false));
-        add(new TagButton(UIUtils.getIcon("remove"), null, editor::removeTagFromPlayers, null, false, false));
+        add(new TagButton(UIUtils.getIcon("add"), null, editor::addTagToPlayers, "Add new tag", true, false), "grow");
+        add(new TagButton(UIUtils.getIcon("remove"), null, editor::removeTagFromPlayers, null, false, false), "grow");
         add(new TagButton(UIUtils.getIcon("close"), "Manage tags", editor::deleteTag, null, false, true));
     }
 
@@ -43,6 +44,8 @@ public class PlayerTagManager extends JPanel {
             this.action = action;
             this.nullTag = nullTag;
             setBorder(UIUtils.getPartialBorder(1, leftBorder ? 1 : 0, 1, rightBorder ? 1 : 0));
+            if (text == null)
+                putClientProperty(FlatClientProperties.SQUARE_SIZE, true);
         }
 
         @Override

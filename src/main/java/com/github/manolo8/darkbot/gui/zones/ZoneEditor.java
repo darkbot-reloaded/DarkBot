@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.gui.drawables.ZonesDrawer;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.MapGraphics;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 
@@ -65,7 +66,8 @@ public class ZoneEditor extends MapDrawer implements Listener {
     }
 
     void setup(Main main, java.util.Map<Integer, ZoneInfo> zonesByMap) {
-        super.setup(main);
+        this.main = main;
+        this.mapGraphics = main.pluginAPI.requireInstance(FixedScaleMapGraphicsImpl.class);
 
         main.pluginAPI.requireAPI(EventBrokerAPI.class).registerListener(this);
 
@@ -180,6 +182,18 @@ public class ZoneEditor extends MapDrawer implements Listener {
 
         private void draw(Graphics2D g2) {
             g2.drawRect(x1, y1, x2 - x1 - (x2 == getWidth() ? 1 : 0), y2 - y1 - (y2 == getHeight() ? 1 : 0));
+        }
+    }
+
+    public static class FixedScaleMapGraphicsImpl extends MapDrawer.MapGraphicsImpl {
+
+        public FixedScaleMapGraphicsImpl(StarSystemAPI star, ConfigAPI config) {
+            super(star, config);
+        }
+
+        @Override
+        protected double getMapZoom() {
+            return 1;
         }
     }
 }

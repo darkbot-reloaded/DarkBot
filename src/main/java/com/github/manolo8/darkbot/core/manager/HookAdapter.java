@@ -4,6 +4,8 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
+import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.API;
 import eu.darkbot.api.DarkHook;
 import eu.darkbot.api.PluginAPI;
@@ -66,7 +68,7 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
         if (callbacks != null)
             callbacks.forEach(CallbackHolder::checkCallback);
 
-        if (!hook.isTaskRunnerValid() && hero.address > 0xFFFF)
+        if (!hook.isTaskRunnerValid() && ByteUtils.isValidPtr(hero.address))
             hook.setTaskRunnerHook(guiAddress, 3, HookFlag.ENV.ordinal());
     }
 
@@ -102,7 +104,7 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
     }
 
     @Override
-    public void selectEntity(long addr, long vtable) {
+    public void selectEntity(Entity entity) {
         throw new UnsupportedOperationException();
     }
 
@@ -217,10 +219,10 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
                 if (methodEnv != 0) hook.clearCallback(methodEnv); //already hooked? remove old methodEnv entry in native map
 
                 long address = scriptObject.get();
-                if (address <= 0xFFFF) return; //invalid address, return
-
-                methodEnv = hook.setMethodCallback(address, callback.methodIdx(),
-                        callback.hookFlag().ordinal(), object, method.getName(), JNIUtil.getJNIMethodSignature(method));
+                if (ByteUtils.isValidPtr(address)) {
+                    methodEnv = hook.setMethodCallback(address, callback.methodIdx(),
+                            callback.hookFlag().ordinal(), object, method.getName(), JNIUtil.getJNIMethodSignature(method));
+                }
             }
         }
     }

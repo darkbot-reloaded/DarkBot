@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.objects;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.utils.Offsets;
 import eu.darkbot.api.API;
 
 import java.util.function.Consumer;
@@ -15,7 +16,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
     protected final Point size = new Point();
     protected final Point minimized = new Point();
 
-    public long addressInfo;
+    public long addressInfo, featureWindowDefinition;
     public boolean visible;
 
     public int x;
@@ -29,6 +30,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
 
     private ObjArray tempArray;
     private ObjArray tempChildArray;
+    private boolean minimizable;
 
     public void update() {
         if (address == 0) return;
@@ -52,6 +54,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
         // API.readMemoryBoolean(addressInfo + 48); // show on top
 
         isTweening = API.readMemoryBoolean(address + 0xC4);
+        minimizable = API.readBoolean(featureWindowDefinition + 40);
     }
 
     @Override
@@ -61,11 +64,13 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
         } else {
             super.update(address);
             this.addressInfo = API.readMemoryLong(address + 496);
+            this.featureWindowDefinition = API.readLong(addressInfo + 88);
             this.update = System.currentTimeMillis();
         }
     }
 
     public void reset() {
+        this.addressInfo = 0;
         this.address = 0;
         this.visible = false;
         this.height = 0;
@@ -92,12 +97,34 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
         API.mouseMove(x + plusX, y + plusY);
     }
 
+    public void moveWindow(int newX, int newY) {
+        API.mouseDown(x + 50, y + 10);
+        API.mouseMove(newX + 50, newY + 10);
+        API.mouseUp(newX + 50, newY + 10);
+    }
+
     public boolean show(boolean value) {
         if (trySetShowing(value)) {
-            if (minimized.address != 0) API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
+            if (minimizable) toggleVisibility();
+            else legacyToggle(value);
+
             return false;
         }
         return value == visible && isAnimationDone();
+    }
+
+    protected void legacyToggle(boolean show) {
+        if (show || minimized.address != 0) clickMinimized();
+        else click(5, 5);
+    }
+
+    private void clickMinimized() {
+        if (minimized.address != 0)
+            API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
+    }
+
+    public void toggleVisibility() {
+        API.callMethodChecked(true, "23(toggleVisibility)(2626?)1116321600", 183, address);
     }
 
     /**
@@ -136,7 +163,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
      * @param childIndex set -1 to get last.
      */
     public long getSpriteChild(long spriteAddress, int childIndex) {
-        return API.readMemoryLong(getSpriteChildWrapper(spriteAddress, childIndex), 216);
+        return API.readMemoryLong(getSpriteChildWrapper(spriteAddress, childIndex), 0xD8 + Offsets.SPRITE_OFFSET);
     }
 
     /**

@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
-import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
@@ -19,7 +18,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
     private PluginHandler pluginHandler;
     private PluginUpdater pluginUpdater;
 
-    private MainButton pluginTab;
+    private AbstractButton pluginTab;
     private JPanel pluginPanel;
     private PluginUpdateHeader header;
 
@@ -28,7 +27,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
         setBorder(BorderFactory.createEmptyBorder());
     }
 
-    public void setup(Main main, MainButton pluginTab) {
+    public void setup(Main main, AbstractButton pluginTab) {
         this.main = main;
         this.pluginTab = pluginTab;
         this.pluginHandler = main.pluginHandler;

@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.core.entities;
 
+import com.github.manolo8.darkbot.Main;
+
 import java.util.Optional;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -9,8 +11,9 @@ public class Pet extends Ship implements eu.darkbot.api.game.entities.Pet {
     private int level, playerId;
     private Ship owner;
 
-    public Pet() {
+    public Pet(Main main) {
         // Removed by default, set to true externally when actually set
+        this.attackTarget.added(main);
         this.removed = true;
     }
 
@@ -34,14 +37,6 @@ public class Pet extends Ship implements eu.darkbot.api.game.entities.Pet {
                     .filter(ship -> ship.getId() == playerId)
                     .findFirst().orElse(null);
         }
-    }
-
-    @Override
-    public void update(long address) {
-        super.update(address);
-
-        if (main == null || main.isRunning())
-            clickable.setRadius(0);
     }
 
     public int getLevel() {

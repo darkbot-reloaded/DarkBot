@@ -39,17 +39,24 @@ public class LoginUtils {
         String lang = I18n.getLocale().getLanguage();
         if (!lang.isEmpty() && ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.FORCE_GAME_LANGUAGE)
             FORCED_PARAMS.put("lang", lang);
-        FORCED_PARAMS.put("display2d", "2");
+        FORCED_PARAMS.put("display2d", "0");
         FORCED_PARAMS.put("autoStartEnabled", "1");
     }
 
     public static LoginData performUserLogin(StartupParams params) {
-        if (params.getAutoLogin()) return performAutoLogin(params.getAutoLoginProps());
+        if (params.getAutoLogin()) {
+            try {
+                return performAutoLogin(params.getAutoLoginProps());
+            } catch (LoginException e) {
+                System.err.println("Failed to perform autologin, falling back to login panel");
+                e.printStackTrace();
+            }
+        }
 
         LoginForm panel = new LoginForm();
 
         Popups.of("Login", panel)
-                .options(new Object[]{})
+                .options()
                 .border(BorderFactory.createEmptyBorder(0, 0, 5, 0))
                 .defaultButton(panel.getLoginBtn())
                 .showSync();

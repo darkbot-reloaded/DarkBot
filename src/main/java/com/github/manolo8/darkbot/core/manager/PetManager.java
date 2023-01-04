@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.objects.Gui;
+import com.github.manolo8.darkbot.core.objects.SpriteObject;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.handlers.PetGearSelectorHandler;
@@ -21,6 +22,7 @@ import eu.darkbot.api.game.other.Health;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.game.other.LocationInfo;
+import eu.darkbot.api.game.other.Point;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.utils.Inject;
@@ -235,7 +237,7 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     private void clickToggleStatus() {
-        if (System.currentTimeMillis() - this.togglePetTime > 5000L) {
+        if (System.currentTimeMillis() - this.togglePetTime > 2000L) {
             click(MAIN_BUTTON_X, MODULE_Y);
             this.selection = ModuleStatus.NOTHING;
             this.togglePetTime = System.currentTimeMillis();
@@ -244,31 +246,21 @@ public class PetManager extends Gui implements PetAPI {
 
     private void selectModule(int moduleId, int submoduleIdx) {
         if (System.currentTimeMillis() < this.selectModuleTime) return;
-        this.selectModuleTime = System.currentTimeMillis() + 1000;
 
-        switch (selection) {
-            case SELECTED:
-            case NOTHING:
-                click(MODULES_X_MAX - 5, MODULE_Y);
-                selection = ModuleStatus.DROPDOWN;
-                break;
-            case DROPDOWN:
-                if (submoduleIdx != -1) {
-                    hover(MODULES_X_MAX - 30, getModuleY(moduleId, true));
-                    selection = ModuleStatus.SUB_DROPDOWN;
-                } else {
-                    click(MODULES_X_MAX - 30, getModuleY(moduleId, true));
-                    selection = ModuleStatus.SELECTED;
-                }
-                break;
-            case SUB_DROPDOWN:
-                selection = ModuleStatus.SELECTED;
-                if (submoduleIdx != -1)
-                    click(MODULES_X_MAX + 50, getModuleY(moduleId, false) + (SUBMODULE_HEIGHT * submoduleIdx));
+        Gear gear = null;
+        if (submoduleIdx == -1) {
+            int moduleIdx = moduleIdToIndex(moduleId);
+            if (moduleIdx < gearList.size()) gear = gearList.get(moduleIdx);
+        } else {
+            gear = locatorList.get(submoduleIdx);
         }
 
-        if (selection == ModuleStatus.SELECTED)
-            this.selectModuleTime = System.currentTimeMillis() + 3000;
+        if (gear != null) {
+            long gearsSprite = getSpriteChild(address, -1);
+            gear.setModule(gearsSprite);
+            this.selection = ModuleStatus.SELECTED;
+            this.selectModuleTime = System.currentTimeMillis() + 1000;
+        }
     }
 
     private int getModuleY(int moduleId, boolean centered) {
@@ -369,6 +361,7 @@ public class PetManager extends Gui implements PetAPI {
         }
     }
 
+    private final SpriteObject locatorTab = new SpriteObject();
     private void updateNpcLocatorList(long gearsSprite) {
         locatorWrapper.update(API.readMemoryLong(gearsSprite + 168));
 
@@ -377,6 +370,7 @@ public class PetManager extends Gui implements PetAPI {
             locatorList.clear();
             return;
         }
+        locatorTab.update(locatorBaseAddr);
         int oldSize = locatorNpcList.getSize();
         locatorNpcList.update(API.readMemoryLong(locatorBaseAddr + 224));
 
@@ -593,6 +587,16 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
+    public boolean isMoving() {
+        return pet.isMoving();
+    }
+
+    @Override
+    public boolean isMoving(long inTime) {
+        return pet.isMoving(inTime);
+    }
+
+    @Override
     public int getSpeed() {
         return pet.getSpeed();
     }
@@ -628,6 +632,11 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     @Override
+    public PetGear getGear() {
+        return currentModule == null ? null : PetGear.of(currentModule.id);
+    }
+
+    @Override
     public void setGear(Integer gearId) throws ItemNotEquippedException {
         if (gearId != null && !hasGear(gearId))
             throw new ItemNotEquippedException(PetGear.of(gearId), "Gear #" + gearId);
@@ -637,7 +646,7 @@ public class PetManager extends Gui implements PetAPI {
 
     @Override
     public void setGear(@Nullable PetGear petGear) throws ItemNotEquippedException {
-        PetAPI.super.setGear(petGear);
+        setGear(petGear != null ? petGear.getId() : null);
     }
 
     @Override
@@ -649,13 +658,17 @@ public class PetManager extends Gui implements PetAPI {
         return Optional.empty();
     }
 
-    public static class Gear extends Reporting {
+    public static class Gear extends Reporting implements Point {
         public int id, parentId;
         public long check;
         public String name, fuzzyName;
 
+        private final SpriteObject sprite = new SpriteObject();
+
         @Override
         public boolean updateAndReport() {
+            sprite.update(address);
+
             int id = API.readMemoryInt(address + 172);
             int parentId = API.readMemoryInt(address + 176); //assume, -1 if none
             String name = API.readMemoryString(API.readMemoryLong(address + 200));
@@ -668,6 +681,24 @@ public class PetManager extends Gui implements PetAPI {
             this.fuzzyName = Strings.fuzzyMatcher(name);
             this.check = API.readMemoryLong(address, 208, 152, 0x10);
             return true;
+        }
+
+        @Override
+        public double getX() {
+            return sprite.getX();
+        }
+
+        @Override
+        public double getY() {
+            return sprite.getY();
+        }
+
+        public void setModule(long gearsSprite) {
+            Main.API.callMethodChecked(true, "23(handleClick)(2626)1016321600", 148, address);
+
+            //to hide gears list
+            Main.API.callMethodChecked(true, "23(hide)(26)008211400",
+                    152, Main.API.readLong(gearsSprite, 176));
         }
     }
 

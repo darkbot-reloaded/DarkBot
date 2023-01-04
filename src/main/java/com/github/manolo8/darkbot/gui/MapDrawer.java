@@ -5,19 +5,26 @@ import com.github.manolo8.darkbot.backpage.FlashResManager;
 import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.extensions.features.handlers.DrawableHandler;
-import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.game.other.GameMap;
+import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.game.other.Point;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -25,7 +32,9 @@ import java.util.concurrent.Future;
 public class MapDrawer extends JPanel {
 
     private static final RenderingHints RENDERING_HINTS =
-            new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            new RenderingHints(Map.of(
+                RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON,
+                RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON));
 
     public MapGraphicsImpl mapGraphics;
     public boolean hovering;
@@ -55,7 +64,6 @@ public class MapDrawer extends JPanel {
 
     public MapDrawer(Main main) {
         this();
-        setBorder(UIUtils.getUnfocusableBorder());
         setup(main);
 
         this.drawableHandler = main.pluginAPI.requireInstance(DrawableHandler.class);
@@ -68,7 +76,7 @@ public class MapDrawer extends JPanel {
                     main.setRunning(!main.isRunning());
                     repaint();
 
-                } else main.hero.drive.move(mapGraphics.toGameLocation(e.getX(), e.getY()));
+                } else main.hero.drive.move(mapGraphics.toGameLocation(e));
             }
         });
 
@@ -77,7 +85,7 @@ public class MapDrawer extends JPanel {
             public void mouseDragged(MouseEvent e) {
                 if (main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) return;
 
-                main.hero.drive.move(mapGraphics.toGameLocation(e.getX(), e.getY()));
+                main.hero.drive.move(mapGraphics.toGameLocation(e));
             }
         });
     }
@@ -88,7 +96,6 @@ public class MapDrawer extends JPanel {
     }
 
     protected void onPaint() {
-        //background image is drawn first
         drawBackgroundImage();
 
         for (Drawable drawable : drawableHandler.getDrawables()) {
@@ -170,15 +177,24 @@ public class MapDrawer extends JPanel {
 
     public static class MapGraphicsImpl implements MapGraphics {
 
-        private final ConfigAPI config;
-        private final Area.Rectangle mapBounds;
+        protected final ConfigAPI config;
+        protected final Area.Rectangle mapBounds;
 
-        private final ConfigSetting<ColorScheme> cs;
-        private final ConfigSetting<ColorScheme.Fonts> fonts;
-        private final ConfigSetting<Set<DisplayFlag>> displayFlags;
+        protected final ConfigSetting<ColorScheme> cs;
+        protected final ConfigSetting<ColorScheme.Fonts> fonts;
+        protected final ConfigSetting<Set<DisplayFlag>> displayFlags;
+        protected final ConfigSetting<Double> mapZoom;
 
-        private Graphics2D g2;
-        private int width, widthMid, height, heightMid;
+        protected final Rectangle2D rect = new Rectangle2D.Double();
+        protected final Ellipse2D ellipse = new Ellipse2D.Double();
+        protected final Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
+        protected final Line2D line = new Line2D.Double();
+
+        protected Graphics2D g2;
+        protected int width, widthMid, height, heightMid, offsetX, offsetY;
+        protected double scaleX, scaleY, invertedScaleX, invertedScaleY;
+
+        protected boolean accuracyEnabled;
 
         public MapGraphicsImpl(StarSystemAPI star, ConfigAPI config) {
             this.config = config;
@@ -187,6 +203,7 @@ public class MapDrawer extends JPanel {
             this.cs = config.requireConfig("bot_settings.map_display.cs");
             this.fonts = config.requireConfig("bot_settings.map_display.cs.fonts");
             this.displayFlags = config.requireConfig("bot_settings.map_display.toggle");
+            this.mapZoom = config.requireConfig("bot_settings.map_display.map_zoom");
         }
 
         public void setup(Graphics graphics, int width, int height) {
@@ -195,16 +212,73 @@ public class MapDrawer extends JPanel {
             this.widthMid = width / 2;
             this.heightMid = height / 2;
 
-            this.g2 = (Graphics2D) graphics; //graphics.create();
+            this.accuracyEnabled = false;
 
-            this.setColor("background");
-            this.g2.fillRect(0, 0, getWidth(), getHeight());
-            this.g2.setRenderingHints(RENDERING_HINTS);
+            this.g2 = (Graphics2D) graphics;
+            this.g2.addRenderingHints(RENDERING_HINTS);
+            this.g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
+
+            double mapZoom = getMapZoom();
+            if (mapZoom < 1) {
+                int w = (int) (width * mapZoom);
+                int h = (int) (height * mapZoom);
+
+                offsetX = (width - w) / 2;
+                offsetY = (height - h) / 2;
+
+                scale(w, h);
+
+                setColor("radiation");
+                getGraphics2D().fillRect(0, 0, width, height);
+                setColor("background");
+                getGraphics2D().fillRect(offsetX, offsetY, w, h);
+                setColor("unknown");
+                getGraphics2D().drawRect(offsetX, offsetY, w, h);
+            } else {
+                offsetX = offsetY = 0;
+                scale(width, height);
+
+                setColor("background");
+                getGraphics2D().fillRect(0, 0, width, height);
+            }
+
+            setSubPixelAccuracy(true);
+            getGraphics2D().setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+            getGraphics2D().setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
 
         public void dispose() {
-            //if (g2 != null) g2.dispose();
             g2 = null;
+        }
+
+        // 0-1 -> 0-100%
+        protected double getMapZoom() {
+            return mapZoom.getValue();
+        }
+
+        protected Locatable toGameLocation(MouseEvent e) {
+            return toGameLocation(e.getX(), e.getY());
+        }
+
+        private void scale(int width, int height) {
+            scaleX = mapBounds.getWidth() / width;
+            scaleY = mapBounds.getHeight() / height;
+            invertedScaleX = 1.0 / scaleX;
+            invertedScaleY = 1.0 / scaleY;
+        }
+
+        private void drawShape(Shape shape, boolean fill) {
+            if (fill) g2.fill(shape);
+            else g2.draw(shape);
+        }
+
+        private void setSubPixelAccuracy(boolean enable) {
+            if (accuracyEnabled == enable) return;
+            accuracyEnabled = enable;
+
+            // in jdk17, java internally checks rendering hint instance but not sure about other versions
+            g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+                    enable ? RenderingHints.VALUE_STROKE_PURE : RenderingHints.VALUE_STROKE_DEFAULT);
         }
 
         @Override
@@ -249,23 +323,83 @@ public class MapDrawer extends JPanel {
         }
 
         @Override
-        public int toScreenPointX(double gameX) {
-            return (int) Math.round((gameX / mapBounds.getWidth()) * getWidth());
+        public double getScaleX() {
+            return scaleX;
         }
 
         @Override
-        public int toScreenPointY(double gameY) {
-            return (int) Math.round((gameY / mapBounds.getHeight()) * getHeight());
+        public double getScaleY() {
+            return scaleY;
         }
 
         @Override
-        public double toGameLocationX(int screenX) {
-            return (screenX / (double) getWidth()) * mapBounds.getWidth();
+        public double toScreenPointX(double gameX) {
+            return offsetX + gameX * invertedScaleX;
         }
 
         @Override
-        public double toGameLocationY(int screenY) {
-            return (screenY / (double) getHeight()) * mapBounds.getHeight();
+        public double toScreenPointY(double gameY) {
+            return offsetY + gameY * invertedScaleY;
+        }
+
+        @Override
+        public double toScreenSizeW(double gameW) {
+            return gameW * invertedScaleX;
+        }
+
+        @Override
+        public double toScreenSizeH(double gameH) {
+            return gameH * invertedScaleY;
+        }
+
+        @Override
+        public double toGameLocationX(double screenX) {
+            return (screenX - offsetX) * scaleX;
+        }
+
+        @Override
+        public double toGameLocationY(double screenY) {
+            return (screenY - offsetY) * scaleY;
+        }
+
+        @Override
+        public void drawRect(double x, double y, double width, double height, boolean fill) {
+            setSubPixelAccuracy(fill || (width > 10 && height > 10));
+            rect.setRect(x, y, width, height);
+            drawShape(rect, fill);
+        }
+
+        @Override
+        public void drawOval(double x, double y, double width, double height, boolean fill) {
+            setSubPixelAccuracy(true);
+            ellipse.setFrame(x, y, width, height);
+            drawShape(ellipse, fill);
+        }
+
+        @Override
+        public void drawPoly(PolyType type, @NotNull Point... points) {
+            setSubPixelAccuracy(true);
+            if (points.length < 2) return;
+
+            path.reset();
+            boolean first = true;
+            for (Point point : points) {
+                if (first) {
+                    path.moveTo(point.getX(), point.getY());
+                    first = false;
+                } else path.lineTo(point.getX(), point.getY());
+            }
+            if (type != PolyType.DRAW_POLYLINE)
+                path.closePath();
+
+            drawShape(path, type == PolyType.FILL_POLYGON);
+        }
+
+        @Override
+        public void drawLine(double x1, double y1, double x2, double y2) {
+            setSubPixelAccuracy(true);
+            line.setLine(x1, y1, x2, y2);
+            g2.draw(line);
         }
     }
 }

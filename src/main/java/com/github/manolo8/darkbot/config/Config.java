@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.config.types.suppliers.ModuleSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGears;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation;
 import com.github.manolo8.darkbot.config.utils.ItemUtils;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.manager.HookAdapter;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
@@ -15,6 +16,8 @@ import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.utils.NpcTableModel;
 import com.github.manolo8.darkbot.gui.tree.utils.TableHelpers;
+import com.github.manolo8.darkbot.utils.OSUtil;
+import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.config.annotations.Number;
 import eu.darkbot.api.config.annotations.Option;
@@ -99,6 +102,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option Running RUNNING = new Running();
         public static class Running {
             public @Option boolean RUN_FROM_ENEMIES = true;
+            public @Option @Tag(Tag.Default.NONE) PlayerTag ENEMIES_TAG = null;
             public @Option @Visibility(Level.INTERMEDIATE) @Number(max = 24 * 60 * 60, step = 300) int REMEMBER_ENEMIES_FOR = 300;
             public @Option boolean RUN_FROM_ENEMIES_SIGHT = false;
             public @Option boolean STOP_RUNNING_NO_SIGHT = true;
@@ -222,20 +226,34 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         public @Option @Visibility(Level.ADVANCED) APIConfig API_CONFIG = new APIConfig();
         public static class APIConfig {
-            public @Option @Dropdown BrowserApi BROWSER_API = BrowserApi.DARK_BOAT;
+            public @Option @Dropdown BrowserApi BROWSER_API = OSUtil.getDefaultAPI();
             public @Option boolean FULLY_HIDE_API = true;
             public @Option boolean FORCE_GAME_LANGUAGE = false;
             public @Option boolean ENFORCE_HW_ACCEL = true;
-            public @Option boolean USE_3D = false; // After reload with forced HW_ACCEL in 3D, cpu usage is really high
-            public @Option
-            @Number(min = 1, max = 60)
-            @Number.Disabled(value = 0, def = 30) int MAX_FPS = 0;
+            public @Option boolean USE_3D = false;
+            public @Option boolean DISABLE_RENDER = false;
+            public @Option boolean USE_PROXY = false;
+            public @Option boolean CLEAR_CACHE_ON_STUCK = true;
+            public @Option @Number(min = 1, max = 60) @Number.Disabled(value = 0, def = 30) int MAX_FPS = 0;
 
             @Option @Dropdown(multi = true)
             public Set<HookAdapter.Flag> DARK_HOOK_FLAGS = EnumSet.allOf(HookAdapter.Flag.class);
 
             public int width = 1280;
             public int height = 800;
+
+            public boolean attachToBot = false;
+            public GameAPI.Handler.GameQuality gameQuality = GameAPI.Handler.GameQuality.LOW;
+            public transient int transparency = 100, volume = 100, clientWidth = width, clientHeight = height;
+
+            public @Option @Table @Visibility(Level.DEVELOPER) Map<String, PatternInfo> BLOCK_PATTERNS = new HashMap<>();
+
+            @Configuration("config.bot_settings.api_config.block_patterns")
+            public static class PatternInfo {
+                public String regex = "";
+                public String filePath = "";
+                public boolean enable = true;
+            }
         }
 
         public @Option MapDisplay MAP_DISPLAY = new MapDisplay();
@@ -244,6 +262,9 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public Set<DisplayFlag> TOGGLE = EnumSet.of(
                     HERO_NAME, HP_SHIELD_NUM, ZONES, STATS_AREA, BOOSTER_AREA, GROUP_NAMES, GROUP_AREA, SHOW_PET);
             public @Option @Visibility(Level.INTERMEDIATE) @Number(max = 300, step = 1) int TRAIL_LENGTH = 15;
+            public @Option @Visibility(Level.INTERMEDIATE) boolean ROUND_ENTITIES = false;
+            public @Option @Visibility(Level.INTERMEDIATE) @Percentage double MAP_ZOOM = 1;
+            public @Option @Visibility(Level.ADVANCED) @Number(min = 1, step = 1, max = 25) int REFRESH_DELAY = 1;
             public @Option @Visibility(Level.INTERMEDIATE) boolean MAP_START_STOP = false;
             public @Option("colors") @Visibility(Level.ADVANCED) ColorScheme cs = new ColorScheme();
         }
@@ -260,7 +281,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public static class Other {
             public @Option boolean DISABLE_MASTER_PASSWORD = false;
             public @Option @Number(min = 10, max = 300) int ZONE_RESOLUTION = 30;
-            public @Option @Visibility(Level.ADVANCED) @Number(min = 10, max = 250) int MIN_TICK = 15;
+            public @Option @Visibility(Level.DEVELOPER) @Number(min = 10, max = 250) int MIN_TICK = 15;
             public @Option @Visibility(Level.ADVANCED) boolean DEV_STUFF = false;
         }
     }

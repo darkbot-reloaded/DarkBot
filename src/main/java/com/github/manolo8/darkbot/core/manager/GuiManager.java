@@ -2,11 +2,14 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.core.objects.ChatGui;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.LogoutGui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.RefinementGui;
+import com.github.manolo8.darkbot.core.objects.SettingsGui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
@@ -62,13 +65,16 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final PetManager pet;
     public final OreTradeGui oreTrade;
     public final GroupManager group;
+    public final SettingsGui settingsGui;
+    public final ChatGui chat;
 
     public final Timer loggedInTimer = Timer.get(15_000);
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
         WAITING(gm -> gm.main.hero.address != 0 && !gm.connecting.isVisible()),
         AFTER_LOGIN(gm -> {
-            API.keyboardClick(gm.main.config.LOOT.AMMO_KEY);
+            API.keyboardClick(gm.main.config.LOOT.AMMO_KEY, false);
+            API.keyboardClick(gm.main.config.LOOT.AMMO_KEY, false);
             gm.loggedInTimer.activate();
             return true;
         }),
@@ -115,6 +121,8 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.astralGate = register("rogue_lite");
         this.astralSelection = register("rogue_lite_selection");
         this.refinement = register("refinement", RefinementGui.class);
+        this.chat = register("chat", ChatGui.class);
+        this.settingsGui = register("settings", SettingsGui.class);
 
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }
@@ -206,14 +214,16 @@ public class GuiManager implements Manager, GameScreenAPI {
         if (System.currentTimeMillis() - validTime > 90_000 + (main.hero.map.id == -1 ? 180_000 : 0)) {
             System.out.println("Triggering refresh: gui manger was invalid for too long. " +
                     "(Make sure your hp fills up, equip an auto-repair CPU if you're missing one)");
+
+            clearCache();
             API.handleRefresh();
             validTime = System.currentTimeMillis();
         }
     }
 
     public boolean canTickModule() {
-
-        if (lostConnection.visible) {
+        // visible var is sometimes false even if lost connection window is visible
+        if (lostConnection.address > 0) {
             //Wait 2.5 seconds to reconnect
             if (lostConnection.lastUpdatedOver(2500)) {
                 tryReconnect(lostConnection);
@@ -224,6 +234,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
             if (connecting.lastUpdatedOver(30000)) {
                 System.out.println("Triggering refresh: connection window stuck for too long");
+                clearCache();
                 API.handleRefresh();
                 connecting.reset();
             }
@@ -283,6 +294,12 @@ public class GuiManager implements Manager, GameScreenAPI {
         checkInvalid();
 
         return main.hero.locationInfo.isLoaded();
+    }
+
+    private void clearCache() {
+        if (main.config.BOT_SETTINGS.API_CONFIG.CLEAR_CACHE_ON_STUCK &&
+                API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE))
+            API.clearCache(".*");
     }
 
     @Override

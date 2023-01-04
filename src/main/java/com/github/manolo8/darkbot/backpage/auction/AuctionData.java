@@ -42,9 +42,11 @@ public class AuctionData {
 
     public boolean parse(String page) {
         Matcher m = AUCTION_TABLE.matcher(page);
+        auctionItems.forEach((k, v) -> v.setForRemoval(true));
         while (m.find()) {
             buildAuctionItems(m.group(), AUCTION_PATTERN);
         }
+        auctionItems.values().removeIf(AuctionItems::getForRemoval);
         return true;
     }
 
@@ -99,6 +101,7 @@ public class AuctionData {
         r.setOwnBid(Long.parseLong("0" + m.group(6).replace(",", "").replace(".", "").replace("-", "")));
         r.setInstantBuy(Long.parseLong("0" + m.group(7).replace(",", "").replace(".", "").replace("-", "")));
         r.setLootId(m.group(8));
+        r.setForRemoval(false);
 
         return true;
     }

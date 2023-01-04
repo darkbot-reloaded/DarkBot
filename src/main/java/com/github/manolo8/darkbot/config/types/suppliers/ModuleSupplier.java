@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.config.types.suppliers;
 
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.modules.TemporalModule;
 import eu.darkbot.api.config.annotations.Dropdown;
+import eu.darkbot.api.extensions.TemporalModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +19,6 @@ public class ModuleSupplier implements Dropdown.Options<String> {
         MODULES_BY_ID = modules;
         MODULE_IDS = MODULES_BY_ID.values().stream()
                 .filter(m -> !TemporalModule.class.isAssignableFrom(m.getClazz()))
-                .filter(m -> !eu.darkbot.shared.modules.TemporalModule.class.isAssignableFrom(m.getClazz()))
                 .map(FeatureDefinition::getId).collect(Collectors.toList());
     }
 

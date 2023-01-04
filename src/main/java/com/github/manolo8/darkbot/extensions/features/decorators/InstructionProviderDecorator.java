@@ -2,10 +2,10 @@ package com.github.manolo8.darkbot.extensions.features.decorators;
 
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.gui.utils.Popups;
-import com.github.manolo8.darkbot.modules.TemporalModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.extensions.InstructionProvider;
 import eu.darkbot.api.extensions.Module;
+import eu.darkbot.api.extensions.TemporalModule;
 
 import javax.swing.*;
 

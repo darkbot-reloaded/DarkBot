@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.utils;
 
+import com.github.manolo8.darkbot.config.types.suppliers.BrowserApi;
 import org.intellij.lang.annotations.Language;
 
 import java.nio.file.Path;
@@ -23,18 +24,51 @@ public class OSUtil {
         return getDataPath().resolve(Paths.get(first, more));
     }
 
-    public enum OS {
-        WINDOWS("win", () -> Paths.get(System.getenv("APPDATA"))),
-        MACOS("mac", () -> Paths.get(System.getProperty("user.home"), "Library", "Application Support")),
-        LINUX("nix|nux|aix", () -> Paths.get(System.getProperty("user.home"), ".local", "share")),
-        //SOLARIS("sunos"),
-        UNKNOWN(null, () -> Paths.get("cache")); //store data in (current folder -> cache)
+    public static BrowserApi getDefaultAPI() {
+        return OSUtil.isLinux() ? BrowserApi.TANOS_API : BrowserApi.KEKKA_PLAYER;
+    }
 
-        private final String pattern;
+    public static boolean isWindows() {
+        return getCurrentOs() == OS.WINDOWS;
+    }
+
+    public static boolean isLinux() {
+        return getCurrentOs() == OS.LINUX;
+    }
+
+    public static boolean isMacOS() {
+        return getCurrentOs() == OS.MACOS;
+    }
+
+    // assume that on failure is not a Windows 7
+    public static boolean isWindows7OrLess() {
+        if (getCurrentOs() != OS.WINDOWS) return false;
+
+        String osVersion = System.getProperty("os.version");
+        if (osVersion == null || osVersion.isEmpty()) return false;
+
+        try {
+            double version = Double.parseDouble(osVersion);
+            return version <= 6.1; // Windows 7 version
+        } catch (NumberFormatException e) {
+            System.err.println("Unable to parse os version! " + osVersion);
+            return false;
+        }
+    }
+
+    public enum OS {
+        WINDOWS("win", "dll", () -> Paths.get(System.getenv("APPDATA"))),
+        MACOS("mac", "so", () -> Paths.get(System.getProperty("user.home"), "Library", "Application Support")),
+        LINUX("nix|nux|aix", "so", () -> Paths.get(System.getProperty("user.home"), ".local", "share")),
+        //SOLARIS("sunos"),
+        UNKNOWN(null, null, () -> Paths.get("cache")); //store data in (current folder -> cache)
+
+        private final String pattern, libExtension;
         private final Supplier<Path> appDataPathSupplier;
 
-        OS(@Language("RegExp") String pattern, Supplier<Path> appDataPathSupplier) {
+        OS(@Language("RegExp") String pattern, String libExtension, Supplier<Path> appDataPathSupplier) {
             this.pattern = pattern;
+            this.libExtension = libExtension;
             this.appDataPathSupplier = appDataPathSupplier;
         }
 
@@ -50,6 +84,10 @@ public class OSUtil {
 
         public Path getBotDataPath() {
             return appDataPathSupplier.get().resolve("DarkBot");
+        }
+
+        public String getLibraryExtension() {
+            return libExtension;
         }
     }
 }

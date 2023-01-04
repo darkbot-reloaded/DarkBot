@@ -50,10 +50,6 @@ public class UIUtils {
         return new FlatBorder();
     }
 
-    public static Border getUnfocusableBorder() {
-        return BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor"));
-    }
-
     public static Color blendColor(Color color, int alpha) {
         float factor = (alpha != -1 ? alpha : color.getAlpha()) / 255f;
         int red = (int) (BACKGROUND.getRed() * (1 - factor) + color.getRed() * factor);

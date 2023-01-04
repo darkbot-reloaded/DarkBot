@@ -42,7 +42,7 @@ public class MainButton extends JButton implements ActionListener {
     @Override
     public Insets getInsets() {
         if (defaultInsets) return super.getInsets();
-        return UIUtils.getInsetConfig(getText() != null && !getText().isEmpty());
+        return UIUtils.getInsetConfig(getText() != null && !getText().isEmpty() && getText().length() > 1);
     }
 
     @Override

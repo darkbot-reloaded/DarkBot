@@ -15,7 +15,7 @@ import static com.github.manolo8.darkbot.Main.API;
  * Instead of EntryArray & Dictionary
  */
 public abstract class PairArray extends SwfPtrCollection {
-    private boolean autoUpdatable, ignoreEmpty = true;
+    protected boolean autoUpdatable, ignoreEmpty = true, valid = false;
 
     public int size;
 
@@ -57,6 +57,7 @@ public abstract class PairArray extends SwfPtrCollection {
     }
 
     public int getSize() {
+        if (!valid) return 0;
         return Math.min(size, pairs.length);
     }
 
@@ -123,6 +124,7 @@ public abstract class PairArray extends SwfPtrCollection {
         }
 
         public void update() {
+            valid = false;
             if (super.lazy.isEmpty() && super.ignoreEmpty) return;
 
             int oldSize = size;
@@ -147,6 +149,8 @@ public abstract class PairArray extends SwfPtrCollection {
                 else super.pairs[i++].set(key, value & ByteUtils.ATOM_MASK);
                 key = null;
             }
+
+            valid = true;
         }
 
     }
@@ -157,6 +161,7 @@ public abstract class PairArray extends SwfPtrCollection {
 
         @Override
         public void update() {
+            valid = false;
             if (address == 0) return;
 
             long tableInfo = API.readMemoryLong(address + 32);
@@ -203,6 +208,8 @@ public abstract class PairArray extends SwfPtrCollection {
                 Lazy<Long> l = super.lazy.get(str);
                 if (l != null) l.send(0L);
             }
+
+            valid = true;
         }
 
         private long align8(long value) {

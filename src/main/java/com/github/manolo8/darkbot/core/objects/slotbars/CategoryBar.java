@@ -6,6 +6,7 @@ import eu.darkbot.api.game.items.SelectableItem;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -26,6 +27,7 @@ public class CategoryBar extends MenuBar {
         this.categoriesArr.sync(this.categories, Category::new);
     }
 
+    @Deprecated
     public Category get(CategoryType type) {
         String id = type.getId();
         for (Category category : categories) {
@@ -34,23 +36,27 @@ public class CategoryBar extends MenuBar {
         return null;
     }
 
-    public Category get(ItemCategory type) {
-        String id = type.getId();
+    public Category get(ItemCategory itemCategory) {
         for (Category category : categories) {
-            if (id.equals(category.categoryId)) return category;
+            if (itemCategory == category.itemCategory)
+                return category;
         }
         return null;
     }
 
-    public Stream<Item> getItemStream(ItemCategory type) {
-        Category cat = get(type);
-        return cat == null ? Stream.empty() : cat.items.stream();
+    public List<Item> getItems(ItemCategory itemCategory)  {
+        Category cat = get(itemCategory);
+        return cat == null ? Collections.emptyList() : cat.items;
+    }
+
+    public Stream<Item> getItemStream(ItemCategory itemCategory) {
+        return getItems(itemCategory).stream();
     }
 
     public boolean hasCategory(ItemCategory type) {
-        String id = type.getId();
         for (Category category : categories) {
-            if (id.equals(category.categoryId)) return true;
+            if (type == category.itemCategory)
+                return true;
         }
         return false;
     }
@@ -109,6 +115,7 @@ public class CategoryBar extends MenuBar {
         }
     }
 
+    @Deprecated
     public enum CategoryType {
         LASERS,
         ROCKETS,
@@ -119,7 +126,8 @@ public class CategoryBar extends MenuBar {
         BUY_NOW,
         TECH_ITEMS,
         SHIP_ABILITIES,
-        DRONE_FORMATIONS;
+        DRONE_FORMATIONS,
+        PET;
 
         public String getId() {
             return name().toLowerCase(Locale.ROOT);

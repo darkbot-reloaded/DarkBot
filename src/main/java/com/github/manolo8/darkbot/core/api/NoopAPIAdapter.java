@@ -20,7 +20,8 @@ public class NoopAPIAdapter extends GameAPIImpl<
                 new GameAPI.NoOpMemory(),
                 new GameAPI.NoOpExtraMemoryReader(),
                 new GameAPI.NoOpInteraction(),
-                new GameAPI.NoOpDirectInteraction());
+                new GameAPI.NoOpDirectInteraction(),
+                GameAPI.Capability.BACKGROUND_ONLY);
     }
 
     @Override

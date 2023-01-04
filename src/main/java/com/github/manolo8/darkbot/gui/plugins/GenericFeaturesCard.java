@@ -2,23 +2,16 @@ package com.github.manolo8.darkbot.gui.plugins;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
-import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
-import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
-import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.extensions.Configurable;
 import net.miginfocom.swing.MigLayout;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.font.TextAttribute;
 import java.util.Collections;
-import java.util.Locale;
 import java.util.Map;
 
 public abstract class GenericFeaturesCard extends JPanel {
@@ -42,7 +35,7 @@ public abstract class GenericFeaturesCard extends JPanel {
         add(new FeatureTypeButton(feature), "growx");
         if (Configurable.class.isAssignableFrom(feature.getClazz())) {
             //noinspection unchecked
-            add(new FeatureConfigButton(main, (FeatureDefinition<Configurable<?>>) feature));
+            add(new FeatureConfigButton(main, (FeatureDefinition<Configurable<?>>) feature), "growy");
         } else {
             add(new JLabel());
         }

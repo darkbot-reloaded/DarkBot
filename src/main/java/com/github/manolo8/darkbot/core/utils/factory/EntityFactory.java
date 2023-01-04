@@ -24,7 +24,7 @@ import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
 import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
 import com.github.manolo8.darkbot.core.entities.bases.QuestGiver;
 import com.github.manolo8.darkbot.core.manager.StarManager;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.utils.Offsets;
 import org.intellij.lang.annotations.Language;
 
 import java.util.function.BiFunction;
@@ -45,7 +45,7 @@ public enum EntityFactory implements EntityBuilder {
     NPC_BEACON      (MapNpc::new,        "npc-beacon.*"),
     SPACE_BALL      (SpaceBall::new,     "mapIcon_spaceball"),
 
-    CBS_ASTEROID    (BattleStation::new, "asteroid"),
+    CBS_ASTEROID    (BattleStation.Asteroid::new, "asteroid"),
     CBS_CONSTRUCTION(BattleStation::new, "cbs-construction"),
     CBS_MODULE      (BattleStation.Module::new, "wreck|module_.*"), // addr+112 moduleType string
     CBS_MODULE_CON  (BattleStation::new, "module-construction"),
@@ -122,18 +122,13 @@ public enum EntityFactory implements EntityBuilder {
     }
 
     public static EntityBuilder find(long address) {
-        String assetId = getAssetId(address);
+        String assetId = Offsets.getEntityAssetId(address);
 
         for (EntityFactory type : EntityFactory.values()) {
             if (type.typeMatcher.test(assetId, address)) return type;
         }
 
         return (id, addr) -> new Unknown(id, addr, assetId);
-    }
-
-    private static String getAssetId(long address) {
-        long temp = API.readMemoryLong(address, 48, 48, 16) & ByteUtils.ATOM_MASK;
-        return API.readMemoryString(temp, 64, 32, 24, 8, 16, 24).trim();
     }
 
     private static String getZoneKey(long address) {

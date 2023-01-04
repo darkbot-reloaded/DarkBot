@@ -32,13 +32,11 @@ public class Strings {
     }
 
     public static String fuzzyMatcher(String string) {
-        string = string
-                .replace("x", "")
-                .replace("X", "")
-                .toLowerCase(Locale.ROOT);
-
-        string = NON_CHARACTER_REPLACEMENT.matcher(string).replaceAll("");
-        return MIMESIS_REPLACEMENT.matcher(string).replaceAll("mimesis");
+        string = string.toLowerCase(Locale.ROOT)
+                .replace("-x-", "") // Fixes "-x-[ NAME ]-x-", used in frozen labyrinth
+                .replace("referee binary bot", "referee bot");
+        string = NON_CHARACTER_REPLACEMENT.matcher(string).replaceAll(""); // Keep only alphanumerical
+        return MIMESIS_REPLACEMENT.matcher(string).replaceAll("mimesis"); // Replace mim35i5 with mimesis
     }
 
     public static boolean isEmpty(String s) {
