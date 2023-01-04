@@ -32,6 +32,14 @@ public class RefreshButton extends JButton {
             Graphics2D g2 = (Graphics2D) g;
             g2.setColor(getColor(c));
 
+            //<!-- Copyright 2000-2021 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file. -->
+            //<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+            //    <path fill="#6E6E6E" fill-rule="evenodd"
+            //          d="M12.5747152,11.8852806 C11.4741474,13.1817355 9.83247882,14.0044386 7.99865879,14.0044386 C5.03907292,14.0044386 2.57997332,11.8615894 2.08820756,9.0427473 L3.94774327,9.10768372 C4.43372186,10.8898575 6.06393114,12.2000519 8.00015362,12.2000519 C9.30149237,12.2000519 10.4645985,11.6082097 11.2349873,10.6790094 L9.05000019,8.71167959 L14.0431479,8.44999981 L14.3048222,13.4430431 L12.5747152,11.8852806 Z M3.42785637,4.11741586 C4.52839138,2.82452748 6.16775464,2.00443857 7.99865879,2.00443857 C10.918604,2.00443857 13.3513802,4.09026967 13.8882946,6.8532307 L12.0226389,6.78808057 C11.5024872,5.05935553 9.89838095,3.8000774 8.00015362,3.8000774 C6.69867367,3.8000774 5.53545628,4.39204806 4.76506921,5.32142241 L6.95482203,7.29304326 L1.96167436,7.55472304 L1.70000005,2.56167973 L3.42785637,4.11741586 Z"
+            //          transform="rotate(3 8.002 8.004)"/>
+            //</svg>
+
+            // svg path converted into java2d
             if (refreshPath == null) {
                 refreshPath = new Path2D.Double(Path2D.WIND_EVEN_ODD);
                 refreshPath.moveTo(12.57, 11.88);
@@ -63,8 +71,9 @@ public class RefreshButton extends JButton {
         }
 
         private Color getColor(Component c) {
-            return FlatButtonUI.buttonStateColor(c, c.getForeground(), null, null,
-                    darker(c.getForeground(), 0.75), darker(c.getForeground(), 0.6));
+            Color foreground = c.getForeground();
+            return FlatButtonUI.buttonStateColor(c, foreground, null, null,
+                    darker(foreground, 0.75), darker(foreground, 0.6));
         }
 
         @Override
@@ -77,7 +86,7 @@ public class RefreshButton extends JButton {
             return 16;
         }
 
-        private Color darker(Color c, double factor) {
+        private static Color darker(Color c, double factor) {
             return new Color(Math.max((int) (c.getRed() * factor), 0),
                     Math.max((int) (c.getGreen() * factor), 0),
                     Math.max((int) (c.getBlue() * factor), 0),

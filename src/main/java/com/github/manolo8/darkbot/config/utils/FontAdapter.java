@@ -20,8 +20,10 @@ public class FontAdapter implements JsonSerializer<Font>, JsonDeserializer<Font>
                 if (parts.length != 2 && parts.length != 3)
                     throw new JsonParseException("Invalid font definition in config");
 
+                String name = parts[1];
+                int size = Integer.parseInt(parts[0]);
                 int type = parts.length == 2 ? Font.PLAIN : Integer.parseInt(parts[2]);
-                return new Font(parts[1], type, Integer.parseInt(parts[0]));
+                return new Font(name, type, name.equals("Consolas") && size == 12 ? 13 : size);
             }
 
             // Parse pre-adapter format, stored as json object
