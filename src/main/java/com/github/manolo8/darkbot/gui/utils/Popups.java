@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.Consumer;
 
 public class Popups {
 
@@ -33,6 +34,11 @@ public class Popups {
     @Deprecated
     public static void showMessageSync(Component parent, String title, JOptionPane pane) {
         of(title, pane).parent(parent).showSync();
+    }
+
+    @Deprecated
+    public static void showMessageSync(String title, JOptionPane pane, Consumer<JDialog> callback) {
+        of(title, pane).callback(callback).showSync();
     }
 
     public static Builder of(String title, Object message) {
@@ -82,6 +88,7 @@ public class Popups {
         private Image titleIcon = MainGui.ICON;
         private boolean showOnTop = true;
         private JButton defaultButton;
+        private Consumer<JDialog> callback;
 
         public Builder() {
         }
@@ -169,6 +176,11 @@ public class Popups {
             return this;
         }
 
+        public Builder callback(Consumer<JDialog> callback) {
+            this.callback = callback;
+            return this;
+        }
+
         private void ensureNonBuilt() {
             if (pane != null)
                 throw new UnsupportedOperationException("Pane may not be modified after built, or rebuilt.");
@@ -217,6 +229,7 @@ public class Popups {
 
             JDialog dialog = parent != null ? pane.createDialog(parent, title) : pane.createDialog(title);
 
+            if (callback != null) callback.accept(dialog);
             if (defaultButton != null) dialog.getRootPane().setDefaultButton(defaultButton);
             dialog.setIconImage(titleIcon == null ? MainGui.ICON : titleIcon);
             dialog.setAlwaysOnTop(showOnTop);
