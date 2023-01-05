@@ -9,6 +9,8 @@ import com.github.manolo8.darkbot.utils.I18n;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.basic.ComboPopup;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -39,6 +41,19 @@ public class ConfigPicker extends JComboBox<String> {
         JList<?> list = popup.getList();
         list.addMouseListener(renderer);
         list.addMouseMotionListener(renderer);
+
+        addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                setup(main);
+            }
+
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
+
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {}
+        });
 
         addActionListener(a -> {
             if (main != null) {
