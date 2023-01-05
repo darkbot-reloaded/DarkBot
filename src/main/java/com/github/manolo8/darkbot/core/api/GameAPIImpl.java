@@ -34,6 +34,8 @@ import java.util.EnumSet;
 import java.util.function.Consumer;
 import java.util.function.LongPredicate;
 
+import static com.github.manolo8.darkbot.Main.API;
+
 public class GameAPIImpl<
         W extends GameAPI.Window,
         H extends GameAPI.Handler,
@@ -465,6 +467,7 @@ public class GameAPIImpl<
 
     @Override
     public void selectEntity(Entity entity) {
+        if (!API.hasCapability(GameAPI.Capability.DIRECT_CALL_METHOD)) return;
         if (mapManager.mapClick(true)) {
             if (entity instanceof Lockable) {
                 //assuming that selectEntity selects only ships & is supported by every API

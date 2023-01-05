@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.objects;
 
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
@@ -124,6 +125,7 @@ public class Gui extends Updatable implements API, eu.darkbot.api.game.other.Gui
     }
 
     public void toggleVisibility() {
+        if (!API.hasCapability(GameAPI.Capability.DIRECT_CALL_METHOD)) return;
         API.callMethodChecked(true, "23(toggleVisibility)(2626?)1116321600", 183, address);
     }
 

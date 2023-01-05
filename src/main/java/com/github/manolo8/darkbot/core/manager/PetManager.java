@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.FakeNpc;
 import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.entities.Pet;
@@ -694,9 +695,10 @@ public class PetManager extends Gui implements PetAPI {
         }
 
         public void setModule(long gearsSprite) {
-            Main.API.callMethodChecked(true, "23(handleClick)(2626)1016321600", 148, address);
+            if (!API.hasCapability(GameAPI.Capability.DIRECT_CALL_METHOD)) return;
 
-            //to hide gears list
+            Main.API.callMethodChecked(true, "23(handleClick)(2626)1016321600", 148, address);
+            // hide gears list again
             Main.API.callMethodChecked(true, "23(hide)(26)008211400",
                     152, Main.API.readLong(gearsSprite, 176));
         }
