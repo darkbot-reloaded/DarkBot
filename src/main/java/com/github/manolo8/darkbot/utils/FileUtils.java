@@ -64,4 +64,12 @@ public class FileUtils {
         }
     }
 
+    public static void deleteIfExists(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

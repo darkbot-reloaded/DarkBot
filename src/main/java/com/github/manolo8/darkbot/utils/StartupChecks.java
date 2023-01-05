@@ -6,6 +6,8 @@ import com.github.manolo8.darkbot.utils.data.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -99,6 +101,8 @@ public class StartupChecks {
         FileUtils.writeString(PID_FILE,
                 currentPid + " " + currentStartTime,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteIfExists(PID_FILE)));
     }
 
 
