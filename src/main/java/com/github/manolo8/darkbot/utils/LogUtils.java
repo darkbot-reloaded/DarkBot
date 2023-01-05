@@ -21,7 +21,7 @@ public class LogUtils {
     public static final DateTimeFormatter FILENAME_DATE = DateTimeFormatter.ofPattern("uuuu-MM-dd_HH-mm-ss_SSS");
     public static final Path LOG_FOLDER = Paths.get("logs");
     public static final String START_TIME = LocalDateTime.now().format(FILENAME_DATE);
-    private static final Pattern SID_PATTERN = Pattern.compile("sid=[a-z0-9]{32}");
+    private static final Pattern SID_PATTERN = Pattern.compile("sid=[a-z0-9]{24,32}");
 
     public static void setupLogOutput() {
         if (!Files.exists(LOG_FOLDER)) createFolder();
