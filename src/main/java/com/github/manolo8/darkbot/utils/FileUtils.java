@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
 
 public class FileUtils {
     private static final MessageDigest SHA_256_DIGEST;
@@ -41,6 +44,31 @@ public class FileUtils {
             }
 
             return Base64Utils.encodeBytes(SHA_256_DIGEST.digest());
+        }
+    }
+
+    public static List<String> readAllLines(Path path) {
+        try {
+            if (Files.exists(path)) return Files.readAllLines(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    public static void writeString(Path path, String text, StandardOpenOption... options) {
+        try {
+            Files.writeString(path, text, options);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteIfExists(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

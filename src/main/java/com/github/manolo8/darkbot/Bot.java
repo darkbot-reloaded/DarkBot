@@ -6,7 +6,6 @@ import com.formdev.flatlaf.util.SystemInfo;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
-import eu.darkbot.util.Popups;
 
 import javax.swing.*;
 import java.awt.*;
@@ -62,27 +61,12 @@ public class Bot {
         LibSetup.setupLibraries();
         StartupParams params = new StartupParams(args);
 
-        checkJavaVersion(params);
-
         System.out.println("Starting DarkBot " + Main.VERSION);
         //noinspection ThrowableNotThrown
         Runtime.getRuntime().addShutdownHook(new Thread(() ->
                 new Throwable("DarkBot shutdown peacefully!").printStackTrace()));
 
         SwingUtilities.invokeLater(() -> new Main(params));
-    }
-
-    private static void checkJavaVersion(StartupParams params) {
-        if (params.has(StartupParams.LaunchArg.NO_WARN)) return;
-        String java = System.getProperty("java.version");
-
-        if (!java.startsWith("11.") && !java.startsWith("17.") && !java.equals("17")) {
-            Popups.showMessageSync("Unsupported java version", new JOptionPane(
-                    "You're currently using java version " + java + "\n" +
-                    "This version is unsupported and may stop working on future bot releases.\n" +
-                    "Please update to java 11 or java 17 to continue using future releases.",
-                    JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION));
-        }
     }
 
     private static void setupSecurityPolicy() {
