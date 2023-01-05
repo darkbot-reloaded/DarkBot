@@ -39,6 +39,7 @@ import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
+import com.github.manolo8.darkbot.utils.StartupChecks;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import eu.darkbot.api.extensions.Behavior;
@@ -131,8 +132,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
         this.configHandler = pluginAPI.requireInstance(ConfigHandler.class);
 
         // These need to be delayed until post-initialization so translated strings are available
-        Bot.checkJavaVersion(params);
-        Bot.checkUniqueInstance(params); //method require min java 9
+        StartupChecks.checkJavaVersion(params);
+        StartupChecks.checkUniqueInstance(params); //method require min java 9
 
         VerifierChecker.getAuthApi().setupAuth();
         this.pluginAPI.addInstance(VerifierChecker.getAuthApi());
