@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.ui.FlatNativeWindowBorder;
 import com.formdev.flatlaf.util.SystemInfo;
+import com.github.manolo8.darkbot.extensions.plugins.PluginClassLoader;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
@@ -74,7 +75,7 @@ public class Bot {
             @Override
             public PermissionCollection getPermissions(ProtectionDomain domain) {
                 // Externally loaded classes get no permissions
-                if (domain.getClassLoader() instanceof URLClassLoader) return new Permissions();
+                if (domain.getClassLoader() instanceof PluginClassLoader) return new Permissions();
 
                 // Stuff from other loaders gets permissions
                 Permissions permissions = new Permissions();

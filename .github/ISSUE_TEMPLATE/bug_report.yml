@@ -1,0 +1,119 @@
+name: Bug Report
+description: Report an issue in the bot
+labels: ["bug"]
+body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+        - label: I have searched the existing issues
+          required: true
+  - type: checkboxes
+    attributes:
+      label: Are you running the latest bot version?
+      description: Please double-check that you're running the latest release.
+      options:
+        - label: I have confirmed i'm running the latest bot version
+          required: true
+  - type: checkboxes
+    attributes:
+      label: Have you tried to remove all plugins and see if the issue persists?
+      description: Often times the bugs are not in the bot, but the result of a misbehaving plugin
+      options:
+        - label: I have reproduced the issue even after removing all non-required plugins
+          required: true
+  - type: checkboxes
+    attributes:
+      label: Can anyone else reproduce the issue?
+      description: |
+        If you're the only one having this issue, it's unlikely we'll be able to fix it.
+        Try to reach out on support channels over on discord to see if it's not just you.
+      options:
+        - label: I have confirmed with someone else that they can reproduce the issue too.
+          required: true
+  - type: textarea
+    attributes:
+      label: Describe the bug
+      description: A concise description of what you're experiencing.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: A concise description of what you expected to happen.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. In this environment...
+        2. With this config...
+        3. Run '...'
+        4. See error...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Screenshots, Video, or other media
+      description: |
+        Include any screenshots or videos that may help explain the issue.
+        Note: Often videos are EXTREMELY helpful in understanding the issue, include them!
+        Tip: You can attach images or videos by clicking this area to highlight it and then dragging files in.
+      placeholder: Attach any relevant videos or screenshots of the bug happening
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Logs
+      description: |
+        Include your bot logs, they can be found in the logs folder.
+        Tip: You can attach logs by clicking this area to highlight it and then dragging files in.
+      placeholder: Attach the latest .log file
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Bot Version
+      description: This is displayed at the top of the bot GUI
+      placeholder: e.g. v1.117 b2
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Installed Plugins & versions
+      description: |
+        List all the plugins you're using and their versions
+        Note: Try to remove all non-required plugins to confirm the bug persists first!!
+      placeholder: |
+        Default Plugin v2.0.1
+        Donor Plugin v2.0.3 b1
+        etc
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Browser API & version
+      description: |
+        What browser api is the bot using? 
+        Note: can be found in the diagnostics menu in the top-right corner of the bot GUI.
+      placeholder: e.g. KekkaPlayer v21
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Operating System
+      description: What operating system & version did the bug occur on?
+      placeholder: e.g. Win7, Win10 1909, Win11 22H2, Ubuntu 22.04...
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: |
+        Links? References? Anything that will give us more context about the issue you are encountering!
+        Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
+    validations:
+      required: false
