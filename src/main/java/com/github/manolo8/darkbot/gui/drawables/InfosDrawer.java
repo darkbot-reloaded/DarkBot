@@ -99,12 +99,11 @@ public class InfosDrawer implements Drawable {
         mg.drawString(mg.getWidthMiddle(), mg.getHeightMiddle() + 35, status, MapGraphics.StringAlign.MID);
 
         mg.setFont("small");
-        String info = i18n.get("gui.map.info", Main.API.getRefreshCount(),
-                (main.isRunning() || !resetRefresh.getValue()
-                        ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00"),
-                Time.toString(refreshTime.getValue() * 60 * 1000L));
-
-        mg.drawString(5, 12, info, MapGraphics.StringAlign.LEFT);
+        String info = Main.API.getRefreshCount() + " - "
+                + (main.isRunning() || !resetRefresh.getValue()
+                ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00")
+                + "/" + Time.toString(refreshTime.getValue() * 60 * 1000L);
+        mg.drawString(21, 12, info, MapGraphics.StringAlign.LEFT);
 
         if (main.getModule() != null) {
             String s = (main.isRunning() && main.repairManager.isDestroyed())
