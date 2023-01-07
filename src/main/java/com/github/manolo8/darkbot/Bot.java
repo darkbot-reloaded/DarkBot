@@ -4,14 +4,27 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.ui.FlatNativeWindowBorder;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.github.manolo8.darkbot.extensions.plugins.PluginClassLoader;
+import com.github.manolo8.darkbot.extensions.util.Version;
+import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
-import java.net.URLClassLoader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.Permission;
@@ -32,6 +45,60 @@ public class Bot {
         }
 
         LogUtils.setupLogOutput();
+
+        try {
+            String fileName = Path.of(Bot.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getFileName().toString();
+            if (fileName.equals("DarkBot.jar.tmp")) {
+                Files.copy(Path.of(fileName), Path.of("DarkBot.jar"), StandardCopyOption.REPLACE_EXISTING);
+                Runtime.getRuntime().exec("java -jar DarkBot.jar");
+                System.exit(0);
+            }
+            if (fileName.equals("DarkBot.jar")) {
+                new File("DarkBot.jar.tmp").delete();
+
+                try {
+                    URL url = new URL("https://");
+                    URLConnection request = url.openConnection();
+                    request.connect();
+
+                    JsonObject jsonObjectAlt = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent())).getAsJsonObject();
+                    String version = jsonObjectAlt.get("version").getAsString();
+
+                    Version lastVersion = new Version(version);
+
+                    if (Main.VERSION.compareTo(lastVersion) < 0) {
+                        JButton cancel = new JButton("Cancel");
+                        JButton download = new JButton("Update");
+                        Popups.of("DarkBot updater",
+                                new JOptionPane("A new version of Darkbot is available\n" + Main.VERSION + " ➜ " + lastVersion,
+                                        JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION,
+                                        null, new Object[]{download, cancel}, download)).showSync();
+
+                        cancel.addActionListener((event) -> SwingUtilities.getWindowAncestor(cancel).setVisible(false));
+
+                        download.addActionListener((event) -> {
+                            try {
+                                URL website = new URL("https://");
+                                try (InputStream in = website.openStream()) {
+                                    Files.copy(in, Path.of("DarkBot.jar.tmp"), StandardCopyOption.REPLACE_EXISTING);
+                                }
+
+                                Runtime.getRuntime().exec("java -jar DarkBot.jar.tmp");
+                                System.exit(0);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidPathException e) {
+
+        }
 
         try {
             UIManager.getFont("Label.font"); // Prevents a linux crash
