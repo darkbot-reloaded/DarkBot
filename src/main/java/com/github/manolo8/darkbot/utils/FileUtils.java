@@ -31,6 +31,11 @@ public class FileUtils {
         }
     }
 
+    public static Path createDirectories(Path path) throws IOException {
+        if (Files.exists(path)) return path;
+        return Files.createDirectories(path);
+    }
+
     public static String calcSHA256(Path path) throws IOException {
         SHA_256_DIGEST.reset();
         try (InputStream input = Files.newInputStream(path)) {
