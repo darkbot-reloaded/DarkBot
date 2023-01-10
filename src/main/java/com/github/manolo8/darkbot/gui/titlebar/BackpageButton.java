@@ -3,9 +3,11 @@ package com.github.manolo8.darkbot.gui.titlebar;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.utils.I18n;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 
 public class BackpageButton extends TitleBarButton<MainGui> {
@@ -17,6 +19,7 @@ public class BackpageButton extends TitleBarButton<MainGui> {
         super(UIUtils.getIcon("home"), frame);
         this.main = main;
 
+        setToolTipText(I18n.get("gui.backpage_button"));
         setLayout(new BorderLayout());
     }
 
@@ -28,8 +31,9 @@ public class BackpageButton extends TitleBarButton<MainGui> {
         new BackpageTask(main, this).start();
     }
 
-    public JProgressBar createProgressBar(int maxValue) {
-        progressBar = new JProgressBar(0, maxValue);
+    public JProgressBar createProgressBar() {
+        progressBar = new JProgressBar();
+        progressBar.setIndeterminate(true);
         SwingUtilities.invokeLater(() -> {
             add(progressBar, BorderLayout.SOUTH);
             revalidate();
@@ -38,11 +42,13 @@ public class BackpageButton extends TitleBarButton<MainGui> {
     }
 
     public void removeProgressBar() {
+        final JProgressBar progressBar = this.progressBar;
+        this.progressBar = null;
+
         if (progressBar != null) {
             SwingUtilities.invokeLater(() -> {
                 remove(progressBar);
                 revalidate();
-                progressBar = null;
             });
         }
     }

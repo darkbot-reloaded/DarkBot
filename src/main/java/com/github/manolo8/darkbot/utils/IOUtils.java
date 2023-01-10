@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.utils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,14 +20,10 @@ public class IOUtils {
     }
 
     public static byte[] readByteArray(InputStream input, boolean closeStream) throws IOException {
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = input.read(buffer)) != -1) {
-            result.write(buffer, 0, length);
-        }
-        if (closeStream) input.close();
-
-        return result.toByteArray();
+        if (closeStream) {
+            try (input) {
+                return input.readAllBytes();
+            }
+        } else return input.readAllBytes();
     }
 }

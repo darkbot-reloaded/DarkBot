@@ -1,8 +1,12 @@
 package com.github.manolo8.darkbot.gui.utils.window;
 
-import javax.swing.*;
-import java.awt.*;
+import com.github.manolo8.darkbot.gui.MainGui;
+
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.Component;
+import java.awt.HeadlessException;
 import java.io.File;
 
 public class FileChooserUtil {
@@ -17,6 +21,7 @@ public class FileChooserUtil {
             protected JDialog createDialog(Component parent) throws HeadlessException {
                 JDialog dialog = super.createDialog(parent);
                 dialog.setAlwaysOnTop(true);
+                dialog.setIconImage(MainGui.ICON);
                 return dialog;
             }
         };
