@@ -14,7 +14,7 @@ import static com.github.manolo8.darkbot.Main.API;
 
 public class VisibilityButton extends TitleBarToggleButton<JFrame> {
 
-    private static final Icon SHOW = UIUtils.getIcon("visibility"), HIDE = UIUtils.getIcon("visibility-off");
+    private static final Icon SHOW = UIUtils.getIcon("visibility"), HIDE = UIUtils.getIcon("visibility_off");
 
     private final Main main;
 

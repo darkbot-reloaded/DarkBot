@@ -259,7 +259,7 @@ public class TreeCell extends JPanel {
 
     private static class EditorButton extends JButton {
 
-        public EditorButton(ImageIcon icon, String tooltip, Consumer<JTree> action) {
+        public EditorButton(Icon icon, String tooltip, Consumer<JTree> action) {
             super(icon);
             setFocusable(false);
             setContentAreaFilled(false);
