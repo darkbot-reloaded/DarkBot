@@ -39,35 +39,23 @@ public class FileUtils {
         return Files.createDirectories(path);
     }
 
-    public static void clearDirectory(Path directory) throws IOException {
-        clearDirectory(directory, null);
-    }
-
     /**
      * Deletion will start with given {@code firstFileName}
      * Its useful when you want to check if file is being used by another process,
      * or is unable to delete for any reason - so other files are remain untouched
      *
      * @param directory directory to clear including itself
-     * @param firstFileName file which should be first deleted in directory
+     * @param deletionOrder filenames which should be first deleted in directory
      * @throws IOException when any file isn't deleted successfully
-     *
-     * @apiNote may use varargs here instead - 'prioritizedNames'
      */
-    public static void clearDirectory(Path directory, String firstFileName) throws IOException {
+    public static void clearDirectory(Path directory, String... deletionOrder) throws IOException {
         if (Files.notExists(directory) || !Files.isDirectory(directory)) return;
 
-        Comparator<Path> comparator = (o1, o2) -> {
-            // reverse order
-            int result = o2.compareTo(o1);
-
-            if (firstFileName != null) {
-                if (o1.toString().contains(firstFileName)) result -= 100;
-                else if (o2.toString().contains(firstFileName)) result += 100;
-            }
-
-            return result;
-        };
+        Comparator<Path> comparator = Comparator.reverseOrder();
+        if (deletionOrder.length > 0) {
+            comparator = Comparator.<Path>comparingInt(p -> getOrder(p, deletionOrder))
+                    .thenComparing(comparator);
+        }
 
         try (Stream<Path> walk = Files.walk(directory)) {
             boolean success = walk.sorted(comparator)
@@ -77,6 +65,15 @@ public class FileUtils {
             if (!success)
                 throw new IOException("Failed to clear directory! Is used by another process? " + directory);
         }
+    }
+
+    private static int getOrder(Path absolutePath, String[] order) {
+        String filename = absolutePath.getFileName().toString();
+        for (int i = 0; i < order.length; i++) {
+            if (filename.contains(order[i]))
+                return i;
+        }
+        return Integer.MAX_VALUE;
     }
 
     public static String calcSHA256(Path path) throws IOException {

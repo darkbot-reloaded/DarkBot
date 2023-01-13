@@ -8,7 +8,6 @@ import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.OSUtil;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
-import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
 import eu.darkbot.util.Timer;
@@ -19,8 +18,6 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -46,6 +43,10 @@ public class BackpageTask extends Thread {
         setDaemon(true);
         this.main = main;
         this.button = button;
+    }
+
+    private static ReleaseInfo getLatestRelease() throws IOException, JsonParseException {
+        return Http.create(RELEASE_URL).fromJson(ReleaseInfo.class);
     }
 
     @Override
@@ -88,11 +89,11 @@ public class BackpageTask extends Thread {
     private boolean checkVersion(Version current) throws IOException {
         JProgressBar progressBar = button.addProgressBar();
 
-        ReleaseInfo releaseInfo = ReleaseInfo.get();
+        ReleaseInfo releaseInfo = getLatestRelease();
         if (releaseInfo == null) return false;
 
         Version remoteVersion = releaseInfo.getVersion();
-        ReleaseInfo.Asset asset = releaseInfo.getValidAsset();
+        Asset asset = releaseInfo.getValidAsset();
         if (remoteVersion == null || asset == null) return false;
 
         VERSION_CHECK_TIMER.activate(); // activate the timer here - version will be successfully checked
@@ -101,7 +102,7 @@ public class BackpageTask extends Thread {
     }
 
     private boolean askUserToDownload(JProgressBar progressBar,
-                                      Version current, Version remote, ReleaseInfo.Asset asset) throws IOException {
+                                      Version current, Version remote, Asset asset) throws IOException {
         String message = current == null ? I18n.get("gui.backpage_button.download_message")
                 : I18n.get("gui.backpage_button.new_version_message");
         message += "\n -Ver: " + (current != null ? current + " -> " : "") + remote + ", size: " + (asset.size >> 20) + "MB";
@@ -124,7 +125,7 @@ public class BackpageTask extends Thread {
         return current != null;
     }
 
-    private void downloadBackpage(JProgressBar progressBar, ReleaseInfo.Asset asset) throws IOException {
+    private void downloadBackpage(JProgressBar progressBar, Asset asset) throws IOException {
         SwingUtilities.invokeLater(() -> progressBar.setIndeterminate(false));
 
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(asset.openStream()))) {
@@ -138,8 +139,7 @@ public class BackpageTask extends Thread {
                     continue;
                 }
 
-                File file = to.toFile();
-                try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file))) {
+                try (BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(to))) {
                     double compressionRatio = (double) entry.getCompressedSize() / entry.getSize();
 
                     int read;
@@ -153,8 +153,9 @@ public class BackpageTask extends Thread {
                             setProgress(progressBar, progress = currentProgress);
                     }
 
-                    if (OSUtil.isLinux() && file.getName().startsWith(EXECUTABLE_NAME))
-                        file.setExecutable(true);
+                    if (OSUtil.isLinux() && to.getFileName().toString().startsWith(EXECUTABLE_NAME)) {
+                        to.toFile().setExecutable(true);
+                    }
                 }
             }
         }
@@ -170,37 +171,34 @@ public class BackpageTask extends Thread {
     }
 
     public static class ReleaseInfo {
-        public String name;
+        @SerializedName("name")
+        public Version version;
         public List<Asset> assets;
 
-        public static ReleaseInfo get() throws IOException, JsonParseException {
-            return new Gson().fromJson(Http.create(RELEASE_URL).getContent(), ReleaseInfo.class);
-        }
-
         public Version getVersion() {
-            return new Version(name);
+            return version;
         }
 
         public Asset getValidAsset() {
             return assets.stream()
-                    .filter(ReleaseInfo.Asset::isSupported)
+                    .filter(Asset::isSupported)
                     .findFirst().orElse(null);
         }
+    }
 
-        public static class Asset {
-            @SerializedName("browser_download_url")
-            public String downloadUrl;
-            public String state;
-            public int size;
+    public static class Asset {
+        @SerializedName("browser_download_url")
+        public String downloadUrl;
+        public String state;
+        public int size;
 
-            public InputStream openStream() throws IOException {
-                return new URL(downloadUrl).openStream();
-            }
+        public InputStream openStream() throws IOException {
+            return new URL(downloadUrl).openStream();
+        }
 
-            public boolean isSupported() {
-                if (state == null || !state.equals("uploaded")) return false;
-                return downloadUrl.contains(OSUtil.getCurrentOs().getShortName() + "-x64.zip");
-            }
+        public boolean isSupported() {
+            if (state == null || !state.equals("uploaded")) return false;
+            return downloadUrl.contains(OSUtil.getCurrentOs().getShortName() + "-x64.zip");
         }
     }
 }
