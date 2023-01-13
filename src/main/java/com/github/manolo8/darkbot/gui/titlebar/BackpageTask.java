@@ -14,7 +14,6 @@ import com.google.gson.annotations.SerializedName;
 import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
@@ -27,9 +26,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -72,7 +69,6 @@ public class BackpageTask extends Thread {
         try {
             Version currentVersion = readVersionFile();
 
-            // have downloaded backpage and version was checked recently
             return (currentVersion != null && VERSION_CHECK_TIMER.isActive())
                     || checkVersion(currentVersion);
         } catch (IOException e) {
@@ -91,7 +87,7 @@ public class BackpageTask extends Thread {
     }
 
     private boolean checkVersion(Version current) throws IOException {
-        JProgressBar progressBar = button.createProgressBar();
+        JProgressBar progressBar = button.addProgressBar();
 
         ReleaseInfo releaseInfo = ReleaseInfo.get();
         if (releaseInfo == null) return false;
@@ -105,83 +101,61 @@ public class BackpageTask extends Thread {
                 || askUserToDownload(progressBar, current, remoteVersion, asset);
     }
 
-    //return true if is possible to run a backpage
     private boolean askUserToDownload(JProgressBar progressBar,
                                       Version current, Version remote, ReleaseInfo.Asset asset) throws IOException {
         String message = current == null ? I18n.get("gui.backpage_button.download_message")
                 : I18n.get("gui.backpage_button.new_version_message");
         message += "\n -Ver: " + (current != null ? current + " -> " : "") + remote + ", size: " + (asset.size >> 20) + "MB";
 
-        JButton download = new JButton(I18n.get("gui.backpage_button.download"));
-        Popups.Builder builder = Popups.of("Backpage browser", message)
+        int selection = Popups.of("Backpage browser", message)
                 .messageType(JOptionPane.QUESTION_MESSAGE)
-                .options(download, I18n.get("gui.backpage_button.cancel"));
+                .options(I18n.get("gui.backpage_button.download"), I18n.get("gui.backpage_button.cancel"))
+                .showOptionSync();
 
-        JOptionPane optionPane = builder.build();
-        download.addActionListener(l -> optionPane.setValue(download));
-
-        if (download == builder.showSync()) {
-            if (!clearDirectory())
-                throw new DirectoryClearException(BACKPAGE_PATH);
-
+        // download selected
+        if (selection == 0) {
+            FileUtils.clearDirectory(BACKPAGE_PATH, EXECUTABLE_NAME);
             FileUtils.createDirectories(BACKPAGE_PATH);
+
             downloadBackpage(progressBar, asset);
-            writeVersionFile(remote);
+            Files.writeString(VERSION_PATH, remote.toString());
+            return true;
         }
 
-        return readVersionFile() != null;
+        return current != null;
     }
 
-    // true if backpage folder is clear
-    private boolean clearDirectory() throws IOException {
-        if (Files.notExists(BACKPAGE_PATH)) return true;
-
-        try (Stream<Path> walk = Files.walk(BACKPAGE_PATH)) {
-            boolean backapgeFileAccessible = walk.sorted(Comparator.reverseOrder())
-                    .filter(path -> path.toString().contains(EXECUTABLE_NAME))
-                    .map(Path::toFile)
-                    .map(File::delete)
-                    .findFirst().orElse(true);
-
-            if (!backapgeFileAccessible) return false; // probably used by another process - cannot delete
-        }
-
-        try (Stream<Path> walk = Files.walk(BACKPAGE_PATH)) {
-            return walk.sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .allMatch(File::delete);
-        }
-    }
-
-    // true if everything downloaded successfully
     private void downloadBackpage(JProgressBar progressBar, ReleaseInfo.Asset asset) throws IOException {
-        SwingUtilities.invokeLater(() -> {
-            progressBar.setIndeterminate(false);
-            progressBar.setMaximum(asset.size);
-        });
+        SwingUtilities.invokeLater(() -> progressBar.setIndeterminate(false));
 
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(asset.openStream()))) {
-            int downloadedBytes = 0;
+            int downloadedBytes = 0, progress = 0, partSize = asset.size / 50;
+
             for (ZipEntry entry = zis.getNextEntry(); entry != null; entry = zis.getNextEntry()) {
                 Path to = BACKPAGE_PATH.resolve(entry.getName());
 
-                if (entry.isDirectory())
+                if (entry.isDirectory()) {
                     Files.createDirectories(to);
-                else {
-                    File file = to.toFile();
-                    try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file))) {
-                        double compressionRatio = (double) entry.getCompressedSize() / entry.getSize();
+                    continue;
+                }
 
-                        int read;
-                        byte[] buffer = new byte[8192];
-                        while ((read = zis.read(buffer)) != -1) {
-                            bos.write(buffer, 0, read);
-                            setProgress(progressBar, downloadedBytes += (read * compressionRatio));
-                        }
+                File file = to.toFile();
+                try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file))) {
+                    double compressionRatio = (double) entry.getCompressedSize() / entry.getSize();
 
-                        if (OSUtil.isLinux() && file.getName().startsWith(EXECUTABLE_NAME))
-                            file.setExecutable(true);
+                    int read;
+                    byte[] buffer = new byte[8192];
+                    while ((read = zis.read(buffer)) != -1) {
+                        bos.write(buffer, 0, read);
+
+                        downloadedBytes += (read * compressionRatio);
+                        int currentProgress = downloadedBytes / partSize;
+                        if (progress != currentProgress)
+                            setProgress(progressBar, progress = currentProgress);
                     }
+
+                    if (OSUtil.isLinux() && file.getName().startsWith(EXECUTABLE_NAME))
+                        file.setExecutable(true);
                 }
             }
         }
@@ -194,10 +168,6 @@ public class BackpageTask extends Thread {
     private @Nullable Version readVersionFile() throws IOException {
         if (Files.notExists(VERSION_PATH)) return null;
         return new Version(Files.readString(VERSION_PATH));
-    }
-
-    private void writeVersionFile(Version version) throws IOException {
-        Files.writeString(VERSION_PATH, version.toString());
     }
 
     public static class ReleaseInfo {
@@ -230,20 +200,7 @@ public class BackpageTask extends Thread {
 
             public boolean isSupported() {
                 if (state == null || !state.equals("uploaded")) return false;
-
-                switch (OSUtil.getCurrentOs()) { // maybe should check architecture?
-                    case WINDOWS:
-                        if (downloadUrl.contains("win-x64.zip")) return true;
-                        break;
-                    case MACOS:
-                        if (downloadUrl.contains("mac-x64.zip")) return true;
-                        break;
-                    case LINUX:
-                        if (downloadUrl.contains("linux-x64.zip")) return true;
-                        break;
-                }
-
-                return false;
+                return downloadUrl.contains(OSUtil.getCurrentOs().getShortName() + "-x64.zip");
             }
         }
     }

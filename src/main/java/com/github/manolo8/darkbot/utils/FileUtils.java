@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -8,7 +9,9 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class FileUtils {
     private static final MessageDigest SHA_256_DIGEST;
@@ -34,6 +37,46 @@ public class FileUtils {
     public static Path createDirectories(Path path) throws IOException {
         if (Files.exists(path)) return path;
         return Files.createDirectories(path);
+    }
+
+    public static void clearDirectory(Path directory) throws IOException {
+        clearDirectory(directory, null);
+    }
+
+    /**
+     * Deletion will start with given {@code firstFileName}
+     * Its useful when you want to check if file is being used by another process,
+     * or is unable to delete for any reason - so other files are remain untouched
+     *
+     * @param directory directory to clear including itself
+     * @param firstFileName file which should be first deleted in directory
+     * @throws IOException when any file isn't deleted successfully
+     *
+     * @apiNote may use varargs here instead - 'prioritizedNames'
+     */
+    public static void clearDirectory(Path directory, String firstFileName) throws IOException {
+        if (Files.notExists(directory) || !Files.isDirectory(directory)) return;
+
+        Comparator<Path> comparator = (o1, o2) -> {
+            // reverse order
+            int result = o2.compareTo(o1);
+
+            if (firstFileName != null) {
+                if (o1.toString().contains(firstFileName)) result -= 100;
+                else if (o2.toString().contains(firstFileName)) result += 100;
+            }
+
+            return result;
+        };
+
+        try (Stream<Path> walk = Files.walk(directory)) {
+            boolean success = walk.sorted(comparator)
+                    .map(Path::toFile)
+                    .allMatch(File::delete);
+
+            if (!success)
+                throw new IOException("Failed to clear directory! Is used by another process? " + directory);
+        }
     }
 
     public static String calcSHA256(Path path) throws IOException {

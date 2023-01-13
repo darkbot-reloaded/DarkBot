@@ -57,17 +57,20 @@ public class OSUtil {
     }
 
     public enum OS {
-        WINDOWS("win", "dll", () -> Paths.get(System.getenv("APPDATA"))),
-        MACOS("mac", "so", () -> Paths.get(System.getProperty("user.home"), "Library", "Application Support")),
-        LINUX("nix|nux|aix", "so", () -> Paths.get(System.getProperty("user.home"), ".local", "share")),
+        WINDOWS("win", "win", "dll", () -> Paths.get(System.getenv("APPDATA"))),
+        MACOS("mac", "mac", "so", () -> Paths.get(System.getProperty("user.home"), "Library", "Application Support")),
+        LINUX("nix|nux|aix", "linux", "so", () -> Paths.get(System.getProperty("user.home"), ".local", "share")),
         //SOLARIS("sunos"),
-        UNKNOWN(null, null, () -> Paths.get("cache")); //store data in (current folder -> cache)
+        UNKNOWN(null, null, null, () -> Paths.get("cache")); //store data in (current folder -> cache)
 
-        private final String pattern, libExtension;
+        private final String pattern;
+        private final String simpleName;
+        private final String libExtension;
         private final Supplier<Path> appDataPathSupplier;
 
-        OS(@Language("RegExp") String pattern, String libExtension, Supplier<Path> appDataPathSupplier) {
+        OS(@Language("RegExp") String pattern, String simpleName, String libExtension, Supplier<Path> appDataPathSupplier) {
             this.pattern = pattern;
+            this.simpleName = simpleName;
             this.libExtension = libExtension;
             this.appDataPathSupplier = appDataPathSupplier;
         }
@@ -88,6 +91,10 @@ public class OSUtil {
 
         public String getLibraryExtension() {
             return libExtension;
+        }
+
+        public String getShortName() {
+            return simpleName;
         }
     }
 }

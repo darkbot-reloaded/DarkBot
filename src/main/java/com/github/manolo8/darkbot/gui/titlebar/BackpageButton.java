@@ -13,7 +13,7 @@ import java.awt.event.ActionEvent;
 public class BackpageButton extends TitleBarButton<MainGui> {
 
     private final Main main;
-    private JProgressBar progressBar;
+    private final JProgressBar progressBar = new JProgressBar(0, 50);
 
     BackpageButton(Main main, MainGui frame) {
         super(UIUtils.getIcon("home"), frame);
@@ -31,10 +31,10 @@ public class BackpageButton extends TitleBarButton<MainGui> {
         new BackpageTask(main, this).start();
     }
 
-    public JProgressBar createProgressBar() {
-        progressBar = new JProgressBar();
-        progressBar.setIndeterminate(true);
+    public JProgressBar addProgressBar() {
         SwingUtilities.invokeLater(() -> {
+            progressBar.setValue(0);
+            progressBar.setIndeterminate(true);
             add(progressBar, BorderLayout.SOUTH);
             revalidate();
         });
@@ -42,14 +42,9 @@ public class BackpageButton extends TitleBarButton<MainGui> {
     }
 
     public void removeProgressBar() {
-        final JProgressBar progressBar = this.progressBar;
-        this.progressBar = null;
-
-        if (progressBar != null) {
-            SwingUtilities.invokeLater(() -> {
-                remove(progressBar);
-                revalidate();
-            });
-        }
+        SwingUtilities.invokeLater(() -> {
+            remove(progressBar);
+            revalidate();
+        });
     }
 }
