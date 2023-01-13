@@ -75,8 +75,7 @@ public class BackpageTask extends Thread {
             e.printStackTrace();
             VERSION_CHECK_TIMER.disarm(); // IOException happen - reset timer
 
-            String message = e instanceof DirectoryClearException ? ((DirectoryClearException) e).getPopupMessage() : e.toString();
-            Popups.of("Backpage exception", message)
+            Popups.of("Backpage exception", e.getLocalizedMessage())
                     .messageType(JOptionPane.ERROR_MESSAGE)
                     .showAsync();
         } finally {
@@ -202,20 +201,6 @@ public class BackpageTask extends Thread {
                 if (state == null || !state.equals("uploaded")) return false;
                 return downloadUrl.contains(OSUtil.getCurrentOs().getShortName() + "-x64.zip");
             }
-        }
-    }
-
-    private static class DirectoryClearException extends IOException {
-        private final String popupMessage;
-
-        public DirectoryClearException(Path path) {
-            super("Failed to clear directory: " + path.toString());
-            this.popupMessage = "Failed to clear backpage directory.\n" +
-                    " -Make sure to close every backpage window!\n -" + path;
-        }
-
-        public String getPopupMessage() {
-            return popupMessage;
         }
     }
 }
