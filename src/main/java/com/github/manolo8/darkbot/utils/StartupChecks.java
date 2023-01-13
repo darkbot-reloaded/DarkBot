@@ -25,7 +25,7 @@ public class StartupChecks {
 
         if (!java.startsWith("11.") && !java.startsWith("17.") && !java.equals("17")) {
             Popups.of(I18n.get("start.old_java_warn_title"),
-                            I18n.get("start.old_java_warn_content"),
+                            I18n.get("start.old_java_warn_content", java),
                             JOptionPane.WARNING_MESSAGE)
                     .optionType(JOptionPane.DEFAULT_OPTION)
                     .showSync();
