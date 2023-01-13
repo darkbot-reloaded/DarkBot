@@ -48,12 +48,7 @@ public class Bot {
 
         try {
             String fileName = Path.of(Bot.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getFileName().toString();
-            if (fileName.equals("DarkBot.jar.tmp")) {
-                Files.copy(Path.of(fileName), Path.of("DarkBot.jar"), StandardCopyOption.REPLACE_EXISTING);
-                Runtime.getRuntime().exec("java -jar DarkBot.jar");
-                System.exit(0);
-            }
-            if (fileName.equals("DarkBot.jar")) {
+            if (fileName.endsWith(".jar")) {
                 new File("DarkBot.jar.tmp").delete();
 
                 try {
@@ -63,7 +58,6 @@ public class Bot {
 
                     JsonObject jsonObjectAlt = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent())).getAsJsonObject();
                     String version = jsonObjectAlt.get("version").getAsString();
-
                     Version lastVersion = new Version(version);
 
                     if (Main.VERSION.compareTo(lastVersion) < 0) {
@@ -94,10 +88,14 @@ public class Bot {
                     e.printStackTrace();
                 }
             }
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidPathException e) {
 
+            if (fileName.equals("DarkBot.jar.tmp")) {
+                Files.copy(Path.of(fileName), Path.of("DarkBot.jar"), StandardCopyOption.REPLACE_EXISTING);
+                Runtime.getRuntime().exec("java -jar DarkBot.jar");
+                System.exit(0);
+            }
+        } catch (URISyntaxException | InvalidPathException e) {
+            e.printStackTrace();
         }
 
         try {
