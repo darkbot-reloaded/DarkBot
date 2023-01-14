@@ -48,7 +48,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final AstralGateProxy astralGate;
     public final HighlightProxy highlight;
     public final SpaceMapWindowProxy spaceMapWindowProxy;
-    public final PlutusProxy plutusProxy;
+    public final PlutusProxy plutus;
 
     public FacadeManager(PluginAPI pluginApi) {
         this.pluginAPI = pluginApi;
@@ -67,7 +67,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.astralGate     = registerProxy("rogue_lite",             AstralGateProxy.class);
         this.highlight      = registerProxy("HighlightProxy",         HighlightProxy.class);
         this.spaceMapWindowProxy = registerProxy("spacemap",          SpaceMapWindowProxy.class);
-        this.plutusProxy    = registerProxy("plutus",                 PlutusProxy.class);
+        this.plutus         = registerProxy("plutus",                 PlutusProxy.class);
     }
 
     public <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
