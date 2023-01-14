@@ -13,9 +13,7 @@ import com.google.gson.annotations.SerializedName;
 import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -62,7 +60,12 @@ public class BackpageTask extends Thread {
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
-        } // inform user that instance/sid is not valid?
+        } else {
+          Popups.of("Backpage",
+                          "No SID available, wait until client loads and try again.",
+                          JOptionPane.INFORMATION_MESSAGE)
+                  .showAsync();
+        }
         SwingUtilities.invokeLater(() -> button.setEnabled(true));
     }
 
