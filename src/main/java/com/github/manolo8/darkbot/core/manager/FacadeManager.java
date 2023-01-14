@@ -17,7 +17,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SpaceMapWindowProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
-import com.github.manolo8.darkbot.core.objects.facades.PlutusProxy;
+import com.github.manolo8.darkbot.core.objects.facades.GauntletPlutusProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
 
@@ -48,7 +48,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final AstralGateProxy astralGate;
     public final HighlightProxy highlight;
     public final SpaceMapWindowProxy spaceMapWindowProxy;
-    public final PlutusProxy plutus;
+    public final GauntletPlutusProxy plutus;
 
     public FacadeManager(PluginAPI pluginApi) {
         this.pluginAPI = pluginApi;
