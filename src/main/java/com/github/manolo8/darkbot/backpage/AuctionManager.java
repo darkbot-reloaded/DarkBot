@@ -16,12 +16,10 @@ public class AuctionManager {
     private final AuctionData data;
     private final Pattern AUCTION_ERROR_PATTERN = Pattern.compile("infoText = '(.*?)';.*?" + "icon = '(.*)';", Pattern.DOTALL);
     private long lastAuctionUpdate;
-    private Gson g;
 
     AuctionManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
         this.data = new AuctionData();
-        this.g = backpageManager.getGson();
     }
 
     public AuctionData getData() {
@@ -37,23 +35,21 @@ public class AuctionManager {
         try {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;
             StringJoiner dataHtml = new StringJoiner("\n");
-            String hour = backpageManager.getConnection("ajax/auction.php", Method.POST)
-                    .setParam ("command", "getAuctionList")
-                    .setParam ("category", "hour")
-                    .setParam ("list", "auction")
-                    .getContent();
-            JsonObject hourObj = g.fromJson(hour, JsonObject.class);
-            if (hourObj.get ("result").getAsString().equalsIgnoreCase("ok")) {
+
+            JsonObject hourObj = backpageManager.getConnection("ajax/auction.php", Method.POST)
+                    .setParam("command", "getAuctionList")
+                    .setParam("category", "hour")
+                    .setParam("list", "auction")
+                    .fromJson(JsonObject.class);
+            if (hourObj.get("result").getAsString().equalsIgnoreCase("ok")) {
                 dataHtml.add(hourObj.get("code").getAsString());
             }
-            String day = backpageManager.getConnection("ajax/auction.php", Method.POST)
-                    .setParam ("command", "getAuctionList")
-                    .setParam ("category", "day")
-                    .setParam ("list", "auction")
-                    .getContent();
-
-            JsonObject dayObj = g.fromJson(day, JsonObject.class);
-            if (dayObj.get ("result").getAsString().equalsIgnoreCase("ok")) {
+            JsonObject dayObj = backpageManager.getConnection("ajax/auction.php", Method.POST)
+                    .setParam("command", "getAuctionList")
+                    .setParam("category", "day")
+                    .setParam("list", "auction")
+                    .fromJson(JsonObject.class);
+            if (dayObj.get("result").getAsString().equalsIgnoreCase("ok")) {
                 dataHtml.add(dayObj.get("code").getAsString());
             }
             lastAuctionUpdate = System.currentTimeMillis();
