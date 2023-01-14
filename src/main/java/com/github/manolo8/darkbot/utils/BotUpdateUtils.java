@@ -20,11 +20,7 @@ public class BotUpdateUtils {
     public static void checkAndUpdateBot(String... args) {
         try {
             String fileName = Path.of(Bot.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getFileName().toString();
-
-            StringBuilder sb = new StringBuilder();
-            for (String arg : args) {
-                sb.append(" ").append("-").append(arg);
-            }
+            String[] command = prefix(args, "java", "-jar", "DarkBot.jar");
 
             if (fileName.endsWith(".jar")) {
                 new File("DarkBot.jar.tmp").delete();
@@ -42,7 +38,7 @@ public class BotUpdateUtils {
                         InputStream in = new URL(lib.download).openStream();
                         Files.copy(in, Path.of("DarkBot.jar.tmp"), StandardCopyOption.REPLACE_EXISTING);
 
-                        Runtime.getRuntime().exec("java -jar DarkBot.jar.tmp" + sb);
+                        Runtime.getRuntime().exec(command);
                         System.exit(0);
                     }
                 }
@@ -50,11 +46,18 @@ public class BotUpdateUtils {
 
             if (fileName.equals("DarkBot.jar.tmp")) {
                 Files.copy(Path.of(fileName), Path.of("DarkBot.jar"), StandardCopyOption.REPLACE_EXISTING);
-                Runtime.getRuntime().exec("java -jar DarkBot.jar" + sb);
+                Runtime.getRuntime().exec(command);
                 System.exit(0);
             }
         } catch (URISyntaxException | InvalidPathException | IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String[] prefix(String[] array, String... prefix) {
+        String[] newArr = new String[array.length + prefix.length];
+        System.arraycopy(prefix, 0, newArr, 0, prefix.length);
+        System.arraycopy(array, 0, newArr, prefix.length, array.length);
+        return newArr;
     }
 }
