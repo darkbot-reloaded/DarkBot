@@ -118,6 +118,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean SEQUENTIAL = false;
             public @Option boolean ONLY_KILL_PREFERRED = false;
             public @Option boolean ENEMY_CBS_INVISIBLE = false;
+            public @Option boolean RADIATION = false;
         }
     }
 

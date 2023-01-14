@@ -86,6 +86,7 @@ public class MapManager implements Manager, StarSystemAPI {
     public Location pingLocation = null;
 
     private ConfigSetting<Boolean> disableRender;
+    private ConfigSetting<Boolean> radiation;
     private Consumer<Boolean> resetRender;
 
     public MapManager(Main main,
@@ -124,6 +125,8 @@ public class MapManager implements Manager, StarSystemAPI {
 
         this.disableRender = config.requireConfig("bot_settings.api_config.disable_render");
         this.disableRender.addListener(resetRender = b -> renderValidated = false);
+
+        this.radiation = config.requireConfig("general.roaming.radiation");
     }
 
     public void tick() {
@@ -469,6 +472,7 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     public boolean isOutOfMap(double x, double y) {
+        if (main.config.GENERAL.ROAMING.RADIATION || radiation.getValue()) return false;
         return x < 0 || y < 0 || x > internalWidth || y > internalHeight;
     }
 
