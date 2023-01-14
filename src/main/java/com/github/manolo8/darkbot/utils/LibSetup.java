@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.utils;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.Nullable;
@@ -31,6 +32,7 @@ public class LibSetup {
         public Set<String> altSha256;
         public String download;
         public boolean auto;
+        public Version version;
     }
 
     public static void setupLibraries() {
@@ -48,7 +50,7 @@ public class LibSetup {
         }
     }
 
-    private static Lib getLib(String path) {
+    protected static Lib getLib(String path) {
         return libraries != null ? libraries.get(path) : null;
     }
 
