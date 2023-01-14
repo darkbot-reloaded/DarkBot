@@ -3,8 +3,11 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
 import com.github.manolo8.darkbot.utils.http.Method;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,10 +16,12 @@ public class AuctionManager {
     private final AuctionData data;
     private final Pattern AUCTION_ERROR_PATTERN = Pattern.compile("infoText = '(.*?)';.*?" + "icon = '(.*)';", Pattern.DOTALL);
     private long lastAuctionUpdate;
+    private Gson g;
 
     AuctionManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
         this.data = new AuctionData();
+        this.g = backpageManager.getGson();
     }
 
     public AuctionData getData() {
@@ -31,11 +36,28 @@ public class AuctionManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;
-            String page = backpageManager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
+            StringJoiner dataHtml = new StringJoiner("\n");
+            String hour = backpageManager.getConnection("ajax/auction.php", Method.POST)
+                    .setParam ("command", "getAuctionList")
+                    .setParam ("category", "hour")
+                    .setParam ("list", "auction")
+                    .getContent();
+            JsonObject hourObj = g.fromJson(hour, JsonObject.class);
+            if (hourObj.get ("result").getAsString().equalsIgnoreCase("ok")) {
+                dataHtml.add(hourObj.get("code").getAsString());
+            }
+            String day = backpageManager.getConnection("ajax/auction.php", Method.POST)
+                    .setParam ("command", "getAuctionList")
+                    .setParam ("category", "day")
+                    .setParam ("list", "auction")
+                    .getContent();
 
-            if (page == null || page.isEmpty()) return false;
+            JsonObject dayObj = g.fromJson(day, JsonObject.class);
+            if (dayObj.get ("result").getAsString().equalsIgnoreCase("ok")) {
+                dataHtml.add(dayObj.get("code").getAsString());
+            }
             lastAuctionUpdate = System.currentTimeMillis();
-            return data.parse(page);
+            return data.parse(dataHtml.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
