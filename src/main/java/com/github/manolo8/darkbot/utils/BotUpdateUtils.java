@@ -18,14 +18,18 @@ import java.nio.file.StandardCopyOption;
 public class BotUpdateUtils {
 
     public static void checkAndUpdateBot(String... args) {
+        String defaultJarName = "DarkBot.jar";
+        String defaultTempJarName = "DarkBot.jar.tmp";
+
         try {
-            String fileName = Path.of(Bot.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getFileName().toString();
-            String[] command = prefix(args, "java", "-jar", "DarkBot.jar");
+            String runningNameJar = getRunningNameJar();
+            if (runningNameJar == null) return;
+            String[] command = prefix(args, "java", "-jar", defaultJarName);
 
-            if (fileName.endsWith(".jar")) {
-                new File("DarkBot.jar.tmp").delete();
+            if (runningNameJar.endsWith(".jar")) {
+                new File(defaultTempJarName).delete();
 
-                LibSetup.Lib lib = LibSetup.getLib("DarkBot.jar");
+                LibSetup.Lib lib = LibSetup.getLib(defaultJarName);
 
                 if (Main.VERSION.compareTo(lib.version) < 0) {
                     System.out.println("DarkBot has an update from version " + Main.VERSION + " to " + lib.version);
@@ -36,21 +40,22 @@ public class BotUpdateUtils {
 
                     if (result == JOptionPane.OK_OPTION) {
                         InputStream in = new URL(lib.download).openStream();
-                        Files.copy(in, Path.of("DarkBot.jar.tmp"), StandardCopyOption.REPLACE_EXISTING);
-
-                        Runtime.getRuntime().exec(command);
-                        System.exit(0);
+                        copyAndRun(in, Path.of(defaultTempJarName), command);
                     }
                 }
+            } else if (runningNameJar.equals(defaultTempJarName)) {
+                copyAndRun(Files.newInputStream(Path.of(runningNameJar)), Path.of(defaultJarName), command);
             }
-
-            if (fileName.equals("DarkBot.jar.tmp")) {
-                Files.copy(Path.of(fileName), Path.of("DarkBot.jar"), StandardCopyOption.REPLACE_EXISTING);
-                Runtime.getRuntime().exec(command);
-                System.exit(0);
-            }
-        } catch (URISyntaxException | InvalidPathException | IOException e) {
+        } catch (InvalidPathException | IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static String getRunningNameJar() {
+        try {
+            return Path.of(Bot.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getFileName().toString();
+        } catch (URISyntaxException e) {
+            return null;
         }
     }
 
@@ -59,5 +64,17 @@ public class BotUpdateUtils {
         System.arraycopy(prefix, 0, newArr, 0, prefix.length);
         System.arraycopy(array, 0, newArr, prefix.length, array.length);
         return newArr;
+    }
+
+    private static void copyAndRun(InputStream newExecutable, Path path, String... args) {
+        try {
+            Files.copy(newExecutable, path, StandardCopyOption.REPLACE_EXISTING);
+            String[] command = prefix(args, "java", "-jar", path.getFileName().toString());
+            Runtime.getRuntime().exec(command);
+            System.out.println("Closing process, updated jar '" + path + "' started running!");
+            System.exit(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
