@@ -45,6 +45,7 @@ public class BotUpdateUtils {
                 }
             } else if (runningNameJar.equals(defaultTempJarName)) {
                 copyAndRun(Files.newInputStream(Path.of(runningNameJar)), Path.of(defaultJarName), command);
+                System.exit(0);
             }
         } catch (InvalidPathException | IOException e) {
             e.printStackTrace();
