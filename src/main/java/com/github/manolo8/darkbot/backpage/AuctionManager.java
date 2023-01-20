@@ -13,6 +13,7 @@ public class AuctionManager {
     private final AuctionData data;
     private final Pattern AUCTION_ERROR_PATTERN = Pattern.compile("infoText = '(.*?)';.*?" + "icon = '(.*)';", Pattern.DOTALL);
     private long lastAuctionUpdate;
+    private boolean captchaDetected = false;
 
     AuctionManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
@@ -32,14 +33,19 @@ public class AuctionManager {
         try {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;
             String page = backpageManager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
+            captchaDetected = page.contains("id=\"captchaScriptContainer\"");
+            if (captchaDetected) return false;
 
-            if (page == null || page.isEmpty()) return false;
             lastAuctionUpdate = System.currentTimeMillis();
             return data.parse(page);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public boolean isCaptchaDetected() {
+        return captchaDetected;
     }
 
     public boolean bidItem(AuctionItems auctionItem) {

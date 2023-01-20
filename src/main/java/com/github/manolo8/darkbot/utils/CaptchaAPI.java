@@ -1,5 +1,8 @@
 package com.github.manolo8.darkbot.utils;
 
+
+import com.github.manolo8.darkbot.extensions.util.Version;
+
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,8 +27,15 @@ public interface CaptchaAPI {
     }
 
     /**
+     * @return version of captcha solver
+     */
+
+    Version getVersion();
+
+    /**
      * Create solving captcha parameters for the provided webpage html string.
-     * @param url this webpage was obtained from
+     *
+     * @param url     this webpage was obtained from
      * @param webpage as an HTML string
      * @return form parameters to include as captcha response solution
      */
@@ -33,7 +43,8 @@ public interface CaptchaAPI {
 
     /**
      * Create solving captcha parameters for the provided webpage html string.
-     * @param url this webpage was obtained from
+     *
+     * @param url     this webpage was obtained from
      * @param webpage as an HTML string
      * @return requestID of captcha solver that can be retrieved later
      */
@@ -41,6 +52,7 @@ public interface CaptchaAPI {
 
     /**
      * Fetches response for captcha that was sent prior
+     *
      * @param requestID request id that was received by {solveCaptchaRequestId}
      * @return status of captcha
      */
@@ -48,6 +60,7 @@ public interface CaptchaAPI {
 
     /**
      * Fetches response for captcha that was sent prior
+     *
      * @param requestID request id that was received by {solveCaptchaRequestId}
      * @return form parameters to include as captcha response solution
      */
