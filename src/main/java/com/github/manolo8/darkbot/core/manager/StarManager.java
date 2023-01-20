@@ -131,12 +131,14 @@ public class StarManager implements API.Singleton {
                 .addGG(413, "GoP Normal 4", "GoP N").accessOnlyBy(24, "GoP Normal 3")
                 .addGG(414, "GoP Normal 5", "GoP N").accessOnlyBy(24, "GoP Normal 4")
                 .addGG(415, "GoP Normal Final", "GoP N").accessOnlyBy(24, "GoP Normal 5").exitBy(1)
+                .addGG(469, "Plutus' Trove of Riches Normal", "PToR N").accessOnlyBy(24, "GoP Normal Final").exitBy(1)
                 .addGG(450, "GoP Easy 1", "GoP E").accessOnlyBy(235, HOME_MAPS)
                 .addGG(451, "GoP Easy 2", "GoP E").accessOnlyBy(235, "GoP Easy 1")
                 .addGG(452, "GoP Easy 3", "GoP E").accessOnlyBy(235, "GoP Easy 2")
                 .addGG(453, "GoP Easy 4", "GoP E").accessOnlyBy(235, "GoP Easy 3")
                 .addGG(454, "GoP Easy 5", "GoP E").accessOnlyBy(235, "GoP Easy 4")
-                .addGG(455, "GoP Easy Final", "GoP E").accessOnlyBy(235, "GoP Easy 5").exitBy(1);
+                .addGG(455, "GoP Easy Final", "GoP E").accessOnlyBy(235, "GoP Easy 5").exitBy(1)
+                .addGG(470, "Plutus' Trove of Riches Easy", "PToR E").accessOnlyBy(235, "GoP Easy Final").exitBy(1);
                 // Special (No direct access)
         mapBuild.addMap(42, "???")
                 .addMap(61, "MMO Invasion", "MMO Inv").addMap(62, "EIC Invasion", "EIC Inv").addMap(63, "VRU Invasion", "VRU Inv")
