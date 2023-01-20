@@ -190,6 +190,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option @Number(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
         public @Option @Number(max = 60 * 12, step = 10) int PAUSE_FOR = 0;
         public @Option boolean RESET_REFRESH = true;
+        public @Option boolean SOLVE_BACKPAGE_CAPTCHA = false;
         public @Option @Visibility(Level.INTERMEDIATE) boolean UPDATE_STATS_WHILE_PAUSED = true;
         public @Option @Visibility(Level.INTERMEDIATE) @Percentage double DRONE_REPAIR_PERCENTAGE = 0.9;
         public @Option @Visibility(Level.INTERMEDIATE) boolean HONOR_LOST_EXACT = true;
