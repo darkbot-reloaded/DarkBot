@@ -5,12 +5,16 @@ import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
 import com.github.manolo8.darkbot.backpage.dispatch.Gate;
+import com.github.manolo8.darkbot.utils.CaptchaAPI;
+import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
+import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.intellij.lang.annotations.Language;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +32,8 @@ public class DispatchManager {
     private final Map<String, Integer> collected;
     private final Map<String, Integer> lastCollected;
     private final Gson g;
+
+    private String requestID = "";
 
     DispatchManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
@@ -49,9 +55,35 @@ public class DispatchManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
-            String page = backpageManager.getConnection("indexInternal.es?action=internalDispatch", Method.GET).getContent();
+            String page = "";
+            if(requestID.isEmpty()) {
+                page = backpageManager.getConnection("indexInternal.es?action=internalDispatch", Method.GET).getContent();
+            }
+            if(page.contains("id=\"captchaScriptContainer\"")){
+                if (backpageManager.getCaptchaSolver() != null) {
+                    try {
+                        if(requestID.isEmpty()) {
+                            URL url = new URL(backpageManager.getInstanceURI().toString() + "indexInternal.es?action=lostPilot&desiredAction=dispatch");
+                            requestID = backpageManager.getCaptchaSolver().solveCaptchaRequestId(url, page);
+                        }
+                        if(backpageManager.getCaptchaSolver().isCaptchaSolved(requestID)){
+                            Map<String, String> extraPostParams = backpageManager.getCaptchaSolver().fetchCaptchaResponse(requestID);
+                            Http http = backpageManager.getConnection("ajax/lostpilot.php", Method.POST)
+                                    .setParam("command", "checkReCaptcha")
+                                    .setParam("desiredAction", "dispatch");
+                            extraPostParams.forEach(http::setParam);
+                            page = http.getContent();
+                            requestID = "";
+                        }
+                    } catch (Throwable t) {
+                        System.out.println("Captcha solver failed to resolve dispatch captcha");
+                        t.printStackTrace();
+                    }
+                } else {
+                    System.out.println("Captcha Detected in Dispatch Page, No captcha resolver is configured");
+                }
+            }
 
-            if (page == null || page.isEmpty()) return false;
             lastDispatcherUpdate = System.currentTimeMillis();
             return InfoReader.updateAll(page, data);
         } catch (Exception e) {
