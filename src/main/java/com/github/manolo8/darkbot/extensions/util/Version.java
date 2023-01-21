@@ -21,7 +21,7 @@ public class Version implements eu.darkbot.api.utils.Version {
             "(\\.(?<patch>[0-9]+))?" +
             "(\\.(?<revision>[0-9]+))?" +
             "(?<beta> ?b(eta)? ?(?<betanum>[0-9]+)?)?" +
-            "(?<alpha> ?a(lpha) ?(?<alphanum>[0-9]+)?)?");
+            "(?<alpha> ?a(lpha)? ?(?<alphanum>[0-9]+)?)?");
 
     private final String version;
     private final int major, minor, patch, revision, beta, alpha;

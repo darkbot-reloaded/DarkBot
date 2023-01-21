@@ -59,7 +59,7 @@ import java.util.Objects;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.118 beta 2");
+    public static final Version VERSION      = new Version("1.118 beta 3 a1");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -312,8 +312,13 @@ public class Main extends Thread implements PluginListener, BotAPI {
             setModule(new DisconnectModule(config.MISCELLANEOUS.PAUSE_FOR * 60 * 1000L, I18n.get("module.disconnect.reason.break")));
         } else {
             System.out.println("Triggering refresh: time arrived & module allows refresh");
-            API.handleRefresh();
+            handleRefresh();
         }
+    }
+
+    @Override
+    public void handleRefresh() {
+        API.handleRefresh();
     }
 
     @Deprecated
