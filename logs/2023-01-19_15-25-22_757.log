@@ -1,5 +1,0 @@
-[2023/01/19 15:25:26.487 | db.Bot.main(Bot.java:65)] Starting DarkBot 1.118 b2
-[2023/01/19 15:25:59.544 | db.gui.components.ExitConfirmation$YesButton.actionPerformed(ExitConfirmation.java:37)] Exit confirmation button pressed, exiting
-java.lang.Throwable: DarkBot shutdown peacefully!
-	at com.github.manolo8.darkbot.Bot.lambda$main$0(Bot.java:68)
-	at java.base/java.lang.Thread.run(Thread.java:829)

@@ -1,3 +1,0 @@
-[2023/01/19 15:26:37.431 | db.Bot.main(Bot.java:65)] Starting DarkBot 1.118 b2
-[2023/01/19 15:26:49.849 | db.utils.CaptchaAPI.createInstance(CaptchaAPI.java:16)] Library file lib/captchasolver.jar not present
-[2023/01/19 15:26:49.850 | db.utils.CaptchaAPI.createInstance(CaptchaAPI.java:18)] No captcha resolver is configured, if you're not trying to use one you can safely ignore this message
