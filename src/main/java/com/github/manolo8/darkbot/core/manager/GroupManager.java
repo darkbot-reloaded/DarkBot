@@ -169,23 +169,54 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void kick(int id) {
-        kick(group.getMember(id));
+        if (pending != null) return;
+        if (canKick()) {
+            pending = () -> {
+                kickUser(group.indexOf(group.getMember(id)));
+            };
+        }
     }
 
     public void kick(GroupMember member) {
-        if (member != null && canKick()) kickUser(group.indexOf(member));
+        if(member == null) return;
+        kick(member.id);
     }
 
     private void kickUser(int idx) {
-        if (idx <= 0) return;
-
-        if (pending != null || !group.isValid() || !group.isLeader) return;
-        pending = () -> {
+        if (idx < 0) return;
+        if (API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS)) {
+            API.postActions(
+                    clickNative(GroupAction.REMOVE),
+                    clickPlayerNative(idx));
+        } else {
             click(GroupAction.REMOVE);
-            Time.sleep(100);
-            click((int) size.x / 2, HEADER_HEIGHT + (MEMBER_HEIGHT / 2) + idx * MEMBER_HEIGHT);
-        };
+            Time.sleep(50);
+            click((int) size.x / 2, HEADER_HEIGHT + (MEMBER_HEIGHT / 2) + (idx * MEMBER_HEIGHT));
+        }
+    }
 
+    private void click(GroupAction action) {
+        clickBtn(MARGIN_WIDTH, action.idx(group.isLeader), HEADER_HEIGHT + getGroupHeight(), 0);
+    }
+    private long clickNative(GroupAction action) {
+        return clickBtnNative(MARGIN_WIDTH, action.idx(group.isLeader), HEADER_HEIGHT + getGroupHeight(), 0);
+    }
+
+    private void clickBtn(int marginX, int indexX,
+                          int marginY, int indexY) {
+        click(offset(marginX, BUTTON_WIDTH, indexX), offset(marginY, BUTTON_HEIGHT, indexY));
+    }
+
+    public long clickBtnNative(int marginX, int indexX,
+                               int marginY, int indexY) {
+        return NativeAction.Mouse.CLICK.of(offset(marginX, BUTTON_WIDTH, indexX), offset(marginY, BUTTON_HEIGHT, indexY));
+    }
+    private int offset(int margin, int offset, int index) {
+        return margin + (offset * index) + (offset / 2);
+    }
+
+    private long clickPlayerNative(int idx) {
+        return NativeAction.Mouse.CLICK.of((int) size.x / 2, HEADER_HEIGHT + (MEMBER_HEIGHT / 2) + (idx * MEMBER_HEIGHT));
     }
 
     public boolean canKick() {
@@ -197,27 +228,14 @@ public class GroupManager extends Gui implements GroupAPI {
         return (!group.isValid() || group.isOpen || group.isLeader) && invites.size() + group.size < 8;
     }
 
-    private void click(GroupAction action) {
-        clickBtn(MARGIN_WIDTH, action.idx(group.isLeader), HEADER_HEIGHT + getGroupHeight(), 0);
-    }
-
     private int getGroupHeight() {
         return Math.max(0, group.size - 1) * MEMBER_HEIGHT +
                 (invites.size() * BUTTON_HEIGHT) +
-                (canInvite() ? BUTTON_HEIGHT : 0);
+                ((group.isValid() && (group.isOpen || group.isLeader)) ? BUTTON_HEIGHT : 0);
     }
 
     private int getInvitingHeight() {
         return HEADER_HEIGHT + (group.isValid() ? getGroupHeight() : BUTTON_HEIGHT) - (BUTTON_HEIGHT / 2);
-    }
-
-    private int offset(int margin, int offset, int index) {
-        return margin + (offset * index) + (offset / 2);
-    }
-
-    private void clickBtn(int marginX, int indexX,
-                          int marginY, int indexY) {
-        click(offset(marginX, BUTTON_WIDTH, indexX), offset(marginY, BUTTON_HEIGHT, indexY));
     }
 
     private enum GroupAction {
