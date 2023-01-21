@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.objects.group.GroupMember;
 import com.github.manolo8.darkbot.core.objects.group.Invite;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
+import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.GroupAPI;
 import eu.darkbot.api.utils.NativeAction;
 import org.jetbrains.annotations.Nullable;
@@ -178,9 +179,13 @@ public class GroupManager extends Gui implements GroupAPI {
     private void kickUser(int idx) {
         if (idx <= 0) return;
 
-        click(GroupAction.REMOVE);
-        // TODO: wait between clicks
-        click((int) size.x / 2, (MEMBER_HEIGHT / 2) + idx * MEMBER_HEIGHT);
+        if (pending != null || !group.isValid() || !group.isLeader) return;
+        pending = () -> {
+            click(GroupAction.REMOVE);
+            Time.sleep(100);
+            click((int) size.x / 2, HEADER_HEIGHT + (MEMBER_HEIGHT / 2) + idx * MEMBER_HEIGHT);
+        };
+
     }
 
     public boolean canKick() {
