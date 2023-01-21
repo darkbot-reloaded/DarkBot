@@ -204,7 +204,7 @@ public class GroupManager extends Gui implements GroupAPI {
     private int getGroupHeight() {
         return Math.max(0, group.size - 1) * MEMBER_HEIGHT +
                 (invites.size() * BUTTON_HEIGHT) +
-                (canInvite() ? BUTTON_HEIGHT : 0);
+                ((group.isValid() && (group.isOpen || group.isLeader)) ? BUTTON_HEIGHT : 0);
     }
 
     private int getInvitingHeight() {
