@@ -153,14 +153,19 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void sendInvite(String username, long wait) {
-        runClicks(getInviteInputPoint(),getInviteInputPoint());
         if (API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS)) {
-            API.pasteText(username);
-        }else{
+            API.pasteText(username,
+                    NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
+                    NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
+                    NativeAction.Mouse.CLICK.after(x + MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), y + getInvitingHeight()));
+        } else {
+            click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
+            click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
+            //        Time.sleep(100); // This should not be here, but will stay for now
             API.sendText(username);
+            //        Time.sleep(500); // This should not be here, but will stay for now
+            click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
         }
-        runClicks(getInviteBtnPoint());
-        pastInvites.put(username, System.currentTimeMillis() + wait); // Wait until re-invite
     }
 
     public void kick(int id) {
