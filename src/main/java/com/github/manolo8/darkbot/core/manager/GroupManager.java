@@ -174,8 +174,7 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void kick(GroupMember member) {
-        if (member == null) return;
-        if (pending != null || !canKick()) return;
+        if (member == null || pending != null || !canKick()) return;
         int idx = group.indexOf(member);
         if (idx < 0) return;
 
