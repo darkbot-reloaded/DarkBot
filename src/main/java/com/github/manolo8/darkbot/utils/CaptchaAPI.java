@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public interface CaptchaAPI {
     Path SOLVER_PATH = Paths.get("lib", "captchasolver.jar");
@@ -41,28 +42,15 @@ public interface CaptchaAPI {
      */
     Map<String, String> solveCaptcha(URL url, String webpage);
 
+
     /**
-     * Create solving captcha parameters for the provided webpage html string.
+     * Creates CompletableFuture
+     * solving captcha parameters for the provided webpage html string.
      *
      * @param url     this webpage was obtained from
      * @param webpage as an HTML string
-     * @return requestID of captcha solver that can be retrieved later
+     * @return CompletableFuture with form parameters to include as captcha response solution
      */
-    String solveCaptchaRequestId(URL url, String webpage);
 
-    /**
-     * Fetches response for captcha that was sent prior
-     *
-     * @param requestID request id that was received by {solveCaptchaRequestId}
-     * @return status of captcha
-     */
-    boolean isCaptchaSolved(String requestID);
-
-    /**
-     * Fetches response for captcha that was sent prior
-     *
-     * @param requestID request id that was received by {solveCaptchaRequestId}
-     * @return form parameters to include as captcha response solution
-     */
-    Map<String, String> fetchCaptchaResponse(String requestID);
+    CompletableFuture<Map<String, String>> solveCaptchaFuture(URL url, String webpage);
 }
