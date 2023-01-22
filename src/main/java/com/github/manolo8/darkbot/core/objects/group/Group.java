@@ -35,7 +35,7 @@ public class Group extends Updatable.Auto {
     @Override
     public void update() {
         id = API.readMemoryInt(address + 0x1F);
-        size = API.readMemoryInt(address + 0x23);
+//        size = API.readMemoryInt(address + 0x23);
         maxSize = API.readMemoryInt(address + 0x27);
         isOpen = API.readMemoryBoolean(address + 0x2B);
 
@@ -52,6 +52,7 @@ public class Group extends Updatable.Auto {
         synchronized (Main.UPDATE_LOCKER) {
             filtered = membersPtr.sync(members, GroupMember::new, m -> m.id != hero.id);
         }
+        size = members.size();
         isLeader = filtered.stream().map(h -> h.isLeader).findFirst().orElse(false);
         selectedMember = members.stream().filter(m -> selectedAddr == m.address).findFirst().orElse(null);
     }
