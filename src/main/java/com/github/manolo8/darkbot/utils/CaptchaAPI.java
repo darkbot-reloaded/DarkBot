@@ -51,6 +51,7 @@ public interface CaptchaAPI {
      * @param webpage as an HTML string
      * @return CompletableFuture with form parameters to include as captcha response solution
      */
-
-    CompletableFuture<Map<String, String>> solveCaptchaFuture(URL url, String webpage);
+    default CompletableFuture<Map<String, String>> solveCaptchaFuture(URL url, String webpage) {
+        return CompletableFuture.supplyAsync(() -> solveCaptcha(url, webpage));
+    }
 }
