@@ -5,6 +5,8 @@ import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
 import com.github.manolo8.darkbot.utils.http.Method;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +16,8 @@ public class AuctionManager {
     private final Pattern AUCTION_ERROR_PATTERN = Pattern.compile("infoText = '(.*?)';.*?" + "icon = '(.*)';", Pattern.DOTALL);
     private long lastAuctionUpdate;
     private boolean captchaDetected = false;
+    private CompletableFuture<Map<String, String>> captchaResponseFuture;
+
 
     AuctionManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
@@ -32,9 +36,13 @@ public class AuctionManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;
+            if (captchaResponseFuture != null) return false;
             String page = backpageManager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
             captchaDetected = page.contains("id=\"captchaScriptContainer\"");
-            if (captchaDetected) return false;
+            if (captchaDetected) {
+                handleCaptcha();
+                return false;
+            }
 
             lastAuctionUpdate = System.currentTimeMillis();
             return data.parse(page);
@@ -42,6 +50,13 @@ public class AuctionManager {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void handleCaptcha() {
+        if (captchaResponseFuture == null) {
+            captchaResponseFuture = backpageManager.solveCaptcha("indexInternal.es?action=internalAuction", "auction")
+                    .whenComplete((r, t) -> captchaResponseFuture = null);
+        }
     }
 
     public boolean isCaptchaDetected() {

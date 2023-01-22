@@ -16,6 +16,7 @@ import org.intellij.lang.annotations.Language;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,7 +58,8 @@ public class DispatchManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
-            String page = backpageManager.getConnection("indexInternal.es?action=internalDispatch", Method.GET).getContent();
+            if (captchaResponseFuture != null) return false;
+            String page = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getContent();
             captchaDetected = page.contains("id=\"captchaScriptContainer\"");
             if (captchaDetected) {
                 handleCaptcha();
@@ -74,26 +76,9 @@ public class DispatchManager {
     }
 
     private void handleCaptcha() {
-        if(!backpageManager.main.config.MISCELLANEOUS.RESET_REFRESH || CaptchaAPI.getInstance() == null) return;
-        if (captchaResponseFuture == null) {
-            try {
-                HttpURLConnection connection = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getConnection();
-                captchaResponseFuture = CaptchaAPI.getInstance().solveCaptchaFuture(connection.getURL(), IOUtils.read(connection.getInputStream(), true));
-                captchaResponseFuture.whenComplete((r, t) -> {
-                    captchaResponseFuture = null;
-                    try {
-                        Http http = backpageManager.postHttp("ajax/lostpilot.php")
-                                .setParam("command", "checkReCaptcha")
-                                .setParam("desiredAction", "dispatch");
-                        r.forEach(http::setParam);
-                        http.closeInputStream();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        if(captchaResponseFuture == null) {
+            captchaResponseFuture = backpageManager.solveCaptcha("indexInternal.es?action=internalDispatch", "dispatch")
+                    .whenComplete((r,t) -> captchaResponseFuture = null);
         }
     }
 

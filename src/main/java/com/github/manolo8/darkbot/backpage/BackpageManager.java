@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
+import com.github.manolo8.darkbot.utils.CaptchaAPI;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
@@ -10,6 +11,7 @@ import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.google.gson.Gson;
 import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.BackpageAPI;
+import eu.darkbot.util.IOUtils;
 import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,8 +26,10 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,6 +67,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     private Optional<LoginData> loginData;
 
     private final Gson gson = new Gson();
+
     public BackpageManager(Main main) {
         super("BackpageManager");
         this.main = main;
@@ -114,6 +119,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
             }
 
             this.hangarManager.tick();
+            this.dispatchManager.update(-1);
+            this.auctionManager.update(-1);
             if (System.currentTimeMillis() > sidNextUpdate) {
                 int waitTime = sidCheck();
                 sidLastUpdate = System.currentTimeMillis();
@@ -291,6 +298,35 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     public Gson getGson() {
         return gson;
+    }
+
+    public CompletableFuture<Map<String, String>> solveCaptcha(String path, String desiredAction) {
+        if (!main.config.MISCELLANEOUS.RESET_REFRESH || CaptchaAPI.getInstance() == null) return null;
+
+        try {
+            HttpURLConnection conn = getHttp(path).getConnection();
+            conn.setInstanceFollowRedirects(false);
+            if (!conn.getHeaderField("Location").isEmpty()) {
+                HttpURLConnection connection = getHttp(conn.getHeaderField("Location")).getConnection();
+                return CaptchaAPI.getInstance().solveCaptchaFuture(connection.getURL(), IOUtils.read(connection.getInputStream(), true))
+                        .whenComplete((r, t) -> {
+                            try {
+                                if (r.isEmpty()) return;
+                                eu.darkbot.util.http.Http http = postHttp("ajax/lostpilot.php")
+                                        .setParam("command", "checkReCaptcha")
+                                        .setParam("desiredAction", desiredAction);
+                                r.forEach(http::setParam);
+                                http.closeInputStream();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 
     @Override
