@@ -119,8 +119,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
             }
 
             this.hangarManager.tick();
-            this.dispatchManager.update(-1);
-            this.auctionManager.update(-1);
             if (System.currentTimeMillis() > sidNextUpdate) {
                 int waitTime = sidCheck();
                 sidLastUpdate = System.currentTimeMillis();
