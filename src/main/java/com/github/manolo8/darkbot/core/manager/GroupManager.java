@@ -244,11 +244,11 @@ public class GroupManager extends Gui implements GroupAPI {
 
     @Override
     public boolean canInvite() {
-        return (!group.isValid() || group.isOpen || group.isLeader) && invites.size() + group.size < 8;
+        return (!group.isValid() || group.isOpen || group.isLeader) && invites.size() + group.members.size() < 7;
     }
 
     private int getGroupHeight() {
-        return Math.max(0, group.size - 1) * MEMBER_HEIGHT +
+        return (group.members.size() * MEMBER_HEIGHT) +
                 (invites.size() * BUTTON_HEIGHT) +
                 ((group.isValid() && (group.isOpen || group.isLeader)) ? BUTTON_HEIGHT : 0);
     }
@@ -288,7 +288,7 @@ public class GroupManager extends Gui implements GroupAPI {
 
     @Override
     public int getSize() {
-        return group.size;
+        return group.members.size();
     }
 
     @Override
