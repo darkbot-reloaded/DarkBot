@@ -86,6 +86,7 @@ public class GroupManager extends Gui implements GroupAPI {
         tryQueueAcceptInvite();
         tryOpenInvites();
         tryQueueSendInvite();
+        tryQueueKick();
 
         if (pending == null) show(false);
         else {
@@ -112,6 +113,20 @@ public class GroupManager extends Gui implements GroupAPI {
         if (group.isOpen != config.OPEN_INVITES) pending = () -> runClicks(getPoint(GroupAction.CAN_INVITE));
     }
 
+    public void tryQueueKick(){
+        if (pending != null || !canKick() || config.INVITE_TAG == null || !config.KICK_NO_INVITED) return;
+        for(GroupMember member : group.members){
+            if(config.INVITE_TAG.has(main.config.PLAYER_INFOS.get(member.id))) continue;
+            if(main.config.PLAYER_INFOS.get(member.id).hasTag(config.INVITE_TAG)) continue;
+
+            Long inviteTime = inviteTimeout.get(member.username);
+            if (inviteTime != null && System.currentTimeMillis() < inviteTime) continue;
+            
+            kick(member.id);
+            break;
+        }
+    }
+
     public void tryQueueSendInvite() {
         if (pending != null || !canInvite() || config.INVITE_TAG == null) return;
 
@@ -134,6 +149,13 @@ public class GroupManager extends Gui implements GroupAPI {
 
         if (shouldLeave >= 20)
             pending = () -> runClicks(getPoint(GroupAction.LEAVE));
+    }
+
+    public boolean shouldKick() {
+        return group.isValid() && config.WHITELIST_TAG != null && config.KICK_NO_INVITED &&
+                group.members.stream()
+                        .map(m -> main.config.PLAYER_INFOS.get(m.id))
+                        .noneMatch(i -> i != null && i.hasTag(config.INVITE_TAG));
     }
 
     public boolean shouldLeave() {
