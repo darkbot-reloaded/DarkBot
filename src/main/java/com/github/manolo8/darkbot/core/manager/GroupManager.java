@@ -44,7 +44,7 @@ public class GroupManager extends Gui implements GroupAPI {
     private long nextAction;
     private Runnable pending;
 
-    private final Map<String, Long> pastInvites = new HashMap<>();
+    private final Map<String, Long> inviteTimeout = new HashMap<>();
     private int shouldLeave = 0;
 
     private long lastValidTime; // Last time group had members for isLoaded check
@@ -118,7 +118,7 @@ public class GroupManager extends Gui implements GroupAPI {
         for (PlayerInfo player : main.config.PLAYER_INFOS.values()) {
             if (!config.INVITE_TAG.has(player) || group.getMember(player.userId) != null) continue;
 
-            Long inviteTime = pastInvites.get(player.username);
+            Long inviteTime = inviteTimeout.get(player.username);
             if (inviteTime != null && System.currentTimeMillis() < inviteTime) continue;
 
             pending = () -> sendInvite(player.username, inviteTime == null ? 60_000 : 120_000);
@@ -166,14 +166,16 @@ public class GroupManager extends Gui implements GroupAPI {
             //        Time.sleep(500); // This should not be here, but will stay for now
             click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
         }
-        pastInvites.put(username, System.currentTimeMillis() + wait);
+        inviteTimeout.put(username, System.currentTimeMillis() + wait);
     }
 
     public void kick(int id) {
         if (pending != null || !canKick()) return;
 
         pending = () -> {
+            GroupMember member = group.getMember(id);
             int idx = group.indexOf(id);
+            inviteTimeout.put(member.username, System.currentTimeMillis()+30_000);
             runClicks(getPoint(GroupAction.REMOVE), getMemberPoint(idx));
         };
 
