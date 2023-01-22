@@ -169,18 +169,19 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void kick(int id) {
-        GroupMember member = group.getMember(id);
-        kick(member);
+        if (pending != null || !canKick()) return;
+
+        pending = () -> {
+            int idx = group.indexOf(id);
+            runClicks(getPoint(GroupAction.REMOVE), getMemberPoint(idx));
+        };
+
     }
 
     public void kick(GroupMember member) {
-        if (member == null || pending != null || !canKick()) return;
-        int idx = group.indexOf(member);
-        if (idx < 0) return;
-
-        pending = () -> runClicks(getPoint(GroupAction.REMOVE), getMemberPoint(idx));
+        if (member == null) return;
+        kick(member.id);
     }
-
 
     private void runClicks(ClickPoint... points) {
         if (API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS)) {
@@ -243,11 +244,11 @@ public class GroupManager extends Gui implements GroupAPI {
 
     @Override
     public boolean canInvite() {
-        return (!group.isValid() || group.isOpen || group.isLeader) && invites.size() + group.members.size() < 7;
+        return (!group.isValid() || group.isOpen || group.isLeader) && invites.size() + group.size < 7;
     }
 
     private int getGroupHeight() {
-        return (group.members.size() * MEMBER_HEIGHT) +
+        return (group.size * MEMBER_HEIGHT) +
                 (invites.size() * BUTTON_HEIGHT) +
                 ((group.isValid() && (group.isOpen || group.isLeader)) ? BUTTON_HEIGHT : 0);
     }
@@ -287,7 +288,7 @@ public class GroupManager extends Gui implements GroupAPI {
 
     @Override
     public int getSize() {
-        return group.members.size();
+        return group.size;
     }
 
     @Override
