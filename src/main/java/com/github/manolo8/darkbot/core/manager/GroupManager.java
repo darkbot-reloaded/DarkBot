@@ -166,6 +166,7 @@ public class GroupManager extends Gui implements GroupAPI {
             //        Time.sleep(500); // This should not be here, but will stay for now
             click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
         }
+        pastInvites.put(username, System.currentTimeMillis() + wait);
     }
 
     public void kick(int id) {
