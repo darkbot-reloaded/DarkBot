@@ -71,14 +71,14 @@ public class Group extends Updatable.Auto {
     }
 
     public int indexOf(int id) {
-        if(members.isEmpty()) return -1;
+        if (members.isEmpty()) return -1;
         for (int i = 0; i < size; i++)
             if (members.get(i).id == id) return i;
         return -1;
     }
 
     public int indexOf(GroupMember member) {
-        if(members.isEmpty()) return -1;
+        if (members.isEmpty()) return -1;
         for (int i = 0; i < size; i++)
             if (members.get(i) == member) return i;
         return -1;

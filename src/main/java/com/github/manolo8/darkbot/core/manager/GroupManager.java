@@ -113,15 +113,15 @@ public class GroupManager extends Gui implements GroupAPI {
         if (group.isOpen != config.OPEN_INVITES) pending = () -> runClicks(getPoint(GroupAction.CAN_INVITE));
     }
 
-    public void tryQueueKick(){
+    public void tryQueueKick() {
         if (pending != null || !canKick() || config.INVITE_TAG == null || !config.KICK_NO_INVITED) return;
-        for(GroupMember member : group.members){
-            if(config.INVITE_TAG.has(main.config.PLAYER_INFOS.get(member.id))) continue;
-            if(main.config.PLAYER_INFOS.get(member.id).hasTag(config.INVITE_TAG)) continue;
+        for (GroupMember member : group.members) {
+            if (config.INVITE_TAG.has(main.config.PLAYER_INFOS.get(member.id))) continue;
+            if (main.config.PLAYER_INFOS.get(member.id).hasTag(config.INVITE_TAG)) continue;
 
             Long inviteTime = inviteTimeout.get(member.username);
             if (inviteTime != null && System.currentTimeMillis() < inviteTime) continue;
-            
+
             kick(member.id);
             break;
         }
@@ -197,7 +197,7 @@ public class GroupManager extends Gui implements GroupAPI {
         pending = () -> {
             GroupMember member = group.getMember(id);
             int idx = group.indexOf(id);
-            inviteTimeout.put(member.username, System.currentTimeMillis()+30_000);
+            inviteTimeout.put(member.username, System.currentTimeMillis() + 30_000);
             runClicks(getPoint(GroupAction.REMOVE), getMemberPoint(idx));
         };
 
