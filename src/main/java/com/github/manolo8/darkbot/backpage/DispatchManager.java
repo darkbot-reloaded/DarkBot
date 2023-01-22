@@ -5,17 +5,23 @@ import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
 import com.github.manolo8.darkbot.backpage.dispatch.Gate;
+import com.github.manolo8.darkbot.utils.CaptchaAPI;
 import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import eu.darkbot.util.IOUtils;
+import eu.darkbot.util.http.Http;
 import org.intellij.lang.annotations.Language;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +35,7 @@ public class DispatchManager {
     private final Map<String, Integer> lastCollected;
     private final Gson gson;
     private boolean captchaDetected = false;
+    private CompletableFuture<Map<String, String>> captchaResponseFuture;
 
     DispatchManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
@@ -52,7 +59,10 @@ public class DispatchManager {
             if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
             String page = backpageManager.getConnection("indexInternal.es?action=internalDispatch", Method.GET).getContent();
             captchaDetected = page.contains("id=\"captchaScriptContainer\"");
-            if (captchaDetected) return false;
+            if (captchaDetected) {
+                handleCaptcha();
+                return false;
+            }
 
             lastDispatcherUpdate = System.currentTimeMillis();
             return InfoReader.updateAll(page, data);
@@ -61,6 +71,30 @@ public class DispatchManager {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void handleCaptcha() {
+        if(!backpageManager.main.config.MISCELLANEOUS.RESET_REFRESH || CaptchaAPI.getInstance() == null) return;
+        if (captchaResponseFuture == null) {
+            try {
+                HttpURLConnection connection = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getConnection();
+                captchaResponseFuture = CaptchaAPI.getInstance().solveCaptchaFuture(connection.getURL(), IOUtils.read(connection.getInputStream(), true));
+                captchaResponseFuture.whenComplete((r, t) -> {
+                    captchaResponseFuture = null;
+                    try {
+                        Http http = backpageManager.postHttp("ajax/lostpilot.php")
+                                .setParam("command", "checkReCaptcha")
+                                .setParam("desiredAction", "dispatch");
+                        r.forEach(http::setParam);
+                        http.closeInputStream();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public Map<String, Integer> getCollected() {

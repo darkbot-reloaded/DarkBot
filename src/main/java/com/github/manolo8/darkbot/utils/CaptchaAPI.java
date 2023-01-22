@@ -31,7 +31,9 @@ public interface CaptchaAPI {
      * @return version of captcha solver
      */
 
-    Version getVersion();
+    default Version getVersion(){
+        return new Version("0.0.0");
+    }
 
     /**
      * Create solving captcha parameters for the provided webpage html string.

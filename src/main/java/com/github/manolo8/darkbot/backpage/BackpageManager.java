@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
-import com.github.manolo8.darkbot.utils.CaptchaAPI;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
@@ -64,7 +63,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
     private Optional<LoginData> loginData;
 
     private final Gson gson = new Gson();
-    private final CaptchaAPI captchaSolver;
     public BackpageManager(Main main) {
         super("BackpageManager");
         this.main = main;
@@ -74,7 +72,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
         this.dispatchManager = new DispatchManager(this);
         this.auctionManager = new AuctionManager(this);
         this.novaManager = new NovaManager(this);
-        this.captchaSolver = CaptchaAPI.getInstance();
         setDaemon(true);
     }
 
@@ -294,10 +291,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     public Gson getGson() {
         return gson;
-    }
-
-    public CaptchaAPI getCaptchaSolver(){
-        return this.captchaSolver;
     }
 
     @Override
