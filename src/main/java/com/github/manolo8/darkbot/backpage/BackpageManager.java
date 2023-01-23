@@ -318,8 +318,11 @@ public class BackpageManager extends Thread implements BackpageAPI {
                                     .setParam("desiredAction", desiredAction);
                             r.forEach(http::setParam);
                             http.closeInputStream();
+
                         } catch (IOException e) {
                             e.printStackTrace();
+                        } finally {
+                            captchaResponseFuture = null;
                         }
                     });
             return true;
