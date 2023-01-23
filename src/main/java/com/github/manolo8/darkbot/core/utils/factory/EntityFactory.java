@@ -51,10 +51,17 @@ public enum EntityFactory implements EntityBuilder {
     CBS_MODULE_CON  (BattleStation::new, "module-construction"),
     CBS_STATION     (BattleStation.Built::new, "battleStation"),
 
-    POD_HEAL        (StaticEntity.PodHeal::new,         "pod_heal"),               // Aegis/hammerclaw healing pods
-    BUFF_CAPSULE    (StaticEntity.BuffCapsule::new,     "buffCapsule_.*"),
-    BURNING_TRAIL   (StaticEntity.BurningTrail::new,    "burning_trail_entity_.*"),
-    PLUTUS_GENERATOR(StaticEntity.PlutusGenerator::new, "plutus-generator"),
+    // Aegis/hammerclaw healing pods
+    POD_HEAL              (StaticEntity.PodHeal::new,              "pod_heal"),
+    BUFF_CAPSULE          (StaticEntity.BuffCapsule::new,          "buffCapsule_.*"),
+    BURNING_TRAIL         (StaticEntity.BurningTrail::new,         "burning_trail_entity_1"),
+    BURNING_TRAIL_ENEMY   (StaticEntity.BurningTrailEnemy::new,    "burning_trail_entity_2"),
+    PLUTUS_GENERATOR      (StaticEntity.PlutusGenerator::new,      "plutus-generator"),
+    // red & green are different class types in-game
+    PLUTUS_GENERATOR_RED  (StaticEntity.PlutusGenerator::new,      "plutus-generator-red"),
+    //todo uncomment after GoP event
+    //PLUTUS_GENERATOR_GREEN(StaticEntity.PlutusGeneratorGreen::new, "plutus-generator-green"),
+    PET_BEACON            (StaticEntity.PetBeacon::new,            "pet_beacon"),
 
     BASE_TURRET     (BaseTurret::new,       "turret_.*"),       // Turrets around x-1 and x-8 bases
     REFINERY        (BaseRefinery::new,     "refinery_.*"),     // Refinery to sell ores at

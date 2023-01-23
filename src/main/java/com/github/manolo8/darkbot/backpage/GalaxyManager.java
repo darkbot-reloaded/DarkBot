@@ -10,6 +10,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 
+/**
+ * @deprecated use {@link eu.darkbot.api.managers.GalaxySpinnerAPI} instead
+ */
+@Deprecated
 public class GalaxyManager {
 
     private final BackpageManager backpage;

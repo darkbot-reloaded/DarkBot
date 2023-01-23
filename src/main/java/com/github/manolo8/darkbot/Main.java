@@ -50,6 +50,7 @@ import eu.darkbot.api.extensions.TemporalModule;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
+import eu.darkbot.util.http.Http;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -116,6 +117,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     public Main(StartupParams params) {
         super("Main");
+        Http.setGson(BackpageManager.GSON);
 
         this.params = params;
 
@@ -328,6 +330,11 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     public <A extends Module> A setModule(A module) {
         return setModule(module, false);
+    }
+
+    @Override
+    public void handleRefresh() {
+        API.handleRefresh();
     }
 
     private <A extends Module> A setModule(A module, boolean setConfig) {
