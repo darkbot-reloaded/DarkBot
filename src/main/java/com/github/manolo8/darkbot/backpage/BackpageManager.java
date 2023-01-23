@@ -68,6 +68,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     private final Gson gson = new Gson();
 
+    private CompletableFuture<Map<String, String>> captchaResponseFuture;
+
     public BackpageManager(Main main) {
         super("BackpageManager");
         this.main = main;
@@ -298,14 +300,16 @@ public class BackpageManager extends Thread implements BackpageAPI {
         return gson;
     }
 
-    public CompletableFuture<Map<String, String>> solveCaptcha(String path, String desiredAction) throws IOException {
-        if (!main.config.MISCELLANEOUS.RESET_REFRESH || CaptchaAPI.getInstance() == null) return null;
+
+    public boolean solveCaptcha(String path, String desiredAction) throws IOException {
+        if (!main.config.MISCELLANEOUS.RESET_REFRESH || CaptchaAPI.getInstance() == null) return false;
+        if(captchaResponseFuture != null) return false;
 
         HttpURLConnection conn = getHttp(path).getConnection();
         conn.setInstanceFollowRedirects(false);
         if (!conn.getHeaderField("Location").isEmpty()) {
             HttpURLConnection connection = getHttp(conn.getHeaderField("Location")).getConnection();
-            return CaptchaAPI.getInstance().solveCaptchaFuture(connection.getURL(), IOUtils.read(connection.getInputStream(), true))
+            captchaResponseFuture = CaptchaAPI.getInstance().solveCaptchaFuture(connection.getURL(), IOUtils.read(connection.getInputStream(), true))
                     .whenComplete((r, t) -> {
                         try {
                             if (r.isEmpty()) return;
@@ -318,8 +322,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
                             e.printStackTrace();
                         }
                     });
+            return true;
         }
-        return null;
+        return false;
     }
 
     @Override

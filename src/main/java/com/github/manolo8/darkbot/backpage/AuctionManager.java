@@ -38,10 +38,8 @@ public class AuctionManager {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;
             if (captchaResponseFuture != null) return false;
             String page = backpageManager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
-            captchaDetected = page.contains("id=\"captchaScriptContainer\"");
-            if (captchaDetected) {
-                handleCaptcha();
-                return false;
+            if (page.contains("id=\"captchaScriptContainer\"")) {
+                return backpageManager.solveCaptcha("indexInternal.es?action=internalAuction", "auction");
             }
 
             lastAuctionUpdate = System.currentTimeMillis();
@@ -50,13 +48,6 @@ public class AuctionManager {
             e.printStackTrace();
         }
         return false;
-    }
-
-    private void handleCaptcha() throws IOException {
-        if (captchaResponseFuture == null) {
-            captchaResponseFuture = backpageManager.solveCaptcha("indexInternal.es?action=internalAuction", "auction");
-            captchaResponseFuture.whenComplete((r, t) -> captchaResponseFuture = null);
-        }
     }
 
     public boolean isCaptchaDetected() {

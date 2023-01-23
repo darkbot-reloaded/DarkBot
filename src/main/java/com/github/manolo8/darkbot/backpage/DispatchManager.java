@@ -31,7 +31,6 @@ public class DispatchManager {
     private final Map<String, Integer> lastCollected;
     private final Gson gson;
     private boolean captchaDetected = false;
-    private CompletableFuture<Map<String, String>> captchaResponseFuture;
 
     DispatchManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
@@ -53,12 +52,10 @@ public class DispatchManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
-            if (captchaResponseFuture != null) return false;
             String page = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getContent();
             captchaDetected = page.contains("id=\"captchaScriptContainer\"");
-            if (captchaDetected) {
-                handleCaptcha();
-                return false;
+            if (page.contains("id=\"captchaScriptContainer\"")) {
+                return backpageManager.solveCaptcha("indexInternal.es?action=internalDispatch", "dispatch");
             }
 
             lastDispatcherUpdate = System.currentTimeMillis();
@@ -68,13 +65,6 @@ public class DispatchManager {
             e.printStackTrace();
         }
         return false;
-    }
-
-    private void handleCaptcha() throws IOException {
-        if (captchaResponseFuture == null) {
-            captchaResponseFuture = backpageManager.solveCaptcha("indexInternal.es?action=internalDispatch", "dispatch");
-            captchaResponseFuture.whenComplete((r, t) -> captchaResponseFuture = null);
-        }
     }
 
     public Map<String, Integer> getCollected() {
