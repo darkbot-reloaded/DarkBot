@@ -31,7 +31,7 @@ public interface CaptchaAPI {
      * @return version of captcha solver
      */
 
-    default Version getVersion(){
+    default Version getVersion() {
         return new Version("0.0.0");
     }
 
