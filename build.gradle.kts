@@ -2,6 +2,7 @@ plugins {
     id("org.gradle.java-library")
     id("org.gradle.maven-publish")
     id("org.gradle.application")
+    id("pmd")
 
     id("io.freefair.lombok") version "6.6.1"
     id("org.beryx.runtime") version "1.12.7"
@@ -61,7 +62,22 @@ dependencies {
     testImplementation("org.mockito:mockito-core:4.10.0")
 }
 
-tasks.withType<JavaCompile> { options.encoding = "UTF-8" }
+pmd {
+    isConsoleOutput = true
+
+    rulesMinimumPriority.set(5)
+    ruleSets = listOf() // Remove built-in, we define our own
+    ruleSetFiles = files(rootDir.path + "/config/pmd/pmd-rules.xml")
+
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
+tasks.withType(PublishToMavenLocal::class) {
+    dependsOn("check")
+}
 
 tasks.wrapper {
     gradleVersion = "7.5.1"

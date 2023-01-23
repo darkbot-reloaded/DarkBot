@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<ruleset name="Custom Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>DarkBot PMD rules</description>
+
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="AvoidReassigningParameters"/>
+        <exclude name="AvoidPrintStackTrace"/>
+        <exclude name="SystemPrintln"/>
+        <exclude name="UnusedPrivateMethod"/> <!-- False-positives are triggering it -->
+    </rule>
+
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="BooleanGetMethodName"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="CallSuperInConstructor"/>
+        <exclude name="LinguisticNaming"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="ShortMethodName"/>
+        <exclude name="ShortClassName"/>
+        <exclude name="UselessParentheses"/>
+    </rule>
+
+    <rule ref="category/java/design.xml">
+        <exclude name="LawOfDemeter"/>
+    </rule>
+
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidFieldNameMatchingMethodName"/>
+        <exclude name="BeanMembersShouldSerialize"/>
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <exclude name="NullAssignment"/>
+        <exclude name="UseProperClassLoader"/>
+        <exclude name="ReturnEmptyCollectionRatherThanNull"/>
+    </rule>
+
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="AvoidSynchronizedAtMethodLevel"/>
+        <exclude name="UseConcurrentHashMap"/>
+    </rule>
+    <rule ref="category/java/performance.xml"/>
+    <rule ref="category/java/security.xml"/>
+
+    <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
+        <properties>
+            <property name="maxDuplicateLiterals" value="3"/>
+            <property name="skipAnnotations" value="true"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
+        <properties>
+            <property name="ignoreMagicNumbers" value="-1,0,1"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/codestyle.xml/ClassNamingConventions">
+        <properties>
+            <property name="utilityClassPattern" value="[A-Z][a-zA-Z0-9]*(Utils?|Helper|Constants|s)" />
+        </properties>
+    </rule>
+
+    <rule ref="category/java/codestyle.xml/ConfusingTernary">
+        <properties>
+            <property name="ignoreElseIf" value="true" />
+        </properties>
+    </rule>
+
+    <rule ref="category/java/codestyle.xml/ControlStatementBraces">
+        <properties>
+            <property name="checkSingleIfStmt" value="false"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/codestyle.xml/LongVariable">
+        <properties>
+            <property name="minimum" value="24"/>
+        </properties>
+    </rule>
+
+    <!-- Source: https://gist.github.com/BaLiKfromUA/5989157b82954e3a834c0faaec402911 -->
+    <rule name="NoWildcardImports"
+          language="java"
+          message="Please don't use wildcard imports"
+          class="net.sourceforge.pmd.lang.rule.XPathRule">
+        <description>
+            Black-list wildcard imports. Those clutter namespace and eventually end up in fun stuff like java.util.List
+            and java.awt.List getting mixed.
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="xpath">
+                <value>
+                    <![CDATA[
+                        //ImportDeclaration[@PackageName=@ImportedName][@Static="false"][@PackageName!="javax.swing"][@PackageName!="java.awt"]
+                    ]]>
+                </value>
+            </property>
+        </properties>
+    </rule>
+
+</ruleset>
