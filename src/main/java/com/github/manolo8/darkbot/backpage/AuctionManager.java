@@ -48,10 +48,6 @@ public class AuctionManager {
         return false;
     }
 
-    public boolean isCaptchaDetected() {
-        return captchaDetected;
-    }
-
     public boolean bidItem(AuctionItems auctionItem) {
         return bidItem(auctionItem, auctionItem.getCurrentBid() + 10000);
     }
