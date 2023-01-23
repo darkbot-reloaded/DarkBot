@@ -2,11 +2,12 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
+import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.utils.CaptchaHandler;
 import com.github.manolo8.darkbot.utils.http.Method;
+import eu.darkbot.api.config.ConfigSetting;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,11 +16,14 @@ public class AuctionManager {
     private final AuctionData data;
     private final Pattern AUCTION_ERROR_PATTERN = Pattern.compile("infoText = '(.*?)';.*?" + "icon = '(.*)';", Pattern.DOTALL);
     private long lastAuctionUpdate;
-
+    private final CaptchaHandler captchaHandler;
 
     AuctionManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
         this.data = new AuctionData();
+        this.captchaHandler = new CaptchaHandler(backpageManager,
+                backpageManager.main.configHandler.requireConfig("config.miscellaneous.solve_backpage_captcha"),
+                "indexInternal.es?action=internalAuction", "auction");
     }
 
     public AuctionData getData() {
@@ -34,11 +38,11 @@ public class AuctionManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;
+            if (captchaHandler.isSolvingCaptcha()) return false;
             String page = backpageManager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
-            if (page.contains("id=\"captchaScriptContainer\"")) {
-                return backpageManager.solveCaptcha("indexInternal.es?action=internalAuction", "auction");
+            if (this.captchaHandler.needsCaptchaSolve(page)) {
+                return captchaHandler.solveCaptcha();
             }
-
             lastAuctionUpdate = System.currentTimeMillis();
             return data.parse(page);
         } catch (IOException e) {

@@ -5,19 +5,18 @@ import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
 import com.github.manolo8.darkbot.backpage.dispatch.Gate;
+import com.github.manolo8.darkbot.utils.CaptchaHandler;
 import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.intellij.lang.annotations.Language;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +29,7 @@ public class DispatchManager {
     private final Map<String, Integer> collected;
     private final Map<String, Integer> lastCollected;
     private final Gson gson;
+    private final CaptchaHandler captchaHandler;
 
     DispatchManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
@@ -37,6 +37,9 @@ public class DispatchManager {
         this.collected = new HashMap<>();
         this.lastCollected = new HashMap<>();
         this.gson = backpageManager.getGson();
+        this.captchaHandler = new CaptchaHandler(backpageManager,
+                backpageManager.main.configHandler.requireConfig("config.miscellaneous.solve_backpage_captcha"),
+                "indexInternal.es?action=internalDispatch", "dispatch");
     }
 
     public DispatchData getData() {
@@ -51,9 +54,10 @@ public class DispatchManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
+            if (captchaHandler.isSolvingCaptcha()) return false;
             String page = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getContent();
-            if (page.contains("id=\"captchaScriptContainer\"")) {
-                return backpageManager.solveCaptcha("indexInternal.es?action=internalDispatch", "dispatch");
+            if (captchaHandler.needsCaptchaSolve(page)) {
+                return captchaHandler.solveCaptcha();
             }
 
             lastDispatcherUpdate = System.currentTimeMillis();
