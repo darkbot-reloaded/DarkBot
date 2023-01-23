@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.backpage.nova.Agent;
 import com.github.manolo8.darkbot.backpage.nova.NovaData;
 import com.github.manolo8.darkbot.backpage.nova.Perk;
-import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -46,7 +45,7 @@ public class NovaManager {
     }
 
     public boolean updateActiveCaptain(int captainId) throws IOException {
-        String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
+        String response = backpageManager.postHttp("ajax/captain.php")
                 .setParam("command", "updateActiveCaptain")
                 .setParam("captainId", captainId == 0 ? "" : captainId)
                 .getContent();
@@ -62,7 +61,7 @@ public class NovaManager {
     }
 
     private boolean updateResource() throws IOException {
-        String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
+        String response = backpageManager.postHttp("ajax/captain.php")
                 .setParam("command", "getResources")
                 .getContent();
 
@@ -77,7 +76,7 @@ public class NovaManager {
     }
 
     private boolean updateRosterList() throws IOException {
-        String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
+        String response = backpageManager.postHttp("ajax/captain.php")
                 .setParam("command", "getRosterList")
                 .getContent();
 
@@ -97,7 +96,7 @@ public class NovaManager {
     }
 
     public boolean dismissAgent(int captainId) throws IOException {
-        String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
+        String response = backpageManager.postHttp("ajax/captain.php")
                 .setParam("command", "dismissCaptain")
                 .setParam("captainId", captainId)
                 .getContent();
@@ -112,7 +111,7 @@ public class NovaManager {
     }
 
     public boolean buyNova(int amount) throws IOException {
-        String response = backpageManager.getConnection("ajax/shop.php", Method.POST)
+        String response = backpageManager.postHttp("ajax/shop.php")
                 .setParam("action", "purchase")
                 .setParam("category", "special")
                 .setParam("itemId", "captain_captain-generic")
@@ -131,7 +130,7 @@ public class NovaManager {
     }
 
     public Perk getPerkDetail(Agent agent, Perk perk) throws IOException {
-        String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
+        String response = backpageManager.postHttp("ajax/captain.php")
                 .setParam("command", "getPerkUpgradeDetail")
                 .setParam("captainId", agent.getCaptainId())
                 .setParam("perkId", perk.getPerkId())
@@ -148,7 +147,7 @@ public class NovaManager {
     }
 
     public boolean upgradeAgentPerk(Agent agent, Perk perk, int upgradeLevel) throws IOException {
-        String response = backpageManager.getConnection("ajax/captain.php", Method.POST)
+        String response = backpageManager.postHttp("ajax/captain.php")
                 .setParam("command", "upgradePerk")
                 .setParam("captainId", agent.getCaptainId())
                 .setParam("perkId", perk.getPerkId())

@@ -3,15 +3,16 @@ package com.github.manolo8.darkbot;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.ui.FlatNativeWindowBorder;
 import com.formdev.flatlaf.util.SystemInfo;
+import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.extensions.plugins.PluginClassLoader;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
+import eu.darkbot.util.http.Http;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.net.URLClassLoader;
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.Permission;
@@ -59,6 +60,8 @@ public class Bot {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
+
+        Http.setGson(BackpageManager.GSON);
         LibSetup.setupLibraries();
         StartupParams params = new StartupParams(args);
 
