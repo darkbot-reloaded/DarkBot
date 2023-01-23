@@ -34,7 +34,7 @@ public class AuctionManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;
-            if (captchaResponseFuture != null) return false;
+            if (backpage.isSolvingCaptcha()) return false;
             String page = backpageManager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
             if (page.contains("id=\"captchaScriptContainer\"")) {
                 return backpageManager.solveCaptcha("indexInternal.es?action=internalAuction", "auction");
