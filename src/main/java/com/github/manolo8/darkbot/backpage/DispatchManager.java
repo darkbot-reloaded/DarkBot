@@ -5,18 +5,13 @@ import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
 import com.github.manolo8.darkbot.backpage.dispatch.Gate;
-import com.github.manolo8.darkbot.utils.CaptchaAPI;
 import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import eu.darkbot.util.IOUtils;
-import eu.darkbot.util.http.Http;
 import org.intellij.lang.annotations.Language;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -75,7 +70,7 @@ public class DispatchManager {
         return false;
     }
 
-    private void handleCaptcha() {
+    private void handleCaptcha() throws IOException {
         if(captchaResponseFuture == null) {
             captchaResponseFuture = backpageManager.solveCaptcha("indexInternal.es?action=internalDispatch", "dispatch")
                     .whenComplete((r,t) -> captchaResponseFuture = null);

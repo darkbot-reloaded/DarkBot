@@ -298,31 +298,26 @@ public class BackpageManager extends Thread implements BackpageAPI {
         return gson;
     }
 
-    public CompletableFuture<Map<String, String>> solveCaptcha(String path, String desiredAction) {
+    public CompletableFuture<Map<String, String>> solveCaptcha(String path, String desiredAction) throws IOException{
         if (!main.config.MISCELLANEOUS.RESET_REFRESH || CaptchaAPI.getInstance() == null) return null;
 
-        try {
-            HttpURLConnection conn = getHttp(path).getConnection();
-            conn.setInstanceFollowRedirects(false);
-            if (!conn.getHeaderField("Location").isEmpty()) {
-                HttpURLConnection connection = getHttp(conn.getHeaderField("Location")).getConnection();
-                return CaptchaAPI.getInstance().solveCaptchaFuture(connection.getURL(), IOUtils.read(connection.getInputStream(), true))
-                        .whenComplete((r, t) -> {
-                            try {
-                                if (r.isEmpty()) return;
-                                eu.darkbot.util.http.Http http = postHttp("ajax/lostpilot.php")
-                                        .setParam("command", "checkReCaptcha")
-                                        .setParam("desiredAction", desiredAction);
-                                r.forEach(http::setParam);
-                                http.closeInputStream();
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        HttpURLConnection conn = getHttp(path).getConnection();
+        conn.setInstanceFollowRedirects(false);
+        if (!conn.getHeaderField("Location").isEmpty()) {
+            HttpURLConnection connection = getHttp(conn.getHeaderField("Location")).getConnection();
+            return CaptchaAPI.getInstance().solveCaptchaFuture(connection.getURL(), IOUtils.read(connection.getInputStream(), true))
+                    .whenComplete((r, t) -> {
+                        try {
+                            if (r.isEmpty()) return;
+                            eu.darkbot.util.http.Http http = postHttp("ajax/lostpilot.php")
+                                    .setParam("command", "checkReCaptcha")
+                                    .setParam("desiredAction", desiredAction);
+                            r.forEach(http::setParam);
+                            http.closeInputStream();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
         }
         return null;
     }
