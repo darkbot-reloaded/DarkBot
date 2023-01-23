@@ -73,10 +73,6 @@ public class DispatchManager {
         return lastCollected;
     }
 
-    public boolean isCaptchaDetected() {
-        return captchaDetected;
-    }
-
     public boolean hireRetriever(Retriever retriever) {
         if (retriever == null) return false;
         try {
