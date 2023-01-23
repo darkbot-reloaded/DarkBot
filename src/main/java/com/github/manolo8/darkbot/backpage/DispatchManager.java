@@ -30,7 +30,6 @@ public class DispatchManager {
     private final Map<String, Integer> collected;
     private final Map<String, Integer> lastCollected;
     private final Gson gson;
-    private boolean captchaDetected = false;
 
     DispatchManager(BackpageManager backpageManager) {
         this.backpageManager = backpageManager;
