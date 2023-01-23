@@ -298,7 +298,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
         return gson;
     }
 
-    public CompletableFuture<Map<String, String>> solveCaptcha(String path, String desiredAction) throws IOException{
+    public CompletableFuture<Map<String, String>> solveCaptcha(String path, String desiredAction) throws IOException {
         if (!main.config.MISCELLANEOUS.RESET_REFRESH || CaptchaAPI.getInstance() == null) return null;
 
         HttpURLConnection conn = getHttp(path).getConnection();

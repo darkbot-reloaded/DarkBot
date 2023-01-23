@@ -71,9 +71,9 @@ public class DispatchManager {
     }
 
     private void handleCaptcha() throws IOException {
-        if(captchaResponseFuture == null) {
-            captchaResponseFuture = backpageManager.solveCaptcha("indexInternal.es?action=internalDispatch", "dispatch")
-                    .whenComplete((r,t) -> captchaResponseFuture = null);
+        if (captchaResponseFuture == null) {
+            captchaResponseFuture = backpageManager.solveCaptcha("indexInternal.es?action=internalDispatch", "dispatch");
+            captchaResponseFuture.whenComplete((r, t) -> captchaResponseFuture = null);
         }
     }
 

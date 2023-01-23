@@ -52,7 +52,7 @@ public class AuctionManager {
         return false;
     }
 
-    private void handleCaptcha() throws IOException{
+    private void handleCaptcha() throws IOException {
         if (captchaResponseFuture == null) {
             captchaResponseFuture = backpageManager.solveCaptcha("indexInternal.es?action=internalAuction", "auction");
             captchaResponseFuture.whenComplete((r, t) -> captchaResponseFuture = null);
