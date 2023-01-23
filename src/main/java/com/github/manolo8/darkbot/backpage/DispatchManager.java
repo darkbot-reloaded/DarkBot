@@ -52,7 +52,6 @@ public class DispatchManager {
         try {
             if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
             String page = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getContent();
-            captchaDetected = page.contains("id=\"captchaScriptContainer\"");
             if (page.contains("id=\"captchaScriptContainer\"")) {
                 return backpageManager.solveCaptcha("indexInternal.es?action=internalDispatch", "dispatch");
             }
