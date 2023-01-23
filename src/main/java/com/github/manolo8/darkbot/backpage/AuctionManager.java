@@ -15,8 +15,6 @@ public class AuctionManager {
     private final AuctionData data;
     private final Pattern AUCTION_ERROR_PATTERN = Pattern.compile("infoText = '(.*?)';.*?" + "icon = '(.*)';", Pattern.DOTALL);
     private long lastAuctionUpdate;
-    private boolean captchaDetected = false;
-    private CompletableFuture<Map<String, String>> captchaResponseFuture;
 
 
     AuctionManager(BackpageManager backpageManager) {
