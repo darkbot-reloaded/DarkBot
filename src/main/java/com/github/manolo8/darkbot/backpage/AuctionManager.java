@@ -54,8 +54,8 @@ public class AuctionManager {
 
     private void handleCaptcha() {
         if (captchaResponseFuture == null) {
-            captchaResponseFuture = backpageManager.solveCaptcha("indexInternal.es?action=internalAuction", "auction")
-                    .whenComplete((r, t) -> captchaResponseFuture = null);
+            captchaResponseFuture = backpageManager.solveCaptcha("indexInternal.es?action=internalAuction", "auction");
+            captchaResponseFuture.whenComplete((r, t) -> captchaResponseFuture = null);
         }
     }
 
