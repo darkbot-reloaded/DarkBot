@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.utils;
 
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.util.IOUtils;
 
 import java.io.IOException;
@@ -15,9 +16,9 @@ public class CaptchaHandler {
     private final ConfigSetting<Boolean> setting;
     private CompletableFuture<Map<String, String>> captchaResponseFuture;
 
-    public CaptchaHandler(BackpageManager backpage, ConfigSetting<Boolean> setting, String base, String action) {
+    public CaptchaHandler(BackpageManager backpage, ConfigAPI configAPI, String base, String action) {
         this.backpage = backpage;
-        this.setting = setting;
+        this.setting = configAPI.getConfig("config.miscellaneous.solve_backpage_captcha");
         this.base = base;
         this.action = action;
     }
@@ -39,9 +40,9 @@ public class CaptchaHandler {
         if (!conn.getHeaderField("Location").isEmpty()) {
             HttpURLConnection connection = backpage.getHttp(conn.getHeaderField("Location")).getConnection();
             captchaResponseFuture = CaptchaAPI.getInstance().solveCaptchaFuture(connection.getURL(), IOUtils.read(connection.getInputStream(), true))
-                    .whenComplete((r, t) -> {
+                    .thenApply(r -> {
                         try {
-                            if (r.isEmpty()) return;
+                            if (r.isEmpty()) return r;
                             eu.darkbot.util.http.Http http = backpage.getHttp("ajax/lostpilot.php")
                                     .setParam("command", "checkReCaptcha")
                                     .setParam("desiredAction", action);
@@ -50,6 +51,7 @@ public class CaptchaHandler {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        return r;
                     });
             captchaResponseFuture.whenComplete((r, t) -> captchaResponseFuture = null);
             return true;

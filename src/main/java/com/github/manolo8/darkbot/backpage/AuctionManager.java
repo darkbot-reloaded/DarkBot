@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.utils.CaptchaHandler;
 import com.github.manolo8.darkbot.utils.http.Method;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.managers.ConfigAPI;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -18,11 +19,10 @@ public class AuctionManager {
     private long lastAuctionUpdate;
     private final CaptchaHandler captchaHandler;
 
-    AuctionManager(BackpageManager backpageManager) {
+    AuctionManager(BackpageManager backpageManager, ConfigAPI configAPI) {
         this.backpageManager = backpageManager;
         this.data = new AuctionData();
-        this.captchaHandler = new CaptchaHandler(backpageManager,
-                backpageManager.main.configHandler.requireConfig("config.miscellaneous.solve_backpage_captcha"),
+        this.captchaHandler = new CaptchaHandler(backpageManager, configAPI,
                 "indexInternal.es?action=internalAuction", "auction");
     }
 

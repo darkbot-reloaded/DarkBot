@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import eu.darkbot.api.managers.ConfigAPI;
 import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
@@ -31,14 +32,13 @@ public class DispatchManager {
     private final Gson gson;
     private final CaptchaHandler captchaHandler;
 
-    DispatchManager(BackpageManager backpageManager) {
+    DispatchManager(BackpageManager backpageManager, ConfigAPI configAPI) {
         this.backpageManager = backpageManager;
         this.data = new DispatchData();
         this.collected = new HashMap<>();
         this.lastCollected = new HashMap<>();
         this.gson = backpageManager.getGson();
-        this.captchaHandler = new CaptchaHandler(backpageManager,
-                backpageManager.main.configHandler.requireConfig("config.miscellaneous.solve_backpage_captcha"),
+        this.captchaHandler = new CaptchaHandler(backpageManager,configAPI,
                 "indexInternal.es?action=internalDispatch", "dispatch");
     }
 
