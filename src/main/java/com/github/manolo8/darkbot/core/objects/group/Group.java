@@ -35,11 +35,11 @@ public class Group extends Updatable.Auto {
     @Override
     public void update() {
         id = API.readMemoryInt(address + 0x1F);
-        int tmpSize = API.readMemoryInt(address + 0x23);
+//        size = API.readMemoryInt(address + 0x23);
         maxSize = API.readMemoryInt(address + 0x27);
         isOpen = API.readMemoryBoolean(address + 0x2B);
 
-        if (!isValid() && tmpSize == 0) {
+        if (!isValid()) {
             if (!members.isEmpty()) reset();
             return;
         }
@@ -59,6 +59,7 @@ public class Group extends Updatable.Auto {
 
     private void reset() {
         members.clear();
+        size = 0;
         isLeader = false;
         selectedMember = null;
     }
