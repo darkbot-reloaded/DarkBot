@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.ui.FlatNativeWindowBorder;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.github.manolo8.darkbot.extensions.plugins.PluginClassLoader;
+import com.github.manolo8.darkbot.utils.BotUpdateUtils;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
@@ -11,7 +12,6 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.net.URLClassLoader;
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.Permission;
@@ -66,6 +66,8 @@ public class Bot {
         //noinspection ThrowableNotThrown
         Runtime.getRuntime().addShutdownHook(new Thread(() ->
                 new Throwable("DarkBot shutdown peacefully!").printStackTrace()));
+
+        BotUpdateUtils.checkAndUpdateBot(args);
 
         SwingUtilities.invokeLater(() -> new Main(params));
     }
