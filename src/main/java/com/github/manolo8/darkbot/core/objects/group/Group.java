@@ -52,7 +52,7 @@ public class Group extends Updatable.Auto {
         synchronized (Main.UPDATE_LOCKER) {
             filtered = membersPtr.sync(members, GroupMember::new, m -> m.id != hero.id);
         }
-        size = members.size();
+        size = members.size() + 1; //add 1 for hero
         isLeader = filtered.stream().map(h -> h.isLeader).findFirst().orElse(false);
         selectedMember = members.stream().filter(m -> selectedAddr == m.address).findFirst().orElse(null);
     }

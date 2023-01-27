@@ -270,7 +270,7 @@ public class GroupManager extends Gui implements GroupAPI {
 
     @Override
     public boolean canInvite() {
-        return (!group.isValid() || group.isOpen || group.isLeader) && invites.size() + group.size < 7;
+        return (!group.isValid() || group.isOpen || group.isLeader) && invites.size() + group.size < 8;
     }
 
     private int getGroupHeight() {
