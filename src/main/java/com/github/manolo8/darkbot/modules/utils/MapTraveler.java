@@ -41,6 +41,7 @@ public class MapTraveler {
         shipTpWait = mapChangeWait = -1;
         this.target = target;
         this.done = false;
+        this.jumper.reset();
     }
 
     public boolean isDone() {
