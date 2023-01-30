@@ -25,7 +25,7 @@ public class ColorScheme {
 
     public @Option Color LOW_RELAYS = new Color(0x00D54B);
     public @Option Color SPACE_BALLS = new Color(0x00D595);
-    public @Option Color STATIC_ENTITIES = new Color(0x1647A1);
+    public @Option Color OTHER_ENTITIES = new Color(0x1647A1);
 
     public @Option Color TARGET = NPCS.darker();
     public @Option Color PET = new Color(0x004c8c);

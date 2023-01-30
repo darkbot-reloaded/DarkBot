@@ -91,7 +91,7 @@ public class DynamicEntitiesDrawer implements Drawable {
     }
 
     private void drawStaticEntities(MapGraphics mg) {
-        mg.setColor("static_entities");
+        mg.setColor("other_entities");
         for (StaticEntity staticEntity : staticEntities) {
             drawEntity(mg, staticEntity, 2, false);
         }
