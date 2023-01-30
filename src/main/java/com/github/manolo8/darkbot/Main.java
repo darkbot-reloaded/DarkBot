@@ -330,11 +330,6 @@ public class Main extends Thread implements PluginListener, BotAPI {
         return setModule(module, false);
     }
 
-    @Override
-    public void handleRefresh() {
-        API.handleRefresh();
-    }
-
     private <A extends Module> A setModule(A module, boolean setConfig) {
         if (module != null) {
             if (module instanceof Installable)
