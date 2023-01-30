@@ -59,8 +59,7 @@ public enum EntityFactory implements EntityBuilder {
     PLUTUS_GENERATOR      (StaticEntity.PlutusGenerator::new,      "plutus-generator"),
     // red & green are different class types in-game
     PLUTUS_GENERATOR_RED  (StaticEntity.PlutusGenerator::new,      "plutus-generator-red"),
-    //todo uncomment after GoP event
-    //PLUTUS_GENERATOR_GREEN(StaticEntity.PlutusGeneratorGreen::new, "plutus-generator-green"),
+    PLUTUS_GENERATOR_GREEN(StaticEntity.PlutusGeneratorGreen::new, "plutus-generator-green"),
     PET_BEACON            (StaticEntity.PetBeacon::new,            "pet_beacon"),
 
     BASE_TURRET     (BaseTurret::new,       "turret_.*"),       // Turrets around x-1 and x-8 bases
