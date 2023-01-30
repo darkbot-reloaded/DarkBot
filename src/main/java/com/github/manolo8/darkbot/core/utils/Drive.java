@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.MovementAPI;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,11 +43,11 @@ public class Drive implements MovementAPI {
     private long lastClick;
     public long lastMoved;
 
-    public Drive(Main main, MapManager map) {
+    public Drive(Main main, MapManager map, ConfigAPI configAPI) {
         this.main = main;
         this.map = map;
         this.mouse = new MouseManager(map);
-        this.pathFinder = new PathFinder(map);
+        this.pathFinder = new PathFinder(map, configAPI);
     }
 
     public void checkMove() {
