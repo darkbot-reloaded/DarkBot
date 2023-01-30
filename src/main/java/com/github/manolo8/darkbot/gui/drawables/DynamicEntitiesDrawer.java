@@ -76,7 +76,6 @@ public class DynamicEntitiesDrawer implements Drawable {
         drawHeroTarget(mg);
     }
 
-    // todo create colors for those three methods
     private void drawRelays(MapGraphics mg) {
         mg.setColor("low_relays");
         for (Relay relay : relays) {
