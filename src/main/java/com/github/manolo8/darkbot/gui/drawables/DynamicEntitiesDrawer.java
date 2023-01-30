@@ -78,21 +78,21 @@ public class DynamicEntitiesDrawer implements Drawable {
 
     // todo create colors for those three methods
     private void drawRelays(MapGraphics mg) {
-        mg.setColor("bases");
+        mg.setColor("low_relays");
         for (Relay relay : relays) {
             drawEntity(mg, relay, 4, true);
         }
     }
 
     private void drawSpaceBalls(MapGraphics mg) {
-        mg.setColor("ping");
+        mg.setColor("space_balls");
         for (SpaceBall spaceBall : spaceBalls) {
             drawEntity(mg, spaceBall, 6, true);
         }
     }
 
     private void drawStaticEntities(MapGraphics mg) {
-        mg.setColor("unknown");
+        mg.setColor("static_entities");
         for (StaticEntity staticEntity : staticEntities) {
             drawEntity(mg, staticEntity, 2, false);
         }
