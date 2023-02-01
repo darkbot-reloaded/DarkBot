@@ -31,6 +31,8 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public class BackpageManager extends Thread implements BackpageAPI {
+    public static final Gson GSON = new Gson();
+
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
     protected static final String[] ACTIONS = new String[]{
             "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
@@ -290,7 +292,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public Gson getGson() {
-        return eu.darkbot.util.http.Http.getGson();
+        return GSON;
     }
 
     @Override
