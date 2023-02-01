@@ -8,8 +8,8 @@ import com.github.manolo8.darkbot.utils.CaptchaAPI;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.IOUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
-import com.github.manolo8.darkbot.utils.http.Http;
-import com.github.manolo8.darkbot.utils.http.Method;
+import eu.darkbot.util.http.Http;
+import eu.darkbot.util.http.Method;
 
 import javax.swing.*;
 import java.io.BufferedReader;

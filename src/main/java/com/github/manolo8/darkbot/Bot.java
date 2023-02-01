@@ -11,7 +11,6 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.net.URLClassLoader;
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.Permission;
@@ -59,6 +58,7 @@ public class Bot {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
+
         LibSetup.setupLibraries();
         StartupParams params = new StartupParams(args);
 

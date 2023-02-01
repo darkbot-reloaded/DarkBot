@@ -62,8 +62,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
     private int userId;
     private Optional<LoginData> loginData;
 
-    private final Gson gson = new Gson();
-
     public BackpageManager(Main main) {
         super("BackpageManager");
         this.main = main;
@@ -221,7 +219,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
         conn.setConnectTimeout(30_000);
         conn.setReadTimeout(30_000);
         conn.setInstanceFollowRedirects(false);
-        conn.setRequestProperty("User-Agent", Http.getDefaultUserAgent());
+        conn.setRequestProperty("User-Agent", eu.darkbot.util.http.Http.getDefaultUserAgent());
         conn.setRequestProperty("Cookie", "dosid=" + this.sid);
         lastRequest = System.currentTimeMillis();
         return conn;
@@ -292,7 +290,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public Gson getGson() {
-        return gson;
+        return eu.darkbot.util.http.Http.getGson();
     }
 
     @Override

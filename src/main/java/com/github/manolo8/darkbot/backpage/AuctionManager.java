@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
-import com.github.manolo8.darkbot.utils.http.Method;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -31,7 +30,7 @@ public class AuctionManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;
-            String page = backpageManager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
+            String page = backpageManager.getHttp("indexInternal.es?action=internalAuction").getContent();
 
             if (page == null || page.isEmpty()) return false;
             lastAuctionUpdate = System.currentTimeMillis();
@@ -48,10 +47,10 @@ public class AuctionManager {
 
     public boolean bidItem(AuctionItems auctionItem, long amount) {
         try {
-            String token = backpageManager.getConnection("indexInternal.es", Method.GET)
+            String token = backpageManager.getHttp("indexInternal.es")
                     .setParam("action", "internalAuction")
                     .consumeInputStream(backpageManager::getReloadToken);
-            String response = backpageManager.getConnection("indexInternal.es", Method.POST)
+            String response = backpageManager.postHttp("indexInternal.es")
                     .setParam("action", "internalAuction")
                     .setParam("reloadToken", token)
                     .setParam("auctionType", auctionItem.getAuctionType().getId())
