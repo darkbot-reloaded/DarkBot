@@ -22,11 +22,21 @@ public class StaticEntity extends Entity implements eu.darkbot.api.game.entities
         public BurningTrail(int id, long address) {
             super(id, address);
         }
+
+        @Override
+        public boolean isOwn() {
+            return false;
+        }
     }
 
     public static class PlutusGenerator extends StaticEntity implements eu.darkbot.api.game.entities.StaticEntity.PlutusGenerator {
         public PlutusGenerator(int id, long address) {
             super(id, address);
+        }
+
+        @Override
+        public boolean isHealType() {
+            return false;
         }
     }
 }

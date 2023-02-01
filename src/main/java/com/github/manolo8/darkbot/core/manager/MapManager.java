@@ -507,6 +507,21 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     @Override
+    public GameMap getOrCreateMap(int mapId) {
+        return null;
+    }
+
+    @Override
+    public Optional<GameMap> findMap(int mapId) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<GameMap> findMap(String mapName) {
+        return Optional.empty();
+    }
+
+    @Override
     public GameMap getById(int mapId) throws MapNotFoundException {
         return starManager.getById(mapId);
     }
