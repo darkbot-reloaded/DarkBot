@@ -43,11 +43,11 @@ public class Drive implements MovementAPI {
     private long lastClick;
     public long lastMoved;
 
-    public Drive(Main main, MapManager map, ConfigAPI configAPI) {
+    public Drive(Main main, MapManager map) {
         this.main = main;
         this.map = map;
         this.mouse = new MouseManager(map);
-        this.pathFinder = new PathFinder(map, configAPI);
+        this.pathFinder = new PathFinder(map, main);
     }
 
     public void checkMove() {

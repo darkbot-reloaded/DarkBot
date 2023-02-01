@@ -1,22 +1,24 @@
 package com.github.manolo8.darkbot.core.utils.pathfinder;
 
-import eu.darkbot.api.config.ConfigSetting;
-import eu.darkbot.api.managers.ConfigAPI;
-
-import java.util.function.Consumer;
+import com.github.manolo8.darkbot.Main;
 
 public class RadiationHandler {
-    private final Consumer<Boolean> listener = b -> this.changed = true;
+    private final Main main;
     private boolean changed;
 
-    public RadiationHandler(ConfigAPI configAPI) {
-        ConfigSetting<Boolean> avoidRadiation = configAPI.requireConfig("miscellaneous.avoid_radiation");
-        avoidRadiation.addListener(listener);
+    public RadiationHandler(Main main) {
+        this.main = main;
+        this.changed = main.config.MISCELLANEOUS.AVOID_RADIATION;
     }
 
     public boolean changed() {
-        boolean result = this.changed;
-        this.changed = false;
-        return result;
+        boolean avoid = main.config.MISCELLANEOUS.AVOID_RADIATION;
+
+        if (changed != avoid) {
+            changed = avoid;
+            return true;
+        }
+
+        return false;
     }
 }

@@ -24,10 +24,10 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
     private final ObstacleHandler obstacleHandler;
     private final RadiationHandler radiationHandler;
 
-    public PathFinder(MapManager map, ConfigAPI configAPI) {
+    public PathFinder(MapManager map, Main main) {
         this.map = map;
         this.obstacleHandler = new ObstacleHandler(map);
-        this.radiationHandler = new RadiationHandler(configAPI);
+        this.radiationHandler = new RadiationHandler(main);
         this.points = new HashMap<>();
     }
 
