@@ -18,9 +18,10 @@ public class CaptchaHandler {
 
     public CaptchaHandler(BackpageManager backpage, ConfigAPI configAPI, String base, String action) {
         this.backpage = backpage;
-        this.setting = configAPI.getConfig("config.miscellaneous.solve_backpage_captcha");
+        this.setting = configAPI.getConfig("miscellaneous.solve_backpage_captcha");
         this.base = base;
         this.action = action;
+        CaptchaAPI.getInstance();
     }
 
     public boolean isSolvingCaptcha() {
@@ -32,7 +33,7 @@ public class CaptchaHandler {
     }
 
     public boolean solveCaptcha() throws IOException {
-        if (!setting.getValue() || CaptchaAPI.getInstance() == null) return false;
+        if (setting == null || !setting.getValue() || CaptchaAPI.getInstance() == null) return false;
         if (isSolvingCaptcha()) return false;
 
         HttpURLConnection conn = backpage.getHttp(base).getConnection();
@@ -43,7 +44,7 @@ public class CaptchaHandler {
                     .thenApply(r -> {
                         try {
                             if (r.isEmpty()) return r;
-                            eu.darkbot.util.http.Http http = backpage.getHttp("ajax/lostpilot.php")
+                            eu.darkbot.util.http.Http http = backpage.postHttp("ajax/lostpilot.php")
                                     .setParam("command", "checkReCaptcha")
                                     .setParam("desiredAction", action);
                             r.forEach(http::setParam);
