@@ -1,26 +1,28 @@
 package com.github.manolo8.darkbot.config.tree.handlers;
 
-import com.github.manolo8.darkbot.gui.tree.utils.GenericDropdownModel;
 import com.github.manolo8.darkbot.gui.tree.utils.EnumDropdownOptions;
+import com.github.manolo8.darkbot.gui.tree.utils.GenericDropdownModel;
+import com.github.manolo8.darkbot.utils.data.SingletonSupplier;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.extensions.PluginInfo;
-import eu.darkbot.impl.config.DefaultHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.function.Supplier;
 
-public class DropdownHandler extends DefaultHandler<Object> {
+public class DropdownHandler extends LazyInitHandler<Object> {
 
     public static DropdownHandler of(Field field, PluginInfo namespace, PluginAPI api) {
         Dropdown dropdown = field.getAnnotation(Dropdown.class);
 
         Class<? extends Dropdown.Options<?>> optionCl = dropdown.options();
-        Dropdown.Options<?> options = optionCl != Dropdown.NullOptions.class ?
-                api.requireInstance(optionCl) : optionsOf(api, namespace, field.getGenericType());
+        Supplier<Dropdown.Options<?>> options = optionCl != Dropdown.NullOptions.class ?
+                SingletonSupplier.of(() -> api.requireInstance(optionCl)) :
+                SingletonSupplier.resolved(optionsOf(api, namespace, field.getGenericType()));
 
         return new DropdownHandler(field, dropdown.multi(), options);
     }
@@ -54,11 +56,12 @@ public class DropdownHandler extends DefaultHandler<Object> {
 
     public DropdownHandler(@Nullable Field field,
                            boolean multi,
-                           Dropdown.Options<?> options) {
+                           Supplier<Dropdown.Options<?>> options) {
         super(field);
+        Supplier<Dropdown.Options<?>> op = SingletonSupplier.of(options);
         metadata.put(multi ? "isMultiDropdown" : "isDropdown", true);
-        metadata.put("dropdown.options", options);
-        metadata.put("dropdown.model", new GenericDropdownModel<>(options));
+        lazyMetadata.put("dropdown.options", op);
+        lazyMetadata.put("dropdown.model", () -> new GenericDropdownModel<>(op.get()));
     }
 
 }
