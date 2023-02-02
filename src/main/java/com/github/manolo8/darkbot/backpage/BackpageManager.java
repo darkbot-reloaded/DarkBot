@@ -99,9 +99,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
                 }
             }
 
-            // For backpage-only apis that support login, we can just arbitrarily refresh
-            if (Main.API.hasCapability(GameAPI.Capability.LOGIN) &&
-                    Main.API.hasCapability(GameAPI.Capability.BACKGROUND_ONLY)
+            // For apis that support login, we can re-login if invalid
+            if (Main.API.hasCapability(GameAPI.Capability.LOGIN)
                     && (isInvalid() || sidStatus == 302)
                     && refreshTimer.tryActivate()) {
                 Main.API.handleRelogin();
