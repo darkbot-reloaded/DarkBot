@@ -35,6 +35,7 @@ import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -504,6 +505,27 @@ public class MapManager implements Manager, StarSystemAPI {
     @Override
     public Collection<? extends GameMap> getMaps() {
         return starManager.getMaps();
+    }
+
+    @Override
+    public GameMap getOrCreateMap(int mapId) {
+        return starManager.byId(mapId);
+    }
+
+    @Override
+    public Optional<GameMap> findMap(int mapId) {
+        return starManager.getMaps().stream()
+                .filter(map -> map.getId() == mapId)
+                .map(map -> (GameMap) map)
+                .findFirst();
+    }
+
+    @Override
+    public Optional<GameMap> findMap(String mapName) {
+        return starManager.getMaps().stream()
+                .filter(map -> Objects.equals(map.getName(), mapName))
+                .map(map -> (GameMap) map)
+                .findFirst();
     }
 
     @Override

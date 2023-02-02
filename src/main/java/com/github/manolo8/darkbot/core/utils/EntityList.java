@@ -66,7 +66,8 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
     private final List<Relay> relays = register(LOW_RELAY);
     private final List<SpaceBall> spaceBalls = register(SPACE_BALL);
-    private final List<StaticEntity> staticEntities = register(POD_HEAL, BUFF_CAPSULE, BURNING_TRAIL, PLUTUS_GENERATOR);
+    private final List<StaticEntity> staticEntities = register(POD_HEAL, BUFF_CAPSULE,
+            BURNING_TRAIL, PLUTUS_GENERATOR, PLUTUS_GENERATOR_RED, PLUTUS_GENERATOR_GREEN, PET_BEACON);
 
     private final Main main;
     private final EventBrokerAPI eventBroker;

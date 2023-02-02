@@ -1,8 +1,7 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.utils.http.Http;
 import com.google.gson.reflect.TypeToken;
+import eu.darkbot.util.http.Http;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -36,7 +35,7 @@ public class LibSetup {
     public static void setupLibraries() {
         try {
             libraries = Http.create(BASE_URL + "/libs.json")
-                    .consumeInputStream(is -> Main.GSON.fromJson(IOUtils.read(is), LIB_LIST_TYPE));
+                    .fromJson(LIB_LIST_TYPE, false);
         } catch (Exception e) {
             System.out.println("Failed to download libraries file, this is safe to ignore if your libs are up-to-date");
             e.printStackTrace();

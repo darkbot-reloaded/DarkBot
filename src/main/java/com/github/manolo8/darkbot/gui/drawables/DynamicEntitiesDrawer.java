@@ -12,6 +12,9 @@ import eu.darkbot.api.game.entities.Mine;
 import eu.darkbot.api.game.entities.Npc;
 import eu.darkbot.api.game.entities.Pet;
 import eu.darkbot.api.game.entities.Player;
+import eu.darkbot.api.game.entities.Relay;
+import eu.darkbot.api.game.entities.SpaceBall;
+import eu.darkbot.api.game.entities.StaticEntity;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.game.other.Movable;
 import eu.darkbot.api.managers.ConfigAPI;
@@ -35,6 +38,9 @@ public class DynamicEntitiesDrawer implements Drawable {
     private final Collection<? extends Mine> mines;
     private final Collection<? extends Pet> pets;
     private final Collection<? extends Player> players;
+    private final Collection<? extends Relay> relays;
+    private final Collection<? extends SpaceBall> spaceBalls;
+    private final Collection<? extends StaticEntity> staticEntities;
 
     public DynamicEntitiesDrawer(HeroAPI hero, PetAPI pet, ConfigAPI config, EntitiesAPI entities) {
         this.hero = hero;
@@ -47,6 +53,10 @@ public class DynamicEntitiesDrawer implements Drawable {
         this.npcs = entities.getNpcs();
         this.pets = entities.getPets();
         this.players = entities.getPlayers();
+
+        this.relays = entities.getRelays();
+        this.spaceBalls = entities.getSpaceBalls();
+        this.staticEntities = entities.getStaticEntities();
     }
 
     @Override
@@ -54,12 +64,37 @@ public class DynamicEntitiesDrawer implements Drawable {
         drawBoxes(mg);
         drawMines(mg);
 
+        drawRelays(mg);
+        drawSpaceBalls(mg);
+        drawStaticEntities(mg);
+
         drawDestinations(mg);
         drawNpcs(mg);
         drawPets(mg);
         drawPlayers(mg);
 
         drawHeroTarget(mg);
+    }
+
+    private void drawRelays(MapGraphics mg) {
+        mg.setColor("low_relays");
+        for (Relay relay : relays) {
+            drawEntity(mg, relay, 4, true);
+        }
+    }
+
+    private void drawSpaceBalls(MapGraphics mg) {
+        mg.setColor("space_balls");
+        for (SpaceBall spaceBall : spaceBalls) {
+            drawEntity(mg, spaceBall, 6, true);
+        }
+    }
+
+    private void drawStaticEntities(MapGraphics mg) {
+        mg.setColor("other_entities");
+        for (StaticEntity staticEntity : staticEntities) {
+            drawEntity(mg, staticEntity, 2, false);
+        }
     }
 
     private void drawBoxes(MapGraphics mg) {

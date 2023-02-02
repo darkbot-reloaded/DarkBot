@@ -7,10 +7,10 @@ import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.OSUtil;
 import com.github.manolo8.darkbot.utils.Time;
-import com.github.manolo8.darkbot.utils.http.Http;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
 import eu.darkbot.util.Timer;
+import eu.darkbot.util.http.Http;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;

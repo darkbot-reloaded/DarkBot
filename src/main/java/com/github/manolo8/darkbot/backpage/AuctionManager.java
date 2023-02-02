@@ -55,10 +55,10 @@ public class AuctionManager {
 
     public boolean bidItem(AuctionItems auctionItem, long amount) {
         try {
-            String token = backpageManager.getConnection("indexInternal.es", Method.GET)
+            String token = backpageManager.getHttp("indexInternal.es")
                     .setParam("action", "internalAuction")
                     .consumeInputStream(backpageManager::getReloadToken);
-            String response = backpageManager.getConnection("indexInternal.es", Method.POST)
+            String response = backpageManager.postHttp("indexInternal.es")
                     .setParam("action", "internalAuction")
                     .setParam("reloadToken", token)
                     .setParam("auctionType", auctionItem.getAuctionType().getId())

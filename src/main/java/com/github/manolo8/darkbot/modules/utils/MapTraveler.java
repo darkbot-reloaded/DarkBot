@@ -5,8 +5,6 @@ import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Map;
-import com.github.manolo8.darkbot.core.utils.Drive;
-import com.github.manolo8.darkbot.core.utils.Location;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -16,7 +14,6 @@ public class MapTraveler {
     private final Main main;
     private final HeroManager hero;
     private final List<Portal> portals;
-    private final Drive drive;
     private final StarManager star;
     private final Consumer<Map> listener = this::onMapChange;
     protected PortalJumper jumper;
@@ -30,7 +27,6 @@ public class MapTraveler {
     public MapTraveler(Main main) {
         this.hero = main.hero;
         this.portals = main.mapManager.entities.portals;
-        this.drive = main.hero.drive;
         this.star = main.starManager;
         this.main = main;
         this.jumper = new PortalJumper(hero);

@@ -22,6 +22,11 @@ public class ColorScheme {
     public @Option Color ALLIES = new Color(0x29B6F6);
     public @Option Color ENEMIES = new Color(0xd50000);
     public @Option Color NPCS = new Color(0xAA4040);
+
+    public @Option Color LOW_RELAYS = new Color(0x00D54B);
+    public @Option Color SPACE_BALLS = new Color(0x00D595);
+    public @Option Color OTHER_ENTITIES = new Color(0x1647A1);
+
     public @Option Color TARGET = NPCS.darker();
     public @Option Color PET = new Color(0x004c8c);
     public @Option Color PET_IN = new Color(0xc56000);

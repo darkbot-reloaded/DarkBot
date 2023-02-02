@@ -34,14 +34,14 @@ public class GroupMember extends PartialGroupMember implements eu.darkbot.api.ga
         memberInfo.update(API.readMemoryLong(address + 0x78));
         targetInfo.update(API.readMemoryLong(address + 0x80));
 
-        factionId  = API.readMemoryInt(address + 0x24);
-        level      = API.readMemoryInt(address + 0x28);
-        mapId      = API.readMemoryInt(address + 0x34);
+        factionId = API.readMemoryInt(address + 0x24);
+        level = API.readMemoryInt(address + 0x28);
+        mapId = API.readMemoryInt(address + 0x34);
         isAttacked = API.readMemoryBoolean(address + 0x44);
         isCloacked = API.readMemoryBoolean(address + 0x48);
-        isLeader   = API.readMemoryBoolean(address + 0x50);
-        isDead     = API.readMemoryBoolean(address + 0x54);
-        isLocked   = API.readMemoryBoolean(address + 0x60);
+        isLeader = API.readMemoryBoolean(address + 0x50);
+        isDead = API.readMemoryBoolean(address + 0x54);
+        isLocked = API.readMemoryBoolean(address + 0x60);
 
         super.update();
     }
