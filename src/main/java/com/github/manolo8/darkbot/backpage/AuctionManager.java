@@ -2,10 +2,8 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
-import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.utils.CaptchaHandler;
 import com.github.manolo8.darkbot.utils.http.Method;
-import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.managers.ConfigAPI;
 
 import java.io.IOException;
