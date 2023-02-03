@@ -2,7 +2,6 @@
 
 How to run:
 - Clone the repository
-- Get the latest full-release on darkbot's discord https://discord.gg/uXHnZJ9
 - Unzip the release in a known folder outside of the project
 - Run `gradle clean build`
 - Add Run/Debug configuration:
