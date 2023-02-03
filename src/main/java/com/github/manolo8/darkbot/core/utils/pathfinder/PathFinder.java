@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
+import eu.darkbot.api.managers.ConfigAPI;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,10 +22,12 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
     private final Map<Locatable, PathPoint> points;
 
     private final ObstacleHandler obstacleHandler;
+    private final RadiationHandler radiationHandler;
 
-    public PathFinder(MapManager map) {
+    public PathFinder(MapManager map, ConfigAPI configAPI) {
         this.map = map;
         this.obstacleHandler = new ObstacleHandler(map);
+        this.radiationHandler = new RadiationHandler(configAPI);
         this.points = new HashMap<>();
     }
 
@@ -99,7 +102,7 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
     }
 
     public boolean changed() {
-        if (!obstacleHandler.changed()) return false;
+        if (!obstacleHandler.changed() & !radiationHandler.changed()) return false;
         synchronized (Main.UPDATE_LOCKER) {
             points.clear();
 

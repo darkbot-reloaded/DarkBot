@@ -197,6 +197,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option @Visibility(Level.INTERMEDIATE) boolean LOG_CHAT = false;
         public @Option @Visibility(Level.INTERMEDIATE) boolean LOG_DEATHS = false;
         public @Option @Visibility(Level.INTERMEDIATE) boolean AVOID_MINES = true;
+        public @Option @Visibility(Level.INTERMEDIATE) boolean AVOID_RADIATION = true;
         public @Option @Visibility(Level.INTERMEDIATE) boolean USERNAME_ON_TITLE = false;
         public @Option @Visibility(Level.ADVANCED) boolean AUTO_REFINE = false;
     }
