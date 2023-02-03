@@ -4,17 +4,17 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.OSUtil;
 import com.github.manolo8.darkbot.utils.XmlHelper;
-import com.github.manolo8.darkbot.utils.http.Http;
 import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.GameResourcesAPI;
+import eu.darkbot.util.XmlUtils;
+import eu.darkbot.util.http.Http;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.imageio.ImageIO;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -122,11 +122,7 @@ public class FlashResManager implements Task, GameResourcesAPI {
 
         try {
             Element root = Http.create(URL.replace("{lang}", currLang))
-                    .consumeInputStream(inputStream -> DocumentBuilderFactory
-                            .newInstance()
-                            .newDocumentBuilder()
-                            .parse(inputStream)
-                            .getDocumentElement());
+                    .consumeInputStream(inputStream -> XmlUtils.parse(inputStream).getDocumentElement());
 
             ALL_TRANSLATIONS = XmlHelper.stream(root.getElementsByTagName("item")).collect(Collectors.toMap(
                     i -> i.getAttributes().getNamedItem("name").getNodeValue(), Node::getTextContent, (a, b) -> a));
@@ -152,11 +148,8 @@ public class FlashResManager implements Task, GameResourcesAPI {
 
         try {
             BACKGROUND_MAP_IDS = XmlHelper.stream(Http.create("https://darkorbit-22.bpsecure.com/spacemap/graphics/maps-config.xml")
-                            .consumeInputStream(inputStream -> DocumentBuilderFactory
-                                    .newInstance()
-                                    .newDocumentBuilder()
-                                    .parse(inputStream)
-                                    .getDocumentElement()).getElementsByTagName("map"))
+                            .consumeInputStream(inputStream -> XmlUtils.parse(inputStream).getDocumentElement())
+                            .getElementsByTagName("map"))
                     .collect(Collectors.toMap(e -> Integer.parseInt(e.getAttribute("id")), MapInfo::new));
         } catch (Exception e) {
             e.printStackTrace();

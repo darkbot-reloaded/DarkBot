@@ -31,6 +31,8 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public class BackpageManager extends Thread implements BackpageAPI {
+    public static final Gson GSON = new Gson();
+
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
     protected static final String[] ACTIONS = new String[]{
             "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
@@ -61,8 +63,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     private int userId;
     private Optional<LoginData> loginData;
-
-    private final Gson gson = new Gson();
 
     public BackpageManager(Main main) {
         super("BackpageManager");
@@ -99,9 +99,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
                 }
             }
 
-            // For backpage-only apis that support login, we can just arbitrarily refresh
-            if (Main.API.hasCapability(GameAPI.Capability.LOGIN) &&
-                    Main.API.hasCapability(GameAPI.Capability.BACKGROUND_ONLY)
+            // For apis that support login, we can re-login if invalid
+            if (Main.API.hasCapability(GameAPI.Capability.LOGIN)
                     && (isInvalid() || sidStatus == 302)
                     && refreshTimer.tryActivate()) {
                 Main.API.handleRelogin();
@@ -221,7 +220,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
         conn.setConnectTimeout(30_000);
         conn.setReadTimeout(30_000);
         conn.setInstanceFollowRedirects(false);
-        conn.setRequestProperty("User-Agent", Http.getDefaultUserAgent());
+        conn.setRequestProperty("User-Agent", eu.darkbot.util.http.Http.getDefaultUserAgent());
         conn.setRequestProperty("Cookie", "dosid=" + this.sid);
         lastRequest = System.currentTimeMillis();
         return conn;
@@ -292,7 +291,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public Gson getGson() {
-        return gson;
+        return GSON;
     }
 
     @Override

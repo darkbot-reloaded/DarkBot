@@ -9,7 +9,6 @@ import com.github.manolo8.darkbot.backpage.hangar.HangarResponse;
 import com.github.manolo8.darkbot.core.itf.Tickable;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
-import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -118,7 +117,7 @@ public class HangarManager implements Tickable {
     }
 
     public InputStream getInputStream(String action, JsonObject json) throws IOException {
-        return backpage.getConnection("flashAPI/inventory.php", Method.POST)
+        return backpage.postHttp("flashAPI/inventory.php")
                 .setRawParam("action", action)
                 .setParam("params", Base64Utils.encode(json.toString()))
                 .getInputStream();

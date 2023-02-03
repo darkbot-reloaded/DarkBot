@@ -21,7 +21,9 @@ import java.util.function.Consumer;
 /**
  * Utility for HTTP connections.
  * Use it like builder, just one time for instance
+ * @deprecated use {@link eu.darkbot.util.http.Http} instead
  */
+@Deprecated
 public class Http {
 
     public static String getDefaultUserAgent() {

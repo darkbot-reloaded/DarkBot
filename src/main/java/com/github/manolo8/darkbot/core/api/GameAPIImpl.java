@@ -438,9 +438,9 @@ public class GameAPIImpl<
 
     @Override
     public void handleRefresh() {
-        if (hasCapability(GameAPI.Capability.LOGIN)) {
-            reload();
-            setData();
+        // No login has happened? Make a first attempt
+        if (hasCapability(GameAPI.Capability.LOGIN) && loginData.getUrl() == null) {
+            handleRelogin();
         }
 
         refreshCount++;
@@ -451,8 +451,10 @@ public class GameAPIImpl<
 
     @Override
     public void handleRelogin() {
-        if (hasCapability(GameAPI.Capability.LOGIN))
+        if (hasCapability(GameAPI.Capability.LOGIN)) {
             relogin();
+            setData();
+        }
     }
 
     @Override
