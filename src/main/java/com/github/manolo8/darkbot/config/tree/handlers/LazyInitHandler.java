@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.config.tree.handlers;
 
+import com.github.manolo8.darkbot.utils.itf.LazyValue;
 import eu.darkbot.impl.config.DefaultHandler;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +11,7 @@ import java.util.function.Supplier;
 
 public class LazyInitHandler<T> extends DefaultHandler<T> {
 
-    protected final Map<String, Supplier<?>> lazyMetadata = new HashMap<>();
+    protected final Map<String, LazyValue<?>> lazyMetadata = new HashMap<>();
 
     public LazyInitHandler() {
         this(null);
@@ -22,7 +23,7 @@ public class LazyInitHandler<T> extends DefaultHandler<T> {
 
     private void check(String key) {
         if (lazyMetadata.isEmpty()) return;
-        Supplier<?> supplier = lazyMetadata.remove(key);
+        LazyValue<?> supplier = lazyMetadata.remove(key);
         if (supplier != null) metadata.put(key, supplier.get());
     }
 

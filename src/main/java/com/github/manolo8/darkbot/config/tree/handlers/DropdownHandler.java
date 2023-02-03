@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.config.tree.handlers;
 
 import com.github.manolo8.darkbot.gui.tree.utils.EnumDropdownOptions;
 import com.github.manolo8.darkbot.gui.tree.utils.GenericDropdownModel;
-import com.github.manolo8.darkbot.utils.data.SingletonSupplier;
+import com.github.manolo8.darkbot.utils.itf.LazyValue;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.extensions.PluginInfo;
@@ -12,7 +12,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.function.Supplier;
 
 public class DropdownHandler extends LazyInitHandler<Object> {
 
@@ -20,9 +19,9 @@ public class DropdownHandler extends LazyInitHandler<Object> {
         Dropdown dropdown = field.getAnnotation(Dropdown.class);
 
         Class<? extends Dropdown.Options<?>> optionCl = dropdown.options();
-        Supplier<Dropdown.Options<?>> options = optionCl != Dropdown.NullOptions.class ?
-                SingletonSupplier.of(() -> api.requireInstance(optionCl)) :
-                SingletonSupplier.resolved(optionsOf(api, namespace, field.getGenericType()));
+        LazyValue<Dropdown.Options<?>> options = optionCl != Dropdown.NullOptions.class ?
+                LazyValue.of(() -> api.requireInstance(optionCl)) :
+                LazyValue.resolved(optionsOf(api, namespace, field.getGenericType()));
 
         return new DropdownHandler(field, dropdown.multi(), options);
     }
@@ -56,12 +55,11 @@ public class DropdownHandler extends LazyInitHandler<Object> {
 
     public DropdownHandler(@Nullable Field field,
                            boolean multi,
-                           Supplier<Dropdown.Options<?>> options) {
+                           LazyValue<Dropdown.Options<?>> options) {
         super(field);
-        Supplier<Dropdown.Options<?>> op = SingletonSupplier.of(options);
         metadata.put(multi ? "isMultiDropdown" : "isDropdown", true);
-        lazyMetadata.put("dropdown.options", op);
-        lazyMetadata.put("dropdown.model", () -> new GenericDropdownModel<>(op.get()));
+        lazyMetadata.put("dropdown.options", options);
+        lazyMetadata.put("dropdown.model", () -> new GenericDropdownModel<>(options.get()));
     }
 
 }
