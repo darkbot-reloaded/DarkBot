@@ -24,10 +24,10 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
     private final ObstacleHandler obstacleHandler;
     private final RadiationHandler radiationHandler;
 
-    public PathFinder(MapManager map, Main main) {
+    public PathFinder(MapManager map, ConfigAPI configAPI) {
         this.map = map;
         this.obstacleHandler = new ObstacleHandler(map);
-        this.radiationHandler = new RadiationHandler(main);
+        this.radiationHandler = new RadiationHandler(configAPI);
         this.points = new HashMap<>();
     }
 
@@ -102,7 +102,7 @@ public class PathFinder implements eu.darkbot.api.utils.PathFinder {
     }
 
     public boolean changed() {
-        if (!obstacleHandler.changed() &  !radiationHandler.changed()) return false;
+        if (!obstacleHandler.changed() & !radiationHandler.changed()) return false;
         synchronized (Main.UPDATE_LOCKER) {
             points.clear();
 
