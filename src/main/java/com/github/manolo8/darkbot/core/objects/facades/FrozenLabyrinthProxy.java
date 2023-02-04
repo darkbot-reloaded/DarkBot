@@ -37,9 +37,11 @@ public class FrozenLabyrinthProxy extends Updatable implements FrozenLabyrinthAP
 
     @Override
     public Status getStatus() {
-        if (labStatus.contains("open")) return Status.OPEN;
-        else if (labStatus.contains("closed")) return Status.CLOSED;
-        else return Status.ENDED;
+        if(labStatus != null && !labStatus.isEmpty()) {
+            if (labStatus.contains("open")) return Status.OPEN;
+            else if (labStatus.contains("closed")) return Status.CLOSED;
+        }
+        return Status.ENDED;
     }
 
     @Override
