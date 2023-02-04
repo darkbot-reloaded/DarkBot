@@ -15,6 +15,7 @@ public class Group extends Updatable.Auto {
 
     public List<GroupMember> members = new ArrayList<>();
     public GroupMember selectedMember = new GroupMember();
+    public GroupMember heroMember = new GroupMember();
 
     public int id;
     public int size;
@@ -52,14 +53,17 @@ public class Group extends Updatable.Auto {
         synchronized (Main.UPDATE_LOCKER) {
             filtered = membersPtr.sync(members, GroupMember::new, m -> m.id != hero.id);
         }
-        size = members.size();
-        isLeader = filtered.stream().map(h -> h.isLeader).findFirst().orElse(false);
+        size = members.size() + 1;
+        heroMember = filtered.stream().findFirst().orElse(null);
+        isLeader = heroMember != null && heroMember.isLeader;
         selectedMember = members.stream().filter(m -> selectedAddr == m.address).findFirst().orElse(null);
     }
 
     private void reset() {
         members.clear();
+        size = 0;
         isLeader = false;
+        heroMember = null;
         selectedMember = null;
     }
 
