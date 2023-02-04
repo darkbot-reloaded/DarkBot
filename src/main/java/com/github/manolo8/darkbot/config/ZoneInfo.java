@@ -125,6 +125,7 @@ public class ZoneInfo implements Serializable, Ignorable, eu.darkbot.api.config.
         return contains(loc.getX() / MapManager.internalWidth, loc.getY() / MapManager.internalHeight);
     }
 
+    @Override
     public List<Zone> getZones() {
         if (changed) {
             zones = new ArrayList<>();
@@ -138,6 +139,7 @@ public class ZoneInfo implements Serializable, Ignorable, eu.darkbot.api.config.
         return zones;
     }
 
+    @Override
     public List<Zone> getSortedZones() {
         getZones(); // Update zones
         if (!ordered) {
