@@ -5,9 +5,13 @@ import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.Gate;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
+import com.github.manolo8.darkbot.backpage.dispatch.Gate;
+import com.github.manolo8.darkbot.utils.CaptchaHandler;
+import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import eu.darkbot.api.managers.ConfigAPI;
 import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
@@ -25,15 +29,19 @@ public class DispatchManager {
     private final DispatchData data;
     private final Map<String, Integer> collected;
     private final Map<String, Integer> lastCollected;
-    private final Gson g;
+    private final Gson gson;
+    private final CaptchaHandler captchaHandler;
+
     private long lastDispatcherUpdate;
 
-    DispatchManager(BackpageManager backpageManager) {
+    DispatchManager(BackpageManager backpageManager, ConfigAPI configAPI) {
         this.backpageManager = backpageManager;
         this.data = new DispatchData();
         this.collected = new HashMap<>();
         this.lastCollected = new HashMap<>();
-        this.g = backpageManager.getGson();
+        this.gson = backpageManager.getGson();
+        this.captchaHandler = new CaptchaHandler(backpageManager,configAPI,
+                "indexInternal.es?action=internalDispatch", "dispatch");
     }
 
     public DispatchData getData() {
@@ -48,9 +56,12 @@ public class DispatchManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
+            if (captchaHandler.isSolvingCaptcha()) return false;
             String page = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getContent();
+            if (captchaHandler.needsCaptchaSolve(page)) {
+                return captchaHandler.solveCaptcha();
+            }
 
-            if (page == null || page.isEmpty()) return false;
             lastDispatcherUpdate = System.currentTimeMillis();
             return InfoReader.updateAll(page, data);
         } catch (Exception e) {
@@ -176,7 +187,7 @@ public class DispatchManager {
         boolean failed = response.contains("ERROR");
         if (!failed) {
             this.lastCollected.clear();
-            JsonObject jsonObj = g.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
+            JsonObject jsonObj = gson.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
             Iterable<JsonElement> rewardsLog = jsonObj.getAsJsonArray("rewardsLog");
             if (rewardsLog == null) rewardsLog = Collections.emptyList();
 

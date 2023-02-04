@@ -2,6 +2,9 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
+import com.github.manolo8.darkbot.utils.CaptchaHandler;
+import com.github.manolo8.darkbot.utils.http.Method;
+import eu.darkbot.api.managers.ConfigAPI;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -12,10 +15,13 @@ public class AuctionManager {
     private final AuctionData data;
     private final Pattern AUCTION_ERROR_PATTERN = Pattern.compile("infoText = '(.*?)';.*?" + "icon = '(.*)';", Pattern.DOTALL);
     private long lastAuctionUpdate;
+    private final CaptchaHandler captchaHandler;
 
-    AuctionManager(BackpageManager backpageManager) {
+    AuctionManager(BackpageManager backpageManager, ConfigAPI configAPI) {
         this.backpageManager = backpageManager;
         this.data = new AuctionData();
+        this.captchaHandler = new CaptchaHandler(backpageManager, configAPI,
+                "indexInternal.es?action=internalAuction", "auction");
     }
 
     public AuctionData getData() {
@@ -30,9 +36,11 @@ public class AuctionManager {
     public boolean update(long expiryTime) {
         try {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;
-            String page = backpageManager.getHttp("indexInternal.es?action=internalAuction").getContent();
-
-            if (page == null || page.isEmpty()) return false;
+            if (captchaHandler.isSolvingCaptcha()) return false;
+            String page = backpageManager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
+            if (this.captchaHandler.needsCaptchaSolve(page)) {
+                return captchaHandler.solveCaptcha();
+            }
             lastAuctionUpdate = System.currentTimeMillis();
             return data.parse(page);
         } catch (IOException e) {
