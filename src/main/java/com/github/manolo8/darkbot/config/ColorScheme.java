@@ -68,9 +68,9 @@ public class ColorScheme {
 
     public @Option Fonts FONTS = new Fonts();
     public static class Fonts {
-        public @Option Font BIG = new Font("Consolas", Font.PLAIN, 32);
+        public @Option Font BIG = new Font("Consolas Bold", Font.PLAIN, 32);
         public @Option Font MID = new Font(Font.SANS_SERIF, Font.PLAIN, 18);
-        public @Option Font SMALL = new Font("Consolas", Font.PLAIN, 13);
+        public @Option Font SMALL = new Font("Consolas Bold", Font.PLAIN, 13);
         public @Option Font TINY = new Font(Font.SANS_SERIF, Font.PLAIN, 9);
     }
 
