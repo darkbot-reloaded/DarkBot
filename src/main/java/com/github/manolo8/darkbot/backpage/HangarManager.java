@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.backpage;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.entities.Drone;
 import com.github.manolo8.darkbot.backpage.entities.Item;
 import com.github.manolo8.darkbot.backpage.entities.ItemInfo;
@@ -10,7 +9,6 @@ import com.github.manolo8.darkbot.backpage.hangar.HangarResponse;
 import com.github.manolo8.darkbot.core.itf.Tickable;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.Time;
-import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -19,12 +17,10 @@ import java.io.InputStream;
 import java.util.List;
 
 public class HangarManager implements Tickable {
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
     @Deprecated
     private final LegacyHangarManager legacyHangarManager;
-
-    private final Main main;
     private final BackpageManager backpage;
 
     private HangarResponse hangarList;
@@ -34,10 +30,9 @@ public class HangarManager implements Tickable {
     private long lastHangarListUpdate, lastCurrentHangarUpdate;
 
 
-    public HangarManager(Main main, BackpageManager backpage) {
-        this.main = main;
+    public HangarManager(BackpageManager backpage) {
         this.backpage = backpage;
-
+        this.gson = backpage.getGson();
         this.legacyHangarManager = backpage.legacyHangarManager;
     }
 
@@ -122,7 +117,7 @@ public class HangarManager implements Tickable {
     }
 
     public InputStream getInputStream(String action, JsonObject json) throws IOException {
-        return backpage.getConnection("flashAPI/inventory.php", Method.POST)
+        return backpage.postHttp("flashAPI/inventory.php")
                 .setRawParam("action", action)
                 .setParam("params", Base64Utils.encode(json.toString()))
                 .getInputStream();

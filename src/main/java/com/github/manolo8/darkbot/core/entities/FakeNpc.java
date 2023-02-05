@@ -30,6 +30,11 @@ public class FakeNpc extends Npc {
         return false;
     }
 
+    @Override
+    public boolean trySelect(boolean tryAttack) {
+        return false; // Always fail to lock
+    }
+
     @Override public void update() {}
     @Override public void update(long address) {}
 

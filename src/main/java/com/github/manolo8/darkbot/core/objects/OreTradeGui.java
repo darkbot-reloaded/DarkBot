@@ -27,9 +27,7 @@ public class OreTradeGui extends Gui implements OreAPI {
     public boolean showTrade(boolean show, BasePoint base) {
         if (trySetShowing(show)) {
             if (show) {
-                base.clickable.setRadius(800);
-                drive.clickCenter(true, base.locationInfo.now);
-                base.clickable.setRadius(0);
+                base.trySelect(false);
             } else click(8, 8);
             return false;
         }

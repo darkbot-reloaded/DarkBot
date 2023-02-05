@@ -116,7 +116,8 @@ public class OverlayDrawer implements Drawable {
     }
 
     private String toEarnedPerHour(double value) {
-        return STAT_FORMAT.format(value / ((double) stats.getRunningTime().toMillis() / TimeUtils.HOUR));
+        long seconds = stats.getRunningTime().toMillis() / TimeUtils.SECOND;
+        return STAT_FORMAT.format(value / (seconds / 3600d));
     }
 
     private void drawBackgroundedText(MapGraphics mg, String... texts) {

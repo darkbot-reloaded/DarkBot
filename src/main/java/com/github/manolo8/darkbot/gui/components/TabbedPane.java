@@ -1,16 +1,13 @@
 package com.github.manolo8.darkbot.gui.components;
 
-import com.formdev.flatlaf.ui.FlatButtonBorder;
-import com.github.manolo8.darkbot.gui.utils.CustomTabBorder;
-import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.github.manolo8.darkbot.utils.I18n;
-import net.miginfocom.swing.MigLayout;
+import lombok.Getter;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.MatteBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,22 +15,18 @@ public class TabbedPane extends JPanel {
 
     private Tab current;
 
-    private List<JComponent> header = new ArrayList<>();
-
-    public List<JComponent> getHeader() {
-        return header;
-    }
+    @Getter
+    private final List<JComponent> header = new ArrayList<>();
 
     public TabbedPane() {
-        super(new MigLayout("ins 0, gap 0, fill", "[grow]", "[grow]"));
-        setBorder(UIUtils.getPartialBorder(0, 1, 1, 1));
+        super(new BorderLayout());
     }
 
     public void addTab(Icon icon, String key, JComponent component) {
         addTab(new Tab(icon, key, component), true);
     }
 
-    public MainButton addHiddenTab(Icon icon, String name, JComponent component) {
+    public AbstractButton addHiddenTab(Icon icon, String name, JComponent component) {
         return addTab(new Tab(icon, name, component), false);
     }
 
@@ -47,30 +40,36 @@ public class TabbedPane extends JPanel {
         Tab old = current;
         current = tab;
         if (old != null) {
-            old.updateBorder();
+            old.setSelected(false);
             remove(old.component);
         }
-        current.updateBorder();
-        add(tab.component, "grow");
+        current.setSelected(true);
+        add(tab.component, BorderLayout.CENTER);
         revalidate();
         repaint();
     }
 
-    private class Tab extends MainButton {
-        private final Border HIGHLIGHT = new CustomTabBorder(0, 0, 2, 0), DEFAULT = new FlatButtonBorder();
-
+    private class Tab extends JToggleButton implements ActionListener {
         private final JComponent component;
 
         private Tab(Icon icon, String key, JComponent component) {
-            super(icon, I18n.getOrDefault(key, null),
-                    key == null ? null : I18n.getOrDefault(key + ".desc", null));
-            setFocusPainted(false);
+            super(I18n.getOrDefault(key, null), icon);
+
+            String description = key == null ? null : I18n.getOrDefault(key + ".desc", null);
+            if (description != null) setToolTipText(description);
 
             this.component = component;
+
+            addActionListener(this);
+            setMargin(new Insets(0, 8, 0, 8));
+            putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_TAB);
         }
 
-        public void updateBorder() {
-            setBorder(current == this ? HIGHLIGHT : DEFAULT);
+        @Override
+        public Dimension getMaximumSize() {
+            Dimension max = super.getMaximumSize();
+            max.height = Short.MAX_VALUE;
+            return max;
         }
 
         @Override

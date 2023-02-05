@@ -1,8 +1,6 @@
 package com.github.manolo8.darkbot.config.types.suppliers;
 
 import com.github.manolo8.darkbot.core.manager.PetManager;
-import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.modules.TemporalModule;
 
 import java.util.Arrays;
 import java.util.Collections;

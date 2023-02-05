@@ -3,16 +3,19 @@ package com.github.manolo8.darkbot.core;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.managers.WindowAPI;
+import org.intellij.lang.annotations.Language;
 
 import java.util.function.LongPredicate;
 
 public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     void tick();
+    int getRefreshCount();
 
     void createWindow();
     void setSize(int width, int height);
@@ -28,20 +31,32 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     void mouseUp(int x, int y);
     void mouseClick(int x, int y);
 
+    // Left for legacy purposes who may still use it, prefer keyboardClick(Character)
     @Deprecated
     default void keyboardClick(char btn) {
-        rawKeyboardClick(Character.toUpperCase(btn));
+        rawKeyboardClick(Character.toUpperCase(btn), true);
     }
 
-    void rawKeyboardClick(char btn);
+    // Left for legacy purposes who may still use it, prefer keyboardClick(Character)
+    @Deprecated
+    default void rawKeyboardClick(char btn) {
+        rawKeyboardClick(btn, true);
+    }
+
+    // Internal, prefer using keyboardClick instead
+    void rawKeyboardClick(char btn, boolean deduplicate);
 
     default void keyboardClick(Character ch) {
-        if (ch != null) rawKeyboardClick(ch);
+        keyboardClick(ch, true);
+    }
+
+    default void keyboardClick(Character ch, boolean deduplicate) {
+        if (ch != null) rawKeyboardClick(ch, deduplicate);
     }
 
     @Override
     default void keyClick(int keyCode) {
-        rawKeyboardClick((char) keyCode);
+        rawKeyboardClick((char) keyCode, true);
     }
 
     void sendText(String string);
@@ -110,6 +125,8 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     void handleRefresh();
 
+    void handleRelogin();
+
     void resetCache();
 
     boolean hasCapability(GameAPI.Capability capability);
@@ -128,6 +145,33 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     void refine(long refineUtilAddress, OreAPI.Ore ore, int amount);
 
     long callMethod(int index, long... arguments);
+    boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments);
+    boolean callMethodAsync(int index, long... arguments);
+    boolean useItem(Item item);
+
+    // checks if useItem() is supported and ready to use
+    boolean isUseItemSupported();
+
+    // post actions (mouse clicks, key clicks or any other window message) see NativeAction
+    void postActions(long... actions);
+    void pasteText(String text, long... actions);
+
+    // Handler API
+    void clearCache(@Language("RegExp") String pattern);
+    void emptyWorkingSet();
+    void setLocalProxy(int port);
+    void setPosition(int x, int y);
+    void setFlashOcxPath(String path);
+    void setUserInput(boolean enable);
+    void setClientSize(int width, int height);
+    void setMinClientSize(int width, int height);
+    void setTransparency(int transparency);
+    void setVolume(int volume); // 0 - 100
+
+    // LOW = 0, MEDIUM = 1, HIGH = 2, BEST = 3, AUTO_LOW = 4, AUTO_HIGH = 5
+    void setQuality(GameAPI.Handler.GameQuality quality);
+
+    long lastInternetReadTime();
 
     //MemoryAPI
     @Override

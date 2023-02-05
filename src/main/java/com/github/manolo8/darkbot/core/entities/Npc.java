@@ -26,11 +26,6 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
     }
 
     @Override
-    public void added(Main main) {
-        super.added(main);
-    }
-
-    @Override
     public void update() {
         String oldName = playerInfo.username;
         super.update();

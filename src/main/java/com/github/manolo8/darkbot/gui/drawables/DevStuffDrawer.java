@@ -19,6 +19,7 @@ import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.HeroAPI;
 
 import java.awt.Color;
+import java.awt.RenderingHints;
 import java.util.Collection;
 
 @Feature(name = "DevStuff Drawer", description = "Draws dev infos (eg: unknown entities, pathfinding points, and entity metadata)")
@@ -69,6 +70,9 @@ public class DevStuffDrawer implements Drawable {
             mg.drawRectCentered(point, 3, true);
         }
 
+        Object renderingHint = mg.getGraphics2D().getRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS);
+        mg.getGraphics2D().setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
+
         mg.setFont("tiny");
         mg.setColor("text");
         entities.getAll().stream()
@@ -86,5 +90,7 @@ public class DevStuffDrawer implements Drawable {
             p = Point.of(mg.getWidth() - 20, mg.getHeight() - 40);
             mg.drawBackgroundedText(p, target.toString(), MapGraphics.StringAlign.RIGHT);
         }
+
+        mg.getGraphics2D().setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, renderingHint);
     }
 }

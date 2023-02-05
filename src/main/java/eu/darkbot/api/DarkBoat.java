@@ -3,7 +3,8 @@ package eu.darkbot.api;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.LibUtils;
 
-public class DarkBoat implements GameAPI.Window, GameAPI.Handler, GameAPI.Memory, GameAPI.Interaction, API.Singleton {
+public class DarkBoat extends GameAPI.NoOpHandler
+        implements GameAPI.Window, GameAPI.Handler, GameAPI.Memory, GameAPI.Interaction, API.Singleton {
 
     static {
         LibUtils.loadLibrary("DarkBoatAPI");

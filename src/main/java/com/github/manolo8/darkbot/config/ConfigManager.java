@@ -46,6 +46,7 @@ public class ConfigManager implements API.Singleton {
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .setLenient()
+            .registerTypeAdapter(BrowserApi.class, new BrowserApi.Deserializer())
             .registerTypeAdapter(byte[].class, new ByteArrayToBase64TypeAdapter())
             .registerTypeAdapter(Color.class, new ColorAdapter())
             .registerTypeAdapter(File.class, new FileEditor.JsonAdapter())

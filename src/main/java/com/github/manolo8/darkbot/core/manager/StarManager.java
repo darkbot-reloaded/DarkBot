@@ -131,12 +131,14 @@ public class StarManager implements API.Singleton {
                 .addGG(413, "GoP Normal 4", "GoP N").accessOnlyBy(24, "GoP Normal 3")
                 .addGG(414, "GoP Normal 5", "GoP N").accessOnlyBy(24, "GoP Normal 4")
                 .addGG(415, "GoP Normal Final", "GoP N").accessOnlyBy(24, "GoP Normal 5").exitBy(1)
+                .addGG(469, "Plutus' Trove of Riches Normal", "PToR N").accessOnlyBy(24, "GoP Normal Final").exitBy(1)
                 .addGG(450, "GoP Easy 1", "GoP E").accessOnlyBy(235, HOME_MAPS)
                 .addGG(451, "GoP Easy 2", "GoP E").accessOnlyBy(235, "GoP Easy 1")
                 .addGG(452, "GoP Easy 3", "GoP E").accessOnlyBy(235, "GoP Easy 2")
                 .addGG(453, "GoP Easy 4", "GoP E").accessOnlyBy(235, "GoP Easy 3")
                 .addGG(454, "GoP Easy 5", "GoP E").accessOnlyBy(235, "GoP Easy 4")
-                .addGG(455, "GoP Easy Final", "GoP E").accessOnlyBy(235, "GoP Easy 5").exitBy(1);
+                .addGG(455, "GoP Easy Final", "GoP E").accessOnlyBy(235, "GoP Easy 5").exitBy(1)
+                .addGG(470, "Plutus' Trove of Riches Easy", "PToR E").accessOnlyBy(235, "GoP Easy Final").exitBy(1);
                 // Special (No direct access)
         mapBuild.addMap(42, "???")
                 .addMap(61, "MMO Invasion", "MMO Inv").addMap(62, "EIC Invasion", "EIC Inv").addMap(63, "VRU Invasion", "VRU Inv")
@@ -157,7 +159,7 @@ public class StarManager implements API.Singleton {
                 .addMap(158, "R-Zone 9", "R-Z").addMap(159, "R-Zone 10", "R-Z")
                 .addMap(420, "WarGame 1", "WG").addMap(421, "WarGame 2", "WG").addMap(422, "WarGame 3", "WG")
                 .addMap(423, "WarGame 4", "WG").addMap(424, "WarGame 5", "WG").addMap(425, "WarGame 6", "WG");
-        /*
+
                 // Frozen laberynth
         mapBuild.addMap(430, "ATLAS A"  ).exitBy(55)
                 .addMap(431, "ATLAS B"  ).exitBy(55)
@@ -175,7 +177,7 @@ public class StarManager implements API.Singleton {
                 .addMap(443, "Aquila"   ).exitBy(55)
                 .addMap(444, "Orion"    ).exitBy(55)
                 .addMap(445, "Maia"     ).exitBy(55);
-        */
+        /*
                 // Mimesis escort maps
         mapBuild.addGG(430, "Escort VRU 1", "ESC-V1").exitBy(1)
                 .addGG(431, "Escort VRU 2", "ESC-V2").exitBy(1)
@@ -194,6 +196,7 @@ public class StarManager implements API.Singleton {
                 .addGG(443, "Eternal Gate", "GG ∞")
                 .addGG(444, "Eternal Gate", "GG ∞")
                 .addGG(445, "Eternal Gate", "GG ∞");
+         */
                 // Eternal BL maps
         mapBuild.addGG(460, "Eternal Blacklight", "GG ∞ BL")
                 .addGG(461, "Eternal Blacklight", "GG ∞ BL")

@@ -8,10 +8,10 @@ import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.MouseManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
-import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.Locatable;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.MovementAPI;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,17 +43,17 @@ public class Drive implements MovementAPI {
     private long lastClick;
     public long lastMoved;
 
-    public Drive(Main main, MapManager map) {
+    public Drive(Main main, MapManager map, PathFinder pathFinder) {
         this.main = main;
         this.map = map;
+        this.pathFinder = pathFinder;
         this.mouse = new MouseManager(map);
-        this.pathFinder = new PathFinder(map);
     }
 
     public void checkMove() {
         this.heroLoc = main.hero.locationInfo;
 
-        // Path-finder changed and bot is already traveling, re-create route
+        // Pathfinder changed and bot is already traveling, re-create route
         if (endLoc != null && pathFinder.changed() && tempDest == null) tempDest = endLoc;
 
         boolean newPath = tempDest != null;
@@ -155,6 +155,7 @@ public class Drive implements MovementAPI {
         if (!paths.isEmpty()) paths = new LinkedList<>();
     }
 
+    @Deprecated
     public void clickCenter(boolean single, Location aim) {
         mouse.clickCenter(single, aim);
     }
@@ -218,6 +219,11 @@ public class Drive implements MovementAPI {
         return !paths.isEmpty() || heroLoc.isMoving();
     }
 
+    @Override
+    public boolean isMoving(long inTime) {
+        return lastMoved + inTime >= System.currentTimeMillis();
+    }
+
     public Location movingTo() {
         return endLoc == null ? heroLoc.now.copy() : endLoc.copy();
     }
@@ -228,7 +234,7 @@ public class Drive implements MovementAPI {
     }
 
     @Override
-    public void jumpPortal(Portal portal) {
+    public void jumpPortal(@NotNull Portal portal) {
         main.hero.jumpPortal(portal);
     }
 

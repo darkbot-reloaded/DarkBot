@@ -3,13 +3,16 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.PlayerInfo;
+import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.objects.group.GroupMember;
 import com.github.manolo8.darkbot.core.objects.group.Invite;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
+import com.github.manolo8.darkbot.core.utils.ClickPoint;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.GroupAPI;
+import eu.darkbot.api.utils.NativeAction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -41,7 +44,7 @@ public class GroupManager extends Gui implements GroupAPI {
     private long nextAction;
     private Runnable pending;
 
-    private final Map<String, Long> pastInvites = new HashMap<>();
+    private final Map<String, Long> inviteTimeout = new HashMap<>();
     private int shouldLeave = 0;
 
     private long lastValidTime; // Last time group had members for isLoaded check
@@ -72,7 +75,8 @@ public class GroupManager extends Gui implements GroupAPI {
         if (group.address == 0) return;
 
         if (group.isValid()) lastValidTime = System.currentTimeMillis();
-        else if (System.currentTimeMillis() - lastValidTime < 10_000L) return; // Wait until reacting to group being invalid
+        else if (System.currentTimeMillis() - lastValidTime < 10_000L)
+            return; // Wait until reacting to group being invalid
         if (nextAction > System.currentTimeMillis()) return;
         nextAction = System.currentTimeMillis() + 100;
 
@@ -82,6 +86,7 @@ public class GroupManager extends Gui implements GroupAPI {
         tryQueueAcceptInvite();
         tryOpenInvites();
         tryQueueSendInvite();
+        tryQueueKick();
 
         if (pending == null) show(false);
         else {
@@ -105,7 +110,21 @@ public class GroupManager extends Gui implements GroupAPI {
     public void tryOpenInvites() {
         if (pending != null || !group.isValid() || !group.isLeader) return;
 
-        if (group.isOpen != config.OPEN_INVITES) pending = () -> click(GroupAction.CAN_INVITE);
+        if (group.isOpen != config.OPEN_INVITES) pending = () -> runClicks(getPoint(GroupAction.CAN_INVITE));
+    }
+
+    public void tryQueueKick() {
+        if (pending != null || !canKick() || config.INVITE_TAG == null || !config.KICK_NO_INVITED) return;
+        for (GroupMember member : group.members) {
+            if (config.INVITE_TAG.has(main.config.PLAYER_INFOS.get(member.id))) continue;
+            if (main.config.PLAYER_INFOS.get(member.id).hasTag(config.INVITE_TAG)) continue;
+
+            Long inviteTime = inviteTimeout.get(member.username);
+            if (inviteTime != null && System.currentTimeMillis() < inviteTime) continue;
+
+            kick(member.id);
+            break;
+        }
     }
 
     public void tryQueueSendInvite() {
@@ -114,7 +133,7 @@ public class GroupManager extends Gui implements GroupAPI {
         for (PlayerInfo player : main.config.PLAYER_INFOS.values()) {
             if (!config.INVITE_TAG.has(player) || group.getMember(player.userId) != null) continue;
 
-            Long inviteTime = pastInvites.get(player.username);
+            Long inviteTime = inviteTimeout.get(player.username);
             if (inviteTime != null && System.currentTimeMillis() < inviteTime) continue;
 
             pending = () -> sendInvite(player.username, inviteTime == null ? 60_000 : 120_000);
@@ -129,7 +148,14 @@ public class GroupManager extends Gui implements GroupAPI {
         else shouldLeave = 0;
 
         if (shouldLeave >= 20)
-            pending = () -> click(GroupAction.LEAVE);
+            pending = () -> runClicks(getPoint(GroupAction.LEAVE));
+    }
+
+    public boolean shouldKick() {
+        return group.isValid() && config.WHITELIST_TAG != null && config.KICK_NO_INVITED &&
+                group.members.stream()
+                        .map(m -> main.config.PLAYER_INFOS.get(m.id))
+                        .noneMatch(i -> i != null && i.hasTag(config.INVITE_TAG));
     }
 
     public boolean shouldLeave() {
@@ -141,36 +167,101 @@ public class GroupManager extends Gui implements GroupAPI {
 
     public void acceptInvite(Invite inv) {
         int idx = invites.indexOf(inv);
-        if (idx >= 0)
-            clickBtn(MARGIN_WIDTH + INVITE_WIDTH, 0, HEADER_HEIGHT + BUTTON_HEIGHT, idx);
+        if (idx >= 0) runClicks(getAcceptPoint(idx));
     }
 
     public void sendInvite(String username) {
         sendInvite(username, 60_000);
     }
+
     public void sendInvite(String username, long wait) {
-        click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
-        Time.sleep(100); // This should not be here, but will stay for now
-        API.sendText(username);
-        Time.sleep(500); // This should not be here, but will stay for now
-        click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
-        pastInvites.put(username, System.currentTimeMillis() + wait); // Wait until re-invite
+        if (API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS)) {
+            API.pasteText(username,
+                    NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
+                    NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
+                    NativeAction.Mouse.CLICK.after(x + MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), y + getInvitingHeight()));
+        } else {
+            click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
+            click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
+            //        Time.sleep(100); // This should not be here, but will stay for now
+            API.sendText(username);
+            //        Time.sleep(500); // This should not be here, but will stay for now
+            click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
+        }
+        inviteTimeout.put(username, System.currentTimeMillis() + wait);
     }
 
     public void kick(int id) {
-        kick(group.getMember(id));
+        if (pending != null || !canKick()) return;
+
+        pending = () -> {
+            GroupMember member = group.getMember(id);
+            int idx = group.indexOf(id);
+            if (idx < 0) return;
+            inviteTimeout.put(member.username, System.currentTimeMillis() + 30_000);
+            runClicks(getPoint(GroupAction.REMOVE), getMemberPoint(idx));
+        };
+
     }
 
     public void kick(GroupMember member) {
-        if (member != null && canKick()) kickUser(group.indexOf(member));
+        if (member == null) return;
+        kick(member.id);
     }
 
-    private void kickUser(int idx) {
-        if (idx <= 0) return;
+    private void runClicks(ClickPoint... points) {
+        if (API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS)) {
+            long[] nativeClicks = new long[points.length];
+            for (int i = 0; i < points.length; i++) {
+                nativeClicks[i] = NativeAction.Mouse.CLICK.of(this.x + points[i].x, this.y + points[i].y);
+            }
+            API.postActions(nativeClicks);
+        } else {
+            for (ClickPoint p : points) {
+                click(p.x, p.y);
+                Time.sleep(25);
+            }
+        }
+    }
 
-        click(GroupAction.REMOVE);
-        // TODO: wait between clicks
-        click((int) size.x / 2, (MEMBER_HEIGHT / 2) + idx * MEMBER_HEIGHT);
+    private ClickPoint getAcceptPoint(int idx) {
+        int x = offset(MARGIN_WIDTH + INVITE_WIDTH, BUTTON_WIDTH, 0);
+        int y = offset(HEADER_HEIGHT + BUTTON_HEIGHT, BUTTON_HEIGHT, idx);
+        return new ClickPoint(x, y);
+    }
+
+    private ClickPoint getInviteInputPoint() {
+        int x = MARGIN_WIDTH + (INVITE_WIDTH / 2);
+        int y = getInvitingHeight();
+        return new ClickPoint(x, y);
+    }
+
+    private ClickPoint getInviteBtnPoint() {
+        int x = MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2);
+        int y = getInvitingHeight();
+        return new ClickPoint(x, y);
+    }
+
+    private ClickPoint getPoint(GroupAction action) {
+        int x = offset(MARGIN_WIDTH, BUTTON_WIDTH, action.idx(group.isLeader));
+        int y = offset(HEADER_HEIGHT + getGroupHeight(), BUTTON_HEIGHT, 0);
+        return new ClickPoint(x, y);
+    }
+
+    private ClickPoint getPoint(GroupMember member) {
+        int idx = group.indexOf(member);
+        if (idx < 0) return null;
+        return getMemberPoint(idx);
+    }
+
+    private ClickPoint getMemberPoint(int idx) {
+        int x = (int) size.x / 2; //center of group window
+        int y = HEADER_HEIGHT + (MEMBER_HEIGHT / 2) + (idx * MEMBER_HEIGHT); //group header offset + halfway point + index offset
+        return new ClickPoint(x, y);
+    }
+
+    private int offset(int margin, int offset, int index) {
+        return margin + (offset * index) + (offset / 2);
     }
 
     public boolean canKick() {
@@ -182,27 +273,14 @@ public class GroupManager extends Gui implements GroupAPI {
         return (!group.isValid() || group.isOpen || group.isLeader) && invites.size() + group.size < 8;
     }
 
-    private void click(GroupAction action) {
-        clickBtn(MARGIN_WIDTH, action.idx(group.isLeader), HEADER_HEIGHT + getGroupHeight(), 0);
-    }
-
     private int getGroupHeight() {
-        return Math.max(0, group.size - 1) * MEMBER_HEIGHT +
+        return (Math.max(0, group.size - 1) * MEMBER_HEIGHT) +
                 (invites.size() * BUTTON_HEIGHT) +
-                (canInvite() ? BUTTON_HEIGHT : 0);
+                ((group.isValid() && (group.isOpen || group.isLeader)) ? BUTTON_HEIGHT : 0);
     }
 
     private int getInvitingHeight() {
         return HEADER_HEIGHT + (group.isValid() ? getGroupHeight() : BUTTON_HEIGHT) - (BUTTON_HEIGHT / 2);
-    }
-
-    private int offset(int margin, int offset, int index) {
-        return margin + (offset * index) + (offset / 2);
-    }
-
-    private void clickBtn(int marginX, int indexX,
-                          int marginY, int indexY) {
-        click(offset(marginX, BUTTON_WIDTH, indexX), offset(marginY, BUTTON_HEIGHT, indexY));
     }
 
     private enum GroupAction {
@@ -273,16 +351,4 @@ public class GroupManager extends Gui implements GroupAPI {
     public List<? extends eu.darkbot.api.game.group.GroupMember.Invite> getInvites() {
         return invites;
     }
-
-    /*
-    @Override
-    public void kickMember(int id) {
-        kick(id);
-    }
-
-
-    @Override
-    public void acceptInvite(eu.darkbot.api.game.group.GroupMember.Invite invite) {
-        acceptInvite((Invite) invite);
-    }*/
 }

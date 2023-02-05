@@ -1,13 +1,17 @@
 package com.github.manolo8.darkbot.utils.http;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.IOUtils;
 import com.github.manolo8.darkbot.utils.ThrowFunction;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,7 +21,9 @@ import java.util.function.Consumer;
 /**
  * Utility for HTTP connections.
  * Use it like builder, just one time for instance
+ * @deprecated use {@link eu.darkbot.util.http.Http} instead
  */
+@Deprecated
 public class Http {
 
     public static String getDefaultUserAgent() {
@@ -202,6 +208,16 @@ public class Http {
      */
     public String getContent() throws IOException {
         return IOUtils.read(getInputStream(), true);
+    }
+
+    public <T> T fromJson(Class<T> type) throws IOException {
+        return fromJson((Type) type);
+    }
+
+    public <T> T fromJson(Type type) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(getInputStream(), StandardCharsets.UTF_8)) {
+            return Main.GSON.fromJson(reader, type);
+        }
     }
 
     /**

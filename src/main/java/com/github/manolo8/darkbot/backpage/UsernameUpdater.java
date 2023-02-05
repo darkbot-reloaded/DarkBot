@@ -8,14 +8,12 @@ import com.github.manolo8.darkbot.config.UnresolvedPlayer;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.Base62;
 import com.github.manolo8.darkbot.utils.I18n;
-import com.github.manolo8.darkbot.utils.IOUtils;
-import com.github.manolo8.darkbot.utils.http.Method;
 import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.Task;
 
 import javax.swing.*;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,10 +49,10 @@ public class UsernameUpdater implements Task {
         try {
             boolean byId = user.userId != -1;
 
-            UserResponse response = backpageManager.getConnection("ajax/" + (byId ? "user" : "pilotprofil") + ".php", Method.POST)
+            UserResponse response = backpageManager.postHttp("ajax/" + (byId ? "user" : "pilotprofil") + ".php")
                     .setParam("command", (byId ? "loadUserInfo" : "searchProfileFromExternalPPP"))
                     .setParam(byId ? "userId" : "profileUsername", byId ? Base62.encode(user.userId) : user.username)
-                    .consumeInputStream(inputStream -> Main.GSON.fromJson(IOUtils.read(inputStream), UserResponse.class));
+                    .fromJson(UserResponse.class);
 
             if (response == null || !Objects.equals(response.result, "OK")) {
                 reQueue(user);
@@ -106,8 +104,8 @@ public class UsernameUpdater implements Task {
         String userName;
         String url;
 
-        private String getUsername() throws UnsupportedEncodingException {
-            return URLDecoder.decode(userName, "UTF-8");
+        private String getUsername() {
+            return URLDecoder.decode(userName, StandardCharsets.UTF_8);
         }
 
         private int getId() {

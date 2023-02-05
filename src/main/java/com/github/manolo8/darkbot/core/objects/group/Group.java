@@ -15,6 +15,7 @@ public class Group extends Updatable.Auto {
 
     public List<GroupMember> members = new ArrayList<>();
     public GroupMember selectedMember = new GroupMember();
+    public GroupMember heroMember = new GroupMember();
 
     public int id;
     public int size;
@@ -29,15 +30,15 @@ public class Group extends Updatable.Auto {
     }
 
     public boolean isValid() {
-        return id != 0 && size != 0 && maxSize == 8;
+        return id != 0 && maxSize == 8;
     }
 
     @Override
     public void update() {
-        id      = API.readMemoryInt(address + 0x1F);
-        size    = API.readMemoryInt(address + 0x23);
+        id = API.readMemoryInt(address + 0x1F);
+//        size = API.readMemoryInt(address + 0x23);
         maxSize = API.readMemoryInt(address + 0x27);
-        isOpen  = API.readMemoryBoolean(address + 0x2B);
+        isOpen = API.readMemoryBoolean(address + 0x2B);
 
         if (!isValid()) {
             if (!members.isEmpty()) reset();
@@ -52,13 +53,17 @@ public class Group extends Updatable.Auto {
         synchronized (Main.UPDATE_LOCKER) {
             filtered = membersPtr.sync(members, GroupMember::new, m -> m.id != hero.id);
         }
-        isLeader = filtered.stream().map(h -> h.isLeader).findFirst().orElse(false);
+        size = members.size() + 1;
+        heroMember = filtered.stream().findFirst().orElse(null);
+        isLeader = heroMember != null && heroMember.isLeader;
         selectedMember = members.stream().filter(m -> selectedAddr == m.address).findFirst().orElse(null);
     }
 
     private void reset() {
         members.clear();
+        size = 0;
         isLeader = false;
+        heroMember = null;
         selectedMember = null;
     }
 
@@ -69,7 +74,15 @@ public class Group extends Updatable.Auto {
         return null;
     }
 
+    public int indexOf(int id) {
+        if (members.isEmpty()) return -1;
+        for (int i = 0; i < size; i++)
+            if (members.get(i).id == id) return i;
+        return -1;
+    }
+
     public int indexOf(GroupMember member) {
+        if (members.isEmpty()) return -1;
         for (int i = 0; i < size; i++)
             if (members.get(i) == member) return i;
         return -1;

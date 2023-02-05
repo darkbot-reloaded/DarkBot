@@ -36,20 +36,21 @@ public class ConstantEntitiesDrawer implements Drawable {
         mg.setColor("portals");
 
         for (Portal portal : portals) {
-            mg.drawOvalCentered(portal, 12, false);
+            mg.drawOvalCentered(portal, 12.0, false);
         }
     }
 
     public void drawBattleStations(MapGraphics mg) {
         for (BattleStation bs : battleStations) {
-            if (bs.getHullId() == 0) mg.setColor("meteroid");
+            if (bs instanceof BattleStation.Asteroid) mg.setColor("meteroid");
             else if (bs.getEntityInfo().isEnemy()) mg.setColor("enemies");
             else mg.setColor("allies");
 
-            if (bs.getHullId() >= 0 && bs.getHullId() < 255)
-                mg.drawOvalCentered(bs, 11, 9, true);
-
-            else mg.drawRectCentered(bs, 3, false);
+            if (bs instanceof BattleStation.Module) {
+                mg.drawRectCentered(bs, 3.0, false);
+            } else {
+                mg.drawOvalCentered(bs, 11.0, 9.0, true);
+            }
         }
     }
 
@@ -57,7 +58,7 @@ public class ConstantEntitiesDrawer implements Drawable {
         for (Station station : stations) {
             if (station instanceof Station.Turret) {
                 mg.setColor("bases");
-                mg.drawOvalCentered(station, 2, true);
+                mg.drawOvalCentered(station, 2.0, true);
 
             } else {
                 mg.setColor("base_spots");
@@ -65,9 +66,8 @@ public class ConstantEntitiesDrawer implements Drawable {
                 int size = station instanceof Station.Headquarter ? 3500
                         : station instanceof Station.HomeBase ? 3000 : 1000;
 
-                mg.drawOvalCentered(station, mg.toScreenPointX(size), mg.toScreenPointY(size), true);
+                mg.drawOvalCentered(station, mg.toScreenSizeW(size), mg.toScreenSizeH(size), true);
             }
-
         }
     }
 }

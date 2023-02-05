@@ -112,7 +112,8 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
     public void onChatMessage(MessageSentEvent event) {
         if (!ConfigEntity.INSTANCE.getConfig().MISCELLANEOUS.LOG_CHAT) return;
 
-        try (OutputStream os = fileWriters.computeIfAbsent(event.getRoom(), LogUtils::createLogFile)) {
+        try {
+            OutputStream os = fileWriters.computeIfAbsent(event.getRoom(), LogUtils::createLogFile);
             if (os != null) os.write(event.getMessage().formatted().getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();

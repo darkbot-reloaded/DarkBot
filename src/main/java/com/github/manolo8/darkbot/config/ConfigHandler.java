@@ -24,7 +24,7 @@ public class ConfigHandler implements ConfigAPI, Listener {
     private final ConfigManager loader;
     private final ConfigBuilder builder;
 
-    private ConfigSetting.Parent<Config> configuration;
+    private final ConfigSetting.Parent<Config> configuration;
 
     public ConfigHandler(PluginAPI api,
                          ConfigManager loader,
@@ -32,13 +32,12 @@ public class ConfigHandler implements ConfigAPI, Listener {
         this.pluginAPI = api;
         this.loader = loader;
         this.builder = builder;
+        this.configuration = builder.of(Config.class, "Configuration", null);
+        this.configuration.setValue(loader.getConfig());
     }
 
     @Inject
     public void init() {
-        this.configuration = builder.of(Config.class, "Configuration", null);
-        this.configuration.setValue(loader.getConfig());
-
         ConfigEntity.INSTANCE = pluginAPI.requireInstance(ConfigEntity.class);
     }
 
