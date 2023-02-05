@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
 import com.github.manolo8.darkbot.utils.CaptchaHandler;
-import com.github.manolo8.darkbot.utils.http.Method;
 import eu.darkbot.api.managers.ConfigAPI;
 
 import java.io.IOException;
@@ -29,15 +28,20 @@ public class AuctionManager {
     }
 
     @Deprecated
-    public boolean update(int expiryTime) {
+    public Boolean update(int expiryTime) {
         return this.update((long) expiryTime);
     }
 
-    public boolean update(long expiryTime) {
+    /**
+     *
+     * @param expiryTime only update if within
+     * @return null if update wasn't required (non-expired), true if updated ok, false if update failed
+     */
+    public Boolean update(long expiryTime) {
         try {
-            if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return false;
+            if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return null;
             if (captchaHandler.isSolvingCaptcha()) return false;
-            String page = backpageManager.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
+            String page = backpageManager.getHttp("indexInternal.es?action=internalAuction").getContent();
             if (this.captchaHandler.needsCaptchaSolve(page)) {
                 return captchaHandler.solveCaptcha();
             }
@@ -50,7 +54,7 @@ public class AuctionManager {
     }
 
     public boolean bidItem(AuctionItems auctionItem) {
-        return bidItem(auctionItem, auctionItem.getCurrentBid() + 10000);
+        return bidItem(auctionItem, auctionItem.getCurrentBid() + 10000L);
     }
 
     public boolean bidItem(AuctionItems auctionItem, long amount) {
