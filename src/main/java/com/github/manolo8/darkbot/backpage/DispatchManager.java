@@ -62,6 +62,7 @@ public class DispatchManager {
             if (captchaHandler.isSolvingCaptcha()) return false;
             String page = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getContent();
             if (captchaHandler.needsCaptchaSolve(page)) {
+                System.out.println("DispatchManager: Captcha Detected");
                 return captchaHandler.solveCaptcha();
             }
 
@@ -205,7 +206,7 @@ public class DispatchManager {
                 this.lastCollected.compute(key, (k, v) -> (v == null ? 0 : v) + amount);
             }
         }
-        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
+        System.out.println("DispatchManager: " + type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
         update(0);
         return !failed;
     }

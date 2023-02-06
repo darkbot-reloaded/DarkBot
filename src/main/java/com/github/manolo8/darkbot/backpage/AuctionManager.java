@@ -43,6 +43,7 @@ public class AuctionManager {
             if (captchaHandler.isSolvingCaptcha()) return false;
             String page = backpageManager.getHttp("indexInternal.es?action=internalAuction").getContent();
             if (this.captchaHandler.needsCaptchaSolve(page)) {
+                System.out.println("AuctionManager: Captcha Detected");
                 return captchaHandler.solveCaptcha();
             }
             lastAuctionUpdate = System.currentTimeMillis();
