@@ -62,6 +62,7 @@ dependencies {
 }
 
 tasks.withType<JavaCompile> { options.encoding = "UTF-8" }
+tasks.withType<JavaExec> { systemProperty("file.encoding", "UTF-8") }
 
 tasks.wrapper {
     gradleVersion = "7.5.1"
@@ -105,7 +106,7 @@ launch4j {
     jarTask = project.tasks["proguard"]
     icon = "$projectDir/icon.ico"
 
-    maxHeapSize = 256
+    maxHeapSize = 512
     version = project.version.toString()
 
     jreRuntimeBits = "64/32" // will prioritize 64bit jre/jdk

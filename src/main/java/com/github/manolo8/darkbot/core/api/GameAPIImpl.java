@@ -236,9 +236,10 @@ public class GameAPIImpl<
     }
 
     protected void setData() {
-        String url = "https://" + loginData.getUrl() + "/", sid = "dosid=" + loginData.getSid();
-
-        window.setData(url, sid, loginData.getPreloaderUrl(), loginData.getParams());
+        if (hasCapability(GameAPI.Capability.LOGIN)) {
+            String url = "https://" + loginData.getUrl() + "/", sid = "dosid=" + loginData.getSid();
+            window.setData(url, sid, loginData.getPreloaderUrl(), loginData.getParams());
+        }
     }
 
     @Override
@@ -443,6 +444,7 @@ public class GameAPIImpl<
             handleRelogin();
         }
 
+        setData(); //always set data to update possible settings changes
         refreshCount++;
         handler.reload();
 
