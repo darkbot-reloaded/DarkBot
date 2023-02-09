@@ -5,9 +5,7 @@ import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.Gate;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
-import com.github.manolo8.darkbot.backpage.dispatch.Gate;
 import com.github.manolo8.darkbot.utils.CaptchaHandler;
-import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -49,16 +47,22 @@ public class DispatchManager {
     }
 
     @Deprecated
-    public boolean update(int expiryTime) {
+    public Boolean update(int expiryTime) {
         return this.update((long) expiryTime);
     }
 
-    public boolean update(long expiryTime) {
+    /**
+     *
+     * @param expiryTime only update if within
+     * @return null if update wasn't required (non-expired), true if updated ok, false if update failed
+     */
+    public Boolean update(long expiryTime) {
         try {
-            if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
+            if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return null;
             if (captchaHandler.isSolvingCaptcha()) return false;
             String page = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getContent();
             if (captchaHandler.needsCaptchaSolve(page)) {
+                System.out.println("DispatchManager: Captcha Detected");
                 return captchaHandler.solveCaptcha();
             }
 
@@ -202,7 +206,7 @@ public class DispatchManager {
                 this.lastCollected.compute(key, (k, v) -> (v == null ? 0 : v) + amount);
             }
         }
-        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
+        System.out.println("DispatchManager: " + type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
         update(0);
         return !failed;
     }

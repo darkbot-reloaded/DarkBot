@@ -20,13 +20,17 @@ public class NovaManager {
         this.gson = backpageManager.getGson();
     }
 
-    public boolean update(long expiryTime) {
+    /**
+     *
+     * @param expiryTime only update if within
+     * @return null if update wasn't required (non-expired), true if updated ok, false if update failed
+     */
+    public Boolean update(long expiryTime) {
         try {
-            if (System.currentTimeMillis() <= lastNovaUpdate + expiryTime) return false;
+            if (System.currentTimeMillis() <= lastNovaUpdate + expiryTime) return null;
             data.getRosterList().forEach((k, v) -> v.setForRemoval(true));
 
-            boolean updated = updateActiveCaptain(0);
-            updated &= updateResource();
+            boolean updated = updateActiveCaptain(0) && updateResource();
             boolean rosterUpdated = updateRosterList();
             if (rosterUpdated) {
                 data.getRosterList().values().removeIf(Agent::getForRemoval);
