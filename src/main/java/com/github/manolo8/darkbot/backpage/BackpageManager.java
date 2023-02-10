@@ -57,7 +57,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     protected long lastRequest;
     protected long sidLastUpdate = System.currentTimeMillis();
     protected long sidNextUpdate = sidLastUpdate;
-    protected Timer refreshTimer = Timer.get(30_000L);
+    protected Timer refreshTimer = Timer.get(300_000L);
 
     protected long checkDrones = Long.MAX_VALUE;
     protected int sidStatus = -1;

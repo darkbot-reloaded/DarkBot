@@ -207,7 +207,7 @@ public class LoginUtils {
 
         Matcher m = DATA_PATTERN.matcher(flashEmbed);
         if (m.find()) loginData.setPreloader(m.group(1), replaceParameters(m.group(2)));
-        else throw  WrongCredentialsException.translated("gui.login.error.flash_embed_fail");
+        else throw WrongCredentialsException.translated("gui.login.error.flash_embed_fail");
     }
 
     private static String replaceParameters(String params) {
