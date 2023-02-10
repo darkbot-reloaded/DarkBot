@@ -33,7 +33,6 @@ public class AuctionManager {
     }
 
     /**
-     *
      * @param expiryTime only update if within
      * @return null if update wasn't required (non-expired), true if updated ok, false if update failed
      */
@@ -44,7 +43,8 @@ public class AuctionManager {
             String page = backpageManager.getHttp("indexInternal.es?action=internalAuction").getContent();
             if (this.captchaHandler.needsCaptchaSolve(page)) {
                 System.out.println("AuctionManager: Captcha Detected");
-                return captchaHandler.solveCaptcha();
+                captchaHandler.solveCaptcha();
+                return false;
             }
             lastAuctionUpdate = System.currentTimeMillis();
             return data.parse(page);
