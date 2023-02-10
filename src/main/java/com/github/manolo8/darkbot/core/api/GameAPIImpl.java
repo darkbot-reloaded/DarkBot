@@ -129,8 +129,10 @@ public class GameAPIImpl<
         }
     }
 
-    protected void reload() {
-        if (loginData == null || loginData.getUsername() == null) {
+    protected void tryRelogin() {
+        if (!hasCapability(GameAPI.Capability.LOGIN)
+                || loginData == null
+                || loginData.getUsername() == null) {
             System.out.println("Re-logging in is unsupported for this browser/API, or you logged in with SID");
             return;
         }
@@ -149,11 +151,15 @@ public class GameAPIImpl<
             lastFailedLogin = System.currentTimeMillis();
         } catch (LoginUtils.WrongCredentialsException e) {
             // SID probably expired, time to log in again
-            relogin();
+            performRelogin();
         }
     }
 
-    protected void relogin() {
+    /**
+     * This is reserved internally for use in {@link #tryRelogin()}, use that instead,
+     * which will safeguard against bad use (ie: calling too often or calling when no login data exists.
+     */
+    protected void performRelogin() {
         try {
             System.out.println("Re-logging in: Logging in (1/2)");
             LoginUtils.usernameLogin(loginData);
@@ -165,9 +171,12 @@ public class GameAPIImpl<
             lastFailedLogin = System.currentTimeMillis();
         } catch (LoginUtils.CaptchaException e) {
             System.err.println("Captcha detected & no Captcha-Solver is configured");
-            lastFailedLogin = System.currentTimeMillis() + Time.MINUTE * 5; // wait minimum 5:30m to next login attempt on refresh
+            e.printStackTrace();
+            lastFailedLogin = System.currentTimeMillis() + Time.MINUTE * 30; // wait ~30m for captcha to go away
         } catch (LoginUtils.LoginException e) {
-            System.err.println("Wrong credentials, check your username and password");
+            System.err.println("Other exception logging in, maybe wrong credentials? See below");
+            e.printStackTrace();
+            lastFailedLogin = System.currentTimeMillis();
         }
     }
 
@@ -454,7 +463,7 @@ public class GameAPIImpl<
     @Override
     public void handleRelogin() {
         if (hasCapability(GameAPI.Capability.LOGIN)) {
-            relogin();
+            tryRelogin();
             setData();
         }
     }

@@ -36,6 +36,7 @@ public class CaptchaHandler {
         if (setting == null || !setting.getValue() || CaptchaAPI.getInstance() == null) return false;
         if (isSolvingCaptcha()) return false;
 
+        System.out.println("CaptchaHandler: Solving Captcha for " + this.action);
         HttpURLConnection conn = backpage.getHttp(base).getConnection();
         conn.setInstanceFollowRedirects(false);
         if (!conn.getHeaderField("Location").isEmpty()) {
@@ -54,7 +55,10 @@ public class CaptchaHandler {
                         }
                         return r;
                     });
-            captchaResponseFuture.whenComplete((r, t) -> captchaResponseFuture = null);
+            captchaResponseFuture.whenComplete((r, t) -> {
+                System.out.println("CaptchaHandler: Done Solving for " + this.action);
+                captchaResponseFuture = null;
+            });
             return true;
         }
         return false;
