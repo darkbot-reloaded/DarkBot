@@ -51,7 +51,7 @@ public class LoginUtils {
                 .showSync();
 
         LoginData loginData = panel.getResult();
-        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
+        if (loginData.isNotInitialized()) {
             System.out.println("Closed login panel, exited without logging in");
             System.exit(0);
         }
@@ -93,7 +93,7 @@ public class LoginUtils {
             System.err.println("Wrong credentials, check your username and password");
         }
 
-        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
+        if (loginData.isNotInitialized()) {
             System.err.println("Could not find preloader url or parameters, exiting bot.");
             System.exit(-1);
         }
@@ -196,7 +196,7 @@ public class LoginUtils {
 
         Matcher m = DATA_PATTERN.matcher(flashEmbed);
         if (m.find()) loginData.setPreloader(m.group(1), m.group(2));
-        else throw  WrongCredentialsException.translated("gui.login.error.flash_embed_fail");
+        else throw WrongCredentialsException.translated("gui.login.error.flash_embed_fail");
     }
 
     private static String getLoginUrl(String in) {

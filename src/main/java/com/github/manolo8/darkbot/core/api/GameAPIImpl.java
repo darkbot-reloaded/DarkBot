@@ -59,6 +59,7 @@ public class GameAPIImpl<
 
     protected final String version;
 
+    private final ConfigAPI config;
     private final Consumer<Integer> fpsLimitListener; // Needs to be kept as a strong reference to avoid GC
 
     protected final LoginData loginData; // Used only if api supports LOGIN
@@ -96,6 +97,7 @@ public class GameAPIImpl<
                 direct.getVersion() + "d";
 
         Main main = HeroManager.instance.main;
+        config = main.configHandler;
 
         this.loginData = hasCapability(GameAPI.Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
         main.backpage.setLoginData(loginData);
@@ -103,7 +105,6 @@ public class GameAPIImpl<
         this.initiallyShown = hasCapability(GameAPI.Capability.INITIALLY_SHOWN) && !params.getAutoHide();
         this.mapManager = main.mapManager;
 
-        ConfigAPI config = main.configHandler;
         if (hasCapability(GameAPI.Capability.DIRECT_LIMIT_FPS)) {
             ConfigSetting<Integer> maxFps = config.requireConfig("bot_settings.api_config.max_fps");
             maxFps.addListener(fpsLimitListener = this::setMaxFps);
@@ -247,7 +248,7 @@ public class GameAPIImpl<
     protected void setData() {
         if (hasCapability(GameAPI.Capability.LOGIN)) {
             String url = "https://" + loginData.getUrl() + "/", sid = "dosid=" + loginData.getSid();
-            window.setData(url, sid, loginData.getPreloaderUrl(), loginData.getParams());
+            window.setData(url, sid, loginData.getPreloaderUrl(), loginData.getParams(config));
         }
     }
 
