@@ -38,7 +38,7 @@ public class DispatchManager {
         this.collected = new HashMap<>();
         this.lastCollected = new HashMap<>();
         this.gson = backpageManager.getGson();
-        this.captchaHandler = new CaptchaHandler(backpageManager,configAPI,
+        this.captchaHandler = new CaptchaHandler(backpageManager, configAPI,
                 "indexInternal.es?action=internalDispatch", "dispatch");
     }
 
@@ -52,7 +52,6 @@ public class DispatchManager {
     }
 
     /**
-     *
      * @param expiryTime only update if within
      * @return null if update wasn't required (non-expired), true if updated ok, false if update failed
      */
@@ -63,9 +62,9 @@ public class DispatchManager {
             String page = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getContent();
             if (captchaHandler.needsCaptchaSolve(page)) {
                 System.out.println("DispatchManager: Captcha Detected");
-                return captchaHandler.solveCaptcha();
+                captchaHandler.solveCaptcha();
+                return false;
             }
-
             lastDispatcherUpdate = System.currentTimeMillis();
             return InfoReader.updateAll(page, data);
         } catch (Exception e) {

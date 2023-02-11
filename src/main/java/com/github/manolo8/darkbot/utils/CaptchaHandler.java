@@ -12,7 +12,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class CaptchaHandler {
     private final BackpageManager backpage;
-    private final String base, action;
+    private final String base;
+    private final String action;
     private final ConfigSetting<Boolean> setting;
     private CompletableFuture<Map<String, String>> captchaResponseFuture;
 
@@ -32,16 +33,16 @@ public class CaptchaHandler {
         return page.contains("id=\"captchaScriptContainer\"");
     }
 
-    public boolean solveCaptcha() throws IOException {
-        if (setting == null || !setting.getValue() || CaptchaAPI.getInstance() == null) return false;
-        if (isSolvingCaptcha()) return false;
+    public void solveCaptcha() throws IOException {
+        if (setting == null || !setting.getValue() || CaptchaAPI.getInstance() == null) return;
+        if (isSolvingCaptcha()) return;
 
-        System.out.println("CaptchaHandler: Solving Captcha for " + this.action);
-        HttpURLConnection conn = backpage.getHttp(base).getConnection();
-        conn.setInstanceFollowRedirects(false);
-        if (!conn.getHeaderField("Location").isEmpty()) {
-            HttpURLConnection connection = backpage.getHttp(conn.getHeaderField("Location")).getConnection();
-            captchaResponseFuture = CaptchaAPI.getInstance().solveCaptchaFuture(connection.getURL(), IOUtils.read(connection.getInputStream(), true))
+        HttpURLConnection connection = backpage.getHttp(base).getConnection();
+        String page = IOUtils.read(connection.getInputStream());
+
+        if (needsCaptchaSolve(page)) {
+            System.out.println("CaptchaHandler: Solving Captcha for " + this.action);
+            captchaResponseFuture = CaptchaAPI.getInstance().solveCaptchaFuture(connection.getURL(), page)
                     .thenApply(r -> {
                         try {
                             if (r.isEmpty()) return r;
@@ -59,9 +60,6 @@ public class CaptchaHandler {
                 System.out.println("CaptchaHandler: Done Solving for " + this.action);
                 captchaResponseFuture = null;
             });
-            return true;
         }
-        return false;
     }
-
 }
