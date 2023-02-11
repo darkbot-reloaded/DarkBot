@@ -1,13 +1,19 @@
 package com.github.manolo8.darkbot.utils.login;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.github.manolo8.darkbot.backpage.BackpageManager;
+import com.google.gson.reflect.TypeToken;
+import eu.darkbot.api.managers.ConfigAPI;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginData {
-    private static final Pattern USER_ID_PATTERN = Pattern.compile("userID=(\\d+)");
+    private static final Type PARAMS_TYPE = new TypeToken<Map<String, String>>() {}.getType();
 
     private int userId;
-    private String username, password, sid, url, fullUrl, preloaderUrl, params;
+    private Map<String, String> params;
+    private String username, password, sid, url, fullUrl, preloaderUrl;
 
     public void setCredentials(String username, String password) {
         this.username = username;
@@ -22,15 +28,11 @@ public class LoginData {
 
     public void setPreloader(String preloaderUrl, String params) {
         this.preloaderUrl = preloaderUrl;
-        this.params = params;
-
-        Matcher matcher = USER_ID_PATTERN.matcher(params);
-        if (matcher.find()) {
-            try {
-                userId = Integer.parseInt(matcher.group(1));
-            } catch (NumberFormatException ignored) {
-                userId = 0;
-            }
+        this.params = BackpageManager.GSON.fromJson(params, PARAMS_TYPE);
+        try {
+            userId = Integer.parseInt(this.params.get("userID"));
+        } catch (NumberFormatException ignored) {
+            userId = 0;
         }
     }
 
@@ -58,8 +60,14 @@ public class LoginData {
         return preloaderUrl;
     }
 
-    public String getParams() {
-        return params;
+    public String getParams(ConfigAPI config) {
+        if (isNotInitialized()) return null;
+        // create copy of params to keep original values
+        return FlashVarReplacement.createVarsString(config, new HashMap<>(params));
+    }
+
+    public boolean isNotInitialized() {
+        return preloaderUrl == null || params == null;
     }
 
     public int getUserId() {
