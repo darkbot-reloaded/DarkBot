@@ -1,8 +1,11 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
+import eu.darkbot.api.extensions.FeatureException;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -23,6 +26,51 @@ public class IssueHandler {
     public IssueHandler(IssueHandler parent) {
         this.parent = parent;
         this.listener.add(uiListener::send);
+    }
+
+    public static void handleLoadFeatureException(FeatureDefinition<?> fd, Throwable e) {
+        handleFeatureException(fd, PluginIssue.Level.ERROR, "bot.issue.feature.failed_to_load", true, e);
+    }
+
+    public static boolean handleTickFeatureException(FeatureDefinition<?> fd, PluginIssue.Level defaultLevel, Throwable e) {
+        return handleFeatureException(fd, defaultLevel, "bot.issue.feature.failed_to_tick", false, e);
+    }
+
+    /**
+     * @return true if exception was {@link FeatureException#isCritical()}, false otherwise
+     */
+    private static boolean handleFeatureException(FeatureDefinition<?> fd, PluginIssue.Level defaultLevel,
+                                                  String defaultMessage, boolean printStackTrace, Throwable e) {
+        Objects.requireNonNull(fd, "Feature Definition cannot be null!");
+
+        FeatureException featureException = FeatureException.find(e);
+        if (featureException != null) {
+            boolean added = fd.getIssues().add(featureException);
+            if (added) {
+                // if exception is `FeatureException` print stacktrace only once
+                // may cache exception in the PluginIssue and print stacktrace evey x seconds or invokes
+                featureException.printStackTrace();
+            }
+
+            return featureException.isCritical();
+        }
+
+        fd.getIssues().add(defaultMessage, IssueHandler.createDescription(e), defaultLevel);
+        if (printStackTrace) e.printStackTrace();
+        return false;
+    }
+
+    private boolean add(FeatureException fe) {
+        String message = fe.getMessage();
+        String description = fe.getDescription() == null ? createDescription(fe.getCause()) : fe.getDescription();
+        PluginIssue.Level level = PluginIssue.Level.values()[fe.getLevel().ordinal()];
+
+        PluginIssue issue = new PluginIssue(message, description, level);
+        if (issues.add(issue)) {
+            listener.send(this);
+            return true;
+        }
+        return false;
     }
 
     public void addInfo(String message, String description) {

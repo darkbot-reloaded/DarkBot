@@ -28,6 +28,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
+import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
@@ -35,6 +36,7 @@ import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
+import com.github.manolo8.darkbot.modules.DummyExceptionModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.StartupChecks;
@@ -281,8 +283,10 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 e.printStackTrace();
                 setRunning(false);
             } catch (Throwable e) {
-                FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(newModule);
-                if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                FeatureDefinition<Module> fd = featureRegistry.getFeatureDefinition(newModule);
+                if (IssueHandler.handleTickFeatureException(fd, PluginIssue.Level.WARNING, e)) {
+                    setModule(new DummyExceptionModule(fd.getName()));
+                }
             }
             for (Behavior behaviour : behaviours) {
                 try {
@@ -292,9 +296,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
                     e.printStackTrace();
                     setRunning(false);
                 } catch (Throwable e) {
-                    featureRegistry.getFeatureDefinition(behaviour)
-                            .getIssues()
-                            .addFailure("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                    FeatureDefinition<?> fd = featureRegistry.getFeatureDefinition(behaviour);
+                    IssueHandler.handleTickFeatureException(fd, PluginIssue.Level.ERROR, e);
                 }
             }
         }

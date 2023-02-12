@@ -7,7 +7,6 @@ import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.utils.I18n;
-import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.managers.ExtensionsAPI;
@@ -119,8 +118,7 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
                 feature.setInstance(instance = featureLoader.loadFeature(feature));
                 return Optional.of(instance);
             } catch (Throwable e) {
-                feature.getIssues().addFailure("bot.issue.feature.failed_to_load", IssueHandler.createDescription(e));
-                e.printStackTrace();
+                IssueHandler.handleLoadFeatureException(feature, e);
                 return Optional.empty();
             }
         }
