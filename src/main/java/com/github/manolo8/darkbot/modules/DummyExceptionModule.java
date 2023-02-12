@@ -12,4 +12,9 @@ public class DummyExceptionModule extends DummyModule {
     public String getStatus() {
         return "Module: " + feature + ", occurred with critical error!";
     }
+
+    @Override
+    public String getStoppedStatus() {
+        return getStatus();
+    }
 }
