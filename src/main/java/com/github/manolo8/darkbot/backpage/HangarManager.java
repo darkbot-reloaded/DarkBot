@@ -73,6 +73,18 @@ public class HangarManager implements Tickable {
     }
 
     /**
+     * @return The ID of the current hangar. A value of 0 indicates that the
+     *         currentHangar has not been initialized.
+     */
+    public int getCurrentHangarId() {
+        return getHangarList().getData().getRet().getHangars().stream()
+                .filter(Hangar::isActive)
+                .map(Hangar::getHangarId)
+                .findFirst()
+                .orElse(0);
+    }
+
+    /**
      * Request hangar list to be updated within a certain timeframe.
      * This method should be repeatedly called to request updates
      * @param millis The maximum time to wait
