@@ -29,48 +29,53 @@ public class IssueHandler {
     }
 
     public static void handleLoadFeatureException(FeatureDefinition<?> fd, Throwable e) {
-        handleFeatureException(fd, PluginIssue.Level.ERROR, "bot.issue.feature.failed_to_load", true, e);
+        handleFeatureException(fd, PluginIssue.Level.ERROR, "bot.issue.feature.failed_to_load", e);
     }
 
     public static boolean handleTickFeatureException(FeatureDefinition<?> fd, PluginIssue.Level defaultLevel, Throwable e) {
-        return handleFeatureException(fd, defaultLevel, "bot.issue.feature.failed_to_tick", false, e);
+        return handleFeatureException(fd, defaultLevel, "bot.issue.feature.failed_to_tick", e);
     }
 
     /**
      * @return true if exception was {@link FeatureException#isCritical()}, false otherwise
      */
     private static boolean handleFeatureException(FeatureDefinition<?> fd, PluginIssue.Level defaultLevel,
-                                                  String defaultMessage, boolean printStackTrace, Throwable e) {
+                                                  String defaultMessage, Throwable e) {
         Objects.requireNonNull(fd, "Feature Definition cannot be null!");
 
         FeatureException featureException = FeatureException.find(e);
         if (featureException != null) {
-            boolean added = fd.getIssues().add(featureException);
-            if (added) {
-                // if exception is `FeatureException` print stacktrace only once
-                // may cache exception in the PluginIssue and print stacktrace evey x seconds or invokes
-                featureException.printStackTrace();
-            }
-
+            fd.getIssues().addIssue(featureException);
             return featureException.isCritical();
         }
 
-        fd.getIssues().add(defaultMessage, IssueHandler.createDescription(e), defaultLevel);
-        if (printStackTrace) e.printStackTrace();
+        PluginIssue issue = new PluginIssue(defaultMessage, IssueHandler.createDescription(e), defaultLevel, e);
+        fd.getIssues().addIssue(issue);
         return false;
     }
 
-    private boolean add(FeatureException fe) {
+    private void addIssue(FeatureException fe) {
         String message = fe.getMessage();
         String description = fe.getDescription() == null ? createDescription(fe.getCause()) : fe.getDescription();
         PluginIssue.Level level = PluginIssue.Level.values()[fe.getLevel().ordinal()];
 
-        PluginIssue issue = new PluginIssue(message, description, level);
-        if (issues.add(issue)) {
+        PluginIssue issue = new PluginIssue(message, description, level, fe);
+        addIssue(issue);
+    }
+
+    private void addIssue(PluginIssue pluginIssue) {
+        if (issues.contains(pluginIssue)) {
+            for (PluginIssue issue : issues) {
+                if (issue.equals(pluginIssue)) {
+                    issue.increaseAndPrint();
+                    return;
+                }
+            }
+        } else {
+            issues.add(pluginIssue);
+            pluginIssue.increaseAndPrint();
             listener.send(this);
-            return true;
         }
-        return false;
     }
 
     public void addInfo(String message, String description) {

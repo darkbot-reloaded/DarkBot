@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.gui.utils;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -48,5 +50,11 @@ public class Strings {
         if (text != null && text.length() > 30 && (sepIdx = text.indexOf(File.separator, text.length() - 30)) != -1)
             return ".." + text.substring(sepIdx);
         else return text;
+    }
+
+    public static String exceptionToString(Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 }

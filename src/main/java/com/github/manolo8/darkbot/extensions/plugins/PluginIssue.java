@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
+import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.extensions.IssueHandler;
 
 import java.util.Objects;
@@ -12,19 +14,28 @@ public class PluginIssue implements Comparable<PluginIssue>, IssueHandler.Issue 
     }
 
     private final String messageKey, description;
+    private final String exceptionString;
     private final Level level;
 
+    private int invokes;
+
     public PluginIssue(String messageKey, String description, Level level) {
+        this(messageKey, description, level, null);
+    }
+
+    public PluginIssue(String messageKey, String description, Level level, Throwable cause) {
         Objects.requireNonNull(messageKey, "Message must not be null");
         Objects.requireNonNull(description, "Description must not be null");
         Objects.requireNonNull(level, "Description must not be null");
         this.messageKey = messageKey;
         this.description = description;
         this.level = level;
+        this.exceptionString = cause == null ? null : Strings.exceptionToString(cause);
     }
 
     public String getMessage() {
-        return I18n.getOrDefault(messageKey, messageKey);
+        String amountStr = invokes > 0 ? "[" + invokes + "] " : "";
+        return amountStr + I18n.getOrDefault(messageKey, messageKey);
     }
 
     public String getMessageKey() {
@@ -46,6 +57,12 @@ public class PluginIssue implements Comparable<PluginIssue>, IssueHandler.Issue 
 
     public Level getLevel() {
         return level;
+    }
+
+    public void increaseAndPrint() {
+        if (MathUtils.isPowerOfTen(++invokes) && exceptionString != null) {
+            System.err.print("[" + invokes + "] " + exceptionString);
+        }
     }
 
     @Override
