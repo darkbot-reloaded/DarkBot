@@ -27,9 +27,9 @@ import java.util.List;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
-    private final PairArray commands         = PairArray.ofArray();
-    private final PairArray proxies          = PairArray.ofArray();
-    private final PairArray mediators        = PairArray.ofArray();
+    private final PairArray commands = PairArray.ofArray();
+    private final PairArray proxies = PairArray.ofArray();
+    private final PairArray mediators = PairArray.ofArray();
     private final List<Updatable> updatables = new ArrayList<>();
 
     private final PluginAPI pluginAPI;
@@ -53,21 +53,21 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public FacadeManager(PluginAPI pluginApi) {
         this.pluginAPI = pluginApi;
 
-        this.log            = registerMediator("LogWindowMediator",   LogMediator.class);
-        this.chat           = registerProxy("ChatProxy",              ChatProxy.class);
-        this.stats          = registerProxy("StatsProxy",             StatsProxy.class);
-        this.escort         = registerProxy("payload_escort",         EscortProxy.class);
-        this.booster        = registerProxy("BoosterProxy",           BoosterProxy.class);
-        this.settings       = registerProxy("SettingsWindowFUIProxy", SettingsProxy.class);
-        this.slotBars       = registerProxy("ItemsControlMenuProxy",  SlotBarsProxy.class);
-        this.labyrinth      = registerProxy("frozen_labyrinth",       FrozenLabyrinthProxy.class);
-        this.eternalGate    = registerProxy("eternal_gate",           EternalGateProxy.class);
-        this.blacklightGate = registerProxy("eternal_blacklight",     EternalBlacklightProxy.class);
-        this.chrominEvent   = registerProxy("chrominEvent",           ChrominProxy.class);
-        this.astralGate     = registerProxy("rogue_lite",             AstralGateProxy.class);
-        this.highlight      = registerProxy("HighlightProxy",         HighlightProxy.class);
-        this.spaceMapWindowProxy = registerProxy("spacemap",          SpaceMapWindowProxy.class);
-        this.plutus         = registerProxy("plutus",                 GauntletPlutusProxy.class);
+        this.log = registerMediator("LogWindowMediator", LogMediator.class);
+        this.chat = registerProxy("ChatProxy", ChatProxy.class);
+        this.stats = registerProxy("StatsProxy", StatsProxy.class);
+        this.escort = registerProxy("payload_escort", EscortProxy.class);
+        this.booster = registerProxy("BoosterProxy", BoosterProxy.class);
+        this.settings = registerProxy("SettingsWindowFUIProxy", SettingsProxy.class);
+        this.slotBars = registerProxy("ItemsControlMenuProxy", SlotBarsProxy.class);
+        this.labyrinth = registerProxy("frozen_labyrinth", FrozenLabyrinthProxy.class);
+        this.eternalGate = registerProxy("eternal_gate", EternalGateProxy.class);
+        this.blacklightGate = registerProxy("eternal_blacklight", EternalBlacklightProxy.class);
+        this.chrominEvent = registerProxy("chrominEvent", ChrominProxy.class);
+        this.astralGate = registerProxy("rogue_lite", AstralGateProxy.class);
+        this.highlight = registerProxy("HighlightProxy", HighlightProxy.class);
+        this.spaceMapWindowProxy = registerProxy("spacemap", SpaceMapWindowProxy.class);
+        this.plutus = registerProxy("plutus", GauntletPlutusProxy.class);
     }
 
     public <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
@@ -79,6 +79,16 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
 
     public <T extends Updatable> T registerProxy(String key, Class<T> proxyClass) {
         T proxy = pluginAPI.requireInstance(proxyClass);
+        this.proxies.addLazy(key, ((Updatable) proxy)::update);
+        this.updatables.add(proxy);
+        return proxy;
+    }
+
+    public <T extends Updatable> T updateProxy(String key, Class<T> proxyClass) {
+        T proxy = pluginAPI.requireInstance(proxyClass);
+        this.proxies.remove(key);
+        this.updatables.removeIf(updatable -> updatable.getClass() == proxy.getClass());
+
         this.proxies.addLazy(key, ((Updatable) proxy)::update);
         this.updatables.add(proxy);
         return proxy;

@@ -52,6 +52,10 @@ public abstract class PairArray extends SwfPtrCollection {
         addLazy(key, consumer, true);
     }
 
+    public void remove(String key) {
+        this.lazy.remove(key);
+    }
+
     public void addLazy(String key, Consumer<Long> consumer, boolean cacheValue) {
         this.lazy.computeIfAbsent(key, k -> (cacheValue ? new Lazy<>() : new Lazy.NoCache<>())).add(consumer);
     }
