@@ -218,6 +218,7 @@ public class DispatchManager {
 
     private enum InfoReader {
         PERMIT("name=\"permit\" value=\"([0-9]+)\"", DispatchData::setPermit),
+        PERMIT_PLUS("name=\"permit plus\" value=\"([0-9]+)\"", DispatchData::setPermit),
         GATE_UNIT("name=\"ggeu\" value=\"([0-9]+)\"", DispatchData::setGateUnits),
         SLOTS(":([0-9]+).*class=\"userCurrentMax\">([0-9]+)", DispatchData::setAvailableSlots, DispatchData::setMaxSlots),
         PRIME_COUPON("name=\"quickcoupon\" value=\"([0-9]+)\"", DispatchData::setPrimeCoupons),
