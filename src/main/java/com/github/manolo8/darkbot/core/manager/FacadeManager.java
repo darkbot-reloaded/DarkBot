@@ -84,7 +84,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         return proxy;
     }
 
-    public <T extends Updatable> T updateProxy(String key, Class<T> proxyClass) {
+    public <T extends Updatable> T replaceProxy(String key, Class<T> proxyClass) {
         T proxy = pluginAPI.requireInstance(proxyClass);
         this.proxies.remove(key);
         this.updatables.removeIf(updatable -> updatable.getClass() == proxy.getClass());
