@@ -15,11 +15,11 @@ public class RefinementGui extends Gui implements API.Singleton {
 
     private final ObjArray basicOresArr      = ObjArray.ofArrObj();
     private final ObjArray upgradableOresArr = ObjArray.ofArrObj();
-    private final ObjArray upgradedLabArr = ObjArray.ofArrObj();
+    private final ObjArray upgradedLabArr    = ObjArray.ofArrObj();
 
     private final List<Ore> basicOres      = new ArrayList<>();
     private final List<Ore> upgradableOres = new ArrayList<>();
-    private final List<Ore> upgradedLab = new ArrayList<>();
+    private final List<Ore> upgradedLab    = new ArrayList<>();
 
     public Ore get(OreType type) {
         List<Ore> oresListRef = type.attribute == OreType.Attribute.BASIC ? basicOres : upgradableOres;
