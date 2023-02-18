@@ -77,11 +77,15 @@ public class HangarManager implements Tickable {
      *         currentHangar has not been initialized.
      */
     public int getCurrentHangarId() {
-        return getHangarList().getData().getRet().getHangars().stream()
-                .filter(Hangar::isActive)
-                .map(Hangar::getHangarId)
-                .findFirst()
-                .orElse(0);
+        if (getHangarList() != null && getHangarList().getData() != null && getHangarList().getData().getRet() != null
+                && getHangarList().getData().getRet().getHangars() != null) {
+            return getHangarList().getData().getRet().getHangars().stream()
+                    .filter(Hangar::isActive)
+                    .map(Hangar::getHangarId)
+                    .findFirst()
+                    .orElse(0);
+        }
+        return 0;
     }
 
     /**
@@ -149,6 +153,11 @@ public class HangarManager implements Tickable {
         }
 
         return hangar;
+    }
+
+    @Deprecated
+    public boolean changeHangar(int hangarId) {
+        return changeHangar(String.valueOf(hangarId));
     }
 
     /* For backwards compatibility, keep methods from legacy hangar manager */
