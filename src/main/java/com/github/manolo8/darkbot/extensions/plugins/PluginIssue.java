@@ -34,8 +34,8 @@ public class PluginIssue implements Comparable<PluginIssue>, IssueHandler.Issue 
     }
 
     public String getMessage() {
-        String amountStr = invokes > 0 ? "[" + invokes + "] " : "";
-        return amountStr + I18n.getOrDefault(messageKey, messageKey);
+        String suffix = invokes > 1 ? "(x" + invokes + ")" : "";
+        return I18n.getOrDefault(messageKey, messageKey) + suffix;
     }
 
     public String getMessageKey() {
@@ -69,15 +69,23 @@ public class PluginIssue implements Comparable<PluginIssue>, IssueHandler.Issue 
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PluginIssue that = (PluginIssue) o;
-        return level == that.level &&
-                messageKey.equals(that.messageKey) &&
-                description.equals(that.description);
+
+        PluginIssue issue = (PluginIssue) o;
+
+        if (!Objects.equals(messageKey, issue.messageKey)) return false;
+        if (!Objects.equals(description, issue.description)) return false;
+        if (!Objects.equals(exceptionString, issue.exceptionString))
+            return false;
+        return level == issue.level;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(messageKey, description, level);
+        int result = messageKey != null ? messageKey.hashCode() : 0;
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (exceptionString != null ? exceptionString.hashCode() : 0);
+        result = 31 * result + (level != null ? level.hashCode() : 0);
+        return result;
     }
 
     @Override

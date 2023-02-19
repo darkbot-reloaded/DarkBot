@@ -96,8 +96,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
                     try {
                         task.onBackgroundTick();
                     } catch (Throwable e) {
-                        FeatureDefinition<?> fd = main.featureRegistry.getFeatureDefinition(task);
-                        IssueHandler.handleTickFeatureException(fd, PluginIssue.Level.WARNING, e);
+                        main.featureRegistry.getFeatureDefinition(task)
+                                .getIssues()
+                                .handleTickFeatureException(PluginIssue.Level.WARNING, e);
                     }
                 }
             }
@@ -144,8 +145,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
                     try {
                         task.onTickTask();
                     } catch (Throwable e) {
-                        FeatureDefinition<?> fd = main.featureRegistry.getFeatureDefinition(task);
-                        IssueHandler.handleTickFeatureException(fd, PluginIssue.Level.WARNING, e);
+                        main.featureRegistry.getFeatureDefinition(task)
+                                .getIssues()
+                                .handleTickFeatureException(PluginIssue.Level.WARNING, e);
                     }
                 }
             }

@@ -284,7 +284,10 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 setRunning(false);
             } catch (Throwable e) {
                 FeatureDefinition<Module> fd = featureRegistry.getFeatureDefinition(newModule);
-                if (IssueHandler.handleTickFeatureException(fd, PluginIssue.Level.WARNING, e)) {
+                fd.getIssues().handleTickFeatureException(PluginIssue.Level.WARNING, e);
+
+                // do not check if module is enabled here via `fd.canLoad()`
+                if (!fd.getIssues().canLoad()) {
                     setModule(new DummyExceptionModule(fd.getName()));
                 }
             }
@@ -296,8 +299,9 @@ public class Main extends Thread implements PluginListener, BotAPI {
                     e.printStackTrace();
                     setRunning(false);
                 } catch (Throwable e) {
-                    FeatureDefinition<?> fd = featureRegistry.getFeatureDefinition(behaviour);
-                    IssueHandler.handleTickFeatureException(fd, PluginIssue.Level.ERROR, e);
+                    featureRegistry.getFeatureDefinition(behaviour)
+                            .getIssues()
+                            .handleTickFeatureException(PluginIssue.Level.ERROR, e);
                 }
             }
         }
