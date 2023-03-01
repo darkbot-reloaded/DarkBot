@@ -31,6 +31,7 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
     @Override
     public void install(BotInstaller botInstaller) {
         botInstaller.settingsAddress.add(value -> {
+            force2d = 0;
             address = value;
             driverNamePrinted = false;
         });
@@ -41,27 +42,27 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
         this.config = API.readMemoryInt(address + 92);
 
         // x-1 & x-2 maps enemy counter
-        this.enemyCount = API.readInt(main.settingsManager.address, 592, 40);
-        this.attackViaSlotbar = API.readBoolean(main.settingsManager.address, 164);
+        this.enemyCount = API.readInt(address, 600, 40);
+        this.attackViaSlotbar = API.readBoolean(address, 164);
 
         this.nextMap = API.readMemoryInt(address + 244);
         this.currMap = API.readMemoryInt(address + 248);
 
-        this.force2d = API.readMemoryInt(address, 784, 0x20);
+        this.force2d = API.readMemoryInt(address, 792, 0x20);
 
-        this.lang = API.readMemoryStringFallback(address, null, 640);
+        this.lang = API.readMemoryStringFallback(address, null, 648);
 
-        this.uiWrapper = Main.API.readLong(main.settingsManager.address, 864);
-        this.hudWrapper = Main.API.readLong(main.settingsManager.address, 856);
+        this.uiWrapper = Main.API.readLong(address, 872);
+        this.hudWrapper = Main.API.readLong(address, 864);
 
-        // Enforce GPU capabilities support
-//        if (main.config.BOT_SETTINGS.API_CONFIG.ENFORCE_HW_ACCEL) {
-//            API.replaceInt(address + 332, 0, 1);
-//            API.replaceInt(address + 340, 0, 1);
-//        }
+        // Enforce GPU capabilities support - it still may be an issue on Windows & 2D mode
+        if (is2DForced() && main.config.BOT_SETTINGS.API_CONFIG.ENFORCE_HW_ACCEL) {
+            API.replaceInt(address + 332, 0, 1);
+            API.replaceInt(address + 340, 0, 1);
+        }
 
         if (!driverNamePrinted) {
-            this.driver = API.readString(address, "", 432);
+            this.driver = API.readString(address, "", 440);
 
             if (driver != null && !driver.isEmpty()) {
                 System.out.println("Game is using: " + driver + " | force2d: " + force2d);
