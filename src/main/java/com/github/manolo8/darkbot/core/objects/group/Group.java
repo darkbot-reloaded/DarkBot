@@ -18,7 +18,6 @@ public class Group extends Updatable.Auto {
     public GroupMember heroMember = new GroupMember();
 
     public int id;
-    public int size;
     public int maxSize;
     public boolean isOpen; // if the group is open to allowing anyone to invite
     public boolean isLeader;
@@ -53,7 +52,6 @@ public class Group extends Updatable.Auto {
         synchronized (Main.UPDATE_LOCKER) {
             filtered = membersPtr.sync(members, GroupMember::new, m -> m.id != hero.id);
         }
-        size = members.size() + 1;
         heroMember = filtered.stream().findFirst().orElse(null);
         isLeader = heroMember != null && heroMember.isLeader;
         selectedMember = members.stream().filter(m -> selectedAddr == m.address).findFirst().orElse(null);
@@ -61,7 +59,6 @@ public class Group extends Updatable.Auto {
 
     private void reset() {
         members.clear();
-        size = 0;
         isLeader = false;
         heroMember = null;
         selectedMember = null;
@@ -76,14 +73,14 @@ public class Group extends Updatable.Auto {
 
     public int indexOf(int id) {
         if (members.isEmpty()) return -1;
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < members.size(); i++)
             if (members.get(i).id == id) return i;
         return -1;
     }
 
     public int indexOf(GroupMember member) {
         if (members.isEmpty()) return -1;
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < members.size(); i++)
             if (members.get(i) == member) return i;
         return -1;
     }
