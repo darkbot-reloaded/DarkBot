@@ -10,7 +10,7 @@ public class DummyExceptionModule extends DummyModule {
 
     @Override
     public String getStatus() {
-        return "Module: " + feature + ", occurred with critical error!";
+        return "Module '" + feature + "' failed with critical error!\nSee plugins tab for more info";
     }
 
     @Override
