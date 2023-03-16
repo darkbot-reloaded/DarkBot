@@ -159,7 +159,7 @@ public class StarManager implements API.Singleton {
                 .addMap(158, "R-Zone 9", "R-Z").addMap(159, "R-Zone 10", "R-Z")
                 .addMap(420, "WarGame 1", "WG").addMap(421, "WarGame 2", "WG").addMap(422, "WarGame 3", "WG")
                 .addMap(423, "WarGame 4", "WG").addMap(424, "WarGame 5", "WG").addMap(425, "WarGame 6", "WG");
-
+        /*
                 // Frozen laberynth
         mapBuild.addMap(430, "ATLAS A"  ).exitBy(55)
                 .addMap(431, "ATLAS B"  ).exitBy(55)
@@ -177,7 +177,7 @@ public class StarManager implements API.Singleton {
                 .addMap(443, "Aquila"   ).exitBy(55)
                 .addMap(444, "Orion"    ).exitBy(55)
                 .addMap(445, "Maia"     ).exitBy(55);
-        /*
+        */
                 // Mimesis escort maps
         mapBuild.addGG(430, "Escort VRU 1", "ESC-V1").exitBy(1)
                 .addGG(431, "Escort VRU 2", "ESC-V2").exitBy(1)
@@ -188,6 +188,7 @@ public class StarManager implements API.Singleton {
                 .addGG(436, "Escort EIC 1", "ESC-E1").exitBy(1)
                 .addGG(437, "Escort EIC 2", "ESC-E2").exitBy(1)
                 .addGG(438, "Escort EIC 3", "ESC-E3").exitBy(1);
+        /*
                 // Eternal gate event
         mapBuild.addGG(439, "Eternal Gate", "GG ∞")
                 .addGG(440, "Eternal Gate", "GG ∞")
