@@ -357,9 +357,10 @@ public class PetManager extends Gui implements PetAPI {
         if (currentModule == null) {
             Gear current = null;
             for (Gear gear : locatorList) {
-                if (gear.check == currGearCheck)
+                if (gear.check == currGearCheck) {
+                    current = gear;
                     currentSubmodules.add(gear.id);
-                current = gear;
+                }
             }
 
             currentSubModule = current;
