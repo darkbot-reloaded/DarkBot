@@ -157,7 +157,7 @@ public class PetManager extends Gui implements PetAPI {
         if (selection != ModuleStatus.SELECTED
                 || (currentModule != null && currentModule.id != moduleId)
                 || (currentSubmodules.isEmpty() && submoduleIdx != -1)
-                || (!currentSubmodules.contains(submoduleId))) {
+                || (!currentSubmodules.isEmpty() && !currentSubmodules.contains(submoduleId))) {
             if (show(true)) this.selectModule(moduleId, submoduleIdx);
         } else if (System.currentTimeMillis() > this.selectModuleTime) show(false);
     }
