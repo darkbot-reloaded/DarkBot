@@ -4,16 +4,18 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import eu.darkbot.api.game.other.Point;
 
-public class SpriteObject extends Updatable.Auto implements Point {
-    public int composite;
+public class SpriteObject extends Updatable implements Point {
+    //public int composite;
 
-    public double x, y;
+    private double x, y;
 
     @Override
     public void update() {
         // composite = Main.API.readInt(address + 8);
-        x = (Main.API.readInt(address, 0x48, 0x58)) / 20d;
-        y = (Main.API.readInt(address, 0x48, 0x5C)) / 20d;
+
+        long posHolder = Main.API.readLong(address + 72);
+        x = Main.API.readInt(posHolder + 88) / 20d;
+        y = Main.API.readInt(posHolder + 92) / 20d;
     }
 
     @Override

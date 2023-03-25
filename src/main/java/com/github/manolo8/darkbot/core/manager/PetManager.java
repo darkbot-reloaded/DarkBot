@@ -390,6 +390,7 @@ public class PetManager extends Gui implements PetAPI {
             return;
         }
         locatorTab.update(locatorBaseAddr);
+        locatorTab.update();
         int oldSize = locatorNpcList.getSize();
         locatorNpcList.update(API.readMemoryLong(locatorBaseAddr + 224));
 
@@ -687,6 +688,7 @@ public class PetManager extends Gui implements PetAPI {
         @Override
         public boolean updateAndReport() {
             sprite.update(address);
+            sprite.update();
 
             int id = API.readMemoryInt(address + 172);
             int parentId = API.readMemoryInt(address + 176); //assume, -1 if none

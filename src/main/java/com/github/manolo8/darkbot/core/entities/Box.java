@@ -32,7 +32,7 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
         this.update(address);
         this.update();
 
-        PAST_BOXES.entrySet().removeIf(e -> e.getValue() <= System.currentTimeMillis());
+        PAST_BOXES.values().removeIf(v -> v <= System.currentTimeMillis());
         if (PAST_BOXES.containsKey(locationInfo.now))
             invalidTimer.activate();
     }
