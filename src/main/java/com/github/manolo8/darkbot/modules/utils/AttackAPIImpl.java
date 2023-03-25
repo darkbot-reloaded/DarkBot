@@ -46,7 +46,7 @@ public class AttackAPIImpl extends AbstractAttackImpl implements Listener {
         this.mapManager = mapManager;
 
         this.shipAbility = config.requireConfig("loot.ship_ability");
-        this.shipAbilityMinHp = config.requireConfig("loot.ship_ability.min");
+        this.shipAbilityMinHp = config.requireConfig("loot.ship_ability_min");
     }
 
     @Override
