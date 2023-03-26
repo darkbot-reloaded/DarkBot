@@ -4,9 +4,11 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.ui.FlatNativeWindowBorder;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.github.manolo8.darkbot.extensions.plugins.PluginClassLoader;
+import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
+import eu.darkbot.util.Popups;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,6 +47,9 @@ public class Bot {
 
             // Load necessary native libraries
             FlatNativeWindowBorder.isSupported();
+
+            // set icon here to use it in login popup, java check popup etc.
+            Popups.setDefaultIcon(MainGui.ICON);
 
             UIManager.setLookAndFeel(new DarkLaf());
             UIManager.put("Button.arc", 0);
