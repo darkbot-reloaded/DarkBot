@@ -365,7 +365,7 @@ public class PetManager extends Gui implements PetAPI {
 
             currentSubModule = current;
             if (current != null) currentModule = findGearById(current.parentId);
-        }
+        } else currentSubModule = null;
 
         if (currentSubmodules.size() > 1) {
             // check every 5 minutes if we have selected correct alien
@@ -374,6 +374,7 @@ public class PetManager extends Gui implements PetAPI {
 
             // recheck on size change with same check-address
             if (submodulesSize != currentSubmodules.size()) {
+                submodulesCheckTimer.activate();
                 submodulesSize = currentSubmodules.size();
                 selection = ModuleStatus.NOTHING;
             }

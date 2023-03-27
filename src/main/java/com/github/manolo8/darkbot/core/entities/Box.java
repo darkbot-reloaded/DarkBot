@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.config.BoxInfo;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.Offsets;
-import eu.darkbot.api.game.other.Location;
 import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +14,7 @@ import java.util.Map;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
-    private static final Map<Location, Long> PAST_BOXES = new HashMap<>();
+    private static final Map<String, Long> PAST_BOXES = new HashMap<>();
 
     private final Timer invalidTimer = Timer.get(1_500);
 
@@ -30,18 +29,20 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
     public Box(int id, long address) {
         super(id);
         this.update(address);
-        this.update();
 
+        // ignore box for 1.5sec if reappears with same hash in 1.5sec
         PAST_BOXES.values().removeIf(v -> v <= System.currentTimeMillis());
-        if (PAST_BOXES.containsKey(locationInfo.now))
+        if (PAST_BOXES.containsKey(hash))
             invalidTimer.activate();
     }
 
     @Override
     public void removed() {
         super.removed();
+
+        // add only if is not a `fake` box
         if (invalidTimer.isInactive())
-            PAST_BOXES.put(locationInfo.now, System.currentTimeMillis() + 1_500);
+            PAST_BOXES.put(hash, System.currentTimeMillis() + 1_500);
     }
 
     @Override
