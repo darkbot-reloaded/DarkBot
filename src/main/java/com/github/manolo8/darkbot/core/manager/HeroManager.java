@@ -135,10 +135,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         if (targetPtr == 0) inGameTarget = null;
         else if (targetPtr == petAddress) inGameTarget = pet;
         else if (inGameTarget == null || inGameTarget.address != targetPtr)
-            inGameTarget = main.mapManager.entities.allEntities.stream()
-                    .flatMap(Collection::stream)
-                    .filter(entity -> entity.address == targetPtr)
-                    .findAny().orElse(null);
+            inGameTarget = main.mapManager.entities.findEntityByAddress(targetPtr);
 
         if (lastTarget != target) setLocalTarget(target);
     }

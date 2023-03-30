@@ -28,6 +28,7 @@ import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.util.Timer;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
@@ -38,8 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.*;
@@ -47,6 +47,7 @@ import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.*;
 public class EntityList extends Updatable implements EntitiesAPI {
     public final EntityRegistry entityRegistry = new EntityRegistry();
 
+    public final List<Entity> all                         = new ArrayList<>();
     public final List<Obstacle> obstacles                 = new ArrayList<>();
     public final List<List<? extends Entity>> allEntities = new ArrayList<>();
 
@@ -61,13 +62,13 @@ public class EntityList extends Updatable implements EntitiesAPI {
     public final List<Pet> pets                     = register(PET);
     public final List<BattleStation> battleStations = register(CBS_ASTEROID, CBS_MODULE, CBS_STATION, CBS_MODULE_CON, CBS_CONSTRUCTION);
     public final List<BasePoint> basePoints         = register(BASE_HANGAR, BASE_STATION, HEADQUARTER, QUEST_GIVER, BASE_TURRET, REPAIR_STATION, REFINERY);
-    public final List<Entity> unknown               = register();
+    public final List<Entity> unknown               = register(UNKNOWN);
     public final FakeNpc fakeNpc;
 
     private final List<Relay> relays = register(LOW_RELAY);
     private final List<SpaceBall> spaceBalls = register(SPACE_BALL);
     private final List<StaticEntity> staticEntities = register(POD_HEAL, BUFF_CAPSULE,
-            BURNING_TRAIL, PLUTUS_GENERATOR, PLUTUS_GENERATOR_RED, PLUTUS_GENERATOR_GREEN, PET_BEACON);
+            BURNING_TRAIL, BURNING_TRAIL_ENEMY, PLUTUS_GENERATOR, PLUTUS_GENERATOR_RED, PLUTUS_GENERATOR_GREEN, PET_BEACON);
 
     private final Main main;
     private final EventBrokerAPI eventBroker;
@@ -82,11 +83,12 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
         this.entityRegistry.addToAll(entity -> {
             if (entity instanceof Obstacle) obstacles.add((Obstacle) entity);
-            eventBroker.sendEvent(new EntityCreateEvent(entity));
         });
-        this.entityRegistry.addDefault(e -> {
-            unknown.add(e);
-            eventBroker.sendEvent(new EntityCreateEvent(e));
+        this.entityRegistry.addDefault(unknown::add);
+
+        this.entityRegistry.onAnyEntityCreate(entity -> {
+            all.add(entity);
+            eventBroker.sendEvent(new EntityCreateEvent(entity));
         });
     }
 
@@ -131,26 +133,20 @@ public class EntityList extends Updatable implements EntitiesAPI {
     private void removeAllInvalidEntities() {
         main.hero.pet.removed = main.hero.pet.isInvalid(address);
 
-        for (List<? extends Entity> entities : allEntities) {
-            for (Iterator<? extends Entity> it = entities.iterator(); it.hasNext();) {
-                Entity entity = it.next();
-                if (entity.isInvalid(address) || entity.address == main.hero.address || entity.address == main.hero.pet.address) {
-                    it.remove();
-                    ids.remove(entity.id);
-                    entity.removed();
+        for (Iterator<Entity> it = all.iterator(); it.hasNext(); ) {
+            Entity entity = it.next();
 
-                    if (entities != ships)
-                        eventBroker.sendEvent(new EntityRemoveEvent(entity));
-
-                } else entity.update();
-            }
+            if (entity.isInvalid(address) || entity.address == main.hero.address || entity.address == main.hero.pet.address) {
+                it.remove();
+                entity.removed();
+                ids.remove(entity.id);
+                eventBroker.sendEvent(new EntityRemoveEvent(entity));
+            } else entity.update();
         }
 
         this.obstacles.removeIf(Obstacle::isRemoved);
-    }
-
-    private void doInEachEntity(Consumer<Entity> consumer) {
-        allEntities.forEach(entities -> entities.forEach(consumer));
+        for (List<? extends Entity> entities : allEntities)
+            entities.removeIf(Predicate.not(Entity::isValid));
     }
 
     public void clear() {
@@ -161,17 +157,16 @@ public class EntityList extends Updatable implements EntitiesAPI {
             obstacles.clear();
             fakeNpc.removed();
 
-            allEntities.forEach(entities -> {
-                entities.forEach(Entity::removed);
+            for (Entity entity : all) {
+                entity.removed();
+                eventBroker.sendEvent(new EntityRemoveEvent(entity));
+            }
+            all.clear();
 
-                if (entities != ships)
-                    entities.forEach(e -> eventBroker.sendEvent(new EntityRemoveEvent(e)));
+            for (List<? extends Entity> entities : allEntities) {
                 entities.clear();
-            });
+            }
         }
-    }
-
-    private void refreshRadius(boolean running) {
     }
 
     private Location lastLocatorLocation = new Location();
@@ -195,6 +190,18 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
             if (!npcs.contains(fakeNpc)) npcs.add(fakeNpc);
         }
+    }
+
+    public @Nullable Entity findEntityByAddress(long entityAddress) {
+        if (main.hero.address == entityAddress) return main.hero;
+        if (main.hero.pet.address == entityAddress) return main.hero.pet;
+
+        for (Entity entity : all) {
+            if (entity.address == entityAddress) {
+                return entity;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -259,9 +266,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
     @Override
     public Collection<? extends eu.darkbot.api.game.entities.Entity> getAll() {
-        return allEntities.stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+        return Collections.unmodifiableList(all);
     }
 
     @Override

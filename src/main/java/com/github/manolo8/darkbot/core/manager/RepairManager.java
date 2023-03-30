@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.entities.bases.BaseRepairStation;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.swf.IntArray;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
@@ -80,6 +81,34 @@ public class RepairManager implements Manager, RepairAPI {
         return System.currentTimeMillis() - beforeReviveTime < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L);
     }
 
+    private boolean instantRepaired = true;
+    private void checkInstantRepair() {
+        if (instantRepaired || !main.isRunning()) return;
+
+        HeroManager hero = main.hero;
+        if (lastDeath != null && hero.getHealth().hpPercent() < 0.25
+                && lastDeath.toEpochMilli() + 15_000 > System.currentTimeMillis()) {
+            main.mapManager.entities.basePoints.stream()
+                    .filter(basePoint -> basePoint instanceof BaseRepairStation)
+                    .findAny()
+                    .filter(basePoint -> basePoint.clickable.enabled)
+                    .ifPresent(basePoint -> {
+                        int minRepairs = main.config.GENERAL.SAFETY.INSTANT_REPAIR;
+                        if (minRepairs == 0) return;
+
+                        BaseRepairStation repairStation = (BaseRepairStation) basePoint;
+
+                        int currentRepairs = repairStation.getInstantRepairs();
+                        if (currentRepairs >= minRepairs) {
+                            repairStation.clickable.click();
+                            System.out.println("Used instant repair! " + currentRepairs);
+                        }
+
+                        instantRepaired = true;
+                    });
+        }
+    }
+
     public void tick() {
         boolean alive = isAlive();
 
@@ -87,11 +116,13 @@ public class RepairManager implements Manager, RepairAPI {
             if (main.hero.address != 0) // possibly alive but we are not sure yet
                 destroyed = false;
 
+            checkInstantRepair();
             beforeReviveTime = -1;
             return;
         }
 
         if (!destroyed) {
+            instantRepaired = false;
             destroyed = true;
             deaths++;
             lastDeath = Instant.now();

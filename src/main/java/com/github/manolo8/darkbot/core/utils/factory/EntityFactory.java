@@ -37,12 +37,12 @@ import static com.github.manolo8.darkbot.Main.API;
 public enum EntityFactory implements EntityBuilder {
     BOX             (Box::new,           "box_.*"),
     ORE             (Box.Ore::new,       "ore_.*"),
-    X2_BEACON       (Box.Beacon::new,    "beacon_.*"),
+    X2_BEACON       (Box.Beacon::new,    "beacon_.*"), //todo use me
     MINE            (Mine::new,          "mine_.*"),
     FIREWORK        (Entity::new,        "firework_box"),
 
     LOW_RELAY       (Relay::new,         "relay"),
-    NPC_BEACON      (MapNpc::new,        "npc-beacon.*"),
+    NPC_BEACON      (MapNpc::new,        "npc-beacon.*"), //todo use me
     SPACE_BALL      (SpaceBall::new,     "mapIcon_spaceball"),
 
     CBS_ASTEROID    (BattleStation.Asteroid::new, "asteroid"),
@@ -69,7 +69,7 @@ public enum EntityFactory implements EntityBuilder {
     REPAIR_STATION  (BaseRepairStation::new,"repairstation_.*"),// Repair station inside bases
     QUEST_GIVER     (QuestGiver::new,       "questgiver_.*"),   // Quest givers on x-1, x-4, x-5 and x-8
     BASE_STATION    (BaseStation::new,      "station_.*"),      // Standalone station on 5-2
-    CTB_HOME_ZONE   (BasePoint::new,        "ctbHomeZone_.*"),
+    CTB_HOME_ZONE   (BasePoint::new,        "ctbHomeZone_.*"),  //todo use me
 
     PORTAL   (EntityFactory::getOrCreatePortal, "\\d+$"),
 

@@ -15,6 +15,8 @@ public class EntityRegistry {
     private final Map<Long, EntityBuilder> cachedTypes       = new HashMap<>();
     private final Map<EntityFactory, Lazy<Entity>> listeners = new EnumMap<>(EntityFactory.class);
     private final Lazy<Entity> fallback                      = new Lazy.NoCache<>();
+
+    private Consumer<Entity> entityCreateConsumer;
     private Main main;
 
     public void setMain(Main main) {
@@ -42,6 +44,10 @@ public class EntityRegistry {
         cachedTypes.clear();
     }
 
+    public void onAnyEntityCreate(Consumer<Entity> consumer) {
+        entityCreateConsumer = consumer;
+    }
+
     public void sendEntity(int id, long address) {
         EntityBuilder type = cachedTypes.computeIfAbsent(API.readMemoryLong(address + 0x10),
                 l -> EntityFactory.find(address)).get(address);
@@ -51,8 +57,7 @@ public class EntityRegistry {
         if (entity == null) return;
         entity.added(main);
         entity.update();
-
-        //if (main.isRunning()) entity.clickable.setRadius(0);
+        entityCreateConsumer.accept(entity);
 
         if (type instanceof EntityFactory)
             listeners.getOrDefault(type, fallback).send(entity);

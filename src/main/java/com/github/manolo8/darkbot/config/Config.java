@@ -97,6 +97,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option("config.general.safety.revive_location") @Dropdown ReviveLocation REVIVE = ReviveLocation.BASE;
             public @Option @Visibility(Level.INTERMEDIATE) @Number(min = 5, max = 60, step = 10) int WAIT_BEFORE_REVIVE = 5;
             public @Option @Visibility(Level.INTERMEDIATE) @Number(min = 3, max = 15 * 60, step = 10) int WAIT_AFTER_REVIVE = 90;
+            public @Option @Visibility(Level.INTERMEDIATE) @Number(min = 0, max = Integer.MAX_VALUE, step = 10) int INSTANT_REPAIR = 0;
         }
 
         public @Option Running RUNNING = new Running();
