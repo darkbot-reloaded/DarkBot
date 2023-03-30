@@ -83,11 +83,11 @@ public class RepairManager implements Manager, RepairAPI {
 
     private boolean instantRepaired = true;
     private void checkInstantRepair() {
+        // have ~25% hp already after revive - do not use instant repair
+        if (!instantRepaired && main.hero.getHealth().hpPercent() >= 0.25) instantRepaired = true;
         if (instantRepaired || !main.isRunning()) return;
 
-        HeroManager hero = main.hero;
-        if (lastDeath != null && hero.getHealth().hpPercent() < 0.25
-                && lastDeath.toEpochMilli() + 15_000 > System.currentTimeMillis()) {
+        if (lastDeath != null && lastReviveAttempt + 15_000 > System.currentTimeMillis()) {
             main.mapManager.entities.basePoints.stream()
                     .filter(basePoint -> basePoint instanceof BaseRepairStation)
                     .findAny()
@@ -149,7 +149,7 @@ public class RepairManager implements Manager, RepairAPI {
         repairTypes.update(API.readMemoryLong(repairAddress + 0x60));
     }
 
-    private long afterAvailableWait;
+    private long afterAvailableWait, lastReviveAttempt;
     // return true if clicked, false if should wait
     public boolean tryRevive() {
         int repairOption = getRepairOptionFromType(reviveHandler.getBest());
@@ -167,6 +167,7 @@ public class RepairManager implements Manager, RepairAPI {
             API.writeMemoryLong(repairAddress + 32, repairOption);
 
         API.mouseClick(MapManager.clientWidth / 2, (MapManager.clientHeight / 2) + 190);
+        lastReviveAttempt = System.currentTimeMillis();
 
         return true;
     }
