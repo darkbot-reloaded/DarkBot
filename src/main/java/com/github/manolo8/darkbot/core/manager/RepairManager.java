@@ -85,7 +85,7 @@ public class RepairManager implements Manager, RepairAPI {
     private void checkInstantRepair() {
         // have ~25% hp already after revive - do not use instant repair
         if (!instantRepaired && main.hero.getHealth().hpPercent() >= 0.25) instantRepaired = true;
-        if (instantRepaired || !main.isRunning()) return;
+        if (instantRepaired || !main.isRunning() || main.config.GENERAL.SAFETY.INSTANT_REPAIR == 0) return;
 
         if (lastDeath != null && lastReviveAttempt + 15_000 > System.currentTimeMillis()) {
             main.mapManager.entities.basePoints.stream()
@@ -93,13 +93,10 @@ public class RepairManager implements Manager, RepairAPI {
                     .findAny()
                     .filter(basePoint -> basePoint.clickable.enabled)
                     .ifPresent(basePoint -> {
-                        int minRepairs = main.config.GENERAL.SAFETY.INSTANT_REPAIR;
-                        if (minRepairs == 0) return;
-
                         BaseRepairStation repairStation = (BaseRepairStation) basePoint;
 
                         int currentRepairs = repairStation.getInstantRepairs();
-                        if (currentRepairs >= minRepairs) {
+                        if (currentRepairs >= main.config.GENERAL.SAFETY.INSTANT_REPAIR) {
                             repairStation.clickable.click();
                             System.out.println("Used instant repair! " + currentRepairs);
                         }
