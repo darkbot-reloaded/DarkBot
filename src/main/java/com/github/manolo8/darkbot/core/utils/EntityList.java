@@ -84,6 +84,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
         this.fakeNpc = new FakeNpc(main);
         this.eventBroker = eventBroker;
 
+        this.allEntities.add(unknown);
         this.entityRegistry = new EntityRegistry(main, this::onEntityCreate, unknown::add);
 
         this.barriers       = register(BARRIER);
