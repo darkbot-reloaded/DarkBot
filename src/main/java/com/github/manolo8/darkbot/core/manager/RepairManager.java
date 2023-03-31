@@ -49,8 +49,8 @@ public class RepairManager implements Manager, RepairAPI {
     private Locatable deathLocation;
     private Instant lastDeath;
 
-    private boolean destroyed;
-    private long userDataAddress, repairAddress, beforeReviveTime;
+    private boolean destroyed, shouldInstantRepair = false;
+    private long userDataAddress, repairAddress, beforeReviveTime, afterAvailableWait, lastReviveAttempt;
     private int deaths;
 
     public RepairManager(Main main, ReviveSelectorHandler reviveHandler) {
@@ -69,7 +69,7 @@ public class RepairManager implements Manager, RepairAPI {
         int availableIn = optionAvailableIn(getRepairOptionFromType(location));
 
         int beforeRevive = (int) (((beforeReviveTime + (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L))
-                                   - System.currentTimeMillis()) / 1000);
+                - System.currentTimeMillis()) / 1000);
 
         return "Reviving at: " + location + ", in " + Math.max(beforeRevive, availableIn) + "s";
     }
@@ -81,13 +81,15 @@ public class RepairManager implements Manager, RepairAPI {
         return System.currentTimeMillis() - beforeReviveTime < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L);
     }
 
-    private boolean instantRepaired = true;
     private void checkInstantRepair() {
-        // have ~25% hp already after revive - do not use instant repair
-        if (!instantRepaired && main.hero.getHealth().hpPercent() >= 0.25) instantRepaired = true;
-        if (instantRepaired || !main.isRunning() || main.config.GENERAL.SAFETY.INSTANT_REPAIR == 0) return;
+        if (!shouldInstantRepair || !main.isRunning() || main.config.GENERAL.SAFETY.INSTANT_REPAIR == 0) return;
+        // have ~25% hp already after revive - do not use instant repair. maybe create setting for min health
+        if (main.hero.getHealth().hpPercent() >= 0.25) {
+            shouldInstantRepair = false;
+            return;
+        }
 
-        if (lastDeath != null && lastReviveAttempt + 15_000 > System.currentTimeMillis()) {
+        if (lastReviveAttempt + 15_000 > System.currentTimeMillis()) {
             main.mapManager.entities.basePoints.stream()
                     .filter(basePoint -> basePoint instanceof BaseRepairStation)
                     .findAny()
@@ -101,7 +103,7 @@ public class RepairManager implements Manager, RepairAPI {
                             System.out.println("Used instant repair! " + currentRepairs);
                         }
 
-                        instantRepaired = true;
+                        shouldInstantRepair = false;
                     });
         }
     }
@@ -119,7 +121,7 @@ public class RepairManager implements Manager, RepairAPI {
         }
 
         if (!destroyed) {
-            instantRepaired = false;
+            shouldInstantRepair = true;
             destroyed = true;
             deaths++;
             lastDeath = Instant.now();
@@ -146,7 +148,6 @@ public class RepairManager implements Manager, RepairAPI {
         repairTypes.update(API.readMemoryLong(repairAddress + 0x60));
     }
 
-    private long afterAvailableWait, lastReviveAttempt;
     // return true if clicked, false if should wait
     public boolean tryRevive() {
         int repairOption = getRepairOptionFromType(reviveHandler.getBest());
@@ -173,7 +174,7 @@ public class RepairManager implements Manager, RepairAPI {
         if (repairAddress != 0) return !API.readMemoryBoolean(repairAddress + 0x28);
 
         if (main.mapManager.mapAddress == 0 || main.guiManager.lostConnection.isVisible()
-            || main.guiManager.connecting.isVisible() || (main.hero.address != 0 && main.hero.id != 0))
+                || main.guiManager.connecting.isVisible() || (main.hero.address != 0 && main.hero.id != 0))
             return true;
 
         if (userDataAddress == 0 || API.readMemoryBoolean(userDataAddress + 0x4C)) {
@@ -235,13 +236,13 @@ public class RepairManager implements Manager, RepairAPI {
         API.readMemory(addr + 48, patternCache);
 
         return ByteUtils.getInt(patternCache, 0) == 0
-               && ByteUtils.getInt(patternCache, 4) == 1
-               && ByteUtils.getInt(patternCache, 8) == 2
-               && ByteUtils.getInt(patternCache, 12) == 3
-               && ByteUtils.getInt(patternCache, 16) == 4
-               && ByteUtils.getInt(patternCache, 20) == 0 // align to 8
-               && API.readLong(ByteUtils.getLong(patternCache, 24), 0x10) != 0
-               && API.readLong(ByteUtils.getLong(patternCache, 32), 0x10) != 0;
+                && ByteUtils.getInt(patternCache, 4) == 1
+                && ByteUtils.getInt(patternCache, 8) == 2
+                && ByteUtils.getInt(patternCache, 12) == 3
+                && ByteUtils.getInt(patternCache, 16) == 4
+                && ByteUtils.getInt(patternCache, 20) == 0 // align to 8
+                && API.readLong(ByteUtils.getLong(patternCache, 24), 0x10) != 0
+                && API.readLong(ByteUtils.getLong(patternCache, 32), 0x10) != 0;
     }
 
     private int getRepairOptionFromType(ReviveLocation reviveLocation) {

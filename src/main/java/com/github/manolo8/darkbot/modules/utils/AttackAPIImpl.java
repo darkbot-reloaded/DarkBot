@@ -23,8 +23,6 @@ import eu.darkbot.impl.managers.AbstractAttackImpl;
 import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-
 public class AttackAPIImpl extends AbstractAttackImpl implements Listener {
 
     private final LaserSelectorHandler laserHandler;
@@ -144,11 +142,8 @@ public class AttackAPIImpl extends AbstractAttackImpl implements Listener {
         if (!target.isMoving() || target.getHealth().hpPercent() < 0.25)
             radius = Math.min(600, radius);
 
-        Optional<Item> ability = heroItems.getItem(SelectableItem.Ability.ZEPHYR_MMT, ItemFlag.AVAILABLE);
-        if (ability.isEmpty())
-            ability = heroItems.getItem(SelectableItem.Ability.HECATE_PLUS_STOCKPILE, ItemFlag.AVAILABLE);
-
-        return radius + ability
+        return radius + heroItems.getItem(SelectableItem.Ability.ZEPHYR_MMT, ItemFlag.AVAILABLE)
+                .or(() -> heroItems.getItem(SelectableItem.Ability.HECATE_PLUS_STOCKPILE, ItemFlag.AVAILABLE))
                 .map(Item::getQuantity)
                 .orElse(0d) * 5;
     }

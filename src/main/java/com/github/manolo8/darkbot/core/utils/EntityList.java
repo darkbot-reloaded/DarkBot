@@ -45,51 +45,62 @@ import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.*;
 
 public class EntityList extends Updatable implements EntitiesAPI {
-    public final EntityRegistry entityRegistry = new EntityRegistry();
 
-    public final List<Entity> all                         = new ArrayList<>();
-    public final List<Obstacle> obstacles                 = new ArrayList<>();
+    public final List<Entity> all = new ArrayList<>();
+    public final List<Entity> unknown = new ArrayList<>();
+    public final List<Obstacle> obstacles = new ArrayList<>();
     public final List<List<? extends Entity>> allEntities = new ArrayList<>();
 
-    public final List<Barrier> barriers             = register(BARRIER);
-    public final List<NoCloack> noCloack            = register(MIST_ZONE);
-    public final List<Box> boxes                    = register(BOX, ORE);
-    public final List<Mine> mines                   = register(MINE);
-    public final List<Npc> npcs                     = register(NPC, LOW_RELAY);
-    public final List<Portal> portals               = register(PORTAL);
-    public final List<Ship> ships                   = register(PLAYER, PET);
-    public final List<Player> players               = register(PLAYER);
-    public final List<Pet> pets                     = register(PET);
-    public final List<BattleStation> battleStations = register(CBS_ASTEROID, CBS_MODULE, CBS_STATION, CBS_MODULE_CON, CBS_CONSTRUCTION);
-    public final List<BasePoint> basePoints         = register(BASE_HANGAR, BASE_STATION, HEADQUARTER, QUEST_GIVER, BASE_TURRET, REPAIR_STATION, REFINERY);
-    public final List<Entity> unknown               = register(UNKNOWN);
+    public final EntityRegistry entityRegistry;
+
+    public final List<Barrier> barriers;
+    public final List<NoCloack> noCloack;
+    public final List<Box> boxes;
+    public final List<Mine> mines;
+    public final List<Npc> npcs;
+    public final List<Portal> portals;
+    public final List<Ship> ships;
+    public final List<Player> players;
+    public final List<Pet> pets;
+    public final List<BattleStation> battleStations;
+    public final List<BasePoint> basePoints;
+
     public final FakeNpc fakeNpc;
 
-    private final List<Relay> relays = register(LOW_RELAY);
-    private final List<SpaceBall> spaceBalls = register(SPACE_BALL);
-    private final List<StaticEntity> staticEntities = register(POD_HEAL, BUFF_CAPSULE,
-            BURNING_TRAIL, BURNING_TRAIL_ENEMY, PLUTUS_GENERATOR, PLUTUS_GENERATOR_RED, PLUTUS_GENERATOR_GREEN, PET_BEACON);
+    private final List<Relay> relays;
+    private final List<SpaceBall> spaceBalls;
+    private final List<StaticEntity> staticEntities;
 
     private final Main main;
     private final EventBrokerAPI eventBroker;
     private final Set<Integer> ids = new HashSet<>();
     private final ObjArray entitiesArr = ObjArray.ofVector();
 
+    private final Timer lastLocatorMatch = Timer.get(5_000);
+    private Location lastLocatorLocation = new Location();
+
     public EntityList(Main main, EventBrokerAPI eventBroker) {
-        this.main    = main;
+        this.main = main;
         this.fakeNpc = new FakeNpc(main);
         this.eventBroker = eventBroker;
-        this.entityRegistry.setMain(main);
 
-        this.entityRegistry.addToAll(entity -> {
-            if (entity instanceof Obstacle) obstacles.add((Obstacle) entity);
-        });
-        this.entityRegistry.addDefault(unknown::add);
+        this.entityRegistry = new EntityRegistry(main, this::onEntityCreate, unknown::add);
 
-        this.entityRegistry.onAnyEntityCreate(entity -> {
-            all.add(entity);
-            eventBroker.sendEvent(new EntityCreateEvent(entity));
-        });
+        this.barriers       = register(BARRIER);
+        this.noCloack       = register(MIST_ZONE);
+        this.boxes          = register(BOX, ORE);
+        this.mines          = register(MINE);
+        this.npcs           = register(NPC, LOW_RELAY);
+        this.portals        = register(PORTAL);
+        this.ships          = register(PLAYER, PET);
+        this.players        = register(PLAYER);
+        this.pets           = register(PET);
+        this.battleStations = register(CBS_ASTEROID, CBS_MODULE, CBS_STATION, CBS_MODULE_CON, CBS_CONSTRUCTION);
+        this.basePoints     = register(BASE_HANGAR, BASE_STATION, HEADQUARTER, QUEST_GIVER, BASE_TURRET, REPAIR_STATION, REFINERY);
+        this.relays         = register(LOW_RELAY);
+        this.spaceBalls     = register(SPACE_BALL);
+        this.staticEntities = register(POD_HEAL, BUFF_CAPSULE,
+                BURNING_TRAIL, BURNING_TRAIL_ENEMY, PLUTUS_GENERATOR, PLUTUS_GENERATOR_RED, PLUTUS_GENERATOR_GREEN, PET_BEACON);
     }
 
     @Override
@@ -106,6 +117,14 @@ public class EntityList extends Updatable implements EntitiesAPI {
         super.update(address);
         this.clear();
         this.entitiesArr.update(API.readMemoryLong(address + 40));
+    }
+
+    private void onEntityCreate(Entity entity) {
+        this.all.add(entity);
+        if (entity instanceof Obstacle)
+            this.obstacles.add((Obstacle) entity);
+
+        this.eventBroker.sendEvent(new EntityCreateEvent(entity));
     }
 
     @SuppressWarnings("unchecked")
@@ -168,9 +187,6 @@ public class EntityList extends Updatable implements EntitiesAPI {
             }
         }
     }
-
-    private Location lastLocatorLocation = new Location();
-    private final Timer lastLocatorMatch = Timer.get(5_000);
 
     public void updatePing(Location location, NpcInfo info) {
         fakeNpc.set(location, info);
