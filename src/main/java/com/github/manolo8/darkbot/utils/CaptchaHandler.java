@@ -7,6 +7,7 @@ import eu.darkbot.util.IOUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,8 +30,8 @@ public class CaptchaHandler {
         return captchaResponseFuture != null;
     }
 
-    public boolean needsCaptchaSolve(String page) {
-        return page.contains("id=\"captchaScriptContainer\"");
+    public boolean needsCaptchaSolve(URL url, String page) {
+        return url.getQuery().contains("lostPilot") && page.contains("id=\"captchaScriptContainer\"");
     }
 
     public void solveCaptcha() throws IOException {
@@ -40,17 +41,22 @@ public class CaptchaHandler {
         HttpURLConnection connection = backpage.getHttp(base).getConnection();
         String page = IOUtils.read(connection.getInputStream());
 
-        if (needsCaptchaSolve(page)) {
+        if (needsCaptchaSolve(connection.getURL(), page)) {
             System.out.println("CaptchaHandler: Solving Captcha for " + this.action);
             captchaResponseFuture = CaptchaAPI.getInstance().solveCaptchaFuture(connection.getURL(), page)
                     .thenApply(r -> {
                         try {
                             if (r.isEmpty()) return r;
-                            eu.darkbot.util.http.Http http = backpage.postHttp("ajax/lostpilot.php")
-                                    .setParam("command", "checkReCaptcha")
-                                    .setParam("desiredAction", action);
+                            eu.darkbot.util.http.Http http = backpage.postHttp("ajax/lostpilot.php");
                             r.forEach(http::setParam);
-                            http.closeInputStream();
+                            http.setParam("desiredAction", action);
+                            String response = http.getContent();
+
+                            if(response.toString().contains("OK")){
+                                System.out.println("Captcha Solve Accepted");
+                            }else{
+                                System.out.println("Captcha Solve Denied: " + response);
+                            }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
