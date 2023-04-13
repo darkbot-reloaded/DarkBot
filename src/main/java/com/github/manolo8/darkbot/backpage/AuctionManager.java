@@ -4,8 +4,10 @@ import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
 import com.github.manolo8.darkbot.utils.CaptchaHandler;
 import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.util.IOUtils;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,8 +42,9 @@ public class AuctionManager {
         try {
             if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return null;
             if (captchaHandler.isSolvingCaptcha()) return false;
-            String page = backpageManager.getHttp("indexInternal.es?action=internalAuction").getContent();
-            if (this.captchaHandler.needsCaptchaSolve(page)) {
+            HttpURLConnection httpURLConnection = backpageManager.getHttp("indexInternal.es?action=internalAuction").getConnection();
+            String page = IOUtils.read(httpURLConnection.getInputStream());
+            if (this.captchaHandler.needsCaptchaSolve(httpURLConnection.getURL(), page)) {
                 System.out.println("AuctionManager: Captcha Detected");
                 captchaHandler.solveCaptcha();
                 return false;

@@ -10,8 +10,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.util.IOUtils;
 import org.intellij.lang.annotations.Language;
 
+import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,8 +61,9 @@ public class DispatchManager {
         try {
             if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return null;
             if (captchaHandler.isSolvingCaptcha()) return false;
-            String page = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getContent();
-            if (captchaHandler.needsCaptchaSolve(page)) {
+            HttpURLConnection httpURLConnection = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getConnection();
+            String page = IOUtils.read(httpURLConnection.getInputStream());
+            if (captchaHandler.needsCaptchaSolve(httpURLConnection.getURL(), page)) {
                 System.out.println("DispatchManager: Captcha Detected");
                 captchaHandler.solveCaptcha();
                 return false;
