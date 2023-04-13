@@ -52,9 +52,9 @@ public class CaptchaHandler {
                             http.setParam("desiredAction", action);
                             String response = http.getContent();
 
-                            if(response.toString().contains("OK")){
+                            if (response.toString().contains("OK")) {
                                 System.out.println("Captcha Solve Accepted");
-                            }else{
+                            } else {
                                 System.out.println("Captcha Solve Denied: " + response);
                             }
                         } catch (IOException e) {
