@@ -9,7 +9,6 @@ import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
 import eu.darkbot.api.config.ConfigSetting;
-import eu.darkbot.util.Popups;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -31,9 +30,6 @@ public class MainGui extends JFrame {
     private MapDrawer mapDrawer;
 
     public static final Image ICON = UIUtils.getImage("icon");
-    static {
-        Popups.setDefaultIcon(ICON);
-    }
     public static final int DEFAULT_WIDTH = 640, DEFAULT_HEIGHT = 480;
     private int lastTick;
 

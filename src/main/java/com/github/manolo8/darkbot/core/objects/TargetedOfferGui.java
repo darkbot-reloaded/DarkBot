@@ -1,7 +1,5 @@
 package com.github.manolo8.darkbot.core.objects;
 
-import static com.github.manolo8.darkbot.Main.API;
-
 public class TargetedOfferGui extends Gui {
 
     private boolean initialized;
@@ -10,8 +8,9 @@ public class TargetedOfferGui extends Gui {
         super.update();
         if (address == 0) return;
 
-        x = (int) API.readMemoryDouble(address + 0x250);
-        y = (int) API.readMemoryDouble(address + 0x258);
+        // Reading position from Sprite should be more accurate
+        //x = (int) API.readMemoryDouble(address + 0x250);
+        //y = (int) API.readMemoryDouble(address + 0x258);
 
         if (!initialized) { // Initialized sets initial time to wait for animation when first displayed
             time = System.currentTimeMillis();

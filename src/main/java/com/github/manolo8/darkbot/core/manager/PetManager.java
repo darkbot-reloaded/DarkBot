@@ -28,6 +28,8 @@ import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.utils.Inject;
 import eu.darkbot.api.utils.ItemNotEquippedException;
+import eu.darkbot.util.TimeUtils;
+import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,10 +38,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -72,6 +76,10 @@ public class PetManager extends Gui implements PetAPI {
     private final List<Gear> locatorList = new ArrayList<>();
 
     private final List<Integer> petBuffsIds = new ArrayList<>();
+
+    private final Set<Integer> currentSubmodules = new HashSet<>();
+    private final Timer submodulesCheckTimer = Timer.get(TimeUtils.MINUTE * 5);
+    private int submodulesSize;
 
     private ModuleStatus selection = ModuleStatus.NOTHING;
     private Gear currentModule;   // The Module used, like Passive mode, kamikaze, or enemy locator
@@ -158,8 +166,8 @@ public class PetManager extends Gui implements PetAPI {
 
         if (selection != ModuleStatus.SELECTED
                 || (currentModule != null && currentModule.id != moduleId)
-                || (currentSubModule == null && submoduleIdx != -1)
-                || (currentSubModule != null && currentSubModule.id != submoduleId)) {
+                || (currentSubmodules.isEmpty() && submoduleIdx != -1)
+                || (!currentSubmodules.isEmpty() && !currentSubmodules.contains(submoduleId))) {
             if (show(true)) this.selectModule(moduleId, submoduleIdx);
         } else if (System.currentTimeMillis() > this.selectModuleTime) show(false);
     }
@@ -354,12 +362,33 @@ public class PetManager extends Gui implements PetAPI {
 
         long currGearCheck = API.readMemoryLong(getSpriteChild(temp, 1), 152, 16);
 
+        currentSubmodules.clear();
         currentModule = findGear(gearList, currGearCheck);
-        if (currentModule != null) currentSubModule = null;
-        else {
-            currentSubModule = findGear(locatorList, currGearCheck);
-            if (currentSubModule != null) currentModule = findGearById(currentSubModule.parentId);
-        }
+        if (currentModule == null) {
+            Gear current = null;
+            for (Gear gear : locatorList) {
+                if (gear.check == currGearCheck) {
+                    current = gear;
+                    currentSubmodules.add(gear.id);
+                }
+            }
+
+            currentSubModule = current;
+            if (current != null) currentModule = findGearById(current.parentId);
+        } else currentSubModule = null;
+
+        if (currentSubmodules.size() > 1) {
+            // check every 5 minutes if we have selected correct alien
+            if (!submodulesCheckTimer.isArmed()) submodulesCheckTimer.activate();
+            if (submodulesCheckTimer.tryDisarm()) selection = ModuleStatus.NOTHING;
+
+            // recheck on size change with same check-address
+            if (submodulesSize != currentSubmodules.size()) {
+                submodulesCheckTimer.activate();
+                submodulesSize = currentSubmodules.size();
+                selection = ModuleStatus.NOTHING;
+            }
+        } else submodulesCheckTimer.disarm();
     }
 
     private final SpriteObject locatorTab = new SpriteObject();
@@ -372,6 +401,7 @@ public class PetManager extends Gui implements PetAPI {
             return;
         }
         locatorTab.update(locatorBaseAddr);
+        locatorTab.update();
         int oldSize = locatorNpcList.getSize();
         locatorNpcList.update(API.readMemoryLong(locatorBaseAddr + 224));
 
@@ -669,6 +699,7 @@ public class PetManager extends Gui implements PetAPI {
         @Override
         public boolean updateAndReport() {
             sprite.update(address);
+            sprite.update();
 
             int id = API.readMemoryInt(address + 172);
             int parentId = API.readMemoryInt(address + 176); //assume, -1 if none
