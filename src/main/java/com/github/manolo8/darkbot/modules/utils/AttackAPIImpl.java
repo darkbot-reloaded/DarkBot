@@ -158,6 +158,7 @@ public class AttackAPIImpl extends AbstractAttackImpl implements Listener {
             radius = Math.min(600, radius);
 
         return radius + heroItems.getItem(SelectableItem.Ability.ZEPHYR_MMT, ItemFlag.AVAILABLE)
+                .or(() -> heroItems.getItem(SelectableItem.Ability.HECATE_PLUS_STOCKPILE, ItemFlag.AVAILABLE))
                 .map(Item::getQuantity)
                 .orElse(0d) * 5;
     }

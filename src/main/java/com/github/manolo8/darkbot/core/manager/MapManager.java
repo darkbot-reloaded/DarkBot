@@ -224,9 +224,7 @@ public class MapManager implements Manager, StarSystemAPI {
         avoided = ConfigEntity.INSTANCE.getOrCreateAvoided();
         safeties = ConfigEntity.INSTANCE.getOrCreateSafeties();
         if (createSafeties) {
-            for (Collection<? extends Entity> entities : entities.allEntities) {
-                for (Entity e : entities) ConfigEntity.INSTANCE.updateSafetyFor(e);
-            }
+            for (Entity e : entities.all) ConfigEntity.INSTANCE.updateSafetyFor(e);
         }
     }
 

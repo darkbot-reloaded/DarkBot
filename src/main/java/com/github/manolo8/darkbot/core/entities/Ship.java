@@ -13,7 +13,6 @@ import eu.darkbot.api.game.other.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -30,6 +29,8 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     public int formationId; // later move it up to Player.class
     public boolean invisible;
     public long timer;
+
+    private Lock lockType = Lock.UNKNOWN;
 
     public Ship() {}
 
@@ -80,6 +81,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
         invisible = API.readMemoryBoolean(API.readMemoryLong(address + 160) + 32);
 
         shipId = API.readInt(address, 192, 76);
+        lockType = Lock.of(API.readMemoryInt(lockPtr, 48, 40));
     }
 
     @Override
@@ -155,17 +157,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
             if (entityPtr == 0) targetedEntity = null;
             else if (targetedEntity == null || entityPtr != targetedEntity.address) {
-
-                if (entityPtr == main.hero.address) {
-                    targetedEntity = main.hero;
-
-                } else if (entityPtr == main.hero.pet.address) {
-                    targetedEntity = main.hero.pet;
-
-                } else targetedEntity = main.mapManager.entities.allEntities.stream()
-                        .flatMap(Collection::stream)
-                        .filter(entity -> entity.address == entityPtr)
-                        .findAny().orElse(null);
+                targetedEntity = main.mapManager.entities.findEntityByAddress(entityPtr);
             }
         }
     }
@@ -192,7 +184,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
     @Override
     public Lock getLockType() {
-        return Lock.of(API.readMemoryInt(lockPtr, 48, 40));
+        return lockType;
     }
 
     @Override
