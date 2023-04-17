@@ -83,8 +83,6 @@ public class AttackAPIImpl extends AbstractAttackImpl implements Listener {
 
     @Override
     public void setTarget(@Nullable Lockable target) {
-        // may happen if pet locator points to incorrect NPC
-        if (target instanceof FakeNpc) return;
         if (this.target != target) {
             buggedTimer.activate();
             highLightTimer.disarm();
