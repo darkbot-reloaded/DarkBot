@@ -48,14 +48,14 @@ public class Bot {
             // Load necessary native libraries
             FlatNativeWindowBorder.isSupported();
 
-            // set icon here to use it in login popup, java check popup etc.
-            Popups.setDefaultIcon(MainGui.ICON);
-
             UIManager.setLookAndFeel(new DarkLaf());
             UIManager.put("Button.arc", 0);
             UIManager.put("Component.arc", 0);
             UIManager.put("Button.default.boldText", false);
             UIManager.put("Table.cellFocusColor", new Color(0, 0, 0, 160));
+
+            // set icon here to use it in login popup, java check popup etc.
+            Popups.setDefaultIcon(MainGui.ICON);
 
             // Not recommended to keep for production
             //FlatInspector.install("ctrl shift alt X");
