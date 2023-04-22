@@ -82,7 +82,8 @@ public class RepairManager implements Manager, RepairAPI {
     }
 
     private void checkInstantRepair() {
-        if (!shouldInstantRepair || !main.isRunning() || main.config.GENERAL.SAFETY.INSTANT_REPAIR == 0) return;
+        if (!shouldInstantRepair || !main.isRunning()
+                || main.hero.getHealth().getMaxHp() == 0 || main.config.GENERAL.SAFETY.INSTANT_REPAIR == 0) return;
         // have ~25% hp already after revive - do not use instant repair. maybe create setting for min health
         if (main.hero.getHealth().hpPercent() >= 0.25) {
             shouldInstantRepair = false;
