@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.config.actions.conditions;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.actions.Condition;
+import com.github.manolo8.darkbot.config.actions.LegacyCondition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
@@ -10,22 +9,24 @@ import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.core.entities.Ship;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.types.Condition;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
 @ValueData(name = "has-effect", description = "Checks if a ship has an effect", example = "has-effect(effect, ship)")
-public class HasEffectCondition implements Condition, Parser {
+public class HasEffectCondition implements LegacyCondition, Parser {
 
     public Effect effect;
     public Value<Ship> ship;
 
     @Override
-    public @NotNull Condition.Result get(Main main) {
+    public @NotNull Condition.Result get(PluginAPI api) {
         Ship sh;
-        if ((effect == null) || (sh = Value.get(ship, main)) == null) return Result.ABSTAIN;
+        if ((effect == null) || (sh = Value.get(ship, api)) == null) return Condition.Result.ABSTAIN;
 
-        return Result.fromBoolean(main.effectManager.hasEffect(sh, effect.id));
+        return Condition.Result.fromBoolean(sh.hasEffect(effect.id));
     }
 
     public enum Effect {

@@ -4,21 +4,18 @@ import com.github.manolo8.darkbot.Main;
 import eu.darkbot.api.PluginAPI;
 import org.jetbrains.annotations.NotNull;
 
+@Deprecated
 public interface Condition extends Value<Condition.Result>, eu.darkbot.api.config.types.Condition {
-
-    @Override
-    default @NotNull eu.darkbot.api.config.types.Condition.Result get(PluginAPI pluginAPI) {
-        Result result = get(pluginAPI.requireInstance(Main.class));
-
-        return eu.darkbot.api.config.types.Condition.Result.values()[result.ordinal()];
-    }
 
     /**
      * @deprecated Use {@link #get(PluginAPI)} instead
      */
     @Deprecated
-    @NotNull Result get(Main main);
+    default @NotNull Result get(Main main) {
+        return Result.values()[get(main.pluginAPI).ordinal()];
+    }
 
+    @Deprecated
     enum Result {
         ALLOW, DENY, ABSTAIN;
 

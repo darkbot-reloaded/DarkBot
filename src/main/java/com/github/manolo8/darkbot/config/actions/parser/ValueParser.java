@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.utils.ReflectionUtils;
 
 public class ValueParser {
 
+    @SuppressWarnings("deprecation")
     public static Condition parseCondition(String str) throws SyntaxException {
         ParseResult<Condition.Result> result = parse(str, Condition.Result.class);
         if (!result.leftover.trim().isEmpty())

@@ -39,7 +39,7 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (!popup.isOpen()) updateDisplay();
+                if (init && !popup.isOpen()) updateDisplay();
             }
         });
     }
@@ -61,6 +61,10 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
     public void setText(String text) {
         if (Objects.equals(text, getText())) return;
         super.setText(text);
+    }
+
+    public void init() {
+        this.init = true;
     }
 
     @Override
@@ -90,32 +94,33 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
 
         // Don't re-parse, use cached exception
         if (text.equals(lastParsed)) {
-            handleSyntaxEx(lastEx);
+            handleSyntaxEx(lastEx, lastParsed);
             return condition;
         }
 
         lastParsed = text;
 
+        String toParse = getText();
         try {
-            Condition cond = ValueParser.parseCondition(getText());
-            handleSyntaxEx(lastEx = null);
+            Condition cond = ValueParser.parseCondition(toParse);
+            handleSyntaxEx(lastEx = null, toParse);
             return cond;
         } catch (SyntaxException e) {
-            handleSyntaxEx(lastEx = e);
+            handleSyntaxEx(lastEx = e, toParse);
             return null;
         }
     }
 
-    private void handleSyntaxEx(SyntaxException e) {
+    private void handleSyntaxEx(SyntaxException e, String parsedText) {
         if (e == null) {
-            setHighlight(0, getText().length(), true);
+            setHighlight(0, parsedText.length(), true);
             popup.update(null, 0, null);
             return;
         }
 
-        int s = getText().lastIndexOf(e.getAt()), start = Math.max(0, s);
+        int start = e.getIdx(parsedText);
 
-        setHighlight(start, getText().length(), getText().isEmpty());
+        setHighlight(start, parsedText.length(), parsedText.isEmpty());
 
         try {
             Rectangle rect = getUI().modelToView(this, start);

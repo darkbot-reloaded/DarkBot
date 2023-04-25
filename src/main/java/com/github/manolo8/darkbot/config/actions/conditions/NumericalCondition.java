@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.config.actions.conditions;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.actions.Condition;
+import com.github.manolo8.darkbot.config.actions.LegacyCondition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
@@ -9,19 +8,21 @@ import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.types.Condition;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiPredicate;
 
 @ValueData(name = "if", description = "Compares two numbers", example = "if(a > b)")
-public class NumericalCondition implements Condition, Parser {
+public class NumericalCondition implements LegacyCondition, Parser {
 
     public Value<Number> a;
     public Operation operation;
     public Value<Number> b;
 
     @Override
-    public @NotNull Condition.Result get(Main main) {
+    public @NotNull Condition.Result get(PluginAPI main) {
         Number numA, numB;
         if ((numA = Value.get(a, main)) == null || (numB = Value.get(b, main)) == null || operation == null)
             return Condition.Result.ABSTAIN;
@@ -68,6 +69,7 @@ public class NumericalCondition implements Condition, Parser {
         ParseResult<Number> prA = ValueParser.parse(str, Number.class);
         a = prA.value;
         str = prA.leftover.trim();
+        if (str.startsWith(",")) str = str.substring(1).trim();
 
         int chars = Math.min(str.length(), str.length() > 1 && str.charAt(1) == '=' ? 2 : 1);
 
@@ -76,7 +78,10 @@ public class NumericalCondition implements Condition, Parser {
         if (operation == null)
             throw new SyntaxException("Unknown operation '" + op + "'", str, Operation.class);
 
-        ParseResult<Number> prB = ValueParser.parse(str.substring(chars), Number.class);
+        str = str.substring(chars).trim();
+        if (str.startsWith(",")) str = str.substring(1).trim();
+
+        ParseResult<Number> prB = ValueParser.parse(str, Number.class);
         b = prB.value;
         return ParseUtil.separate(prB.leftover.trim(), getClass(), ")");
     }

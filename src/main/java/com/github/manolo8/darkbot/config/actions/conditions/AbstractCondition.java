@@ -1,41 +1,44 @@
 package com.github.manolo8.darkbot.config.actions.conditions;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.actions.Condition;
+import com.github.manolo8.darkbot.config.actions.LegacyCondition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
-import com.github.manolo8.darkbot.config.actions.parser.Values;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.types.Condition;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class AbstractCondition implements Condition, Parser {
+import static eu.darkbot.api.config.types.Condition.Result.ABSTAIN;
+import static eu.darkbot.api.config.types.Condition.Result.ALLOW;
+import static eu.darkbot.api.config.types.Condition.Result.DENY;
 
-    public int min, max;
+public abstract class AbstractCondition implements LegacyCondition, Parser {
+
     public List<Condition> children;
 
     public AbstractCondition() {
         children = new ArrayList<>();
     }
 
-    public Result getValue(Main main, int min, int max) {
+    public Condition.Result getValue(PluginAPI api, int min, int max) {
         int[] states = new int[]{0, 0, 0};
         for (int i = 0; i < children.size(); i++) {
-            states[children.get(i).get(main).ordinal()]++;
+            states[children.get(i).get(api).ordinal()]++;
             if ((states[1] + states[2] > children.size() - min && states[0] + states[1] > 0) /* Can't reach min anymore */
                     || states[0] > max /* Allow bigger than max */) {
-                return Condition.Result.DENY;
+                return DENY;
             }
             if (states[0] >= min && states[0] + (children.size() - 1 - i) >= max) { /* Won't go bigger than max */
-                return Condition.Result.ALLOW;
+                return ALLOW;
             }
         }
-        return states[0] >= min ? Condition.Result.ALLOW : Condition.Result.ABSTAIN;
+        return states[0] >= min ? ALLOW : ABSTAIN;
     }
 
     protected String name() {
@@ -52,10 +55,8 @@ public abstract class AbstractCondition implements Condition, Parser {
         boolean hasNext;
         do {
             ParseResult<Result> pr = ValueParser.parse(str, Result.class);
-            if (!(pr.value instanceof Condition))
-                throw new SyntaxException("Error: Expected boolean condition", str, Values.getMeta(getClass()));
 
-            children.add((Condition) pr.value);
+            children.add(pr.asCondition(str, getClass()));
             str = pr.leftover.trim();
 
             hasNext = !str.isEmpty() && str.charAt(0) == ',';

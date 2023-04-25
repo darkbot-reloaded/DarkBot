@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.config.actions.conditions;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.actions.Condition;
+import com.github.manolo8.darkbot.config.actions.LegacyCondition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
@@ -10,27 +9,29 @@ import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.types.Condition;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 @ValueData(name = "equal", description = "Returns true if both parameters are the same", example = "equal(a, b)")
-public class EqualCondition implements Condition, Parser {
+public class EqualCondition implements LegacyCondition, Parser {
 
     private Boolean isComparable;
     private Value<?> a, b;
 
     @Override
-    public @NotNull Result get(Main main) {
-        Object objA = Value.get(a, main), objB = Value.get(b, main);
-        if (objA == null || objB == null) return Result.ABSTAIN;
+    public @NotNull Condition.Result get(PluginAPI api) {
+        Object objA = Value.get(a, api), objB = Value.get(b, api);
+        if (objA == null || objB == null) return Condition.Result.ABSTAIN;
 
         if (isComparable == null) isComparable = isComparable(objA, objB);
 
         if (isComparable) //noinspection unchecked
-            return Result.fromBoolean(((Comparable<Object>) objA).compareTo(objB) == 0);
-        return Result.fromBoolean(objA.equals(objB));
+            return Condition.Result.fromBoolean(((Comparable<Object>) objA).compareTo(objB) == 0);
+        return Condition.Result.fromBoolean(objA.equals(objB));
     }
 
     @Override

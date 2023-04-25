@@ -1,36 +1,32 @@
 package com.github.manolo8.darkbot.config.actions.conditions;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.actions.Condition;
+import com.github.manolo8.darkbot.config.actions.LegacyCondition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
-import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.config.actions.values.NumberConstant;
-import com.github.manolo8.darkbot.core.entities.Ship;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.types.Condition;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
-
 @ValueData(name = "after", description = "Returns true if inner condition is true after the specified time in seconds", example = "after(7.5, condition)")
-public class AfterCondition implements Condition, Parser {
+public class AfterCondition implements LegacyCondition, Parser {
 
     public long time;
-    public Value<Result> condition;
+    public Condition condition;
 
     private transient Long allowTime = null;
 
     @Override
-    public @NotNull Condition.Result get(Main main) {
-        Result res = Value.get(condition, main);
-        if (res == null) return Result.ABSTAIN;
+    public @NotNull Condition.Result get(PluginAPI api) {
+        Condition.Result res = condition.get(api);
 
         allowTime = res.allows() ? allowTime != null ? allowTime : System.currentTimeMillis() + time : null;
 
-        return Result.fromBoolean(allowTime != null && System.currentTimeMillis() > allowTime);
+        return Condition.Result.fromBoolean(allowTime != null && System.currentTimeMillis() > allowTime);
     }
 
 
@@ -48,7 +44,7 @@ public class AfterCondition implements Condition, Parser {
         str = ParseUtil.separate(params, getClass(), ",");
 
         ParseResult<Result> pr = ValueParser.parse(str, Result.class);
-        condition = pr.value;
+        condition = pr.asCondition(str, getClass());
 
         return ParseUtil.separate(pr.leftover.trim(), getClass(), ")");
     }

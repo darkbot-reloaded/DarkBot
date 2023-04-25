@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.config.actions.conditions;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.actions.Condition;
+import com.github.manolo8.darkbot.config.actions.LegacyCondition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
@@ -10,22 +9,24 @@ import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
 import com.github.manolo8.darkbot.core.entities.Ship;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.types.Condition;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
 @ValueData(name = "has-formation", description = "Checks if a ship has a formation", example = "has-formation(formation, ship)")
-public class HasFormationCondition implements Condition, Parser {
+public class HasFormationCondition implements LegacyCondition, Parser {
 
     public Formation formation;
     public Value<Ship> ship;
 
     @Override
-    public @NotNull Condition.Result get(Main main) {
+    public @NotNull Condition.Result get(PluginAPI main) {
         Ship sh;
-        if ((formation == null) || (sh = Value.get(ship, main)) == null) return Result.ABSTAIN;
+        if ((formation == null) || (sh = Value.get(ship, main)) == null) return Condition.Result.ABSTAIN;
 
-        return Result.fromBoolean(sh.formationId == formation.id);
+        return Condition.Result.fromBoolean(sh.formationId == formation.id);
     }
 
     public enum Formation {
