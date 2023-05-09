@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.utils;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import eu.darkbot.util.Timer;
 import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Exception;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import org.jcodec.api.SequenceEncoder;
@@ -26,9 +27,10 @@ public class DeathRecorder {
     private static final int PICTURE_LENGTH = WIDTH * HEIGHT * 3;
 
     private static final int MAX_FRAMES = 100;
+    private static final int MAX_COMPRESSION_LENGTH = PICTURE_LENGTH / 8; //115_200
 
     private final byte[] bitmapBuffer = new byte[PICTURE_LENGTH];
-    private final byte[] compressionBuffer = new byte[PICTURE_LENGTH];
+    private final byte[] compressionBuffer = new byte[MAX_COMPRESSION_LENGTH];
 
     private final List<CompressedFrame> compressedFrames = new ArrayList<>(MAX_FRAMES);
     private final BufferedImage imageCache = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
@@ -133,21 +135,19 @@ public class DeathRecorder {
     }
 
     private class CompressedFrame {
-        private static final int MAX_COMPRESSED_LENGTH = 128_000;
-
         private byte[] compressed;
         private int size;
 
         private void compress() {
-            size = compressor.compress(bitmapBuffer, compressionBuffer);
-
-            if (size > MAX_COMPRESSED_LENGTH) {
+            try {
+                size = compressor.compress(bitmapBuffer, compressionBuffer);
+            } catch (LZ4Exception e) {
                 size = 0;
                 return;
             }
 
             if (compressed == null || compressed.length < size) {
-                compressed = new byte[(int) Math.min(MAX_COMPRESSED_LENGTH, size * 1.1)];
+                compressed = new byte[(int) Math.min(MAX_COMPRESSION_LENGTH, size * 1.1)];
             }
 
             System.arraycopy(compressionBuffer, 0, compressed, 0, size);
