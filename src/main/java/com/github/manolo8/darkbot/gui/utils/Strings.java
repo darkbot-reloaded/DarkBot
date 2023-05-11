@@ -36,6 +36,7 @@ public class Strings {
     public static String fuzzyMatcher(String string) {
         string = string.toLowerCase(Locale.ROOT)
                 .replace("-x-", "") // Fixes "-x-[ NAME ]-x-", used in frozen labyrinth
+                .replace("xx", "") // Fixes Chaos Protegit
                 .replace("referee binary bot", "referee bot");
         string = NON_CHARACTER_REPLACEMENT.matcher(string).replaceAll(""); // Keep only alphanumerical
         return MIMESIS_REPLACEMENT.matcher(string).replaceAll("mimesis"); // Replace mim35i5 with mimesis

@@ -177,7 +177,7 @@ public class PetManager extends Gui implements PetAPI {
         private final Gear gear;
         public NpcPick(String npcName, NpcInfo npc) {
             this.npc = npc;
-            String fuzzyName = Strings.fuzzyMatcher(npcName);
+            String fuzzyName = npc.fuzzyName != null ? npc.fuzzyName : (npc.fuzzyName = Strings.fuzzyMatcher(npcName));
             this.gear = locatorList.stream().filter(l -> fuzzyName.equals(l.fuzzyName)).findFirst().orElse(null);
         }
     }
