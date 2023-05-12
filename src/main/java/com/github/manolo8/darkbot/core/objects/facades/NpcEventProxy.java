@@ -12,14 +12,41 @@ public class NpcEventProxy extends Updatable implements NpcEventAPI {
     public String eventName;
     public String eventDescriptionID;
     public String eventDescription;
-    public String npcLeftStatus;
-    public double leftToKill;
-    public double bossCount;
+    public String npcLeftDescription;
+    public int npcCount;
+    public int bossCount;
     public boolean eventActive;
 
     @Override
     public double getRemainingTime() {
         return time;
+    }
+
+    @Override
+    public String getEventName(){
+        return eventName;
+    }
+
+    @Override
+    public String getEventID(){
+        return eventID;
+    }
+
+    @Override
+    public String getEventDescription(){
+        return eventDescription;
+    }
+    @Override
+    public String getNpcLeftDescription(){
+        return npcLeftDescription;
+    }
+    @Override
+    public int npcLeft(){
+        return npcCount;
+    }
+    @Override
+    public int bossNpcLeft(){
+        return bossCount;
     }
 
     @Override
@@ -37,11 +64,11 @@ public class NpcEventProxy extends Updatable implements NpcEventAPI {
         this.eventActive = API.readBoolean(data+0x44);
         this.time = API.readMemoryDouble(API.readMemoryLong(data+0x50)+0x38);
         this.eventDescription = API.readMemoryString(API.readMemoryLong(data+0x60));
-        this.npcLeftStatus = API.readMemoryString(API.readMemoryLong(data+0x68));
+        this.npcLeftDescription = API.readMemoryString(API.readMemoryLong(data+0x68));
         this.eventDescriptionID = API.readMemoryString(API.readMemoryLong(data+0x70));
         this.eventID = API.readMemoryString(API.readMemoryLong(data+0x78));
         this.eventName = API.readMemoryString(API.readMemoryLong(data+0x80));
-        this.leftToKill = API.readDouble(data+0x88);
-        this.bossCount = API.readDouble(data+0x90);
+        this.npcCount = API.readInt(data+0x88);
+        this.bossCount = API.readInt(data+0x90);
     }
 }
