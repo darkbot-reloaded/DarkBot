@@ -68,6 +68,10 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final SettingsGui settingsGui;
     public final ChatGui chat;
 
+    public final Gui dispatch;
+    public final Gui icon;
+    public final Gui icon_ok;
+
     public final Timer loggedInTimer = Timer.get(15_000);
     private LoadStatus checks = LoadStatus.WAITING;
     private enum LoadStatus {
@@ -123,6 +127,10 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.refinement = register("refinement", RefinementGui.class);
         this.chat = register("chat", ChatGui.class);
         this.settingsGui = register("settings", SettingsGui.class);
+
+        this.dispatch = register("dispatch");
+        this.icon = register("popup_generic_icon");
+        this.icon_ok = register("popup_generic_icon_ok");
 
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }

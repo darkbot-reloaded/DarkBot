@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class DispatchManager {
     private final BackpageManager backpageManager;
     private final DispatchData data;
@@ -50,7 +51,7 @@ public class DispatchManager {
 
     @Deprecated
     public Boolean update(int expiryTime) {
-        return this.update((long) expiryTime);
+        return false;
     }
 
     /**
@@ -58,22 +59,6 @@ public class DispatchManager {
      * @return null if update wasn't required (non-expired), true if updated ok, false if update failed
      */
     public Boolean update(long expiryTime) {
-        try {
-            if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return null;
-            if (captchaHandler.isSolvingCaptcha()) return false;
-            HttpURLConnection httpURLConnection = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getConnection();
-            String page = IOUtils.read(httpURLConnection.getInputStream());
-            if (captchaHandler.needsCaptchaSolve(httpURLConnection.getURL(), page)) {
-                System.out.println("DispatchManager: Captcha Detected");
-                captchaHandler.solveCaptcha();
-                return false;
-            }
-            lastDispatcherUpdate = System.currentTimeMillis();
-            return InfoReader.updateAll(page, data);
-        } catch (Exception e) {
-            System.out.println("Exception updating dispatch data" + e);
-            e.printStackTrace();
-        }
         return false;
     }
 
@@ -86,137 +71,32 @@ public class DispatchManager {
     }
 
     public boolean hireRetriever(Retriever retriever) {
-        if (retriever == null) return false;
-        try {
-            if (data.getAvailableSlots() <= 0) return false;
-            if (retriever.getPermitCost() > data.getPermit()) {
-                return handleResponse("Hire Retriever", retriever.getId(), "(ERROR) Can Not Hire Retriever, Not enough permits");
-            }
-            String response = backpageManager.postHttp("ajax/dispatch.php")
-                    .setParam("command", "sendDispatch")
-                    .setParam("dispatchId", retriever.getId())
-                    .getContent();
-            return handleResponse("Hired Dispatcher", retriever.getId(), response);
-        } catch (Exception e) {
-            System.out.println("Exception hiring dispatcher: " + e);
-            e.printStackTrace();
-        }
         return false;
     }
 
     public boolean collectInstant(InProgress progress) {
-        if (progress == null) return false;
-        try {
-            System.out.println("Collecting Instant: Slot " + progress.getSlotId());
-            if (data.getPrimeCoupons() <= 0)
-                return handleResponse("Instant Collect", progress.getId(),
-                        "(ERROR) Can Not Instant Collect, No Prime Coupon available for instant collection");
-            String response = backpageManager.postHttp("ajax/dispatch.php")
-                    .setParam("command", "instantComplete")
-                    .setParam("dispatchId", progress.getId())
-                    .setParam("dispatchRewardPackage", progress.getDispatchRewardPackage())
-                    .setParam("slotId", progress.getSlotId())
-                    .getContent();
-
-            return handleResponse("Collected Retriever", progress.getId(), response);
-        } catch (Exception e) {
-            System.out.println("Exception collecting dispatcher: " + e);
-            e.printStackTrace();
-        }
         return false;
     }
 
     public boolean hireGate(Gate gate) {
-        if (gate == null) return false;
-        try {
-            if (gate.getInProgress()) {
-                return handleResponse("Hire Gate", gate.getName(), "(ERROR) This Gate in Progress, Can Not Start Same Gate");
-            }
-            if (data.getGateUnits() <= 0) {
-                return handleResponse("Hire Gate ", gate.getName(), "(ERROR) Can not Hire Gate, Not enough GGEU");
-            }
-
-            String response = backpageManager.postHttp("ajax/dispatch.php")
-                    .setParam("command", "sendGateDispatch")
-                    .setParam("gateId", gate.getId())
-                    .getContent();
-            return handleResponse("Gate Started", gate.getName(), response);
-        } catch (Exception e) {
-            System.out.println("Exception dispatching gate: " + e);
-            e.printStackTrace();
-        }
-
         return false;
     }
 
     public boolean collectGate(Gate gate) {
-        if (gate.getCollectable().equals("0")) return false;
-        try {
-            System.out.println("Collecting: Gate " + gate.getName());
-            String response = backpageManager.postHttp("ajax/dispatch.php")
-                    .setParam("command", "collectGateDispatch")
-                    .setParam("gateId", gate.getId())
-                    .getContent();
-
-            gate.setInProgress(false);
-            gate.setCollectable("0");
-            gate.setTime("0");
-            gate.setCost("0");
-
-            return handleResponse("Collected Gate", gate.getName(), response);
-        } catch (Exception e) {
-            System.out.println("Exception collecting dispatcher: " + e);
-            e.printStackTrace();
-        }
         return false;
     }
 
 
     public boolean collect(InProgress progress) {
-        if (progress.getCollectable().equals("0")) return false;
-        try {
-            System.out.println("Collecting: Slot " + progress.getSlotId());
-            String response = backpageManager.postHttp("ajax/dispatch.php")
-                    .setParam("command", "collectDispatch")
-                    .setParam("slot", progress.getSlotId())
-                    .getContent();
-
-            return handleResponse("Collected Retriever", progress.getId(), response);
-        } catch (Exception e) {
-            System.out.println("Exception collecting dispatcher: " + e);
-            e.printStackTrace();
-        }
         return false;
     }
 
     private boolean handleResponse(String type, String id, String response) {
-        boolean failed = response.contains("ERROR");
-        if (!failed) {
-            this.lastCollected.clear();
-            JsonObject jsonObj = gson.fromJson(response, JsonObject.class); //Converts the json string to JsonElement without POJO
-            Iterable<JsonElement> rewardsLog = jsonObj.getAsJsonArray("rewardsLog");
-            if (rewardsLog == null) rewardsLog = Collections.emptyList();
-
-            for (JsonElement item : rewardsLog) {
-                JsonObject obj = item.getAsJsonObject();
-                if (!obj.has("lootId")) continue;
-
-                String key = obj.getAsJsonPrimitive("lootId").getAsString();
-                int amount = obj.getAsJsonPrimitive("amount").getAsInt();
-
-                this.collected.compute(key, (k, v) -> (v == null ? 0 : v) + amount);
-                this.lastCollected.compute(key, (k, v) -> (v == null ? 0 : v) + amount);
-            }
-        }
-        System.out.println("DispatchManager: " + type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
-        update(0);
-        return !failed;
+        return false;
     }
 
     public List<String> collectAll() {
-        List<InProgress> toCollect = data.getInProgress().values().stream()
-                .filter(ip -> !ip.getCollectable().equals("0")).collect(Collectors.toList());
-        return toCollect.stream().filter(this::collect).map(InProgress::getId).collect(Collectors.toList());
+        return Collections.emptyList();
     }
 
     private enum InfoReader {
