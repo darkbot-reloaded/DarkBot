@@ -130,7 +130,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
         this.dispatch = register("dispatch");
         this.icon = register("popup_generic_icon");
-        this.icon_ok = register("popup_generic_icon_ok");
+        this.iconOk = register("popup_generic_icon_ok");
 
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }
