@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
-import static com.github.manolo8.darkbot.Main.UPDATE_LOCKER;
 
 public class DispatchRetrieverMediator extends Updatable implements DispatchRetrieverAPI {
 
@@ -31,13 +30,10 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
 
         availableRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x58) & ByteUtils.ATOM_MASK);
         inProgressRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x60) & ByteUtils.ATOM_MASK);
-        synchronized (UPDATE_LOCKER) {
-            availableRetrieverArr.sync(availableRetrievers, Retriever::new);
-            inProgressRetrieverArr.sync(inProgressRetrievers, Retriever::new);
-        }
+        availableRetrieverArr.sync(availableRetrievers, Retriever::new);
+        inProgressRetrieverArr.sync(inProgressRetrievers, Retriever::new);
 
         selectedRetriever.update(API.readMemoryLong(dispatchRetrieverData + 0x68) & ByteUtils.ATOM_MASK);
-        tick();
     }
 
     @Override
