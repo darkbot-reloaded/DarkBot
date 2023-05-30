@@ -70,7 +70,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     public final Gui dispatch;
     public final Gui icon;
-    public final Gui icon_ok;
+    public final Gui iconOk;
 
     public final Timer loggedInTimer = Timer.get(15_000);
     private LoadStatus checks = LoadStatus.WAITING;
