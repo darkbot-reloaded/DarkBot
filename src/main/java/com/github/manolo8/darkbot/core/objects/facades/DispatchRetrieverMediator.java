@@ -15,13 +15,13 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
 
     public int availableSlots, totalSlots;
 
-    public List<DispatchRetrieverVO> availableRetrievers = new ArrayList<>();
-    public List<DispatchRetrieverVO> inProgressRetrievers = new ArrayList<>();
+    public List<Retriever> availableRetrievers = new ArrayList<>();
+    public List<Retriever> inProgressRetrievers = new ArrayList<>();
 
     private final ObjArray availableRetrieverArr = ObjArray.ofVector(true);
     private final ObjArray inProgressRetrieverArr = ObjArray.ofVector(true);
 
-    public DispatchRetrieverVO selectedRetriever = new DispatchRetrieverVO();
+    public Retriever selectedRetriever = new Retriever();
 
     @Override
     public void update() {
@@ -32,11 +32,12 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
         availableRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x58) & ByteUtils.ATOM_MASK);
         inProgressRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x60) & ByteUtils.ATOM_MASK);
         synchronized (UPDATE_LOCKER) {
-            availableRetrieverArr.sync(availableRetrievers, DispatchRetrieverVO::new);
-            inProgressRetrieverArr.sync(inProgressRetrievers, DispatchRetrieverVO::new);
+            availableRetrieverArr.sync(availableRetrievers, Retriever::new);
+            inProgressRetrieverArr.sync(inProgressRetrievers, Retriever::new);
         }
 
         selectedRetriever.update(API.readMemoryLong(dispatchRetrieverData + 0x68) & ByteUtils.ATOM_MASK);
+        tick();
     }
 
     @Override
@@ -64,7 +65,7 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
         return selectedRetriever;
     }
 
-    public static class DispatchRetrieverVO extends Auto implements DispatchRetrieverAPI.DispatchRetrieverVO {
+    public static class Retriever extends Auto implements DispatchRetrieverAPI.DispatchRetrieverVO {
         public String name, inGameName, type;
         public double duration;
         public int slotId;
