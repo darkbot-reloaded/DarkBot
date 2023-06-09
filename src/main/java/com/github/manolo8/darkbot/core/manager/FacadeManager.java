@@ -98,6 +98,10 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         return proxies.getPtr(key);
     }
 
+    public long getMediatorAddressOf(String key) {
+        return mediators.getPtr(key);
+    }
+
     @Override
     public void install(BotInstaller botInstaller) {
         botInstaller.mainAddress.add(mainAddr -> {
