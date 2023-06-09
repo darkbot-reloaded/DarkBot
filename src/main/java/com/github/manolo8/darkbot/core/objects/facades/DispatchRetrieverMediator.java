@@ -47,22 +47,22 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
     }
 
     @Override
-    public List<? extends DispatchRetrieverAPI.DispatchRetrieverVO> getAvailableRetrievers() {
+    public List<? extends DispatchRetrieverAPI.Retriever> getAvailableRetrievers() {
         return availableRetrievers;
     }
 
     @Override
-    public List<? extends DispatchRetrieverAPI.DispatchRetrieverVO> getInProgressRetrievers() {
+    public List<? extends DispatchRetrieverAPI.Retriever> getInProgressRetrievers() {
         return inProgressRetrievers;
     }
 
     @Override
-    public DispatchRetrieverAPI.DispatchRetrieverVO getSelectedRetriever() {
+    public DispatchRetrieverAPI.Retriever getSelectedRetriever() {
         return selectedRetriever;
     }
 
-    public static class Retriever extends Auto implements DispatchRetrieverAPI.DispatchRetrieverVO {
-        public String name, inGameName, type;
+    public static class Retriever extends Auto implements DispatchRetrieverAPI.Retriever {
+        public String id, name, type;
         public double duration;
         public int slotId;
 
@@ -72,20 +72,20 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
             long dispatchModule = API.readMemoryLong(address + 0x30) & ByteUtils.ATOM_MASK;
 
             this.slotId = API.readMemoryInt(address + 0x20);
-            this.name = API.readMemoryString(dispatchModule, 0x28);
-            this.inGameName = API.readMemoryString(dispatchModule, 0x48);
+            this.id = API.readMemoryString(dispatchModule, 0x28);
+            this.name = API.readMemoryString(dispatchModule, 0x48);
             this.type = API.readMemoryString(dispatchModule, 0x50);
             this.duration = API.readMemoryDouble(dispatchModule + 0x58);
         }
 
         @Override
-        public String getName() {
-            return name;
+        public String getId() {
+            return id;
         }
 
         @Override
-        public String getInGameName() {
-            return inGameName;
+        public String getName() {
+            return name;
         }
 
         @Override
