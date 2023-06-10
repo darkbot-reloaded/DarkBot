@@ -2,8 +2,11 @@ package com.github.manolo8.darkbot.core.objects;
 
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.utils.ClickPoint;
 import com.github.manolo8.darkbot.utils.Offsets;
+import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.API;
+import eu.darkbot.api.utils.NativeAction;
 
 import java.util.function.Consumer;
 
@@ -215,6 +218,29 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
         return 0;
     }
+
+    /**
+     * Click Points on Gui, only if visible
+     * @param points lists of points to click
+     * @return if clicks were processed
+     */
+    public boolean runClicks(ClickPoint... points) {
+        if(!this.isVisible()) return false;
+        if (API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS)) {
+            long[] nativeClicks = new long[points.length];
+            for (int i = 0; i < points.length; i++) {
+                nativeClicks[i] = NativeAction.Mouse.CLICK.of(this.x + points[i].x, this.x + points[i].y);
+            }
+            API.postActions(nativeClicks);
+        } else {
+            for (ClickPoint p : points) {
+                this.click(p.x, p.y);
+                Time.sleep(25);
+            }
+        }
+        return true;
+    }
+
 
     @Override
     public double getWidth() {

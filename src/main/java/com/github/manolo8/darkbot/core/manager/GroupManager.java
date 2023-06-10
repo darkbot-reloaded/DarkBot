@@ -10,7 +10,6 @@ import com.github.manolo8.darkbot.core.objects.group.GroupMember;
 import com.github.manolo8.darkbot.core.objects.group.Invite;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ClickPoint;
-import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.GroupAPI;
 import eu.darkbot.api.utils.NativeAction;
 import org.jetbrains.annotations.Nullable;
@@ -206,21 +205,6 @@ public class GroupManager extends Gui implements GroupAPI {
     public void kick(GroupMember member) {
         if (member == null) return;
         kick(member.id);
-    }
-
-    private void runClicks(ClickPoint... points) {
-        if (API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS)) {
-            long[] nativeClicks = new long[points.length];
-            for (int i = 0; i < points.length; i++) {
-                nativeClicks[i] = NativeAction.Mouse.CLICK.of(this.x + points[i].x, this.y + points[i].y);
-            }
-            API.postActions(nativeClicks);
-        } else {
-            for (ClickPoint p : points) {
-                click(p.x, p.y);
-                Time.sleep(25);
-            }
-        }
     }
 
     private ClickPoint getAcceptPoint(int idx) {
