@@ -71,10 +71,10 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
             if (address <= 0) return;
             long dispatchModule = API.readMemoryLong(address + 0x30) & ByteUtils.ATOM_MASK;
 
-            this.slotId = API.readMemoryInt(address + 0x20);
+            this.slotId = API.readMemoryInt(dispatchModule + 0x24);
             this.id = API.readMemoryString(dispatchModule, 0x28);
             this.name = API.readMemoryString(dispatchModule, 0x48);
-            this.type = API.readMemoryString(dispatchModule, 0x50);
+            this.type = API.readMemoryString(dispatchModule, 0x30);
             this.duration = API.readMemoryDouble(dispatchModule + 0x58);
         }
 
