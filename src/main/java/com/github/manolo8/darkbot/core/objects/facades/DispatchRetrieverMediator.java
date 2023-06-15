@@ -74,7 +74,7 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
             this.slotId = API.readMemoryInt(dispatchModule + 0x24);
             this.id = API.readMemoryString(dispatchModule, 0x28);
             this.name = API.readMemoryString(dispatchModule, 0x48);
-            this.type = API.readMemoryString(dispatchModule, 0x30);
+            this.type = API.readMemoryString(dispatchModule, 0x50);
             this.duration = API.readMemoryDouble(dispatchModule + 0x58);
         }
 
