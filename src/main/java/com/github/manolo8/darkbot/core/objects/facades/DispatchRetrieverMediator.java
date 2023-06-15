@@ -62,7 +62,7 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
     }
 
     public static class Retriever extends Auto implements DispatchRetrieverAPI.Retriever {
-        public String id, name, type;
+        public String id, name, description;
         public double duration;
         public int slotId;
 
@@ -73,8 +73,8 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
 
             this.slotId = API.readMemoryInt(dispatchModule + 0x24);
             this.id = API.readMemoryString(dispatchModule, 0x28);
-            this.name = API.readMemoryString(dispatchModule, 0x48);
-            this.type = API.readMemoryString(dispatchModule, 0x50);
+            this.name = API.readMemoryString(dispatchModule, 0x50);
+            this.description = API.readMemoryString(dispatchModule, 0x48);
             this.duration = API.readMemoryDouble(dispatchModule + 0x58);
         }
 
@@ -89,8 +89,8 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
         }
 
         @Override
-        public String getType() {
-            return type;
+        public String getDescription() {
+            return description;
         }
 
         @Override
