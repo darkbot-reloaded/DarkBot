@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.core.objects.facades.AstralGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ChatProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ChrominProxy;
+import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchRetrieverMediator;
 import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalBlacklightProxy;
@@ -50,6 +51,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final HighlightProxy highlight;
     public final SpaceMapWindowProxy spaceMapWindowProxy;
     public final GauntletPlutusProxy plutus;
+    public final DispatchProxy dispatchProxy;
     public final DispatchRetrieverMediator dispatchRetrieverMediator;
 
     public FacadeManager(PluginAPI pluginApi) {
@@ -70,6 +72,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.highlight      = registerProxy("HighlightProxy",         HighlightProxy.class);
         this.spaceMapWindowProxy = registerProxy("spacemap",          SpaceMapWindowProxy.class);
         this.plutus         = registerProxy("plutus",                 GauntletPlutusProxy.class);
+        this.dispatchProxy  = registerProxy("dispatch",               DispatchProxy.class);
         this.dispatchRetrieverMediator = registerMediator("dispatch_retriever", DispatchRetrieverMediator.class);
     }
 
@@ -96,10 +99,6 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
 
     public long getProxyAddressOf(String key) {
         return proxies.getPtr(key);
-    }
-
-    public long getMediatorAddressOf(String key) {
-        return mediators.getPtr(key);
     }
 
     @Override
