@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.ChatGui;
+import com.github.manolo8.darkbot.core.objects.DispatchGui;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.LogoutGui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
@@ -128,7 +129,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.chat = register("chat", ChatGui.class);
         this.settingsGui = register("settings", SettingsGui.class);
 
-        this.dispatch = register("dispatch");
+        this.dispatch = register("dispatch", DispatchGui.class);
         this.icon = register("popup_generic_icon");
         this.iconOk = register("popup_generic_icon_ok");
 
