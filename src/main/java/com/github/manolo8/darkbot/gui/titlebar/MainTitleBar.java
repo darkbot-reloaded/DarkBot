@@ -66,7 +66,7 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
         private JComponent createLeftPanel(StatsManager statsManager) {
             JPanel panel = new JPanel(new GridLayout(2, 1));
 
-            JLabel tick = createLabel("heart-pulse", false, null,
+            JLabel tick = createLabel("tick_time", false, null,
                     () -> "Tick time\n\n" + statsManager.getTickStats());
             JLabel ping = createLabel("ping", false,
                     color -> {
@@ -86,7 +86,7 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
         private JComponent createRightPanel(StatsManager statsManager) {
             JPanel panel = new JPanel(new GridLayout(2, 1));
 
-            JLabel cpu = createLabel("cpu-fill", true, null, () -> "CPU usage\n\n" + statsManager.getCpuStats());
+            JLabel cpu = createLabel("cpu", true, null, () -> "CPU usage\n\n" + statsManager.getCpuStats());
             JLabel ram = createLabel("ram", true, null,
                     () -> "Process RAM usage\n\n" + statsManager.getMemoryStats()
                             + "\n\nHeap=" + (Runtime.getRuntime().totalMemory() >> 20) + "MB"
