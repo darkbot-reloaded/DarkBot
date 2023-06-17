@@ -116,9 +116,7 @@ public class InfosDrawer implements Drawable {
             }
         }
 
-        mg.drawString(mg.getWidth() - 5, 12, getSysInfo(), MapGraphics.StringAlign.RIGHT);
-        mg.drawString(mg.getWidth() - 5, 26, getTickInfo(), MapGraphics.StringAlign.RIGHT);
-        mg.drawString(mg.getWidth() - 5, 40, "SID: " + main.backpage.sidStatus(), MapGraphics.StringAlign.RIGHT);
+        mg.drawString(mg.getWidth() - 5, 12, "SID: " + main.backpage.sidStatus(), MapGraphics.StringAlign.RIGHT);
     }
 
     public void drawMap(MapGraphics mg) {
@@ -227,7 +225,7 @@ public class InfosDrawer implements Drawable {
         if (displayAmount) {
             mg.drawString(pos.getX() + width / 2.0, pos.getY() + height - 2,
                     HEALTH_FORMAT.format(health.getHull() + health.getHp())
-                            + "/" + HEALTH_FORMAT.format(totalMaxHealth), MapGraphics.StringAlign.MID);
+                            + "/" + HEALTH_FORMAT.format(health.getMaxHp()), MapGraphics.StringAlign.MID);
         }
 
         if (health.getMaxShield() != 0) {

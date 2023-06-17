@@ -6,19 +6,14 @@ import eu.darkbot.api.config.types.DisplayFlag;
 import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
-import eu.darkbot.api.game.entities.Box;
-import eu.darkbot.api.game.entities.Entity;
-import eu.darkbot.api.game.entities.Mine;
-import eu.darkbot.api.game.entities.Npc;
-import eu.darkbot.api.game.entities.Pet;
-import eu.darkbot.api.game.entities.Player;
-import eu.darkbot.api.game.entities.Relay;
-import eu.darkbot.api.game.entities.SpaceBall;
-import eu.darkbot.api.game.entities.StaticEntity;
+import eu.darkbot.api.game.entities.*;
+import eu.darkbot.api.game.group.GroupMember;
+import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.game.other.Movable;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EntitiesAPI;
+import eu.darkbot.api.managers.GroupAPI;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.PetAPI;
 
@@ -30,6 +25,7 @@ public class DynamicEntitiesDrawer implements Drawable {
 
     private final HeroAPI hero;
     private final PetAPI pet;
+    private final GroupAPI group;
 
     private final ConfigSetting<Boolean> roundEntities;
 
@@ -42,9 +38,10 @@ public class DynamicEntitiesDrawer implements Drawable {
     private final Collection<? extends SpaceBall> spaceBalls;
     private final Collection<? extends StaticEntity> staticEntities;
 
-    public DynamicEntitiesDrawer(HeroAPI hero, PetAPI pet, ConfigAPI config, EntitiesAPI entities) {
+    public DynamicEntitiesDrawer(HeroAPI hero, PetAPI pet, GroupAPI group, ConfigAPI config, EntitiesAPI entities) {
         this.hero = hero;
         this.pet = pet;
+        this.group = group;
 
         this.roundEntities = config.requireConfig("bot_settings.map_display.round_entities");
 
@@ -111,15 +108,20 @@ public class DynamicEntitiesDrawer implements Drawable {
     private void drawMines(MapGraphics mg) {
         mg.setColor("mines");
 
-        for (Mine mine : mines)
+        for (Mine mine : mines) {
             drawEntity(mg, mine, 3, true);
+        }
     }
 
     private void drawNpcs(MapGraphics mg) {
         mg.setColor("npcs");
+        mg.setFont("small");
 
-        for (Npc npc : npcs)
+        for (Npc npc : npcs) {
             drawEntity(mg, npc, 4, npc.getInfo().getShouldKill());
+            if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
+                mg.drawString(npc, npc.getEntityInfo().getUsername(), -6, MapGraphics.StringAlign.MID);
+        }
 
         pet.getLocatorNpcLoc()
                 .ifPresent(locator -> {
@@ -133,21 +135,44 @@ public class DynamicEntitiesDrawer implements Drawable {
     private void drawPlayers(MapGraphics mg) {
         for (Player player : players) {
             boolean isEnemy = player.getEntityInfo().isEnemy();
-            mg.setColor(isEnemy ? "enemies" : "allies");
-            drawEntity(mg, player, 4, false);
 
+            int level = -1;
+            String color = isEnemy ? "enemies" : "allies";
+            if (group.hasGroup()) {
+                GroupMember member = group.getMember(player);
+                if (member != null) {
+                    color = "group_member";
+                    level = member.getLevel();
+                }
+            }
+
+            mg.setColor(color);
+            drawEntity(mg, player, 4, false);
             if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
-                mg.drawString(player, player.getEntityInfo().getUsername(), -5, MapGraphics.StringAlign.MID);
+                mg.drawString(player, player.getEntityInfo().getUsername()
+                        + (level != -1 ? " [" + level + "]" : ""), -6, MapGraphics.StringAlign.MID);
+        }
+
+        if (group.hasGroup()) {
+            mg.setColor("group_member");
+            for (GroupMember member : group.getMembers()) {
+                if (member.getMapId() == hero.getMap().getId() && !isMemberVisible(member)) {
+                    drawEntity(mg, member.getLocation(), 4, false);
+                    if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
+                        mg.drawString(member.getLocation(), member.getUsername(), -6, MapGraphics.StringAlign.MID);
+                }
+            }
         }
     }
 
     private void drawPets(MapGraphics mg) {
         for (Pet pet : pets) {
             mg.setColor(pet.getEntityInfo().isEnemy() ? "enemies" : "allies");
+
             drawEntity(mg, pet, 4, false);
 
             if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
-                mg.drawString(pet, pet.getEntityInfo().getUsername(), -5, MapGraphics.StringAlign.MID);
+                mg.drawString(pet, pet.getEntityInfo().getUsername(), -6, MapGraphics.StringAlign.MID);
         }
     }
 
@@ -189,11 +214,20 @@ public class DynamicEntitiesDrawer implements Drawable {
         }
     }
 
-    private void drawEntity(MapGraphics mg, Entity entity, double size, boolean fill) {
+    private boolean isMemberVisible(GroupMember member) {
+        for (Player player : players) {
+            if (member.getId() == player.getId())
+                return true;
+        }
+
+        return false;
+    }
+
+    private void drawEntity(MapGraphics mg, Locatable entity, double size, boolean fill) {
         drawEntity(mg, entity, size, fill, false);
     }
 
-    private void drawEntity(MapGraphics mg, Entity entity, double size, boolean fill, boolean target) {
+    private void drawEntity(MapGraphics mg, Locatable entity, double size, boolean fill, boolean target) {
         if (!target && entity == hero.getLocalTarget()) return; // don't paint entity from loop if is a target
         if (fill) size += 1;
 

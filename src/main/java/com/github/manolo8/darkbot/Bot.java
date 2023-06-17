@@ -18,7 +18,6 @@ import java.security.CodeSource;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
-import java.security.Policy;
 import java.security.ProtectionDomain;
 
 public class Bot {
@@ -77,7 +76,7 @@ public class Bot {
 
     @SuppressWarnings("removal")
     private static void setupSecurityPolicy() {
-        Policy.setPolicy(new Policy() {
+        java.security.Policy.setPolicy(new java.security.Policy() {
             @Override
             public PermissionCollection getPermissions(ProtectionDomain domain) {
                 // Externally loaded classes get no permissions

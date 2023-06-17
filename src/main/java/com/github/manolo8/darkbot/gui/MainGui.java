@@ -3,7 +3,7 @@ package com.github.manolo8.darkbot.gui;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.gui.components.ExitConfirmation;
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -62,7 +62,7 @@ public class MainGui extends JFrame {
         requestFocus();
         setAlwaysOnTop(main.config.BOT_SETTINGS.BOT_GUI.ALWAYS_ON_TOP);
 
-        if (Main.API.hasCapability(GameAPI.Capability.WINDOW_POSITION)) {
+        if (Main.API.hasCapability(Capability.WINDOW_POSITION)) {
             addComponentListener(new ComponentAdapter() {
                 public void componentMoved(ComponentEvent e) {
                     if (main.config.BOT_SETTINGS.API_CONFIG.attachToBot)

@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core.objects;
 
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.utils.Offsets;
 import eu.darkbot.api.API;
@@ -127,7 +127,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
     }
 
     public void toggleVisibility() {
-        if (!API.hasCapability(GameAPI.Capability.DIRECT_CALL_METHOD)) return;
+        if (!API.hasCapability(Capability.DIRECT_CALL_METHOD)) return;
         API.callMethodChecked(true, "23(toggleVisibility)(2626?)1116321600", 183, address);
     }
 

@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.formdev.flatlaf.ui.FlatButtonUI;
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 
 import javax.swing.*;
@@ -67,7 +68,7 @@ public class RefreshButton extends JButton {
         private Color getColor(Component c) {
             Color foreground = c.getForeground();
             return FlatButtonUI.buttonStateColor(c, foreground, null, null,
-                    darker(foreground, 0.75), darker(foreground, 0.6));
+                    UIUtils.darker(foreground, 0.75), UIUtils.darker(foreground, 0.6));
         }
 
         @Override
@@ -78,13 +79,6 @@ public class RefreshButton extends JButton {
         @Override
         public int getIconHeight() {
             return 16;
-        }
-
-        private static Color darker(Color c, double factor) {
-            return new Color(Math.max((int) (c.getRed() * factor), 0),
-                    Math.max((int) (c.getGreen() * factor), 0),
-                    Math.max((int) (c.getBlue() * factor), 0),
-                    c.getAlpha());
         }
     }
 

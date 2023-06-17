@@ -1,9 +1,7 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.api.GameAPI;
-import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
@@ -104,7 +102,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
             }
 
             // For apis that support login, we can re-login if invalid
-            if (Main.API.hasCapability(GameAPI.Capability.LOGIN)
+            if (Main.API.hasCapability(Capability.LOGIN)
                     && (isInvalid() || sidStatus == 302)
                     && refreshTimer.tryActivate()) {
                 Main.API.handleRelogin();

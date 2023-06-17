@@ -177,8 +177,8 @@ public class MapManager implements Manager, StarSystemAPI {
 
         if (ByteUtils.isScriptableObjectValid(settings3DAddress)) {
             if (disableRender.getValue() && main.isRunning())
-                API.replaceInt(API.readLong(settings3DAddress, 0xf0) + 0x20, 1, 0);
-            else API.replaceInt(API.readLong(settings3DAddress, 0xf0) + 0x20, 0, 1);
+                API.replaceInt(API.readLong(settings3DAddress, 0xf8) + 0x20, 1, 0);
+            else API.replaceInt(API.readLong(settings3DAddress, 0xf8) + 0x20, 0, 1);
         }
 
         renderValidated = true;

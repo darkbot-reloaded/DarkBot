@@ -10,7 +10,7 @@ import com.github.manolo8.darkbot.config.utils.PlayerTagTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.InvalidNativeSignature;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.FacadeManager;
@@ -60,7 +60,7 @@ import java.util.Objects;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.121");
+    public static final Version VERSION      = new Version("1.122 b1 a2");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -201,6 +201,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
             }
 
             avgTick = ((avgTick * 9) + (System.currentTimeMillis() - time)) / 10;
+            statsManager.tickAverageStats();
 
             Time.sleepMax(time, botInstaller.invalid.get() ? 250 :
                     Math.max(config.BOT_SETTINGS.OTHER.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
@@ -212,7 +213,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         checkModule();
 
         // Do not care for either valid nor invalid if we're running a background-only bot
-        if (!Main.API.hasCapability(GameAPI.Capability.BACKGROUND_ONLY)) {
+        if (!Main.API.hasCapability(Capability.BACKGROUND_ONLY)) {
             if (isInvalid()) tickingModule = false;
             else validTick();
         }

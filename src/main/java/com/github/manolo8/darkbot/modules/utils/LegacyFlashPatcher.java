@@ -1,13 +1,12 @@
 package com.github.manolo8.darkbot.modules.utils;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.api.DarkBoatAdapter;
-import com.github.manolo8.darkbot.core.api.DarkBoatHookAdapter;
+import com.github.manolo8.darkbot.core.api.adapters.DarkBoatAdapter;
+import com.github.manolo8.darkbot.core.api.adapters.DarkBoatHookAdapter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.LibSetup;
-import com.github.manolo8.darkbot.utils.OSUtil;
 
 import javax.swing.*;
 import java.io.IOException;

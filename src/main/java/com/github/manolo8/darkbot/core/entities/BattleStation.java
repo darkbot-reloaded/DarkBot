@@ -19,7 +19,7 @@ public class BattleStation
 
     public PlayerInfo info = new PlayerInfo();
     public Health health = new Health();
-    public CircleImpl area = new CircleImpl(0, 0, 1200);
+    public CircleImpl area = new CircleImpl(0, 0, 700);
     public int hullId;
 
     protected final Ship.Target target = new Ship.Target();
@@ -58,12 +58,6 @@ public class BattleStation
     }
 
     @Override
-    public void removed() {
-        super.removed();
-        ConfigEntity.INSTANCE.updateSafetyFor(this);
-    }
-
-    @Override
     public AreaImpl getArea() {
         return area;
     }
@@ -75,8 +69,7 @@ public class BattleStation
 
     @Override
     public boolean use() {
-        boolean allowEnemy = main.hero.invisible && main.config.GENERAL.ROAMING.ENEMY_CBS_INVISIBLE;
-        return hullId > 0 && hullId < 255 && (info.isEnemy() && !allowEnemy);
+        return false;
     }
 
     @Override
@@ -88,6 +81,15 @@ public class BattleStation
 
         public Asteroid(int id, long address) {
             super(id, address);
+        }
+
+        @Override
+        public void update() {
+            super.update();
+
+            if (info.username.isEmpty()) {
+                info.username = Main.API.readString(traits.getLast(), "", 56, 40);
+            }
         }
     }
 
@@ -106,10 +108,6 @@ public class BattleStation
 
             info.update();
             health.update();
-            if (locationInfo.isMoving()) {
-                area.set(locationInfo.now, 1200);
-                ConfigEntity.INSTANCE.updateSafetyFor(this);
-            }
         }
 
         @Override
@@ -179,6 +177,11 @@ public class BattleStation
             info.update();
             health.update();
             target.update();
+
+            if (locationInfo.isMoving()) {
+                area.set(locationInfo.now, 600);
+                ConfigEntity.INSTANCE.updateSafetyFor(this);
+            }
         }
 
         @Override
@@ -195,6 +198,23 @@ public class BattleStation
         public void added(Main main) {
             super.added(main);
             target.added(main);
+        }
+
+        @Override
+        public boolean use() {
+            boolean allowEnemy = main.hero.invisible && main.config.GENERAL.ROAMING.ENEMY_CBS_INVISIBLE;
+            return !allowEnemy && info.isEnemy() && isDangerousModule();
+        }
+
+        private boolean isDangerousModule() {
+            return moduleType == Type.LASER_HR || moduleType == Type.LASER_MR || moduleType == Type.LASER_LR
+                    || moduleType == Type.ROCKET_LA || moduleType == Type.ROCKET_MA;
+        }
+
+        @Override
+        public void removed() {
+            super.removed();
+            ConfigEntity.INSTANCE.updateSafetyFor(this);
         }
 
         @Override
