@@ -16,10 +16,11 @@ import static com.github.manolo8.darkbot.Main.API;
 public class BattleStation
         extends Entity
         implements Obstacle, eu.darkbot.api.game.entities.BattleStation {
+    private static final int AVOID_RADIUS = 700;
 
     public PlayerInfo info = new PlayerInfo();
     public Health health = new Health();
-    public CircleImpl area = new CircleImpl(0, 0, 700);
+    public CircleImpl area = new CircleImpl(0, 0, AVOID_RADIUS);
     public int hullId;
 
     protected final Ship.Target target = new Ship.Target();
@@ -55,6 +56,12 @@ public class BattleStation
     @Override
     public EntityInfo getEntityInfo() {
         return info;
+    }
+
+    @Override
+    public void removed() {
+        super.removed();
+        ConfigEntity.INSTANCE.updateSafetyFor(this);
     }
 
     @Override
@@ -108,6 +115,9 @@ public class BattleStation
 
             info.update();
             health.update();
+            if (locationInfo.isMoving()) {
+                ConfigEntity.INSTANCE.updateSafetyFor(this);
+            }
         }
 
         @Override
@@ -178,9 +188,8 @@ public class BattleStation
             health.update();
             target.update();
 
-            if (locationInfo.isMoving()) {
-                area.set(locationInfo.now, 600);
-                ConfigEntity.INSTANCE.updateSafetyFor(this);
+            if (isMoving()) {
+                area.set(locationInfo.now, AVOID_RADIUS);
             }
         }
 
@@ -212,12 +221,6 @@ public class BattleStation
         }
 
         @Override
-        public void removed() {
-            super.removed();
-            ConfigEntity.INSTANCE.updateSafetyFor(this);
-        }
-
-        @Override
         public @Nullable eu.darkbot.api.game.entities.Entity getTarget() {
             return target.targetedEntity;
         }
@@ -225,6 +228,11 @@ public class BattleStation
         @Override
         public boolean isAttacking() {
             return target.laserAttacking;
+        }
+
+        @Override
+        public String toString() {
+            return moduleType.toString();
         }
     }
 }
