@@ -6,9 +6,11 @@ import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.extensions.features.handlers.DrawableHandler;
 import com.github.manolo8.darkbot.gui.titlebar.RefreshButton;
+import com.github.manolo8.darkbot.gui.utils.FloatingDialog;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
+import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.game.other.Locatable;
@@ -26,6 +28,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -80,7 +83,22 @@ public class MapDrawer extends JPanel {
                     main.setRunning(!main.isRunning());
                     repaint();
 
-                } else main.hero.drive.move(mapGraphics.toGameLocation(e));
+                } else {
+                    Locatable loc = mapGraphics.toGameLocation(e);
+                    if (e.getClickCount() == 2) {
+                        synchronized (Main.UPDATE_LOCKER) {
+                            Collection<? extends Portal> portals = main.mapManager.entities.getPortals();
+                            portals.stream()
+                                    .filter(p -> p.distanceTo(main.hero) < 250 && p.distanceTo(loc) < 250)
+                                    .findAny()
+                                    .ifPresent(p -> {
+                                        main.hero.jumpPortal(p);
+                                        JLabel label = new JLabel("Jumping to -> " + p.getTargetMap().map(GameMap::getName).orElse(""));
+                                        FloatingDialog.showAutoHide(MapDrawer.this, label, e.getX(), e.getY(), 2000);
+                                    });
+                        }
+                    } else main.hero.drive.move(loc);
+                }
             }
         });
 
