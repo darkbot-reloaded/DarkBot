@@ -78,9 +78,9 @@ public class StatsManager implements Manager, StatsAPI {
         if (settingsAddress == 0) return;
         instance = API.readMemoryStringFallback(API.readMemoryLong(settingsAddress + 664), null);
 
-//        long novaData = API.readMemoryLong(address + 0xC0) & ByteUtils.ATOM_MASK;
-//        novaEnergy = API.readInt(novaData + 0x98);
-        //Both memory location gives same value
+        // Both memory location gives same value
+        // long novaData = API.readMemoryLong(address + 0xC0) & ByteUtils.ATOM_MASK;
+        // novaEnergy = API.readInt(novaData + 0x98);
         long novaData = API.readMemoryLong(address + 0x100) & ByteUtils.ATOM_MASK;
         novaEnergy = API.readInt(novaData + 0x28);
     }
@@ -253,7 +253,7 @@ public class StatsManager implements Manager, StatsAPI {
     }
 
     @Override
-    public int getNovaEnergy(){
+    public int getNovaEnergy() {
         return novaEnergy;
     }
 }
