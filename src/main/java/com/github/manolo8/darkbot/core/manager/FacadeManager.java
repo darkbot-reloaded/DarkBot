@@ -18,6 +18,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SpaceMapWindowProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.GauntletPlutusProxy;
+import com.github.manolo8.darkbot.core.objects.facades.NpcEventProxy;
 import com.github.manolo8.darkbot.core.objects.facades.WorldBossOverviewProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
@@ -50,6 +51,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final HighlightProxy highlight;
     public final SpaceMapWindowProxy spaceMapWindowProxy;
     public final GauntletPlutusProxy plutus;
+    public final NpcEventProxy npcEventProxy;
     public final WorldBossOverviewProxy worldBossOverview;
 
     public FacadeManager(PluginAPI pluginApi) {
@@ -70,6 +72,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.highlight      = registerProxy("HighlightProxy",         HighlightProxy.class);
         this.spaceMapWindowProxy = registerProxy("spacemap",          SpaceMapWindowProxy.class);
         this.plutus         = registerProxy("plutus",                 GauntletPlutusProxy.class);
+        this.npcEventProxy  = registerProxy("npc_event",              NpcEventProxy.class);
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
     }
 
