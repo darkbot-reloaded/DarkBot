@@ -11,13 +11,14 @@ import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalBlacklightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.FrozenLabyrinthProxy;
+import com.github.manolo8.darkbot.core.objects.facades.GauntletPlutusProxy;
 import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
+import com.github.manolo8.darkbot.core.objects.facades.NpcEventProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SpaceMapWindowProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
-import com.github.manolo8.darkbot.core.objects.facades.GauntletPlutusProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
 
@@ -49,6 +50,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final HighlightProxy highlight;
     public final SpaceMapWindowProxy spaceMapWindowProxy;
     public final GauntletPlutusProxy plutus;
+    public final NpcEventProxy npcEventProxy;
 
     public FacadeManager(PluginAPI pluginApi) {
         this.pluginAPI = pluginApi;
@@ -68,6 +70,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.highlight      = registerProxy("HighlightProxy",         HighlightProxy.class);
         this.spaceMapWindowProxy = registerProxy("spacemap",          SpaceMapWindowProxy.class);
         this.plutus         = registerProxy("plutus",                 GauntletPlutusProxy.class);
+        this.npcEventProxy  = registerProxy("npc_event",              NpcEventProxy.class);
     }
 
     public <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
