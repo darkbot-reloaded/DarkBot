@@ -41,7 +41,7 @@ public class WorldBossOverviewProxy extends Updatable implements WorldBossOvervi
     }
 
     @Override
-    String getBannerKey() {
+    public String getBannerKey() {
         return bannerKey;
     }
 
