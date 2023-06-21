@@ -70,7 +70,7 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
                     () -> "Tick time\n\n" + statsManager.getTickStats());
             JLabel ping = createLabel("ping", false,
                     color -> {
-                        float hue = 1 - Math.min(500, Math.max(1, main.statsManager.getPing())) / 500f;
+                        float hue = 1 - Math.min(300, Math.max(1, main.statsManager.getPing())) / 300f;
                         return Color.getHSBColor(hue * 0.35f, 1f, 0.75f);
                     }, () -> "Game ping\n\n" + statsManager.getPingStats());
 
@@ -123,7 +123,7 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
             Dimension preferredSize = label.getPreferredSize();
             label.setPreferredSize(new Dimension(40, preferredSize.height));
 
-            label.setText("0");
+            label.setText("...");
             return label;
         }
 

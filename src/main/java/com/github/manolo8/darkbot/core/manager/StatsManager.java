@@ -6,6 +6,8 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
+import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StatsAPI;
 
@@ -20,11 +22,7 @@ public class StatsManager implements Manager, StatsAPI {
     private final Main main;
     private final EventBrokerAPI eventBroker;
 
-    private final AverageStats
-            cpuStat = new AverageStats(),
-            pingStat = new AverageStats(),
-            tickStat = new AverageStats(),
-            memoryStat = new AverageStats();
+    private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
 
     @Deprecated
     public long currentBox; // Pretty out of place, but will work
@@ -53,6 +51,11 @@ public class StatsManager implements Manager, StatsAPI {
         this.eventBroker = eventBroker;
 
         this.main.status.add(this::toggle);
+
+        this.cpuStat = new AverageStats(main.configHandler);
+        this.pingStat = new AverageStats(main.configHandler);
+        this.tickStat = new AverageStats(main.configHandler);
+        this.memoryStat = new AverageStats(main.configHandler);
     }
 
     @Override
@@ -276,25 +279,27 @@ public class StatsManager implements Manager, StatsAPI {
     public static class AverageStats {
         private static final DecimalFormat MAX_TWO_PLACES_FORMAT = new DecimalFormat("0.##");
 
-        private int count;
+        private final ConfigSetting<Integer> minTick;
+
         private double last, average, min = Double.MAX_VALUE, max = Double.MIN_VALUE;
 
         private Consumer<String> onChange;
 
+
+        public AverageStats(ConfigAPI config) {
+            minTick = config.requireConfig("bot_settings.other.min_tick");
+        }
+
         public void accept(double value) {
+            double K = minTick.getValue() / 60_000d;
+            average = average + K * (value - average);
+
             max = Math.max(max, value);
             min = Math.min(min, value);
 
             if (last != value && onChange != null)
                 onChange.accept(MAX_TWO_PLACES_FORMAT.format(value));
             last = value;
-
-            if (count == Integer.MAX_VALUE) {
-                count = 0;
-                average = 0;
-            }
-
-            average = average + (value - average) / (++count);
         }
 
         public double getMax() {

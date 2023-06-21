@@ -6,8 +6,16 @@ import eu.darkbot.api.config.types.DisplayFlag;
 import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
-import eu.darkbot.api.game.entities.*;
+import eu.darkbot.api.game.entities.Box;
+import eu.darkbot.api.game.entities.Mine;
+import eu.darkbot.api.game.entities.Npc;
+import eu.darkbot.api.game.entities.Pet;
+import eu.darkbot.api.game.entities.Player;
+import eu.darkbot.api.game.entities.Relay;
+import eu.darkbot.api.game.entities.SpaceBall;
+import eu.darkbot.api.game.entities.StaticEntity;
 import eu.darkbot.api.game.group.GroupMember;
+import eu.darkbot.api.game.group.PartialGroupMember;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.game.other.Movable;
@@ -17,7 +25,12 @@ import eu.darkbot.api.managers.GroupAPI;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.PetAPI;
 
+import java.awt.Color;
+import java.awt.font.TextAttribute;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Feature(name = "Dynamic Entities Drawer", description = "Draws dynamic entities (eg: npcs, boxes, or players)")
 @Draw(value = Draw.Stage.DYNAMIC_ENTITIES, attach = Draw.Attach.REPLACE)
@@ -119,7 +132,7 @@ public class DynamicEntitiesDrawer implements Drawable {
 
         for (Npc npc : npcs) {
             drawEntity(mg, npc, 4, npc.getInfo().getShouldKill());
-            if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
+            if (mg.hasDisplayFlag(DisplayFlag.NPC_NAMES))
                 mg.drawString(npc, npc.getEntityInfo().getUsername(), -6, MapGraphics.StringAlign.MID);
         }
 
@@ -133,15 +146,24 @@ public class DynamicEntitiesDrawer implements Drawable {
     }
 
     private void drawPlayers(MapGraphics mg) {
+        Set<Integer> oosMembers = group.getMembers().stream()
+                .map(PartialGroupMember::getId)
+                .collect(Collectors.toSet());
+
+        Color ally = mg.getColor("allies");
+        Color enemy = mg.getColor("enemies");
+        Color groupMember = mg.getColor("group_member");
+
         for (Player player : players) {
+            oosMembers.remove(player.getId());
             boolean isEnemy = player.getEntityInfo().isEnemy();
 
             int level = -1;
-            String color = isEnemy ? "enemies" : "allies";
+            Color color = isEnemy ? enemy : ally;
             if (group.hasGroup()) {
                 GroupMember member = group.getMember(player);
                 if (member != null) {
-                    color = "group_member";
+                    color = groupMember;
                     level = member.getLevel();
                 }
             }
@@ -154,12 +176,18 @@ public class DynamicEntitiesDrawer implements Drawable {
         }
 
         if (group.hasGroup()) {
-            mg.setColor("group_member");
+            mg.setColor(groupMember.darker());
+
+            Map<TextAttribute, Integer> attrs = Map.of(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_LOW_DASHED);
+            mg.setFont(mg.getGraphics2D().getFont().deriveFont(attrs));
+
             for (GroupMember member : group.getMembers()) {
-                if (member.getMapId() == hero.getMap().getId() && !isMemberVisible(member)) {
+                if (member.getMapId() == hero.getMap().getId() && oosMembers.contains(member.getId())) {
                     drawEntity(mg, member.getLocation(), 4, false);
-                    if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
-                        mg.drawString(member.getLocation(), member.getUsername(), -6, MapGraphics.StringAlign.MID);
+                    if (mg.hasDisplayFlag(DisplayFlag.USERNAMES)) {
+                        mg.drawString(member.getLocation(),
+                                member.getUsername() + " [" + member.getLevel() + "]", -6, MapGraphics.StringAlign.MID);
+                    }
                 }
             }
         }
@@ -212,15 +240,6 @@ public class DynamicEntitiesDrawer implements Drawable {
             mg.setColor("target");
             drawEntity(mg, target, 4, true, true);
         }
-    }
-
-    private boolean isMemberVisible(GroupMember member) {
-        for (Player player : players) {
-            if (member.getId() == player.getId())
-                return true;
-        }
-
-        return false;
     }
 
     private void drawEntity(MapGraphics mg, Locatable entity, double size, boolean fill) {

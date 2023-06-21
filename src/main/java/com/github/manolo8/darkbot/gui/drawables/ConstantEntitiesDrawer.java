@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.drawables;
 
 import com.github.manolo8.darkbot.extensions.features.Feature;
+import eu.darkbot.api.config.types.DisplayFlag;
 import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
@@ -56,10 +57,12 @@ public class ConstantEntitiesDrawer implements Drawable {
             } else {
                 mg.drawOvalCentered(bs, 11.0, 9.0, true);
 
-                String name = bs instanceof BattleStation.Hull ? ("[" + bs.getEntityInfo().getClanTag() + "] ") : "";
-                name += bs.getEntityInfo().getUsername();
+                if (mg.hasDisplayFlag(DisplayFlag.USERNAMES)) {
+                    String name = bs instanceof BattleStation.Hull ? ("[" + bs.getEntityInfo().getClanTag() + "] ") : "";
+                    name += bs.getEntityInfo().getUsername();
 
-                mg.drawString(bs, name, bs instanceof BattleStation.Hull ? -14 : -10, MapGraphics.StringAlign.MID);
+                    mg.drawString(bs, name, bs instanceof BattleStation.Hull ? -14 : -10, MapGraphics.StringAlign.MID);
+                }
             }
         }
     }
