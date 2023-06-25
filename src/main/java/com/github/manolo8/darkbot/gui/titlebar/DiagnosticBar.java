@@ -9,14 +9,8 @@ import com.github.manolo8.darkbot.gui.components.DiagnosticsPanel;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import java.awt.Color;
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -29,7 +23,7 @@ public class DiagnosticBar extends JButton {
 
         setBorder(BorderFactory.createEmptyBorder());
 
-        setLayout(new MigLayout("ins 0, gap 0", "3px[][right]3px", "1px[][]"));
+        setLayout(new MigLayout("ins 0, gap 0", "3px:5px[][right]3px:5px", "[15px!][15px!]"));
         putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS);
 
         JLabel tick = createLabel("tick_time", "Tick time", false,
@@ -51,7 +45,7 @@ public class DiagnosticBar extends JButton {
 
     private JLabel createLabel(String iconName, String tooltip, boolean alignRight,
                                Function<Color, Color> colorFilter, StatsManager.AverageStats stat) {
-        FlatSVGIcon icon = UIUtils.getSVGIcon(iconName, 12, 12);
+        FlatSVGIcon icon = UIUtils.getSVGIcon(iconName, 15, 15);
         if (colorFilter != null) icon.setColorFilter(new FlatSVGIcon.ColorFilter(colorFilter));
 
         JLabel label = new JLabel(icon);
