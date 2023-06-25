@@ -22,7 +22,6 @@ public class DiagnosticBar extends JButton {
         StatsManager statsManager = main.statsManager;
 
         setBorder(BorderFactory.createEmptyBorder());
-
         setLayout(new MigLayout("ins 0, gap 0", "3px:5px[][right]3px:5px", "[15px!][15px!]"));
         putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS);
 
@@ -32,14 +31,20 @@ public class DiagnosticBar extends JButton {
                 color -> UIUtils.getTrafficLight(main.statsManager.getPing(), 300), statsManager.getPingStats());
         add(tick, "cell 0 0");
         add(ping, "cell 0 1");
+
         if (Main.API.hasCapability(Capability.HANDLER_CPU_USAGE, Capability.HANDLER_RAM_USAGE)) {
-            JLabel cpu = createLabel("cpu", "Cpu usage", true, null, statsManager.getCpuStats());
-            JLabel ram = createLabel("ram", "Ram usage", true, null, statsManager.getMemoryStats());
+            JLabel cpu = createLabel("cpu", "Cpu usage", true,
+                    color -> UIUtils.getTrafficLight(Main.API.getCpuUsage(), 100), statsManager.getCpuStats());
+            JLabel ram = createLabel("ram", "Ram usage", true,
+                    color -> UIUtils.getTrafficLight(Main.API.getMemoryUsage(), 2500), statsManager.getMemoryStats());
             add(cpu, "cell 1 0, gapleft 5px");
             add(ram, "cell 1 1, gapleft 5px");
         }
 
-        redirectMouseEvents(this);
+        for (Component component : getComponents()) {
+            component.addMouseListener(new RedirectMouseAdapter());
+            component.addMouseMotionListener(new RedirectMouseAdapter());
+        }
         addActionListener(l -> new DiagnosticsPanel(main, this));
     }
 
@@ -62,15 +67,6 @@ public class DiagnosticBar extends JButton {
 
         stat.setListener(label::setText);
         return label;
-    }
-
-    private void redirectMouseEvents(JComponent c) {
-        for (Component component : c.getComponents()) {
-            redirectMouseEvents((JComponent) component);
-
-            component.addMouseListener(new RedirectMouseAdapter());
-            component.addMouseMotionListener(new RedirectMouseAdapter());
-        }
     }
 
     private static class RedirectMouseAdapter implements MouseListener, MouseMotionListener {
