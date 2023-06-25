@@ -16,7 +16,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class BattleStation
         extends Entity
         implements Obstacle, eu.darkbot.api.game.entities.BattleStation {
-    private static final int AVOID_RADIUS = 700;
+    private static final int AVOID_RADIUS = 800;
 
     public PlayerInfo info = new PlayerInfo();
     public Health health = new Health();

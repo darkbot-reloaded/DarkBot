@@ -28,7 +28,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -85,18 +85,24 @@ public class MapDrawer extends JPanel {
 
                 } else {
                     Locatable loc = mapGraphics.toGameLocation(e);
-                    if (e.getClickCount() == 2) {
+                    if (!main.isRunning() && SwingUtilities.isRightMouseButton(e)) {
+                        Portal portal;
                         synchronized (Main.UPDATE_LOCKER) {
-                            Collection<? extends Portal> portals = main.mapManager.entities.getPortals();
-                            portals.stream()
-                                    .filter(p -> p.distanceTo(main.hero) < 250 && p.distanceTo(loc) < 250)
-                                    .findAny()
-                                    .ifPresent(p -> {
-                                        main.hero.jumpPortal(p);
-                                        JLabel label = new JLabel("Jumping to -> " + p.getTargetMap().map(GameMap::getName).orElse(""));
-                                        FloatingDialog.showAutoHide(MapDrawer.this, label, e.getX(), e.getY(), 2000);
-                                    });
+                            portal = main.mapManager.entities.getPortals().stream()
+                                    .filter(p -> p.distanceTo(main.hero) <= 250 && p.distanceTo(loc) <= 250)
+                                    .min(Comparator.comparingDouble(p -> p.distanceTo(loc)))
+                                    .orElse(null);
                         }
+
+                        if (portal != null) {
+                            JButton jump = new JButton("Jump to " + portal.getTargetMap().map(GameMap::getName).orElse(""));
+                            JPopupMenu popup = FloatingDialog.show(jump, MapDrawer.this, e.getX(), e.getY());
+                            jump.addActionListener(l -> {
+                                main.hero.jumpPortal(portal);
+                                popup.setVisible(false);
+                            });
+
+                        } else main.hero.drive.move(loc);
                     } else main.hero.drive.move(loc);
                 }
             }

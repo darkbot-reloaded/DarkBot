@@ -132,6 +132,15 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     boolean hasCapability(Capability capability);
 
+    default boolean hasCapability(Capability... capabilities) {
+        for (Capability capability : capabilities) {
+            if (!hasCapability(capability)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // Direct game access
     void setMaxFps(int maxCps);
 

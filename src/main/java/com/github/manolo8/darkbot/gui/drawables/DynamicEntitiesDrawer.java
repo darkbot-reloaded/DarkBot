@@ -155,39 +155,25 @@ public class DynamicEntitiesDrawer implements Drawable {
         Color groupMember = mg.getColor("group_member");
 
         for (Player player : players) {
-            oosMembers.remove(player.getId());
             boolean isEnemy = player.getEntityInfo().isEnemy();
+            boolean isGroupMember = oosMembers.remove(player.getId()) && group.hasGroup();
 
-            int level = -1;
-            Color color = isEnemy ? enemy : ally;
-            if (group.hasGroup()) {
-                GroupMember member = group.getMember(player);
-                if (member != null) {
-                    color = groupMember;
-                    level = member.getLevel();
-                }
-            }
-
+            Color color = isGroupMember ? groupMember : isEnemy ? enemy : ally;
             mg.setColor(color);
-            drawEntity(mg, player, 4, false);
+
+            drawEntity(mg, player, 4, isGroupMember);
             if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
-                mg.drawString(player, player.getEntityInfo().getUsername()
-                        + (level != -1 ? " [" + level + "]" : ""), -6, MapGraphics.StringAlign.MID);
+                mg.drawString(player, player.getEntityInfo().getUsername(), -6, MapGraphics.StringAlign.MID);
         }
 
         if (group.hasGroup()) {
             mg.setColor(groupMember.darker());
 
-            Map<TextAttribute, Integer> attrs = Map.of(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_LOW_DASHED);
-            mg.setFont(mg.getGraphics2D().getFont().deriveFont(attrs));
-
             for (GroupMember member : group.getMembers()) {
                 if (member.getMapId() == hero.getMap().getId() && oosMembers.contains(member.getId())) {
                     drawEntity(mg, member.getLocation(), 4, false);
-                    if (mg.hasDisplayFlag(DisplayFlag.USERNAMES)) {
-                        mg.drawString(member.getLocation(),
-                                member.getUsername() + " [" + member.getLevel() + "]", -6, MapGraphics.StringAlign.MID);
-                    }
+                    if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
+                        mg.drawString(member.getLocation(), member.getUsername(), -6, MapGraphics.StringAlign.MID);
                 }
             }
         }

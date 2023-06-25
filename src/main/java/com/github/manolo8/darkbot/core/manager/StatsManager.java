@@ -277,11 +277,11 @@ public class StatsManager implements Manager, StatsAPI {
     }
 
     public static class AverageStats {
-        private static final DecimalFormat MAX_TWO_PLACES_FORMAT = new DecimalFormat("0.##");
+        private static final DecimalFormat MAX_ONE_PLACE_FORMAT = new DecimalFormat("0.#");
 
         private final ConfigSetting<Integer> minTick;
 
-        private double last, average, min = Double.MAX_VALUE, max = Double.MIN_VALUE;
+        private double last, average, max = Double.MIN_VALUE;
 
         private Consumer<String> onChange;
 
@@ -295,11 +295,13 @@ public class StatsManager implements Manager, StatsAPI {
             average = average + K * (value - average);
 
             max = Math.max(max, value);
-            min = Math.min(min, value);
+            max = max + K * (average - max);
 
-            if (last != value && onChange != null)
-                onChange.accept(MAX_TWO_PLACES_FORMAT.format(value));
-            last = value;
+            //is it worth to?
+            double rounded = round(value, 1);
+            if (last != rounded && onChange != null)
+                onChange.accept(MAX_ONE_PLACE_FORMAT.format(rounded));
+            last = rounded;
         }
 
         public double getMax() {
@@ -314,10 +316,15 @@ public class StatsManager implements Manager, StatsAPI {
             this.onChange = onChange;
         }
 
+        private static double round(double value, int precision) {
+            int scale = (int) Math.pow(10, precision);
+            return (double) Math.round(value * scale) / scale;
+        }
+
         @Override
         public String toString() {
-            return "Max=" + MAX_TWO_PLACES_FORMAT.format(getMax()) +
-                    "\nAverage=" + MAX_TWO_PLACES_FORMAT.format(getAverage());
+            return "Max=" + MAX_ONE_PLACE_FORMAT.format(getMax()) +
+                    "\nAverage=" + MAX_ONE_PLACE_FORMAT.format(getAverage());
         }
     }
 }

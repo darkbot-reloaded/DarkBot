@@ -104,4 +104,9 @@ public class UIUtils {
                 Math.max((int) (c.getBlue() * factor), 0),
                 c.getAlpha());
     }
+
+    public static Color getTrafficLight(double value, double maximum) {
+        double hue = 1 - Math.min(maximum, Math.max(0, value)) / maximum;
+        return Color.getHSBColor((float) (hue * 0.35), 1f, 0.75f);
+    }
 }
