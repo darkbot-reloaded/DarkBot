@@ -52,10 +52,10 @@ public class StatsManager implements Manager, StatsAPI {
 
         this.main.status.add(this::toggle);
 
-        this.cpuStat = new AverageStats(main.configHandler);
-        this.pingStat = new AverageStats(main.configHandler);
-        this.tickStat = new AverageStats(main.configHandler);
-        this.memoryStat = new AverageStats(main.configHandler);
+        this.cpuStat = new AverageStats(main.configHandler, true);
+        this.pingStat = new AverageStats(main.configHandler, false);
+        this.tickStat = new AverageStats(main.configHandler, true);
+        this.memoryStat = new AverageStats(main.configHandler, false);
     }
 
     @Override
@@ -277,17 +277,18 @@ public class StatsManager implements Manager, StatsAPI {
     }
 
     public static class AverageStats {
-        private static final DecimalFormat MAX_ONE_PLACE_FORMAT = new DecimalFormat("0.#");
+        private static final DecimalFormat ONE_PLACE_FORMAT = new DecimalFormat("0.0");
 
         private final ConfigSetting<Integer> minTick;
+        private final boolean showDecimal;
 
         private double last, average, max = Double.MIN_VALUE;
 
         private Consumer<String> onChange;
 
-
-        public AverageStats(ConfigAPI config) {
-            minTick = config.requireConfig("bot_settings.other.min_tick");
+        public AverageStats(ConfigAPI config, boolean showDecimal) {
+            this.minTick = config.requireConfig("bot_settings.other.min_tick");
+            this.showDecimal = showDecimal;
         }
 
         public void accept(double value) {
@@ -297,11 +298,11 @@ public class StatsManager implements Manager, StatsAPI {
             max = Math.max(max, value);
             max = max + K * (average - max);
 
-            //is it worth to?
-            double rounded = round(value, 1);
-            if (last != rounded && onChange != null)
-                onChange.accept(MAX_ONE_PLACE_FORMAT.format(rounded));
-            last = rounded;
+            if (last != value && onChange != null) {
+                String s = showDecimal ? ONE_PLACE_FORMAT.format(value) : String.valueOf((int) value);
+                onChange.accept(s);
+            }
+            last = value;
         }
 
         public double getMax() {
@@ -316,15 +317,10 @@ public class StatsManager implements Manager, StatsAPI {
             this.onChange = onChange;
         }
 
-        private static double round(double value, int precision) {
-            int scale = (int) Math.pow(10, precision);
-            return (double) Math.round(value * scale) / scale;
-        }
-
         @Override
         public String toString() {
-            return "Max=" + MAX_ONE_PLACE_FORMAT.format(getMax()) +
-                    "\nAverage=" + MAX_ONE_PLACE_FORMAT.format(getAverage());
+            return "Max=" + ONE_PLACE_FORMAT.format(getMax()) +
+                    "\nAverage=" + ONE_PLACE_FORMAT.format(getAverage());
         }
     }
 }
