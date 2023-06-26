@@ -39,7 +39,7 @@ public class Drive implements MovementAPI {
     private Location tempDest, endLoc, lastSegment = new Location();
 
     private long lastDirChange;
-    private long lastClick;
+    private long lastClick, lastMapClickMove;
     public long lastMoved;
 
     public Drive(Main main, MapManager map, PathFinder pathFinder) {
@@ -176,6 +176,11 @@ public class Drive implements MovementAPI {
         if (movingTo().distance(newDir) > 10) tempDest = endLoc = newDir;
     }
 
+    public void mapClickMove(Locatable locatable) {
+        move(locatable);
+        lastMapClickMove = System.currentTimeMillis();
+    }
+
     private Location lastRandomMove;
     private List<ZoneInfo.Zone> lastZones;
     private int lastZoneIdx;
@@ -283,5 +288,9 @@ public class Drive implements MovementAPI {
     @Override
     public boolean isInPreferredZone(Locatable locatable) {
         return map.preferred.contains(locatable);
+    }
+
+    public boolean movementInterrupted(long inTime) {
+        return lastMapClickMove + inTime > System.currentTimeMillis();
     }
 }

@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.extensions.features.handlers.DrawableHandler;
 import com.github.manolo8.darkbot.gui.titlebar.RefreshButton;
 import com.github.manolo8.darkbot.gui.utils.FloatingDialog;
+import com.github.manolo8.darkbot.modules.TemporalPortalJumper;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
@@ -40,6 +41,18 @@ public class MapDrawer extends JPanel {
             new RenderingHints(Map.of(
                 RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON,
                 RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON));
+
+    static {
+        // tests needed - may increase CPU usage for some users
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        RenderingHints hints = (RenderingHints) toolkit.getDesktopProperty("awt.font.desktophints");
+
+        if (hints != null) {
+            RENDERING_HINTS.add(hints);
+            toolkit.addPropertyChangeListener("awt.font.desktophints",
+                    evt -> RENDERING_HINTS.add((RenderingHints) evt.getNewValue()));
+        }
+    }
 
     public MapGraphicsImpl mapGraphics;
     public boolean hovering;
@@ -85,25 +98,28 @@ public class MapDrawer extends JPanel {
 
                 } else {
                     Locatable loc = mapGraphics.toGameLocation(e);
-                    if (!main.isRunning() && SwingUtilities.isRightMouseButton(e)) {
+                    if (SwingUtilities.isRightMouseButton(e)) {
                         Portal portal;
                         synchronized (Main.UPDATE_LOCKER) {
                             portal = main.mapManager.entities.getPortals().stream()
-                                    .filter(p -> p.distanceTo(main.hero) <= 250 && p.distanceTo(loc) <= 250)
+                                    .filter(p -> p.distanceTo(loc) < 600)
                                     .min(Comparator.comparingDouble(p -> p.distanceTo(loc)))
                                     .orElse(null);
                         }
 
                         if (portal != null) {
-                            JButton jump = new JButton("Jump to " + portal.getTargetMap().map(GameMap::getName).orElse(""));
-                            JPopupMenu popup = FloatingDialog.show(jump, MapDrawer.this, e.getX(), e.getY());
+                            JMenuItem jump = new JMenuItem("Jump to " + portal.getTargetMap()
+                                    .map(GameMap::getName)
+                                    .orElse("(" + portal.getLocationInfo().getLast().toString() + ")"));
+
+                            JPopupMenu popup = FloatingDialog.show(jump, MapDrawer.this, e.getX(), e.getY() + 5);
                             jump.addActionListener(l -> {
-                                main.hero.jumpPortal(portal);
+                                main.setModule(new TemporalPortalJumper(main, portal));
                                 popup.setVisible(false);
                             });
 
-                        } else main.hero.drive.move(loc);
-                    } else main.hero.drive.move(loc);
+                        } else main.hero.drive.mapClickMove(loc);
+                    } else main.hero.drive.mapClickMove(loc);
                 }
             }
         });
@@ -113,7 +129,7 @@ public class MapDrawer extends JPanel {
             public void mouseDragged(MouseEvent e) {
                 if (main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) return;
 
-                main.hero.drive.move(mapGraphics.toGameLocation(e));
+                main.hero.drive.mapClickMove(mapGraphics.toGameLocation(e));
             }
         });
 
@@ -338,6 +354,7 @@ public class MapDrawer extends JPanel {
 
         @Override
         public boolean hasDisplayFlag(eu.darkbot.api.config.types.DisplayFlag displayFlag) {
+            if (true) return false;
             DisplayFlag legacyFlag = DisplayFlag.values()[displayFlag.ordinal()];
             return displayFlags.getValue().contains(legacyFlag);
         }

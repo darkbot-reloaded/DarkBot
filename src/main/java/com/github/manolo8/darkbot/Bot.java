@@ -34,6 +34,7 @@ public class Bot {
         LogUtils.setupLogOutput();
 
         try {
+            UIManager.put("MenuItem.selectionBackground", new Color(80, 83, 85));
             UIManager.getFont("Label.font"); // Prevents a linux crash
 
             // Set no padding when icon is removed
