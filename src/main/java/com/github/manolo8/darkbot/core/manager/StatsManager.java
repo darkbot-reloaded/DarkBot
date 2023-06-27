@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
@@ -28,6 +29,7 @@ public class StatsManager implements Manager, StatsAPI {
     public double uridium;
     public double experience;
     public double honor;
+    public int novaEnergy;
     public int deposit;
     public int depositTotal;
     public int userId;
@@ -80,6 +82,12 @@ public class StatsManager implements Manager, StatsAPI {
         userId = API.readInt(address + 48);
         if (settingsAddress == 0) return;
         instance = API.readMemoryStringFallback(API.readMemoryLong(settingsAddress + 664), null);
+
+        // Both memory location gives same value
+        // long novaData = API.readMemoryLong(address + 0xC0) & ByteUtils.ATOM_MASK;
+        // novaEnergy = API.readInt(novaData + 0x98);
+        long novaData = API.readMemoryLong(address + 0x100) & ByteUtils.ATOM_MASK;
+        novaEnergy = API.readInt(novaData + 0x28);
     }
 
     public int getLevel() {
@@ -256,6 +264,11 @@ public class StatsManager implements Manager, StatsAPI {
     @Override
     public double getEarnedHonor() {
         return earnedHonor;
+    }
+
+    @Override
+    public int getNovaEnergy() {
+        return novaEnergy;
     }
 
     public AverageStats getCpuStats() {
