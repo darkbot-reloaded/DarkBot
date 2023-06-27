@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.extensions.features.handlers.DrawableHandler;
 import com.github.manolo8.darkbot.gui.titlebar.RefreshButton;
-import com.github.manolo8.darkbot.gui.utils.FloatingDialog;
 import com.github.manolo8.darkbot.modules.TemporalPortalJumper;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Drawable;
@@ -29,11 +28,12 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class MapDrawer extends JPanel {
 
@@ -89,6 +89,9 @@ public class MapDrawer extends JPanel {
         this.drawableHandler = main.pluginAPI.requireInstance(DrawableHandler.class);
         this.flashResManager = main.pluginAPI.requireInstance(FlashResManager.class);
 
+        JPopupMenu portalMenu = new JPopupMenu();
+        portalMenu.setBorder(BorderFactory.createEmptyBorder());
+
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -98,28 +101,35 @@ public class MapDrawer extends JPanel {
 
                 } else {
                     Locatable loc = mapGraphics.toGameLocation(e);
+
+                    // move ship only on left button click
                     if (SwingUtilities.isRightMouseButton(e)) {
-                        Portal portal;
+                        List<? extends Portal> portals;
                         synchronized (Main.UPDATE_LOCKER) {
-                            portal = main.mapManager.entities.getPortals().stream()
-                                    .filter(p -> p.distanceTo(loc) < 600)
-                                    .min(Comparator.comparingDouble(p -> p.distanceTo(loc)))
-                                    .orElse(null);
+                             portals = main.mapManager.entities.getPortals().stream()
+                                    .filter(p -> p.distanceTo(loc) < 1000)
+                                    .collect(Collectors.toList());
                         }
 
-                        if (portal != null) {
-                            JMenuItem jump = new JMenuItem("Jump to " + portal.getTargetMap()
-                                    .map(GameMap::getName)
-                                    .orElse("(" + portal.getLocationInfo().getLast().toString() + ")"));
+                        if (!portals.isEmpty()) {
+                            portalMenu.removeAll();
 
-                            JPopupMenu popup = FloatingDialog.show(jump, MapDrawer.this, e.getX(), e.getY() + 5);
-                            jump.addActionListener(l -> {
-                                main.setModule(new TemporalPortalJumper(main, portal));
-                                popup.setVisible(false);
-                            });
+                            // https://github.com/JFormDesigner/FlatLaf/issues/328
+                            UIManager.put("MenuItem.minimumIconSize", new Dimension());
+                            for (Portal portal : portals) {
+                                JMenuItem item = new JMenuItem(portal.getTargetMap()
+                                        .map(GameMap::getShortName)
+                                        .orElse("(" + portal.getLocationInfo().getLast().toString() + ")"));
 
-                        } else main.hero.drive.mapClickMove(loc);
-                    } else main.hero.drive.mapClickMove(loc);
+                                item.addActionListener(l -> main.setModule(new TemporalPortalJumper(main, portal)));
+                                portalMenu.add(item);
+                            }
+                            UIManager.put("MenuItem.minimumIconSize", null);
+                            portalMenu.show(MapDrawer.this, e.getX(), e.getY() + 5);
+                        }
+                    } else {
+                        main.hero.drive.mapClickMove(loc);
+                    }
                 }
             }
         });
@@ -134,7 +144,7 @@ public class MapDrawer extends JPanel {
         });
 
         setLayout(new MigLayout("insets 0px"));
-        add(new RefreshButton(), "gapx 5px");
+        add(new RefreshButton(), "gapx 7px");
     }
 
     public void setup(Main main) {
@@ -354,7 +364,6 @@ public class MapDrawer extends JPanel {
 
         @Override
         public boolean hasDisplayFlag(eu.darkbot.api.config.types.DisplayFlag displayFlag) {
-            if (true) return false;
             DisplayFlag legacyFlag = DisplayFlag.values()[displayFlag.ordinal()];
             return displayFlags.getValue().contains(legacyFlag);
         }

@@ -188,7 +188,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     @Override
     @SuppressWarnings("InfiniteLoopStatement")
     public void run() {
-        long time;
+        long time, last = System.currentTimeMillis();
 
         while (true) {
             time = System.currentTimeMillis();
@@ -200,8 +200,11 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 Time.sleep(1000);
             }
 
-            avgTick = ((avgTick * 9) + (System.currentTimeMillis() - time)) / 10;
-            statsManager.tickAverageStats();
+            long current = System.currentTimeMillis();
+            avgTick = ((avgTick * 9) + (current - time)) / 10;
+
+            statsManager.tickAverageStats(current - last);
+            last = current;
 
             Time.sleepMax(time, botInstaller.invalid.get() ? 250 :
                     Math.max(config.BOT_SETTINGS.OTHER.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));

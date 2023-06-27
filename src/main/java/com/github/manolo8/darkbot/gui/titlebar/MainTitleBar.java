@@ -30,7 +30,7 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
         add(new BackpageButton(main, frame));
 
         add(titleFiller, "grow, push");
-        add(new DiagnosticBar(main), "hmax 30");
+        add(DiagnosticBar.create(main), "hmax 30");
 
         add(new HookButton(frame));
         add(new VisibilityButton(main, frame));

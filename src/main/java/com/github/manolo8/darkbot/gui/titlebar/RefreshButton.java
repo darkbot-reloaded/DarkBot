@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.titlebar;
 
+import com.formdev.flatlaf.icons.FlatAnimatedIcon;
 import com.formdev.flatlaf.ui.FlatButtonUI;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -25,11 +26,15 @@ public class RefreshButton extends JButton {
         });
     }
 
-    private static class RefreshIcon implements Icon {
+    private static class RefreshIcon extends FlatAnimatedIcon {
         private Path2D refreshPath;
 
+        public RefreshIcon() {
+            super(16, 16, null);
+        }
+
         @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
+        public void paintIconAnimated(Component c, Graphics g, int x, int y, float animatedValue) {
             Graphics2D g2 = (Graphics2D) g;
             g2.setColor(getColor(c));
 
@@ -62,23 +67,24 @@ public class RefreshButton extends JButton {
                 refreshPath.closePath();
             }
 
+            g2.rotate(animatedValue * Math.PI, 8, 8);
             g2.fill(refreshPath);
+        }
+
+        @Override
+        public float getValue(Component c) {
+            return ((AbstractButton)c).getModel().isRollover() ? 1 : 0;
+        }
+
+        @Override
+        public int getAnimationDuration() {
+            return 250;
         }
 
         private Color getColor(Component c) {
             Color foreground = c.getForeground();
             return FlatButtonUI.buttonStateColor(c, foreground, null, null,
                     UIUtils.darker(foreground, 0.75), UIUtils.darker(foreground, 0.6));
-        }
-
-        @Override
-        public int getIconWidth() {
-            return 16;
-        }
-
-        @Override
-        public int getIconHeight() {
-            return 16;
         }
     }
 

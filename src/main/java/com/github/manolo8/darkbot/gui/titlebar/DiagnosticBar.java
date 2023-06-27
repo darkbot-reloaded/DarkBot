@@ -9,42 +9,68 @@ import com.github.manolo8.darkbot.gui.components.DiagnosticsPanel;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JLayer;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.plaf.LayerUI;
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.util.function.Function;
 
 public class DiagnosticBar extends JButton {
 
-    DiagnosticBar(Main main) {
-        StatsManager statsManager = main.statsManager;
+    static JComponent create(Main main) {
+        return new JLayer<JButton>(new DiagnosticBar(main), new LayerUI<>() {
+            public void installUI(JComponent c) {
+                super.installUI(c);
+                ((JLayer<?>) c).setLayerEventMask(AWTEvent.MOUSE_EVENT_MASK);
+            }
+
+            public void uninstallUI(JComponent c) {
+                super.uninstallUI(c);
+                ((JLayer<?>) c).setLayerEventMask(0);
+            }
+
+            @Override
+            protected void processMouseEvent(MouseEvent e, JLayer<? extends JButton> l) {
+                Component source = (Component) e.getSource();
+                Component parent = l.getView();
+
+                if (source == parent) return;
+                parent.dispatchEvent(SwingUtilities.convertMouseEvent(source, e, parent));
+            }
+        });
+    }
+
+    private DiagnosticBar(Main main) {
+        StatsManager stats = main.statsManager;
 
         setBorder(BorderFactory.createEmptyBorder());
         setLayout(new MigLayout("ins 0, gap 0", "3px:5px[][right]3px:5px", "[15px!][15px!]"));
         putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS);
 
         JLabel tick = createLabel("tick_time", "Tick time", false,
-                color -> UIUtils.getTrafficLight(main.getTickTime(), 30), statsManager.getTickStats());
+                color -> UIUtils.getTrafficLight(main.getTickTime(), 30), stats.getTickStats());
         JLabel ping = createLabel("ping", "In-game ping", false,
-                color -> UIUtils.getTrafficLight(main.statsManager.getPing(), 300), statsManager.getPingStats());
+                color -> UIUtils.getTrafficLight(main.statsManager.getPing(), 300), stats.getPingStats());
         add(tick, "cell 0 0");
         add(ping, "cell 0 1");
 
         if (Main.API.hasCapability(Capability.HANDLER_CPU_USAGE, Capability.HANDLER_RAM_USAGE)) {
             JLabel cpu = createLabel("cpu", "Cpu usage", true,
-                    color -> UIUtils.getTrafficLight(Main.API.getCpuUsage(), 100), statsManager.getCpuStats());
+                    color -> UIUtils.getTrafficLight(Main.API.getCpuUsage(), 100), stats.getCpuStats());
             JLabel ram = createLabel("ram", "Ram usage", true,
-                    color -> UIUtils.getTrafficLight(Main.API.getMemoryUsage(), 2500), statsManager.getMemoryStats());
+                    color -> UIUtils.getTrafficLight(Main.API.getMemoryUsage(), 2500), stats.getMemoryStats());
             add(cpu, "cell 1 0, gapleft 5px");
             add(ram, "cell 1 1, gapleft 5px");
         }
 
-        for (Component component : getComponents()) {
-            component.addMouseListener(new RedirectMouseAdapter());
-            component.addMouseMotionListener(new RedirectMouseAdapter());
-        }
         addActionListener(l -> new DiagnosticsPanel(main, this));
     }
 
@@ -67,40 +93,5 @@ public class DiagnosticBar extends JButton {
 
         stat.setListener(label::setText);
         return label;
-    }
-
-    private static class RedirectMouseAdapter implements MouseListener, MouseMotionListener {
-        public void mouseClicked(MouseEvent e) {
-            redirect(e);
-        }
-
-        public void mousePressed(MouseEvent e) {
-            redirect(e);
-        }
-
-        public void mouseReleased(MouseEvent e) {
-            redirect(e);
-        }
-
-        public void mouseEntered(MouseEvent e) {
-            redirect(e);
-        }
-
-        public void mouseExited(MouseEvent e) {
-            redirect(e);
-        }
-
-        public void mouseDragged(MouseEvent e) {
-            redirect(e);
-        }
-
-        public void mouseMoved(MouseEvent e) {
-            redirect(e);
-        }
-
-        private void redirect(MouseEvent e) {
-            Component source = (Component) e.getSource();
-            source.getParent().dispatchEvent(SwingUtilities.convertMouseEvent(source, e, source.getParent()));
-        }
     }
 }

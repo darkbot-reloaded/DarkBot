@@ -6,8 +6,6 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
-import eu.darkbot.api.config.ConfigSetting;
-import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StatsAPI;
 
@@ -52,10 +50,10 @@ public class StatsManager implements Manager, StatsAPI {
 
         this.main.status.add(this::toggle);
 
-        this.cpuStat = new AverageStats(main.configHandler, true);
-        this.pingStat = new AverageStats(main.configHandler, false);
-        this.tickStat = new AverageStats(main.configHandler, true);
-        this.memoryStat = new AverageStats(main.configHandler, false);
+        this.cpuStat = new AverageStats(true);
+        this.pingStat = new AverageStats(false);
+        this.tickStat = new AverageStats(true);
+        this.memoryStat = new AverageStats(false);
     }
 
     @Override
@@ -98,13 +96,13 @@ public class StatsManager implements Manager, StatsAPI {
         }
     }
 
-    public void tickAverageStats() {
+    public void tickAverageStats(long lastUpdate) {
         int p = getPing();
-        if (p > 0) pingStat.accept(p);
+        if (p > 0) pingStat.accept(lastUpdate, p);
 
-        cpuStat.accept(API.getCpuUsage());
-        tickStat.accept(main.getTickTime());
-        memoryStat.accept(API.getMemoryUsage());
+        cpuStat.accept(lastUpdate, API.getCpuUsage());
+        tickStat.accept(lastUpdate, main.getTickTime());
+        memoryStat.accept(lastUpdate, API.getMemoryUsage());
     }
 
     private void updateCredits(double credits) {
@@ -279,24 +277,21 @@ public class StatsManager implements Manager, StatsAPI {
     public static class AverageStats {
         private static final DecimalFormat ONE_PLACE_FORMAT = new DecimalFormat("0.0");
 
-        private final ConfigSetting<Integer> minTick;
-        private final boolean showDecimal;
-
         private double last, average, max = Double.MIN_VALUE;
+        private final boolean showDecimal;
 
         private Consumer<String> onChange;
 
-        public AverageStats(ConfigAPI config, boolean showDecimal) {
-            this.minTick = config.requireConfig("bot_settings.other.min_tick");
+        public AverageStats(boolean showDecimal) {
             this.showDecimal = showDecimal;
         }
 
-        public void accept(double value) {
-            double K = minTick.getValue() / 60_000d;
+        public void accept(long lastUpdate, double value) {
+            double K = lastUpdate / 30_000d;
             average = average + K * (value - average);
 
+            max = max + K * 2 * (average - max);
             max = Math.max(max, value);
-            max = max + K * (average - max);
 
             if (last != value && onChange != null) {
                 String s = showDecimal ? ONE_PLACE_FORMAT.format(value) : String.valueOf((int) value);

@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.ui.FlatRootPaneUI;
+import com.formdev.flatlaf.ui.FlatTitlePane;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.api.Capability;
@@ -37,9 +39,20 @@ public class MainGui extends JFrame {
         super("DarkBot");
         getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_ICON, false);
         getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_TITLE, false);
+        getRootPane().setUI(new FlatRootPaneUI() {
+            @Override
+            protected FlatTitlePane createTitlePane() {
+                return new FlatTitlePane(getRootPane()) {
+                    @Override
+                    protected void menuBarChanged() {
+                        menuBarPlaceholder.invalidate();
+                    }
+                };
+            }
+        });
 
         this.configGui = new ConfigGui(main);
-        configGui.setIconImage(ICON);
+        this.configGui.setIconImage(ICON);
 
         this.main = main;
 
