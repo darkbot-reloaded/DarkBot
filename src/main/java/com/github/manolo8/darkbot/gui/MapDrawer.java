@@ -122,10 +122,11 @@ public class MapDrawer extends JPanel {
                             Object iconSize = UIManager.put("MenuItem.minimumIconSize", new Dimension(6, 0));
                             Object itemWidth = UIManager.put("MenuItem.minimumWidth", 0);
                             for (Portal portal : portals) {
-                                JMenuItem item = new JMenuItem(portal.getTargetMap()
-                                        .map(GameMap::getName)
-                                        .orElse("(" + portal.getLocationInfo().getLast().toString() + ")"));
+                                String portalText = portal.getTargetMap()
+                                        .map(map -> map.getName().length() > 12 ? map.getShortName() : map.getName())
+                                        .orElse("(" + portal.getLocationInfo().getLast().toString() + ")");
 
+                                JMenuItem item = new JMenuItem(portalText);
                                 item.addActionListener(l -> main.setModule(new TemporalPortalJumper(main, portal)));
                                 portalMenu.add(item);
                             }
