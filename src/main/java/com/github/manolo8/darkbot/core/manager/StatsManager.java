@@ -104,13 +104,13 @@ public class StatsManager implements Manager, StatsAPI {
         }
     }
 
-    public void tickAverageStats(long lastUpdate) {
+    public void tickAverageStats(long timeDelta) {
         int p = getPing();
-        if (p > 0) pingStat.accept(lastUpdate, p);
+        if (p > 0) pingStat.accept(timeDelta, p);
 
-        cpuStat.accept(lastUpdate, API.getCpuUsage());
-        tickStat.accept(lastUpdate, main.getTickTime());
-        memoryStat.accept(lastUpdate, API.getMemoryUsage());
+        cpuStat.accept(timeDelta, API.getCpuUsage());
+        tickStat.accept(timeDelta, main.getTickTime());
+        memoryStat.accept(timeDelta, API.getMemoryUsage());
     }
 
     private void updateCredits(double credits) {
@@ -299,11 +299,11 @@ public class StatsManager implements Manager, StatsAPI {
             this.showDecimal = showDecimal;
         }
 
-        public void accept(long lastUpdate, double value) {
-            double K = lastUpdate / 30_000d;
-            average = average + K * (value - average);
+        public void accept(long timeDelta, double value) {
+            double adjustFactor = timeDelta / 10_000d;
+            average = average + adjustFactor * (value - average);
 
-            max = max + K * 2 * (average - max);
+            max += adjustFactor * 0.2 * (average - max);
             max = Math.max(max, value);
 
             if (last != value && onChange != null) {

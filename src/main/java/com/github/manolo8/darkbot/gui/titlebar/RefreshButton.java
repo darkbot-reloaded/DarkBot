@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.gui.titlebar;
 
-import com.formdev.flatlaf.icons.FlatAnimatedIcon;
 import com.formdev.flatlaf.ui.FlatButtonUI;
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.gui.utils.ForwardAnimatedIcon;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 
@@ -21,12 +21,13 @@ public class RefreshButton extends JButton {
         setToolTipText(I18n.get("gui.hamburger_button.reload"));
 
         addActionListener(l -> {
+            ForwardAnimatedIcon.toggleState(this);
             System.out.println("Triggering refresh: user requested");
             Main.API.handleRefresh();
         });
     }
 
-    private static class RefreshIcon extends FlatAnimatedIcon {
+    private static class RefreshIcon extends ForwardAnimatedIcon {
         private Path2D refreshPath;
 
         public RefreshIcon() {
@@ -34,7 +35,7 @@ public class RefreshButton extends JButton {
         }
 
         @Override
-        public void paintIconAnimated(Component c, Graphics g, int x, int y, float animatedValue) {
+        public void paintIcon(Component c, Graphics g, int x, int y, float animatedValue) {
             Graphics2D g2 = (Graphics2D) g;
             g2.setColor(getColor(c));
 
@@ -67,13 +68,8 @@ public class RefreshButton extends JButton {
                 refreshPath.closePath();
             }
 
-            g2.rotate(animatedValue * Math.PI, 8, 8);
+            g2.rotate(animatedValue * Math.PI, getIconWidth() / 2.0, getIconHeight() / 2.0);
             g2.fill(refreshPath);
-        }
-
-        @Override
-        public float getValue(Component c) {
-            return ((AbstractButton)c).getModel().isRollover() ? 1 : 0;
         }
 
         @Override

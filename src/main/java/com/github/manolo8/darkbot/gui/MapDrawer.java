@@ -17,6 +17,7 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Point;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
+import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 
@@ -65,6 +66,8 @@ public class MapDrawer extends JPanel {
     private CompletableFuture<Image> minimapFuture;
     private GameMap lastMap;
     private Image backgroundImage;
+
+    @Getter private long lastMapClick;
 
     public MapDrawer() {
         addMouseListener(new MouseAdapter() {
@@ -115,20 +118,24 @@ public class MapDrawer extends JPanel {
                             portalMenu.removeAll();
 
                             // https://github.com/JFormDesigner/FlatLaf/issues/328
-                            UIManager.put("MenuItem.minimumIconSize", new Dimension());
+                            // compensate `MenuItem.textNoAcceleratorGap` which is 6 by default
+                            Object iconSize = UIManager.put("MenuItem.minimumIconSize", new Dimension(6, 0));
+                            Object itemWidth = UIManager.put("MenuItem.minimumWidth", 0);
                             for (Portal portal : portals) {
                                 JMenuItem item = new JMenuItem(portal.getTargetMap()
-                                        .map(GameMap::getShortName)
+                                        .map(GameMap::getName)
                                         .orElse("(" + portal.getLocationInfo().getLast().toString() + ")"));
 
                                 item.addActionListener(l -> main.setModule(new TemporalPortalJumper(main, portal)));
                                 portalMenu.add(item);
                             }
-                            UIManager.put("MenuItem.minimumIconSize", null);
-                            portalMenu.show(MapDrawer.this, e.getX(), e.getY() + 5);
+                            UIManager.put("MenuItem.minimumIconSize", iconSize);
+                            UIManager.put("MenuItem.minimumWidth", itemWidth);
+                            portalMenu.show(MapDrawer.this, e.getX(), e.getY());
                         }
                     } else {
-                        main.hero.drive.mapClickMove(loc);
+                        main.hero.drive.move(loc);
+                        lastMapClick = System.currentTimeMillis();
                     }
                 }
             }
@@ -137,9 +144,11 @@ public class MapDrawer extends JPanel {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) return;
+                if ((main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e))
+                        || SwingUtilities.isRightMouseButton(e)) return;
 
-                main.hero.drive.mapClickMove(mapGraphics.toGameLocation(e));
+                main.hero.drive.move(mapGraphics.toGameLocation(e));
+                lastMapClick = System.currentTimeMillis();
             }
         });
 

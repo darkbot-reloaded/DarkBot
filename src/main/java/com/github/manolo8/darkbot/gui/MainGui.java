@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
 import eu.darkbot.api.config.ConfigSetting;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -29,7 +30,7 @@ public class MainGui extends JFrame {
 
     private MainTitleBar titleBar;
     private ExitConfirmation exitConfirmation;
-    private MapDrawer mapDrawer;
+    @Getter private MapDrawer mapDrawer;
 
     public static final Image ICON = UIUtils.getImage("icon");
     public static final int DEFAULT_WIDTH = 640, DEFAULT_HEIGHT = 480;
@@ -39,6 +40,10 @@ public class MainGui extends JFrame {
         super("DarkBot");
         getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_ICON, false);
         getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_TITLE, false);
+
+        // FlatLaf repaints the entire TitlePane on any change within its bounds
+        // so the custom border color is painted correctly when embedded menu is invisible
+        // we don't need this behavior, which affects performance
         getRootPane().setUI(new FlatRootPaneUI() {
             @Override
             protected FlatTitlePane createTitlePane() {
