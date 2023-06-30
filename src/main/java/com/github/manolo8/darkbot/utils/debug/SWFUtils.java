@@ -13,10 +13,11 @@ public class SWFUtils {
 
         for (long addr : addresses) {
             int size = API.readMemoryInt(addr + 4);
-            if (size < 11_500_000 || size > 13_000_000) continue;
+            if (size < 11_500_000 || size > 15_000_000) continue;
 
             try (FileOutputStream writer = new FileOutputStream("main.swf")) {
                 writer.write(API.readMemory(addr, size));
+                System.out.println("SWF saved - " + (size / (1024f * 1024f)) + "MB");
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.config.BoxInfo;
 import com.github.manolo8.darkbot.config.ConfigEntity;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.utils.Offsets;
 import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.Nullable;
@@ -66,7 +66,7 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
 
     @Override
     public boolean tryCollect() {
-        if (API.hasCapability(GameAPI.Capability.DIRECT_COLLECT_BOX)) {
+        if (API.hasCapability(Capability.DIRECT_COLLECT_BOX)) {
             API.collectBox(this);
             setCollected();
             return true;

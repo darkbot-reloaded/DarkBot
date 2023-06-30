@@ -3,16 +3,24 @@ package com.github.manolo8.darkbot.gui.titlebar;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import net.miginfocom.swing.MigLayout;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.SwingConstants;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Graphics;
 
 public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
 
-    private final Info info;
+    private final TitleFiller titleFiller = new TitleFiller();
 
     public MainTitleBar(Main main, MainGui frame) {
-        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        setLayout(new MigLayout("fill, ins 0, gap 0, hidemode 2"));
         setBorder(BorderFactory.createEmptyBorder());
 
         add(new ExtraButton(main, frame));
@@ -21,31 +29,38 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
         add(new StartButton(main, frame));
         add(new BackpageButton(main, frame));
 
-        add(this.info = new Info());
+        add(titleFiller, "grow, push");
+        add(DiagnosticBar.create(main), "hmax 30");
 
         add(new HookButton(frame));
-        add(new DiagnosticsButton(main, frame));
         add(new VisibilityButton(main, frame));
         add(new PinButton(frame));
         add(new TrayButton(main, frame));
     }
 
     public void setInfo(String info) {
-        this.info.label.setText(info);
+        this.titleFiller.title.setText(info);
     }
 
-    private static class Info extends Box.Filler {
+    private static class TitleFiller extends Box.Filler {
+        private final JLabel title = new JLabel();
 
-        private final JLabel label = new JLabel();
-
-        Info() {
+        private TitleFiller() {
             super(new Dimension(20, 0), new Dimension(120, 0), new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
             setLayout(new BorderLayout());
             setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-            add(this.label, BorderLayout.CENTER);
-            label.setHorizontalAlignment(SwingConstants.CENTER);
+
+            add(title, BorderLayout.CENTER);
+            title.setHorizontalAlignment(SwingConstants.CENTER);
         }
 
-    }
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
 
+            g.setColor(UIUtils.darker(g.getColor(), 0.6));
+            g.drawLine(0, 5, 0, getHeight() - 6);
+            g.drawLine(getWidth() - 1, 5, getWidth() - 1, getHeight() - 6);
+        }
+    }
 }

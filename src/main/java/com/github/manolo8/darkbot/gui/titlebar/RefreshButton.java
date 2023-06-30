@@ -2,6 +2,8 @@ package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.formdev.flatlaf.ui.FlatButtonUI;
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.gui.utils.ForwardAnimatedIcon;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 
 import javax.swing.*;
@@ -19,16 +21,21 @@ public class RefreshButton extends JButton {
         setToolTipText(I18n.get("gui.hamburger_button.reload"));
 
         addActionListener(l -> {
+            ForwardAnimatedIcon.toggleState(this);
             System.out.println("Triggering refresh: user requested");
             Main.API.handleRefresh();
         });
     }
 
-    private static class RefreshIcon implements Icon {
+    private static class RefreshIcon extends ForwardAnimatedIcon {
         private Path2D refreshPath;
 
+        public RefreshIcon() {
+            super(16, 16, null);
+        }
+
         @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
+        public void paintIcon(Component c, Graphics g, int x, int y, float animatedValue) {
             Graphics2D g2 = (Graphics2D) g;
             g2.setColor(getColor(c));
 
@@ -61,30 +68,19 @@ public class RefreshButton extends JButton {
                 refreshPath.closePath();
             }
 
+            g2.rotate(animatedValue * Math.PI, getIconWidth() / 2.0, getIconHeight() / 2.0);
             g2.fill(refreshPath);
+        }
+
+        @Override
+        public int getAnimationDuration() {
+            return 250;
         }
 
         private Color getColor(Component c) {
             Color foreground = c.getForeground();
             return FlatButtonUI.buttonStateColor(c, foreground, null, null,
-                    darker(foreground, 0.75), darker(foreground, 0.6));
-        }
-
-        @Override
-        public int getIconWidth() {
-            return 16;
-        }
-
-        @Override
-        public int getIconHeight() {
-            return 16;
-        }
-
-        private static Color darker(Color c, double factor) {
-            return new Color(Math.max((int) (c.getRed() * factor), 0),
-                    Math.max((int) (c.getGreen() * factor), 0),
-                    Math.max((int) (c.getBlue() * factor), 0),
-                    c.getAlpha());
+                    UIUtils.darker(foreground, 0.75), UIUtils.darker(foreground, 0.6));
         }
     }
 

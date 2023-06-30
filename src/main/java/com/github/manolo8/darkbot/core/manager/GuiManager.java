@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.ChatGui;
 import com.github.manolo8.darkbot.core.objects.Gui;
@@ -137,12 +137,12 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }
 
-    public Gui register(String key) {
+    private Gui register(String key) {
         return register(key, Gui.class);
     }
 
     @SuppressWarnings({"unchecked", "CastCanBeRemovedNarrowingVariableType"})
-    public <T extends Gui> T register(String key, Class<T> gui) {
+    private <T extends Gui> T register(String key, Class<T> gui) {
         Gui guiFix = pluginAPI.requireInstance(gui); // Workaround for a java compiler assertion bug having issues with types
         this.guis.addLazy(key, guiFix::update);
         this.registeredGuis.put(key, guiFix);
@@ -307,7 +307,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     private void clearCache() {
         if (main.config.BOT_SETTINGS.API_CONFIG.CLEAR_CACHE_ON_STUCK &&
-                API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE))
+                API.hasCapability(Capability.HANDLER_CLEAR_CACHE))
             API.clearCache(".*");
     }
 
