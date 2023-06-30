@@ -56,35 +56,36 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final GauntletPlutusProxy plutus;
     public final NpcEventProxy npcEventProxy;
     public final WorldBossOverviewProxy worldBossOverview;
+
+    public final Updatable group;
     public final DispatchProxy dispatchProxy;
     public final DispatchRetrieverMediator dispatchRetrieverMediator;
     public final AssemblyMediator assemblyMediator;
-    public final Updatable group;
 
     public FacadeManager(PluginAPI pluginApi) {
         this.pluginAPI = pluginApi;
 
-        this.log            = registerMediator("LogWindowMediator",   LogMediator.class);
-        this.chat           = registerProxy("ChatProxy",              ChatProxy.class);
-        this.stats          = registerProxy("StatsProxy",             StatsProxy.class);
-        this.escort         = registerProxy("payload_escort",         EscortProxy.class);
-        this.booster        = registerProxy("BoosterProxy",           BoosterProxy.class);
-        this.settings       = registerProxy("SettingsWindowFUIProxy", SettingsProxy.class);
-        this.slotBars       = registerProxy("ItemsControlMenuProxy",  SlotBarsProxy.class);
-        this.labyrinth      = registerProxy("frozen_labyrinth",       FrozenLabyrinthProxy.class);
-        this.eternalGate    = registerProxy("eternal_gate",           EternalGateProxy.class);
-        this.blacklightGate = registerProxy("eternal_blacklight",     EternalBlacklightProxy.class);
-        this.chrominEvent   = registerProxy("chrominEvent",           ChrominProxy.class);
-        this.astralGate     = registerProxy("rogue_lite",             AstralGateProxy.class);
-        this.highlight      = registerProxy("HighlightProxy",         HighlightProxy.class);
-        this.spaceMapWindowProxy = registerProxy("spacemap",          SpaceMapWindowProxy.class);
-        this.plutus         = registerProxy("plutus",                 GauntletPlutusProxy.class);
-        this.npcEventProxy  = registerProxy("npc_event",              NpcEventProxy.class);
-        this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
-        this.dispatchProxy  = registerProxy("dispatch",               DispatchProxy.class);
-        this.dispatchRetrieverMediator = registerMediator("dispatch_retriever", DispatchRetrieverMediator.class);
-        assemblyMediator    = registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
-        this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
+        this.log                       = registerMediator("LogWindowMediator",      LogMediator.class);
+        this.chat                      = registerProxy("ChatProxy",                 ChatProxy.class);
+        this.stats                     = registerProxy("StatsProxy",                StatsProxy.class);
+        this.escort                    = registerProxy("payload_escort",            EscortProxy.class);
+        this.booster                   = registerProxy("BoosterProxy",              BoosterProxy.class);
+        this.settings                  = registerProxy("SettingsWindowFUIProxy",    SettingsProxy.class);
+        this.slotBars                  = registerProxy("ItemsControlMenuProxy",     SlotBarsProxy.class);
+        this.labyrinth                 = registerProxy("frozen_labyrinth",          FrozenLabyrinthProxy.class);
+        this.eternalGate               = registerProxy("eternal_gate",              EternalGateProxy.class);
+        this.blacklightGate            = registerProxy("eternal_blacklight",        EternalBlacklightProxy.class);
+        this.chrominEvent              = registerProxy("chrominEvent",              ChrominProxy.class);
+        this.astralGate                = registerProxy("rogue_lite",                AstralGateProxy.class);
+        this.highlight                 = registerProxy("HighlightProxy",            HighlightProxy.class);
+        this.spaceMapWindowProxy       = registerProxy("spacemap",                  SpaceMapWindowProxy.class);
+        this.plutus                    = registerProxy("plutus",                    GauntletPlutusProxy.class);
+        this.npcEventProxy             = registerProxy("npc_event",                 NpcEventProxy.class);
+        this.worldBossOverview         = registerProxy("worldBoss_overview",        WorldBossOverviewProxy.class);
+        this.group                     = registerProxy("GroupProxy",                Updatable.NoOp.class);
+        this.dispatchProxy             = registerProxy("dispatch",                  DispatchProxy.class);
+        this.dispatchRetrieverMediator = registerMediator("dispatch_retriever",     DispatchRetrieverMediator.class);
+        this.assemblyMediator          = registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
     }
 
     private <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
