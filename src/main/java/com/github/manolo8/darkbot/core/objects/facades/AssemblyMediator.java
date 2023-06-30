@@ -14,7 +14,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class AssemblyMediator extends Updatable implements AssemblyAPI {
     public int selectedRecipeIndex;
     public Recipe selectedRecipe = new Recipe();
-    public CheckBox filterDropdown = new CheckBox();
+    public boolean isFilterDropDownOpen;
     public List<Recipe> recipes = new ArrayList<>();
     private final ObjArray recipesPtr = ObjArray.ofVector(true);
     public List<RowSetting> rowSettings = new ArrayList<>();
@@ -41,8 +41,8 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         rowSettingsArr.sync(rowSettings, RowSetting::new);
 
         //get filter drop down is open
-        filterDropdown.update(Main.API.readMemoryLong(itemFilterViewController + 0x60) & ByteUtils.ATOM_MASK);
-
+        long filterDropdownAddress = Main.API.readMemoryLong(itemFilterViewController + 0x60) & ByteUtils.ATOM_MASK;
+        isFilterDropDownOpen = API.readBoolean(filterDropdownAddress + 0x1D0);
     }
 
     @Override
@@ -56,8 +56,8 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     }
 
     @Override
-    public AssemblyAPI.CheckBox getFilterDropdown() {
-        return filterDropdown;
+    public boolean isFilterDropDownOpen() {
+        return isFilterDropDownOpen;
     }
 
     @Override
@@ -188,7 +188,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
         @Override
         public String toString() {
-            return RowSetting.class.getSimpleName() + " - " + first.filter + ":" + first.checkBox.getIsChecked() + " - " + second.filter + ":" + second.checkBox.getIsChecked();
+            return RowSetting.class.getSimpleName() + " - " + first.filter + ":" + first.isChecked() + " - " + second.filter + ":" + second.isChecked();
         }
 
         @Override
@@ -204,17 +204,18 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
     public static class RowEntryVO extends Auto implements AssemblyAPI.RowEntryVO {
         public String filter = "";
-        public CheckBox checkBox = new CheckBox();
+        public boolean isChecked;
 
         public void update() {
             if (address <= 0) return;
             filter = API.readString(address, 0x20);
-            checkBox.update(Main.API.readMemoryLong(address + 0x28) & ByteUtils.ATOM_MASK);
+            long isCheckedAddress = Main.API.readMemoryLong(address + 0x28) & ByteUtils.ATOM_MASK;
+            isChecked = API.readBoolean(isCheckedAddress + 0x1D0);
         }
 
         @Override
         public String toString() {
-            return RowEntryVO.class.getSimpleName() + " - " + filter + " - " + checkBox.getIsChecked();
+            return RowEntryVO.class.getSimpleName() + " - " + filter + " - " + isChecked;
         }
 
         @Override
@@ -223,26 +224,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
 
         @Override
-        public AssemblyAPI.CheckBox getCheckBox() {
-            return checkBox;
-        }
-    }
-
-    public static class CheckBox extends Auto implements AssemblyAPI.CheckBox {
-        public boolean isChecked = false;
-
-        public void update() {
-            if (address <= 0) return;
-            isChecked = API.readBoolean(address + 0x1D0);
-        }
-
-        @Override
-        public String toString() {
-            return CheckBox.class.getSimpleName() + " - " + isChecked;
-        }
-
-        @Override
-        public boolean getIsChecked() {
+        public boolean isChecked() {
             return isChecked;
         }
     }
