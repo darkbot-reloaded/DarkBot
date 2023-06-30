@@ -13,9 +13,14 @@ public class DispatchManager extends Gui implements DispatchAPI {
     private final DispatchProxy proxy;
     private final DispatchRetrieverMediator mediator;
 
+    private final Gui icon;
+    private final Gui iconOk;
+
     public DispatchManager(Main main) {
         this.proxy = main.facadeManager.dispatchProxy;
         this.mediator = main.facadeManager.dispatchRetrieverMediator;
+        this.icon = main.guiManager.icon;
+        this.iconOk = main.guiManager.iconOk;
     }
 
     @Override
