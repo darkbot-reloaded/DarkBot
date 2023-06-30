@@ -11,15 +11,11 @@ import java.util.List;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class DispatchRetrieverMediator extends Updatable {
-
     public int availableSlots, totalSlots;
-
     public List<Retriever> availableRetrievers = new ArrayList<>();
-    public List<Retriever> inProgressRetrievers = new ArrayList<>();
-
     private final ObjArray availableRetrieverArr = ObjArray.ofVector(true);
+    public List<Retriever> inProgressRetrievers = new ArrayList<>();
     private final ObjArray inProgressRetrieverArr = ObjArray.ofVector(true);
-
     public Retriever selectedRetriever = new Retriever();
 
     @Override
@@ -29,8 +25,8 @@ public class DispatchRetrieverMediator extends Updatable {
         totalSlots = API.readMemoryInt(dispatchRetrieverData + 0x44);
 
         availableRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x58) & ByteUtils.ATOM_MASK);
-        inProgressRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x60) & ByteUtils.ATOM_MASK);
         availableRetrieverArr.sync(availableRetrievers, Retriever::new);
+        inProgressRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x60) & ByteUtils.ATOM_MASK);
         inProgressRetrieverArr.sync(inProgressRetrievers, Retriever::new);
 
         selectedRetriever.update(API.readMemoryLong(dispatchRetrieverData + 0x68) & ByteUtils.ATOM_MASK);

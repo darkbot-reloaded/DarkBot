@@ -29,9 +29,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         //get list of shown recipe
         long recipeCollectionAddress = Main.API.readMemoryLong(address + 0x60) & ByteUtils.ATOM_MASK;
         recipesPtr.update(Main.API.readMemoryLong(recipeCollectionAddress + 0x20) & ByteUtils.ATOM_MASK);
-        synchronized (Main.UPDATE_LOCKER) {
-            recipesPtr.sync(recipes, Recipe::new);
-        }
+        recipesPtr.sync(recipes, Recipe::new);
 
         //get selected recipe info
         long selectedRecipeAddress = Main.API.readMemoryLong(address + 0x70) & ByteUtils.ATOM_MASK;
@@ -40,9 +38,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         //get list of selected filters
         long itemFilterViewController = Main.API.readMemoryLong(address + 0x78) & ByteUtils.ATOM_MASK;
         rowSettingsArr.update(Main.API.readMemoryLong(itemFilterViewController + 0xb0) & ByteUtils.ATOM_MASK);
-        synchronized (Main.UPDATE_LOCKER) {
-            rowSettingsArr.sync(rowSettings, RowSetting::new);
-        }
+        rowSettingsArr.sync(rowSettings, RowSetting::new);
 
         //get filter drop down is open
         filterDropdown.update(Main.API.readMemoryLong(itemFilterViewController + 0x60) & ByteUtils.ATOM_MASK);
