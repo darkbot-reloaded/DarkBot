@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchRetrieverMediator;
+import com.github.manolo8.darkbot.core.utils.ClickPoint;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.DispatchAPI;
 
@@ -93,6 +94,39 @@ public class DispatchManager extends Gui implements DispatchAPI {
         if (openInProgressTab()) {
             Time.sleep(25);
             click(260, 160 + (41 * i));
+            return true;
+        }
+        return false;
+    }
+
+    public boolean clickOkRewardsPopup(int i) {
+        if (i == 0) i = 1;
+        if (iconOk.isVisible()) {
+            iconOk.click(180, 136 + (13 * i));
+            return true;
+        }
+        return false;
+    }
+
+    public boolean clickAcceptPopup() {
+        if (icon.isVisible()) {
+            icon.click(100, 170);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean clickDeclinePopup() {
+        if (icon.isVisible()) {
+            icon.click(270, 170);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean clickCloseOkPopup() {
+        if (iconOk.isVisible()) {
+            iconOk.click(190, 150);
             return true;
         }
         return false;
