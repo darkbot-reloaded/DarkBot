@@ -3,14 +3,14 @@ package com.github.manolo8.darkbot.core.objects.facades;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
-import eu.darkbot.api.managers.DispatchRetrieverAPI;
+import eu.darkbot.api.managers.DispatchAPI;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class DispatchRetrieverMediator extends Updatable implements DispatchRetrieverAPI {
+public class DispatchRetrieverMediator extends Updatable {
 
     public int availableSlots, totalSlots;
 
@@ -36,32 +36,27 @@ public class DispatchRetrieverMediator extends Updatable implements DispatchRetr
         selectedRetriever.update(API.readMemoryLong(dispatchRetrieverData + 0x68) & ByteUtils.ATOM_MASK);
     }
 
-    @Override
     public int getAvailableSlots() {
         return availableSlots;
     }
 
-    @Override
     public int getTotalSlots() {
         return totalSlots;
     }
 
-    @Override
-    public List<? extends DispatchRetrieverAPI.Retriever> getAvailableRetrievers() {
+    public List<? extends Retriever> getAvailableRetrievers() {
         return availableRetrievers;
     }
 
-    @Override
-    public List<? extends DispatchRetrieverAPI.Retriever> getInProgressRetrievers() {
+    public List<? extends Retriever> getInProgressRetrievers() {
         return inProgressRetrievers;
     }
 
-    @Override
-    public DispatchRetrieverAPI.Retriever getSelectedRetriever() {
+    public Retriever getSelectedRetriever() {
         return selectedRetriever;
     }
 
-    public static class Retriever extends Auto implements DispatchRetrieverAPI.Retriever {
+    public static class Retriever extends Auto implements DispatchAPI.Retriever {
         public String id, name, description;
         public double duration;
         public int slotId;

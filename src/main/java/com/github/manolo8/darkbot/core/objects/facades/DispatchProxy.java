@@ -10,27 +10,27 @@ import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class DispatchProxy extends Updatable implements DispatchAPI {
+public class DispatchProxy extends Updatable {
 
-    public List<RewardsLoot> popupMessageLoots = new ArrayList<>();
+    public List<RewardLoot> popupMessageLoots = new ArrayList<>();
     private final ObjArray popupMessageLootArr = ObjArray.ofVector(true);
 
     @Override
     public void update() {
         long data = API.readMemoryLong(address + 0x30) & ByteUtils.ATOM_MASK;
         popupMessageLootArr.update(API.readMemoryLong(data + 0x70) & ByteUtils.ATOM_MASK);
-        popupMessageLootArr.sync(popupMessageLoots, RewardsLoot::new);
+        popupMessageLootArr.sync(popupMessageLoots, RewardLoot::new);
     }
 
-    @Override
-    public List<? extends RewardLoot> getRewardLoot() {
+    public List<? extends RewardLoot> getRewardLoots() {
         return popupMessageLoots;
     }
 
-    public static class RewardsLoot extends Auto implements RewardLoot {
+    public static class RewardLoot extends Auto implements DispatchAPI.RewardLoot {
         public String lootId;
         public int amount;
 
+        @Override
         public void update() {
             if (address <= 0) return;
             this.amount = API.readMemoryInt(address + 0x20);
