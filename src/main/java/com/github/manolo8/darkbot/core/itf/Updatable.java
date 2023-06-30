@@ -45,4 +45,10 @@ public abstract class Updatable {
 
         public abstract boolean updateAndReport();
     }
+
+    public static class NoOp extends Updatable {
+
+        @Override
+        public void update() {}
+    }
 }

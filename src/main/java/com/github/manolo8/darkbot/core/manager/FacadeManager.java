@@ -75,7 +75,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.plutus         = registerProxy("plutus",                 GauntletPlutusProxy.class);
         this.npcEventProxy  = registerProxy("npc_event",              NpcEventProxy.class);
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
-        this.group          = registerProxy("GroupProxy", Updatable.class);
+        this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
     }
 
     private <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
