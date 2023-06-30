@@ -11,7 +11,7 @@ import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class AssemblyMediator extends Updatable implements AssemblyAPI{
+public class AssemblyMediator extends Updatable implements AssemblyAPI {
     public int selectedRecipeIndex;
     public Recipe selectedRecipe = new Recipe();
     public CheckBox filterDropdown = new CheckBox();
