@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchRetrieverMediator;
-import com.github.manolo8.darkbot.core.utils.ClickPoint;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.DispatchAPI;
 
