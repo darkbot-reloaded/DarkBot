@@ -28,22 +28,27 @@ public class DispatchManager extends Gui implements DispatchAPI {
         return proxy.getRewardLoots();
     }
 
+    @Override
     public int getAvailableSlots() {
         return mediator.getAvailableSlots();
     }
 
+    @Override
     public int getTotalSlots() {
         return mediator.getTotalSlots();
     }
 
+    @Override
     public List<? extends Retriever> getAvailableRetrievers() {
         return mediator.getAvailableRetrievers();
     }
 
+    @Override
     public List<? extends Retriever> getInProgressRetrievers() {
         return mediator.getInProgressRetrievers();
     }
 
+    @Override
     public Retriever getSelectedRetriever() {
         return mediator.getSelectedRetriever();
     }
