@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.core;
 
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import eu.darkbot.api.API;
@@ -130,9 +130,9 @@ public class BotInstaller implements API.Singleton {
     private long lastInternetRead;
     private void checkInvalid() {
         // Background only api ignores invalid checks
-        if (API.hasCapability(GameAPI.Capability.BACKGROUND_ONLY)) return;
+        if (API.hasCapability(Capability.BACKGROUND_ONLY)) return;
 
-        if (API.hasCapability(GameAPI.Capability.HANDLER_INTERNET_READ_TIME)) {
+        if (API.hasCapability(Capability.HANDLER_INTERNET_READ_TIME)) {
             long lastRead = API.lastInternetReadTime();
             if (lastInternetRead != lastRead) {
                 lastInternetRead = lastRead;
@@ -143,7 +143,7 @@ public class BotInstaller implements API.Singleton {
 
         // timer is disarmed on refresh and on valid tick
         if (invalidTimer.tryDisarm()) {
-            if (API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE))
+            if (API.hasCapability(Capability.HANDLER_CLEAR_CACHE))
                 API.clearCache(".*");
 
             API.handleRefresh();

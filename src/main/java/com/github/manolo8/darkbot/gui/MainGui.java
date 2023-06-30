@@ -1,14 +1,17 @@
 package com.github.manolo8.darkbot.gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.ui.FlatRootPaneUI;
+import com.formdev.flatlaf.ui.FlatTitlePane;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.gui.components.ExitConfirmation;
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
 import eu.darkbot.api.config.ConfigSetting;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -27,7 +30,7 @@ public class MainGui extends JFrame {
 
     private MainTitleBar titleBar;
     private ExitConfirmation exitConfirmation;
-    private MapDrawer mapDrawer;
+    @Getter private MapDrawer mapDrawer;
 
     public static final Image ICON = UIUtils.getImage("icon");
     public static final int DEFAULT_WIDTH = 640, DEFAULT_HEIGHT = 480;
@@ -38,8 +41,23 @@ public class MainGui extends JFrame {
         getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_ICON, false);
         getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_TITLE, false);
 
+        // FlatLaf repaints the entire TitlePane on any change within its bounds
+        // so the custom border color is painted correctly when embedded menu is invisible
+        // we don't need this behavior, which affects performance
+        getRootPane().setUI(new FlatRootPaneUI() {
+            @Override
+            protected FlatTitlePane createTitlePane() {
+                return new FlatTitlePane(getRootPane()) {
+                    @Override
+                    protected void menuBarChanged() {
+                        menuBarPlaceholder.invalidate();
+                    }
+                };
+            }
+        });
+
         this.configGui = new ConfigGui(main);
-        configGui.setIconImage(ICON);
+        this.configGui.setIconImage(ICON);
 
         this.main = main;
 
@@ -62,7 +80,7 @@ public class MainGui extends JFrame {
         requestFocus();
         setAlwaysOnTop(main.config.BOT_SETTINGS.BOT_GUI.ALWAYS_ON_TOP);
 
-        if (Main.API.hasCapability(GameAPI.Capability.WINDOW_POSITION)) {
+        if (Main.API.hasCapability(Capability.WINDOW_POSITION)) {
             addComponentListener(new ComponentAdapter() {
                 public void componentMoved(ComponentEvent e) {
                     if (main.config.BOT_SETTINGS.API_CONFIG.attachToBot)

@@ -22,10 +22,18 @@ public class UIUtils {
             BORDER = UIManager.getColor("Component.borderColor"), // Normal border of things
             TAB_HIGLIGHT = UIManager.getColor("TabbedPane.underlineColor");
 
+    public static FlatSVGIcon getSVGIcon(String name, int width, int height) {
+        URL url = UIUtils.class.getResource("/" + name + ".svg");
+        if (url != null) return getSvgIcon(url, width, height);
+
+        url = Objects.requireNonNull(UIUtils.class.getResource("/missing.svg"));
+        return getSvgIcon(url, width, height);
+    }
+
     public static Icon getIcon(String name) {
         // Prefer SVG if available
         URL url = UIUtils.class.getResource("/" + name + ".svg");
-        if (url != null) return getSvgIcon(url);
+        if (url != null) return getSvgIcon(url, 16, 16);
 
         // Fallback to png
         url = UIUtils.class.getResource("/" + name + ".png");
@@ -33,11 +41,11 @@ public class UIUtils {
 
         System.err.println("Failed to locate icon: '" + name + "'");
         url = Objects.requireNonNull(UIUtils.class.getResource("/missing.svg"));
-        return getSvgIcon(url);
+        return getSvgIcon(url, 16, 16);
     }
 
-    private static Icon getSvgIcon(URL url) {
-        return new FlatSVGIcon(url).derive(16, 16);
+    private static FlatSVGIcon getSvgIcon(URL url, int width, int height) {
+        return new FlatSVGIcon(url).derive(width, height);
     }
 
     private static Icon getPngIcon(URL url) {
@@ -90,4 +98,15 @@ public class UIUtils {
         return label;
     }
 
+    public static Color darker(Color c, double factor) {
+        return new Color(Math.max((int) (c.getRed() * factor), 0),
+                Math.max((int) (c.getGreen() * factor), 0),
+                Math.max((int) (c.getBlue() * factor), 0),
+                c.getAlpha());
+    }
+
+    public static Color getTrafficLight(double value, double maximum) {
+        double hue = 1 - Math.min(maximum, Math.max(0, value)) / maximum;
+        return Color.getHSBColor((float) (hue * 0.35), 0.7f, 0.55f);
+    }
 }

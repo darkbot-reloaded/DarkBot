@@ -3,7 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.PlayerInfo;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.objects.group.GroupMember;
@@ -61,7 +61,7 @@ public class GroupManager extends Gui implements GroupAPI {
 
         if (address == 0) return;
 
-        long groupAddress = main.facadeManager.getProxyAddressOf("GroupProxy");
+        long groupAddress = main.facadeManager.group.address;
         if (groupAddress == 0) return;
         group.update(API.readMemoryLong(groupAddress + 0x30));
 
@@ -175,7 +175,7 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void sendInvite(String username, long wait) {
-        if (API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS)) {
+        if (API.hasCapability(Capability.DIRECT_POST_ACTIONS)) {
             API.pasteText(username,
                     NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
                     NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
@@ -209,7 +209,7 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     private void runClicks(ClickPoint... points) {
-        if (API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS)) {
+        if (API.hasCapability(Capability.DIRECT_POST_ACTIONS)) {
             long[] nativeClicks = new long[points.length];
             for (int i = 0; i < points.length; i++) {
                 nativeClicks[i] = NativeAction.Mouse.CLICK.of(this.x + points[i].x, this.y + points[i].y);

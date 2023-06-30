@@ -10,7 +10,9 @@ import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StatsAPI;
 
+import java.text.DecimalFormat;
 import java.time.Duration;
+import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -19,11 +21,10 @@ public class StatsManager implements Manager, StatsAPI {
     private final Main main;
     private final EventBrokerAPI eventBroker;
 
-    private long address;
-    private long settingsAddress;
+    private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
 
+    @Deprecated
     public long currentBox; // Pretty out of place, but will work
-
     public double credits;
     public double uridium;
     public double experience;
@@ -32,24 +33,29 @@ public class StatsManager implements Manager, StatsAPI {
     public int deposit;
     public int depositTotal;
     public int userId;
-
-    private long started = System.currentTimeMillis();
-    private long runningTime = Time.SECOND; // Assume running for 1 second by default
-    private boolean lastStatus;
-
     public double earnedCredits;
     public double earnedUridium;
     public double earnedExperience;
     public double earnedHonor;
-
     public volatile String sid;
     public volatile String instance;
+
+    private long address;
+    private long settingsAddress;
+    private long started = System.currentTimeMillis();
+    private long runningTime = Time.SECOND; // Assume running for 1 second by default
+    private boolean lastStatus;
 
     public StatsManager(Main main, EventBrokerAPI eventBroker) {
         this.main = main;
         this.eventBroker = eventBroker;
 
         this.main.status.add(this::toggle);
+
+        this.cpuStat = new AverageStats(true);
+        this.pingStat = new AverageStats(false);
+        this.tickStat = new AverageStats(true);
+        this.memoryStat = new AverageStats(false);
     }
 
     @Override
@@ -58,7 +64,6 @@ public class StatsManager implements Manager, StatsAPI {
         botInstaller.heroInfoAddress.add(value -> address = value);
         botInstaller.settingsAddress.add(value -> settingsAddress = value);
     }
-
 
     public void tick() {
         if (address == 0) return;
@@ -97,6 +102,15 @@ public class StatsManager implements Manager, StatsAPI {
         } else {
             runningTime += System.currentTimeMillis() - started;
         }
+    }
+
+    public void tickAverageStats(long timeDelta) {
+        int p = getPing();
+        if (p > 0) pingStat.accept(timeDelta, p);
+
+        cpuStat.accept(timeDelta, API.getCpuUsage());
+        tickStat.accept(timeDelta, main.getTickTime());
+        memoryStat.accept(timeDelta, API.getMemoryUsage());
     }
 
     private void updateCredits(double credits) {
@@ -255,5 +269,66 @@ public class StatsManager implements Manager, StatsAPI {
     @Override
     public int getNovaEnergy() {
         return novaEnergy;
+    }
+
+    public AverageStats getCpuStats() {
+        return cpuStat;
+    }
+
+    public AverageStats getPingStats() {
+        return pingStat;
+    }
+
+    public AverageStats getTickStats() {
+        return tickStat;
+    }
+
+    public AverageStats getMemoryStats() {
+        return memoryStat;
+    }
+
+    public static class AverageStats {
+        private static final DecimalFormat ONE_PLACE_FORMAT = new DecimalFormat("0.0");
+
+        private double last, average, max = Double.MIN_VALUE;
+        private final boolean showDecimal;
+
+        private Consumer<String> onChange;
+
+        public AverageStats(boolean showDecimal) {
+            this.showDecimal = showDecimal;
+        }
+
+        public void accept(long timeDelta, double value) {
+            double adjustFactor = timeDelta / 10_000d;
+            average = average + adjustFactor * (value - average);
+
+            max += adjustFactor * 0.2 * (average - max);
+            max = Math.max(max, value);
+
+            if (last != value && onChange != null) {
+                String s = showDecimal ? ONE_PLACE_FORMAT.format(value) : String.valueOf((int) value);
+                onChange.accept(s);
+            }
+            last = value;
+        }
+
+        public double getMax() {
+            return max;
+        }
+
+        public double getAverage() {
+            return average;
+        }
+
+        public void setListener(Consumer<String> onChange) {
+            this.onChange = onChange;
+        }
+
+        @Override
+        public String toString() {
+            return "Max=" + ONE_PLACE_FORMAT.format(getMax()) +
+                    "\nAverage=" + ONE_PLACE_FORMAT.format(getAverage());
+        }
     }
 }
