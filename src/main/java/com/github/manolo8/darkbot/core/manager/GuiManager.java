@@ -127,12 +127,12 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }
 
-    public Gui register(String key) {
+    private Gui register(String key) {
         return register(key, Gui.class);
     }
 
     @SuppressWarnings({"unchecked", "CastCanBeRemovedNarrowingVariableType"})
-    public <T extends Gui> T register(String key, Class<T> gui) {
+    private <T extends Gui> T register(String key, Class<T> gui) {
         Gui guiFix = pluginAPI.requireInstance(gui); // Workaround for a java compiler assertion bug having issues with types
         this.guis.addLazy(key, guiFix::update);
         this.registeredGuis.put(key, guiFix);

@@ -11,14 +11,14 @@ import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalBlacklightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.FrozenLabyrinthProxy;
+import com.github.manolo8.darkbot.core.objects.facades.GauntletPlutusProxy;
 import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
+import com.github.manolo8.darkbot.core.objects.facades.NpcEventProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SpaceMapWindowProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
-import com.github.manolo8.darkbot.core.objects.facades.GauntletPlutusProxy;
-import com.github.manolo8.darkbot.core.objects.facades.NpcEventProxy;
 import com.github.manolo8.darkbot.core.objects.facades.WorldBossOverviewProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
@@ -53,6 +53,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final GauntletPlutusProxy plutus;
     public final NpcEventProxy npcEventProxy;
     public final WorldBossOverviewProxy worldBossOverview;
+    public final Updatable group;
 
     public FacadeManager(PluginAPI pluginApi) {
         this.pluginAPI = pluginApi;
@@ -74,31 +75,28 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.plutus         = registerProxy("plutus",                 GauntletPlutusProxy.class);
         this.npcEventProxy  = registerProxy("npc_event",              NpcEventProxy.class);
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
+        this.group          = registerProxy("GroupProxy", Updatable.class);
     }
 
-    public <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
+    private <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
         T command = pluginAPI.requireInstance(commandClass);
         this.commands.addLazy(key, ((Updatable) command)::update);
         updatables.add(command);
         return command;
     }
 
-    public <T extends Updatable> T registerProxy(String key, Class<T> proxyClass) {
+    private <T extends Updatable> T registerProxy(String key, Class<T> proxyClass) {
         T proxy = pluginAPI.requireInstance(proxyClass);
         this.proxies.addLazy(key, ((Updatable) proxy)::update);
         this.updatables.add(proxy);
         return proxy;
     }
 
-    public <T extends Updatable> T registerMediator(String key, Class<T> mediatorClass) {
+    private <T extends Updatable> T registerMediator(String key, Class<T> mediatorClass) {
         T mediator = pluginAPI.requireInstance(mediatorClass);
         this.mediators.addLazy(key, ((Updatable) mediator)::update);
         updatables.add(mediator);
         return mediator;
-    }
-
-    public long getProxyAddressOf(String key) {
-        return proxies.getPtr(key);
     }
 
     @Override

@@ -61,7 +61,7 @@ public class GroupManager extends Gui implements GroupAPI {
 
         if (address == 0) return;
 
-        long groupAddress = main.facadeManager.getProxyAddressOf("GroupProxy");
+        long groupAddress = main.facadeManager.group.address;
         if (groupAddress == 0) return;
         group.update(API.readMemoryLong(groupAddress + 0x30));
 
