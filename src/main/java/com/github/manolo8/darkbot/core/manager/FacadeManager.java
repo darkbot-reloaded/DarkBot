@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.objects.facades.AssemblyMediator;
 import com.github.manolo8.darkbot.core.objects.facades.AstralGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ChatProxy;
@@ -57,6 +58,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final WorldBossOverviewProxy worldBossOverview;
     public final DispatchProxy dispatchProxy;
     public final DispatchRetrieverMediator dispatchRetrieverMediator;
+    public final AssemblyMediator assemblyMediator;
     public final Updatable group;
 
     public FacadeManager(PluginAPI pluginApi) {
@@ -81,6 +83,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
         this.dispatchProxy  = registerProxy("dispatch",               DispatchProxy.class);
         this.dispatchRetrieverMediator = registerMediator("dispatch_retriever", DispatchRetrieverMediator.class);
+        assemblyMediator    = registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
     }
 

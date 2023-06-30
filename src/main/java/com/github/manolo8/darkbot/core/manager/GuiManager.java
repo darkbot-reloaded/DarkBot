@@ -72,6 +72,8 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final Gui icon;
     public final Gui iconOk;
 
+    public final Gui assembly;
+
     public final Timer loggedInTimer = Timer.get(15_000);
     private LoadStatus checks = LoadStatus.WAITING;
 
@@ -129,11 +131,10 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.refinement = register("refinement", RefinementGui.class);
         this.chat = register("chat", ChatGui.class);
         this.settingsGui = register("settings", SettingsGui.class);
-
         this.dispatch = register("dispatch", DispatchManager.class);
         this.icon = register("popup_generic_icon");
         this.iconOk = register("popup_generic_icon_ok");
-
+        this.assembly = register("assembly");
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }
 
