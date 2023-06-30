@@ -103,7 +103,7 @@ public class InfosDrawer implements Drawable {
                 + (main.isRunning() || !resetRefresh.getValue()
                 ? Time.toString(System.currentTimeMillis() - main.lastRefresh) : "00")
                 + "/" + Time.toString(refreshTime.getValue() * 60 * 1000L);
-        mg.drawString(21, 12, info, MapGraphics.StringAlign.LEFT);
+        mg.drawString(23, 12, info, MapGraphics.StringAlign.LEFT);
 
         if (main.getModule() != null) {
             String s = (main.isRunning() && main.repairManager.isDestroyed())
@@ -112,13 +112,11 @@ public class InfosDrawer implements Drawable {
             if (s != null) {
                 int i = 12;
                 for (String line : s.split("\n"))
-                    mg.drawString(5, i += 14, line, MapGraphics.StringAlign.LEFT);
+                    mg.drawString(7, i += 14, line, MapGraphics.StringAlign.LEFT);
             }
         }
 
-        mg.drawString(mg.getWidth() - 5, 12, getSysInfo(), MapGraphics.StringAlign.RIGHT);
-        mg.drawString(mg.getWidth() - 5, 26, getTickInfo(), MapGraphics.StringAlign.RIGHT);
-        mg.drawString(mg.getWidth() - 5, 40, "SID: " + main.backpage.sidStatus(), MapGraphics.StringAlign.RIGHT);
+        mg.drawString(mg.getWidth() - 5, 12, "SID: " + main.backpage.sidStatus(), MapGraphics.StringAlign.RIGHT);
     }
 
     public void drawMap(MapGraphics mg) {
@@ -227,7 +225,7 @@ public class InfosDrawer implements Drawable {
         if (displayAmount) {
             mg.drawString(pos.getX() + width / 2.0, pos.getY() + height - 2,
                     HEALTH_FORMAT.format(health.getHull() + health.getHp())
-                            + "/" + HEALTH_FORMAT.format(totalMaxHealth), MapGraphics.StringAlign.MID);
+                            + "/" + HEALTH_FORMAT.format(health.getMaxHp()), MapGraphics.StringAlign.MID);
         }
 
         if (health.getMaxShield() != 0) {

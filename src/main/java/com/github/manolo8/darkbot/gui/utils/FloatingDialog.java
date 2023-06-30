@@ -1,14 +1,9 @@
 package com.github.manolo8.darkbot.gui.utils;
 
-import javax.swing.*;
-import javax.swing.border.Border;
-import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 
 public class FloatingDialog {
 
@@ -18,5 +13,4 @@ public class FloatingDialog {
         popup.add(panel);
         popup.show(parent, 0, parent.getHeight());
     }
-
 }

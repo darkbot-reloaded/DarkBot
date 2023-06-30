@@ -1,11 +1,14 @@
-package com.github.manolo8.darkbot.core.api;
+package com.github.manolo8.darkbot.core.api.adapters;
 
 import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.api.Capability;
+import com.github.manolo8.darkbot.core.api.GameAPIImpl;
 import com.github.manolo8.darkbot.core.manager.HookAdapter;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.DarkBoat;
 
+@Deprecated
 public class DarkBoatHookAdapter extends GameAPIImpl<
         DarkBoat,
         DarkBoat,
@@ -22,15 +25,15 @@ public class DarkBoatHookAdapter extends GameAPIImpl<
                 new ByteUtils.ExtraMemoryReader(darkboat, botInstaller),
                 darkboat,
                 hookAdapter,
-                GameAPI.Capability.LOGIN,
-                GameAPI.Capability.INITIALLY_SHOWN,
-                GameAPI.Capability.CREATE_WINDOW_THREAD,
-                GameAPI.Capability.ALL_KEYBINDS_SUPPORT,
+                Capability.LOGIN,
+                Capability.INITIALLY_SHOWN,
+                Capability.CREATE_WINDOW_THREAD,
+                Capability.ALL_KEYBINDS_SUPPORT,
                 // Dark Hook!
-                GameAPI.Capability.DIRECT_LIMIT_FPS,
-                GameAPI.Capability.DIRECT_MOVE_SHIP,
-                GameAPI.Capability.DIRECT_COLLECT_BOX,
-                GameAPI.Capability.DIRECT_REFINE, GameAPI.Capability.DIRECT_CALL_METHOD);
+                Capability.DIRECT_LIMIT_FPS,
+                Capability.DIRECT_MOVE_SHIP,
+                Capability.DIRECT_COLLECT_BOX,
+                Capability.DIRECT_REFINE, Capability.DIRECT_CALL_METHOD);
     }
 
     @Override
@@ -46,7 +49,7 @@ public class DarkBoatHookAdapter extends GameAPIImpl<
     }
 
     @Override
-    public boolean hasCapability(GameAPI.Capability capability) {
+    public boolean hasCapability(Capability capability) {
         HookAdapter.Flag flag = HookAdapter.Flag.of(capability);
         if (flag != null && !direct.isEnabled(flag)) return false;
 

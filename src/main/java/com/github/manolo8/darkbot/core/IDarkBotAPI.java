@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core;
 
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
@@ -129,7 +130,16 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     void resetCache();
 
-    boolean hasCapability(GameAPI.Capability capability);
+    boolean hasCapability(Capability capability);
+
+    default boolean hasCapability(Capability... capabilities) {
+        for (Capability capability : capabilities) {
+            if (!hasCapability(capability)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     // Direct game access
     void setMaxFps(int maxCps);

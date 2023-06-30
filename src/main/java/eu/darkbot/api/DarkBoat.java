@@ -1,9 +1,11 @@
 package eu.darkbot.api;
 
 import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.adapters.NoopAPIAdapter;
 import com.github.manolo8.darkbot.utils.LibUtils;
 
-public class DarkBoat extends GameAPI.NoOpHandler
+@Deprecated
+public class DarkBoat extends NoopAPIAdapter.NoOpHandler
         implements GameAPI.Window, GameAPI.Handler, GameAPI.Memory, GameAPI.Interaction, API.Singleton {
 
     static {
