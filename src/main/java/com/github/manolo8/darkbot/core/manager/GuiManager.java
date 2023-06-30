@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.ChatGui;
-import com.github.manolo8.darkbot.core.objects.DispatchGui;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.LogoutGui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
@@ -75,6 +74,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     public final Timer loggedInTimer = Timer.get(15_000);
     private LoadStatus checks = LoadStatus.WAITING;
+
     private enum LoadStatus {
         WAITING(gm -> gm.main.hero.address != 0 && !gm.connecting.isVisible()),
         AFTER_LOGIN(gm -> {
@@ -86,6 +86,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         DONE(q -> false);
 
         final Predicate<GuiManager> canAdvance;
+
         LoadStatus(Predicate<GuiManager> next) {
             this.canAdvance = next;
         }
@@ -129,7 +130,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.chat = register("chat", ChatGui.class);
         this.settingsGui = register("settings", SettingsGui.class);
 
-        this.dispatch = register("dispatch", DispatchGui.class);
+        this.dispatch = register("dispatch", DispatchManager.class);
         this.icon = register("popup_generic_icon");
         this.iconOk = register("popup_generic_icon_ok");
 
@@ -278,7 +279,6 @@ public class GuiManager implements Manager, GameScreenAPI {
         } else {
             lastDeath = -1;
         }
-
 
 
         HeroManager hero = main.hero;
