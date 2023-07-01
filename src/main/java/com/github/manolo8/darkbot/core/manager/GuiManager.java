@@ -68,7 +68,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final SettingsGui settingsGui;
     public final ChatGui chat;
 
-    public final Gui dispatch;
+    public final DispatchManager dispatch;
     public final Gui icon;
     public final Gui iconOk;
 
