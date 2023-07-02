@@ -22,6 +22,7 @@ public class DisconnectModule extends TemporalModule {
 
     private Long pauseUntil = null;
     private boolean refreshing = false;
+    private boolean closeBot = false;
 
     /**
      * @param pauseTime null for infinite pause, otherwise pause for that amount of MS.
@@ -29,6 +30,14 @@ public class DisconnectModule extends TemporalModule {
     public DisconnectModule(Long pauseTime, String reason) {
         this.reason = reason;
         this.pauseTime = pauseTime;
+    }
+
+    /**
+     * @param pauseTime null for infinite pause, otherwise pause for that amount of MS.
+     */
+    public DisconnectModule(Long pauseTime, String reason, boolean closeBot) {
+        this(pauseTime, reason);
+        this.closeBot = closeBot;
     }
 
     @Override
@@ -83,6 +92,8 @@ public class DisconnectModule extends TemporalModule {
             else {
                 pauseUntil = System.currentTimeMillis() + pauseTime;
                 main.setRunning(false);
+
+                if (closeBot) System.exit(0);
             }
         } else if (pauseUntil != null && System.currentTimeMillis() > pauseUntil - 10_000) {
             if (!refreshing) {
