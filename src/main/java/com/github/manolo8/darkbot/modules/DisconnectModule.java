@@ -7,6 +7,12 @@ import com.github.manolo8.darkbot.modules.utils.SafetyFinder;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
+import eu.darkbot.util.Popups;
+
 public class DisconnectModule extends TemporalModule {
 
     private final Long pauseTime;
@@ -38,6 +44,7 @@ public class DisconnectModule extends TemporalModule {
     public DisconnectModule(Long pauseTime, String reason, boolean closeBot) {
         this(pauseTime, reason);
         this.closeBot = closeBot;
+        showClosePopup();
     }
 
     @Override
@@ -119,5 +126,22 @@ public class DisconnectModule extends TemporalModule {
     public String stoppedStatus() {
         if (pauseUntil == null) return I18n.get("module.disconnect.status_stopped", reason);
         else return I18n.get("module.disconnect.status_paused", reason, Time.toString(Math.max(0, pauseUntil - System.currentTimeMillis())));
+    }
+
+    private void showClosePopup() {
+        JButton okBtn = new JButton(I18n.get("module.disconnect.popup.ok_btn"));
+        JButton cancelBtn = new JButton(I18n.get("module.disconnect.popup.cancel_btn"));
+        okBtn.addActionListener(e -> {
+            SwingUtilities.getWindowAncestor(okBtn).setVisible(false);
+        });
+        cancelBtn.addActionListener(e -> {
+            closeBot = false;
+            SwingUtilities.getWindowAncestor(cancelBtn).setVisible(false);
+        });
+
+        Popups.of(I18n.get("module.disconnect.popup.title"),
+                new JOptionPane(I18n.get("module.disconnect.popup.message"), JOptionPane.INFORMATION_MESSAGE,
+                        JOptionPane.DEFAULT_OPTION, null, new Object[] { okBtn, cancelBtn }))
+                .showAsync();
     }
 }
