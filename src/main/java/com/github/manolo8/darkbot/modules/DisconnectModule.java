@@ -93,7 +93,10 @@ public class DisconnectModule extends TemporalModule {
                 pauseUntil = System.currentTimeMillis() + pauseTime;
                 main.setRunning(false);
 
-                if (closeBot) System.exit(0);
+                if (closeBot) {
+                    System.out.println("Exit by the Disconnect module, exiting");
+                    System.exit(0);
+                }
             }
         } else if (pauseUntil != null && System.currentTimeMillis() > pauseUntil - 10_000) {
             if (!refreshing) {
