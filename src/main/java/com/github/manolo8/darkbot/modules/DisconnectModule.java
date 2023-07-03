@@ -31,7 +31,8 @@ public class DisconnectModule extends TemporalModule {
     private boolean closeBot = false;
 
     /**
-     * @param pauseTime null for infinite pause, otherwise pause for that amount of MS.
+     * @param pauseTime null for infinite pause, otherwise pause for that amount of
+     *                  MS.
      */
     public DisconnectModule(Long pauseTime, String reason) {
         this.reason = reason;
@@ -39,12 +40,16 @@ public class DisconnectModule extends TemporalModule {
     }
 
     /**
-     * @param pauseTime null for infinite pause, otherwise pause for that amount of MS.
+     * @param pauseTime null for infinite pause, otherwise pause for that amount of
+     *                  MS.
      */
     public DisconnectModule(Long pauseTime, String reason, boolean closeBot) {
         this(pauseTime, reason);
         this.closeBot = closeBot;
-        showClosePopup();
+
+        if (closeBot) {
+            showClosePopup();
+        }
     }
 
     @Override
@@ -78,8 +83,10 @@ public class DisconnectModule extends TemporalModule {
         main.guiManager.pet.setEnabled(false);
         safety.setRefreshing(true);
         safety.tick();
-        if (hero.locationInfo.isMoving() || safety.state() != SafetyFinder.Escaping.WAITING) return;
-        if (!logout.visible) logoutStart = System.currentTimeMillis();
+        if (hero.locationInfo.isMoving() || safety.state() != SafetyFinder.Escaping.WAITING)
+            return;
+        if (!logout.visible)
+            logoutStart = System.currentTimeMillis();
         logout.show(true);
         // Prevent bug where logout gets to 0 and doesn't log out, just force a reload
         if (System.currentTimeMillis() - logoutStart > 25_000) {
@@ -92,10 +99,13 @@ public class DisconnectModule extends TemporalModule {
     @Override
     public void tickStopped() {
         if (main.isRunning()) {
-            if (!lostConnection.visible) return;
+            if (!lostConnection.visible)
+                return;
             // Bot done. Pause "forever" (unless a behaviour restarts it).
-            if (pauseTime == null) main.setRunning(false);
-            else if (pauseTime == 0) goBack();
+            if (pauseTime == null)
+                main.setRunning(false);
+            else if (pauseTime == 0)
+                goBack();
             else {
                 pauseUntil = System.currentTimeMillis() + pauseTime;
                 main.setRunning(false);
@@ -124,8 +134,11 @@ public class DisconnectModule extends TemporalModule {
 
     @Override
     public String stoppedStatus() {
-        if (pauseUntil == null) return I18n.get("module.disconnect.status_stopped", reason);
-        else return I18n.get("module.disconnect.status_paused", reason, Time.toString(Math.max(0, pauseUntil - System.currentTimeMillis())));
+        if (pauseUntil == null)
+            return I18n.get("module.disconnect.status_stopped", reason);
+        else
+            return I18n.get("module.disconnect.status_paused", reason,
+                    Time.toString(Math.max(0, pauseUntil - System.currentTimeMillis())));
     }
 
     private void showClosePopup() {
