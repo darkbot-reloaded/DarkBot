@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.core.objects.facades;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.AssemblyAPI;
 
 import java.util.ArrayList;
@@ -28,27 +27,31 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         selectedRecipeIndex = Main.API.readInt(address + 0x48);
 
         //get list of shown recipe
-        long recipeCollectionAddress = Main.API.readMemoryLong(address + 0x60) & ByteUtils.ATOM_MASK;
-        recipesPtr.update(Main.API.readMemoryLong(recipeCollectionAddress + 0x20) & ByteUtils.ATOM_MASK);
+        long recipeCollectionAddress = Main.API.readMemoryLong(address + 0x60);
+        recipesPtr.update(Main.API.readMemoryLong(recipeCollectionAddress + 0x20));
         recipesPtr.sync(recipes, Recipe::new);
 
         //get selected recipe info
-        long selectedRecipeAddress = Main.API.readMemoryLong(address + 0x70) & ByteUtils.ATOM_MASK;
+        long selectedRecipeAddress = Main.API.readMemoryLong(address + 0x70);
         selectedRecipe.update(selectedRecipeAddress);
 
         //get list of selected filters
-        long itemFilterViewController = Main.API.readMemoryLong(address + 0x78) & ByteUtils.ATOM_MASK;
-        rowSettingsArr.update(Main.API.readMemoryLong(itemFilterViewController + 0xb0) & ByteUtils.ATOM_MASK);
+        long itemFilterViewController = Main.API.readMemoryLong(address + 0x78);
+        rowSettingsArr.update(Main.API.readMemoryLong(itemFilterViewController + 0xb0));
         rowSettingsArr.sync(rowSettings, RowFilter::new);
         filters.clear();
         for (int i = 0; i < rowSettings.size(); i++) {
             RowFilter currRow = rowSettings.get(i);
-            filters.add(new Filter(currRow.getFirst(), i, 0));
-            filters.add(new Filter(currRow.getSecond(), i, 1));
+            if (currRow.getFirst() != null) {
+                filters.add(new Filter(currRow.getFirst(), i, 0));
+            }
+            if (currRow.getSecond() != null) {
+                filters.add(new Filter(currRow.getSecond(), i, 1));
+            }
         }
 
         //get filter drop down is open
-        long filterDropdownAddress = Main.API.readMemoryLong(itemFilterViewController + 0x60) & ByteUtils.ATOM_MASK;
+        long filterDropdownAddress = Main.API.readMemoryLong(itemFilterViewController + 0x60);
         isFilterDropDownOpen = API.readBoolean(filterDropdownAddress + 0x1D0);
     }
 
@@ -83,7 +86,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     }
 
     public static class Recipe extends Auto implements AssemblyAPI.Recipe {
-        public String lootId = "";
+        public String recipeId = "";
         public List<String> rewards = new ArrayList<>();
         public final ObjArray rewardsArr = ObjArray.ofVector(true);
 
@@ -97,27 +100,27 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             if (address == 0) return;
             isCraftable = API.readBoolean(address + 0x20);
 
-            long itemVoAddress = Main.API.readMemoryLong(address + 0x58) & ByteUtils.ATOM_MASK;
-            lootId = API.readMemoryString(itemVoAddress, 0x48);
+            long itemVoAddress = Main.API.readMemoryLong(address + 0x58);
+            recipeId = API.readMemoryString(itemVoAddress, 0x48);
 
-            long rewardsArrAddress = Main.API.readMemoryLong(address + 0x60) & ByteUtils.ATOM_MASK;
+            long rewardsArrAddress = Main.API.readMemoryLong(address + 0x60);
             rewardsArr.update(rewardsArrAddress);
             rewards.clear();
             rewardsArr.forEach(ptr -> rewards.add(API.readMemoryString(ptr, 0x48)));
 
-            long resourcesRequiredArrAddress = Main.API.readMemoryLong(address + 0x50) & ByteUtils.ATOM_MASK;
+            long resourcesRequiredArrAddress = Main.API.readMemoryLong(address + 0x50);
             resourcesRequiredArr.update(resourcesRequiredArrAddress);
             resourcesRequiredArr.sync(resourcesRequired, ResourceRequired::new);
         }
 
         @Override
         public String toString() {
-            return Recipe.class.getSimpleName() + " - " + lootId + ":" + isCraftable;
+            return Recipe.class.getSimpleName() + " - " + recipeId + ":" + isCraftable;
         }
 
         @Override
         public String getRecipeId() {
-            return lootId;
+            return recipeId;
         }
 
         @Override
@@ -138,13 +141,13 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
 
     public static class ResourceRequired extends Auto implements AssemblyAPI.ResourceRequired {
-        public String lootId = "";
+        public String resourceId = "";
         public double amountRequired, amountRequiredBackup = -1.0;
 
         public void update() {
             if (address <= 0) return;
-            long itemVoAddress = Main.API.readMemoryLong(address + 0x28) & ByteUtils.ATOM_MASK;
-            lootId = API.readMemoryString(itemVoAddress, 0x48);
+            long itemVoAddress = Main.API.readMemoryLong(address + 0x28);
+            resourceId = API.readMemoryString(itemVoAddress, 0x48);
             amountRequired = API.readDouble(address + 0x30);
             //this also gives back same value, not sure which is correct
             amountRequiredBackup = API.readDouble(address + 0x38);
@@ -152,12 +155,12 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
         @Override
         public String toString() {
-            return ResourceRequired.class.getSimpleName() + " - " + lootId + ":" + amountRequired;
+            return ResourceRequired.class.getSimpleName() + " - " + resourceId + ":" + amountRequired;
         }
 
         @Override
         public String getResourceId() {
-            return lootId;
+            return resourceId;
         }
 
         @Override
@@ -172,18 +175,26 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     }
 
     public static class RowFilter extends Auto implements AssemblyAPI.RowFilter {
-        public ItemFilter first = new ItemFilter();
-        public ItemFilter second = new ItemFilter();
+        public ItemFilter first;
+        public ItemFilter second;
 
         public void update() {
             if (address <= 0) return;
-            first.update(Main.API.readMemoryLong(address + 0x20) & ByteUtils.ATOM_MASK);
-            second.update(Main.API.readMemoryLong(address + 0x28) & ByteUtils.ATOM_MASK);
+            long firstAddress = Main.API.readMemoryLong(address + 0x20);
+            if (firstAddress > 0) {
+                first = new ItemFilter();
+                first.update(firstAddress);
+            }
+            long secondAddress = Main.API.readMemoryLong(address + 0x28);
+            if (secondAddress > 0) {
+                second = new ItemFilter();
+                second.update(secondAddress);
+            }
         }
 
         @Override
         public String toString() {
-            return RowFilter.class.getSimpleName() + " - " + first.filter + ":" + first.isChecked() + " - " + second.filter + ":" + second.isChecked();
+            return RowFilter.class.getSimpleName() + " - " + (first == null ? "null" : (first.filter + ":" + first.isChecked())) + " - " + (second == null ? "null" : (second.filter + ":" + second.isChecked()));
         }
 
         @Override
@@ -204,7 +215,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         public void update() {
             if (address <= 0) return;
             filter = API.readString(address, 0x20);
-            long isCheckedAddress = Main.API.readMemoryLong(address + 0x28) & ByteUtils.ATOM_MASK;
+            long isCheckedAddress = Main.API.readMemoryLong(address + 0x28);
             isChecked = API.readBoolean(isCheckedAddress + 0x1D0);
         }
 

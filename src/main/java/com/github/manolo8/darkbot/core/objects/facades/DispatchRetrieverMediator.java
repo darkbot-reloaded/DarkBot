@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.DispatchAPI;
 
 import java.util.ArrayList;
@@ -20,16 +19,16 @@ public class DispatchRetrieverMediator extends Updatable {
 
     @Override
     public void update() {
-        long dispatchRetrieverData = API.readMemoryLong(address + 80) & ByteUtils.ATOM_MASK;
+        long dispatchRetrieverData = API.readMemoryLong(address + 80);
         availableSlots = API.readMemoryInt(dispatchRetrieverData + 0x40);
         totalSlots = API.readMemoryInt(dispatchRetrieverData + 0x44);
 
-        availableRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x58) & ByteUtils.ATOM_MASK);
+        availableRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x58));
         availableRetrieverArr.sync(availableRetrievers, Retriever::new);
-        inProgressRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x60) & ByteUtils.ATOM_MASK);
+        inProgressRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x60));
         inProgressRetrieverArr.sync(inProgressRetrievers, Retriever::new);
 
-        selectedRetriever.update(API.readMemoryLong(dispatchRetrieverData + 0x68) & ByteUtils.ATOM_MASK);
+        selectedRetriever.update(API.readMemoryLong(dispatchRetrieverData + 0x68));
     }
 
     public int getAvailableSlots() {
@@ -53,19 +52,19 @@ public class DispatchRetrieverMediator extends Updatable {
     }
 
     public static class Retriever extends Auto implements DispatchAPI.Retriever {
-        public String id, name, description;
+        public String id, name, descriptionId;
         public double duration;
         public int slotId;
 
         @Override
         public void update() {
             if (address <= 0) return;
-            long dispatchModule = API.readMemoryLong(address + 0x30) & ByteUtils.ATOM_MASK;
+            long dispatchModule = API.readMemoryLong(address + 0x30);
 
             this.slotId = API.readMemoryInt(dispatchModule + 0x24);
             this.id = API.readMemoryString(dispatchModule, 0x28);
             this.name = API.readMemoryString(dispatchModule, 0x50);
-            this.description = API.readMemoryString(dispatchModule, 0x48);
+            this.descriptionId = API.readMemoryString(dispatchModule, 0x48);
             this.duration = API.readMemoryDouble(dispatchModule + 0x58);
         }
 
@@ -80,8 +79,8 @@ public class DispatchRetrieverMediator extends Updatable {
         }
 
         @Override
-        public String getDescription() {
-            return description;
+        public String getDescriptionId() {
+            return descriptionId;
         }
 
         @Override
