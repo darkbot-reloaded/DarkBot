@@ -17,7 +17,8 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     public boolean isFilterDropDownOpen;
     public List<Recipe> recipes = new ArrayList<>();
     private final ObjArray recipesPtr = ObjArray.ofVector(true);
-    public List<RowSetting> rowSettings = new ArrayList<>();
+    public List<RowFilter> rowSettings = new ArrayList<>();
+    public List<Filter> filters = new ArrayList<>();
     private final ObjArray rowSettingsArr = ObjArray.ofVector(true);
 
     @Override
@@ -38,8 +39,16 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         //get list of selected filters
         long itemFilterViewController = Main.API.readMemoryLong(address + 0x78) & ByteUtils.ATOM_MASK;
         rowSettingsArr.update(Main.API.readMemoryLong(itemFilterViewController + 0xb0) & ByteUtils.ATOM_MASK);
-        rowSettingsArr.sync(rowSettings, RowSetting::new);
+        rowSettingsArr.sync(rowSettings, RowFilter::new);
 
+        if (filters.size() != rowSettings.size() * 2) {
+            filters.clear();
+            for (int i = 0; i < rowSettings.size(); i++) {
+                RowFilter currRow = rowSettings.get(i);
+                filters.add(new Filter(currRow.getFirst(), i, 0));
+                filters.add(new Filter(currRow.getSecond(), i, 1));
+            }
+        }
         //get filter drop down is open
         long filterDropdownAddress = Main.API.readMemoryLong(itemFilterViewController + 0x60) & ByteUtils.ATOM_MASK;
         isFilterDropDownOpen = API.readBoolean(filterDropdownAddress + 0x1D0);
@@ -66,13 +75,18 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     }
 
     @Override
-    public List<? extends AssemblyAPI.RowSetting> getRowSettings() {
+    public List<? extends AssemblyAPI.RowFilter> getRowFilters() {
         return rowSettings;
     }
 
+    @Override
+    public List<? extends AssemblyAPI.Filter> getFilters() {
+        return filters;
+    }
+
     public static class Recipe extends Auto implements AssemblyAPI.Recipe {
-        public ItemVo itemVo = new ItemVo();
-        public List<ItemVo> rewards = new ArrayList<>();
+        public String lootId = "";
+        public List<String> rewards = new ArrayList<>();
         public final ObjArray rewardsArr = ObjArray.ofVector(true);
 
         public List<ResourceRequired> resourcesRequired = new ArrayList<>();
@@ -86,11 +100,12 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             isCraftable = API.readBoolean(address + 0x20);
 
             long itemVoAddress = Main.API.readMemoryLong(address + 0x58) & ByteUtils.ATOM_MASK;
-            itemVo.update(itemVoAddress);
+            lootId = API.readMemoryString(itemVoAddress, 0x48);
 
             long rewardsArrAddress = Main.API.readMemoryLong(address + 0x60) & ByteUtils.ATOM_MASK;
             rewardsArr.update(rewardsArrAddress);
-            rewardsArr.sync(rewards, ItemVo::new);
+            rewards.clear();
+            rewardsArr.forEach(ptr -> rewards.add(API.readMemoryString(ptr, 0x48)));
 
             long resourcesRequiredArrAddress = Main.API.readMemoryLong(address + 0x50) & ByteUtils.ATOM_MASK;
             resourcesRequiredArr.update(resourcesRequiredArrAddress);
@@ -99,16 +114,16 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
         @Override
         public String toString() {
-            return Recipe.class.getSimpleName() + " - " + itemVo.lootId + ":" + isCraftable;
+            return Recipe.class.getSimpleName() + " - " + lootId + ":" + isCraftable;
         }
 
         @Override
-        public AssemblyAPI.ItemVo getItemVo() {
-            return itemVo;
+        public String getRecipeId() {
+            return lootId;
         }
 
         @Override
-        public List<? extends AssemblyAPI.ItemVo> getRewards() {
+        public List<? extends String> getRewards() {
             return rewards;
         }
 
@@ -118,38 +133,20 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
 
         @Override
-        public boolean getIsCraftable() {
+        public boolean isCraftable() {
             return isCraftable;
         }
     }
 
-    public static class ItemVo extends Auto implements AssemblyAPI.ItemVo {
-        public String lootId = "";
-
-        public void update() {
-            if (address <= 0) return;
-            this.lootId = API.readMemoryString(address, 0x48);
-        }
-
-        @Override
-        public String getLootId() {
-            return lootId;
-        }
-
-        @Override
-        public String toString() {
-            return ItemVo.class.getSimpleName() + " - " + lootId;
-        }
-    }
 
     public static class ResourceRequired extends Auto implements AssemblyAPI.ResourceRequired {
-        public ItemVo itemVo = new ItemVo();
+        public String lootId = "";
         public double amountRequired, amountRequiredBackup = -1.0;
 
         public void update() {
             if (address <= 0) return;
-            long itemvo = Main.API.readMemoryLong(address + 0x28) & ByteUtils.ATOM_MASK;
-            itemVo.update(itemvo);
+            long itemVoAddress = Main.API.readMemoryLong(address + 0x28) & ByteUtils.ATOM_MASK;
+            lootId = API.readMemoryString(itemVoAddress, 0x48);
             amountRequired = API.readDouble(address + 0x30);
             //this also gives back same value, not sure which is correct
             amountRequiredBackup = API.readDouble(address + 0x38);
@@ -157,12 +154,12 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
         @Override
         public String toString() {
-            return ResourceRequired.class.getSimpleName() + " - " + itemVo.lootId + ":" + amountRequired;
+            return ResourceRequired.class.getSimpleName() + " - " + lootId + ":" + amountRequired;
         }
 
         @Override
-        public AssemblyAPI.ItemVo getItemVo() {
-            return itemVo;
+        public String getResourceId() {
+            return lootId;
         }
 
         @Override
@@ -176,9 +173,9 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
     }
 
-    public static class RowSetting extends Auto implements AssemblyAPI.RowSetting {
-        public RowEntryVO first = new RowEntryVO();
-        public RowEntryVO second = new RowEntryVO();
+    public static class RowFilter extends Auto implements AssemblyAPI.RowFilter {
+        public ItemFilter first = new ItemFilter();
+        public ItemFilter second = new ItemFilter();
 
         public void update() {
             if (address <= 0) return;
@@ -188,21 +185,21 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
         @Override
         public String toString() {
-            return RowSetting.class.getSimpleName() + " - " + first.filter + ":" + first.isChecked() + " - " + second.filter + ":" + second.isChecked();
+            return RowFilter.class.getSimpleName() + " - " + first.filter + ":" + first.isChecked() + " - " + second.filter + ":" + second.isChecked();
         }
 
         @Override
-        public AssemblyAPI.RowEntryVO getFirst() {
+        public AssemblyAPI.ItemFilter getFirst() {
             return first;
         }
 
         @Override
-        public AssemblyAPI.RowEntryVO getSecond() {
+        public AssemblyAPI.ItemFilter getSecond() {
             return second;
         }
     }
 
-    public static class RowEntryVO extends Auto implements AssemblyAPI.RowEntryVO {
+    public static class ItemFilter extends Auto implements AssemblyAPI.ItemFilter {
         public String filter = "";
         public boolean isChecked;
 
@@ -215,12 +212,45 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
         @Override
         public String toString() {
-            return RowEntryVO.class.getSimpleName() + " - " + filter + " - " + isChecked;
+            return ItemFilter.class.getSimpleName() + " - " + filter + " - " + isChecked;
         }
 
         @Override
-        public String getFilter() {
+        public String getFilterName() {
             return filter;
+        }
+
+        @Override
+        public boolean isChecked() {
+            return isChecked;
+        }
+    }
+
+    public static class Filter implements AssemblyAPI.Filter {
+        String filter = "";
+        int row, col = -1;
+        boolean isChecked = false;
+
+        public Filter(AssemblyAPI.ItemFilter itemFilter, int row, int col) {
+            this.filter = itemFilter.getFilterName();
+            this.row = row;
+            this.col = col;
+            this.isChecked = itemFilter.isChecked();
+        }
+
+        @Override
+        public String getFilterName() {
+            return filter;
+        }
+
+        @Override
+        public int getRow() {
+            return row;
+        }
+
+        @Override
+        public int getCol() {
+            return col;
         }
 
         @Override
