@@ -6,6 +6,8 @@ import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.ChatGui;
 import com.github.manolo8.darkbot.core.objects.Gui;
+import com.github.manolo8.darkbot.core.objects.IconGui;
+import com.github.manolo8.darkbot.core.objects.IconOkGui;
 import com.github.manolo8.darkbot.core.objects.LogoutGui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.RefinementGui;
@@ -69,8 +71,8 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final ChatGui chat;
 
     public final DispatchManager dispatch;
-    public final Gui icon;
-    public final Gui iconOk;
+    public final IconGui icon;
+    public final IconOkGui iconOk;
 
     public final Gui assembly;
 
@@ -132,8 +134,8 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.chat = register("chat", ChatGui.class);
         this.settingsGui = register("settings", SettingsGui.class);
         this.dispatch = register("dispatch", DispatchManager.class);
-        this.icon = register("popup_generic_icon");
-        this.iconOk = register("popup_generic_icon_ok");
+        this.icon = register("popup_generic_icon", IconGui.class);
+        this.iconOk = register("popup_generic_icon_ok", IconOkGui.class);
         this.assembly = register("assembly");
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }

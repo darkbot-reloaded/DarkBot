@@ -2,6 +2,8 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.Gui;
+import com.github.manolo8.darkbot.core.objects.IconGui;
+import com.github.manolo8.darkbot.core.objects.IconOkGui;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchRetrieverMediator;
 import com.github.manolo8.darkbot.utils.Time;
@@ -10,26 +12,17 @@ import eu.darkbot.api.managers.DispatchAPI;
 import java.util.List;
 
 public class DispatchManager extends Gui implements DispatchAPI {
-
-    //When initializing this class guiManager has not initialized, which results in null for guiManager
-    private final Main main;
     private final DispatchProxy proxy;
     private final DispatchRetrieverMediator mediator;
 
-    private Gui icon;
-    private Gui iconOk;
+    private final IconGui icon;
+    private final IconOkGui iconOk;
 
-    public DispatchManager(Main main) {
-        this.main = main;
+    public DispatchManager(Main main, IconGui icon, IconOkGui iconOk) {
         this.proxy = main.facadeManager.dispatchProxy;
         this.mediator = main.facadeManager.dispatchRetrieverMediator;
-    }
-
-    @Override
-    public void update() {
-        super.update();
-        this.icon = main.guiManager.icon;
-        this.iconOk = main.guiManager.iconOk;
+        this.icon = icon;
+        this.iconOk = iconOk;
     }
 
     @Override
@@ -112,38 +105,6 @@ public class DispatchManager extends Gui implements DispatchAPI {
         return false;
     }
 
-    public boolean clickOkRewardsPopup(int i) {
-        if (i == 0) i = 1;
-        if (iconOk.isVisible()) {
-            iconOk.click(180, 136 + (13 * i));
-            return true;
-        }
-        return false;
-    }
-
-    public boolean clickAcceptPopup() {
-        if (icon.isVisible()) {
-            icon.click(100, 170);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean clickDeclinePopup() {
-        if (icon.isVisible()) {
-            icon.click(270, 170);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean clickCloseOkPopup() {
-        if (iconOk.isVisible()) {
-            iconOk.click(190, 150);
-            return true;
-        }
-        return false;
-    }
 }
 
 
