@@ -27,17 +27,17 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         selectedRecipeIndex = Main.API.readInt(address + 0x48);
 
         //get list of shown recipe
-        long recipeCollectionAddress = Main.API.readMemoryLong(address + 0x60);
-        recipesPtr.update(Main.API.readMemoryLong(recipeCollectionAddress + 0x20));
+        long recipeCollectionAddress = Main.API.readMemoryPtr(address + 0x60);
+        recipesPtr.update(Main.API.readMemoryPtr(recipeCollectionAddress + 0x20));
         recipesPtr.sync(recipes, Recipe::new);
 
         //get selected recipe info
-        long selectedRecipeAddress = Main.API.readMemoryLong(address + 0x70);
+        long selectedRecipeAddress = Main.API.readMemoryPtr(address + 0x70);
         selectedRecipe.update(selectedRecipeAddress);
 
         //get list of selected filters
-        long itemFilterViewController = Main.API.readMemoryLong(address + 0x78);
-        rowSettingsArr.update(Main.API.readMemoryLong(itemFilterViewController + 0xb0));
+        long itemFilterViewController = Main.API.readMemoryPtr(address + 0x78);
+        rowSettingsArr.update(Main.API.readMemoryPtr(itemFilterViewController + 0xb0));
         rowSettingsArr.sync(rowSettings, RowFilter::new);
         filters.clear();
         for (int i = 0; i < rowSettings.size(); i++) {
@@ -51,7 +51,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
 
         //get filter drop down is open
-        long filterDropdownAddress = Main.API.readMemoryLong(itemFilterViewController + 0x60);
+        long filterDropdownAddress = Main.API.readMemoryPtr(itemFilterViewController + 0x60);
         isFilterDropDownOpen = API.readBoolean(filterDropdownAddress + 0x1D0);
     }
 
@@ -100,15 +100,15 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             if (address == 0) return;
             isCraftable = API.readBoolean(address + 0x20);
 
-            long itemVoAddress = Main.API.readMemoryLong(address + 0x58);
+            long itemVoAddress = Main.API.readMemoryPtr(address + 0x58);
             recipeId = API.readMemoryString(itemVoAddress, 0x48);
 
-            long rewardsArrAddress = Main.API.readMemoryLong(address + 0x60);
+            long rewardsArrAddress = Main.API.readMemoryPtr(address + 0x60);
             rewardsArr.update(rewardsArrAddress);
             rewards.clear();
             rewardsArr.forEach(ptr -> rewards.add(API.readMemoryString(ptr, 0x48)));
 
-            long resourcesRequiredArrAddress = Main.API.readMemoryLong(address + 0x50);
+            long resourcesRequiredArrAddress = Main.API.readMemoryPtr(address + 0x50);
             resourcesRequiredArr.update(resourcesRequiredArrAddress);
             resourcesRequiredArr.sync(resourcesRequired, ResourceRequired::new);
         }
@@ -146,7 +146,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
         public void update() {
             if (address <= 0) return;
-            long itemVoAddress = Main.API.readMemoryLong(address + 0x28);
+            long itemVoAddress = Main.API.readMemoryPtr(address + 0x28);
             resourceId = API.readMemoryString(itemVoAddress, 0x48);
             amountRequired = API.readDouble(address + 0x30);
             //this also gives back same value, not sure which is correct
@@ -180,12 +180,12 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
         public void update() {
             if (address <= 0) return;
-            long firstAddress = Main.API.readMemoryLong(address + 0x20);
+            long firstAddress = Main.API.readMemoryPtr(address + 0x20);
             if (firstAddress > 0) {
                 first = new ItemFilter();
                 first.update(firstAddress);
             }
-            long secondAddress = Main.API.readMemoryLong(address + 0x28);
+            long secondAddress = Main.API.readMemoryPtr(address + 0x28);
             if (secondAddress > 0) {
                 second = new ItemFilter();
                 second.update(secondAddress);
@@ -215,7 +215,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         public void update() {
             if (address <= 0) return;
             filter = API.readString(address, 0x20);
-            long isCheckedAddress = Main.API.readMemoryLong(address + 0x28);
+            long isCheckedAddress = Main.API.readMemoryPtr(address + 0x28);
             isChecked = API.readBoolean(isCheckedAddress + 0x1D0);
         }
 

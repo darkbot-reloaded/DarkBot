@@ -19,16 +19,16 @@ public class DispatchRetrieverMediator extends Updatable {
 
     @Override
     public void update() {
-        long dispatchRetrieverData = API.readMemoryLong(address + 80);
+        long dispatchRetrieverData = API.readMemoryPtr(address + 80);
         availableSlots = API.readMemoryInt(dispatchRetrieverData + 0x40);
         totalSlots = API.readMemoryInt(dispatchRetrieverData + 0x44);
 
-        availableRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x58));
+        availableRetrieverArr.update(API.readMemoryPtr(dispatchRetrieverData + 0x58));
         availableRetrieverArr.sync(availableRetrievers, Retriever::new);
-        inProgressRetrieverArr.update(API.readMemoryLong(dispatchRetrieverData + 0x60));
+        inProgressRetrieverArr.update(API.readMemoryPtr(dispatchRetrieverData + 0x60));
         inProgressRetrieverArr.sync(inProgressRetrievers, Retriever::new);
 
-        selectedRetriever.update(API.readMemoryLong(dispatchRetrieverData + 0x68));
+        selectedRetriever.update(API.readMemoryPtr(dispatchRetrieverData + 0x68));
     }
 
     public int getAvailableSlots() {
@@ -59,7 +59,7 @@ public class DispatchRetrieverMediator extends Updatable {
         @Override
         public void update() {
             if (address <= 0) return;
-            long dispatchModule = API.readMemoryLong(address + 0x30);
+            long dispatchModule = API.readMemoryPtr(address + 0x30);
 
             this.slotId = API.readMemoryInt(dispatchModule + 0x24);
             this.id = API.readMemoryString(dispatchModule, 0x28);
