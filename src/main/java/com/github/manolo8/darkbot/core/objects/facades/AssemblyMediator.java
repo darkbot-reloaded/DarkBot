@@ -40,15 +40,13 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         long itemFilterViewController = Main.API.readMemoryLong(address + 0x78) & ByteUtils.ATOM_MASK;
         rowSettingsArr.update(Main.API.readMemoryLong(itemFilterViewController + 0xb0) & ByteUtils.ATOM_MASK);
         rowSettingsArr.sync(rowSettings, RowFilter::new);
-
-        if (filters.size() != rowSettings.size() * 2) {
-            filters.clear();
-            for (int i = 0; i < rowSettings.size(); i++) {
-                RowFilter currRow = rowSettings.get(i);
-                filters.add(new Filter(currRow.getFirst(), i, 0));
-                filters.add(new Filter(currRow.getSecond(), i, 1));
-            }
+        filters.clear();
+        for (int i = 0; i < rowSettings.size(); i++) {
+            RowFilter currRow = rowSettings.get(i);
+            filters.add(new Filter(currRow.getFirst(), i, 0));
+            filters.add(new Filter(currRow.getSecond(), i, 1));
         }
+        
         //get filter drop down is open
         long filterDropdownAddress = Main.API.readMemoryLong(itemFilterViewController + 0x60) & ByteUtils.ATOM_MASK;
         isFilterDropDownOpen = API.readBoolean(filterDropdownAddress + 0x1D0);
