@@ -76,8 +76,8 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     }
 
     default long readMemoryPtr(long address){
-        return readMemoryLong(address & ByteUtils.ATOM_MASK);
-    };
+        return readMemoryLong(address) & ByteUtils.ATOM_MASK;
+    }
     default long readMemoryPtr(long address, int... offsets) {
         for (int offset : offsets) address = readMemoryPtr(address + offset);
         return address;
