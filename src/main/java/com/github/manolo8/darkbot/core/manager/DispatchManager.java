@@ -10,15 +10,24 @@ import eu.darkbot.api.managers.DispatchAPI;
 import java.util.List;
 
 public class DispatchManager extends Gui implements DispatchAPI {
+
+    //When initializing this class guiManager has not initialized, which results in null for guiManager
+    private final Main main;
     private final DispatchProxy proxy;
     private final DispatchRetrieverMediator mediator;
 
-    private final Gui icon;
-    private final Gui iconOk;
+    private Gui icon;
+    private Gui iconOk;
 
     public DispatchManager(Main main) {
+        this.main = main;
         this.proxy = main.facadeManager.dispatchProxy;
         this.mediator = main.facadeManager.dispatchRetrieverMediator;
+    }
+
+    @Override
+    public void update() {
+        super.update();
         this.icon = main.guiManager.icon;
         this.iconOk = main.guiManager.iconOk;
     }

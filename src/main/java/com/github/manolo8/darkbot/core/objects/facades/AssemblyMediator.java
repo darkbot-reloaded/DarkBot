@@ -46,7 +46,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             filters.add(new Filter(currRow.getFirst(), i, 0));
             filters.add(new Filter(currRow.getSecond(), i, 1));
         }
-        
+
         //get filter drop down is open
         long filterDropdownAddress = Main.API.readMemoryLong(itemFilterViewController + 0x60) & ByteUtils.ATOM_MASK;
         isFilterDropDownOpen = API.readBoolean(filterDropdownAddress + 0x1D0);
