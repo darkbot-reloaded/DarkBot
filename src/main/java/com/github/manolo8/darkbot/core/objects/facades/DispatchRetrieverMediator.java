@@ -52,9 +52,9 @@ public class DispatchRetrieverMediator extends Updatable {
     }
 
     public static class Retriever extends Auto implements DispatchAPI.Retriever {
-        public String id, name, descriptionId;
-        public double duration;
-        public int slotId;
+        public String id, name, descriptionId = "";
+        public double duration = -1;
+        public int slotId = -1;
 
         @Override
         public void update() {
@@ -91,6 +91,11 @@ public class DispatchRetrieverMediator extends Updatable {
         @Override
         public int getSlotId() {
             return slotId;
+        }
+
+        @Override
+        public String toString(){
+            return name + " - " + duration + " - " + slotId;
         }
     }
 }

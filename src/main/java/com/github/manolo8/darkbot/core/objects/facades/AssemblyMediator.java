@@ -114,11 +114,6 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
 
         @Override
-        public String toString() {
-            return Recipe.class.getSimpleName() + " - " + recipeId + ":" + isCraftable;
-        }
-
-        @Override
         public String getRecipeId() {
             return recipeId;
         }
@@ -137,6 +132,11 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         public boolean isCraftable() {
             return isCraftable;
         }
+
+        @Override
+        public String toString() {
+            return Recipe.class.getSimpleName() + " - " + recipeId + " - " + isCraftable;
+        }
     }
 
 
@@ -154,11 +154,6 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
 
         @Override
-        public String toString() {
-            return ResourceRequired.class.getSimpleName() + " - " + resourceId + ":" + amountRequired;
-        }
-
-        @Override
         public String getResourceId() {
             return resourceId;
         }
@@ -171,6 +166,11 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         @Override
         public double getAmountRequiredBackup() {
             return amountRequiredBackup;
+        }
+
+        @Override
+        public String toString() {
+            return ResourceRequired.class.getSimpleName() + " - " + resourceId + " - " + amountRequired;
         }
     }
 
@@ -193,11 +193,6 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
 
         @Override
-        public String toString() {
-            return RowFilter.class.getSimpleName() + " - " + (first == null ? "null" : (first.filter + ":" + first.isChecked())) + " - " + (second == null ? "null" : (second.filter + ":" + second.isChecked()));
-        }
-
-        @Override
         public AssemblyAPI.ItemFilter getFirst() {
             return first;
         }
@@ -205,6 +200,11 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         @Override
         public AssemblyAPI.ItemFilter getSecond() {
             return second;
+        }
+
+        @Override
+        public String toString() {
+            return RowFilter.class.getSimpleName() + " - " + (first == null ? "null" : (first.filter + ":" + first.isChecked())) + " - " + (second == null ? "null" : (second.filter + ":" + second.isChecked()));
         }
     }
 
@@ -220,11 +220,6 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
 
         @Override
-        public String toString() {
-            return ItemFilter.class.getSimpleName() + " - " + filter + " - " + isChecked;
-        }
-
-        @Override
         public String getFilterName() {
             return filter;
         }
@@ -233,6 +228,12 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         public boolean isChecked() {
             return isChecked;
         }
+
+        @Override
+        public String toString() {
+            return ItemFilter.class.getSimpleName() + " - " + filter + " - " + isChecked;
+        }
+
     }
 
     public static class Filter implements AssemblyAPI.Filter {
@@ -265,6 +266,11 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         @Override
         public boolean isChecked() {
             return isChecked;
+        }
+
+        @Override
+        public String toString() {
+            return Filter.class.getSimpleName() + " - " + filter + " - " + row + "," + col + " - " + isChecked;
         }
     }
 }
