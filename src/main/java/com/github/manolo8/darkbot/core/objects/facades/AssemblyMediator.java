@@ -13,12 +13,16 @@ import static com.github.manolo8.darkbot.Main.API;
 public class AssemblyMediator extends Updatable implements AssemblyAPI {
     public int selectedRecipeIndex;
     public Recipe selectedRecipe = new Recipe();
-    public boolean isFilterDropDownOpen;
+
     public List<Recipe> recipes = new ArrayList<>();
     private final ObjArray recipesPtr = ObjArray.ofVector(true);
-    public List<RowFilter> rowSettings = new ArrayList<>();
+
     public List<Filter> filters = new ArrayList<>();
+
+    public List<RowFilter> rowSettings = new ArrayList<>();
     private final ObjArray rowSettingsArr = ObjArray.ofVector(true);
+
+    public boolean isFilterDropDownOpen;
 
     @Override
     public void update() {
@@ -47,7 +51,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             }
         }
 
-        //get filter drop down is open
+        //get filter dropdown is open
         long filterDropdownAddress = Main.API.readMemoryPtr(itemFilterViewController + 0x60);
         isFilterDropDownOpen = API.readBoolean(filterDropdownAddress + 0x1D0);
     }
@@ -72,13 +76,13 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         return recipes;
     }
 
-    public List<? extends RowFilter> getRowFilters() {
-        return rowSettings;
-    }
-
     @Override
     public List<? extends AssemblyAPI.Filter> getFilters() {
         return filters;
+    }
+
+    public List<? extends RowFilter> getRowFilters() {
+        return rowSettings;
     }
 
     public static class Recipe extends Auto implements AssemblyAPI.Recipe {
@@ -174,6 +178,44 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
     }
 
+    public static class Filter implements AssemblyAPI.Filter {
+        String filter = "";
+        int row, col = -1;
+        boolean isChecked = false;
+
+        public Filter(ItemFilter itemFilter, int row, int col) {
+            this.filter = itemFilter.getFilterName();
+            this.row = row;
+            this.col = col;
+            this.isChecked = itemFilter.isChecked();
+        }
+
+        @Override
+        public String getFilterName() {
+            return filter;
+        }
+
+        @Override
+        public int getRow() {
+            return row;
+        }
+
+        @Override
+        public int getCol() {
+            return col;
+        }
+
+        @Override
+        public boolean isChecked() {
+            return isChecked;
+        }
+
+        @Override
+        public String toString() {
+            return Filter.class.getSimpleName() + " - " + filter + " - " + row + "," + col + " - " + isChecked;
+        }
+    }
+    
     public static class RowFilter extends Reporting {
         public ItemFilter first = new ItemFilter();
         public ItemFilter second = new ItemFilter();
@@ -219,6 +261,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             long isCheckedAddress = Main.API.readMemoryPtr(address + 0x28);
             isChecked = API.readBoolean(isCheckedAddress + 0x1D0);
         }
+
         public String getFilterName() {
             return filter;
         }
@@ -232,43 +275,5 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             return ItemFilter.class.getSimpleName() + " - " + filter + " - " + isChecked;
         }
 
-    }
-
-    public static class Filter implements AssemblyAPI.Filter {
-        String filter = "";
-        int row, col = -1;
-        boolean isChecked = false;
-
-        public Filter(ItemFilter itemFilter, int row, int col) {
-            this.filter = itemFilter.getFilterName();
-            this.row = row;
-            this.col = col;
-            this.isChecked = itemFilter.isChecked();
-        }
-
-        @Override
-        public String getFilterName() {
-            return filter;
-        }
-
-        @Override
-        public int getRow() {
-            return row;
-        }
-
-        @Override
-        public int getCol() {
-            return col;
-        }
-
-        @Override
-        public boolean isChecked() {
-            return isChecked;
-        }
-
-        @Override
-        public String toString() {
-            return Filter.class.getSimpleName() + " - " + filter + " - " + row + "," + col + " - " + isChecked;
-        }
     }
 }
