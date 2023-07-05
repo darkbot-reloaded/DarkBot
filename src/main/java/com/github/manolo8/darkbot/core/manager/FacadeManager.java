@@ -84,7 +84,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.worldBossOverview         = registerProxy("worldBoss_overview",        WorldBossOverviewProxy.class);
         this.group                     = registerProxy("GroupProxy",                Updatable.NoOp.class);
         this.dispatchProxy             = registerProxy("dispatch",                  DispatchProxy.class);
-        this.dispatchRetrieverMediator = registerMediator("dispatch_retriever",     DispatchRetrieverMediator.class);
+        this.dispatchMediator = registerMediator("dispatch_retriever",     DispatchMediator.class);
         this.assemblyMediator          = registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
     }
 
