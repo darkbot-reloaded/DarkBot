@@ -113,7 +113,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         public void update(long address) {
             boolean addressChanged = this.address != address;
             super.update(address);
-            if(addressChanged){
+            if (addressChanged) {
                 update();
             }
         }
