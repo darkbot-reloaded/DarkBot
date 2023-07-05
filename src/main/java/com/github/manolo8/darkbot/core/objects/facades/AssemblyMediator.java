@@ -38,14 +38,11 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         //get list of selected filters
         long itemFilterViewController = Main.API.readMemoryPtr(address + 0x78);
         rowSettingsArr.update(Main.API.readMemoryPtr(itemFilterViewController + 0xb0));
-        rowSettingsArr.sync(rowSettings, RowFilter::new);
-        filters.clear();
-        for (int i = 0; i < rowSettings.size(); i++) {
-            RowFilter currRow = rowSettings.get(i);
-            if (currRow.getFirst() != null) {
+        if (rowSettingsArr.syncAndReport(rowSettings, RowFilter::new)) {
+            filters.clear();
+            for (int i = 0; i < rowSettings.size(); i++) {
+                RowFilter currRow = rowSettings.get(i);
                 filters.add(new Filter(currRow.getFirst(), i, 0));
-            }
-            if (currRow.getSecond() != null) {
                 filters.add(new Filter(currRow.getSecond(), i, 1));
             }
         }
@@ -75,8 +72,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         return recipes;
     }
 
-    @Override
-    public List<? extends AssemblyAPI.RowFilter> getRowFilters() {
+    public List<? extends RowFilter> getRowFilters() {
         return rowSettings;
     }
 
@@ -111,6 +107,15 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             long resourcesRequiredArrAddress = Main.API.readMemoryPtr(address + 0x50);
             resourcesRequiredArr.update(resourcesRequiredArrAddress);
             resourcesRequiredArr.sync(resourcesRequired, ResourceRequired::new);
+        }
+
+        @Override
+        public void update(long address) {
+            boolean addressChanged = this.address != address;
+            super.update(address);
+            if(addressChanged){
+                update();
+            }
         }
 
         @Override
@@ -174,35 +179,36 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
     }
 
-    public static class RowFilter extends Auto implements AssemblyAPI.RowFilter {
-        public ItemFilter first;
-        public ItemFilter second;
+    public static class RowFilter extends Reporting {
+        public ItemFilter first = new ItemFilter();
+        public ItemFilter second = new ItemFilter();
 
-        public void update() {
-            if (address <= 0) return;
-            long firstAddress = Main.API.readMemoryPtr(address + 0x20);
-            if (firstAddress > 0) {
-                first = new ItemFilter();
-                first.update(firstAddress);
+        @Override
+        public boolean updateAndReport() {
+            if (address <= 0) return false;
+            if (first.address == Main.API.readMemoryPtr(address + 0x20) && second.address == Main.API.readMemoryPtr(address + 0x28)) {
+                return false;
             }
-            long secondAddress = Main.API.readMemoryPtr(address + 0x28);
-            if (secondAddress > 0) {
-                second = new ItemFilter();
-                second.update(secondAddress);
-            }
+            first.update(Main.API.readMemoryPtr(address + 0x20));
+            second.update(Main.API.readMemoryPtr(address + 0x28));
+            return true;
         }
 
         @Override
+        public boolean updateAndReport(long address) {
+            boolean addressChanged = this.address != address;
+            super.update(address);
+            return addressChanged && updateAndReport();
+        }
+
         public AssemblyAPI.ItemFilter getFirst() {
             return first;
         }
 
-        @Override
         public AssemblyAPI.ItemFilter getSecond() {
             return second;
         }
 
-        @Override
         public String toString() {
             return RowFilter.class.getSimpleName() + " - " + (first == null ? "null" : (first.filter + ":" + first.isChecked())) + " - " + (second == null ? "null" : (second.filter + ":" + second.isChecked()));
         }
