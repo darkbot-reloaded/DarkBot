@@ -11,18 +11,18 @@ import java.util.List;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class AssemblyMediator extends Updatable implements AssemblyAPI {
-    public int selectedRecipeIndex;
-    public Recipe selectedRecipe = new Recipe();
+    private int selectedRecipeIndex;
+    private final Recipe selectedRecipe = new Recipe();
 
-    public List<Recipe> recipes = new ArrayList<>();
+    private final List<Recipe> recipes = new ArrayList<>();
     private final ObjArray recipesPtr = ObjArray.ofVector(true);
 
-    public List<Filter> filters = new ArrayList<>();
+    private final List<Filter> filters = new ArrayList<>();
 
-    public List<RowFilter> rowSettings = new ArrayList<>();
+    private final List<RowFilter> rowSettings = new ArrayList<>();
     private final ObjArray rowSettingsArr = ObjArray.ofVector(true);
 
-    public boolean isFilterDropDownOpen;
+    private boolean isFilterDropDownOpen;
 
     @Override
     public void update() {
@@ -86,14 +86,14 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     }
 
     public static class Recipe extends Auto implements AssemblyAPI.Recipe {
-        public String recipeId = "";
-        public List<String> rewards = new ArrayList<>();
-        public final ObjArray rewardsArr = ObjArray.ofVector(true);
+        private String recipeId = "";
+        private final List<String> rewards = new ArrayList<>();
+        private final ObjArray rewardsArr = ObjArray.ofVector(true);
 
-        public List<ResourceRequired> resourcesRequired = new ArrayList<>();
+        private final List<ResourceRequired> resourcesRequired = new ArrayList<>();
         private final ObjArray resourcesRequiredArr = ObjArray.ofVector(true);
 
-        public boolean isCraftable = false;
+        private boolean isCraftable = false;
 
         @Override
         public void update() {
@@ -150,8 +150,8 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
 
     public static class ResourceRequired extends Auto implements AssemblyAPI.ResourceRequired {
-        public String resourceId = "";
-        public double amountRequired, amountRequiredBackup = -1.0;
+        private String resourceId = "";
+        private double amountRequired, amountRequiredBackup = -1.0;
 
         public void update() {
             if (address <= 0) return;
@@ -179,9 +179,9 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     }
 
     public static class Filter implements AssemblyAPI.Filter {
-        String filter = "";
-        int row, col = -1;
-        boolean isChecked = false;
+        private String filter = "";
+        private int row, col = -1;
+        private boolean isChecked = false;
 
         public Filter(ItemFilter itemFilter, int row, int col) {
             this.filter = itemFilter.getFilterName();
@@ -217,8 +217,8 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     }
 
     public static class RowFilter extends Reporting {
-        public ItemFilter first = new ItemFilter();
-        public ItemFilter second = new ItemFilter();
+        private final ItemFilter first = new ItemFilter();
+        private final ItemFilter second = new ItemFilter();
 
         @Override
         public boolean updateAndReport() {
@@ -247,13 +247,13 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
 
         public String toString() {
-            return RowFilter.class.getSimpleName() + " - " + (first == null ? "null" : (first.filter + ":" + first.isChecked())) + " - " + (second == null ? "null" : (second.filter + ":" + second.isChecked()));
+            return RowFilter.class.getSimpleName() + " - " + first.filter + ":" + first.isChecked() + " - " + second.filter + ":" + second.isChecked();
         }
     }
 
     public static class ItemFilter extends Auto {
-        public String filter = "";
-        public boolean isChecked;
+        private String filter = "";
+        private boolean isChecked;
 
         public void update() {
             if (address <= 0) return;

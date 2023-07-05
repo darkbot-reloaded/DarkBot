@@ -10,12 +10,12 @@ import java.util.List;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class DispatchMediator extends Updatable {
-    public int availableSlots, totalSlots;
-    public List<Retriever> availableRetrievers = new ArrayList<>();
+    private int availableSlots, totalSlots;
+    private final List<Retriever> availableRetrievers = new ArrayList<>();
     private final ObjArray availableRetrieverArr = ObjArray.ofVector(true);
-    public List<Retriever> inProgressRetrievers = new ArrayList<>();
+    private final List<Retriever> inProgressRetrievers = new ArrayList<>();
     private final ObjArray inProgressRetrieverArr = ObjArray.ofVector(true);
-    public Retriever selectedRetriever = new Retriever();
+    private final Retriever selectedRetriever = new Retriever();
 
     @Override
     public void update() {
@@ -52,9 +52,9 @@ public class DispatchMediator extends Updatable {
     }
 
     public static class Retriever extends Auto implements DispatchAPI.Retriever {
-        public String id, name, descriptionId = "";
-        public double duration = -1;
-        public int slotId = -1;
+        private String id, name, descriptionId = "";
+        private double duration = -1;
+        private int slotId = -1;
 
         @Override
         public void update() {
