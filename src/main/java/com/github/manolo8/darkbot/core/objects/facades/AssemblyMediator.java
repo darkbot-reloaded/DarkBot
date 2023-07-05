@@ -169,11 +169,6 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
 
         @Override
-        public double getAmountRequiredBackup() {
-            return amountRequiredBackup;
-        }
-
-        @Override
         public String toString() {
             return ResourceRequired.class.getSimpleName() + " - " + resourceId + " - " + amountRequired;
         }
@@ -201,11 +196,11 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             return addressChanged && updateAndReport();
         }
 
-        public AssemblyAPI.ItemFilter getFirst() {
+        public ItemFilter getFirst() {
             return first;
         }
 
-        public AssemblyAPI.ItemFilter getSecond() {
+        public ItemFilter getSecond() {
             return second;
         }
 
@@ -214,7 +209,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
     }
 
-    public static class ItemFilter extends Auto implements AssemblyAPI.ItemFilter {
+    public static class ItemFilter extends Auto {
         public String filter = "";
         public boolean isChecked;
 
@@ -224,13 +219,10 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             long isCheckedAddress = Main.API.readMemoryPtr(address + 0x28);
             isChecked = API.readBoolean(isCheckedAddress + 0x1D0);
         }
-
-        @Override
         public String getFilterName() {
             return filter;
         }
 
-        @Override
         public boolean isChecked() {
             return isChecked;
         }
@@ -247,7 +239,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         int row, col = -1;
         boolean isChecked = false;
 
-        public Filter(AssemblyAPI.ItemFilter itemFilter, int row, int col) {
+        public Filter(ItemFilter itemFilter, int row, int col) {
             this.filter = itemFilter.getFilterName();
             this.row = row;
             this.col = col;
