@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.IconGui;
 import com.github.manolo8.darkbot.core.objects.IconOkGui;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
-import com.github.manolo8.darkbot.core.objects.facades.DispatchRetrieverMediator;
+import com.github.manolo8.darkbot.core.objects.facades.DispatchMediator;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.DispatchAPI;
 
@@ -13,14 +13,14 @@ import java.util.List;
 
 public class DispatchManager extends Gui implements DispatchAPI {
     private final DispatchProxy proxy;
-    private final DispatchRetrieverMediator mediator;
+    private final DispatchMediator mediator;
 
     private final IconGui icon;
     private final IconOkGui iconOk;
 
     public DispatchManager(Main main, IconGui icon, IconOkGui iconOk) {
         this.proxy = main.facadeManager.dispatchProxy;
-        this.mediator = main.facadeManager.dispatchRetrieverMediator;
+        this.mediator = main.facadeManager.dispatchMediator;
         this.icon = icon;
         this.iconOk = iconOk;
     }

@@ -9,7 +9,7 @@ import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class DispatchRetrieverMediator extends Updatable {
+public class DispatchMediator extends Updatable {
     public int availableSlots, totalSlots;
     public List<Retriever> availableRetrievers = new ArrayList<>();
     private final ObjArray availableRetrieverArr = ObjArray.ofVector(true);
