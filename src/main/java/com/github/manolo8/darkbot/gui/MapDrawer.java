@@ -45,14 +45,14 @@ public class MapDrawer extends JPanel {
 
     static {
         // tests needed - may increase CPU usage for some users
-        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        /*Toolkit toolkit = Toolkit.getDefaultToolkit();
         RenderingHints hints = (RenderingHints) toolkit.getDesktopProperty("awt.font.desktophints");
 
         if (hints != null) {
             RENDERING_HINTS.add(hints);
             toolkit.addPropertyChangeListener("awt.font.desktophints",
                     evt -> RENDERING_HINTS.add((RenderingHints) evt.getNewValue()));
-        }
+        }*/
     }
 
     public MapGraphicsImpl mapGraphics;

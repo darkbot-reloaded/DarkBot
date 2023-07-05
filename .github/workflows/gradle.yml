@@ -23,7 +23,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v2.5.1
         with:
           gradle-version: 7.5.1
           arguments: proguard
