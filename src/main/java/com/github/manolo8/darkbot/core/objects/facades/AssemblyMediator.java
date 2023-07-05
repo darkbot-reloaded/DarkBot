@@ -215,7 +215,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             return Filter.class.getSimpleName() + " - " + filter + " - " + row + "," + col + " - " + isChecked;
         }
     }
-    
+
     public static class RowFilter extends Reporting {
         public ItemFilter first = new ItemFilter();
         public ItemFilter second = new ItemFilter();
