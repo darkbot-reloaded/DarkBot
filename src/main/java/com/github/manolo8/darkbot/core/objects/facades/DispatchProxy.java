@@ -2,49 +2,41 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import eu.darkbot.api.API;
 import eu.darkbot.api.managers.DispatchAPI;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class DispatchProxy extends Updatable {
+@Getter
+public class DispatchProxy extends Updatable implements API.Singleton {
+    @Getter(AccessLevel.NONE)
+    private final ObjArray rewardLootArr = ObjArray.ofVector(true);
 
-    public List<RewardLoot> popupMessageLoots = new ArrayList<>();
-    private final ObjArray popupMessageLootArr = ObjArray.ofVector(true);
+    private final List<RewardLoot> rewardLoots = new ArrayList<>();
 
     @Override
     public void update() {
-        long data = API.readMemoryLong(address + 0x30) & ByteUtils.ATOM_MASK;
-        popupMessageLootArr.update(API.readMemoryLong(data + 0x70) & ByteUtils.ATOM_MASK);
-        popupMessageLootArr.sync(popupMessageLoots, RewardLoot::new);
+        rewardLootArr.update(API.readMemoryPtr(address, 0x30, 0x70));
+        rewardLootArr.sync(rewardLoots, RewardLoot::new);
     }
 
-    public List<? extends RewardLoot> getRewardLoots() {
-        return popupMessageLoots;
-    }
-
+    @Getter
+    @ToString
     public static class RewardLoot extends Auto implements DispatchAPI.RewardLoot {
-        public String lootId;
-        public int amount;
+        private String lootId;
+        private int amount;
 
         @Override
         public void update() {
-            if (address <= 0) return;
             this.amount = API.readMemoryInt(address + 0x20);
             this.lootId = API.readMemoryString(address, 0x28);
         }
 
-        @Override
-        public String getLootId() {
-            return lootId;
-        }
-
-        @Override
-        public int getAmount() {
-            return amount;
-        }
     }
 }

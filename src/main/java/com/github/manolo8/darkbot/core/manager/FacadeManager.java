@@ -8,8 +8,8 @@ import com.github.manolo8.darkbot.core.objects.facades.AstralGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ChatProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ChrominProxy;
-import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchMediator;
+import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalBlacklightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalGateProxy;
@@ -56,11 +56,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final GauntletPlutusProxy plutus;
     public final NpcEventProxy npcEventProxy;
     public final WorldBossOverviewProxy worldBossOverview;
-
     public final Updatable group;
-    public final DispatchProxy dispatchProxy;
-    public final DispatchMediator dispatchMediator;
-    public final AssemblyMediator assemblyMediator;
 
     public FacadeManager(PluginAPI pluginApi) {
         this.pluginAPI = pluginApi;
@@ -83,9 +79,10 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.npcEventProxy  = registerProxy("npc_event",              NpcEventProxy.class);
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
-        this.dispatchProxy  = registerProxy("dispatch",                  DispatchProxy.class);
-        this.dispatchMediator = registerMediator("dispatch_retriever",     DispatchMediator.class);
-        this.assemblyMediator = registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
+
+        registerProxy("dispatch", DispatchProxy.class);
+        registerMediator("dispatch_retriever", DispatchMediator.class);
+        registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
     }
 
     private <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {

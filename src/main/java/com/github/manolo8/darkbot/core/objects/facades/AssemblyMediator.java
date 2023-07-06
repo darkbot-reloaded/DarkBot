@@ -4,218 +4,104 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import eu.darkbot.api.managers.AssemblyAPI;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
+@Getter
 public class AssemblyMediator extends Updatable implements AssemblyAPI {
+    @Getter(AccessLevel.NONE)
+    private final ObjArray recipesPtr = ObjArray.ofVector(true),
+            rowSettingsArr = ObjArray.ofVector(true);
+
     private int selectedRecipeIndex;
     private final Recipe selectedRecipe = new Recipe();
 
     private final List<Recipe> recipes = new ArrayList<>();
-    private final ObjArray recipesPtr = ObjArray.ofVector(true);
-
     private final List<Filter> filters = new ArrayList<>();
-
     private final List<RowFilter> rowSettings = new ArrayList<>();
-    private final ObjArray rowSettingsArr = ObjArray.ofVector(true);
 
     private boolean isFilterDropDownOpen;
 
     @Override
     public void update() {
         if (address == 0) return;
-        //get index of current selected index
         selectedRecipeIndex = Main.API.readInt(address + 0x48);
 
-        //get list of shown recipe
-        long recipeCollectionAddress = Main.API.readMemoryPtr(address + 0x60);
-        recipesPtr.update(Main.API.readMemoryPtr(recipeCollectionAddress + 0x20));
+        recipesPtr.update(Main.API.readMemoryPtr(address, 0x60, 0x20));
         recipesPtr.sync(recipes, Recipe::new);
 
-        //get selected recipe info
-        long selectedRecipeAddress = Main.API.readMemoryPtr(address + 0x70);
-        selectedRecipe.update(selectedRecipeAddress);
+        selectedRecipe.update(Main.API.readMemoryPtr(address + 0x70));
 
-        //get list of selected filters
-        long itemFilterViewController = Main.API.readMemoryPtr(address + 0x78);
-        rowSettingsArr.update(Main.API.readMemoryPtr(itemFilterViewController + 0xb0));
+        rowSettingsArr.update(Main.API.readMemoryPtr(address, 0x78, 0xb0));
         if (rowSettingsArr.syncAndReport(rowSettings, RowFilter::new)) {
             filters.clear();
             for (int i = 0; i < rowSettings.size(); i++) {
                 RowFilter currRow = rowSettings.get(i);
-                filters.add(new Filter(currRow.getFirst(), i, 0));
-                filters.add(new Filter(currRow.getSecond(), i, 1));
+                filters.add(currRow.first.withPos(i, 0));
+                filters.add(currRow.second.withPos(i, 1));
             }
         }
 
-        //get filter dropdown is open
-        long filterDropdownAddress = Main.API.readMemoryPtr(itemFilterViewController + 0x60);
-        isFilterDropDownOpen = API.readBoolean(filterDropdownAddress + 0x1D0);
+        isFilterDropDownOpen = API.readBoolean(address, 0x78, 0x60, 0x1D0);
     }
 
-    @Override
-    public int getSelectedRecipeIndex() {
-        return selectedRecipeIndex;
-    }
-
-    @Override
-    public AssemblyAPI.Recipe getSelectedRecipe() {
-        return selectedRecipe;
-    }
-
-    @Override
-    public boolean isFilterDropDownOpen() {
-        return isFilterDropDownOpen;
-    }
-
-    @Override
-    public List<? extends AssemblyAPI.Recipe> getRecipes() {
-        return recipes;
-    }
-
-    @Override
-    public List<? extends AssemblyAPI.Filter> getFilters() {
-        return filters;
-    }
-
-    public List<? extends RowFilter> getRowFilters() {
-        return rowSettings;
-    }
-
+    @Getter
+    @ToString
     public static class Recipe extends Auto implements AssemblyAPI.Recipe {
+        @Getter(AccessLevel.NONE)
+        @ToString.Exclude
+        private final ObjArray rewardsArr = ObjArray.ofVector(true),
+                resourcesRequiredArr = ObjArray.ofVector(true);
+
         private String recipeId = "";
         private final List<String> rewards = new ArrayList<>();
-        private final ObjArray rewardsArr = ObjArray.ofVector(true);
-
         private final List<ResourceRequired> resourcesRequired = new ArrayList<>();
-        private final ObjArray resourcesRequiredArr = ObjArray.ofVector(true);
-
         private boolean isCraftable = false;
 
         @Override
         public void update() {
-            if (address == 0) return;
             isCraftable = API.readBoolean(address + 0x20);
-
-            long itemVoAddress = Main.API.readMemoryPtr(address + 0x58);
-            recipeId = API.readMemoryString(itemVoAddress, 0x48);
-
-            long rewardsArrAddress = Main.API.readMemoryPtr(address + 0x60);
-            rewardsArr.update(rewardsArrAddress);
-            rewards.clear();
-            rewardsArr.forEach(ptr -> rewards.add(API.readMemoryString(ptr, 0x48)));
-
-            long resourcesRequiredArrAddress = Main.API.readMemoryPtr(address + 0x50);
-            resourcesRequiredArr.update(resourcesRequiredArrAddress);
-            resourcesRequiredArr.sync(resourcesRequired, ResourceRequired::new);
+            recipeId = API.readMemoryString(address, 0x58, 0x48);
         }
 
         @Override
         public void update(long address) {
-            boolean addressChanged = this.address != address;
+            boolean addrChanged = this.address != address;
             super.update(address);
-            if (addressChanged) {
-                update();
-            }
+
+            if (!addrChanged) return;
+            rewardsArr.update(API.readMemoryPtr(address + 0x60));
+            rewards.clear();
+            rewardsArr.forEach(ptr -> rewards.add(API.readMemoryString(ptr, 0x48)));
+
+            resourcesRequiredArr.update(API.readMemoryPtr(address + 0x50));
+            resourcesRequiredArr.sync(resourcesRequired, ResourceRequired::new);
         }
 
-        @Override
-        public String getRecipeId() {
-            return recipeId;
-        }
-
-        @Override
-        public List<? extends String> getRewards() {
-            return rewards;
-        }
-
-        @Override
-        public List<? extends AssemblyAPI.ResourceRequired> getResourcesRequired() {
-            return resourcesRequired;
-        }
-
-        @Override
-        public boolean isCraftable() {
-            return isCraftable;
-        }
-
-        @Override
-        public String toString() {
-            return Recipe.class.getSimpleName() + " - " + recipeId + " - " + isCraftable;
-        }
     }
 
-
+    @Getter
+    @ToString
     public static class ResourceRequired extends Auto implements AssemblyAPI.ResourceRequired {
         private String resourceId = "";
-        private double amountRequired, amountRequiredBackup = -1.0;
+        private double amountRequired;
 
         public void update() {
             if (address <= 0) return;
-            long itemVoAddress = Main.API.readMemoryPtr(address + 0x28);
-            resourceId = API.readMemoryString(itemVoAddress, 0x48);
+            resourceId = API.readMemoryString(address, 0x28, 0x48);
             amountRequired = API.readDouble(address + 0x30);
-            //this also gives back same value, not sure which is correct
-            amountRequiredBackup = API.readDouble(address + 0x38);
-        }
-
-        @Override
-        public String getResourceId() {
-            return resourceId;
-        }
-
-        @Override
-        public double getAmountRequired() {
-            return amountRequired;
-        }
-
-        @Override
-        public String toString() {
-            return ResourceRequired.class.getSimpleName() + " - " + resourceId + " - " + amountRequired;
+            // this also gives back same value, not sure which is correct
+            // amountRequired = API.readDouble(address + 0x38);
         }
     }
 
-    public static class Filter implements AssemblyAPI.Filter {
-        private String filter = "";
-        private int row, col = -1;
-        private boolean isChecked = false;
-
-        public Filter(ItemFilter itemFilter, int row, int col) {
-            this.filter = itemFilter.getFilterName();
-            this.row = row;
-            this.col = col;
-            this.isChecked = itemFilter.isChecked();
-        }
-
-        @Override
-        public String getFilterName() {
-            return filter;
-        }
-
-        @Override
-        public int getRow() {
-            return row;
-        }
-
-        @Override
-        public int getCol() {
-            return col;
-        }
-
-        @Override
-        public boolean isChecked() {
-            return isChecked;
-        }
-
-        @Override
-        public String toString() {
-            return Filter.class.getSimpleName() + " - " + filter + " - " + row + "," + col + " - " + isChecked;
-        }
-    }
-
+    @ToString
     public static class RowFilter extends Reporting {
         private final ItemFilter first = new ItemFilter();
         private final ItemFilter second = new ItemFilter();
@@ -223,57 +109,33 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         @Override
         public boolean updateAndReport() {
             if (address <= 0) return false;
-            if (first.address == Main.API.readMemoryPtr(address + 0x20) && second.address == Main.API.readMemoryPtr(address + 0x28)) {
-                return false;
-            }
-            first.update(Main.API.readMemoryPtr(address + 0x20));
-            second.update(Main.API.readMemoryPtr(address + 0x28));
-            return true;
-        }
 
-        @Override
-        public boolean updateAndReport(long address) {
-            boolean addressChanged = this.address != address;
-            super.update(address);
-            return addressChanged && updateAndReport();
-        }
-
-        public ItemFilter getFirst() {
-            return first;
-        }
-
-        public ItemFilter getSecond() {
-            return second;
-        }
-
-        public String toString() {
-            return RowFilter.class.getSimpleName() + " - " + first.filter + ":" + first.isChecked() + " - " + second.filter + ":" + second.isChecked();
+            return first.updateAndReport(Main.API.readMemoryPtr(address + 0x20))
+                    || second.updateAndReport(Main.API.readMemoryPtr(address + 0x28));
         }
     }
 
-    public static class ItemFilter extends Auto {
-        private String filter = "";
+    @Getter
+    @ToString
+    public static class ItemFilter extends Reporting implements AssemblyAPI.Filter {
+        private String filterName = "";
         private boolean isChecked;
-
-        public void update() {
-            if (address <= 0) return;
-            filter = API.readString(address, 0x20);
-            long isCheckedAddress = Main.API.readMemoryPtr(address + 0x28);
-            isChecked = API.readBoolean(isCheckedAddress + 0x1D0);
-        }
-
-        public String getFilterName() {
-            return filter;
-        }
-
-        public boolean isChecked() {
-            return isChecked;
-        }
+        private int row, col;
 
         @Override
-        public String toString() {
-            return ItemFilter.class.getSimpleName() + " - " + filter + " - " + isChecked;
+        public boolean updateAndReport() {
+            if (address <= 0) return false;
+            filterName = API.readString(address, 0x20);
+            isChecked = API.readBoolean(address, 0x28, 0x1D0);
+
+            // Always false, we only care about address itself changing, which reports true regardless
+            return false;
         }
 
+        public ItemFilter withPos(int row, int col) {
+            this.row = row;
+            this.col = col;
+            return this;
+        }
     }
 }
