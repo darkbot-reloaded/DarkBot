@@ -469,7 +469,7 @@ public class GameAPIImpl<
 
     @Override
     public void setMaxFps(int maxFps) {
-        direct.setMaxFps(HeroManager.instance.main.isRunning() ? maxFps : 0);
+        direct.setMaxFps(maxFps);
     }
 
     @Override

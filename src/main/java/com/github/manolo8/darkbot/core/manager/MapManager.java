@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.SafetyInfo;
 import com.github.manolo8.darkbot.config.ZoneInfo;
 import com.github.manolo8.darkbot.core.BotInstaller;
-import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.Npc;
@@ -88,7 +87,10 @@ public class MapManager implements Manager, StarSystemAPI {
 
     private ConfigSetting<Boolean> disableRender;
     private ConfigSetting<Boolean> avoidRadiation;
-    private Consumer<Boolean> resetRender;
+
+    // If the disableRender setting has been properly applied, or needs re-checking
+    private boolean disableRenderApplied = false;
+    private final Consumer<Boolean> invalidateRender = b -> disableRenderApplied = false;
 
     public MapManager(Main main,
                       PluginAPI pluginAPI,
@@ -119,13 +121,11 @@ public class MapManager implements Manager, StarSystemAPI {
             }
 
             settings3DAddress = 0;
-            renderValidated = false;
+            disableRenderApplied = false;
         });
 
-        main.status.add(r -> renderValidated = false);
-
         this.disableRender = config.requireConfig("bot_settings.api_config.disable_render");
-        this.disableRender.addListener(resetRender = b -> renderValidated = false);
+        this.disableRender.addListener(invalidateRender);
 
         this.avoidRadiation = config.requireConfig("miscellaneous.avoid_radiation");
     }
@@ -144,7 +144,7 @@ public class MapManager implements Manager, StarSystemAPI {
 
         updateBounds();
         checkMirror();
-        updateRender();
+        checkUpdateRender();
     }
 
     private void update(long address) {
@@ -166,9 +166,8 @@ public class MapManager implements Manager, StarSystemAPI {
         entities.update(address);
     }
 
-    private boolean renderValidated = false;
-    private void updateRender() {
-        if (!is3DView || renderValidated) return;
+    private void checkUpdateRender() {
+        if (!is3DView || disableRenderApplied) return;
 
         if (!ByteUtils.isValidPtr(settings3DAddress)) {
             settings3DAddress = API.searchClassClosure(l -> ByteUtils.readObjectName(l).equals("Settings3D$"));
@@ -176,12 +175,12 @@ public class MapManager implements Manager, StarSystemAPI {
         }
 
         if (ByteUtils.isScriptableObjectValid(settings3DAddress)) {
-            if (disableRender.getValue() && main.isRunning())
-                API.replaceInt(API.readLong(settings3DAddress, 0xf8) + 0x20, 1, 0);
-            else API.replaceInt(API.readLong(settings3DAddress, 0xf8) + 0x20, 0, 1);
+            int render = disableRender.getValue() ? 0 : 1;
+            int oldValue = render == 1 ? 0 : 1;
+            API.replaceInt(API.readLong(settings3DAddress, 0xf8) + 0x20, oldValue, render);
         }
 
-        renderValidated = true;
+        disableRenderApplied = true;
     }
 
     private int lastNextMap;
@@ -339,7 +338,7 @@ public class MapManager implements Manager, StarSystemAPI {
         if (viewAddress != temp) {
             viewAddress = temp;
 
-            renderValidated = false;
+            disableRenderApplied = false;
             is3DView = !main.settingsManager.is2DForced()
                        && ByteUtils.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
             boundsAddress = API.readMemoryLong(viewAddress + (is3DView ? 216 : 208));
