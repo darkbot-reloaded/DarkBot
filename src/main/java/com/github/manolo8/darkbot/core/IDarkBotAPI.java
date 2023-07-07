@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.OreAPI;
@@ -71,6 +72,14 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     long readMemoryLong(long address);
     default long readMemoryLong(long address, int... offsets) {
         for (int offset : offsets) address = readMemoryLong(address + offset);
+        return address;
+    }
+
+    default long readMemoryPtr(long address){
+        return readMemoryLong(address) & ByteUtils.ATOM_MASK;
+    }
+    default long readMemoryPtr(long address, int... offsets) {
+        for (int offset : offsets) address = readMemoryPtr(address + offset);
         return address;
     }
 

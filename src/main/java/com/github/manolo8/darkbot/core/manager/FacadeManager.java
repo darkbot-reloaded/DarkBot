@@ -3,10 +3,13 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.objects.facades.AssemblyMediator;
 import com.github.manolo8.darkbot.core.objects.facades.AstralGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ChatProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ChrominProxy;
+import com.github.manolo8.darkbot.core.objects.facades.DispatchMediator;
+import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalBlacklightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalGateProxy;
@@ -76,6 +79,10 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.npcEventProxy  = registerProxy("npc_event",              NpcEventProxy.class);
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
+
+        registerProxy("dispatch", DispatchProxy.class);
+        registerMediator("dispatch_retriever", DispatchMediator.class);
+        registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
     }
 
     private <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
