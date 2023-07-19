@@ -81,7 +81,7 @@ public class StatsManager implements Manager, StatsAPI {
         sid = API.readMemoryStringFallback(API.readMemoryLong(address + 200), null);
         userId = API.readInt(address + 48);
         if (settingsAddress == 0) return;
-        instance = API.readMemoryStringFallback(API.readMemoryLong(settingsAddress + 664), null);
+        instance = API.readMemoryStringFallback(API.readLong(settingsAddress + SettingsManager.convertOffset(664)), null);
 
         // Both memory location gives same value
         // long novaData = API.readMemoryLong(address + 0xC0) & ByteUtils.ATOM_MASK;
