@@ -39,36 +39,42 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
 
     @Override
     public void tick() {
-        this.config = API.readMemoryInt(address + 92);
+        this.config = API.readMemoryInt(address + convertOffset(92));
 
         // x-1 & x-2 maps enemy counter
-        this.enemyCount = API.readInt(address, 600, 40);
-        this.attackViaSlotbar = API.readBoolean(address, 164);
+        this.enemyCount = API.readInt(address, convertOffset(600), 40);
+        this.attackViaSlotbar = API.readBoolean(address, convertOffset(164));
 
-        this.nextMap = API.readMemoryInt(address + 244);
-        this.currMap = API.readMemoryInt(address + 248);
+        this.nextMap = API.readMemoryInt(address + convertOffset(244));
+        this.currMap = API.readMemoryInt(address + convertOffset(248));
 
-        this.force2d = API.readMemoryInt(address, 792, 0x20);
+        this.force2d = API.readMemoryInt(address, convertOffset(792), 0x20);
 
-        this.lang = API.readMemoryStringFallback(address, null, 648);
+        this.lang = API.readMemoryStringFallback(address, null, convertOffset(648));
 
-        this.uiWrapper = Main.API.readLong(address, 872);
-        this.hudWrapper = Main.API.readLong(address, 864);
+        this.uiWrapper = Main.API.readLong(address, convertOffset(872));
+        this.hudWrapper = Main.API.readLong(address, convertOffset(864));
 
         // Enforce GPU capabilities support - it still may be an issue on Windows & 2D mode
         if (is2DForced() && main.config.BOT_SETTINGS.API_CONFIG.ENFORCE_HW_ACCEL) {
-            API.replaceInt(address + 332, 0, 1);
-            API.replaceInt(address + 340, 0, 1);
+            API.replaceInt(address + convertOffset(332), 0, 1);
+            API.replaceInt(address + convertOffset(340), 0, 1);
         }
 
         if (!driverNamePrinted) {
-            this.driver = API.readString(address, "", 440);
+            this.driver = API.readString(address, "", convertOffset(440));
 
             if (driver != null && !driver.isEmpty()) {
                 System.out.println("Game is using: " + driver + " | force2d: " + force2d);
                 driverNamePrinted = true;
             }
         }
+    }
+
+    // offsets in settings manager often changes, so there can easily add or remove field offsets
+    public static int convertOffset(int offset) {
+        if (offset >= 392) offset += 8; // 19.07.2023 - jumpGateResourceHash
+        return offset;
     }
 
     public boolean is2DForced() {
