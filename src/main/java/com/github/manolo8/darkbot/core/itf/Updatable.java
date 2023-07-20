@@ -3,7 +3,7 @@ package com.github.manolo8.darkbot.core.itf;
 /**
  * Represents an in-game object that has an address, and can be updated.
  */
-public abstract class Updatable {
+public abstract class Updatable implements NativeUpdatable {
 
     public long address;
 
@@ -11,6 +11,11 @@ public abstract class Updatable {
 
     public void update(long address) {
         this.address = address;
+    }
+
+    @Override
+    public long getAddress() {
+        return address;
     }
 
     /**
