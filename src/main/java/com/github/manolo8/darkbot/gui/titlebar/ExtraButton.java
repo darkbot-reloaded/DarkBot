@@ -156,13 +156,6 @@ public class ExtraButton extends TitleBarButton<JFrame> {
                     new FlashRunnerTask("Dock", main,
                             result -> SwingUtilities.invokeLater(() -> component.setEnabled(true)));
                 }));
-
-                list.add(create("Open GalaxyGate", e -> {
-                    JComponent component = (JComponent) e.getSource();
-                    component.setEnabled(false);
-                    new FlashRunnerTask("GalaxyGates", main,
-                            result -> SwingUtilities.invokeLater(() -> component.setEnabled(true)));
-                }));
             }
 
             ConfigSetting<Config> root = config.getConfigRoot();
