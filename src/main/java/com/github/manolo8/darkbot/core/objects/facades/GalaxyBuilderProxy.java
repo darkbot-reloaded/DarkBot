@@ -14,6 +14,7 @@ import eu.darkbot.util.Timer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,11 +54,6 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     @Override
     public @Nullable Boolean updateGalaxyInfos(int expiryTime) {
         return isReady();
-    }
-
-    @Override
-    public Optional<SpinResult> spinGate(@NotNull GalaxyGate gate, int useMultiAt, int spinAmount, int minWait) {
-        return spinGate(gate, galaxyInfo.currentGateMultiplier >= useMultiAt, spinAmount, minWait);
     }
 
     @Override
@@ -127,7 +123,6 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         private boolean initialized;
         private boolean spinSale, galaxyGateDay, bonusRewardsDay;
 
-        private int currentGateMultiplier;
         private int uridium;
 
         public BuilderData() {
@@ -150,11 +145,15 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
             if (initialized) {
                 this.gatesArr.update(readLong(112));
                 for (GalaxyGate gate : GalaxyGate.values()) {
-                    gateData.get(gate).update(gatesArr.getPtr(gate.getId() - 1));
+                    GateInfoImpl gateInfo = gateData.get(gate);
+                    gateInfo.update(gatesArr.getPtr(gate.getId() - 1));
+
+                    if (selectedGateId == gate.getId()) {
+                        // Current gate multiplier
+                        gateInfo.setMultiplier(readInt(224, 32));
+                    }
                 }
             }
-
-            this.currentGateMultiplier = readInt(224, 32);
 
             // not sure about order -- need test
             long classClosure = getClassClosure();
@@ -204,6 +203,9 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         private int currentWave, totalWave;
         private boolean readyToPlace;
 
+        @Setter
+        private int multiplier;
+
         @Override
         public void update() {
             if (address == 0) return;
@@ -224,12 +226,6 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         @Override
         public boolean isOnMap() {
             return livesLeft > 0;
-        }
-
-        @Override
-        public int getMultiplier() {
-            // TODO: read multiplier
-            return 0;
         }
 
         @Override
