@@ -1,9 +1,11 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.gui.GateSpinnerGui;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.game.galaxy.GalaxyGate;
 import eu.darkbot.api.game.galaxy.GalaxyInfo;
 import eu.darkbot.api.game.galaxy.GateInfo;
@@ -26,17 +28,20 @@ import java.util.Optional;
 
 public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
+    private final GateSpinnerGui gui;
+    private final BackpageManager bpManager;
+
     @Getter
     private final BuilderData galaxyInfo = new BuilderData();
-    private int spinsUsed;
 
     private final Timer dirtyTimer = Timer.getRandom(250, 5);
-    private final Timer guiDecay = Timer.get(10_000);
 
-    private final GateSpinnerGui gui;
+    private int spinsUsed;
+    private long lastSpinAttempt = 0;
 
-    public GalaxyBuilderProxy(GateSpinnerGui gui) {
+    public GalaxyBuilderProxy(GateSpinnerGui gui, BackpageManager bpManager) {
         this.gui = gui;
+        this.bpManager = bpManager;
     }
 
     @Override
@@ -44,7 +49,8 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         this.galaxyInfo.update(readAtom(48));
         this.dirtyTimer.tryDisarm();
 
-        if (guiDecay.isInactive()) gui.show(false);
+        // Last spin >10s ago, close gui
+        if ((lastSpinAttempt + 10_000) < System.currentTimeMillis()) gui.show(false);
     }
 
     public boolean isWaiting() {
@@ -58,18 +64,22 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
     @Override
     public Optional<SpinResult> spinGate(@NotNull GalaxyGate gate, boolean multiplier, int spinAmount, int minWait) {
-        guiDecay.activate();
+        if (Thread.currentThread() == bpManager) {
+            Time.sleep(lastSpinAttempt + minWait - System.currentTimeMillis());
+        }
+
+        lastSpinAttempt = System.currentTimeMillis();
         if (isWaiting()
                 || !gui.show(true)
                 || !setGate(gate)
                 || !setSpinAmount(spinAmount)
-                || (multiplier && !useMultiplier())) {
+                || (multiplier && getGalaxyInfo().getGateInfo(gate).getMultiplier() > 1 && !useMultiplier())) {
             return Optional.empty();
         }
 
         Main.API.callMethodChecked(false, "23(26)008421700", 68, galaxyInfo.address); // make a spin
         spinsUsed += spinAmount;
-        dirtyTimer.activate(minWait); // add some wait-time between spins, if failed
+        dirtyTimer.activate(5); // wait till next tick to spin again
         return Optional.of(new SpinResultImpl(gate));
     }
 
