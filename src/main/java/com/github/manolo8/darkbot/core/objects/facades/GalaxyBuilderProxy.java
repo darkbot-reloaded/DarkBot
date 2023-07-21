@@ -30,7 +30,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     private final BuilderData galaxyInfo = new BuilderData();
     private int spinsUsed;
 
-    private final Timer dirtyTimer = Timer.get(250);
+    private final Timer dirtyTimer = Timer.getRandom(250, 5);
     private final Timer guiDecay = Timer.get(10_000);
 
     private final GateSpinnerGui gui;
@@ -69,7 +69,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
         Main.API.callMethodChecked(false, "23(26)008421700", 68, galaxyInfo.address); // make a spin
         spinsUsed += spinAmount;
-        dirtyTimer.activate(Math.max(minWait, 5)); // add min-wait at the end, at least 5ms
+        dirtyTimer.activate(minWait); // add some wait-time between spins, if failed
         return Optional.of(new SpinResultImpl(gate));
     }
 
