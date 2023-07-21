@@ -30,6 +30,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
     private final GateSpinnerGui gui;
     private final BackpageManager bpManager;
+    private final Main main;
 
     @Getter
     private final BuilderData galaxyInfo = new BuilderData();
@@ -39,9 +40,10 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     private int spinsUsed;
     private long lastSpinAttempt = 0;
 
-    public GalaxyBuilderProxy(GateSpinnerGui gui, BackpageManager bpManager) {
+    public GalaxyBuilderProxy(GateSpinnerGui gui, BackpageManager bpManager, Main main) {
         this.gui = gui;
         this.bpManager = bpManager;
+        this.main = main;
     }
 
     @Override
@@ -50,7 +52,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         this.dirtyTimer.tryDisarm();
 
         // Last spin >10s ago, close gui
-        if ((lastSpinAttempt + 10_000) < System.currentTimeMillis()) gui.show(false);
+        if (main.isRunning() && (lastSpinAttempt + 10_000) < System.currentTimeMillis()) gui.show(false);
     }
 
     public boolean isWaiting() {
@@ -106,6 +108,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
     private boolean setGate(GalaxyGate gate) {
         if (isWaiting()) return false;
+        if (gate.ordinal() < 3 && galaxyInfo.selectedGateId <= 3 && galaxyInfo.selectedGateId > 0) return true;
         if (galaxyInfo.selectedGateId == gate.getId()) return true;
         if (Main.API.callMethodChecked(false, "23(267)1016241700", 19, galaxyInfo.address, gate.getId())) {
             dirtyTimer.activate();
@@ -231,8 +234,8 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
             this.readyToPlace = readBoolean(48);
 
-            this.totalWave = readInt(52);
-            this.currentWave = readInt(56);
+            this.totalWave = readInt(56);
+            this.currentWave = readInt(60);
 
             this.bonusReward.update(readLong(88));
         }
