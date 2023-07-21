@@ -40,6 +40,10 @@ public interface NativeUpdatable {
         return readLong(offset) & ByteUtils.ATOM_MASK;
     }
 
+    default long getClassClosure() {
+        return ByteUtils.getClassClosure(getAddress());
+    }
+
     default double readDouble(int offset) {
         return Main.API.readDouble(getAddress() + modifyOffset(offset));
     }

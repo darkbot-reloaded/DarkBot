@@ -22,21 +22,12 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
     @Getter
     private final BuilderData galaxyInfo = new BuilderData();
+    private int spinsUsed;
 
     @Override
     public void update() {
         this.galaxyInfo.update(readAtom(48));
     }
-
-    // 1, 5, 10, 100
-    public void spin(GalaxyGate gate, int amount) {
-        if (!galaxyInfo.initialized) return;
-
-        Main.API.callMethodAsync(19, galaxyInfo.address, gate.getId()); // set current gate
-        Main.API.callMethodAsync(70, galaxyInfo.address, amount); // set spin amount
-        Main.API.callMethodAsync(68, galaxyInfo.address); // make a spin
-    }
-
 
     @Override
     public @Nullable Boolean updateGalaxyInfos(int expiryTime) {
@@ -46,26 +37,39 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
     @Override
     public Optional<SpinResult> spinGate(@NotNull GalaxyGate gate, boolean multiplier, int spinAmount, int minWait) {
+        if (setGate(gate)) {
+            Main.API.callMethodChecked(false, "23(267)1016231600", 70, galaxyInfo.address, spinAmount); // set spin amount
+            Main.API.callMethodChecked(false, "23(26)008421700", 68, galaxyInfo.address); // make a spin
+            spinsUsed += spinAmount;
+        }
         // TODO: implement
         return Optional.empty();
     }
 
     @Override
     public int getSpinsUsed() {
-        // TODO: implement
-        return 0;
+        return spinsUsed;
     }
 
     @Override
     public boolean placeGate(@NotNull GalaxyGate gate, int minWait) {
-        // TODO: implement
+        if (setGate(gate)) {
+            return Main.API.callMethodChecked(false, "23(26)008411600", 80, galaxyInfo.address);
+        }
         return false;
     }
 
     @Override
     public boolean buyLife(@NotNull GalaxyGate gate, int minWait) {
-        // TODO: implement
+        if (setGate(gate)) {
+            return Main.API.callMethodChecked(false, "23(26)008411600", 62, galaxyInfo.address);
+        }
         return false;
+    }
+
+    private boolean setGate(GalaxyGate gate) {
+        if (!galaxyInfo.initialized) return false;
+        return Main.API.callMethodChecked(false, "23(267)1016241700", 19, galaxyInfo.address, gate.getId());
     }
 
     @Data
@@ -75,6 +79,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         private final Map<GalaxyGate, GateInfoImpl> gateData = new EnumMap<>(GalaxyGate.class);
         private int freeEnergy, selectedSpinAmount, energyCost, selectedGateId;
         private boolean initialized;
+        private boolean spinSale, galaxyGateDay, bonusRewardsDay;
 
         private int uridium;
 
@@ -101,6 +106,12 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
                     gateData.get(gate).update(gatesArr.getPtr(gate.getId() - 1));
                 }
             }
+
+            // not sure about order -- need test
+            long classClosure = getClassClosure();
+            this.spinSale = Main.API.readBoolean(classClosure + 216);
+            this.galaxyGateDay = Main.API.readBoolean(classClosure + 220);
+            this.bonusRewardsDay = Main.API.readBoolean(classClosure + 224);
         }
 
         @Override
@@ -110,17 +121,17 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
         @Override
         public boolean isSpinSale() {
-            return energyCost != 100; // TODO: read data from static field in-game
+            return spinSale;
         }
 
         @Override
         public boolean isGalaxyGateDay() {
-            return false; // TODO: read data from static field in-game
+            return galaxyGateDay;
         }
 
         @Override
         public boolean isBonusRewardsDay() {
-            return false; // TODO: read data from static field in-game
+            return bonusRewardsDay;
         }
 
         @Override
