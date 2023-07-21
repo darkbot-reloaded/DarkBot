@@ -56,9 +56,14 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     }
 
     @Override
+    public Optional<SpinResult> spinGate(@NotNull GalaxyGate gate, int useMultiAt, int spinAmount, int minWait) {
+        return spinGate(gate, galaxyInfo.currentGateMultiplier >= useMultiAt, spinAmount, minWait);
+    }
+
+    @Override
     public Optional<SpinResult> spinGate(@NotNull GalaxyGate gate, boolean multiplier, int spinAmount, int minWait) {
         guiDecay.activate();
-        if (!isReady() || !gui.show(true) || !setGate(gate) || !setSpinAmount(spinAmount)) {
+        if (!isReady() || !gui.show(true) || !setGate(gate) || !setSpinAmount(spinAmount) || (multiplier && !useMultiplier())) {
             return Optional.empty();
         }
 
@@ -109,6 +114,10 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         return false;
     }
 
+    private boolean useMultiplier() {
+        return Main.API.callMethodChecked(false, "23(262)1016321600", 91, galaxyInfo.address, 1);
+    }
+
     @Data
     @EqualsAndHashCode(callSuper = true)
     private static class BuilderData extends Updatable.Auto implements GalaxyInfo {
@@ -118,6 +127,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         private boolean initialized;
         private boolean spinSale, galaxyGateDay, bonusRewardsDay;
 
+        private int currentGateMultiplier;
         private int uridium;
 
         public BuilderData() {
@@ -143,6 +153,8 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
                     gateData.get(gate).update(gatesArr.getPtr(gate.getId() - 1));
                 }
             }
+
+            this.currentGateMultiplier = readInt(224, 32);
 
             // not sure about order -- need test
             long classClosure = getClassClosure();
