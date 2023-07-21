@@ -7,14 +7,18 @@ import eu.darkbot.api.game.galaxy.GalaxyGate;
 import eu.darkbot.api.game.galaxy.GalaxyInfo;
 import eu.darkbot.api.game.galaxy.GateInfo;
 import eu.darkbot.api.game.galaxy.SpinResult;
+import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.GalaxySpinnerAPI;
+import eu.darkbot.util.Timer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,26 +28,32 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     private final BuilderData galaxyInfo = new BuilderData();
     private int spinsUsed;
 
+    private final Timer dirtyTimer = Timer.get(250);
+
     @Override
     public void update() {
         this.galaxyInfo.update(readAtom(48));
+        this.dirtyTimer.tryDisarm();
+    }
+
+    public boolean isReady() {
+        return galaxyInfo.initialized && !dirtyTimer.isArmed();
     }
 
     @Override
     public @Nullable Boolean updateGalaxyInfos(int expiryTime) {
-        // TODO: implement
-        return true;
+        return isReady();
     }
 
     @Override
     public Optional<SpinResult> spinGate(@NotNull GalaxyGate gate, boolean multiplier, int spinAmount, int minWait) {
-        if (setGate(gate)) {
-            Main.API.callMethodChecked(false, "23(267)1016231600", 70, galaxyInfo.address, spinAmount); // set spin amount
-            Main.API.callMethodChecked(false, "23(26)008421700", 68, galaxyInfo.address); // make a spin
-            spinsUsed += spinAmount;
+        if (!isReady() || !setGate(gate) || !setSpinAmount(spinAmount)) {
+            return Optional.empty();
         }
-        // TODO: implement
-        return Optional.empty();
+
+        Main.API.callMethodChecked(false, "23(26)008421700", 68, galaxyInfo.address); // make a spin
+        spinsUsed += spinAmount;
+        return Optional.of(new SpinResultImpl(gate));
     }
 
     @Override
@@ -68,8 +78,23 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     }
 
     private boolean setGate(GalaxyGate gate) {
-        if (!galaxyInfo.initialized) return false;
-        return Main.API.callMethodChecked(false, "23(267)1016241700", 19, galaxyInfo.address, gate.getId());
+        if (!isReady()) return false;
+        if (galaxyInfo.selectedGateId == gate.getId()) return true;
+        if (Main.API.callMethodChecked(false, "23(267)1016241700", 19, galaxyInfo.address, gate.getId())) {
+            dirtyTimer.activate();
+            return false;
+        }
+        return false;
+    }
+
+    private boolean setSpinAmount(int amount) {
+        if (!isReady()) return false;
+        if (galaxyInfo.selectedSpinAmount == amount) return true;
+        if (Main.API.callMethodChecked(false, "23(267)1016231600", 70, galaxyInfo.address, amount)) {
+            dirtyTimer.activate();
+            return false;
+        }
+        return false;
     }
 
     @Data
@@ -223,4 +248,26 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
             return (int) (countdown - (System.currentTimeMillis() - lastUpdate) / 1000);
         }
     }
+
+    @Data
+    private static class SpinResultImpl implements SpinResult {
+        private final GalaxyGate galaxyGate;
+        private Instant date = Instant.now();
+        private int parts;
+        private int multipliers;
+        private SpinInfo mines = new SpinInfoImpl();
+        private SpinInfo rockets = new SpinInfoImpl();
+        private SpinInfo xenomit = new SpinInfoImpl();
+        private SpinInfo nanoHull = new SpinInfoImpl();
+        private SpinInfo logFiles = new SpinInfoImpl();
+        private SpinInfo vouchers = new SpinInfoImpl();
+        Map<SelectableItem.Laser, SpinInfo> ammo = new HashMap<>();
+    }
+
+    @Data
+    private static class SpinInfoImpl implements SpinResult.SpinInfo {
+        int obtained;
+        int spinsUsed;
+    }
+
 }
