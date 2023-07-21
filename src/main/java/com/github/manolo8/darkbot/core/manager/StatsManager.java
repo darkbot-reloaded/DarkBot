@@ -3,7 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class StatsManager implements Manager, StatsAPI {
+public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     private final Main main;
     private final EventBrokerAPI eventBroker;
@@ -41,7 +41,6 @@ public class StatsManager implements Manager, StatsAPI {
     public volatile String instance;
 
     private long address;
-    private long settingsAddress;
     private long started = System.currentTimeMillis();
     private long runningTime = Time.SECOND; // Assume running for 1 second by default
     private boolean lastStatus;
@@ -62,31 +61,32 @@ public class StatsManager implements Manager, StatsAPI {
     public void install(BotInstaller botInstaller) {
         botInstaller.invalid.add(value -> userId = 0);
         botInstaller.heroInfoAddress.add(value -> address = value);
-        botInstaller.settingsAddress.add(value -> settingsAddress = value);
     }
 
     public void tick() {
         if (address == 0) return;
-        updateCredits(API.readMemoryDouble(address + 352));
-        updateUridium(API.readMemoryDouble(address + 360));
-        //API.readMemoryDouble(address + 336); // Jackpot
-        updateExperience(API.readMemoryDouble(address + 376));
-        updateHonor(API.readMemoryDouble(address + 384));
 
-        deposit = API.readMemoryInt(API.readMemoryLong(address + 304) + 40);
-        depositTotal = API.readMemoryInt(API.readMemoryLong(address + 312) + 40);
+        updateCredits(readDouble(352));
+        updateUridium(readDouble(360));
+        updateExperience(readDouble(376));
+        updateHonor(readDouble(384));
+
+        deposit = readIntHolder(304);
+        depositTotal = readIntHolder(312);
 
         //currentBox = API.readMemoryLong(address + 0xE8);
 
-        sid = API.readMemoryStringFallback(API.readMemoryLong(address + 200), null);
-        userId = API.readInt(address + 48);
-        if (settingsAddress == 0) return;
-        instance = API.readMemoryStringFallback(API.readLong(settingsAddress + SettingsManager.convertOffset(664)), null);
+        sid = readString(200);
+        userId = readInt(48);
+
+        //is that even possible to happen?
+        if (main.settingsManager.getAddress() == 0) return;
+        instance = main.settingsManager.readString(664);
 
         // Both memory location gives same value
         // long novaData = API.readMemoryLong(address + 0xC0) & ByteUtils.ATOM_MASK;
         // novaEnergy = API.readInt(novaData + 0x98);
-        long novaData = API.readMemoryLong(address + 0x100) & ByteUtils.ATOM_MASK;
+        long novaData = readAtom(0x100);
         novaEnergy = API.readInt(novaData + 0x28);
     }
 
@@ -285,6 +285,11 @@ public class StatsManager implements Manager, StatsAPI {
 
     public AverageStats getMemoryStats() {
         return memoryStat;
+    }
+
+    @Override
+    public long getAddress() {
+        return address;
     }
 
     public static class AverageStats {

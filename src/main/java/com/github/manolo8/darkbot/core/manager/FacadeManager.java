@@ -14,6 +14,7 @@ import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalBlacklightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.FrozenLabyrinthProxy;
+import com.github.manolo8.darkbot.core.objects.facades.GalaxyBuilderProxy;
 import com.github.manolo8.darkbot.core.objects.facades.GauntletPlutusProxy;
 import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
@@ -81,6 +82,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
 
         registerProxy("dispatch", DispatchProxy.class);
+        registerProxy("ggBuilder", GalaxyBuilderProxy.class);
         registerMediator("dispatch_retriever", DispatchMediator.class);
         registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
     }
