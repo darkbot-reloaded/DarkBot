@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.objects.gui.GateSpinnerGui;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import eu.darkbot.api.game.galaxy.GalaxyGate;
 import eu.darkbot.api.game.galaxy.GalaxyInfo;
@@ -29,11 +30,20 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     private int spinsUsed;
 
     private final Timer dirtyTimer = Timer.get(250);
+    private final Timer guiDecay = Timer.get(10_000);
+
+    private final GateSpinnerGui gui;
+
+    public GalaxyBuilderProxy(GateSpinnerGui gui) {
+        this.gui = gui;
+    }
 
     @Override
     public void update() {
         this.galaxyInfo.update(readAtom(48));
         this.dirtyTimer.tryDisarm();
+
+        if (guiDecay.isInactive()) gui.show(false);
     }
 
     public boolean isReady() {
@@ -47,12 +57,14 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
     @Override
     public Optional<SpinResult> spinGate(@NotNull GalaxyGate gate, boolean multiplier, int spinAmount, int minWait) {
-        if (!isReady() || !setGate(gate) || !setSpinAmount(spinAmount)) {
+        guiDecay.activate();
+        if (!isReady() || !gui.show(true) || !setGate(gate) || !setSpinAmount(spinAmount)) {
             return Optional.empty();
         }
 
         Main.API.callMethodChecked(false, "23(26)008421700", 68, galaxyInfo.address); // make a spin
         spinsUsed += spinAmount;
+        dirtyTimer.activate(minWait); // add min-wait at the end
         return Optional.of(new SpinResultImpl(gate));
     }
 

@@ -16,6 +16,7 @@ import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
+import com.github.manolo8.darkbot.core.objects.gui.GateSpinnerGui;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.other.Area;
@@ -134,6 +135,8 @@ public class GuiManager implements Manager, GameScreenAPI {
         register("popup_generic_icon", IconGui.class);
         register("popup_generic_icon_ok", IconOkGui.class);
         this.assembly = register("assembly");
+
+        register("ggBuilder", GateSpinnerGui.class);
 
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }
