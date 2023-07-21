@@ -47,25 +47,29 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         if (guiDecay.isInactive()) gui.show(false);
     }
 
-    public boolean isReady() {
-        return galaxyInfo.initialized && !dirtyTimer.isArmed();
+    public boolean isWaiting() {
+        return !galaxyInfo.initialized || dirtyTimer.isArmed();
     }
 
     @Override
     public @Nullable Boolean updateGalaxyInfos(int expiryTime) {
-        return isReady();
+        return galaxyInfo.initialized;
     }
 
     @Override
     public Optional<SpinResult> spinGate(@NotNull GalaxyGate gate, boolean multiplier, int spinAmount, int minWait) {
         guiDecay.activate();
-        if (!isReady() || !gui.show(true) || !setGate(gate) || !setSpinAmount(spinAmount) || (multiplier && !useMultiplier())) {
+        if (isWaiting()
+                || !gui.show(true)
+                || !setGate(gate)
+                || !setSpinAmount(spinAmount)
+                || (multiplier && !useMultiplier())) {
             return Optional.empty();
         }
 
         Main.API.callMethodChecked(false, "23(26)008421700", 68, galaxyInfo.address); // make a spin
         spinsUsed += spinAmount;
-        dirtyTimer.activate(minWait); // add min-wait at the end
+        dirtyTimer.activate(Math.max(minWait, 5)); // add min-wait at the end, at least 5ms
         return Optional.of(new SpinResultImpl(gate));
     }
 
@@ -91,7 +95,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     }
 
     private boolean setGate(GalaxyGate gate) {
-        if (!isReady()) return false;
+        if (isWaiting()) return false;
         if (galaxyInfo.selectedGateId == gate.getId()) return true;
         if (Main.API.callMethodChecked(false, "23(267)1016241700", 19, galaxyInfo.address, gate.getId())) {
             dirtyTimer.activate();
@@ -101,7 +105,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     }
 
     private boolean setSpinAmount(int amount) {
-        if (!isReady()) return false;
+        if (isWaiting()) return false;
         if (galaxyInfo.selectedSpinAmount == amount) return true;
         if (Main.API.callMethodChecked(false, "23(267)1016231600", 70, galaxyInfo.address, amount)) {
             dirtyTimer.activate();
