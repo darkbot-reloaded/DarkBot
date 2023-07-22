@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.gui.utils.inspector.ObjectInspectorUI;
 import com.github.manolo8.darkbot.utils.OSUtil;
 import com.github.manolo8.darkbot.utils.SystemUtils;
 import com.github.manolo8.darkbot.utils.debug.SWFUtils;
@@ -163,6 +164,11 @@ public class ExtraButton extends TitleBarButton<JFrame> {
                 list.add(createSeparator("Dev stuff"));
                 list.add(create("Save SWF", e -> main.addTask(SWFUtils::dumpMainSWF)));
                 list.add(create("Reset keybinds", e -> main.addTask(() -> main.guiManager.settingsGui.setKeyBinds(false))));
+                list.add(create("Object inspector", e -> {
+                    JFrame frame = new ObjectInspectorUI();
+                    frame.setSize(600, 600);
+                    frame.setVisible(true);
+                }));
             }
 
             return list;
