@@ -59,15 +59,18 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         private final ObjArray rewardsArr = ObjArray.ofVector(true),
                 resourcesRequiredArr = ObjArray.ofVector(true);
 
-        private String recipeId = "";
+        private String recipeId, visibility = "";
         private final List<String> rewards = new ArrayList<>();
         private final List<ResourceRequired> resourcesRequired = new ArrayList<>();
-        private boolean isCraftable = false;
+        private boolean isCraftable, isInProgress, isCollectable = false;
 
         @Override
         public void update() {
             isCraftable = API.readBoolean(address + 0x20);
             recipeId = API.readMemoryString(address, 0x58, 0x48);
+            visibility = API.readMemoryString(address, 0x58, 0x40, 0x20, 0x90);
+            isInProgress = visibility.equalsIgnoreCase("ON_SCHEDULE");
+            isCollectable = !isCraftable && !isInProgress && API.readDouble(API.readMemoryPtr(0x2C3AE729BC8L, 0x40, 0x20) + 0x28) == 1.0;
         }
 
         @Override
