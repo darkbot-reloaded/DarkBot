@@ -5,9 +5,12 @@ import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.debug.ObjectInspector;
+import eu.darkbot.util.Popups;
 
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
+import java.util.Locale;
 import java.util.Vector;
 import java.util.function.Supplier;
 
@@ -63,26 +66,48 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
     }
 
     public void memoryWrite(String text) {
+        text = text.trim();
+
         ObjectInspector.Slot slot = (ObjectInspector.Slot) getUserObject();
         switch (slot.slotType) {
+            case BOOLEAN:
+                Boolean result = null;
+
+                if (text.equalsIgnoreCase("true") || text.equalsIgnoreCase("1")) result = true;
+                if (text.equalsIgnoreCase("false") || text.equalsIgnoreCase("0")) result = false;
+
+                if (result != null) {
+                    API.writeInt(address.get(), result ? 1 : 0);
+                    return;
+                }
+                break;
             case INT:
             case UINT:
-            case BOOLEAN:
-                int i = Integer.parseInt(text);
-                API.writeInt(address.get(), i);
+                try {
+                    int i = Integer.parseInt(text);
+                    API.writeInt(address.get(), i);
+                    return;
+                } catch (NumberFormatException ignore) {}
                 break;
             case DOUBLE:
-                double v = Double.parseDouble(text);
-                API.writeLong(address.get(), Double.doubleToLongBits(v));
+                try {
+                    double v = Double.parseDouble(text);
+                    API.writeLong(address.get(), Double.doubleToLongBits(v));
+                    return;
+                } catch (NumberFormatException ignore) {}
                 break;
             case OBJECT:
-                Long l = ObjectInspectorUI.tryParse(text);
-                if (l != null)
+                Long l = ObjectInspectorUI.parseAddress(text);
+                if (l != null) {
                     API.writeLong(address.get(), l);
+                    return;
+                }
                 break;
-            default:
-                throw new IllegalArgumentException();
         }
+        String name = slot.slotType.name().toLowerCase(Locale.ROOT);
+        Popups.of("Invalid " + name + " value",
+                "Expected a " + name + " value, but got '" + text + "'",
+                JOptionPane.ERROR_MESSAGE).showAsync();
     }
 
     public void update(InspectorTree tree) {

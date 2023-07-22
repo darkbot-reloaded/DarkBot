@@ -37,7 +37,7 @@ public class InspectorTree extends JTree {
                     popupMenu.show(e.getComponent(), e.getX(), e.getY());
                 }
 
-                if (e.getClickCount() == 2) editValue(false);
+                if (e.getClickCount() == 2) editValue(true);
             }
         });
 
@@ -103,14 +103,14 @@ public class InspectorTree extends JTree {
         return node instanceof ObjectTreeNode ? (ObjectTreeNode) node : null;
     }
 
-    private void editValue(boolean calledViaPopupMenu) {
+    private void editValue(boolean primitivesOnly) {
         ObjectTreeNode node = getSelectedNode();
         if (node != null && node.isMemoryWritable()) {
             ObjectInspector.Slot slot = (ObjectInspector.Slot) node.getUserObject();
-            if (!calledViaPopupMenu && slot.slotType == ObjectInspector.Slot.Type.OBJECT) return;
+            if (primitivesOnly && slot.slotType == ObjectInspector.Slot.Type.OBJECT) return;
 
             String result = JOptionPane.showInputDialog(getRootPane(),
-                    "Edit value of " + slot.name, "Edit value", JOptionPane.PLAIN_MESSAGE);
+                    "Edit value of " + slot.type + " " + slot.name, "Edit value", JOptionPane.PLAIN_MESSAGE);
             if (result != null && !result.isEmpty())
                 node.memoryWrite(result);
         }
@@ -132,7 +132,7 @@ public class InspectorTree extends JTree {
                 ObjectTreeNode node = getSelectedNode();
                 if (node != null) SystemUtils.toClipboard(String.format("0x%x", node.address.get()));
             });
-            editValueItem.addActionListener(a -> editValue(true));
+            editValueItem.addActionListener(a -> editValue(false));
             add(copyValueItem);
             add(copyAddressItem);
             add(editValueItem);

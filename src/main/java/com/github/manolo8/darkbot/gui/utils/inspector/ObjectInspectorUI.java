@@ -84,7 +84,7 @@ public class ObjectInspectorUI extends JFrame {
             if (selectedItem instanceof AddressEntry) {
                 return ((AddressEntry) selectedItem).address;
             } else if (selectedItem instanceof String) {
-                Long addr = tryParse((String) selectedItem);
+                Long addr = parseAddress((String) selectedItem);
                 if (addr != null) return () -> addr;
             } else {
                 System.out.println("Unknown type of value in address combo: " + selectedItem);
@@ -93,7 +93,7 @@ public class ObjectInspectorUI extends JFrame {
         }
     }
 
-    public static Long tryParse(String text) {
+    public static Long parseAddress(String text) {
         try {
             if (text.startsWith("0x"))
                 return Long.parseLong(text.substring(2), 16);
