@@ -70,7 +70,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             recipeId = API.readMemoryString(address, 0x58, 0x48);
             visibility = API.readMemoryString(address, 0x58, 0x40, 0x20, 0x90);
             isInProgress = visibility.equalsIgnoreCase("ON_SCHEDULE");
-            isCollectable = !isCraftable && !isInProgress && API.readDouble(API.readMemoryPtr(0x2C3AE729BC8L, 0x40, 0x20) + 0x28) == 1.0;
+            isCollectable = !isCraftable && !isInProgress && API.readDouble(API.readMemoryPtr(address, 0x40, 0x20) + 0x28) == 1.0;
         }
 
         @Override
