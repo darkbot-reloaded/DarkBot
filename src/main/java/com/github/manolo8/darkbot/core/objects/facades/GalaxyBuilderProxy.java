@@ -11,6 +11,7 @@ import eu.darkbot.api.game.galaxy.GalaxyInfo;
 import eu.darkbot.api.game.galaxy.GateInfo;
 import eu.darkbot.api.game.galaxy.SpinResult;
 import eu.darkbot.api.game.items.SelectableItem;
+import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.GalaxySpinnerAPI;
 import eu.darkbot.util.Timer;
 import lombok.Data;
@@ -28,9 +29,9 @@ import java.util.Optional;
 
 public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
+    private final BotAPI bot;
     private final GateSpinnerGui gui;
     private final BackpageManager bpManager;
-    private final Main main;
 
     @Getter
     private final BuilderData galaxyInfo = new BuilderData();
@@ -40,10 +41,10 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     private int spinsUsed;
     private long lastSpinAttempt = 0;
 
-    public GalaxyBuilderProxy(GateSpinnerGui gui, BackpageManager bpManager, Main main) {
+    public GalaxyBuilderProxy(BotAPI bot, GateSpinnerGui gui, BackpageManager bpManager) {
+        this.bot = bot;
         this.gui = gui;
         this.bpManager = bpManager;
-        this.main = main;
     }
 
     @Override
@@ -52,7 +53,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         this.dirtyTimer.tryDisarm();
 
         // Last spin >10s ago, close gui
-        if (main.isRunning() && (lastSpinAttempt + 10_000) < System.currentTimeMillis()) gui.show(false);
+        if (bot.isRunning() && (lastSpinAttempt + 10_000) < System.currentTimeMillis()) gui.show(false);
     }
 
     public boolean isWaiting() {
