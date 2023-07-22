@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.utils.debug;
 
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.utils.OSUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,9 +44,18 @@ public class ObjectInspector {
         public String templateType;
         public long offset;
         public long size;
+        public Type slotType;
 
         long getOffset() {
             return offset;
+        }
+
+        public String getType() {
+            String type = this.type;
+            if (templateType != null && !templateType.equals("ERROR"))
+                type += "<" + templateType + ">";
+
+            return type;
         }
 
         public String toString() {
@@ -58,6 +68,35 @@ public class ObjectInspector {
             this.templateType = templateType;
             this.offset = offset;
             this.size = size;
+
+            this.slotType = Type.of(this);
+        }
+
+        public enum Type {
+            INT("int"),
+            UINT("uint"),
+            BOOLEAN("Boolean"),
+            STRING("String"),
+            DOUBLE("Number"),
+            ARRAY("Array"),
+            VECTOR("Vector"),
+            DICTIONARY("Dictionary"),
+            OBJECT(null);
+
+            private final String typeName;
+
+            Type(String typeName) {
+                this.typeName = typeName;
+            }
+
+            static Type of(Slot slot) {
+                for (Type value : values()) {
+                    if (slot.type.equals(value.typeName))
+                        return value;
+                }
+
+                return slot.size >= 8 ? OBJECT : INT;
+            }
         }
     }
 
@@ -212,7 +251,7 @@ public class ObjectInspector {
     private static List<Slot> getTraitsBinding (long traits, long pool) {
         List<Slot> result = new ArrayList<Slot>();
 
-        long offset = API.readInt(0xea) & 0xffff;
+        long offset = API.readInt(traits + 0xea) & 0xffff;
         long base = API.readLong(traits + 0x10);
 
         if (offset == 0 && base != 0) {
@@ -223,8 +262,8 @@ public class ObjectInspector {
             result = getTraitsBinding(base, pool);
         }
 
-        int precompMnSize = API.readInt(pool + 0x98);
-        long precompMn = API.readLong(pool + 0xe8);
+        int precompMnSize = API.readInt(pool + 0x98 + (OSUtil.isWindows() ? -0x18 : 0));
+        long precompMn = API.readLong(pool + 0xe8 + (OSUtil.isWindows() ? -0x20 : 0));
 
         int slot32Count = 0;
         int slotPointerCount = 0;
