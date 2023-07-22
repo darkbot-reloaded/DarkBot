@@ -8,10 +8,9 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
-import com.github.manolo8.darkbot.gui.utils.ObjectInspectorUI;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.gui.utils.inspector.ObjectInspectorUI;
 import com.github.manolo8.darkbot.utils.OSUtil;
 import com.github.manolo8.darkbot.utils.SystemUtils;
 import com.github.manolo8.darkbot.utils.debug.SWFUtils;
@@ -21,8 +20,6 @@ import eu.darkbot.api.extensions.ExtraMenus;
 import eu.darkbot.api.managers.BackpageAPI;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.I18nAPI;
-import com.github.manolo8.darkbot.utils.debug.ObjectInspector;
-
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -39,8 +36,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static javax.swing.BorderFactory.createEmptyBorder;
 
 public class ExtraButton extends TitleBarButton<JFrame> {
 
@@ -170,11 +165,9 @@ public class ExtraButton extends TitleBarButton<JFrame> {
                 list.add(create("Save SWF", e -> main.addTask(SWFUtils::dumpMainSWF)));
                 list.add(create("Reset keybinds", e -> main.addTask(() -> main.guiManager.settingsGui.setKeyBinds(false))));
                 list.add(create("Object inspector", e -> {
-                    Popups.of("Object Inspector", new ObjectInspectorUI())
-                            .callback(dialog -> dialog.setSize(600, 600))
-                            .options()
-                            .border(createEmptyBorder(0, 0, -4, 0))
-                            .showAsync();
+                    JFrame frame = new ObjectInspectorUI();
+                    frame.setSize(600, 600);
+                    frame.setVisible(true);
                 }));
             }
 

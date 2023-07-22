@@ -1,6 +1,9 @@
 package com.github.manolo8.darkbot.utils.debug;
 
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -41,14 +44,12 @@ public class ObjectInspector {
         public long offset;
         public long size;
 
-        long getOffset() { return offset; }
+        long getOffset() {
+            return offset;
+        }
 
         public String toString() {
             return String.format("%03X  -  %s  %s", offset, name, type);
-        }
-
-        public Boolean isVector() {
-            return type.startsWith("Vector");
         }
 
         public Slot(String name, String type, String templateType, long offset, long size) {
@@ -58,21 +59,25 @@ public class ObjectInspector {
             this.offset = offset;
             this.size = size;
         }
-    };
+    }
 
     private static class TraitsPtr {
         long address;
+        byte[] bs = new byte[5];
 
         TraitsPtr(long address) {
             this.address = address;
         }
 
         byte readByte() {
-            return API.readBytes(this.address++, 1)[0];
+            bs[0] = 0;
+            API.readMemory(this.address++, bs, 1);
+            return bs[0];
         }
 
         int readU32() {
-            byte[] bs = API.readBytes(this.address, 5);
+            Arrays.fill(bs, (byte) 0);
+            API.readMemory(this.address, bs,5);
 
             int result = bs[0];
             if ((result & 0x00000080) == 0) {
@@ -197,6 +202,7 @@ public class ObjectInspector {
     }
 
     public static List<Slot> getObjectSlots(long address) {
+        address = address & ByteUtils.ATOM_MASK;
         // obj -> vtable -> vtable init -> vtable scope -> abc env -> const pool
         long pool = API.readLong(address, 0x10, 0x10, 0x18, 0x10, 0x8);
         long traits = API.readLong(address, 0x10, 0x28);
