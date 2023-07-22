@@ -108,8 +108,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
     private boolean setGate(GalaxyGate gate) {
         if (isWaiting()) return false;
-        if (gate.ordinal() < 3 && galaxyInfo.selectedGateId <= 3 && galaxyInfo.selectedGateId > 0) return true;
-        if (galaxyInfo.selectedGateId == gate.getId()) return true;
+        if (galaxyInfo.isSelectedGate(gate)) return true;
         if (Main.API.callMethodChecked(false, "23(267)1016241700", 19, galaxyInfo.address, gate.getId())) {
             dirtyTimer.activate();
             return false;
@@ -160,14 +159,15 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
             this.uridium = (int) readDouble(288);
 
             if (initialized) {
+                int multiplier = readInt(224, 32);
                 this.gatesArr.update(readLong(112));
                 for (GalaxyGate gate : GalaxyGate.values()) {
                     GateInfoImpl gateInfo = gateData.get(gate);
                     gateInfo.update(gatesArr.getPtr(gate.getId() - 1));
 
-                    if (selectedGateId == gate.getId()) {
+                    if (isSelectedGate(gate)) {
                         // Current gate multiplier
-                        gateInfo.setMultiplier(readInt(224, 32));
+                        gateInfo.setMultiplier(multiplier);
                     }
                 }
             }
@@ -207,6 +207,10 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         @Override
         public GateInfo getGateInfo(GalaxyGate galaxyGate) {
             return gateData.get(galaxyGate);
+        }
+
+        private boolean isSelectedGate(GalaxyGate gate) {
+            return selectedGateId > 0 && (selectedGateId == gate.getId() || gate.getId() <= 3 && selectedGateId <= 3);
         }
 
     }
