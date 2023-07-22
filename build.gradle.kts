@@ -24,7 +24,7 @@ repositories {
 }
 
 group = "eu.darkbot"
-version = "1.125"
+version = "1.126"
 description = "DarkBot"
 java.sourceCompatibility = JavaVersion.VERSION_11
 java.targetCompatibility = JavaVersion.VERSION_11
