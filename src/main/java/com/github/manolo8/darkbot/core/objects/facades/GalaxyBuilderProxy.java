@@ -37,6 +37,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     private final BuilderData galaxyInfo = new BuilderData();
 
     private final Timer dirtyTimer = Timer.getRandom(250, 5);
+    private final Timer guiUsed = Timer.getRandom(9_000, 1000);
 
     private int spinsUsed;
     private long lastSpinAttempt = 0;
@@ -52,8 +53,8 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         this.galaxyInfo.update(readAtom(48));
         this.dirtyTimer.tryDisarm();
 
-        // Last spin >10s ago, close gui
-        if (bot.isRunning() && (lastSpinAttempt + 10_000) < System.currentTimeMillis()) gui.show(false);
+        // Last gui usage >10s ago, close gui
+        if (bot.isRunning() && guiUsed.isInactive()) gui.show(false);
     }
 
     public boolean isWaiting() {
@@ -69,14 +70,10 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     public Optional<SpinResult> spinGate(@NotNull GalaxyGate gate, boolean multiplier, int spinAmount, int minWait) {
         if (Thread.currentThread() == bpManager) {
             Time.sleep(lastSpinAttempt + minWait - System.currentTimeMillis());
+            lastSpinAttempt = System.currentTimeMillis();
         }
 
-        lastSpinAttempt = System.currentTimeMillis();
-        if (isWaiting()
-                || !gui.show(true)
-                || !setGate(gate)
-                || !setSpinAmount(spinAmount)
-                || (multiplier && getGalaxyInfo().getGateInfo(gate).getMultiplier() > 1 && !useMultiplier())) {
+        if (!setGate(gate) || !setSpinAmount(spinAmount) || (multiplier && !useMultiplier()) || !showGui()) {
             return Optional.empty();
         }
 
@@ -93,43 +90,48 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
     @Override
     public boolean placeGate(@NotNull GalaxyGate gate, int minWait) {
-        if (setGate(gate)) {
-            return Main.API.callMethodChecked(false, "23(26)008411600", 80, galaxyInfo.address);
-        }
-        return false;
+        return prepareAndCall(gate, "23(26)008411600", 80, galaxyInfo.address);
     }
 
     @Override
     public boolean buyLife(@NotNull GalaxyGate gate, int minWait) {
-        if (setGate(gate)) {
-            return Main.API.callMethodChecked(false, "23(26)008411600", 62, galaxyInfo.address);
-        }
-        return false;
+        return prepareAndCall(gate, "23(26)008411600", 62, galaxyInfo.address);
     }
 
     private boolean setGate(GalaxyGate gate) {
         if (isWaiting()) return false;
-        if (galaxyInfo.isSelectedGate(gate)) return true;
-        if (Main.API.callMethodChecked(false, "23(267)1016241700", 19, galaxyInfo.address, gate.getId())) {
-            dirtyTimer.activate();
-            return false;
-        }
+        if (galaxyInfo.selectedGateId == gate.getId()) return true;
+        prepareAndCall(null, "23(267)1016241700", 19, galaxyInfo.address, gate.getId());
         return false;
     }
 
     private boolean setSpinAmount(int amount) {
         if (isWaiting()) return false;
         if (galaxyInfo.selectedSpinAmount == amount) return true;
-        if (Main.API.callMethodChecked(false, "23(267)1016231600", 70, galaxyInfo.address, amount)) {
+        if (prepareAndCall(null,"23(267)1016231600", 70, galaxyInfo.address, amount)) {
             dirtyTimer.activate();
-            return false;
         }
         return false;
     }
 
-    private boolean useMultiplier() {
-        return Main.API.callMethodChecked(false, "23(262)1016321600", 91, galaxyInfo.address, 1);
+    private boolean showGui() {
+        guiUsed.activate();
+        return gui.show(true);
     }
+
+    private boolean useMultiplier() {
+        return prepareAndCall(null, "23(262)1016321600", 91, galaxyInfo.address, 1);
+    }
+
+    private boolean prepareAndCall(GalaxyGate gate, String signature, int index, long... arguments) {
+        if (!isWaiting() && (gate == null || setGate(gate)) && showGui() &&
+                Main.API.callMethodChecked(false, signature, index, arguments)) {
+            dirtyTimer.activate();
+            return true;
+        }
+        return false;
+    }
+
 
     @Data
     @EqualsAndHashCode(callSuper = true)
