@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.utils.debug;
 
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.utils.OSUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -231,8 +232,8 @@ public class ObjectInspector {
             result = getTraitsBinding(base, pool);
         }
 
-        int precompMnSize = API.readInt(pool + 0x98 - 0x18);
-        long precompMn = API.readLong(pool + 0xe8 - 0x20);
+        int precompMnSize = API.readInt(pool + 0x98 + (OSUtil.isWindows() ? -0x18 : 0));
+        long precompMn = API.readLong(pool + 0xe8 + (OSUtil.isWindows() ? -0x20 : 0));
 
         int slot32Count = 0;
         int slotPointerCount = 0;
