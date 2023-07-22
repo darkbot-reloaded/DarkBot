@@ -53,6 +53,38 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         }
     }
 
+    public boolean isMemoryWritable() {
+        ObjectInspector.Slot slot = (ObjectInspector.Slot) getUserObject();
+        return slot.slotType == ObjectInspector.Slot.Type.INT
+                || slot.slotType == ObjectInspector.Slot.Type.UINT
+                || slot.slotType == ObjectInspector.Slot.Type.DOUBLE
+                || slot.slotType == ObjectInspector.Slot.Type.BOOLEAN
+                || slot.slotType == ObjectInspector.Slot.Type.OBJECT;
+    }
+
+    public void memoryWrite(String text) {
+        ObjectInspector.Slot slot = (ObjectInspector.Slot) getUserObject();
+        switch (slot.slotType) {
+            case INT:
+            case UINT:
+            case BOOLEAN:
+                int i = Integer.parseInt(text);
+                API.writeInt(address.get(), i);
+                break;
+            case DOUBLE:
+                double v = Double.parseDouble(text);
+                API.writeLong(address.get(), Double.doubleToLongBits(v));
+                break;
+            case OBJECT:
+                Long l = ObjectInspectorUI.tryParse(text);
+                if (l != null)
+                    API.writeLong(address.get(), l);
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
     public void update(InspectorTree tree) {
         long address = this.address.get();
         if (address == 0) {

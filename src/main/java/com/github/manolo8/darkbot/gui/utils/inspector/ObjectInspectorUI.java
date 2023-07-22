@@ -91,16 +91,16 @@ public class ObjectInspectorUI extends JFrame {
             }
             return null;
         }
+    }
 
-        private Long tryParse(String text) {
-            try {
-                if (text.startsWith("0x"))
-                    return Long.parseLong(text.substring(2), 16);
-                return Long.parseLong(text, 10);
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid address '" + text + "': " + e.getMessage());
-                return null;
-            }
+    public static Long tryParse(String text) {
+        try {
+            if (text.startsWith("0x"))
+                return Long.parseLong(text.substring(2), 16);
+            return Long.parseLong(text, 10);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid address '" + text + "': " + e.getMessage());
+            return null;
         }
     }
 

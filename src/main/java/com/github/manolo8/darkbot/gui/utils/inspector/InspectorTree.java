@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.utils.inspector;
 
 import com.github.manolo8.darkbot.utils.SystemUtils;
+import com.github.manolo8.darkbot.utils.debug.ObjectInspector;
 
 import javax.swing.*;
 import javax.swing.event.AncestorEvent;
@@ -35,6 +36,8 @@ public class InspectorTree extends JTree {
                     setSelectionRow(row);
                     popupMenu.show(e.getComponent(), e.getX(), e.getY());
                 }
+
+                if (e.getClickCount() == 2) editValue(false);
             }
         });
 
@@ -100,6 +103,19 @@ public class InspectorTree extends JTree {
         return node instanceof ObjectTreeNode ? (ObjectTreeNode) node : null;
     }
 
+    private void editValue(boolean calledViaPopupMenu) {
+        ObjectTreeNode node = getSelectedNode();
+        if (node != null && node.isMemoryWritable()) {
+            ObjectInspector.Slot slot = (ObjectInspector.Slot) node.getUserObject();
+            if (!calledViaPopupMenu && slot.slotType == ObjectInspector.Slot.Type.OBJECT) return;
+
+            String result = JOptionPane.showInputDialog(getRootPane(),
+                    "Edit value of " + slot.name, "Edit value", JOptionPane.PLAIN_MESSAGE);
+            if (result != null && !result.isEmpty())
+                node.memoryWrite(result);
+        }
+    }
+
     private class ContextMenu extends JPopupMenu {
 
         public ContextMenu() {
@@ -107,16 +123,19 @@ public class InspectorTree extends JTree {
 
             JMenuItem copyValueItem = new JMenuItem("Copy value");
             JMenuItem copyAddressItem = new JMenuItem("Copy address");
+            JMenuItem editValueItem = new JMenuItem("Edit value");
             copyValueItem.addActionListener(a -> {
                 ObjectTreeNode node = getSelectedNode();
                 if (node != null) SystemUtils.toClipboard(node.strValue);
             });
             copyAddressItem.addActionListener(a -> {
                 ObjectTreeNode node = getSelectedNode();
-                if (node != null) SystemUtils.toClipboard(String.format("0x%x", node.address));
+                if (node != null) SystemUtils.toClipboard(String.format("0x%x", node.address.get()));
             });
+            editValueItem.addActionListener(a -> editValue(true));
             add(copyValueItem);
             add(copyAddressItem);
+            add(editValueItem);
         }
     }
 

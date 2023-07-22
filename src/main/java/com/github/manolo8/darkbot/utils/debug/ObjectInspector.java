@@ -44,6 +44,7 @@ public class ObjectInspector {
         public String templateType;
         public long offset;
         public long size;
+        public Type slotType;
 
         long getOffset() {
             return offset;
@@ -67,6 +68,35 @@ public class ObjectInspector {
             this.templateType = templateType;
             this.offset = offset;
             this.size = size;
+
+            this.slotType = Type.of(this);
+        }
+
+        public enum Type {
+            INT("int"),
+            UINT("uint"),
+            BOOLEAN("Boolean"),
+            STRING("String"),
+            DOUBLE("Number"),
+            ARRAY("Array"),
+            VECTOR("Vector"),
+            DICTIONARY("Dictionary"),
+            OBJECT(null);
+
+            private final String typeName;
+
+            Type(String typeName) {
+                this.typeName = typeName;
+            }
+
+            static Type of(Slot slot) {
+                for (Type value : values()) {
+                    if (slot.type.equals(value.typeName))
+                        return value;
+                }
+
+                return slot.size >= 8 ? OBJECT : INT;
+            }
         }
     }
 
