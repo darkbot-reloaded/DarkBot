@@ -101,7 +101,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     private final EventBrokerAPI eventBroker;
 
     private final MainGui form;
-    public final BotInstaller botInstaller;
+    private final BotInstaller botInstaller;
 
     public com.github.manolo8.darkbot.core.itf.Module module; // Legacy module, kept for old plugin compatibility
     private Module newModule;

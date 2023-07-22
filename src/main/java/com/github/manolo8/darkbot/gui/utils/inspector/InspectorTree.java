@@ -20,6 +20,7 @@ public class InspectorTree extends JTree {
 
     private final JPopupMenu popupMenu = new ContextMenu();
     private Timer timer;
+    private int delay = 250;
 
     public InspectorTree(DefaultTreeModel model) {
         super(model);
@@ -43,7 +44,7 @@ public class InspectorTree extends JTree {
                 TreePath path = event.getPath();
                 if (path.getLastPathComponent() instanceof ObjectTreeNode) {
                     ObjectTreeNode node = (ObjectTreeNode) path.getLastPathComponent();
-                    node.loadChildren(model);
+                    node.loadChildren(InspectorTree.this);
                 }
             }
 
@@ -57,7 +58,7 @@ public class InspectorTree extends JTree {
             public void ancestorAdded(AncestorEvent event) {
                 if (timer == null) {
                     timer = new Timer(delay, e -> {
-                        ((ObjectTreeNode) model.getRoot()).update(model);
+                        ((ObjectTreeNode) model.getRoot()).update(InspectorTree.this);
                         invalidate();
                     });
                     timer.setRepeats(true);
@@ -82,7 +83,11 @@ public class InspectorTree extends JTree {
         setCellRenderer(cellRender);
     }
 
-    private int delay = 250;
+    @Override
+    public DefaultTreeModel getModel() {
+        return (DefaultTreeModel) super.getModel();
+    }
+
     public void setTimerDelay(int delay) {
         this.delay = delay;
         if (timer != null) timer.setDelay(delay);

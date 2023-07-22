@@ -7,8 +7,8 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.debug.ObjectInspector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-
+import javax.swing.tree.TreePath;
+import java.util.Vector;
 import java.util.function.Supplier;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -21,10 +21,16 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
     protected long value = -1;
     protected String strValue;
 
-    ObjectTreeNode(ObjectInspector.Slot slot, Supplier<Long> address, Boolean addressIsValue) {
+    public ObjectTreeNode(ObjectInspector.Slot slot, Supplier<Long> address, boolean addressIsValue) {
         super(slot);
         this.address = address;
         this.addressIsValue = addressIsValue;
+    }
+
+    public static ObjectTreeNode root(String name, Supplier<Long> addr) {
+        return new ObjectTreeNode(
+                new ObjectInspector.Slot(name, "Object", null, 0, 8),
+                addr, true);
     }
 
     @Override
@@ -40,7 +46,14 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                 slot.offset, (slot.name.length() >= 25) ? slot.name.substring(25) : slot.name, slot.getType(), strValue);
     }
 
-    public void update(DefaultTreeModel model) {
+    public void trimChildren(int maxSize) {
+        if (children == null) return;
+        while (children.size() > maxSize) {
+            remove(children.size() - 1);
+        }
+    }
+
+    public void update(InspectorTree tree) {
         long address = this.address.get();
         if (address == 0) {
             return;
@@ -48,7 +61,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
 
         ObjectInspector.Slot slot = (ObjectInspector.Slot) (this.getUserObject());
 
-        boolean changed = value != address;
+        long oldValue = value;
         if (addressIsValue) {
             value = address;
         } else {
@@ -63,6 +76,8 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
             // Non-leaf means it's an object, which we need to remove atom mask from.
             if (!isLeaf()) value &= ByteUtils.ATOM_MASK;
         }
+
+        boolean changed = oldValue != value;
         if (changed) {
             if (slot.type.equals("Number")) {
                 strValue = String.format("%.2f", Double.longBitsToDouble(value));
@@ -77,18 +92,18 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
             }
         }
 
-        if (children != null) {
-            children.forEach(child -> ((ObjectTreeNode) child).update(model));
+        if (children != null && tree.isExpanded(new TreePath(tree.getModel().getPathToRoot(this)))) {
+            children.forEach(child -> ((ObjectTreeNode) child).update(tree));
         }
-        if (changed) model.nodeChanged(this);
+        if (changed) tree.getModel().nodeChanged(this);
     }
 
-    public void loadChildren(DefaultTreeModel model) {
-        if (getChildCount() > 0) {
-            return;
-        }
+    public void loadChildren(InspectorTree tree) {
+        if (children != null) return;
+        children = new Vector<>();
 
-        int c = 0;
+        if (value == -1) update(tree);
+
         for (ObjectInspector.Slot childSlot : ObjectInspector.getObjectSlots(this.value)) {
             ObjectTreeNode child;
             switch (childSlot.type) {
@@ -105,12 +120,12 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                     child = new ObjectTreeNode(childSlot, () -> this.value + childSlot.offset, false);
                     break;
             }
-
-            if (getChildCount() <= c) {
-                model.insertNodeInto(child, this, c++);
-            }
-            child.update(model);
+            child.setParent(this);
+            children.add(child);
         }
+
+        tree.getModel().nodeStructureChanged(this);
+        children.forEach(ch -> ((ObjectTreeNode) ch).update(tree));
     }
 
     private static class DictionaryTreeNode extends ObjectTreeNode {
@@ -119,8 +134,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         }
 
         @Override
-        public void loadChildren(DefaultTreeModel model) {
-            ObjectInspector.Slot slot = (ObjectInspector.Slot) (this.getUserObject());
+        public void loadChildren(InspectorTree tree) {
             PairArray dict = PairArray.ofDictionary();
             dict.update(this.value);
             dict.update();
@@ -129,8 +143,8 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                 PairArray.Pair p = dict.get(index);
                 ObjectInspector.Slot valueSlot = new ObjectInspector.Slot(p.key, ByteUtils.readObjectName(p.value), null, index, 8);
                 ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> p.value, true);
-                model.insertNodeInto(child, this, index);
-                child.update(model);
+                tree.getModel().insertNodeInto(child, this, index);
+                child.update(tree);
             }
         }
     }
@@ -141,7 +155,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         }
 
         @Override
-        public void update(DefaultTreeModel model) {
+        public void update(InspectorTree tree) {
             int denseLength = API.readInt(this.value + 0x28);
 
             if (denseLength != 0) {
@@ -151,12 +165,10 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                 for (int index = 0; index < arr.elements.length; index++) {
                     ObjectInspector.Slot valueSlot = new ObjectInspector.Slot("", "int", null, index, 4);
                     ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> this.value, false);
-                    model.insertNodeInto(child, this, index);
-                    child.update(model);
+                    tree.getModel().insertNodeInto(child, this, index);
+                    child.update(tree);
                 }
-                while (getChildCount() > arr.getSize()) {
-                    remove(getChildCount() - 1);
-                }
+                trimChildren(arr.getSize());
             } else {
                 PairArray dict = PairArray.ofArray();
                 dict.setAutoUpdatable(true);
@@ -174,17 +186,15 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                     String objectName = ByteUtils.readObjectName(p.value);
                     ObjectInspector.Slot valueSlot = new ObjectInspector.Slot(p.key, objectName, null, index, 8);
                     ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> p.value, true);
-                    model.insertNodeInto(child, this, index);
+                    tree.getModel().insertNodeInto(child, this, index);
                 }
-                while (getChildCount() > c) {
-                    remove(getChildCount() - 1);
-                }
+                trimChildren(c);
             }
         }
 
         @Override
-        public void loadChildren(DefaultTreeModel model) {
-
+        public void loadChildren(InspectorTree model) {
+            // Children are populated in update method for arrays
         }
     }
 
@@ -194,7 +204,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         }
 
         @Override
-        public void loadChildren(DefaultTreeModel model) {
+        public void loadChildren(InspectorTree tree) {
             ObjectInspector.Slot slot = (ObjectInspector.Slot) (this.getUserObject());
 
             if (slot.templateType.equals("uint") || slot.templateType.equals("int")) {
@@ -203,12 +213,10 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                 for (int index = 0; index < vec.elements.length; index++) {
                     ObjectInspector.Slot valueSlot = new ObjectInspector.Slot("", slot.templateType, null, index, 4);
                     ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> this.value + slot.offset, false);
-                    model.insertNodeInto(child, this, index);
-                    child.update(model);
+                    tree.getModel().insertNodeInto(child, this, index);
+                    child.update(tree);
                 }
-                while (getChildCount() > vec.getSize()) {
-                    remove(getChildCount() - 1);
-                }
+                trimChildren(vec.getSize());
             } else {
                 ObjArray vec = ObjArray.ofVector();
                 vec.update(this.value);
@@ -217,13 +225,10 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                     long object = vec.getPtr(index);
                     ObjectInspector.Slot valueSlot = new ObjectInspector.Slot("", ByteUtils.readObjectName(object), null, index, 8);
                     ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> object & ByteUtils.ATOM_MASK, true);
-                    model.insertNodeInto(child, this, index);
-                    child.update(model);
+                    tree.getModel().insertNodeInto(child, this, index);
+                    child.update(tree);
                 }
-
-                while (getChildCount() > vec.getSize()) {
-                    remove(getChildCount() - 1);
-                }
+                trimChildren(vec.getSize());
             }
         }
     }
