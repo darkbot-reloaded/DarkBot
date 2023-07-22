@@ -9,18 +9,19 @@ import com.github.manolo8.darkbot.utils.debug.ObjectInspector;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
+import java.util.function.Supplier;
+
 import static com.github.manolo8.darkbot.Main.API;
 
 public class ObjectTreeNode extends DefaultMutableTreeNode {
 
-    public final long address;
+    public final Supplier<Long> address;
     private final boolean addressIsValue;
 
-    protected long value;
+    protected long value = -1;
     protected String strValue;
 
-
-    ObjectTreeNode(ObjectInspector.Slot slot, long address, Boolean addressIsValue) {
+    ObjectTreeNode(ObjectInspector.Slot slot, Supplier<Long> address, Boolean addressIsValue) {
         super(slot);
         this.address = address;
         this.addressIsValue = addressIsValue;
@@ -36,49 +37,50 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
     public String toString() {
         ObjectInspector.Slot slot = (ObjectInspector.Slot) (this.getUserObject());
         return String.format("%03X %-25s  %-25s %s",
-                slot.offset, (slot.name.length() >= 25) ? slot.name.substring(25) : slot.name, slot.type, strValue);
+                slot.offset, (slot.name.length() >= 25) ? slot.name.substring(25) : slot.name, slot.getType(), strValue);
     }
 
     public void update(DefaultTreeModel model) {
+        long address = this.address.get();
         if (address == 0) {
             return;
         }
 
         ObjectInspector.Slot slot = (ObjectInspector.Slot) (this.getUserObject());
 
-        long oldValue = value;
+        boolean changed = value != address;
         if (addressIsValue) {
-            value = this.address;
+            value = address;
         } else {
             if (slot.size == 8) {
-                value = API.readMemoryLong(this.address);
+                value = API.readMemoryLong(address);
             } else if (slot.size == 4) {
-                value = API.readMemoryInt(this.address);
+                value = API.readMemoryInt(address);
             } else if (slot.size == 1) {
-                value = API.readMemoryBoolean(this.address) ? 1 : 0;
+                value = API.readInt(address);
             }
 
             // Non-leaf means it's an object, which we need to remove atom mask from.
             if (!isLeaf()) value &= ByteUtils.ATOM_MASK;
         }
-        if (value != oldValue) {
+        if (changed) {
             if (slot.type.equals("Number")) {
                 strValue = String.format("%.2f", Double.longBitsToDouble(value));
             } else if (slot.type.equals("String")) {
-                strValue = String.format("%s", API.readString(value));
+                strValue = value == 0 ? "null" : String.format("%s", API.readString(value));
             } else if (slot.type.equals("Boolean")) {
-                strValue = (value == 1) ? "true" : "false";
+                strValue = (value == 1) ? "true" : (value == 0 ? "false" : String.format("Boolean(%d)", this.value));
             } else if (slot.size == 4) {
                 strValue = String.format("%d", this.value);
             } else {
-                strValue = String.format("0x%x", this.value);
+                strValue = value == 0 ? "null" : String.format("0x%x", this.value);
             }
         }
 
         if (children != null) {
             children.forEach(child -> ((ObjectTreeNode) child).update(model));
         }
-        if (value != oldValue) model.nodeChanged(this);
+        if (changed) model.nodeChanged(this);
     }
 
     public void loadChildren(DefaultTreeModel model) {
@@ -91,16 +93,16 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
             ObjectTreeNode child;
             switch (childSlot.type) {
                 case "Dictionary":
-                    child = new DictionaryTreeNode(childSlot, this.value + childSlot.offset);
+                    child = new DictionaryTreeNode(childSlot, () -> this.value + childSlot.offset);
                     break;
                 case "Array":
-                    child = new ArrayTreeNode(childSlot, API.readLong(this.value + childSlot.offset));
+                    child = new ArrayTreeNode(childSlot, () -> API.readLong(this.value + childSlot.offset));
                     break;
                 case "Vector":
-                    child = new VectorTreeNode(childSlot, this.value + childSlot.offset);
+                    child = new VectorTreeNode(childSlot, () -> this.value + childSlot.offset);
                     break;
                 default:
-                    child = new ObjectTreeNode(childSlot, this.value + childSlot.offset, false);
+                    child = new ObjectTreeNode(childSlot, () -> this.value + childSlot.offset, false);
                     break;
             }
 
@@ -112,8 +114,8 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
     }
 
     private static class DictionaryTreeNode extends ObjectTreeNode {
-        public DictionaryTreeNode(ObjectInspector.Slot slot, long address) {
-            super(slot, address, true);
+        public DictionaryTreeNode(ObjectInspector.Slot slot, Supplier<Long> address) {
+            super(slot, address, false);
         }
 
         @Override
@@ -125,8 +127,8 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
 
             for (int index = 0; index < dict.getSize(); index++) {
                 PairArray.Pair p = dict.get(index);
-                ObjectInspector.Slot valueSlot = new ObjectInspector.Slot(p.key, slot.templateType, null, index, 8);
-                ObjectTreeNode child = new ObjectTreeNode(valueSlot, p.value, true);
+                ObjectInspector.Slot valueSlot = new ObjectInspector.Slot(p.key, ByteUtils.readObjectName(p.value), null, index, 8);
+                ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> p.value, true);
                 model.insertNodeInto(child, this, index);
                 child.update(model);
             }
@@ -134,8 +136,8 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
     }
 
     private static class ArrayTreeNode extends ObjectTreeNode {
-        public ArrayTreeNode(ObjectInspector.Slot slot, long address) {
-            super(slot, address, true);
+        public ArrayTreeNode(ObjectInspector.Slot slot, Supplier<Long> address) {
+            super(slot, address, false);
         }
 
         @Override
@@ -148,7 +150,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
 
                 for (int index = 0; index < arr.elements.length; index++) {
                     ObjectInspector.Slot valueSlot = new ObjectInspector.Slot("", "int", null, index, 4);
-                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, this.value, false);
+                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> this.value, false);
                     model.insertNodeInto(child, this, index);
                     child.update(model);
                 }
@@ -171,7 +173,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                     c++;
                     String objectName = ByteUtils.readObjectName(p.value);
                     ObjectInspector.Slot valueSlot = new ObjectInspector.Slot(p.key, objectName, null, index, 8);
-                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, p.value, true);
+                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> p.value, true);
                     model.insertNodeInto(child, this, index);
                 }
                 while (getChildCount() > c) {
@@ -187,8 +189,8 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
     }
 
     private static class VectorTreeNode extends ObjectTreeNode {
-        public VectorTreeNode(ObjectInspector.Slot slot, long address) {
-            super(slot, address, true);
+        public VectorTreeNode(ObjectInspector.Slot slot, Supplier<Long> address) {
+            super(slot, address, false);
         }
 
         @Override
@@ -200,7 +202,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                 vec.update();
                 for (int index = 0; index < vec.elements.length; index++) {
                     ObjectInspector.Slot valueSlot = new ObjectInspector.Slot("", slot.templateType, null, index, 4);
-                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, this.value + slot.offset, false);
+                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> this.value + slot.offset, false);
                     model.insertNodeInto(child, this, index);
                     child.update(model);
                 }
@@ -212,8 +214,9 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                 vec.update(this.value);
                 vec.update();
                 for (int index = 0; index < vec.getSize(); index++) {
-                    ObjectInspector.Slot valueSlot = new ObjectInspector.Slot("", slot.templateType, null, index, 8);
-                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, vec.get(index) & ByteUtils.ATOM_MASK, true);
+                    long object = vec.getPtr(index);
+                    ObjectInspector.Slot valueSlot = new ObjectInspector.Slot("", ByteUtils.readObjectName(object), null, index, 8);
+                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> object & ByteUtils.ATOM_MASK, true);
                     model.insertNodeInto(child, this, index);
                     child.update(model);
                 }

@@ -56,7 +56,7 @@ public class InspectorTree extends JTree {
             @Override
             public void ancestorAdded(AncestorEvent event) {
                 if (timer == null) {
-                    timer = new Timer(250, e -> {
+                    timer = new Timer(delay, e -> {
                         ((ObjectTreeNode) model.getRoot()).update(model);
                         invalidate();
                     });
@@ -80,6 +80,12 @@ public class InspectorTree extends JTree {
         DefaultTreeCellRenderer cellRender = new DefaultTreeCellRenderer();
         cellRender.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         setCellRenderer(cellRender);
+    }
+
+    private int delay = 250;
+    public void setTimerDelay(int delay) {
+        this.delay = delay;
+        if (timer != null) timer.setDelay(delay);
     }
 
     private ObjectTreeNode getSelectedNode() {

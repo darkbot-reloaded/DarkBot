@@ -48,6 +48,14 @@ public class ObjectInspector {
             return offset;
         }
 
+        public String getType() {
+            String type = this.type;
+            if (templateType != null && !templateType.equals("ERROR"))
+                type += "<" + templateType + ">";
+
+            return type;
+        }
+
         public String toString() {
             return String.format("%03X  -  %s  %s", offset, name, type);
         }
@@ -212,7 +220,7 @@ public class ObjectInspector {
     private static List<Slot> getTraitsBinding (long traits, long pool) {
         List<Slot> result = new ArrayList<Slot>();
 
-        long offset = API.readInt(0xea) & 0xffff;
+        long offset = API.readInt(traits + 0xea) & 0xffff;
         long base = API.readLong(traits + 0x10);
 
         if (offset == 0 && base != 0) {
@@ -223,8 +231,8 @@ public class ObjectInspector {
             result = getTraitsBinding(base, pool);
         }
 
-        int precompMnSize = API.readInt(pool + 0x98);
-        long precompMn = API.readLong(pool + 0xe8);
+        int precompMnSize = API.readInt(pool + 0x98 - 0x18);
+        long precompMn = API.readLong(pool + 0xe8 - 0x20);
 
         int slot32Count = 0;
         int slotPointerCount = 0;
