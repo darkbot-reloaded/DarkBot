@@ -24,6 +24,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SpaceMapWindowProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.WorldBossOverviewProxy;
+import com.github.manolo8.darkbot.core.objects.facades.MiniRewardProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
 
@@ -58,6 +59,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final NpcEventProxy npcEventProxy;
     public final WorldBossOverviewProxy worldBossOverview;
     public final Updatable group;
+    public final MiniRewardProxy rewardProxy;
 
     public FacadeManager(PluginAPI pluginApi) {
         this.pluginAPI = pluginApi;
@@ -80,6 +82,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.npcEventProxy  = registerProxy("npc_event",              NpcEventProxy.class);
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
+        this.rewardProxy    = registerProxy("miniclient_reward",      MiniRewardProxy.class);
 
         registerProxy("dispatch", DispatchProxy.class);
         registerProxy("ggBuilder", GalaxyBuilderProxy.class);

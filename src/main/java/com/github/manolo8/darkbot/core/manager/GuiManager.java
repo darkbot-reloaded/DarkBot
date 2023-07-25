@@ -64,6 +64,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final Gui blacklightGate;
     public final Gui astralGate;
     public final Gui astralSelection;
+    public final Gui miniClientReward;
     public final RefinementGui refinement;
     public final PetManager pet;
     public final OreTradeGui oreTrade;
@@ -130,6 +131,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.refinement = register("refinement", RefinementGui.class);
         this.chat = register("chat", ChatGui.class);
         this.settingsGui = register("settings", SettingsGui.class);
+        this.miniClientReward = register("miniclient_reward");
 
         register("dispatch", DispatchManager.class);
         register("popup_generic_icon", IconGui.class);
