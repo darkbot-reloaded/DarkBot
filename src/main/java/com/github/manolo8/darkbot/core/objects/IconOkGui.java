@@ -10,8 +10,7 @@ public class IconOkGui extends Gui implements API.Singleton {
         super.update();
         width = (int) Main.API.readMemoryDouble(address + 0x1F8);
         height = (int) Main.API.readMemoryDouble(address + 0x200);
-        visible = Main.API.readMemoryBoolean(address + 0xB0); // is visible
-//        minimizable = Main.API.readMemoryBoolean(address + 0xC8);
+        visible = Main.API.readMemoryLong(address + 0x180) != 0; // isVisible, sprite object is set
     }
 
     public boolean clickOkRewardsPopup(int i) {
