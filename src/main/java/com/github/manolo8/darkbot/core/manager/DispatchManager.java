@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.core.manager;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.IconGui;
 import com.github.manolo8.darkbot.core.objects.IconOkGui;
