@@ -76,7 +76,8 @@ public class AstralGateProxy extends Updatable {
         private boolean equipped;
         private int upgradeLevel;
         private String lootId;
-        private String status;
+        private List<ItemStat> itemStats = new ArrayList<>();
+        private final ObjArray itemStatsArr = ObjArray.ofVector(true);
 
         @Override
         public void update() {
@@ -89,7 +90,11 @@ public class AstralGateProxy extends Updatable {
             this.upgradeLevel = API.readInt(itemData + 0x2C);
 
             this.lootId = API.readString(itemData, 0x48);
-            this.status = API.readString(itemData, 0x60);
+
+            itemStatsArr.update(API.readMemoryLong(address + 0x38));
+            synchronized (UPDATE_LOCKER) {
+                itemStatsArr.sync(itemStats, ItemStat::new);
+            }
         }
 
         public boolean isEquipped() {
@@ -103,9 +108,28 @@ public class AstralGateProxy extends Updatable {
         public String getLootId() {
             return lootId;
         }
+    }
 
-        public String getStatus() {
-            return status;
+    public static class ItemStat extends Auto {
+        private String attribute;
+        private Double value;
+
+        @Override
+        public void update() {
+            if (address == 0) {
+                return;
+            }
+
+            this.attribute = API.readString(address, 0x20);
+            this.value = API.readDouble(address + 0x28);
+        }
+
+        public String getAttribute() {
+            return attribute;
+        }
+
+        public Double getValue() {
+            return value;
         }
     }
 }
