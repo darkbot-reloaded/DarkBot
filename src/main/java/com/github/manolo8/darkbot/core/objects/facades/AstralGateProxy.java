@@ -108,6 +108,10 @@ public class AstralGateProxy extends Updatable {
         public String getLootId() {
             return lootId;
         }
+
+        public List<ItemStat> getTheStatsList() {
+            return itemStats;
+        }
     }
 
     public static class ItemStat extends Auto {
