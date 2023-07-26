@@ -29,6 +29,7 @@ public class DisconnectModule extends TemporalModule {
     private Long pauseUntil = null;
     private boolean refreshing = false;
     private boolean closeBot = false;
+    private boolean popupOpened = false;
 
     /**
      * @param pauseTime null for infinite pause, otherwise pause for that amount of
@@ -46,10 +47,6 @@ public class DisconnectModule extends TemporalModule {
     public DisconnectModule(Long pauseTime, String reason, boolean closeBot) {
         this(pauseTime, reason);
         this.closeBot = closeBot;
-
-        if (closeBot) {
-            showClosePopup();
-        }
     }
 
     @Override
@@ -75,6 +72,7 @@ public class DisconnectModule extends TemporalModule {
 
     @Override
     public void tick() {
+        showClosePopup();
         // Just in case refresh was super quick, don't go back to normal tick.
         if (refreshing) {
             tickStopped();
@@ -98,6 +96,7 @@ public class DisconnectModule extends TemporalModule {
 
     @Override
     public void tickStopped() {
+        showClosePopup();
         if (main.isRunning()) {
             if (!lostConnection.visible)
                 return;
@@ -142,6 +141,11 @@ public class DisconnectModule extends TemporalModule {
     }
 
     private void showClosePopup() {
+        if (!closeBot || popupOpened) {
+            return;
+        }
+
+        this.popupOpened = true;
         JButton okBtn = new JButton(I18n.get("module.disconnect.popup.ok_btn"));
         JButton cancelBtn = new JButton(I18n.get("module.disconnect.popup.cancel_btn"));
         okBtn.addActionListener(e -> {
