@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.objects;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.utils.Offsets;
@@ -50,7 +51,8 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
         x = super.x;
         y = super.y;
 
-        visible = API.readMemoryBoolean(addressInfo + 32); // Maximized
+        visible = Main.API.readMemoryBoolean(address + 0xB0); // isVisible
+//        visible = API.readMemoryBoolean(addressInfo + 32); // Maximized
         // API.readMemoryBoolean(addressInfo + 36); // Toggle maximize (set to true/false when pressing H to show/hide)
         // API.readMemoryBoolean(addressInfo + 40); // Maximized changed (set to true when toggling maximized)
         // API.readMemoryBoolean(addressInfo + 44); // Settings on server
