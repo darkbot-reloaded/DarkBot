@@ -21,6 +21,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
 
     @Override
     public void update(){
+        if (address == 0) return;
         super.update();
         width = (int) Main.API.readMemoryDouble(address + 0x1F8);
         height = (int) Main.API.readMemoryDouble(address + 0x200);

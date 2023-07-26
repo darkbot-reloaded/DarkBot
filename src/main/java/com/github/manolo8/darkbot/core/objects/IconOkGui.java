@@ -6,6 +6,7 @@ import eu.darkbot.api.API;
 public class IconOkGui extends Gui implements API.Singleton {
     @Override
     public void update(){
+        if (address == 0) return;
         super.update();
         width = (int) Main.API.readMemoryDouble(address + 0x1F8);
         height = (int) Main.API.readMemoryDouble(address + 0x200);
