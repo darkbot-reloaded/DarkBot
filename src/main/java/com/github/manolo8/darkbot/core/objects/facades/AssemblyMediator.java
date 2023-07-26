@@ -104,6 +104,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
     }
 
+    @Getter
     @ToString
     public static class RowFilter extends Reporting {
         private final ItemFilter first = new ItemFilter();
