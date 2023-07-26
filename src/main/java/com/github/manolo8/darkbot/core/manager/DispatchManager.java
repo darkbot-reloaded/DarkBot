@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.manager;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.IconGui;
 import com.github.manolo8.darkbot.core.objects.IconOkGui;
@@ -17,6 +18,15 @@ public class DispatchManager extends Gui implements DispatchAPI {
     private final DispatchMediator mediator;
     private final IconGui icon;
     private final IconOkGui iconOk;
+
+    @Override
+    public void update(){
+        super.update();
+        width = (int) Main.API.readMemoryDouble(address + 0x1F8);
+        height = (int) Main.API.readMemoryDouble(address + 0x200);
+        visible = Main.API.readMemoryBoolean(address + 0xB0); // is visible
+//        minimizable = Main.API.readMemoryBoolean(address + 0xC8);
+    }
 
     @Override
     public List<? extends RewardLoot> getRewardLoot() {
