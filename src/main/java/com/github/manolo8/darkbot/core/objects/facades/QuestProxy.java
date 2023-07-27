@@ -73,7 +73,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
             return title;
         }
 
-        public String getDescriptiuon() {
+        public String getDescription() {
             return description;
         }
     }
