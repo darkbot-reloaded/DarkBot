@@ -92,9 +92,7 @@ public class AstralGateProxy extends Updatable {
             this.lootId = API.readString(itemData, 0x48);
 
             itemStatsArr.update(API.readMemoryLong(address + 0x38));
-            synchronized (UPDATE_LOCKER) {
-                itemStatsArr.sync(itemStats, ItemStat::new);
-            }
+            itemStatsArr.sync(itemStats, ItemStat::new);
         }
 
         public boolean isEquipped() {
