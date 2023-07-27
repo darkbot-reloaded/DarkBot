@@ -42,6 +42,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
         private String category;
         private String description;
         private String title;
+        private int conditionsCount;
         private int id;
 
         @Override
@@ -55,6 +56,9 @@ public class QuestProxy extends Updatable implements API.Singleton {
             this.category = API.readMemoryString(address, 0x48);
             this.title = API.readMemoryString(address, 0x68);
             this.description = API.readMemoryString(address, 0x70);
+
+            long conditionsAddr = API.readMemoryLong(address + 0x38) & ByteUtils.ATOM_MASK;
+            this.conditionsCount = API.readMemoryInt(conditionsAddr + 0x30);
         }
 
         public int getCurrentQuestId() {
@@ -75,6 +79,10 @@ public class QuestProxy extends Updatable implements API.Singleton {
 
         public String getDescription() {
             return description;
+        }
+
+        public int getConditionsCount() {
+            return conditionsCount;
         }
     }
 }
