@@ -79,7 +79,7 @@ public class RefinementGui extends Gui implements API.Singleton {
 
         @Override
         public void update(long address) {
-            if (address != this.address || name == null || !name.contains("ore")) {
+            if (address != this.address || name == null || (!name.contains("ore") && !name.contains("lab"))) {
                 name = API.readMemoryString(address, 184);
 
                 if (name != null && !name.isEmpty()) {
