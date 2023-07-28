@@ -76,8 +76,8 @@ public class DispatchMediator extends Updatable implements API.Singleton {
         @Override
         public void update() {
             if (address <= 0) return;
-            this.amount = API.readMemoryInt(address + 0x20); // 1
-            this.lootId = API.readMemoryString(address, 0x28); // 1
+            this.amount = API.readMemoryInt(address + 0x20);
+            this.lootId = API.readMemoryString(address, 0x28);
         }
 
     }

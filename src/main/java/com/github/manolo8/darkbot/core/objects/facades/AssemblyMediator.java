@@ -104,7 +104,6 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
     }
 
-    @Getter
     @ToString
     public static class RowFilter extends Reporting {
         private final ItemFilter first = new ItemFilter();
@@ -125,15 +124,12 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         private String filterName = "";
         private boolean isChecked;
         private int row, col;
-        private double x, y;
 
         @Override
         public boolean updateAndReport() {
             if (address <= 0) return false;
             filterName = API.readString(address, 0x20);
             isChecked = API.readBoolean(address, 0x28, 0x1D0);
-            x = API.readDouble(address, 0x28, 0x158);
-            y = API.readDouble(address, 0x28, 0x160);
             // Always false, we only care about address itself changing, which reports true regardless
             return false;
         }
