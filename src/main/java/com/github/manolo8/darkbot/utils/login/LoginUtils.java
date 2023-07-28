@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.utils.login;
 
-import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.gui.login.LoginForm;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.Strings;
@@ -8,8 +7,8 @@ import com.github.manolo8.darkbot.utils.CaptchaAPI;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.IOUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
-import com.github.manolo8.darkbot.utils.http.Http;
-import com.github.manolo8.darkbot.utils.http.Method;
+import eu.darkbot.util.http.Http;
+import eu.darkbot.util.http.Method;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -25,37 +24,34 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LoginUtils {
     private static final Pattern LOGIN_PATTERN = Pattern.compile("\"bgcdw_login_form\" action=\"(.*)\"");
-    private static final Pattern DATA_PATTERN = Pattern.compile("\"src\": \"([^\"]*)\".*}, \\{(.*)}");
-
-    private static final Map<String, String> FORCED_PARAMS = new HashMap<>();
-    static {
-        String lang = I18n.getLocale().getLanguage();
-        if (!lang.isEmpty() && ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.FORCE_GAME_LANGUAGE)
-            FORCED_PARAMS.put("lang", lang);
-        FORCED_PARAMS.put("display2d", "2");
-        FORCED_PARAMS.put("autoStartEnabled", "1");
-    }
+    private static final Pattern DATA_PATTERN = Pattern.compile("\"src\": \"([^\"]*)\".*}, (\\{.*})");
 
     public static LoginData performUserLogin(StartupParams params) {
-        if (params.getAutoLogin()) return performAutoLogin(params.getAutoLoginProps());
+        if (params.getAutoLogin()) {
+            try {
+                return performAutoLogin(params.getAutoLoginProps());
+            } catch (LoginException e) {
+                System.err.println("Failed to perform autologin, falling back to login panel");
+                e.printStackTrace();
+            }
+        }
 
         LoginForm panel = new LoginForm();
 
         Popups.of("Login", panel)
-                .options(new Object[]{})
+                .options()
                 .border(BorderFactory.createEmptyBorder(0, 0, 5, 0))
                 .defaultButton(panel.getLoginBtn())
                 .showSync();
 
         LoginData loginData = panel.getResult();
-        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
+        if (loginData.isNotInitialized()) {
             System.out.println("Closed login panel, exited without logging in");
             System.exit(0);
         }
@@ -97,7 +93,7 @@ public class LoginUtils {
             System.err.println("Wrong credentials, check your username and password");
         }
 
-        if (loginData.getPreloaderUrl() == null || loginData.getParams() == null) {
+        if (loginData.isNotInitialized()) {
             System.err.println("Could not find preloader url or parameters, exiting bot.");
             System.exit(-1);
         }
@@ -199,19 +195,8 @@ public class LoginUtils {
                         .orElseThrow(() -> WrongCredentialsException.translated("gui.login.error.no_flash_embed")));
 
         Matcher m = DATA_PATTERN.matcher(flashEmbed);
-        if (m.find()) loginData.setPreloader(m.group(1), replaceParameters(m.group(2)));
-        else throw  WrongCredentialsException.translated("gui.login.error.flash_embed_fail");
-    }
-
-    private static String replaceParameters(String params) {
-        // update it here so on refresh can be used 2d or 3d
-        FORCED_PARAMS.put("display2d", ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.API_CONFIG.USE_3D ? "1" : "2");
-
-        params = params.replaceAll("\"", "").replaceAll(",", "&").replaceAll(": ", "=");
-        for (Map.Entry<String, String> replaces : FORCED_PARAMS.entrySet()) {
-            params = params.replaceAll(replaces.getKey() + "=[^&]+", replaces.getKey() + "=" + replaces.getValue());
-        }
-        return params;
+        if (m.find()) loginData.setPreloader(m.group(1), m.group(2));
+        else throw WrongCredentialsException.translated("gui.login.error.flash_embed_fail");
     }
 
     private static String getLoginUrl(String in) {

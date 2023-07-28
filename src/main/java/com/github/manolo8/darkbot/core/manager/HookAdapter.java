@@ -2,8 +2,11 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
+import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.API;
 import eu.darkbot.api.DarkHook;
 import eu.darkbot.api.PluginAPI;
@@ -66,7 +69,7 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
         if (callbacks != null)
             callbacks.forEach(CallbackHolder::checkCallback);
 
-        if (!hook.isTaskRunnerValid() && hero.address > 0xFFFF)
+        if (!hook.isTaskRunnerValid() && ByteUtils.isValidPtr(hero.address))
             hook.setTaskRunnerHook(guiAddress, 3, HookFlag.ENV.ordinal());
     }
 
@@ -102,7 +105,7 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
     }
 
     @Override
-    public void selectEntity(long addr, long vtable) {
+    public void selectEntity(Entity entity) {
         throw new UnsupportedOperationException();
     }
 
@@ -138,17 +141,17 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
 
     @Configuration("config.bot_settings.api_config.dark_hook_flags")
     public enum Flag {
-        TRAVEL(GameAPI.Capability.DIRECT_MOVE_SHIP),
-        COLLECT(GameAPI.Capability.DIRECT_COLLECT_BOX),
-        REFINE(GameAPI.Capability.DIRECT_REFINE);
+        TRAVEL(Capability.DIRECT_MOVE_SHIP),
+        COLLECT(Capability.DIRECT_COLLECT_BOX),
+        REFINE(Capability.DIRECT_REFINE);
 
-        private final GameAPI.Capability capability;
+        private final Capability capability;
 
-        Flag(GameAPI.Capability capability) {
+        Flag(Capability capability) {
             this.capability = capability;
         }
 
-        public static @Nullable Flag of(GameAPI.Capability capability) {
+        public static @Nullable Flag of(Capability capability) {
             for (Flag flag : values())
                 if (flag.capability == capability)
                     return flag;
@@ -217,10 +220,10 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
                 if (methodEnv != 0) hook.clearCallback(methodEnv); //already hooked? remove old methodEnv entry in native map
 
                 long address = scriptObject.get();
-                if (address <= 0xFFFF) return; //invalid address, return
-
-                methodEnv = hook.setMethodCallback(address, callback.methodIdx(),
-                        callback.hookFlag().ordinal(), object, method.getName(), JNIUtil.getJNIMethodSignature(method));
+                if (ByteUtils.isValidPtr(address)) {
+                    methodEnv = hook.setMethodCallback(address, callback.methodIdx(),
+                            callback.hookFlag().ordinal(), object, method.getName(), JNIUtil.getJNIMethodSignature(method));
+                }
             }
         }
     }

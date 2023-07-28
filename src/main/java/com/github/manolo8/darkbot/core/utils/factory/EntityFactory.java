@@ -24,7 +24,7 @@ import com.github.manolo8.darkbot.core.entities.bases.BaseStation;
 import com.github.manolo8.darkbot.core.entities.bases.BaseTurret;
 import com.github.manolo8.darkbot.core.entities.bases.QuestGiver;
 import com.github.manolo8.darkbot.core.manager.StarManager;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.utils.Offsets;
 import org.intellij.lang.annotations.Language;
 
 import java.util.function.BiFunction;
@@ -37,24 +37,30 @@ import static com.github.manolo8.darkbot.Main.API;
 public enum EntityFactory implements EntityBuilder {
     BOX             (Box::new,           "box_.*"),
     ORE             (Box.Ore::new,       "ore_.*"),
-    X2_BEACON       (Box.Beacon::new,    "beacon_.*"),
+    X2_BEACON       (Box.Beacon::new,    "beacon_.*"), //todo use me
     MINE            (Mine::new,          "mine_.*"),
     FIREWORK        (Entity::new,        "firework_box"),
 
     LOW_RELAY       (Relay::new,         "relay"),
-    NPC_BEACON      (MapNpc::new,        "npc-beacon.*"),
+    NPC_BEACON      (MapNpc::new,        "npc-beacon.*"), //todo use me
     SPACE_BALL      (SpaceBall::new,     "mapIcon_spaceball"),
 
-    CBS_ASTEROID    (BattleStation::new, "asteroid"),
+    CBS_ASTEROID    (BattleStation.Asteroid::new, "asteroid"),
     CBS_CONSTRUCTION(BattleStation::new, "cbs-construction"),
     CBS_MODULE      (BattleStation.Module::new, "wreck|module_.*"), // addr+112 moduleType string
     CBS_MODULE_CON  (BattleStation::new, "module-construction"),
     CBS_STATION     (BattleStation.Built::new, "battleStation"),
 
-    POD_HEAL        (StaticEntity.PodHeal::new,         "pod_heal"),               // Aegis/hammerclaw healing pods
-    BUFF_CAPSULE    (StaticEntity.BuffCapsule::new,     "buffCapsule_.*"),
-    BURNING_TRAIL   (StaticEntity.BurningTrail::new,    "burning_trail_entity_.*"),
-    PLUTUS_GENERATOR(StaticEntity.PlutusGenerator::new, "plutus-generator"),
+    // Aegis/hammerclaw healing pods
+    POD_HEAL              (StaticEntity.PodHeal::new,              "pod_heal"),
+    BUFF_CAPSULE          (StaticEntity.BuffCapsule::new,          "buffCapsule_.*"),
+    BURNING_TRAIL         (StaticEntity.BurningTrail::new,         "burning_trail_entity_1"),
+    BURNING_TRAIL_ENEMY   (StaticEntity.BurningTrailEnemy::new,    "burning_trail_entity_2"),
+    PLUTUS_GENERATOR      (StaticEntity.PlutusGenerator::new,      "plutus-generator"),
+    // red & green are different class types in-game
+    PLUTUS_GENERATOR_RED  (StaticEntity.PlutusGenerator::new,      "plutus-generator-red"),
+    PLUTUS_GENERATOR_GREEN(StaticEntity.PlutusGeneratorGreen::new, "plutus-generator-green"),
+    PET_BEACON            (StaticEntity.PetBeacon::new,            "pet_beacon"),
 
     BASE_TURRET     (BaseTurret::new,       "turret_.*"),       // Turrets around x-1 and x-8 bases
     REFINERY        (BaseRefinery::new,     "refinery_.*"),     // Refinery to sell ores at
@@ -63,7 +69,7 @@ public enum EntityFactory implements EntityBuilder {
     REPAIR_STATION  (BaseRepairStation::new,"repairstation_.*"),// Repair station inside bases
     QUEST_GIVER     (QuestGiver::new,       "questgiver_.*"),   // Quest givers on x-1, x-4, x-5 and x-8
     BASE_STATION    (BaseStation::new,      "station_.*"),      // Standalone station on 5-2
-    CTB_HOME_ZONE   (BasePoint::new,        "ctbHomeZone_.*"),
+    CTB_HOME_ZONE   (BasePoint::new,        "ctbHomeZone_.*"),  //todo use me
 
     PORTAL   (EntityFactory::getOrCreatePortal, "\\d+$"),
 
@@ -74,16 +80,14 @@ public enum EntityFactory implements EntityBuilder {
     PET      (Pet::new, EntityFactory::isPet),
     SHIP     (EntityFactory::isShip, EntityFactory::defineShipType), // Generic ship, redirects to PLAYER or NPC
     PLAYER   (Player::new),
-    NPC      (Npc::new),
-
-    UNKNOWN  (Entity::new, (asset, addr) -> false);
+    NPC      (Npc::new);
 
     // Constructor to create the entity of this type
     private final BiFunction<Integer, Long, ? extends Entity> constructor;
     // Test if the type matches for the asset & address provided
     private final BiPredicate<String, Long> typeMatcher;
     // Will mutate the type to a different (specialized) type in the bot
-    private final Function<Long, EntityFactory> typeModifier;
+    private final Function<Long, EntityBuilder> typeModifier;
 
 
     EntityFactory(BiFunction<Integer, Long, Entity> constructor) {
@@ -98,11 +102,11 @@ public enum EntityFactory implements EntityBuilder {
         this(constructor, typeMatcher, null);
     }
 
-    EntityFactory(BiPredicate<String, Long> typeMatcher, Function<Long, EntityFactory> typeModifier) {
+    EntityFactory(BiPredicate<String, Long> typeMatcher, Function<Long, EntityBuilder> typeModifier) {
         this(null, typeMatcher, typeModifier);
     }
 
-    EntityFactory(BiFunction<Integer, Long, Entity> constructor, BiPredicate<String, Long> typeMatcher, Function<Long, EntityFactory> typeModifier) {
+    EntityFactory(BiFunction<Integer, Long, Entity> constructor, BiPredicate<String, Long> typeMatcher, Function<Long, EntityBuilder> typeModifier) {
         this.constructor  = constructor;
         this.typeModifier = typeModifier;
         this.typeMatcher  = typeMatcher;
@@ -113,7 +117,7 @@ public enum EntityFactory implements EntityBuilder {
         return (asset, addr) -> p.matcher(asset).matches();
     }
 
-    public EntityFactory get(long address) {
+    public EntityBuilder get(long address) {
         return this.typeModifier == null ? this : this.typeModifier.apply(address);
     }
 
@@ -122,18 +126,13 @@ public enum EntityFactory implements EntityBuilder {
     }
 
     public static EntityBuilder find(long address) {
-        String assetId = getAssetId(address);
+        String assetId = Offsets.getEntityAssetId(address);
 
         for (EntityFactory type : EntityFactory.values()) {
             if (type.typeMatcher.test(assetId, address)) return type;
         }
 
-        return (id, addr) -> new Unknown(id, addr, assetId);
-    }
-
-    private static String getAssetId(long address) {
-        long temp = API.readMemoryLong(address, 48, 48, 16) & ByteUtils.ATOM_MASK;
-        return API.readMemoryString(temp, 64, 32, 24, 8, 16, 24).trim();
+        return createUnknown(assetId);
     }
 
     private static String getZoneKey(long address) {
@@ -160,14 +159,14 @@ public enum EntityFactory implements EntityBuilder {
                 (visible == 1 || visible == 0) && (c == 1 || c == 0) && d == 0;
     }
 
-    private static EntityFactory defineZoneType(long address) {
+    private static EntityBuilder defineZoneType(long address) {
         String key = getZoneKey(address);
-        return key.equals("NOA") ? BARRIER : key.equals("DMG") ? MIST_ZONE : UNKNOWN;
+        return key.equals("NOA") ? BARRIER : key.equals("DMG") ? MIST_ZONE : createUnknown(key);
     }
 
-    private static EntityFactory defineShipType(long address) {
+    private static EntityBuilder defineShipType(long address) {
         int isNpc = API.readMemoryInt(address + 112);
-        return isNpc == 1 ? NPC : isNpc == 0 ? PLAYER : UNKNOWN;
+        return isNpc == 1 ? NPC : isNpc == 0 ? PLAYER : createUnknown(null);
     }
 
     private static Portal getOrCreatePortal(int id, long address) {
@@ -179,5 +178,9 @@ public enum EntityFactory implements EntityBuilder {
         portal.update(address);
 
         return portal;
+    }
+
+    private static EntityBuilder createUnknown(String assetId) {
+        return (id, addr) -> new Unknown(id, addr, assetId);
     }
 }

@@ -26,7 +26,7 @@ public class HighlightProxy extends Updatable implements API.Singleton {
     private boolean checkAttacking(String key) {
         long categoryHighlightItem = proxyDictionary.getPtr(key);
 
-        if (categoryHighlightItem > 0xFFFF) {
+        if (ByteUtils.isValidPtr(categoryHighlightItem)) {
             highlightItems.update(categoryHighlightItem);
 
             for (int i = 0; i < highlightItems.getSize(); i++) {

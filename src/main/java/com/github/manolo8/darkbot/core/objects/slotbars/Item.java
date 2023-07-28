@@ -51,6 +51,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
         return this.associatedSlots.computeIfAbsent(type, l -> new HashSet<>());
     }
 
+    // TODO: 28.08.2022 Sometimes, after reload *some* items are probably invalid? Why?
     @Override
     public void update() {
         // There are *a lot* of items in-game
@@ -151,7 +152,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
 
     @Override
     public boolean isAvailable() {
-        return available;
+        return available || isActivatable(); //Firework ignite is not available but activatable?
     }
 
     @Override
@@ -172,6 +173,10 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
     @Override
     public eu.darkbot.api.game.items.ItemTimer getTimer() {
         return itemTimer.address == 0 ? null : itemTimer;
+    }
+
+    public void setItemUsed() {
+        setLastUsed(System.currentTimeMillis());
     }
 
     public void setLastUsed(long lastUsed) {
@@ -277,7 +282,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
+        if (this == o || selectableItem != null && selectableItem == o) return true;
         if (!(o instanceof SelectableItem)) return false;
 
         if (o instanceof Item) {

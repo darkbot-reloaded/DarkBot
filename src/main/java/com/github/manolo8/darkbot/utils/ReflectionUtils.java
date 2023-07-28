@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.extensions.plugins.PluginClassLoader;
 import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
 
 import java.io.IOException;

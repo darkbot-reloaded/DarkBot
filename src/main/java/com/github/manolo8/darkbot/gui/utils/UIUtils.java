@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.utils;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.ui.FlatBorder;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 
@@ -7,6 +8,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
+import java.net.URL;
+import java.util.Objects;
 
 public class UIUtils {
 
@@ -19,17 +22,38 @@ public class UIUtils {
             BORDER = UIManager.getColor("Component.borderColor"), // Normal border of things
             TAB_HIGLIGHT = UIManager.getColor("TabbedPane.underlineColor");
 
-    public static ImageIcon getIcon(String name) {
-        return new ImageIcon(new ImageIcon(UIUtils.class.getResource("/" + name + ".png")).getImage()
-                .getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+    public static FlatSVGIcon getSVGIcon(String name, int width, int height) {
+        URL url = UIUtils.class.getResource("/" + name + ".svg");
+        if (url != null) return getSvgIcon(url, width, height);
+
+        url = Objects.requireNonNull(UIUtils.class.getResource("/missing.svg"));
+        return getSvgIcon(url, width, height);
+    }
+
+    public static Icon getIcon(String name) {
+        // Prefer SVG if available
+        URL url = UIUtils.class.getResource("/" + name + ".svg");
+        if (url != null) return getSvgIcon(url, 16, 16);
+
+        // Fallback to png
+        url = UIUtils.class.getResource("/" + name + ".png");
+        if (url != null) return getPngIcon(url);
+
+        System.err.println("Failed to locate icon: '" + name + "'");
+        url = Objects.requireNonNull(UIUtils.class.getResource("/missing.svg"));
+        return getSvgIcon(url, 16, 16);
+    }
+
+    private static FlatSVGIcon getSvgIcon(URL url, int width, int height) {
+        return new FlatSVGIcon(url).derive(width, height);
+    }
+
+    private static Icon getPngIcon(URL url) {
+        return new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
     }
 
     public static Image getImage(String name) {
-        return getImage(name, "png");
-    }
-
-    public static Image getImage(String name, String extension) {
-        return new ImageIcon(UIUtils.class.getResource("/" + name + "." + extension)).getImage();
+        return new ImageIcon(Objects.requireNonNull(UIUtils.class.getResource("/" + name + ".png"))).getImage();
     }
 
     public static Insets getInsetConfig(boolean textPadding) {
@@ -48,10 +72,6 @@ public class UIUtils {
 
     public static Border getBorder() {
         return new FlatBorder();
-    }
-
-    public static Border getUnfocusableBorder() {
-        return BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor"));
     }
 
     public static Color blendColor(Color color, int alpha) {
@@ -78,4 +98,15 @@ public class UIUtils {
         return label;
     }
 
+    public static Color darker(Color c, double factor) {
+        return new Color(Math.max((int) (c.getRed() * factor), 0),
+                Math.max((int) (c.getGreen() * factor), 0),
+                Math.max((int) (c.getBlue() * factor), 0),
+                c.getAlpha());
+    }
+
+    public static Color getTrafficLight(double value, double maximum) {
+        double hue = 1 - Math.min(maximum, Math.max(0, value)) / maximum;
+        return Color.getHSBColor((float) (hue * 0.35), 0.7f, 0.55f);
+    }
 }

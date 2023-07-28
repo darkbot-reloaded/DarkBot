@@ -2,19 +2,26 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.core.objects.ChatGui;
 import com.github.manolo8.darkbot.core.objects.Gui;
+import com.github.manolo8.darkbot.core.objects.IconGui;
+import com.github.manolo8.darkbot.core.objects.IconOkGui;
 import com.github.manolo8.darkbot.core.objects.LogoutGui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.RefinementGui;
+import com.github.manolo8.darkbot.core.objects.SettingsGui;
 import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
+import com.github.manolo8.darkbot.core.objects.gui.GateSpinnerGui;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.managers.GameScreenAPI;
+import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -61,17 +68,26 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final PetManager pet;
     public final OreTradeGui oreTrade;
     public final GroupManager group;
+    public final SettingsGui settingsGui;
+    public final ChatGui chat;
 
+    public final Gui assembly;
+
+    public final Timer loggedInTimer = Timer.get(15_000);
     private LoadStatus checks = LoadStatus.WAITING;
+
     private enum LoadStatus {
         WAITING(gm -> gm.main.hero.address != 0 && !gm.connecting.isVisible()),
-        CLICKING_AMMO(gm -> {
-            API.keyboardClick(gm.main.config.LOOT.AMMO_KEY);
+        AFTER_LOGIN(gm -> {
+            API.keyboardClick(gm.main.config.LOOT.AMMO_KEY, false);
+            API.keyboardClick(gm.main.config.LOOT.AMMO_KEY, false);
+            gm.loggedInTimer.activate();
             return true;
         }),
         DONE(q -> false);
 
         final Predicate<GuiManager> canAdvance;
+
         LoadStatus(Predicate<GuiManager> next) {
             this.canAdvance = next;
         }
@@ -112,16 +128,25 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.astralGate = register("rogue_lite");
         this.astralSelection = register("rogue_lite_selection");
         this.refinement = register("refinement", RefinementGui.class);
+        this.chat = register("chat", ChatGui.class);
+        this.settingsGui = register("settings", SettingsGui.class);
+
+        register("dispatch", DispatchManager.class);
+        register("popup_generic_icon", IconGui.class);
+        register("popup_generic_icon_ok", IconOkGui.class);
+        this.assembly = register("assembly");
+
+        register("ggBuilder", GateSpinnerGui.class);
 
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }
 
-    public Gui register(String key) {
+    private Gui register(String key) {
         return register(key, Gui.class);
     }
 
     @SuppressWarnings({"unchecked", "CastCanBeRemovedNarrowingVariableType"})
-    public <T extends Gui> T register(String key, Class<T> gui) {
+    private <T extends Gui> T register(String key, Class<T> gui) {
         Gui guiFix = pluginAPI.requireInstance(gui); // Workaround for a java compiler assertion bug having issues with types
         this.guis.addLazy(key, guiFix::update);
         this.registeredGuis.put(key, guiFix);
@@ -182,6 +207,10 @@ public class GuiManager implements Manager, GameScreenAPI {
         }
     }
 
+    public boolean canJumpPortal() {
+        return loggedInTimer.isInactive();
+    }
+
     public boolean tryRevive() {
         if (repairManager.setBeforeReviveTime())
             return false;
@@ -199,14 +228,16 @@ public class GuiManager implements Manager, GameScreenAPI {
         if (System.currentTimeMillis() - validTime > 90_000 + (main.hero.map.id == -1 ? 180_000 : 0)) {
             System.out.println("Triggering refresh: gui manger was invalid for too long. " +
                     "(Make sure your hp fills up, equip an auto-repair CPU if you're missing one)");
+
+            clearCache();
             API.handleRefresh();
             validTime = System.currentTimeMillis();
         }
     }
 
     public boolean canTickModule() {
-
-        if (lostConnection.visible) {
+        // visible var is sometimes false even if lost connection window is visible
+        if (lostConnection.address > 0) {
             //Wait 2.5 seconds to reconnect
             if (lostConnection.lastUpdatedOver(2500)) {
                 tryReconnect(lostConnection);
@@ -217,6 +248,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
             if (connecting.lastUpdatedOver(30000)) {
                 System.out.println("Triggering refresh: connection window stuck for too long");
+                clearCache();
                 API.handleRefresh();
                 connecting.reset();
             }
@@ -253,7 +285,6 @@ public class GuiManager implements Manager, GameScreenAPI {
         }
 
 
-
         HeroManager hero = main.hero;
         if (this.needRefresh && System.currentTimeMillis() - lastRepairAttempt > 5_000) {
             this.needRefresh = false;
@@ -276,6 +307,12 @@ public class GuiManager implements Manager, GameScreenAPI {
         checkInvalid();
 
         return main.hero.locationInfo.isLoaded();
+    }
+
+    private void clearCache() {
+        if (main.config.BOT_SETTINGS.API_CONFIG.CLEAR_CACHE_ON_STUCK &&
+                API.hasCapability(Capability.HANDLER_CLEAR_CACHE))
+            API.clearCache(".*");
     }
 
     @Override
@@ -361,8 +398,7 @@ public class GuiManager implements Manager, GameScreenAPI {
                 if (closed[i]) continue;
 
                 Gui gui = managedGuis[i];
-                if (gui.lastUpdatedOver(5000) && gui.visible) {
-                    gui.show(false);
+                if (gui.lastUpdatedOver(5000) && gui.show(false)) {
                     closed[i] = true;
                 }
             }

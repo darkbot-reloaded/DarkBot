@@ -2,13 +2,12 @@ package com.github.manolo8.darkbot.core.utils;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ZoneInfo;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.MouseManager;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
-import com.github.manolo8.darkbot.core.utils.pathfinder.PathPoint;
 import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.Locatable;
@@ -43,17 +42,17 @@ public class Drive implements MovementAPI {
     private long lastClick;
     public long lastMoved;
 
-    public Drive(Main main, MapManager map) {
+    public Drive(Main main, MapManager map, PathFinder pathFinder) {
         this.main = main;
         this.map = map;
+        this.pathFinder = pathFinder;
         this.mouse = new MouseManager(map);
-        this.pathFinder = new PathFinder(map);
     }
 
     public void checkMove() {
         this.heroLoc = main.hero.locationInfo;
 
-        // Path-finder changed and bot is already traveling, re-create route
+        // Pathfinder changed and bot is already traveling, re-create route
         if (endLoc != null && pathFinder.changed() && tempDest == null) tempDest = endLoc;
 
         boolean newPath = tempDest != null;
@@ -118,7 +117,7 @@ public class Drive implements MovementAPI {
         if (System.currentTimeMillis() - lastClick > 200) {
             lastClick = System.currentTimeMillis();
 
-            if (Main.API.hasCapability(GameAPI.Capability.DIRECT_MOVE_SHIP)) Main.API.moveShip(loc);
+            if (Main.API.hasCapability(Capability.DIRECT_MOVE_SHIP)) Main.API.moveShip(loc);
             else mouse.clickLoc(loc);
         }
     }
@@ -147,7 +146,7 @@ public class Drive implements MovementAPI {
             Location stopLoc = heroLoc.now.copy();
             stopLoc.toAngle(heroLoc.now, heroLoc.last.angle(heroLoc.now), 100);
 
-            if (Main.API.hasCapability(GameAPI.Capability.DIRECT_MOVE_SHIP)) Main.API.moveShip(stopLoc);
+            if (Main.API.hasCapability(Capability.DIRECT_MOVE_SHIP)) Main.API.moveShip(stopLoc);
             else mouse.clickLoc(stopLoc);
         }
 
@@ -155,6 +154,7 @@ public class Drive implements MovementAPI {
         if (!paths.isEmpty()) paths = new LinkedList<>();
     }
 
+    @Deprecated
     public void clickCenter(boolean single, Location aim) {
         mouse.clickCenter(single, aim);
     }
@@ -218,6 +218,11 @@ public class Drive implements MovementAPI {
         return !paths.isEmpty() || heroLoc.isMoving();
     }
 
+    @Override
+    public boolean isMoving(long inTime) {
+        return lastMoved + inTime >= System.currentTimeMillis();
+    }
+
     public Location movingTo() {
         return endLoc == null ? heroLoc.now.copy() : endLoc.copy();
     }
@@ -228,7 +233,7 @@ public class Drive implements MovementAPI {
     }
 
     @Override
-    public void jumpPortal(Portal portal) {
+    public void jumpPortal(@NotNull Portal portal) {
         main.hero.jumpPortal(portal);
     }
 
@@ -278,5 +283,9 @@ public class Drive implements MovementAPI {
     @Override
     public boolean isInPreferredZone(Locatable locatable) {
         return map.preferred.contains(locatable);
+    }
+
+    public boolean movementInterrupted(long inTime) {
+        return main.getGui().getMapDrawer().getLastMapClick() + inTime > System.currentTimeMillis();
     }
 }

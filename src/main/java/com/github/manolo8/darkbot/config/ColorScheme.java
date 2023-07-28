@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 public class ColorScheme {
 
     public @Option @Col(alpha = false) Color BACKGROUND = new Color(0x263238);
+    public @Option @Col(alpha = false) Color RADIATION = new Color(0x372638);
     public @Option Color TEXT = new Color(0xF2F2F2);
     public @Option Color TEXT_DARK = new Color(0xBBBBBB);
     public @Option Color GOING = new Color(0x8F9BFF);
@@ -21,6 +22,12 @@ public class ColorScheme {
     public @Option Color ALLIES = new Color(0x29B6F6);
     public @Option Color ENEMIES = new Color(0xd50000);
     public @Option Color NPCS = new Color(0xAA4040);
+    public @Option Color GROUP_MEMBER = new Color(0xFFD700);
+
+    public @Option Color LOW_RELAYS = new Color(0x00D54B);
+    public @Option Color SPACE_BALLS = new Color(0x00D595);
+    public @Option Color OTHER_ENTITIES = new Color(0x1647A1);
+
     public @Option Color TARGET = NPCS.darker();
     public @Option Color PET = new Color(0x004c8c);
     public @Option Color PET_IN = new Color(0xc56000);
@@ -64,7 +71,7 @@ public class ColorScheme {
     public static class Fonts {
         public @Option Font BIG = new Font("Consolas", Font.PLAIN, 32);
         public @Option Font MID = new Font(Font.SANS_SERIF, Font.PLAIN, 18);
-        public @Option Font SMALL = new Font("Consolas", Font.PLAIN, 12);
+        public @Option Font SMALL = new Font("Consolas", Font.PLAIN, 13);
         public @Option Font TINY = new Font(Font.SANS_SERIF, Font.PLAIN, 9);
     }
 

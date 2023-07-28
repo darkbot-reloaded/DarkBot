@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import eu.darkbot.util.Timer;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.function.LongPredicate;
@@ -54,6 +55,8 @@ public class ByteUtils {
 
     public static final int OBJECT_TYPE = 0b001;
     public static final int STRING_TYPE = 0b010;
+
+    public static final int BAD_PTR = 0xFFFF;
 
     /**
      * Constant value which means that reference to the object,
@@ -117,6 +120,26 @@ public class ByteUtils {
         return b;
     }
 
+    public static boolean isValidPtr(long ptr) {
+        return ptr > BAD_PTR;
+    }
+
+    public static long tagInteger(long value) {
+        return (value << 3) | 6;
+    }
+
+    public static boolean isScriptableObjectValid(long scriptableObject) {
+        if (!isValidPtr(scriptableObject)) return false;
+        // contains references count & GC flags
+        int composite = Main.API.readInt(scriptableObject + 8);
+        return composite > 0;
+    }
+
+    public static long getClassClosure(long scriptObject) {
+        long adr = Main.API.readLong(scriptObject, 0x18, 0x20) & ATOM_MASK;
+        return Main.API.readLong(adr + 0x10) & ATOM_MASK;
+    }
+
     public static String readObjectName(long object) {
         return Main.API.readString(object, 0x10, 0x28, 0x90);
     }
@@ -135,9 +158,9 @@ public class ByteUtils {
         }
 
         private class StrLocation {
-            private long address, base;
+            private long address, base, sizeAndFlags;
             private int size;
-            private boolean width8;
+            private boolean width8, dependent;
 
             private StrLocation() {}
 
@@ -146,12 +169,14 @@ public class ByteUtils {
                 this.base = copy.base;
                 this.size = copy.size;
                 this.width8 = copy.width8;
+                this.sizeAndFlags = copy.sizeAndFlags;
+                this.dependent = copy.dependent;
             }
 
             private void setAddress(long address) {
                 this.address = address;
 
-                long sizeAndFlags = reader.readLong(address + 32);
+                this.sizeAndFlags = reader.readLong(address + 32);
                 int size = (int) sizeAndFlags; // lower 32bits
                 if (size == 0) {
                     this.size = 0;
@@ -161,24 +186,35 @@ public class ByteUtils {
                 }
 
                 int flags  = (int) (sizeAndFlags >> 32); // high 32bits
-                int type   = (flags & 0b110) >> 1;
+                this.dependent = ((flags & 0b110) >> 1) == TYPE_DEPENDENT;
                 int width = (flags & 0b001);
 
                 this.size  = (size << width);
                 this.width8 = width == WIDTH_8;
-                if (type == TYPE_DEPENDENT)
+                if (dependent)
                     this.base = reader.readLong(address, 24, 16) + reader.readInt(address + 16);
                 else
                     this.base = reader.readLong(address + 16);
             }
 
-            private String read() {
+            private @Nullable String read() {
                 if (size == 0) return "";
                 // assume that string sizes over 1024 or below 0 are invalid
                 if (size > 1024 || size < 0) return null;
 
                 return new String(reader.readBytes(base, size),
                         width8 ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_16LE);
+            }
+
+            private boolean hasChanged() {
+                long sizeAndFlags = reader.readLong(address + 32);
+                if (sizeAndFlags != this.sizeAndFlags) return true;
+
+                long base;
+                if (dependent) base = reader.readLong(address, 24, 16) + reader.readInt(address + 16);
+                else base = reader.readLong(address + 16);
+
+                return base != this.base;
             }
 
             @Override
@@ -208,7 +244,9 @@ public class ByteUtils {
         private final StrLocation CACHED = new StrLocation();
 
         public String readString(long address) {
-            if (address == 0) return null;
+            if (!isScriptableObjectValid(address)) return null;
+            if (Main.API.readLong(address) != BotInstaller.STRING_OBJECT_VTABLE)
+                return null;
             CACHED.setAddress(address);
 
             // Attempt read in cache
@@ -217,7 +255,10 @@ public class ByteUtils {
 
             result = CACHED.read();
             if (result != null && !result.isEmpty()) {
-                stringCache.put(new StrLocation(CACHED), result);
+                if (CACHED.hasChanged()) {
+                    System.out.println("String header has changed!"); // return null maybe?
+                    return null;
+                } else stringCache.put(new StrLocation(CACHED), result);
             }
 
             return result;
@@ -238,6 +279,8 @@ public class ByteUtils {
         private byte[] tableData = null;
 
         /**
+         * May cache the indexes.
+         * Index for closures is always the same
          * @author Alph4rd
          */
         @Override

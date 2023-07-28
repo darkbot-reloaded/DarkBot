@@ -1,10 +1,7 @@
 package com.github.manolo8.darkbot.extensions.features.handlers;
 
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
-import eu.darkbot.api.API;
 import eu.darkbot.api.extensions.selectors.PrioritizedSupplier;
-import eu.darkbot.api.utils.Inject;
 
 import java.util.Comparator;
 import java.util.List;
@@ -21,7 +18,7 @@ public abstract class AbstractSelectorHandler<T, P, PS extends PrioritizedSuppli
     private List<PS> suppliers;
 
     private final Comparator<PS> COMPARATOR = Comparator.comparing(PS::getPriority,
-                    Comparator.nullsLast(Comparator.comparingInt(PrioritizedSupplier.Priority::ordinal)))
+                    Comparator.nullsLast(Comparator.comparingInt(PrioritizedSupplier.Priority::ordinal).reversed()))
             .thenComparing(ps -> ps == last);
 
     public AbstractSelectorHandler(Function<T, PS> extractor) {
@@ -56,4 +53,7 @@ public abstract class AbstractSelectorHandler<T, P, PS extends PrioritizedSuppli
         return null;
     }
 
+    public PS getLastUsedSupplier() {
+        return last;
+    }
 }

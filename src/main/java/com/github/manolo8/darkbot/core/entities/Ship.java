@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.entities;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.Health;
 import com.github.manolo8.darkbot.core.objects.PlayerInfo;
@@ -12,7 +13,6 @@ import eu.darkbot.api.game.other.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -29,6 +29,8 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     public int formationId; // later move it up to Player.class
     public boolean invisible;
     public long timer;
+
+    private Lock lockType = Lock.UNKNOWN;
 
     public Ship() {}
 
@@ -47,6 +49,12 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
         if (temp != null) timer = temp;
     }
 
+    @Override
+    public void added(Main main) {
+        super.added(main);
+        attackTarget.added(main);
+    }
+
     public boolean isAttacking(Ship other) {
         return shipInfo.target == other.address;
     }
@@ -55,7 +63,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
         return isAiming((Locatable) other);
     }
 
-    private final Target attackTarget = new Target();
+    protected final Target attackTarget = new Target();
     private long lockPtr;
     private int shipId;
 
@@ -73,6 +81,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
         invisible = API.readMemoryBoolean(API.readMemoryLong(address + 160) + 32);
 
         shipId = API.readInt(address, 192, 76);
+        lockType = Lock.of(API.readMemoryInt(lockPtr, 48, 40));
     }
 
     @Override
@@ -130,9 +139,14 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     }
 
 
-    private class Target extends Updatable {
-        private Entity targetedEntity;
-        private boolean laserAttacking;
+    public static class Target extends Updatable {
+        public Entity targetedEntity;
+        public boolean laserAttacking;
+        private Main main;
+
+        public void added(Main main) {
+            this.main = main;
+        }
 
         @Override
         public void update() {
@@ -143,17 +157,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
             if (entityPtr == 0) targetedEntity = null;
             else if (targetedEntity == null || entityPtr != targetedEntity.address) {
-
-                if (entityPtr == main.hero.address) {
-                    targetedEntity = main.hero;
-
-                } else if (entityPtr == main.hero.pet.address) {
-                    targetedEntity = main.hero.pet;
-
-                } else targetedEntity = main.mapManager.entities.allEntities.stream()
-                        .flatMap(Collection::stream)
-                        .filter(entity -> entity.address == entityPtr)
-                        .findAny().orElse(null);
+                targetedEntity = main.mapManager.entities.findEntityByAddress(entityPtr);
             }
         }
     }
@@ -180,7 +184,7 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
     @Override
     public Lock getLockType() {
-        return Lock.of(API.readMemoryInt(lockPtr, 48, 40));
+        return lockType;
     }
 
     @Override
@@ -201,6 +205,16 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
     @Override
     public boolean isAttacking() {
         return attackTarget.laserAttacking;
+    }
+
+    @Override
+    public boolean isMoving() {
+        return shipInfo.isMoving();
+    }
+
+    @Override
+    public boolean isMoving(long inTime) {
+        return shipInfo.isMoving(inTime);
     }
 
     @Override

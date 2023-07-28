@@ -1,18 +1,10 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.backpage.entities.Drone;
-import com.github.manolo8.darkbot.backpage.entities.Hangar;
-import com.github.manolo8.darkbot.backpage.entities.Item;
-import com.github.manolo8.darkbot.backpage.entities.ItemInfo;
-import com.github.manolo8.darkbot.backpage.entities.ShipInfo;
+import com.github.manolo8.darkbot.backpage.entities.*;
 import com.github.manolo8.darkbot.utils.Base64Utils;
 import com.github.manolo8.darkbot.utils.http.Method;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
@@ -24,7 +16,7 @@ import java.util.function.Consumer;
 @Deprecated
 public class LegacyHangarManager {
 
-    private static final Gson GSON = new Gson();
+    private final Gson GSON;
     private static final JsonParser JSON_PARSER = new JsonParser();
     private static final Type DRONE_LIST = new TypeToken<List<Drone>>(){}.getType();
     private static final Type ITEMINFO_LIST = new TypeToken<List<ItemInfo>>(){}.getType();
@@ -52,6 +44,18 @@ public class LegacyHangarManager {
         this.items = new ArrayList<>();
         this.itemInfos = new ArrayList<>();
         this.shipInfos = new ArrayList<>();
+        this.GSON = backpageManager.getGson();
+    }
+
+    public String getDataInventory(String params) {
+        try {
+            return backpageManager.getConnection(params, Method.GET, 2500)
+                    .setRawHeader("Content-Type", "application/x-www-form-urlencoded")
+                    .consumeInputStream(Base64Utils::decode);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public boolean changeHangar(String hangarId) {

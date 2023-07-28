@@ -1,22 +1,18 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.utils.http.Http;
-import com.github.manolo8.darkbot.utils.http.Method;
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
+import eu.darkbot.util.http.Http;
+import eu.darkbot.util.http.Method;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Adaptation of original source: https://gist.github.com/k3kdude/fba6f6b37594eae3d6f9475330733bdb
+ * Adaptation of original source: <a href="https://gist.github.com/k3kdude/fba6f6b37594eae3d6f9475330733bdb">source</a>
  */
 public class DiscordWebhook {
-    private static final Gson GSON = new Gson();
-
     private String content;
     private String username;
     @SerializedName("avatar_url") private String avatarUrl;
@@ -55,7 +51,7 @@ public class DiscordWebhook {
 
         return Http.create(url, Method.POST)
                 .setRawHeader("Content-Type", "application/json; charset=UTF-8")
-                .setBody(GSON.toJson(this).getBytes(StandardCharsets.UTF_8))
+                .setJsonBody(this)
                 .getConnection().getResponseCode();
     }
 

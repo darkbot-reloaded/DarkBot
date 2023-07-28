@@ -1,12 +1,13 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.gui.utils.Popups;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RuntimeUtil {
 
@@ -35,13 +36,21 @@ public class RuntimeUtil {
                     command[0] + "\n\n" +
                     "This can run anything, if you did not request it yourself, deny it.";
 
-            int result = JOptionPane.showConfirmDialog(HeroManager.instance.main.getGui(),
-                    new Object[]{message, alwaysAllow},
-                    "Run external program?",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE);
+            AtomicBoolean accepted = new AtomicBoolean(false);
 
-            if (result != JOptionPane.YES_OPTION) return false;
+            JButton run = new JButton("Run");
+            run.addActionListener(a -> {
+                if (isUserTriggered()) accepted.set(true);
+                SwingUtilities.getWindowAncestor(run).setVisible(false);
+            });
+
+            Popups.of("Run external program?", new Object[]{message, alwaysAllow}, JOptionPane.WARNING_MESSAGE)
+                    .alwaysOnTop(true)
+                    .options(run, "Cancel")
+                    .defaultButton(run)
+                    .showSync();
+
+            if (!accepted.get()) return false;
             if (alwaysAllow.isSelected()) allowed.add(command[0]);
         }
 
@@ -60,8 +69,6 @@ public class RuntimeUtil {
             isUser &= className.startsWith("java.awt.") ||
                     className.startsWith("javax.swing.") ||
                     className.startsWith("java.security.");
-
-            System.out.println(className + "#" + element.getMethodName() + " \t " + isUser);
         }
         return isUser;
     }

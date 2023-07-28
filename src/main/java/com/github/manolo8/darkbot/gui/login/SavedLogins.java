@@ -45,6 +45,11 @@ public class SavedLogins extends JPanel implements LoginScreen {
                 } else {
                     credentials.decrypt(password);
                     loaded = true;
+
+                    // do not ask for master password again if was empty
+                    if (password.length == 0) {
+                        ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.OTHER.DISABLE_MASTER_PASSWORD = true;
+                    }
                 }
             } else {
                 loaded = true;

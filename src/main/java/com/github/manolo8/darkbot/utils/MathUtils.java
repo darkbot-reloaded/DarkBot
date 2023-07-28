@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.utils;
 public class MathUtils {
 
     public static final double TAU = Math.PI * 2;
+    public static final double HALF_PI = Math.PI * 0.5;
 
     public static double angleDiff(double alpha, double beta) {
         double phi = Math.abs(beta - alpha) % TAU;
@@ -27,4 +28,7 @@ public class MathUtils {
         return (Comparable<T>) toNumber(number, type);
     }
 
+    public static boolean isPowerOfTen(int value) {
+        return (Math.log10(value) % 1.0) == 0;
+    }
 }

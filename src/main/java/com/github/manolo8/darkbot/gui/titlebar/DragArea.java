@@ -3,13 +3,12 @@ package com.github.manolo8.darkbot.gui.titlebar;
 import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
-public class DragArea extends JPanel implements SimpleMouseListener {
+public class DragArea extends JComponent implements SimpleMouseListener {
 
     private final JFrame frame;
 
@@ -19,6 +18,10 @@ public class DragArea extends JPanel implements SimpleMouseListener {
     DragArea(JFrame frame) {
         this.frame = frame;
 
+        setMinimumSize(new Dimension(0, 0));
+        setPreferredSize(new Dimension(0, 0));
+        setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+
         setBorder(UIUtils.getPartialBorder(1, 0, 1, 0));
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -26,19 +29,19 @@ public class DragArea extends JPanel implements SimpleMouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        Point dragAreaLoc = getLocationOnScreen();
+        Point frameLoc = frame.getLocationOnScreen();
         Point clickLoc = e.getLocationOnScreen();
-        internalX = (clickLoc.x - dragAreaLoc.x) / (double) getWidth();
-        internalY = (clickLoc.y - dragAreaLoc.y) / (double) getHeight();
+        internalX = (clickLoc.x - frameLoc.x) / (double) frame.getWidth();
+        internalY = (clickLoc.y - frameLoc.y) / (double) frame.getHeight();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         WindowUtils.setMaximized(frame, false);
 
-        Point clickLoc = e.getLocationOnScreen();
-        Point dragAreaLoc = getLocation();
-        frame.setLocation(clickLoc.x - (int)(internalX * getWidth()) - dragAreaLoc.x, clickLoc.y - (int) (internalY * getHeight()) - dragAreaLoc.y);
+        Point mouseLoc = e.getLocationOnScreen();
+        frame.setLocation(mouseLoc.x - (int)(internalX * frame.getWidth()),
+                mouseLoc.y - (int) (internalY * frame.getHeight()));
     }
 
     @Override
@@ -53,18 +56,4 @@ public class DragArea extends JPanel implements SimpleMouseListener {
         if (e.getClickCount() == 2) WindowUtils.toggleMaximized(frame);
     }
 
-    public static class Info extends DragArea {
-
-        private final JLabel info = new JLabel();
-
-        Info(JFrame frame) {
-            super(frame);
-            setLayout(new MigLayout("ins 0", "push[]push", "push[]push"));
-            add(this.info, "grow");
-        }
-
-        public void setInfo(String info) {
-            this.info.setText(info);
-        }
-    }
 }

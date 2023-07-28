@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.extensions.plugins;
 
 import com.github.manolo8.darkbot.core.utils.Lazy;
+import eu.darkbot.api.extensions.FeatureException;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -23,6 +24,26 @@ public class IssueHandler {
     public IssueHandler(IssueHandler parent) {
         this.parent = parent;
         this.listener.add(uiListener::send);
+    }
+
+    public void handleTickFeatureException(PluginIssue.Level defaultLevel, Throwable e) {
+        handleFeatureException(defaultLevel, "bot.issue.feature.failed_to_tick", e);
+    }
+
+    /**
+     * @return true if feature have any critical issue, false otherwise
+     */
+    public void handleFeatureException(PluginIssue.Level defaultLevel, String defaultMessage, Throwable e) {
+        FeatureException fe = FeatureException.find(e);
+        if (fe != null) {
+            String message = fe.getMessage();
+            String description = fe.getDescription() == null ? createDescription(fe.getCause()) : fe.getDescription();
+            PluginIssue.Level level = PluginIssue.Level.values()[fe.getLevel().ordinal()];
+
+            add(new PluginIssue(message, description, level, fe));
+        } else {
+            add(new PluginIssue(defaultMessage, IssueHandler.createDescription(e), defaultLevel, e));
+        }
     }
 
     public void addInfo(String message, String description) {
@@ -67,8 +88,18 @@ public class IssueHandler {
         return ste.getClassName() + "." + ste.getMethodName() + "(" + code + ")";
     }
 
-    public void add(PluginIssue issue) {
-        if (this.issues.add(issue)) listener.send(this);
+    public void add(PluginIssue pluginIssue) {
+        if (issues.add(pluginIssue)) {
+            listener.send(this);
+            pluginIssue.increaseAndPrint();
+        } else {
+            for (PluginIssue issue : issues) {
+                if (issue.equals(pluginIssue)) {
+                    issue.increaseAndPrint();
+                    break;
+                }
+            }
+        }
     }
 
     public void add(String messageKey, String description, PluginIssue.Level level) {

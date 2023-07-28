@@ -4,7 +4,7 @@ How to run:
 - Clone the repository
 - Get the latest full-release on darkbot's discord https://discord.gg/uXHnZJ9
 - Unzip the release in a known folder outside of the project
-- Run `mvn clean install`
+- Run `gradle clean build`
 - Add Run/Debug configuration:
   - Main class: com.github.manolo8.darkbot.Bot
   - Working directory: wherever you unzipped the release

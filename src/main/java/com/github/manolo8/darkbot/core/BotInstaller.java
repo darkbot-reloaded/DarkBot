@@ -1,8 +1,10 @@
 package com.github.manolo8.darkbot.core;
 
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import eu.darkbot.api.API;
+import eu.darkbot.util.Timer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -26,11 +28,11 @@ public class BotInstaller implements API.Singleton {
     public final Lazy<Long> connectionManagerAddress = new Lazy<>();
     public static int SEP;
 
-    private long timer;
+    private final Timer invalidTimer = Timer.get();
 
     public BotInstaller() {
         this.invalid.add(value -> {
-            if (value) timer = System.currentTimeMillis();
+            if (!value) invalidTimer.disarm();
         });
     }
 
@@ -46,7 +48,7 @@ public class BotInstaller implements API.Singleton {
             return true;
         }
 
-        if (API.readMemoryLong(mainApplicationAddress.get() + 1344) == mainAddress.get()) {
+        if (API.isValid() && API.readMemoryLong(mainApplicationAddress.get() + 1344) == mainAddress.get()) {
             if (heroInfoAddress.get() == 0) checkUserData();
 
             if (connectionManagerAddress.get() == 0) {
@@ -69,8 +71,8 @@ public class BotInstaller implements API.Singleton {
             int speed = API.readMemoryInt(closure + 56);
             int bool = API.readMemoryInt(closure + 60);
             int val = API.readMemoryInt(closure + 64);
-            int cargo = API.readMemoryInt(API.readMemoryLong(closure + 264) + 40);
-            int maxCargo = API.readMemoryInt(API.readMemoryLong(closure + 272) + 40);
+            int cargo = API.readMemoryInt(API.readMemoryLong(closure + 304) + 40);
+            int maxCargo = API.readMemoryInt(API.readMemoryLong(closure + 312) + 40);
 
             return heroId == API.readMemoryInt(closure + 0x30)
                    && level >= 0 && level <= 100
@@ -125,11 +127,27 @@ public class BotInstaller implements API.Singleton {
         // address + 280 - starts old pattern here
     }
 
+    private long lastInternetRead;
     private void checkInvalid() {
-        if (timer == 0 || System.currentTimeMillis() - timer < 180000) return;
+        // Background only api ignores invalid checks
+        if (API.hasCapability(Capability.BACKGROUND_ONLY)) return;
 
-        API.handleRefresh();
-        timer = System.currentTimeMillis();
-        System.out.println("Triggering refresh: bot installer was invalid for too long");
+        if (API.hasCapability(Capability.HANDLER_INTERNET_READ_TIME)) {
+            long lastRead = API.lastInternetReadTime();
+            if (lastInternetRead != lastRead) {
+                lastInternetRead = lastRead;
+                invalidTimer.activate(60_000); // decrypting of main.swf can be tough
+            } else if (!invalidTimer.isArmed()) invalidTimer.activate(60_000);
+
+        } else if (!invalidTimer.isArmed()) invalidTimer.activate(150_000); // 2.5 min
+
+        // timer is disarmed on refresh and on valid tick
+        if (invalidTimer.tryDisarm()) {
+            if (API.hasCapability(Capability.HANDLER_CLEAR_CACHE))
+                API.clearCache(".*");
+
+            API.handleRefresh();
+            System.out.println("Triggering refresh: stuck at loading screen for too long!");
+        }
     }
 }

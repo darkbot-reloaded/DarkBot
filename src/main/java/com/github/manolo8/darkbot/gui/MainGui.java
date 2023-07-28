@@ -1,17 +1,25 @@
 package com.github.manolo8.darkbot.gui;
 
+import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.ui.FlatRootPaneUI;
+import com.formdev.flatlaf.ui.FlatTitlePane;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.gui.components.ExitConfirmation;
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
 import eu.darkbot.api.config.ConfigSetting;
-import net.miginfocom.swing.MigLayout;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -20,25 +28,42 @@ public class MainGui extends JFrame {
     private final Main main;
     private final ConfigGui configGui;
 
-    private final JPanel mainPanel = new JPanel();
     private MainTitleBar titleBar;
     private ExitConfirmation exitConfirmation;
-    private MapDrawer mapDrawer;
+    @Getter private MapDrawer mapDrawer;
 
     public static final Image ICON = UIUtils.getImage("icon");
     public static final int DEFAULT_WIDTH = 640, DEFAULT_HEIGHT = 480;
+    private int lastTick;
 
     public MainGui(Main main) throws HeadlessException {
         super("DarkBot");
+        getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_ICON, false);
+        getRootPane().putClientProperty(FlatClientProperties.TITLE_BAR_SHOW_TITLE, false);
+
+        // FlatLaf repaints the entire TitlePane on any change within its bounds
+        // so the custom border color is painted correctly when embedded menu is invisible
+        // we don't need this behavior, which affects performance
+        getRootPane().setUI(new FlatRootPaneUI() {
+            @Override
+            protected FlatTitlePane createTitlePane() {
+                return new FlatTitlePane(getRootPane()) {
+                    @Override
+                    protected void menuBarChanged() {
+                        menuBarPlaceholder.invalidate();
+                    }
+                };
+            }
+        });
 
         this.configGui = new ConfigGui(main);
-        configGui.setIconImage(ICON);
+        this.configGui.setIconImage(ICON);
 
         this.main = main;
 
         ToolTipManager.sharedInstance().setInitialDelay(350);
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         Config.BotSettings.BotGui guiConfig = main.config.BOT_SETTINGS.BOT_GUI;
         WindowUtils.setWindowSize(this, guiConfig.SAVE_GUI_POS, guiConfig.MAIN_GUI_WINDOW);
@@ -46,8 +71,8 @@ public class MainGui extends JFrame {
         setIconImage(ICON);
 
         setComponentPosition();
+        titleBar.setInfo("DarkBot " + Main.VERSION);
 
-        WindowUtils.setupUndecorated(this, mainPanel);
         setVisible(true);
 
         setAlwaysOnTop(true);
@@ -55,14 +80,31 @@ public class MainGui extends JFrame {
         requestFocus();
         setAlwaysOnTop(main.config.BOT_SETTINGS.BOT_GUI.ALWAYS_ON_TOP);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> main.configManager.saveConfig()));
+        if (Main.API.hasCapability(Capability.WINDOW_POSITION)) {
+            addComponentListener(new ComponentAdapter() {
+                public void componentMoved(ComponentEvent e) {
+                    if (main.config.BOT_SETTINGS.API_CONFIG.attachToBot)
+                        Main.API.setPosition((int) getBounds().getMaxX() - 15, (int) getBounds().getMinY());
+                }
+            });
+        }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                main.pluginHandler.PLUGIN_CLASS_LOADER.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            main.configManager.saveConfig();
+        }));
     }
 
     private void setComponentPosition() {
-        mainPanel.setLayout(new MigLayout("ins 0, gap 0, wrap 1, fill", "[]", "[][][grow]"));
-        mainPanel.add(titleBar = new MainTitleBar(main, this), "grow, span");
-        mainPanel.add(exitConfirmation = new ExitConfirmation(), "grow, span, hidemode 2");
-        mainPanel.add(mapDrawer = new MapDrawer(main), "grow, span");
+        setJMenuBar(titleBar = new MainTitleBar(main, this));
+
+        setLayout(new BorderLayout());
+        add(exitConfirmation = new ExitConfirmation(), BorderLayout.NORTH);
+        add(mapDrawer = new MapDrawer(main), BorderLayout.CENTER);
     }
 
     public void addConfigVisibilityListener(Consumer<Boolean> listener) {
@@ -73,6 +115,7 @@ public class MainGui extends JFrame {
         boolean open = !configGui.isVisible();
         configGui.setVisible(open);
         if (open) {
+            configGui.setState(NORMAL); // bring the window if was minimized
             configGui.setAlwaysOnTop(this.isAlwaysOnTop());
             configGui.toFront();
         }
@@ -91,14 +134,6 @@ public class MainGui extends JFrame {
         configGui.setComponentData();
     }
 
-    public void tryClose() {
-        if (main.config.BOT_SETTINGS.BOT_GUI.CONFIRM_EXIT) exitConfirmation.setVisible(true);
-        else {
-            System.out.println("Exit button pressed, exiting");
-            System.exit(0);
-        }
-    }
-
     @Override
     public void setTitle(String title) {
         if (!Objects.equals(getTitle(), title)) super.setTitle(title);
@@ -110,7 +145,26 @@ public class MainGui extends JFrame {
         }
         else setTitle("DarkBot");
 
-        mapDrawer.repaint();
+        if ((lastTick++ % main.config.BOT_SETTINGS.MAP_DISPLAY.REFRESH_DELAY) == 0) {
+            mapDrawer.repaint();
+        }
+    }
+
+    @Override
+    protected void processWindowEvent(final WindowEvent e) {
+        super.processWindowEvent(e);
+
+        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+            // if is minimized close without confirmation
+            if (main.config.BOT_SETTINGS.BOT_GUI.CONFIRM_EXIT && getState() == NORMAL) {
+                toFront(); // bring to front if possible
+                exitConfirmation.setVisible(true);
+            }
+            else {
+                System.out.println("Exit button pressed, exiting");
+                System.exit(0);
+            }
+        }
     }
 
 }

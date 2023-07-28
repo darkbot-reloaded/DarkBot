@@ -80,7 +80,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         super(new BorderLayout());
 
         this.api = api;
-        this.guiConfig = api.requireAPI(ConfigAPI.class).getConfigValue("bot_settings.bot_gui");
+        this.guiConfig = api.requireAPI(ConfigAPI.class).requireConfig("bot_settings.bot_gui");
         this.packed = true;
         setEditingConfig(config);
         rebuildUI();

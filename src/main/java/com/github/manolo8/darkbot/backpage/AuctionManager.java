@@ -1,37 +1,55 @@
 package com.github.manolo8.darkbot.backpage;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.auction.AuctionData;
 import com.github.manolo8.darkbot.backpage.auction.AuctionItems;
-import com.github.manolo8.darkbot.utils.http.Method;
+import com.github.manolo8.darkbot.utils.CaptchaHandler;
+import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.util.IOUtils;
+
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AuctionManager {
-    private final Main main;
-    private final BackpageManager backpage;
+    private final BackpageManager backpageManager;
     private final AuctionData data;
     private final Pattern AUCTION_ERROR_PATTERN = Pattern.compile("infoText = '(.*?)';.*?" + "icon = '(.*)';", Pattern.DOTALL);
-    private long lasAuctionUpdate;
+    private long lastAuctionUpdate;
+    private final CaptchaHandler captchaHandler;
 
-    AuctionManager(Main main, BackpageManager backpage) {
-        this.main = main;
-        this.backpage = backpage;
+    AuctionManager(BackpageManager backpageManager, ConfigAPI configAPI) {
+        this.backpageManager = backpageManager;
         this.data = new AuctionData();
+        this.captchaHandler = new CaptchaHandler(backpageManager, configAPI,
+                "indexInternal.es?action=internalAuction", "auction");
     }
 
     public AuctionData getData() {
         return data;
     }
 
-    public boolean update(int expiryTime) {
-        try {
-            if (System.currentTimeMillis() <= lasAuctionUpdate + expiryTime) return false;
-            String page = backpage.getConnection("indexInternal.es?action=internalAuction", Method.GET).getContent();
+    @Deprecated
+    public Boolean update(int expiryTime) {
+        return this.update((long) expiryTime);
+    }
 
-            if (page == null || page.isEmpty()) return false;
-            lasAuctionUpdate = System.currentTimeMillis();
+    /**
+     * @param expiryTime only update if within
+     * @return null if update wasn't required (non-expired), true if updated ok, false if update failed
+     */
+    public Boolean update(long expiryTime) {
+        try {
+            if (System.currentTimeMillis() <= lastAuctionUpdate + expiryTime) return null;
+            if (captchaHandler.isSolvingCaptcha()) return false;
+            HttpURLConnection httpURLConnection = backpageManager.getHttp("indexInternal.es?action=internalAuction").getConnection();
+            String page = IOUtils.read(httpURLConnection.getInputStream());
+            if (this.captchaHandler.needsCaptchaSolve(httpURLConnection.getURL(), page)) {
+                System.out.println("AuctionManager: Captcha Detected");
+                captchaHandler.solveCaptcha();
+                return false;
+            }
+            lastAuctionUpdate = System.currentTimeMillis();
             return data.parse(page);
         } catch (IOException e) {
             e.printStackTrace();
@@ -40,23 +58,23 @@ public class AuctionManager {
     }
 
     public boolean bidItem(AuctionItems auctionItem) {
-        return bidItem(auctionItem, auctionItem.getCurrentBid() + 10000);
+        return bidItem(auctionItem, auctionItem.getCurrentBid() + 10000L);
     }
 
     public boolean bidItem(AuctionItems auctionItem, long amount) {
         try {
-            String token = main.backpage.getConnection("indexInternal.es", Method.GET)
-                    .setRawParam("action", "internalAuction")
-                    .consumeInputStream(main.backpage::getReloadToken);
-            String response = main.backpage.getConnection("indexInternal.es", Method.POST)
-                    .setRawParam("action", "internalAuction")
-                    .setRawParam("reloadToken", token)
-                    .setRawParam("auctionType", auctionItem.getAuctionType().getId())
-                    .setRawParam("subAction", "bid")
-                    .setRawParam("lootId", auctionItem.getLootId())
-                    .setRawParam("itemId", auctionItem.getId())
-                    .setRawParam("credits", String.valueOf(amount))
-                    .setRawParam("auction_buy_button", "BID")
+            String token = backpageManager.getHttp("indexInternal.es")
+                    .setParam("action", "internalAuction")
+                    .consumeInputStream(backpageManager::getReloadToken);
+            String response = backpageManager.postHttp("indexInternal.es")
+                    .setParam("action", "internalAuction")
+                    .setParam("reloadToken", token)
+                    .setParam("auctionType", auctionItem.getAuctionType().getId())
+                    .setParam("subAction", "bid")
+                    .setParam("lootId", auctionItem.getLootId())
+                    .setParam("itemId", auctionItem.getId())
+                    .setParam("credits", String.valueOf(amount))
+                    .setParam("auction_buy_button", "BID")
                     .getContent();
             return handleResponse("Bid on Item", auctionItem.getName(), response);
         } catch (Exception e) {

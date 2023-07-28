@@ -10,7 +10,8 @@ import com.github.manolo8.darkbot.config.utils.PlayerTagTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
+import com.github.manolo8.darkbot.core.api.InvalidNativeSignature;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.FacadeManager;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
@@ -25,8 +26,8 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.DarkBotPluginApiImpl;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
-import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
+import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
@@ -34,9 +35,10 @@ import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
+import com.github.manolo8.darkbot.modules.DummyExceptionModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
-import com.github.manolo8.darkbot.modules.TemporalModule;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.StartupChecks;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
@@ -45,6 +47,7 @@ import eu.darkbot.api.extensions.Behavior;
 import eu.darkbot.api.extensions.Configurable;
 import eu.darkbot.api.extensions.Installable;
 import eu.darkbot.api.extensions.Module;
+import eu.darkbot.api.extensions.TemporalModule;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
@@ -57,7 +60,7 @@ import java.util.Objects;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.13.17 beta 108");
+    public static final Version VERSION      = new Version("1.126");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -129,6 +132,10 @@ public class Main extends Thread implements PluginListener, BotAPI {
         // 4: Generate the actual config
         this.configHandler = pluginAPI.requireInstance(ConfigHandler.class);
 
+        // These need to be delayed until post-initialization so translated strings are available
+        StartupChecks.checkJavaVersion(params);
+        StartupChecks.checkUniqueInstance(params); //method require min java 9
+
         VerifierChecker.getAuthApi().setupAuth();
         this.pluginAPI.addInstance(VerifierChecker.getAuthApi());
 
@@ -181,7 +188,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     @Override
     @SuppressWarnings("InfiniteLoopStatement")
     public void run() {
-        long time;
+        long time, last = System.currentTimeMillis();
 
         while (true) {
             time = System.currentTimeMillis();
@@ -193,9 +200,13 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 Time.sleep(1000);
             }
 
-            avgTick = ((avgTick * 9) + (System.currentTimeMillis() - time)) / 10;
+            long current = System.currentTimeMillis();
+            avgTick = ((avgTick * 9) + (current - time)) / 10;
 
-            Time.sleepMax(time, botInstaller.invalid.get() ? 1000 :
+            statsManager.tickAverageStats(current - last);
+            last = current;
+
+            Time.sleepMax(time, botInstaller.invalid.get() ? 250 :
                     Math.max(config.BOT_SETTINGS.OTHER.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
         }
     }
@@ -205,7 +216,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         checkModule();
 
         // Do not care for either valid nor invalid if we're running a background-only bot
-        if (!Main.API.hasCapability(GameAPI.Capability.BACKGROUND_ONLY)) {
+        if (!Main.API.hasCapability(Capability.BACKGROUND_ONLY)) {
             if (isInvalid()) tickingModule = false;
             else validTick();
         }
@@ -271,18 +282,29 @@ public class Main extends Thread implements PluginListener, BotAPI {
             try {
                 if (running) newModule.onTickModule();
                 else newModule.onTickStopped();
+            } catch (InvalidNativeSignature e) {
+                e.printStackTrace();
+                setRunning(false);
             } catch (Throwable e) {
-                FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(newModule);
-                if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                FeatureDefinition<Module> fd = featureRegistry.getFeatureDefinition(newModule);
+                fd.getIssues().handleTickFeatureException(PluginIssue.Level.WARNING, e);
+
+                // do not check if module is enabled here via `fd.canLoad()`
+                if (!fd.getIssues().canLoad()) {
+                    setModule(new DummyExceptionModule(fd.getName()));
+                }
             }
             for (Behavior behaviour : behaviours) {
                 try {
                     if (running) behaviour.onTickBehavior();
                     else behaviour.onStoppedBehavior();
+                } catch (InvalidNativeSignature e) {
+                    e.printStackTrace();
+                    setRunning(false);
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
-                            .addFailure("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                            .handleTickFeatureException(PluginIssue.Level.ERROR, e);
                 }
             }
         }
@@ -300,8 +322,13 @@ public class Main extends Thread implements PluginListener, BotAPI {
             setModule(new DisconnectModule(config.MISCELLANEOUS.PAUSE_FOR * 60 * 1000L, I18n.get("module.disconnect.reason.break")));
         } else {
             System.out.println("Triggering refresh: time arrived & module allows refresh");
-            API.handleRefresh();
+            handleRefresh();
         }
+    }
+
+    @Override
+    public void handleRefresh() {
+        API.handleRefresh();
     }
 
     @Deprecated
@@ -355,6 +382,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         if (this.running == running) return;
         status.send(running);
         this.running = running;
+        API.setUserInput(!running);
     }
 
     private void onRunningToggle(boolean running) {
@@ -365,9 +393,6 @@ public class Main extends Thread implements PluginListener, BotAPI {
         }
 
         eventBroker.sendEvent(new RunningToggleEvent(running));
-
-        if (running) hero.pet.clickable.setRadius(0);
-        else hero.pet.clickable.reset();
     }
 
     public void setBehaviours(List<Behavior> behaviours) {
@@ -432,5 +457,4 @@ public class Main extends Thread implements PluginListener, BotAPI {
     public Module getModule() {
         return newModule;
     }
-
 }

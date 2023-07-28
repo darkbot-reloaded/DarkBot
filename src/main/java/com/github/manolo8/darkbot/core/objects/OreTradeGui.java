@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.core.utils.Drive;
 import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.OreAPI;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class OreTradeGui extends Gui implements OreAPI {
 
@@ -26,9 +27,7 @@ public class OreTradeGui extends Gui implements OreAPI {
     public boolean showTrade(boolean show, BasePoint base) {
         if (trySetShowing(show)) {
             if (show) {
-                base.clickable.setRadius(800);
-                drive.clickCenter(true, base.locationInfo.now);
-                base.clickable.setRadius(0);
+                base.trySelect(false);
             } else click(8, 8);
             return false;
         }
@@ -60,7 +59,7 @@ public class OreTradeGui extends Gui implements OreAPI {
     }
 
     @Override
-    public boolean showTrade(boolean show, @NotNull Station.Refinery tradePoint) {
+    public boolean showTrade(boolean show, @Nullable Station.Refinery tradePoint) {
         return showTrade(show, (BasePoint) tradePoint);
     }
 }

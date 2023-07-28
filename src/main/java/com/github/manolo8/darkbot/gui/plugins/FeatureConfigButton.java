@@ -32,7 +32,7 @@ public class FeatureConfigButton extends MainButton {
         if (instructions != null) paneMessage = new Object[]{instructions, paneMessage};
 
         Popups.of(feature.getName(), paneMessage)
-                .options(new Object[]{})
+                .options()
                 .border(BorderFactory.createEmptyBorder(0, 0, -4, 0))
                 .parent(this)
                 .showSync();

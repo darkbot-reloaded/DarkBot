@@ -1,9 +1,9 @@
 package com.github.manolo8.darkbot.extensions.features.handlers;
 
-import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.config.NpcExtraFlag;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
+import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.types.NpcFlag;
@@ -36,10 +36,20 @@ public class NpcExtraHandler extends FeatureHandler<NpcFlags<?>> {
 
     @Override
     public void update(Stream<FeatureDefinition<NpcFlags<?>>> flags) {
-        NpcInfo.setNpcFlags(flags.flatMap(fd -> featureRegistry.getFeature(fd)
-                .map(flag -> getNpcFlags(fd.getPluginInfo(), flag))
-                .orElse(Stream.empty())
-        ), false);
+        NpcInfo.setNpcFlags(
+                flags.flatMap(fd -> featureRegistry.getFeature(fd)
+                        .map(flag -> tryGetNpcFlags(fd, flag))
+                        .orElse(Stream.empty()))
+                , false);
+    }
+
+    private Stream<NpcExtraFlag> tryGetNpcFlags(FeatureDefinition<NpcFlags<?>> fd, NpcFlags<?> instance) {
+        try {
+            return getNpcFlags(fd.getPluginInfo(), instance);
+        } catch (Exception e) {
+            fd.getIssues().addFailure("bot.issue.feature.failed_to_load", IssueHandler.createDescription(e));
+            return Stream.empty();
+        }
     }
 
     private <T extends Enum<T>> Stream<NpcExtraFlag> getNpcFlags(PluginInfo namespace, NpcFlags<?> npcFlags) {
@@ -48,17 +58,18 @@ public class NpcExtraHandler extends FeatureHandler<NpcFlags<?>> {
             throw new IllegalArgumentException("NpcFlags must include a class in the generic argument: "
                     + npcFlags.getClass().getCanonicalName());
 
-        if (!((Class<?>) types[0]).isEnum()) throw new IllegalArgumentException(
-                "NpcFlags must be an enum: " + npcFlags.getClass().getCanonicalName());
-
         @SuppressWarnings("unchecked")
         Class<T> flagEnum = (Class<T>) types[0];
+
+        T[] constants = flagEnum.getEnumConstants();
+        if (constants == null) throw new IllegalArgumentException(
+                "NpcFlags must be an enum: " + npcFlags.getClass().getCanonicalName());
 
         Configuration config = flagEnum.getAnnotation(Configuration.class);
         if (config == null) throw new IllegalArgumentException(
                 "NpcFlags type must be annotated with @Configuration in " + flagEnum.getCanonicalName());
 
-        return Arrays.stream(flagEnum.getEnumConstants())
+        return Arrays.stream(constants)
                 .map(flag -> createFlag(i18n, namespace, config.value(), flag));
     }
 

@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.behaviours;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import eu.darkbot.api.extensions.Behavior;
 import eu.darkbot.api.extensions.Feature;
@@ -37,7 +37,7 @@ public class AutoRefine implements Behavior {
     @Override
     public void onTickBehavior() {
         if (!main.config.MISCELLANEOUS.AUTO_REFINE ||
-                !darkbotApi.hasCapability(GameAPI.Capability.DIRECT_REFINE) ||
+                !darkbotApi.hasCapability(Capability.DIRECT_REFINE) ||
                 guiManager.getAddress() == 0) return;
 
         Arrays.stream(Ore.values())

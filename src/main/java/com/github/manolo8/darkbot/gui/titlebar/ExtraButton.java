@@ -10,6 +10,8 @@ import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
+import com.github.manolo8.darkbot.gui.utils.inspector.ObjectInspectorUI;
+import com.github.manolo8.darkbot.utils.OSUtil;
 import com.github.manolo8.darkbot.utils.SystemUtils;
 import com.github.manolo8.darkbot.utils.debug.SWFUtils;
 import eu.darkbot.api.PluginAPI;
@@ -35,7 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ExtraButton extends TitleBarToggleButton<JFrame> {
+public class ExtraButton extends TitleBarButton<JFrame> {
 
     private final Main main;
     private final JPopupMenu extraOptions = new JPopupMenu("Extra Options");
@@ -101,7 +103,7 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
     @Override
     public void actionPerformed(ActionEvent e) {
         rebuild(main);
-        if (isSelected()) extraOptions.show(this, 0, getHeight() - 1);
+        extraOptions.show(this, 0, getHeight() - 1);
     }
 
     @Feature(name = "Extra menu default provider", description = "Provides default extra buttons")
@@ -147,10 +149,26 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
                 main.statsManager.resetValues();
                 main.repairManager.resetDeaths();
             }));
+
+            if (OSUtil.isWindows()) {
+                list.add(create("Open Hangar", e -> {
+                    JComponent component = (JComponent) e.getSource();
+                    component.setEnabled(false);
+                    new FlashRunnerTask("Dock", main,
+                            result -> SwingUtilities.invokeLater(() -> component.setEnabled(true)));
+                }));
+            }
+
             ConfigSetting<Config> root = config.getConfigRoot();
             if (root.getValue().BOT_SETTINGS.OTHER.DEV_STUFF) {
                 list.add(createSeparator("Dev stuff"));
                 list.add(create("Save SWF", e -> main.addTask(SWFUtils::dumpMainSWF)));
+                list.add(create("Reset keybinds", e -> main.addTask(() -> main.guiManager.settingsGui.setKeyBinds(false))));
+                list.add(create("Object inspector", e -> {
+                    JFrame frame = new ObjectInspectorUI();
+                    frame.setSize(600, 600);
+                    frame.setVisible(true);
+                }));
             }
 
             return list;
@@ -182,5 +200,4 @@ public class ExtraButton extends TitleBarToggleButton<JFrame> {
             return list;
         }
     }
-
 }

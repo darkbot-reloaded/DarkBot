@@ -22,6 +22,8 @@ public class LoginForm extends JPanel {
 
     public LoginForm() {
         super(new MigLayout("wrap 2, ins 0", "[]10px:push[]", "[]8px[]"));
+        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+
         tabbedPane.addTab(I18n.get("gui.login.user_pass"), new UserLogin());
         tabbedPane.addTab(I18n.get("gui.login.sid"), new SidLogin());
         SavedLogins saved =  new SavedLogins(this);

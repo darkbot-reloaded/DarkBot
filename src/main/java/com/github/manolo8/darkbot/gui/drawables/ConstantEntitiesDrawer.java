@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.gui.drawables;
 
 import com.github.manolo8.darkbot.extensions.features.Feature;
+import eu.darkbot.api.config.types.DisplayFlag;
 import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
@@ -34,22 +35,35 @@ public class ConstantEntitiesDrawer implements Drawable {
 
     public void drawPortals(MapGraphics mg) {
         mg.setColor("portals");
+        mg.setFont("small");
 
         for (Portal portal : portals) {
-            mg.drawOvalCentered(portal, 12, false);
+            mg.drawOvalCentered(portal, 12.0, false);
+            portal.getTargetMap()
+                    .ifPresent(gameMap -> mg.drawString(portal, gameMap.getShortName(), -8, MapGraphics.StringAlign.MID));
         }
     }
 
     public void drawBattleStations(MapGraphics mg) {
         for (BattleStation bs : battleStations) {
-            if (bs.getHullId() == 0) mg.setColor("meteroid");
-            else if (bs.getEntityInfo().isEnemy()) mg.setColor("enemies");
-            else mg.setColor("allies");
+            if (bs instanceof BattleStation.Asteroid) {
+                mg.setColor("meteroid");
+            } else {
+                mg.setColor(bs.getEntityInfo().isEnemy() ? "enemies" : "allies");
+            }
 
-            if (bs.getHullId() >= 0 && bs.getHullId() < 255)
-                mg.drawOvalCentered(bs, 11, 9, true);
+            if (bs instanceof BattleStation.Module) {
+                mg.drawRectCentered(bs, 3.0, false);
+            } else {
+                mg.drawOvalCentered(bs, 11.0, 9.0, true);
 
-            else mg.drawRectCentered(bs, 3, false);
+                if (mg.hasDisplayFlag(DisplayFlag.USERNAMES)) {
+                    String name = bs instanceof BattleStation.Hull ? ("[" + bs.getEntityInfo().getClanTag() + "] ") : "";
+                    name += bs.getEntityInfo().getUsername();
+
+                    mg.drawString(bs, name, bs instanceof BattleStation.Hull ? -14 : -10, MapGraphics.StringAlign.MID);
+                }
+            }
         }
     }
 
@@ -57,7 +71,7 @@ public class ConstantEntitiesDrawer implements Drawable {
         for (Station station : stations) {
             if (station instanceof Station.Turret) {
                 mg.setColor("bases");
-                mg.drawOvalCentered(station, 2, true);
+                mg.drawOvalCentered(station, 2.0, true);
 
             } else {
                 mg.setColor("base_spots");
@@ -65,9 +79,8 @@ public class ConstantEntitiesDrawer implements Drawable {
                 int size = station instanceof Station.Headquarter ? 3500
                         : station instanceof Station.HomeBase ? 3000 : 1000;
 
-                mg.drawOvalCentered(station, mg.toScreenPointX(size), mg.toScreenPointY(size), true);
+                mg.drawOvalCentered(station, mg.toScreenSizeW(size), mg.toScreenSizeH(size), true);
             }
-
         }
     }
 }

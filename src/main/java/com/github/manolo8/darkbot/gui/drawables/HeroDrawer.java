@@ -1,12 +1,12 @@
 package com.github.manolo8.darkbot.gui.drawables;
 
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.utils.pathfinder.PolygonImpl;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import eu.darkbot.api.extensions.Draw;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Locatable;
-import eu.darkbot.api.game.other.Point;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.MovementAPI;
 
@@ -35,7 +35,7 @@ public class HeroDrawer implements Drawable {
         drawHeroDestination(mg);
 
         mg.setColor("hero");
-        mg.drawOvalCentered(hero, 8, true);
+        mg.drawOvalCentered(hero, 9.0, true);
 
         drawScreenBounds(mg);
         drawPet(mg);
@@ -63,25 +63,20 @@ public class HeroDrawer implements Drawable {
     }
 
     private void drawScreenBounds(MapGraphics mg) {
-        MapManager.ViewBounds view = mapManager.viewBounds;
-        if (view.address == 0) return;
-
-        Point tl = mg.toScreenPoint(view.leftTopX, view.leftTopY);
-        Point tr = mg.toScreenPoint(view.rightTopX, view.rightTopY);
-        Point br = mg.toScreenPoint(view.rightBotX, view.rightBotY);
-        Point bl = mg.toScreenPoint(view.leftBotX, view.leftBotY);
+        PolygonImpl view = mapManager.viewBounds.polygon;
+        if (view.isEmpty()) return;
 
         mg.setColor("barrier_border");
-        mg.drawPoly(MapGraphics.PolyType.DRAW_POLYGON, tl, tr, br, bl);
+        mg.drawArea(view, false);
     }
 
     private void drawPet(MapGraphics mg) {
         hero.getPet().ifPresent(pet -> {
             mg.setColor("pet");
-            mg.drawRectCentered(pet, 6, true);
+            mg.drawOvalCentered(pet, 9.0, true);
 
             mg.setColor("pet_in");
-            mg.drawRectCentered(pet, 4, true);
+            mg.drawOvalCentered(pet, 7.0, true);
         });
     }
 }
