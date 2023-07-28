@@ -4,13 +4,15 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
+import eu.darkbot.api.managers.AstralGateAPI;
+
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.Main.UPDATE_LOCKER;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AstralGateProxy extends Updatable {
+public class AstralGateProxy extends Updatable implements AstralGateAPI {
     private int highScore, currentRift, currentScore, cpuCount;
     private boolean canEquip;
     private List<AstralItem> rewardItems = new ArrayList<>();
@@ -34,40 +36,43 @@ public class AstralGateProxy extends Updatable {
         this.canEquip = API.readBoolean(API.readMemoryLong(data + 0x0B0) + 0x20);
 
         rewardItemsArr.update(API.readMemoryLong(data + 0x88));
-        synchronized (UPDATE_LOCKER) {
-            rewardItemsArr.sync(rewardItems, AstralItem::new);
-        }
+        rewardItemsArr.sync(rewardItems, AstralItem::new);
 
         inventoryItemsArr.update(API.readMemoryLong(data + 0x0A0));
-        synchronized (UPDATE_LOCKER) {
-            inventoryItemsArr.sync(inventoryItems, AstralItem::new);
-        }
+        inventoryItemsArr.sync(inventoryItems, AstralItem::new);
     }
 
+    @Override
     public List<AstralItem> getRewardsItems() {
         return rewardItems;
     }
 
+    @Override
     public List<AstralItem> getInventoryItems() {
         return inventoryItems;
     }
 
+    @Override
     public boolean allowedToEquip() {
         return canEquip;
     }
 
+    @Override
     public int getHighScore() {
         return highScore;
     }
 
+    @Override
     public int getCurrentRift() {
         return currentRift;
     }
 
+    @Override
     public int getCurrentScore() {
         return currentScore;
     }
 
+    @Override
     public int getCpuCount() {
         return cpuCount;
     }
