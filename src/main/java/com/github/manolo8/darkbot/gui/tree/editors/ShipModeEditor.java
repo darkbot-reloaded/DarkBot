@@ -2,10 +2,10 @@ package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
+import com.github.manolo8.darkbot.gui.tree.utils.SizedLabel;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.config.util.OptionEditor;
-import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
 
 import javax.swing.*;
@@ -32,7 +32,7 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
             add(configButton);
             configButton.addKeyListener(formationField); // Relay key presses to formation
         }
-        add(new JLabel("      Formation  "));
+        add(new SizedLabel("      Formation  "));
         add(formationField);
     }
 
