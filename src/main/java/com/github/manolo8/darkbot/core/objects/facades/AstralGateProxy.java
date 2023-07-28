@@ -7,7 +7,6 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.AstralGateAPI;
 
 import static com.github.manolo8.darkbot.Main.API;
-import static com.github.manolo8.darkbot.Main.UPDATE_LOCKER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +76,7 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
         return cpuCount;
     }
 
-    public static class AstralItem extends Auto {
+    public static class AstralItem extends Auto implements AstralGateAPI.AstralItem {
         private boolean equipped;
         private int upgradeLevel;
         private String lootId;
@@ -100,26 +99,30 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
             itemStatsArr.sync(itemStats, ItemStat::new);
         }
 
+        @Override
         public boolean isEquipped() {
             return equipped;
         }
 
+        @Override
         public int getUpgradeLevel() {
             return upgradeLevel;
         }
 
+        @Override
         public String getLootId() {
             return lootId;
         }
 
+        @Override
         public List<ItemStat> getTheStatsList() {
             return itemStats;
         }
     }
 
-    public static class ItemStat extends Auto {
+    public static class ItemStat extends Auto implements AstralGateAPI.ItemStat {
         private String attribute;
-        private Double value;
+        private double value;
 
         @Override
         public void update() {
@@ -131,11 +134,13 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
             this.value = API.readDouble(address + 0x28);
         }
 
+        @Override
         public String getAttribute() {
             return attribute;
         }
 
-        public Double getValue() {
+        @Override
+        public double getValue() {
             return value;
         }
     }
