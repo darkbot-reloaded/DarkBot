@@ -74,16 +74,15 @@ public class RefinementGui extends Gui implements API.Singleton {
 
         @Override
         public void update(long address) {
-            if (address != this.address || name == null || (!name.contains("ore") && !name.contains("lab"))) {
+            if (address != this.address || name == null || !name.contains("ore")) {
                 name = API.readMemoryString(address, 184);
 
                 if (name != null && !name.isEmpty()) {
-                    if(name.contains("ore_")) {
-                        String processedName = name.replace("ore_", "");
-                        fuzzyName = processedName.substring(0, 1).toUpperCase(Locale.ROOT) + processedName.substring(1);
-                    }
-                    if(name.contains("lab_")){
-                        fuzzyName = API.readMemoryString(address, 0x108);
+                    String processedName = name.replace("ore_", "");
+                    fuzzyName = processedName.substring(0, 1).toUpperCase(Locale.ROOT) + processedName.substring(1);
+                    if (name.contains("lab_")) {
+                        int upgradeOreId = API.readMemoryInt(address, 0x118, 0xB8);
+                        String upgradedOre = API.readMemoryString(address, 0x118, 0xC8);
                     }
                 }
             }
