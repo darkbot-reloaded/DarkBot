@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.swf;
 
+import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
@@ -20,7 +21,7 @@ import static com.github.manolo8.darkbot.Main.API;
 /**
  * Object[K] = V, Array[K] = V, Dictionary[K] = V
  */
-public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
+public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable {
     /**
      * since identifiers are always interned strings, they can't be 0,
      * so we can use 0 as the empty value.
@@ -55,24 +56,44 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
     private EntrySet entrySet;
     private Map<K, UpdatableWrapper> updatables;
 
-    public FlashMap(Class<K> keyType, Class<V> valueType) {
-        this.keyKind = AtomKind.of(keyType);
-        this.valueKind = AtomKind.of(valueType);
+    private FlashMap(Class<K> keyType, Class<V> valueType) {
+        if (keyType == null || valueType == null) {
+            this.keyKind = null;
+            this.valueKind = null;
 
-        this.keyType = keyType;
-        this.valueType = valueType;
-        if (keyKind.isNotSupported() || valueKind.isNotSupported())
-            throw new UnsupportedOperationException("Provided java types are not supported!");
+            this.keyType = null;
+            this.valueType = null;
 
-        this.keyUpdatable = Updatable.class.isAssignableFrom(keyType);
-        this.valueUpdatable = Updatable.class.isAssignableFrom(valueType);
+            this.keyUpdatable = false;
+            this.valueUpdatable = false;
 
-        if (keyUpdatable)
-            throw new UnsupportedOperationException("Key as updatable is not supported!");
-        if (valueUpdatable && Modifier.isAbstract(valueType.getModifiers()))
-            throw new UnsupportedOperationException("Abstract updatable value type is not supported!");
+        } else {
+            this.keyKind = AtomKind.of(keyType);
+            this.valueKind = AtomKind.of(valueType);
+
+            this.keyType = keyType;
+            this.valueType = valueType;
+            if (keyKind.isNotSupported() || valueKind.isNotSupported())
+                throw new UnsupportedOperationException("Provided java types are not supported!");
+
+            this.keyUpdatable = Updatable.class.isAssignableFrom(keyType);
+            this.valueUpdatable = Updatable.class.isAssignableFrom(valueType);
+
+            if (keyUpdatable)
+                throw new UnsupportedOperationException("Key as updatable is not supported!");
+            if (valueUpdatable && Modifier.isAbstract(valueType.getModifiers()))
+                throw new UnsupportedOperationException("Abstract updatable value type is not supported!");
+        }
 
         clearMap();
+    }
+
+    public static <K, V> FlashMap<K, V> of(Class<K> keyType, Class<V> valueType) {
+        return new FlashMap<>(keyType, valueType);
+    }
+
+    public static FlashMap<Object, Object> ofUnknown() {
+        return new FlashMap<>(null, null);
     }
 
     private static void updateIfChanged(Updatable u, long address) {
@@ -80,24 +101,22 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
             u.update(address);
     }
 
-    @Override
     public void update() {
         if (address == 0) return;
 
-        long traits = API.readLong(address, 16, 40);
+        long traits = readLong(16, 40);
 
         int tableOffset = API.readInt(traits, 236);
         if (tableOffset == 0) return;
 
         boolean isDictionary = (API.readInt(traits, 248) & DICTIONARY_FLAG) != 0;
         if (isDictionary) {
-            readHashTable(API.readLong(address + tableOffset) + 8); //read hash table ptr & skip cpp vtable
+            readHashTable(readLong(tableOffset) + 8); //read hash table ptr & skip cpp vtable
         } else {
             readHashTable(address + tableOffset);
         }
     }
 
-    @Override
     public void update(long address) {
         if (this.address != address) {
             clearMap();
@@ -123,15 +142,20 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
         int size = API.readMemoryInt(table + 8); // includes deleted items
         int capacity = getCapacity(API.readMemoryInt(table + 12), (atomsAndFlags & HAS_ITER_INDEX) != 0);
 
+        //noinspection unused
+        boolean hasDeletedItems = (atomsAndFlags & HAS_DELETED_ITEMS) != 0;
+
         if (size <= 0 || size > MAX_SIZE || capacity <= 0 || capacity > MAX_CAPACITY) {
             resetOldEntries(0);
             resetUpdatablesIfNoRef();
             this.size = 0;
             return;
         }
-        if (entries.length < size) entries = Arrays.copyOf(entries, (int) Math.min(size * 1.25, MAX_SIZE));
+        if (entries.length < size) {
+            entries = Arrays.copyOf(entries, (int) Math.min(size * 1.25, MAX_SIZE));
+        }
 
-        API.readMemory(atoms, BUFFER, capacity); //TODO add readLongs in API
+        API.readMemory(atoms, BUFFER, capacity);
         int currentSize = 0, realSize = 0;
         for (int offset = 0; offset < capacity && currentSize < size; offset += 8) {
             long keyAtom = ByteUtils.getLong(BUFFER, offset);
@@ -144,14 +168,22 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
             }
 
             AtomKind keyKind = AtomKind.of(keyAtom);
-            if (keyKind != this.keyKind) {
+
+            // if keyKind is Double, most-likely it is a weak key
+            if (keyKind == AtomKind.DOUBLE) {
+                keyKind = AtomKind.OBJECT;
+
+                // it is no more an atom tagged pointer
+                keyAtom = API.readLong(keyAtom & ByteUtils.ATOM_MASK);
+            }
+            if (this.keyKind != null && keyKind != this.keyKind) {
                 System.out.println("Invalid keyKind! expected: " + this.keyKind + ", read: " + keyKind);
                 break;
             }
 
             long valueAtom = ByteUtils.getLong(BUFFER, (offset += 8));
             AtomKind valueKind = AtomKind.of(valueAtom);
-            if (valueKind != this.valueKind) {
+            if (this.valueKind != null && valueKind != this.valueKind) {
                 System.out.println("Invalid valueKind! expected: " + this.valueKind + ", read: " + valueKind);
                 break;
             }
@@ -160,7 +192,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
             if (entry == null)
                 entry = entries[realSize] = new Entry();
 
-            entry.set(keyAtom, valueAtom);
+            entry.set(keyAtom, valueAtom, keyKind, valueKind);
 
             realSize++;
             currentSize++;
@@ -172,7 +204,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
         this.size = realSize;
     }
 
-    public void clearMap() {
+    private void clearMap() {
         this.size = 0;
         //noinspection unchecked
         this.entries = (Entry[]) Array.newInstance(Entry.class, 0);
@@ -181,8 +213,8 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
     }
 
     public <T extends Updatable> T putUpdatable(K key, T updatable) {
-        if (!valueType.isInstance(updatable))
-            throw new UnsupportedOperationException("Given updatable is not instance of value type!");
+        if (valueType == null || !valueType.isInstance(updatable))
+            throw new IllegalArgumentException("value type is unknown or given updatable is not instance of value type!");
         if (updatables == null) updatables = new HashMap<>();
         updatables.put(key, new UpdatableWrapper(updatable));
 
@@ -244,6 +276,11 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public long getAddress() {
+        return address;
+    }
+
     private static class UpdatableWrapper {
         private final Updatable value;
 
@@ -260,6 +297,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
 
         private void resetReferences() {
             references = 0;
+            updateIfChanged(value, 0);
         }
 
         private void removeReference() {
@@ -286,7 +324,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements IUpdatable {
                 this.value = HeroManager.instance.main.pluginAPI.requireInstance(valueType);
         }
 
-        private void set(long keyAtom, long valueAtom) {
+        private void set(long keyAtom, long valueAtom, AtomKind keyKind, AtomKind valueKind) {
             boolean keyChanged = keyAtomCache != keyAtom;
             if (keyChanged) {
                 setKey(keyKind.read(keyAtom));
