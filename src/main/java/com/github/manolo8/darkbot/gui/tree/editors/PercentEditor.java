@@ -12,7 +12,7 @@ import java.awt.*;
 public class PercentEditor extends JSpinner implements OptionEditor<Double> {
 
     public PercentEditor() {
-        super(new SpinnerNumberMinMaxFix(0, 0d, 1d, 0.05d));
+        super(new SpinnerNumberMinMaxFix(0d, 0d, 1d, 0.05d));
         setEditor(new JSpinner.NumberEditor(this, "0%"));
         ((DefaultEditor) getEditor()).getTextField().setColumns(3);
         addChangeListener(a -> SpinnerUtils.setError(this, false));
