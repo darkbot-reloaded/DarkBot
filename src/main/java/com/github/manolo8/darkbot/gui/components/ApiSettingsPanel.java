@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.gui.components;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.utils.FloatingDialog;
@@ -26,7 +27,7 @@ public class ApiSettingsPanel extends JPanel {
         super(new MigLayout("wrap 6"));
         this.apiConfig = display;
 
-        if (Main.API.hasCapability(GameAPI.Capability.WINDOW_POSITION)) {
+        if (Main.API.hasCapability(Capability.WINDOW_POSITION)) {
             JCheckBox c = new JCheckBox();
             c.setSelected(apiConfig.attachToBot);
 
@@ -36,7 +37,7 @@ public class ApiSettingsPanel extends JPanel {
             add(c, "span 3");
         }
 
-        if (Main.API.hasCapability(GameAPI.Capability.DIRECT_CALL_METHOD)) {
+        if (Main.API.hasCapability(Capability.DIRECT_CALL_METHOD)) {
             JCheckBox c = new JCheckBox();
             c.setSelected(main.settingsManager.isUiVisible());
 
@@ -46,7 +47,7 @@ public class ApiSettingsPanel extends JPanel {
             add(c, "span 3");
         }
 
-        if (Main.API.hasCapability(GameAPI.Capability.DIRECT_CALL_METHOD)) {
+        if (Main.API.hasCapability(Capability.DIRECT_CALL_METHOD)) {
             JCheckBox c = new JCheckBox();
             c.setSelected(main.settingsManager.isHudVisible());
 
@@ -56,13 +57,13 @@ public class ApiSettingsPanel extends JPanel {
             add(c, "span 3");
         }
 
-        if (Main.API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE)) {
+        if (Main.API.hasCapability(Capability.HANDLER_CLEAR_CACHE)) {
             JButton b = new JButton("Clear Cache");
             b.addActionListener(l -> API.clearCache(".*"));
             add(b, "span 3, grow");
         }
 
-        if (Main.API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_RAM)) {
+        if (Main.API.hasCapability(Capability.HANDLER_CLEAR_RAM)) {
             JButton b = new JButton("Clear Ram");
             b.addActionListener(l -> {
                 System.gc();
@@ -71,7 +72,7 @@ public class ApiSettingsPanel extends JPanel {
             add(b, "span 3, grow");
         }
 
-        if (Main.API.hasCapability(GameAPI.Capability.HANDLER_VOLUME)) {
+        if (Main.API.hasCapability(Capability.HANDLER_VOLUME)) {
             JSlider s = new JSlider(0, 100);
             s.setValue(display.volume);
             s.addChangeListener(l -> Main.API.setVolume(display.volume = s.getValue()));
@@ -81,7 +82,7 @@ public class ApiSettingsPanel extends JPanel {
             add(s, "span 3, align right");
         }
 
-        if (Main.API.hasCapability(GameAPI.Capability.HANDLER_TRANSPARENCY)) {
+        if (Main.API.hasCapability(Capability.HANDLER_TRANSPARENCY)) {
             JSlider s = new JSlider(10, 100);
             s.setValue(display.transparency);
             s.addChangeListener(l -> Main.API.setTransparency(display.transparency = s.getValue()));
@@ -91,7 +92,7 @@ public class ApiSettingsPanel extends JPanel {
             add(s, "span 3, align right");
         }
 
-        if (Main.API.hasCapability(GameAPI.Capability.HANDLER_GAME_QUALITY)) {
+        if (Main.API.hasCapability(Capability.HANDLER_GAME_QUALITY)) {
             JSlider s = new JSlider(0, 3);
             s.setValue(display.gameQuality.ordinal());
             s.addChangeListener(l -> Main.API.setQuality(display.gameQuality = GameAPI.Handler.GameQuality.values()[s.getValue()]));
@@ -101,7 +102,7 @@ public class ApiSettingsPanel extends JPanel {
             add(s, "span 3, align right");
         }
 
-        if (Main.API.hasCapability(GameAPI.Capability.DIRECT_CALL_METHOD)) {
+        if (Main.API.hasCapability(Capability.DIRECT_CALL_METHOD)) {
             JSlider s = new JSlider(1, 100);
             s.setValue((int) Math.min(100, Math.max(1,  HeroManager.instance.main.mapManager.getZoom() * 100.0)));
             s.addChangeListener(l -> main.mapManager.setZoom(s.getValue() / 100.0));

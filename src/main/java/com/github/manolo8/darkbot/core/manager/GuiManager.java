@@ -2,10 +2,12 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.ChatGui;
 import com.github.manolo8.darkbot.core.objects.Gui;
+import com.github.manolo8.darkbot.core.objects.IconGui;
+import com.github.manolo8.darkbot.core.objects.IconOkGui;
 import com.github.manolo8.darkbot.core.objects.LogoutGui;
 import com.github.manolo8.darkbot.core.objects.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.RefinementGui;
@@ -14,6 +16,7 @@ import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
+import com.github.manolo8.darkbot.core.objects.gui.GateSpinnerGui;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.other.Area;
@@ -68,8 +71,11 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final SettingsGui settingsGui;
     public final ChatGui chat;
 
+    public final Gui assembly;
+
     public final Timer loggedInTimer = Timer.get(15_000);
     private LoadStatus checks = LoadStatus.WAITING;
+
     private enum LoadStatus {
         WAITING(gm -> gm.main.hero.address != 0 && !gm.connecting.isVisible()),
         AFTER_LOGIN(gm -> {
@@ -81,6 +87,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         DONE(q -> false);
 
         final Predicate<GuiManager> canAdvance;
+
         LoadStatus(Predicate<GuiManager> next) {
             this.canAdvance = next;
         }
@@ -124,15 +131,22 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.chat = register("chat", ChatGui.class);
         this.settingsGui = register("settings", SettingsGui.class);
 
+        register("dispatch", DispatchManager.class);
+        register("popup_generic_icon", IconGui.class);
+        register("popup_generic_icon_ok", IconOkGui.class);
+        this.assembly = register("assembly");
+
+        register("ggBuilder", GateSpinnerGui.class);
+
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }
 
-    public Gui register(String key) {
+    private Gui register(String key) {
         return register(key, Gui.class);
     }
 
     @SuppressWarnings({"unchecked", "CastCanBeRemovedNarrowingVariableType"})
-    public <T extends Gui> T register(String key, Class<T> gui) {
+    private <T extends Gui> T register(String key, Class<T> gui) {
         Gui guiFix = pluginAPI.requireInstance(gui); // Workaround for a java compiler assertion bug having issues with types
         this.guis.addLazy(key, guiFix::update);
         this.registeredGuis.put(key, guiFix);
@@ -271,7 +285,6 @@ public class GuiManager implements Manager, GameScreenAPI {
         }
 
 
-
         HeroManager hero = main.hero;
         if (this.needRefresh && System.currentTimeMillis() - lastRepairAttempt > 5_000) {
             this.needRefresh = false;
@@ -298,7 +311,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     private void clearCache() {
         if (main.config.BOT_SETTINGS.API_CONFIG.CLEAR_CACHE_ON_STUCK &&
-                API.hasCapability(GameAPI.Capability.HANDLER_CLEAR_CACHE))
+                API.hasCapability(Capability.HANDLER_CLEAR_CACHE))
             API.clearCache(".*");
     }
 

@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.core.manager.SettingsManager;
 import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.extensions.features.handlers.LaserSelectorHandler;
 import com.github.manolo8.darkbot.utils.MathUtils;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.game.enums.EntityEffect;
@@ -32,6 +33,9 @@ public class AttackAPIImpl extends AbstractAttackImpl implements Listener {
 
     private final Timer buggedTimer = Timer.get(20_000), highLightTimer = Timer.get(500);
 
+    private final ConfigSetting<Character> shipAbility;
+    private final ConfigSetting<Integer> shipAbilityMinHp;
+
     public AttackAPIImpl(HeroItemsAPI heroItems, HeroAPI hero, LaserSelectorHandler laserHandler,
                          HighlightProxy highlight, SettingsManager settingsManager, MapManager mapManager,
                          ConfigAPI config) {
@@ -41,8 +45,8 @@ public class AttackAPIImpl extends AbstractAttackImpl implements Listener {
         this.settingsManager = settingsManager;
         this.mapManager = mapManager;
 
-//        this.shipAbility = config.requireConfig("loot.ship_ability");
-//        this.shipAbilityHealth = config.requireConfig("loot.ship_ability.min");
+        this.shipAbility = config.requireConfig("loot.ship_ability");
+        this.shipAbilityMinHp = config.requireConfig("loot.ship_ability_min");
     }
 
     @Override
@@ -115,6 +119,15 @@ public class AttackAPIImpl extends AbstractAttackImpl implements Listener {
                         || target.getHealth().hpDecreasedIn(3_000)))) {
             buggedTimer.activate();
         }
+
+        // try to use item without changing radius for now
+        Character ability = shipAbility.getValue();
+        if (ability != null && isLocked() && isAttacking() && getTarget().getHealth().getHp() > shipAbilityMinHp.getValue()) {
+            Item item = heroItems.getItem(ability);
+            if (item != null) {
+                heroItems.useItem(item, 5_000);
+            }
+        }
     }
 
     @Override
@@ -143,6 +156,7 @@ public class AttackAPIImpl extends AbstractAttackImpl implements Listener {
             radius = Math.min(600, radius);
 
         return radius + heroItems.getItem(SelectableItem.Ability.ZEPHYR_MMT, ItemFlag.AVAILABLE)
+                .or(() -> heroItems.getItem(SelectableItem.Ability.HECATE_PLUS_STOCKPILE, ItemFlag.AVAILABLE))
                 .map(Item::getQuantity)
                 .orElse(0d) * 5;
     }

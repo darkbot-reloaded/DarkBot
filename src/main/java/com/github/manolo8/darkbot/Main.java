@@ -10,7 +10,7 @@ import com.github.manolo8.darkbot.config.utils.PlayerTagTypeAdapterFactory;
 import com.github.manolo8.darkbot.config.utils.SpecialTypeAdapter;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.InvalidNativeSignature;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.manager.FacadeManager;
@@ -26,8 +26,8 @@ import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.DarkBotPluginApiImpl;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
-import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
+import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
@@ -35,6 +35,7 @@ import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
+import com.github.manolo8.darkbot.modules.DummyExceptionModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.StartupChecks;
@@ -59,7 +60,7 @@ import java.util.Objects;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.118");
+    public static final Version VERSION      = new Version("1.126");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -187,7 +188,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     @Override
     @SuppressWarnings("InfiniteLoopStatement")
     public void run() {
-        long time;
+        long time, last = System.currentTimeMillis();
 
         while (true) {
             time = System.currentTimeMillis();
@@ -199,7 +200,11 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 Time.sleep(1000);
             }
 
-            avgTick = ((avgTick * 9) + (System.currentTimeMillis() - time)) / 10;
+            long current = System.currentTimeMillis();
+            avgTick = ((avgTick * 9) + (current - time)) / 10;
+
+            statsManager.tickAverageStats(current - last);
+            last = current;
 
             Time.sleepMax(time, botInstaller.invalid.get() ? 250 :
                     Math.max(config.BOT_SETTINGS.OTHER.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
@@ -211,7 +216,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         checkModule();
 
         // Do not care for either valid nor invalid if we're running a background-only bot
-        if (!Main.API.hasCapability(GameAPI.Capability.BACKGROUND_ONLY)) {
+        if (!Main.API.hasCapability(Capability.BACKGROUND_ONLY)) {
             if (isInvalid()) tickingModule = false;
             else validTick();
         }
@@ -281,8 +286,13 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 e.printStackTrace();
                 setRunning(false);
             } catch (Throwable e) {
-                FeatureDefinition<Module> modDef = featureRegistry.getFeatureDefinition(newModule);
-                if (modDef != null) modDef.getIssues().addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                FeatureDefinition<Module> fd = featureRegistry.getFeatureDefinition(newModule);
+                fd.getIssues().handleTickFeatureException(PluginIssue.Level.WARNING, e);
+
+                // do not check if module is enabled here via `fd.canLoad()`
+                if (!fd.getIssues().canLoad()) {
+                    setModule(new DummyExceptionModule(fd.getName()));
+                }
             }
             for (Behavior behaviour : behaviours) {
                 try {
@@ -294,7 +304,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 } catch (Throwable e) {
                     featureRegistry.getFeatureDefinition(behaviour)
                             .getIssues()
-                            .addFailure("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                            .handleTickFeatureException(PluginIssue.Level.ERROR, e);
                 }
             }
         }

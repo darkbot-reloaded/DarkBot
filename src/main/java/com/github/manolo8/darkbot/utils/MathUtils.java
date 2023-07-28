@@ -28,4 +28,7 @@ public class MathUtils {
         return (Comparable<T>) toNumber(number, type);
     }
 
+    public static boolean isPowerOfTen(int value) {
+        return (Math.log10(value) % 1.0) == 0;
+    }
 }

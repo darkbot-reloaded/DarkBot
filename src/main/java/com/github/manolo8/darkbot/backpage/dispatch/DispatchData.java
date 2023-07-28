@@ -10,7 +10,7 @@ public class DispatchData {
     private final Map<String, Retriever> retrievers = new LinkedHashMap<>();
     private final Map<String, InProgress> progressSlots = new LinkedHashMap<>();
     private final Map<String, Gate> gates = new LinkedHashMap<>();
-    private int permit = 0, gateUnits = 0, availableSlots = 0, maxSlots = 0, primeCoupons = 0;
+    private int permit = 0, permitPlus = 0, gateUnits = 0, availableSlots = 0, maxSlots = 0, primeCoupons = 0;
 
     public int getPermit() {
         return permit;
@@ -18,6 +18,10 @@ public class DispatchData {
 
     public void setPermit(int permit) {
         this.permit = permit;
+    }
+
+    public void setPermitPlus(int permitPlus) {
+        this.permitPlus = permitPlus;
     }
 
     public int getGateUnits() {

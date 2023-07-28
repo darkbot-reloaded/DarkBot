@@ -6,15 +6,18 @@ import com.github.manolo8.darkbot.config.ColorScheme;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.extensions.features.handlers.DrawableHandler;
 import com.github.manolo8.darkbot.gui.titlebar.RefreshButton;
+import com.github.manolo8.darkbot.modules.TemporalPortalJumper;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.MapGraphics;
+import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Point;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
+import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,10 +29,12 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class MapDrawer extends JPanel {
 
@@ -37,6 +42,18 @@ public class MapDrawer extends JPanel {
             new RenderingHints(Map.of(
                 RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON,
                 RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON));
+
+    static {
+        // tests needed - may increase CPU usage for some users
+        /*Toolkit toolkit = Toolkit.getDefaultToolkit();
+        RenderingHints hints = (RenderingHints) toolkit.getDesktopProperty("awt.font.desktophints");
+
+        if (hints != null) {
+            RENDERING_HINTS.add(hints);
+            toolkit.addPropertyChangeListener("awt.font.desktophints",
+                    evt -> RENDERING_HINTS.add((RenderingHints) evt.getNewValue()));
+        }*/
+    }
 
     public MapGraphicsImpl mapGraphics;
     public boolean hovering;
@@ -49,6 +66,8 @@ public class MapDrawer extends JPanel {
     private CompletableFuture<Image> minimapFuture;
     private GameMap lastMap;
     private Image backgroundImage;
+
+    @Getter private long lastMapClick;
 
     public MapDrawer() {
         addMouseListener(new MouseAdapter() {
@@ -73,6 +92,9 @@ public class MapDrawer extends JPanel {
         this.drawableHandler = main.pluginAPI.requireInstance(DrawableHandler.class);
         this.flashResManager = main.pluginAPI.requireInstance(FlashResManager.class);
 
+        JPopupMenu portalMenu = new JPopupMenu();
+        portalMenu.setBorder(BorderFactory.createEmptyBorder());
+
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -80,21 +102,59 @@ public class MapDrawer extends JPanel {
                     main.setRunning(!main.isRunning());
                     repaint();
 
-                } else main.hero.drive.move(mapGraphics.toGameLocation(e));
+                } else {
+                    Locatable loc = mapGraphics.toGameLocation(e);
+
+                    // move ship only on left button click
+                    if (SwingUtilities.isRightMouseButton(e)) {
+                        List<? extends Portal> portals;
+                        synchronized (Main.UPDATE_LOCKER) {
+                             portals = main.mapManager.entities.getPortals().stream()
+                                    .filter(p -> p.distanceTo(loc) < 1000)
+                                    .collect(Collectors.toList());
+                        }
+
+                        if (!portals.isEmpty()) {
+                            portalMenu.removeAll();
+
+                            // https://github.com/JFormDesigner/FlatLaf/issues/328
+                            // compensate `MenuItem.textNoAcceleratorGap` which is 6 by default
+                            Object iconSize = UIManager.put("MenuItem.minimumIconSize", new Dimension(6, 0));
+                            Object itemWidth = UIManager.put("MenuItem.minimumWidth", 0);
+                            for (Portal portal : portals) {
+                                String portalText = portal.getTargetMap()
+                                        .map(GameMap::getShortName)
+                                        .orElse("(" + portal.getLocationInfo().getLast().toString() + ")");
+
+                                JMenuItem item = new JMenuItem(portalText);
+                                item.addActionListener(l -> main.setModule(new TemporalPortalJumper(main, portal)));
+                                portalMenu.add(item);
+                            }
+                            UIManager.put("MenuItem.minimumIconSize", iconSize);
+                            UIManager.put("MenuItem.minimumWidth", itemWidth);
+                            portalMenu.show(MapDrawer.this, e.getX(), e.getY());
+                        }
+                    } else {
+                        main.hero.drive.move(loc);
+                        lastMapClick = System.currentTimeMillis();
+                    }
+                }
             }
         });
 
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e)) return;
+                if ((main.config.BOT_SETTINGS.MAP_DISPLAY.MAP_START_STOP && SwingUtilities.isLeftMouseButton(e))
+                        || SwingUtilities.isRightMouseButton(e)) return;
 
                 main.hero.drive.move(mapGraphics.toGameLocation(e));
+                lastMapClick = System.currentTimeMillis();
             }
         });
 
         setLayout(new MigLayout("insets 0px"));
-        add(new RefreshButton(), "gapx 5px");
+        add(new RefreshButton(), "gapx 7px");
     }
 
     public void setup(Main main) {

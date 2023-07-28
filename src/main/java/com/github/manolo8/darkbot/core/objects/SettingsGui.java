@@ -1,15 +1,13 @@
 package com.github.manolo8.darkbot.core.objects;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
-import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import eu.darkbot.api.API;
 import eu.darkbot.api.utils.NativeAction;
 import eu.darkbot.util.TimeUtils;
 import eu.darkbot.util.Timer;
 
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -34,7 +32,7 @@ public class SettingsGui extends Gui implements API.Singleton {
         super.update();
 
         if (!main.isRunning()) return;
-        if (Main.API.hasCapability(GameAPI.Capability.DIRECT_POST_ACTIONS) && (reset || !assignKeyBindTimer.isArmed())) {
+        if (Main.API.hasCapability(Capability.DIRECT_POST_ACTIONS) && (reset || !assignKeyBindTimer.isArmed())) {
             if (show(true)) {
                 Main.API.postActions(assignKeyBinds(!reset, fake));
 

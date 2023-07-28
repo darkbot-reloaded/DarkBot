@@ -28,6 +28,7 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     public Character attackFormation;
     public ExtraNpcInfo extra = new ExtraNpcInfo();
 
+    public transient String fuzzyName;
     public transient int npcId;
     public @Option.Ignore Set<Integer> mapList = new HashSet<>();
 

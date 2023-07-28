@@ -2,12 +2,11 @@ package com.github.manolo8.darkbot.extensions.features;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigHandler;
-import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
+import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.utils.I18n;
-import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.managers.ExtensionsAPI;
@@ -119,8 +118,7 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
                 feature.setInstance(instance = featureLoader.loadFeature(feature));
                 return Optional.of(instance);
             } catch (Throwable e) {
-                feature.getIssues().addFailure("bot.issue.feature.failed_to_load", IssueHandler.createDescription(e));
-                e.printStackTrace();
+                feature.getIssues().handleFeatureException(PluginIssue.Level.ERROR, "bot.issue.feature.failed_to_load", e);
                 return Optional.empty();
             }
         }

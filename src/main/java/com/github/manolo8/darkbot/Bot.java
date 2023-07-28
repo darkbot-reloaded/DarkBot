@@ -3,12 +3,12 @@ package com.github.manolo8.darkbot;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.ui.FlatNativeWindowBorder;
 import com.formdev.flatlaf.util.SystemInfo;
-import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.extensions.plugins.PluginClassLoader;
+import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
-import eu.darkbot.util.http.Http;
+import eu.darkbot.util.Popups;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +18,6 @@ import java.security.CodeSource;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
-import java.security.Policy;
 import java.security.ProtectionDomain;
 
 public class Bot {
@@ -35,6 +34,7 @@ public class Bot {
         LogUtils.setupLogOutput();
 
         try {
+            UIManager.put("MenuItem.selectionType", "underline");
             UIManager.getFont("Label.font"); // Prevents a linux crash
 
             // Set no padding when icon is removed
@@ -54,6 +54,9 @@ public class Bot {
             UIManager.put("Button.default.boldText", false);
             UIManager.put("Table.cellFocusColor", new Color(0, 0, 0, 160));
 
+            // set icon here to use it in login popup, java check popup etc.
+            Popups.setDefaultIcon(MainGui.ICON);
+
             // Not recommended to keep for production
             //FlatInspector.install("ctrl shift alt X");
             //FlatUIDefaultsInspector.install("ctrl shift alt I");
@@ -61,7 +64,6 @@ public class Bot {
             e.printStackTrace();
         }
 
-        Http.setGson(BackpageManager.GSON);
         LibSetup.setupLibraries();
         StartupParams params = new StartupParams(args);
 
@@ -73,8 +75,9 @@ public class Bot {
         SwingUtilities.invokeLater(() -> new Main(params));
     }
 
+    @SuppressWarnings("removal")
     private static void setupSecurityPolicy() {
-        Policy.setPolicy(new Policy() {
+        java.security.Policy.setPolicy(new java.security.Policy() {
             @Override
             public PermissionCollection getPermissions(ProtectionDomain domain) {
                 // Externally loaded classes get no permissions

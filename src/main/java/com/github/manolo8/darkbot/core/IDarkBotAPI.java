@@ -1,9 +1,11 @@
 package com.github.manolo8.darkbot.core;
 
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.OreAPI;
@@ -73,6 +75,14 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
         return address;
     }
 
+    default long readMemoryPtr(long address){
+        return readMemoryLong(address) & ByteUtils.ATOM_MASK;
+    }
+    default long readMemoryPtr(long address, int... offsets) {
+        for (int offset : offsets) address = readMemoryPtr(address + offset);
+        return address;
+    }
+
     int readMemoryInt(long address);
     default int readMemoryInt(long address, int... offsets) {
         for (int i = 0; i < offsets.length - 1; i++) address = readMemoryLong(address + offsets[i]);
@@ -129,7 +139,16 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     void resetCache();
 
-    boolean hasCapability(GameAPI.Capability capability);
+    boolean hasCapability(Capability capability);
+
+    default boolean hasCapability(Capability... capabilities) {
+        for (Capability capability : capabilities) {
+            if (!hasCapability(capability)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     // Direct game access
     void setMaxFps(int maxCps);

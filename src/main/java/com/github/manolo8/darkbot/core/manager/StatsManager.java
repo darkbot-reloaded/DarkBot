@@ -3,78 +3,91 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StatsAPI;
 
+import java.text.DecimalFormat;
 import java.time.Duration;
+import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class StatsManager implements Manager, StatsAPI {
+public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     private final Main main;
     private final EventBrokerAPI eventBroker;
 
-    private long address;
-    private long settingsAddress;
+    private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
 
+    @Deprecated
     public long currentBox; // Pretty out of place, but will work
-
     public double credits;
     public double uridium;
     public double experience;
     public double honor;
+    public int novaEnergy;
     public int deposit;
     public int depositTotal;
     public int userId;
-
-    private long started = System.currentTimeMillis();
-    private long runningTime = Time.SECOND; // Assume running for 1 second by default
-    private boolean lastStatus;
-
     public double earnedCredits;
     public double earnedUridium;
     public double earnedExperience;
     public double earnedHonor;
-
     public volatile String sid;
     public volatile String instance;
+
+    private long address;
+    private long started = System.currentTimeMillis();
+    private long runningTime = Time.SECOND; // Assume running for 1 second by default
+    private boolean lastStatus;
 
     public StatsManager(Main main, EventBrokerAPI eventBroker) {
         this.main = main;
         this.eventBroker = eventBroker;
 
         this.main.status.add(this::toggle);
+
+        this.cpuStat = new AverageStats(true);
+        this.pingStat = new AverageStats(false);
+        this.tickStat = new AverageStats(true);
+        this.memoryStat = new AverageStats(false);
     }
 
     @Override
     public void install(BotInstaller botInstaller) {
         botInstaller.invalid.add(value -> userId = 0);
         botInstaller.heroInfoAddress.add(value -> address = value);
-        botInstaller.settingsAddress.add(value -> settingsAddress = value);
     }
-
 
     public void tick() {
         if (address == 0) return;
-        updateCredits(API.readMemoryDouble(address + 352));
-        updateUridium(API.readMemoryDouble(address + 360));
-        //API.readMemoryDouble(address + 336); // Jackpot
-        updateExperience(API.readMemoryDouble(address + 376));
-        updateHonor(API.readMemoryDouble(address + 384));
 
-        deposit = API.readMemoryInt(API.readMemoryLong(address + 304) + 40);
-        depositTotal = API.readMemoryInt(API.readMemoryLong(address + 312) + 40);
+        updateCredits(readDouble(352));
+        updateUridium(readDouble(360));
+        updateExperience(readDouble(376));
+        updateHonor(readDouble(384));
+
+        deposit = readIntHolder(304);
+        depositTotal = readIntHolder(312);
 
         //currentBox = API.readMemoryLong(address + 0xE8);
 
-        sid = API.readMemoryStringFallback(API.readMemoryLong(address + 200), null);
-        userId = API.readInt(address + 48);
-        if (settingsAddress == 0) return;
-        instance = API.readMemoryStringFallback(API.readMemoryLong(settingsAddress + 656), null);
+        sid = readString(200);
+        userId = readInt(48);
+
+        //is that even possible to happen?
+        if (main.settingsManager.getAddress() == 0) return;
+        instance = main.settingsManager.readString(664);
+
+        // Both memory location gives same value
+        // long novaData = API.readMemoryLong(address + 0xC0) & ByteUtils.ATOM_MASK;
+        // novaEnergy = API.readInt(novaData + 0x98);
+        long novaData = readAtom(0x100);
+        novaEnergy = API.readInt(novaData + 0x28);
     }
 
     public int getLevel() {
@@ -89,6 +102,15 @@ public class StatsManager implements Manager, StatsAPI {
         } else {
             runningTime += System.currentTimeMillis() - started;
         }
+    }
+
+    public void tickAverageStats(long timeDelta) {
+        int p = getPing();
+        if (p > 0) pingStat.accept(timeDelta, p);
+
+        cpuStat.accept(timeDelta, API.getCpuUsage());
+        tickStat.accept(timeDelta, main.getTickTime());
+        memoryStat.accept(timeDelta, API.getMemoryUsage());
     }
 
     private void updateCredits(double credits) {
@@ -242,5 +264,76 @@ public class StatsManager implements Manager, StatsAPI {
     @Override
     public double getEarnedHonor() {
         return earnedHonor;
+    }
+
+    @Override
+    public int getNovaEnergy() {
+        return novaEnergy;
+    }
+
+    public AverageStats getCpuStats() {
+        return cpuStat;
+    }
+
+    public AverageStats getPingStats() {
+        return pingStat;
+    }
+
+    public AverageStats getTickStats() {
+        return tickStat;
+    }
+
+    public AverageStats getMemoryStats() {
+        return memoryStat;
+    }
+
+    @Override
+    public long getAddress() {
+        return address;
+    }
+
+    public static class AverageStats {
+        private static final DecimalFormat ONE_PLACE_FORMAT = new DecimalFormat("0.0");
+
+        private double last, average, max = Double.MIN_VALUE;
+        private final boolean showDecimal;
+
+        private Consumer<String> onChange;
+
+        public AverageStats(boolean showDecimal) {
+            this.showDecimal = showDecimal;
+        }
+
+        public void accept(long timeDelta, double value) {
+            double adjustFactor = timeDelta / 10_000d;
+            average = average + adjustFactor * (value - average);
+
+            max += adjustFactor * 0.2 * (average - max);
+            max = Math.max(max, value);
+
+            if (last != value && onChange != null) {
+                String s = showDecimal ? ONE_PLACE_FORMAT.format(value) : String.valueOf((int) value);
+                onChange.accept(s);
+            }
+            last = value;
+        }
+
+        public double getMax() {
+            return max;
+        }
+
+        public double getAverage() {
+            return average;
+        }
+
+        public void setListener(Consumer<String> onChange) {
+            this.onChange = onChange;
+        }
+
+        @Override
+        public String toString() {
+            return "Max=" + ONE_PLACE_FORMAT.format(getMax()) +
+                    "\nAverage=" + ONE_PLACE_FORMAT.format(getAverage());
+        }
     }
 }

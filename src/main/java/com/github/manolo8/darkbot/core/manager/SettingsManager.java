@@ -3,13 +3,14 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
 import com.github.manolo8.darkbot.core.itf.Tickable;
 import eu.darkbot.api.API;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 
-public class SettingsManager implements Manager, Tickable, API.Singleton {
+public class SettingsManager implements Manager, Tickable, API.Singleton, NativeUpdatable {
 
     private final Main main;
     public int config;
@@ -31,6 +32,7 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
     @Override
     public void install(BotInstaller botInstaller) {
         botInstaller.settingsAddress.add(value -> {
+            force2d = 0;
             address = value;
             driverNamePrinted = false;
         });
@@ -38,36 +40,42 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
 
     @Override
     public void tick() {
-        this.config = API.readMemoryInt(address + 92);
+        this.config = readInt(92);
 
         // x-1 & x-2 maps enemy counter
-        this.enemyCount = API.readInt(main.settingsManager.address, 592, 40);
-        this.attackViaSlotbar = API.readBoolean(main.settingsManager.address, 164);
+        this.enemyCount = readInt(600, 40);
+        this.attackViaSlotbar = readBoolean(164);
 
-        this.nextMap = API.readMemoryInt(address + 244);
-        this.currMap = API.readMemoryInt(address + 248);
+        this.nextMap = readInt(244);
+        this.currMap = readInt(248);
 
-        this.force2d = API.readMemoryInt(address, 784, 0x20);
+        this.force2d = readInt(792, 32);
 
-        this.lang = API.readMemoryStringFallback(address, null, 640);
+        this.lang = readString(648);
 
-        this.uiWrapper = Main.API.readLong(main.settingsManager.address, 864);
-        this.hudWrapper = Main.API.readLong(main.settingsManager.address, 856);
+        this.uiWrapper = readLong(872);
+        this.hudWrapper = readLong(864);
 
-        // Enforce GPU capabilities support
-//        if (main.config.BOT_SETTINGS.API_CONFIG.ENFORCE_HW_ACCEL) {
-//            API.replaceInt(address + 332, 0, 1);
-//            API.replaceInt(address + 340, 0, 1);
-//        }
+        // Enforce GPU capabilities support - it still may be an issue on Windows & 2D mode
+        if (is2DForced() && main.config.BOT_SETTINGS.API_CONFIG.ENFORCE_HW_ACCEL) {
+            replaceInt(0, 1, 332);
+            replaceInt(0, 1, 340);
+        }
 
         if (!driverNamePrinted) {
-            this.driver = API.readString(address, "", 432);
+            this.driver = readString(440);
 
             if (driver != null && !driver.isEmpty()) {
                 System.out.println("Game is using: " + driver + " | force2d: " + force2d);
                 driverNamePrinted = true;
             }
         }
+    }
+
+    @Override
+    public int modifyOffset(int offset) {
+        if (offset >= 392) offset += 8; // 19.07.2023 - jumpGateResourceHash
+        return offset;
     }
 
     public boolean is2DForced() {
@@ -92,5 +100,10 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
         if (hudWrapper != 0) {
             API.callMethodAsync(4, hudWrapper, visible ? 1 : 0);
         }
+    }
+
+    @Override
+    public long getAddress() {
+        return address;
     }
 }

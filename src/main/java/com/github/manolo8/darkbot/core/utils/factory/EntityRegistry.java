@@ -15,22 +15,18 @@ public class EntityRegistry {
     private final Map<Long, EntityBuilder> cachedTypes       = new HashMap<>();
     private final Map<EntityFactory, Lazy<Entity>> listeners = new EnumMap<>(EntityFactory.class);
     private final Lazy<Entity> fallback                      = new Lazy.NoCache<>();
-    private Main main;
 
-    public void setMain(Main main) {
+    private final Main main;
+    private final Consumer<Entity> onEntityCreate;
+
+    public EntityRegistry(Main main, Consumer<Entity> onEntityCreate, Consumer<Entity> onDefault) {
         this.main = main;
+        this.onEntityCreate = onEntityCreate;
+        this.fallback.add(onDefault);
     }
 
     public void add(EntityFactory type, Consumer<Entity> consumer) {
         listeners.computeIfAbsent(type, k -> new Lazy.NoCache<>()).add(consumer);
-    }
-
-    public void addDefault(Consumer<Entity> consumer) {
-        fallback.add(consumer);
-    }
-
-    public void addToAll(Consumer<Entity> consumer) {
-        listeners.forEach((f, e) -> add(f, consumer));
     }
 
     public boolean remove(EntityFactory type, Consumer<Entity> consumer) {
@@ -51,8 +47,7 @@ public class EntityRegistry {
         if (entity == null) return;
         entity.added(main);
         entity.update();
-
-        //if (main.isRunning()) entity.clickable.setRadius(0);
+        onEntityCreate.accept(entity);
 
         if (type instanceof EntityFactory)
             listeners.getOrDefault(type, fallback).send(entity);

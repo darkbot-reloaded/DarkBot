@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.gui.utils;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -34,6 +36,7 @@ public class Strings {
     public static String fuzzyMatcher(String string) {
         string = string.toLowerCase(Locale.ROOT)
                 .replace("-x-", "") // Fixes "-x-[ NAME ]-x-", used in frozen labyrinth
+                .replace("xx", "") // Fixes Chaos Protegit
                 .replace("referee binary bot", "referee bot");
         string = NON_CHARACTER_REPLACEMENT.matcher(string).replaceAll(""); // Keep only alphanumerical
         return MIMESIS_REPLACEMENT.matcher(string).replaceAll("mimesis"); // Replace mim35i5 with mimesis
@@ -48,5 +51,11 @@ public class Strings {
         if (text != null && text.length() > 30 && (sepIdx = text.indexOf(File.separator, text.length() - 30)) != -1)
             return ".." + text.substring(sepIdx);
         else return text;
+    }
+
+    public static String exceptionToString(Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 }

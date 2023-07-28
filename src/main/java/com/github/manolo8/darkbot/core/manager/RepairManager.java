@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.entities.bases.BaseRepairStation;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.swf.IntArray;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
@@ -48,8 +49,8 @@ public class RepairManager implements Manager, RepairAPI {
     private Locatable deathLocation;
     private Instant lastDeath;
 
-    private boolean destroyed;
-    private long userDataAddress, repairAddress, beforeReviveTime;
+    private boolean destroyed, shouldInstantRepair = false;
+    private long userDataAddress, repairAddress, beforeReviveTime, afterAvailableWait, lastReviveAttempt;
     private int deaths;
 
     public RepairManager(Main main, ReviveSelectorHandler reviveHandler) {
@@ -68,7 +69,7 @@ public class RepairManager implements Manager, RepairAPI {
         int availableIn = optionAvailableIn(getRepairOptionFromType(location));
 
         int beforeRevive = (int) (((beforeReviveTime + (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L))
-                                   - System.currentTimeMillis()) / 1000);
+                - System.currentTimeMillis()) / 1000);
 
         return "Reviving at: " + location + ", in " + Math.max(beforeRevive, availableIn) + "s";
     }
@@ -80,6 +81,34 @@ public class RepairManager implements Manager, RepairAPI {
         return System.currentTimeMillis() - beforeReviveTime < (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L);
     }
 
+    private void checkInstantRepair() {
+        if (!shouldInstantRepair || !main.isRunning()
+                || main.hero.getHealth().getMaxHp() == 0 || main.config.GENERAL.SAFETY.INSTANT_REPAIR == 0) return;
+        // have ~25% hp already after revive - do not use instant repair. maybe create setting for min health
+        if (main.hero.getHealth().hpPercent() >= 0.25) {
+            shouldInstantRepair = false;
+            return;
+        }
+
+        if (lastReviveAttempt + 15_000 > System.currentTimeMillis()) {
+            main.mapManager.entities.basePoints.stream()
+                    .filter(basePoint -> basePoint instanceof BaseRepairStation)
+                    .findAny()
+                    .filter(basePoint -> basePoint.clickable.enabled)
+                    .ifPresent(basePoint -> {
+                        BaseRepairStation repairStation = (BaseRepairStation) basePoint;
+
+                        int currentRepairs = repairStation.getInstantRepairs();
+                        if (currentRepairs >= main.config.GENERAL.SAFETY.INSTANT_REPAIR) {
+                            repairStation.clickable.click();
+                            System.out.println("Used instant repair! " + currentRepairs);
+                        }
+
+                        shouldInstantRepair = false;
+                    });
+        }
+    }
+
     public void tick() {
         boolean alive = isAlive();
 
@@ -87,11 +116,13 @@ public class RepairManager implements Manager, RepairAPI {
             if (main.hero.address != 0) // possibly alive but we are not sure yet
                 destroyed = false;
 
+            checkInstantRepair();
             beforeReviveTime = -1;
             return;
         }
 
         if (!destroyed) {
+            shouldInstantRepair = true;
             destroyed = true;
             deaths++;
             lastDeath = Instant.now();
@@ -118,7 +149,6 @@ public class RepairManager implements Manager, RepairAPI {
         repairTypes.update(API.readMemoryLong(repairAddress + 0x60));
     }
 
-    private long afterAvailableWait;
     // return true if clicked, false if should wait
     public boolean tryRevive() {
         int repairOption = getRepairOptionFromType(reviveHandler.getBest());
@@ -136,6 +166,7 @@ public class RepairManager implements Manager, RepairAPI {
             API.writeMemoryLong(repairAddress + 32, repairOption);
 
         API.mouseClick(MapManager.clientWidth / 2, (MapManager.clientHeight / 2) + 190);
+        lastReviveAttempt = System.currentTimeMillis();
 
         return true;
     }
@@ -144,7 +175,7 @@ public class RepairManager implements Manager, RepairAPI {
         if (repairAddress != 0) return !API.readMemoryBoolean(repairAddress + 0x28);
 
         if (main.mapManager.mapAddress == 0 || main.guiManager.lostConnection.isVisible()
-            || main.guiManager.connecting.isVisible() || (main.hero.address != 0 && main.hero.id != 0))
+                || main.guiManager.connecting.isVisible() || (main.hero.address != 0 && main.hero.id != 0))
             return true;
 
         if (userDataAddress == 0 || API.readMemoryBoolean(userDataAddress + 0x4C)) {
@@ -206,13 +237,13 @@ public class RepairManager implements Manager, RepairAPI {
         API.readMemory(addr + 48, patternCache);
 
         return ByteUtils.getInt(patternCache, 0) == 0
-               && ByteUtils.getInt(patternCache, 4) == 1
-               && ByteUtils.getInt(patternCache, 8) == 2
-               && ByteUtils.getInt(patternCache, 12) == 3
-               && ByteUtils.getInt(patternCache, 16) == 4
-               && ByteUtils.getInt(patternCache, 20) == 0 // align to 8
-               && API.readLong(ByteUtils.getLong(patternCache, 24), 0x10) != 0
-               && API.readLong(ByteUtils.getLong(patternCache, 32), 0x10) != 0;
+                && ByteUtils.getInt(patternCache, 4) == 1
+                && ByteUtils.getInt(patternCache, 8) == 2
+                && ByteUtils.getInt(patternCache, 12) == 3
+                && ByteUtils.getInt(patternCache, 16) == 4
+                && ByteUtils.getInt(patternCache, 20) == 0 // align to 8
+                && API.readLong(ByteUtils.getLong(patternCache, 24), 0x10) != 0
+                && API.readLong(ByteUtils.getLong(patternCache, 32), 0x10) != 0;
     }
 
     private int getRepairOptionFromType(ReviveLocation reviveLocation) {

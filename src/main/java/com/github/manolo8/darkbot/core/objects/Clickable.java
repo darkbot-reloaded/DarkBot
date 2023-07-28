@@ -17,7 +17,7 @@ public class Clickable extends Updatable {
     public void click() {
         if (!isInvalid() && enabled) {
             // size <= 128 = normal click trait, > 128 = portal/battlestation/etc click trait
-            short instanceSize = (short) API.readInt(address, 0x10, 0x28, 240);
+            short instanceSize = (short) API.readInt(address, 0x10, 0x28, 0xF0);
             if (instanceSize > 128) API.callMethodChecked(false, "23(26)0086311000", 8, address);
             else API.callMethodChecked(false, "23(26)008531900", 8, address);
         }

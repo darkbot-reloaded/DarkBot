@@ -11,7 +11,6 @@ import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.gui.utils.PidSelector;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.LibUtils;
 import com.github.manolo8.darkbot.utils.OSUtil;
 import com.github.manolo8.darkbot.utils.StartupParams;
@@ -23,6 +22,7 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.OreAPI;
+import eu.darkbot.util.Popups;
 import eu.darkbot.util.Timer;
 import eu.darkbot.utils.KekkaPlayerProxyServer;
 import org.intellij.lang.annotations.Language;
@@ -55,7 +55,7 @@ public class GameAPIImpl<
     protected final I interaction;
     protected final D direct;
 
-    protected final EnumSet<GameAPI.Capability> capabilities;
+    protected final EnumSet<Capability> capabilities;
 
     protected final String version;
 
@@ -76,7 +76,7 @@ public class GameAPIImpl<
 
     public GameAPIImpl(StartupParams params,
                        W window, H handler, M memory, E extraMemoryReader, I interaction, D direct,
-                       GameAPI.Capability... capabilityArr) {
+                       Capability... capabilityArr) {
         this.params = params;
 
         this.window = window;
@@ -86,7 +86,7 @@ public class GameAPIImpl<
         this.interaction = interaction;
         this.direct = direct;
 
-        this.capabilities = EnumSet.noneOf(GameAPI.Capability.class);
+        this.capabilities = EnumSet.noneOf(Capability.class);
         this.capabilities.addAll(Arrays.asList(capabilityArr));
 
         this.version = window.getVersion() + "w " +
@@ -99,39 +99,37 @@ public class GameAPIImpl<
         Main main = HeroManager.instance.main;
         config = main.configHandler;
 
-        this.loginData = hasCapability(GameAPI.Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
+        this.loginData = hasCapability(Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
         main.backpage.setLoginData(loginData);
 
-        this.initiallyShown = hasCapability(GameAPI.Capability.INITIALLY_SHOWN) && !params.getAutoHide();
+        this.initiallyShown = hasCapability(Capability.INITIALLY_SHOWN) && !params.getAutoHide();
         this.mapManager = main.mapManager;
 
-        if (hasCapability(GameAPI.Capability.DIRECT_LIMIT_FPS)) {
+        if (hasCapability(Capability.DIRECT_LIMIT_FPS)) {
             ConfigSetting<Integer> maxFps = config.requireConfig("bot_settings.api_config.max_fps");
             maxFps.addListener(fpsLimitListener = this::setMaxFps);
-
-            main.status.add(running -> setMaxFps(maxFps.getValue()));
             setMaxFps(maxFps.getValue());
         } else {
             this.fpsLimitListener = null;
         }
 
-        if (hasCapability(GameAPI.Capability.PROXY)) {
+        if (hasCapability(Capability.PROXY)) {
             ConfigSetting<Boolean> useProxy = config.requireConfig("bot_settings.api_config.use_proxy");
             if (useProxy.getValue() || OSUtil.isWindows7OrLess())
                 new KekkaPlayerProxyServer(handler).start();
         }
 
-        if (hasCapability(GameAPI.Capability.HANDLER_FLASH_PATH) && OSUtil.isWindows()) {
+        if (hasCapability(Capability.HANDLER_FLASH_PATH) && OSUtil.isWindows()) {
             setFlashOcxPath(LibUtils.getFlashOcxPath().toString());
         }
 
-        if (hasCapability(GameAPI.Capability.HANDLER_MIN_CLIENT_SIZE)) {
+        if (hasCapability(Capability.HANDLER_MIN_CLIENT_SIZE)) {
             setMinClientSize(800, 600); // API window can be smaller, but game client cannot
         }
     }
 
     protected void tryRelogin() {
-        if (!hasCapability(GameAPI.Capability.LOGIN)
+        if (!hasCapability(Capability.LOGIN)
                 || loginData == null
                 || loginData.getUsername() == null) {
             System.out.println("Re-logging in is unsupported for this browser/API, or you logged in with SID");
@@ -185,7 +183,7 @@ public class GameAPIImpl<
     public int getRefreshCount() {
         return refreshCount;
     }
-    public boolean hasCapability(GameAPI.Capability capability) {
+    public boolean hasCapability(Capability capability) {
         return capabilities.contains(capability);
     }
 
@@ -203,7 +201,7 @@ public class GameAPIImpl<
         interaction.tick();
         direct.tick();
 
-        if (hasCapability(GameAPI.Capability.HANDLER_CLEAR_RAM) && clearRamTimer.tryActivate())
+        if (hasCapability(Capability.HANDLER_CLEAR_RAM) && clearRamTimer.tryActivate())
             emptyWorkingSet();
     }
 
@@ -214,11 +212,11 @@ public class GameAPIImpl<
 
     @Override
     public void createWindow() {
-        if (hasCapability(GameAPI.Capability.LOGIN)) setData();
+        if (hasCapability(Capability.LOGIN)) setData();
 
-        if (hasCapability(GameAPI.Capability.BACKGROUND_ONLY)) return;
+        if (hasCapability(Capability.BACKGROUND_ONLY)) return;
 
-        if (hasCapability(GameAPI.Capability.ATTACH)) {
+        if (hasCapability(Capability.ATTACH)) {
             PidSelector pidSelector = new PidSelector(window.getProcesses());
 
             int result = Popups.of("Select flash process", pidSelector, JOptionPane.QUESTION_MESSAGE)
@@ -236,7 +234,7 @@ public class GameAPIImpl<
             }
 
             window.openProcess(this.pid);
-        } else if (hasCapability(GameAPI.Capability.CREATE_WINDOW_THREAD)) {
+        } else if (hasCapability(Capability.CREATE_WINDOW_THREAD)) {
             Thread apiThread = new Thread(window::createWindow, "API thread");
             apiThread.setDaemon(true);
             apiThread.start();
@@ -246,7 +244,7 @@ public class GameAPIImpl<
     }
 
     protected void setData() {
-        if (hasCapability(GameAPI.Capability.LOGIN)) {
+        if (hasCapability(Capability.LOGIN)) {
             String url = "https://" + loginData.getUrl() + "/", sid = "dosid=" + loginData.getSid();
             window.setData(url, sid, loginData.getPreloaderUrl(), loginData.getParams(config));
         }
@@ -450,7 +448,7 @@ public class GameAPIImpl<
     @Override
     public void handleRefresh() {
         // No login has happened? Make a first attempt
-        if (hasCapability(GameAPI.Capability.LOGIN) && loginData.getUrl() == null) {
+        if (hasCapability(Capability.LOGIN) && loginData.getUrl() == null) {
             handleRelogin();
         }
 
@@ -463,7 +461,7 @@ public class GameAPIImpl<
 
     @Override
     public void handleRelogin() {
-        if (hasCapability(GameAPI.Capability.LOGIN)) {
+        if (hasCapability(Capability.LOGIN)) {
             tryRelogin();
             setData();
         }
@@ -471,7 +469,7 @@ public class GameAPIImpl<
 
     @Override
     public void setMaxFps(int maxFps) {
-        direct.setMaxFps(HeroManager.instance.main.isRunning() ? maxFps : 0);
+        direct.setMaxFps(maxFps);
     }
 
     @Override
@@ -481,7 +479,7 @@ public class GameAPIImpl<
 
     @Override
     public void selectEntity(Entity entity) {
-        if (!API.hasCapability(GameAPI.Capability.DIRECT_CALL_METHOD)) return;
+        if (!API.hasCapability(Capability.DIRECT_CALL_METHOD)) return;
         if (mapManager.mapClick(true)) {
             if (entity instanceof Lockable) {
                 //assuming that selectEntity selects only ships & is supported by every API

@@ -3,10 +3,16 @@ package com.github.manolo8.darkbot.backpage.entities.galaxy;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Map;
+import lombok.Getter;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * @deprecated Use {@link eu.darkbot.api.game.galaxy.GalaxyGate} instead
+ */
+@Getter
+@Deprecated
 public enum GalaxyGate {
     ALPHA  ("alpha",    1,  "α"),
     BETA   ("beta",     2,  "β"),
@@ -21,9 +27,9 @@ public enum GalaxyGate {
     HADES  ("hades",    13, "Hades"),
     KUIPER ("streuner", 19, "ς");
 
-    private String name;
-    private int id;
-    private Set<Map> maps;
+    private final String name;
+    private final int id;
+    private final Set<Map> maps;
 
     GalaxyGate(String name, int id, String mapSymbol) {
         this.name = name;
@@ -31,26 +37,6 @@ public enum GalaxyGate {
         this.maps = StarManager.getAllMaps().stream()
                 .filter(map -> map.gg && map.name.contains(mapSymbol))
                 .collect(Collectors.toSet());
-    }
-
-    public String getParam() {
-        return "&gateID=" + getId() + "&" + getName() + "=1";
-    }
-
-    public String getIdParam() {
-        return "&gateID=" + getId();
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public Set<Map> getMaps() {
-        return maps;
     }
 
     public boolean isInGate(HeroManager hero) {

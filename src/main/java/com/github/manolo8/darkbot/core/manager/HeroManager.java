@@ -135,10 +135,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         if (targetPtr == 0) inGameTarget = null;
         else if (targetPtr == petAddress) inGameTarget = pet;
         else if (inGameTarget == null || inGameTarget.address != targetPtr)
-            inGameTarget = main.mapManager.entities.allEntities.stream()
-                    .flatMap(Collection::stream)
-                    .filter(entity -> entity.address == targetPtr)
-                    .findAny().orElse(null);
+            inGameTarget = main.mapManager.entities.findEntityByAddress(targetPtr);
 
         if (lastTarget != target) setLocalTarget(target);
     }
@@ -365,16 +362,18 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     public SelectableItem.Laser getLaser() {
         return items.getItems(ItemCategory.LASERS).stream()
                 .filter(Item::isSelected)
-                .map(item -> SelectableItem.Laser.of(item.getId()))
-                .findFirst().orElse(null);
+                .findFirst()
+                .map(item -> item.getAs(SelectableItem.Laser.class))
+                .orElse(null);
     }
 
     @Override
     public SelectableItem.Rocket getRocket() {
         return items.getItems(ItemCategory.ROCKETS).stream()
                 .filter(Item::isSelected)
-                .map(item -> SelectableItem.Rocket.of(item.getId()))
-                .findFirst().orElse(null);
+                .findFirst()
+                .map(item -> item.getAs(SelectableItem.Rocket.class))
+                .orElse(null);
     }
 
     @Override

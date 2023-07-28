@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.utils;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ZoneInfo;
-import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.manager.MouseManager;
@@ -11,7 +11,6 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.PathFinder;
 import com.github.manolo8.darkbot.utils.MathUtils;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.Locatable;
-import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.MovementAPI;
 import org.jetbrains.annotations.NotNull;
 
@@ -118,7 +117,7 @@ public class Drive implements MovementAPI {
         if (System.currentTimeMillis() - lastClick > 200) {
             lastClick = System.currentTimeMillis();
 
-            if (Main.API.hasCapability(GameAPI.Capability.DIRECT_MOVE_SHIP)) Main.API.moveShip(loc);
+            if (Main.API.hasCapability(Capability.DIRECT_MOVE_SHIP)) Main.API.moveShip(loc);
             else mouse.clickLoc(loc);
         }
     }
@@ -147,7 +146,7 @@ public class Drive implements MovementAPI {
             Location stopLoc = heroLoc.now.copy();
             stopLoc.toAngle(heroLoc.now, heroLoc.last.angle(heroLoc.now), 100);
 
-            if (Main.API.hasCapability(GameAPI.Capability.DIRECT_MOVE_SHIP)) Main.API.moveShip(stopLoc);
+            if (Main.API.hasCapability(Capability.DIRECT_MOVE_SHIP)) Main.API.moveShip(stopLoc);
             else mouse.clickLoc(stopLoc);
         }
 
@@ -284,5 +283,9 @@ public class Drive implements MovementAPI {
     @Override
     public boolean isInPreferredZone(Locatable locatable) {
         return map.preferred.contains(locatable);
+    }
+
+    public boolean movementInterrupted(long inTime) {
+        return main.getGui().getMapDrawer().getLastMapClick() + inTime > System.currentTimeMillis();
     }
 }

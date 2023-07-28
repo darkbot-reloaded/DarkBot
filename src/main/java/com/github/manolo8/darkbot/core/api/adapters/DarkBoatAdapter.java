@@ -1,10 +1,13 @@
-package com.github.manolo8.darkbot.core.api;
+package com.github.manolo8.darkbot.core.api.adapters;
 
 import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.core.api.Capability;
+import com.github.manolo8.darkbot.core.api.GameAPIImpl;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.DarkBoat;
 
+@Deprecated
 public class DarkBoatAdapter extends GameAPIImpl<
         DarkBoat,
         DarkBoat,
@@ -21,11 +24,11 @@ public class DarkBoatAdapter extends GameAPIImpl<
                 new ByteUtils.ExtraMemoryReader(darkboat, botInstaller),
                 darkboat,
                 di,
-                GameAPI.Capability.LOGIN,
-                GameAPI.Capability.INITIALLY_SHOWN,
-                GameAPI.Capability.ALL_KEYBINDS_SUPPORT,
-                GameAPI.Capability.CREATE_WINDOW_THREAD,
-                GameAPI.Capability.DIRECT_LIMIT_FPS);
+                Capability.LOGIN,
+                Capability.INITIALLY_SHOWN,
+                Capability.ALL_KEYBINDS_SUPPORT,
+                Capability.CREATE_WINDOW_THREAD,
+                Capability.DIRECT_LIMIT_FPS);
     }
 
     @Override
@@ -33,7 +36,7 @@ public class DarkBoatAdapter extends GameAPIImpl<
         return "darkboat-" + window.getVersion();
     }
 
-    public static class DarkBoatDirectInteraction extends GameAPI.NoOpDirectInteraction {
+    public static class DarkBoatDirectInteraction extends NoopAPIAdapter.NoOpDirectInteraction {
         private final DarkBoat darkboat;
 
         public DarkBoatDirectInteraction(DarkBoat darkboat) {

@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.api.GameAPI;
-import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
+import com.github.manolo8.darkbot.core.api.Capability;
+import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
@@ -36,7 +36,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
     protected static final String[] ACTIONS = new String[]{
-            "internalStart", "internalDock", "internalAuction", "internalGalaxyGates", "internalPilotSheet"};
+            "internalStart", "internalDock", "internalAuction", "internalPilotSheet"};
 
     protected static class SidStatus {
         private static final int NO_SID = -1, ERROR = -2, UNKNOWN = -3;
@@ -44,8 +44,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     public final LegacyHangarManager legacyHangarManager;
     public final HangarManager hangarManager;
-    public final GalaxyManager galaxyManager;
-    public final DispatchManager dispatchManager;
     public final AuctionManager auctionManager;
     public final NovaManager novaManager;
 
@@ -72,8 +70,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
         this.main = main;
         this.legacyHangarManager = new LegacyHangarManager(main, this);
         this.hangarManager = new HangarManager(this);
-        this.galaxyManager = new GalaxyManager(this);
-        this.dispatchManager = new DispatchManager(this, configAPI);
         this.auctionManager = new AuctionManager(this, configAPI);
         this.novaManager = new NovaManager(this);
         setDaemon(true);
@@ -96,13 +92,13 @@ public class BackpageManager extends Thread implements BackpageAPI {
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
-                                .addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                                .handleTickFeatureException(PluginIssue.Level.WARNING, e);
                     }
                 }
             }
 
             // For apis that support login, we can re-login if invalid
-            if (Main.API.hasCapability(GameAPI.Capability.LOGIN)
+            if (Main.API.hasCapability(Capability.LOGIN)
                     && (isInvalid() || sidStatus == 302)
                     && refreshTimer.tryActivate()) {
                 Main.API.handleRelogin();
@@ -121,7 +117,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
                 int waitTime = sidCheck();
                 sidLastUpdate = System.currentTimeMillis();
                 sidNextUpdate = sidLastUpdate + (int) (waitTime + waitTime * Math.random());
-                galaxyManager.initIfEmpty();
             }
 
             if (System.currentTimeMillis() > checkDrones) {
@@ -145,7 +140,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
-                                .addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                                .handleTickFeatureException(PluginIssue.Level.WARNING, e);
                     }
                 }
             }
@@ -288,7 +283,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
             case 302:
                 return "KO";
             default:
-                return sidStatus + "";
+                return String.valueOf(sidStatus);
         }
     }
 
