@@ -161,8 +161,8 @@ public class SavedLogins extends JPanel implements LoginScreen {
                 I18n.get("gui.login.error.no_user"), I18n.get("gui.login.error.no_user.desc"));
 
         login.setCredentials(user.u, user.p);
-        LoginUtils.usernameLogin(login);
         login.setCredentials(credentials, password);
+        LoginUtils.usernameLogin(login);
         return null;
     }
 
