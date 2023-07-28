@@ -93,10 +93,10 @@ public class MapManager implements Manager, StarSystemAPI {
     private final Consumer<Boolean> invalidateRender = b -> disableRenderApplied = false;
 
     public MapManager(Main main,
-                      PluginAPI pluginAPI,
-                      EventBrokerAPI eventBroker,
-                      StarManager starManager,
-                      ConfigAPI config) {
+            PluginAPI pluginAPI,
+            EventBrokerAPI eventBroker,
+            StarManager starManager,
+            ConfigAPI config) {
         this.main = main;
         this.eventBroker = eventBroker;
         this.starManager = starManager;
@@ -152,8 +152,10 @@ public class MapManager implements Manager, StarSystemAPI {
 
         internalWidth = API.readMemoryInt(address + 68);
         internalHeight = API.readMemoryInt(address + 72);
-        if (internalHeight == 13100) internalHeight = 13500;
-        if (internalHeight == 26200) internalHeight = 27000;
+        if (internalHeight == 13100)
+            internalHeight = 13500;
+        if (internalHeight == 26200)
+            internalHeight = 27000;
 
         mapBound.set(0, 0, internalWidth, internalHeight);
 
@@ -167,7 +169,8 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     private void checkUpdateRender() {
-        if (!is3DView || disableRenderApplied) return;
+        if (!is3DView || disableRenderApplied)
+            return;
 
         if (!ByteUtils.isValidPtr(settings3DAddress)) {
             settings3DAddress = API.searchClassClosure(l -> ByteUtils.readObjectName(l).equals("Settings3D$"));
@@ -184,6 +187,7 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     private int lastNextMap;
+
     public void checkNextMap(int next) {
         if (next != lastNextMap)
             main.hero.nextMap = main.starManager.byId(lastNextMap = next);
@@ -206,7 +210,8 @@ public class MapManager implements Manager, StarSystemAPI {
 
     private void switchMap(Map next) {
         Map old = main.hero.map;
-        if (old.getId() == next.getId()) return;
+        if (old.getId() == next.getId())
+            return;
 
         id = next.getId();
         main.hero.map = main.hero.nextMap = next;
@@ -223,7 +228,8 @@ public class MapManager implements Manager, StarSystemAPI {
         avoided = ConfigEntity.INSTANCE.getOrCreateAvoided();
         safeties = ConfigEntity.INSTANCE.getOrCreateSafeties();
         if (createSafeties) {
-            for (Entity e : entities.all) ConfigEntity.INSTANCE.updateSafetyFor(e);
+            for (Entity e : entities.all)
+                ConfigEntity.INSTANCE.updateSafetyFor(e);
         }
     }
 
@@ -275,17 +281,20 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     private final Timer lastMove = Timer.getRandom(1000, 8000);
+
     public boolean mapClick(boolean isEntityAction) {
         if (main.repairManager.isDestroyed() || main.guiManager.connecting.visible
-                || main.guiManager.lostConnection.visible) return false;
+                || main.guiManager.lostConnection.visible)
+            return false;
 
         long eventManager = Main.API.readLong(eventAddress);
         if (eventManager > 0) {
             boolean enabled = !API.readBoolean(eventManager + 36); // are clicks enabled?
             if (enabled) {
                 if (isEntityAction || lastMove.tryActivate()) {
-                    API.callMethodChecked(false, "23(26)008431800",26, eventManager);
-                    if (isEntityAction) lastMove.disarm();
+                    API.callMethodChecked(false, "23(26)008431800", 26, eventManager);
+                    if (isEntityAction)
+                        lastMove.disarm();
                 }
                 return true;
             }
@@ -297,41 +306,41 @@ public class MapManager implements Manager, StarSystemAPI {
 
     // viewAddress
     // 2D
-    //   Slot[168] int
-    //   Slot[172] int
-    //   Slot[176] Boolean
-    //   Slot[180] Boolean
-    //   Slot[184] starling.core::Starling
-    //   Slot[192] _-73v::_-X5l
-    //   Slot[200] _-e4L::HUD
-    //   Slot[208] net.bigpoint.darkorbit.map.view2D::_-v25
-    //   Slot[216] net.bigpoint.darkorbit.map.view2D::_-C4s
-    //   Slot[224] net.bigpoint.darkorbit.map.model::_-332
-    //   Slot[232] __AS3__.vec::Vector.<net.bigpoint.darkorbit.map.common::_-kb>
-    //   Slot[240] __AS3__.vec::Vector.<String>
-    //   Slot[248] _-J4u::_-4L
-    //   Slot[256] flash.display::Bitmap
-    //   Slot[264] flash.geom::Matrix
-    //   Slot[272] Number
-
+    // Slot[168] int
+    // Slot[172] int
+    // Slot[176] Boolean
+    // Slot[180] Boolean
+    // Slot[184] starling.core::Starling
+    // Slot[192] _-73v::_-X5l
+    // Slot[200] _-e4L::HUD
+    // Slot[208] net.bigpoint.darkorbit.map.view2D::_-v25
+    // Slot[216] net.bigpoint.darkorbit.map.view2D::_-C4s
+    // Slot[224] net.bigpoint.darkorbit.map.model::_-332
+    // Slot[232] __AS3__.vec::Vector.<net.bigpoint.darkorbit.map.common::_-kb>
+    // Slot[240] __AS3__.vec::Vector.<String>
+    // Slot[248] _-J4u::_-4L
+    // Slot[256] flash.display::Bitmap
+    // Slot[264] flash.geom::Matrix
+    // Slot[272] Number
 
     // 3D
-    //   Slot[168] int
-    //   Slot[172] int
-    //   Slot[176] Boolean
-    //   Slot[180] Boolean
-    //   Slot[184] int
-    //   Slot[192] flash.geom::Vector3D
-    //   Slot[200] starling.core::Starling
-    //   Slot[208] _-e4L::HUD
-    //   Slot[216] net.bigpoint.darkorbit.map.view3D::_-U4m
-    //   Slot[224] net.bigpoint.darkorbit.map.model::_-332
-    //   Slot[232] _-d5C::Stage3DManager
-    //   Slot[240] _-d5C::_-T3i
-    //   Slot[248] _-73v::_-X5l
-    //   Slot[256] _-J4u::_-4L
+    // Slot[168] int
+    // Slot[172] int
+    // Slot[176] Boolean
+    // Slot[180] Boolean
+    // Slot[184] int
+    // Slot[192] flash.geom::Vector3D
+    // Slot[200] starling.core::Starling
+    // Slot[208] _-e4L::HUD
+    // Slot[216] net.bigpoint.darkorbit.map.view3D::_-U4m
+    // Slot[224] net.bigpoint.darkorbit.map.model::_-332
+    // Slot[232] _-d5C::Stage3DManager
+    // Slot[240] _-d5C::_-T3i
+    // Slot[248] _-73v::_-X5l
+    // Slot[256] _-J4u::_-4L
 
     private boolean is3DView;
+
     private void updateBounds() {
         long temp = API.readMemoryLong(viewAddressStatic);
 
@@ -340,7 +349,7 @@ public class MapManager implements Manager, StarSystemAPI {
 
             disableRenderApplied = false;
             is3DView = !main.settingsManager.is2DForced()
-                       && ByteUtils.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
+                    && ByteUtils.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
             boundsAddress = API.readMemoryLong(viewAddress + (is3DView ? 216 : 208));
         }
 
@@ -414,11 +423,13 @@ public class MapManager implements Manager, StarSystemAPI {
             long layer = minimapLayers.get(i); // Seems to be offset by 1 for some reason.
             long layerIdx = API.readMemoryInt(layer + 0xA8);
 
-            if (layerIdx != Integer.MAX_VALUE) continue;
+            if (layerIdx != Integer.MAX_VALUE)
+                continue;
 
             double scale = (internalWidth / minimapX) / 20;
             long sprites = API.readMemoryLong(layer, 0x48);
-            if (findMarker(sprites, scale, pingLocationCache)) return pingLocationCache;
+            if (findMarker(sprites, scale, pingLocationCache))
+                return pingLocationCache;
         }
         return null;
     }
@@ -426,34 +437,41 @@ public class MapManager implements Manager, StarSystemAPI {
     private boolean findMarker(long spriteArray, double scale, Location result) {
         int size = API.readMemoryInt(spriteArray, 0x40, 0x18 + Offsets.SPRITE_OFFSET);
         // Always try to iterate at least once.
-        // With 0 or 1 elements, it seems to be implemented as a singleton and size isn't updated.
+        // With 0 or 1 elements, it seems to be implemented as a singleton and size
+        // isn't updated.
         // With 2 or more elements, it's a linked list of elements to follow at 0x18.
         if (size == 0)
             return isMarker(API.readMemoryLong(spriteArray, 0x20), scale, result);
 
         long marker = API.readMemoryLong(spriteArray, 0x20);
         for (int i = 0; i < size; i++, marker = API.readMemoryLong(marker, 0x18)) {
-            if (isMarker(marker, scale, result)) return true;
+            if (isMarker(marker, scale, result))
+                return true;
         }
 
         return false;
     }
 
     private boolean isMarker(long sprite, double scale, Location result) {
-        if (sprite == 0) return false;
+        if (sprite == 0)
+            return false;
 
         int x = API.readMemoryInt(sprite + 0x58);
         int y = API.readMemoryInt(sprite + 0x5C);
         result.set(scale * x, scale * y);
 
         int halfWidth = internalWidth / 2, halfHeight = internalHeight / 2;
-        // Ignore if 0,0, or further away from the center of the map than corner in manhattan distance
-        if ((x == 0 && y == 0) || result.distance(halfWidth, halfHeight) > halfWidth + halfHeight) return false;
+        // Ignore if 0,0, or further away from the center of the map than corner in
+        // manhattan distance
+        if ((x == 0 && y == 0) || result.distance(halfWidth, halfHeight) > halfWidth + halfHeight)
+            return false;
 
         String name = API.readMemoryString(API.readMemoryLong(sprite, 0x1B8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
-        if (name != null && name.equals("minimapmarker")) return true;
+        if (name != null && name.equals("minimapmarker"))
+            return true;
 
-        String pointer = API.readMemoryString(API.readMemoryLong(sprite, 0xD8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
+        String pointer = API
+                .readMemoryString(API.readMemoryLong(sprite, 0xD8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
         return pointer == null || !pointer.equals("minimapPointer");
     }
 
@@ -490,7 +508,6 @@ public class MapManager implements Manager, StarSystemAPI {
         // 4 = ?
         return lockStatus == 1 || lockStatus < 1 || lockStatus > 4;
     }
-
 
     @Override
     public GameMap getCurrentMap() {
@@ -546,5 +563,10 @@ public class MapManager implements Manager, StarSystemAPI {
     @Override
     public Portal findNext(GameMap targetMap) {
         return starManager.next(main.hero, starManager.byId(targetMap.getId()));
+    }
+
+    @Override
+    public boolean isAccessible(GameMap map) {
+        return starManager.getAccessibleMaps().contains(map.getName());
     }
 }
