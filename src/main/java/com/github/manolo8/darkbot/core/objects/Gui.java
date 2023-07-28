@@ -16,7 +16,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
     protected final Point minimized = new Point();
 
     public long addressInfo, featureWindowDefinition;
-    public boolean visible, isClosing;
+    public boolean visible;
 
     @Deprecated public int x;
     @Deprecated public int y;
@@ -58,7 +58,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
         isTweening = API.readMemoryBoolean(address + 0xC4);
         minimizable = API.readBoolean(featureWindowDefinition + 40);
-        isClosing = API.readMemoryBoolean(address + 0xB8);
+        // API.readMemoryBoolean(address + 0xB8); //true if window is closing
     }
 
     @Override
