@@ -19,7 +19,7 @@ public class RefinementGui extends Gui implements API.Singleton {
 
     private final List<Ore> basicOres      = new ArrayList<>();
     private final List<Ore> upgradableOres = new ArrayList<>();
-    private final List<Ore> upgradedLab    = new ArrayList<>();
+    private final List<Ore> upgradedLab = new ArrayList<>();
 
     public Ore get(OreType type) {
         List<Ore> oresListRef = type.attribute == OreType.Attribute.BASIC ? basicOres : upgradableOres;
@@ -51,8 +51,9 @@ public class RefinementGui extends Gui implements API.Singleton {
         upgradableOresArr.sync(upgradableOres, Ore::new);
         upgradedLabArr.sync(upgradedLab, Ore::new);
     }
+
     public static class Ore extends Auto {
-        private String name, fuzzyName;
+        private String name, fuzzyName, upgradedOre;
         private int amount;
 
         public String getName() {
@@ -61,6 +62,10 @@ public class RefinementGui extends Gui implements API.Singleton {
 
         public String getFuzzyName() {
             return fuzzyName;
+        }
+
+        public String getUpgradedOre() {
+            return upgradedOre;
         }
 
         public int getAmount() {
@@ -78,12 +83,15 @@ public class RefinementGui extends Gui implements API.Singleton {
                 name = API.readMemoryString(address, 184);
 
                 if (name != null && !name.isEmpty()) {
-                    String processedName = name.replace("ore_", "");
-                    fuzzyName = processedName.substring(0, 1).toUpperCase(Locale.ROOT) + processedName.substring(1);
+                    String processedName;
                     if (name.contains("lab_")) {
-                        int upgradeOreId = API.readMemoryInt(address, 0x118, 0xB8);
-                        String upgradedOre = API.readMemoryString(address, 0x118, 0xC8);
+                        processedName = API.readMemoryString(address,0x108).toLowerCase(Locale.ROOT);
+                        // int upgradeOreId = API.readMemoryInt(address, 0x118, 0xB8);
+                        upgradedOre = API.readMemoryString(address, 0x118, 0xC8).replace("lab_effect_", "");
+                    }else{
+                        processedName = name.replace("ore_", "");
                     }
+                    fuzzyName = processedName.substring(0, 1).toUpperCase(Locale.ROOT) + processedName.substring(1);
                 }
             }
             super.update(address);
