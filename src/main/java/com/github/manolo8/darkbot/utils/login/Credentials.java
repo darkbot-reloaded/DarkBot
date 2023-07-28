@@ -52,13 +52,18 @@ public class Credentials {
     }
 
     public static class User {
-        public String u, p;
+        public String u, p, s, sv;
 
         public User() {}
 
         public User(String username, String password) {
             this.u = username;
             this.p = password;
+        }
+
+        public void setSid(String sid, String server) {
+            this.s = sid;
+            this.sv = server;
         }
 
         @Override

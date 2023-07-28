@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.login.Credentials;
@@ -17,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 
 public class SavedLogins extends JPanel implements LoginScreen {
     public LoginForm loginForm;
@@ -160,7 +162,28 @@ public class SavedLogins extends JPanel implements LoginScreen {
 
         login.setCredentials(user.u, user.p);
         LoginUtils.usernameLogin(login);
+        login.setCredentials(credentials, password);
         return null;
+    }
+
+    public boolean trySavedSidLogin(LoginData loginData) {
+        Credentials.User user = users.getSelectedValue();
+        if (user == null) return false;
+
+        if (!Strings.isEmpty(user.s) && !Strings.isEmpty(user.sv)) {
+            loginData.setSid(user.s, user.sv);
+            try {
+                LoginUtils.findPreloader(loginData);
+
+                if (!loginData.isNotInitialized()) {
+                    loginData.setCredentials(user.u, user.p);
+                    loginData.setCredentials(credentials, password);
+                    return true;
+                }
+            } catch (LoginUtils.WrongCredentialsException | IOException ignored) {
+            }
+        }
+        return false;
     }
 
     private class AddLogin extends MainButton {

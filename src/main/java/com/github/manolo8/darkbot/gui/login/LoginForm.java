@@ -93,8 +93,16 @@ public class LoginForm extends JPanel {
         @Override
         protected LoginData doInBackground() {
             try {
+                LoginScreen selectedComponent = (LoginScreen) tabbedPane.getSelectedComponent();
+                if (selectedComponent instanceof SavedLogins) {
+                    publish(new Message(false, "Trying to login via saved SID", null));
+                    if (((SavedLogins) selectedComponent).trySavedSidLogin(loginData)) {
+                        return loginData;
+                    }
+                }
+
                 publish(new Message(false, I18n.get("gui.login.info.logging_in"), null));
-                Message msg = ((LoginScreen) tabbedPane.getSelectedComponent()).tryLogin(loginData);
+                Message msg = selectedComponent.tryLogin(loginData);
                 if (msg != null) {
                     publish(msg);
                     failed = true;
