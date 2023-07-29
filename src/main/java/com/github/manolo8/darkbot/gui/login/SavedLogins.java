@@ -168,20 +168,18 @@ public class SavedLogins extends JPanel implements LoginScreen {
 
     public boolean trySavedSidLogin(LoginData loginData) {
         Credentials.User user = users.getSelectedValue();
-        if (user == null) return false;
+        if (user == null || Strings.isEmpty(user.s) || Strings.isEmpty(user.sv)) return false;
 
-        if (!Strings.isEmpty(user.s) && !Strings.isEmpty(user.sv)) {
+        try {
             loginData.setSid(user.s, user.sv);
-            try {
-                LoginUtils.findPreloader(loginData);
+            LoginUtils.findPreloader(loginData);
 
-                if (!loginData.isNotInitialized()) {
-                    loginData.setCredentials(user.u, user.p);
-                    loginData.setCredentials(credentials, password);
-                    return true;
-                }
-            } catch (LoginUtils.WrongCredentialsException | IOException ignored) {
+            if (!loginData.isNotInitialized()) {
+                loginData.setCredentials(user.u, user.p);
+                loginData.setCredentials(credentials, password);
+                return true;
             }
+        } catch (LoginUtils.WrongCredentialsException | IOException ignored) {
         }
         return false;
     }
