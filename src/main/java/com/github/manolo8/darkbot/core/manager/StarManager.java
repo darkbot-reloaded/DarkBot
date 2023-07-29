@@ -299,8 +299,8 @@ public class StarManager implements API.Singleton {
                 .sorted().collect(Collectors.toList());
     }
 
-    public boolean isAccessibleMapById(int id) {
-        return starSystem.vertexSet().stream().filter(m -> !m.gg && m.id == id).anyMatch(m -> starSystem.inDegreeOf(m) > 0);
+    public boolean isAccessibleMap(Map map) {
+        return getMaps().stream().anyMatch(m -> !m.gg && m.id == map.getId() && starSystem.inDegreeOf(m) > 0);
     }
 
     public static Collection<Map> getAllMaps() {

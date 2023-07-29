@@ -550,6 +550,6 @@ public class MapManager implements Manager, StarSystemAPI {
 
     @Override
     public boolean isAccessible(@NotNull GameMap map) {
-        return starManager.isAccessibleMapById(map.getId());
+        return starManager.isAccessibleMap((Map) map);
     }
 }
