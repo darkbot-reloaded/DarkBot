@@ -2,20 +2,19 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
-
 import eu.darkbot.api.managers.AstralGateAPI;
-
-import static com.github.manolo8.darkbot.Main.API;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.manolo8.darkbot.Main.API;
+
+
 public class AstralGateProxy extends Updatable implements AstralGateAPI {
     private int highScore, currentRift, currentScore, cpuCount;
     private boolean canEquip;
-    private List<AstralItem> rewardItems = new ArrayList<>();
-    private List<AstralItem> inventoryItems = new ArrayList<>();
+    private final List<AstralItem> rewardItems = new ArrayList<>();
+    private final List<AstralItem> inventoryItems = new ArrayList<>();
 
     private final ObjArray rewardItemsArr = ObjArray.ofVector(true);
     private final ObjArray inventoryItemsArr = ObjArray.ofVector(true);
@@ -26,18 +25,18 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
             return;
         }
 
-        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
+        long data = API.readMemoryPtr(address + 48);
 
         this.highScore = API.readMemoryInt(data + 64);
-        this.currentRift = API.readMemoryInt(API.readMemoryLong(data + 80) + 40);
-        this.currentScore = API.readMemoryInt(API.readMemoryLong(data + 88) + 40);
-        this.cpuCount = API.readMemoryInt(API.readMemoryLong(data + 96) + 40);
-        this.canEquip = API.readBoolean(API.readMemoryLong(data + 0x0B0) + 0x20);
+        this.currentRift = API.readMemoryInt(data, 80, 40);
+        this.currentScore = API.readMemoryInt(data, 88, 40);
+        this.cpuCount = API.readMemoryInt(data, 96, 40);
+        this.canEquip = API.readBoolean(data, 0x0B0, 0x20);
 
-        rewardItemsArr.update(API.readMemoryLong(data + 0x88));
+        rewardItemsArr.update(API.readMemoryPtr(data + 0x88));
         rewardItemsArr.sync(rewardItems, AstralItem::new);
 
-        inventoryItemsArr.update(API.readMemoryLong(data + 0x0A0));
+        inventoryItemsArr.update(API.readMemoryPtr(data + 0x0A0));
         inventoryItemsArr.sync(inventoryItems, AstralItem::new);
     }
 
@@ -80,7 +79,7 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
         private boolean equipped;
         private int upgradeLevel;
         private String lootId;
-        private List<ItemStat> itemStats = new ArrayList<>();
+        private final List<ItemStat> itemStats = new ArrayList<>();
         private final ObjArray itemStatsArr = ObjArray.ofVector(true);
 
         @Override
@@ -90,7 +89,7 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
             }
 
             this.equipped = API.readBoolean(address + 0x24);
-            long itemData = API.readMemoryLong(address + 0x30) & ByteUtils.ATOM_MASK;
+            long itemData = API.readMemoryPtr(address + 0x30);
             this.upgradeLevel = API.readInt(itemData + 0x2C);
 
             this.lootId = API.readString(itemData, 0x48);
@@ -114,8 +113,12 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
             return lootId;
         }
 
-        @Override
+        @Deprecated
         public List<ItemStat> getTheStatsList() {
+            return itemStats;
+        }
+
+        public List<ItemStat> getStats() {
             return itemStats;
         }
     }
