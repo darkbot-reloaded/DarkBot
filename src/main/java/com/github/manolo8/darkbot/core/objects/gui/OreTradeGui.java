@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.core.objects.gui;
 
 import com.github.manolo8.darkbot.core.entities.BasePoint;
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.RefinementGui;
 import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.OreAPI;
 import org.jetbrains.annotations.NotNull;
