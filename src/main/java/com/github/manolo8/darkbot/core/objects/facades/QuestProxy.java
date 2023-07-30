@@ -33,7 +33,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
         }
     }
 
-    public @Nullable Quest getCurrenQuest() {
+    public @Nullable Quest getCurrentQuest() {
         return currentQuest;
     }
 
@@ -61,7 +61,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
             this.conditionsCount = API.readMemoryInt(conditionsAddr + 0x30);
         }
 
-        public int getCurrentQuestId() {
+        public int getId() {
             return id;
         }
 
