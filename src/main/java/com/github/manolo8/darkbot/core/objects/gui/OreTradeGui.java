@@ -1,8 +1,7 @@
-package com.github.manolo8.darkbot.core.objects;
+package com.github.manolo8.darkbot.core.objects.gui;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.entities.BasePoint;
-import com.github.manolo8.darkbot.core.utils.Drive;
+import com.github.manolo8.darkbot.core.objects.Gui;
 import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.OreAPI;
 import org.jetbrains.annotations.NotNull;
@@ -12,11 +11,9 @@ public class OreTradeGui extends Gui implements OreAPI {
 
     private static final int SELLING_X_OFFSET = 80;
 
-    private final Drive drive;
     private final RefinementGui refinement;
 
-    public OreTradeGui(Main main, RefinementGui refinementGui) {
-        this.drive = main.hero.drive;
+    public OreTradeGui(RefinementGui refinementGui) {
         this.refinement = refinementGui;
     }
 

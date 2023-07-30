@@ -1,10 +1,10 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.IconGui;
-import com.github.manolo8.darkbot.core.objects.IconOkGui;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchMediator;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
+import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
+import com.github.manolo8.darkbot.core.objects.gui.DispatchIconOkGui;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.DispatchAPI;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +15,8 @@ import java.util.List;
 public class DispatchManager extends Gui implements DispatchAPI {
     private final DispatchProxy proxy;
     private final DispatchMediator mediator;
-    private final IconGui icon;
-    private final IconOkGui iconOk;
+    private final DispatchIconGui icon;
+    private final DispatchIconOkGui iconOk;
 
     @Override
     public List<? extends RewardLoot> getRewardLoot() {
@@ -96,6 +96,22 @@ public class DispatchManager extends Gui implements DispatchAPI {
             return true;
         }
         return false;
+    }
+
+    public boolean clickAcceptPopup() {
+        return icon.clickAcceptPopup();
+    }
+
+    public boolean clickDeclinePopup() {
+        return icon.clickDeclinePopup();
+    }
+
+    public boolean clickOkRewardsPopup(int i) {
+        return iconOk.clickOkRewardsPopup(i);
+    }
+
+    public boolean clickCloseOkPopup() {
+        return iconOk.clickCloseOkPopup();
     }
 
 }

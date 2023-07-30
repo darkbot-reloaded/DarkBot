@@ -4,19 +4,19 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.itf.Manager;
-import com.github.manolo8.darkbot.core.objects.ChatGui;
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.IconGui;
-import com.github.manolo8.darkbot.core.objects.IconOkGui;
-import com.github.manolo8.darkbot.core.objects.LogoutGui;
-import com.github.manolo8.darkbot.core.objects.OreTradeGui;
-import com.github.manolo8.darkbot.core.objects.RefinementGui;
-import com.github.manolo8.darkbot.core.objects.SettingsGui;
-import com.github.manolo8.darkbot.core.objects.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
+import com.github.manolo8.darkbot.core.objects.gui.ChatGui;
+import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
+import com.github.manolo8.darkbot.core.objects.gui.DispatchIconOkGui;
 import com.github.manolo8.darkbot.core.objects.gui.GateSpinnerGui;
+import com.github.manolo8.darkbot.core.objects.gui.LogoutGui;
+import com.github.manolo8.darkbot.core.objects.gui.OreTradeGui;
+import com.github.manolo8.darkbot.core.objects.gui.RefinementGui;
+import com.github.manolo8.darkbot.core.objects.gui.SettingsGui;
+import com.github.manolo8.darkbot.core.objects.gui.TargetedOfferGui;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.other.Area;
@@ -132,8 +132,8 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.settingsGui = register("settings", SettingsGui.class);
 
         register("dispatch", DispatchManager.class);
-        register("popup_generic_icon", IconGui.class);
-        register("popup_generic_icon_ok", IconOkGui.class);
+        register("popup_generic_icon", DispatchIconGui.class);
+        register("popup_generic_icon_ok", DispatchIconOkGui.class);
         this.assembly = register("assembly");
 
         register("ggBuilder", GateSpinnerGui.class);

@@ -41,22 +41,43 @@ public class DispatchMediator extends Updatable implements API.Singleton {
 
     @Getter
     @ToString
-    public static class Retriever extends Auto implements DispatchAPI.Retriever {
+    private static class Retriever extends Auto implements DispatchAPI.Retriever {
         private String id, type, name, descriptionId = "";
         private double duration = -1;
         private int slotId = -1;
+        private int tier = -1;
+        private final ObjArray costListArr = ObjArray.ofVector(true);
+        private final List<Cost> costList = new ArrayList<>();
 
         @Override
         public void update() {
             if (address <= 0) return;
             long dispatchModule = API.readMemoryPtr(address + 0x30);
 
-            this.slotId = API.readMemoryInt(dispatchModule + 0x24); // 1
+            this.slotId = API.readMemoryInt(dispatchModule + 0x20); // 1
+            this.tier = API.readMemoryInt(dispatchModule + 0x24); // 1
             this.name = API.readMemoryString(dispatchModule, 0x30); // dispatch_retriever_r01
             this.type = API.readMemoryString(dispatchModule, 0x38); // resource
             this.id = API.readMemoryString(dispatchModule, 0x48); // R-01
             this.descriptionId = API.readMemoryString(dispatchModule, 0x50); // dispatch_label_description_retriever_r01
             this.duration = API.readMemoryDouble(dispatchModule + 0x58); // time in seconds
+            costListArr.update(API.readMemoryPtr(dispatchModule + 0x28));
+            costListArr.sync(costList, Cost::new);
+        }
+
+    }
+
+    @Getter
+    @ToString
+    private static class Cost extends Auto  implements DispatchAPI.Cost{
+        private String lootId = "";
+        private int amount = -1;
+
+        @Override
+        public void update() {
+            if (address <= 0) return;
+            this.amount = API.readMemoryInt(address + 0x20);
+            this.lootId = API.readMemoryString(address, 0x28);
         }
 
     }

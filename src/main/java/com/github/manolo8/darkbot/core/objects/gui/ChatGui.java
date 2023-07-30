@@ -1,10 +1,8 @@
-package com.github.manolo8.darkbot.core.objects;
+package com.github.manolo8.darkbot.core.objects.gui;
 
-import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.objects.Gui;
 import eu.darkbot.api.API;
-import eu.darkbot.api.utils.NativeAction;
 
-//todo
 public class ChatGui extends Gui implements API.Singleton {
 
 //    public void writeChat(String text) {

@@ -1,3 +1,4 @@
+# IDE or build files
 /.idea
 /.gradle
 /build
@@ -6,4 +7,9 @@
 /out
 dependency-reduced-pom.xml
 *.iml
+
+# Leftovers from running the bot
 *.json
+/logs
+/lib
+/plugins
