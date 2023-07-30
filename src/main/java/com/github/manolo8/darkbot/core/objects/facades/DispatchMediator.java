@@ -41,7 +41,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
 
     @Getter
     @ToString
-    public static class Retriever extends Auto implements DispatchAPI.Retriever {
+    private static class Retriever extends Auto implements DispatchAPI.Retriever {
         private String id, type, name, descriptionId = "";
         private double duration = -1;
         private int slotId = -1;
@@ -69,7 +69,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
 
     @Getter
     @ToString
-    public static class Cost extends Auto  implements DispatchAPI.Cost{
+    private static class Cost extends Auto  implements DispatchAPI.Cost{
         private String lootId = "";
         private int amount = -1;
 

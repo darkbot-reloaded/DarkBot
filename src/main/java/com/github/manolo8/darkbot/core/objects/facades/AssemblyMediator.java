@@ -53,7 +53,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
     @Getter
     @ToString
-    public static class Recipe extends Auto implements AssemblyAPI.Recipe {
+    private static class Recipe extends Auto implements AssemblyAPI.Recipe {
         @Getter(AccessLevel.NONE)
         @ToString.Exclude
         private final ObjArray rewardsArr = ObjArray.ofVector(true),
@@ -91,7 +91,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
     @Getter
     @ToString
-    public static class ResourceRequired extends Auto implements AssemblyAPI.ResourceRequired {
+    private static class ResourceRequired extends Auto implements AssemblyAPI.ResourceRequired {
         private String resourceId = "";
         private double amountRequired;
 
@@ -105,7 +105,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     }
 
     @ToString
-    public static class RowFilter extends Reporting {
+    private static class RowFilter extends Reporting {
         private final ItemFilter first = new ItemFilter();
         private final ItemFilter second = new ItemFilter();
 
@@ -120,16 +120,19 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
     @Getter
     @ToString
-    public static class ItemFilter extends Reporting implements AssemblyAPI.Filter {
+    private static class ItemFilter extends Reporting implements AssemblyAPI.Filter {
         private String filterName = "";
         private boolean isChecked;
         private int row, col;
+        private double x, y;
 
         @Override
         public boolean updateAndReport() {
             if (address <= 0) return false;
             filterName = API.readString(address, 0x20);
             isChecked = API.readBoolean(address, 0x28, 0x1D0);
+            x = API.readDouble(address, 0x28, 0x158);
+            y = API.readDouble(address, 0x28, 0x160);
             // Always false, we only care about address itself changing, which reports true regardless
             return false;
         }

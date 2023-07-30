@@ -1,9 +1,10 @@
-package com.github.manolo8.darkbot.core.objects;
+package com.github.manolo8.darkbot.core.objects.gui;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.objects.Gui;
 import eu.darkbot.api.API;
 
-public class PopupGui extends Gui implements API.Singleton {
+class PopupGui extends Gui implements API.Singleton {
     @Override
     public void update() {
         if (address == 0) return;

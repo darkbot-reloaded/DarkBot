@@ -1,9 +1,8 @@
-package com.github.manolo8.darkbot.core.objects;
+package com.github.manolo8.darkbot.core.objects.gui;
 
-import com.github.manolo8.darkbot.Main;
 import eu.darkbot.api.API;
 
-public class IconOkGui extends PopupGui implements API.Singleton {
+public class DispatchIconOkGui extends PopupGui implements API.Singleton {
     public boolean clickOkRewardsPopup(int i) {
         if (i == 0) i = 1;
         if (this.isVisible()) {

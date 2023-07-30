@@ -58,7 +58,6 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
         isTweening = API.readMemoryBoolean(address + 0xC4);
         minimizable = API.readBoolean(featureWindowDefinition + 40);
-        // API.readMemoryBoolean(address + 0xB8); //true if window is closing
     }
 
     @Override
