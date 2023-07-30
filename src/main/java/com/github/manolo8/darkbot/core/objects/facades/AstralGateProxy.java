@@ -113,11 +113,7 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
             return lootId;
         }
 
-        @Deprecated
-        public List<ItemStat> getTheStatsList() {
-            return itemStats;
-        }
-
+        @Override
         public List<ItemStat> getStats() {
             return itemStats;
         }

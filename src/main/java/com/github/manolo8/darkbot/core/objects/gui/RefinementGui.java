@@ -38,7 +38,7 @@ public class RefinementGui extends Gui implements API.Singleton {
     }
 
     public Ore get(OreAPI.Ore type) {
-        List<Ore> oresListRef = isBasic(type) ? basicOres : upgradableOres;
+        List<Ore> oresListRef = type.isUpgradable() ? upgradableOres : basicOres;
 
         for (Ore ore : oresListRef) {
             if (ore.name.endsWith(type.name().toLowerCase())) return ore;
@@ -97,14 +97,6 @@ public class RefinementGui extends Gui implements API.Singleton {
             }
             super.update(address);
         }
-    }
-
-    private boolean isBasic(OreAPI.Ore ore) {
-        return ore == OreAPI.Ore.PROMETIUM
-                || ore == OreAPI.Ore.ENDURIUM
-                || ore == OreAPI.Ore.TERBIUM
-                || ore == OreAPI.Ore.XENOMIT
-                || ore == OreAPI.Ore.PALLADIUM;
     }
 
     /**
