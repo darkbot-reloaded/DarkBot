@@ -1,8 +1,10 @@
-package com.github.manolo8.darkbot.core.objects;
+package com.github.manolo8.darkbot.core.objects.gui;
 
+import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import eu.darkbot.api.API;
 import eu.darkbot.api.managers.OreAPI;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +17,28 @@ public class RefinementGui extends Gui implements API.Singleton {
 
     private final ObjArray basicOresArr      = ObjArray.ofArrObj();
     private final ObjArray upgradableOresArr = ObjArray.ofArrObj();
+    private final ObjArray upgradedLabArr    = ObjArray.ofArrObj();
 
     private final List<Ore> basicOres      = new ArrayList<>();
     private final List<Ore> upgradableOres = new ArrayList<>();
+    private final List<Ore> upgradedLab = new ArrayList<>();
 
+    /**
+     * Use {@link OreAPI#getAmount(OreAPI.Ore)}
+     */
+    @Deprecated(forRemoval = true)
     public Ore get(OreType type) {
         List<Ore> oresListRef = type.attribute == OreType.Attribute.BASIC ? basicOres : upgradableOres;
+
+        for (Ore ore : oresListRef) {
+            if (ore.name.endsWith(type.name().toLowerCase())) return ore;
+        }
+
+        return null;
+    }
+
+    public Ore get(OreAPI.Ore type) {
+        List<Ore> oresListRef = type.isUpgradable() ? upgradableOres : basicOres;
 
         for (Ore ore : oresListRef) {
             if (ore.name.endsWith(type.name().toLowerCase())) return ore;
@@ -43,26 +61,17 @@ public class RefinementGui extends Gui implements API.Singleton {
 
         basicOresArr.update(API.readMemoryLong(getElementsList(37), 184));
         upgradableOresArr.update(API.readMemoryLong(getElementsList(31), 184));
+        upgradedLabArr.update(API.readMemoryLong(getElementsList(32), 184));
 
         basicOresArr.sync(basicOres, Ore::new);
         upgradableOresArr.sync(upgradableOres, Ore::new);
+        upgradedLabArr.sync(upgradedLab, Ore::new);
     }
 
+    @Getter
     public static class Ore extends Auto {
-        private String name, fuzzyName;
+        private String name, fuzzyName, upgradedOre;
         private int amount;
-
-        public String getName() {
-            return name;
-        }
-
-        public String getFuzzyName() {
-            return fuzzyName;
-        }
-
-        public int getAmount() {
-            return amount;
-        }
 
         @Override
         public void update() {
@@ -71,11 +80,18 @@ public class RefinementGui extends Gui implements API.Singleton {
 
         @Override
         public void update(long address) {
-            if (address != this.address || name == null || !name.contains("ore")) {
+            if (address != this.address || name == null || (!name.contains("ore") && !name.contains("lab"))) {
                 name = API.readMemoryString(address, 184);
 
                 if (name != null && !name.isEmpty()) {
-                    String processedName = name.replace("ore_", "");
+                    String processedName;
+                    if (name.contains("lab_")) {
+                        processedName = API.readMemoryString(address,0x108).toLowerCase(Locale.ROOT);
+                        // int upgradeOreId = API.readMemoryInt(address, 0x118, 0xB8);
+                        upgradedOre = API.readMemoryString(address, 0x118, 0xC8).replace("lab_effect_", "");
+                    }else{
+                        processedName = name.replace("ore_", "");
+                    }
                     fuzzyName = processedName.substring(0, 1).toUpperCase(Locale.ROOT) + processedName.substring(1);
                 }
             }
@@ -83,6 +99,10 @@ public class RefinementGui extends Gui implements API.Singleton {
         }
     }
 
+    /**
+     * @deprecated use {@link eu.darkbot.api.managers.OreAPI.Ore}
+     */
+    @Deprecated(forRemoval = true)
     public enum OreType {
         PROMETIUM(Attribute.BASIC),
         ENDURIUM(Attribute.BASIC),
