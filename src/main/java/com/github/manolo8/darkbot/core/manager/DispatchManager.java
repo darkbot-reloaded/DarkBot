@@ -6,7 +6,9 @@ import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconOkGui;
 import com.github.manolo8.darkbot.utils.Time;
+import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.DispatchAPI;
+import eu.darkbot.util.Timer;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -17,6 +19,20 @@ public class DispatchManager extends Gui implements DispatchAPI {
     private final DispatchMediator mediator;
     private final DispatchIconGui icon;
     private final DispatchIconOkGui iconOk;
+    private final BotAPI bot;
+
+    private final Timer guiUsed = Timer.getRandom(19_000, 1000);
+    @Override
+    public void update(){
+        super.update();
+        // Last gui usage >20s ago, close gui
+        if (bot.isRunning() && guiUsed.isInactive()) this.show(false);
+    }
+
+    private boolean show(){
+        guiUsed.activate();
+        return this.show(true);
+    }
 
     @Override
     public List<? extends RewardLoot> getRewardLoot() {
@@ -49,7 +65,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean openRetrieverTab() {
-        if (show(true)) {
+        if (show()) {
             click(80, 70);
             return true;
         }
@@ -57,7 +73,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean openAvailableTab() {
-        if (show(true)) {
+        if (show()) {
             click(80, 100);
             return true;
         }
@@ -65,7 +81,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean clickFirstItem() {
-        if (show(true)) {
+        if (show()) {
             Time.sleep(25);
             click(300, 150);
             return true;
@@ -74,7 +90,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean clickHire() {
-        if (show(true)) {
+        if (show()) {
             click(700, 375);
             return true;
         }
@@ -82,7 +98,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean openInProgressTab() {
-        if (show(true)) {
+        if (show()) {
             click(200, 100);
             return true;
         }
