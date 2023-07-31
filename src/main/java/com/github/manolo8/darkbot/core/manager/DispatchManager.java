@@ -26,7 +26,11 @@ public class DispatchManager extends Gui implements DispatchAPI {
     public void update(){
         super.update();
         // Last gui usage >20s ago, close gui
-        if (bot.isRunning() && guiUsed.isInactive()) this.show(false);
+        if (bot.isRunning() && guiUsed.isInactive()) {
+            this.icon.clickDeclinePopup();
+            this.iconOk.clickCloseOkPopup();
+            this.show(false);
+        }
     }
 
     private boolean show(){
