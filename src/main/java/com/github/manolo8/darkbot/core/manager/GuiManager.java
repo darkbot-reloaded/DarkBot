@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.gui.ChatGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconOkGui;
+import com.github.manolo8.darkbot.core.objects.gui.DispatchPopupRewardGui;
 import com.github.manolo8.darkbot.core.objects.gui.GateSpinnerGui;
 import com.github.manolo8.darkbot.core.objects.gui.LogoutGui;
 import com.github.manolo8.darkbot.core.objects.gui.OreTradeGui;
@@ -132,6 +133,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.settingsGui = register("settings", SettingsGui.class);
 
         register("dispatch", DispatchManager.class);
+        register("dispatch_popup_reward_list", DispatchPopupRewardGui.class);
         register("popup_generic_icon", DispatchIconGui.class);
         register("popup_generic_icon_ok", DispatchIconOkGui.class);
         this.assembly = register("assembly");
@@ -178,6 +180,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     public long getAddress() {
         return guiAddress;
     }
+
 
     public void tick() {
         guis.update();

@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.objects.facades.DispatchMediator;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconOkGui;
+import com.github.manolo8.darkbot.core.objects.gui.DispatchPopupRewardGui;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.DispatchAPI;
@@ -17,6 +18,7 @@ import java.util.List;
 public class DispatchManager extends Gui implements DispatchAPI {
     private final DispatchProxy proxy;
     private final DispatchMediator mediator;
+    private final DispatchPopupRewardGui dispatchPopupRewardGui;
     private final DispatchIconGui icon;
     private final DispatchIconOkGui iconOk;
     private final BotAPI bot;
@@ -27,6 +29,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
         super.update();
         // Last gui usage >20s ago, close gui
         if (bot.isRunning() && guiUsed.isInactive()) {
+            this.dispatchPopupRewardGui.show(false);
             this.icon.clickDeclinePopup();
             this.iconOk.clickCloseOkPopup();
             this.show(false);
