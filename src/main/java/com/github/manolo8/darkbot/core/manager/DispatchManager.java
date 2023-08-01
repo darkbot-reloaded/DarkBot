@@ -1,11 +1,13 @@
 package com.github.manolo8.darkbot.core.manager;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchMediator;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconOkGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchPopupRewardGui;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.DispatchAPI;
@@ -136,6 +138,10 @@ public class DispatchManager extends Gui implements DispatchAPI {
 
     public boolean clickCloseOkPopup() {
         return iconOk.clickCloseOkPopup();
+    }
+
+    public void OverrideSelectedRetriever(Retriever retriever){
+        mediator.OverrideSelectedRetriever(retriever);
     }
 
 }

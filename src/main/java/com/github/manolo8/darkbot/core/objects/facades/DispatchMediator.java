@@ -1,7 +1,9 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.API;
 import eu.darkbot.api.managers.DispatchAPI;
 import lombok.AccessLevel;
@@ -41,7 +43,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
 
     @Getter
     @ToString
-    public static class Retriever extends Auto implements DispatchAPI.Retriever {
+    private static class Retriever extends Auto implements DispatchAPI.Retriever {
         private boolean isAvailable = false;
         private String id, type, name, descriptionId = "";
         private double duration = -1;
@@ -84,5 +86,14 @@ public class DispatchMediator extends Updatable implements API.Singleton {
             this.lootId = API.readMemoryString(address, 0x28);
         }
 
+    }
+
+    public void OverrideSelectedRetriever(DispatchAPI.Retriever retriever) {
+        if (retriever == null) {
+            Main.API.writeLong((Main.API.readMemoryLong(address + 0x50) & ByteUtils.ATOM_MASK) + 0x68, 0L);
+        } else {
+            Main.API.writeLong((Main.API.readMemoryLong(address + 0x50) & ByteUtils.ATOM_MASK) + 0x68,
+                    ((DispatchMediator.Retriever) retriever).address);
+        }
     }
 }
