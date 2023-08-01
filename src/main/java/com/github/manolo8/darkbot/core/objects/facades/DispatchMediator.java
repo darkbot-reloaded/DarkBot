@@ -41,12 +41,13 @@ public class DispatchMediator extends Updatable implements API.Singleton {
 
     @Getter
     @ToString
-    private static class Retriever extends Auto implements DispatchAPI.Retriever {
+    public static class Retriever extends Auto implements DispatchAPI.Retriever {
         private boolean isAvailable = false;
         private String id, type, name, descriptionId = "";
         private double duration = -1;
         private int slotId = -1;
         private int tier = -1;
+        @Getter(AccessLevel.NONE)
         private final ObjArray costListArr = ObjArray.ofVector(true);
         private final List<Cost> costList = new ArrayList<>();
 
@@ -56,7 +57,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
             isAvailable = API.readMemoryBoolean(address + 0x20);
             long dispatchModule = API.readMemoryPtr(address + 0x30);
             this.slotId = API.readMemoryInt(dispatchModule + 0x24);
-            this.duration = API.readMemoryDouble(dispatchModule + 0x28); // time in seconds
+            this.duration = API.readMemoryDouble(dispatchModule + 0x28); // time left in seconds
 
             long retrieverDefinition = API.readMemoryPtr(address + 0x38);
             this.tier = API.readMemoryInt(retrieverDefinition + 0x24); // 1
