@@ -140,8 +140,8 @@ public class DispatchManager extends Gui implements DispatchAPI {
         return iconOk.clickCloseOkPopup();
     }
 
-    public void OverrideSelectedRetriever(Retriever retriever){
-        mediator.OverrideSelectedRetriever(retriever);
+    public void overrideSelectedRetriever(Retriever retriever){
+        mediator.overrideSelectedRetriever(retriever);
     }
 
 }
