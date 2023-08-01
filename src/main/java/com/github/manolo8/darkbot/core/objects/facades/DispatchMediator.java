@@ -54,7 +54,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
         @Getter(AccessLevel.NONE)
         private final ObjArray costListArr = ObjArray.ofVector(true);
         private final List<Cost> costList = new ArrayList<>();
-        private Cost instantCost = new Cost();
+        private final Cost instantCost = new Cost();
 
         @Override
         public void update() {
