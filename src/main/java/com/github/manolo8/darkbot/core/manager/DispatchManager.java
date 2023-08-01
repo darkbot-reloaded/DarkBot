@@ -33,9 +33,10 @@ public class DispatchManager extends Gui implements DispatchAPI {
         }
     }
 
-    private boolean show(){
+    @Override
+    public boolean show(boolean value){
         guiUsed.activate();
-        return this.show(true);
+        return super.show(value);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean openRetrieverTab() {
-        if (show()) {
+        if (show(true)) {
             click(80, 70);
             return true;
         }
@@ -77,7 +78,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean openAvailableTab() {
-        if (show()) {
+        if (show(true)) {
             click(80, 100);
             return true;
         }
@@ -85,7 +86,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean clickFirstItem() {
-        if (show()) {
+        if (show(true)) {
             Time.sleep(25);
             click(300, 150);
             return true;
@@ -94,7 +95,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean clickHire() {
-        if (show()) {
+        if (show(true)) {
             click(700, 375);
             return true;
         }
@@ -102,7 +103,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean openInProgressTab() {
-        if (show()) {
+        if (show(true)) {
             click(200, 100);
             return true;
         }
