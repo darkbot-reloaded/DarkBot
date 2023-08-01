@@ -91,7 +91,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
     public void overrideSelectedRetriever(DispatchAPI.Retriever retriever) {
         if (retriever == null) {
             Main.API.writeLong((Main.API.readMemoryLong(address + 0x50) & ByteUtils.ATOM_MASK) + 0x68, 0L);
-        } else if(this.selectedRetriever.address != ((DispatchMediator.Retriever) retriever).address){
+        } else if (this.selectedRetriever.address != ((DispatchMediator.Retriever) retriever).address) {
             Main.API.writeLong((Main.API.readMemoryLong(address + 0x50) & ByteUtils.ATOM_MASK) + 0x68,
                     ((DispatchMediator.Retriever) retriever).address);
         }

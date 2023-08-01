@@ -1,13 +1,11 @@
 package com.github.manolo8.darkbot.core.manager;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchMediator;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconOkGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchPopupRewardGui;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.DispatchAPI;
@@ -26,8 +24,9 @@ public class DispatchManager extends Gui implements DispatchAPI {
     private final BotAPI bot;
 
     private final Timer guiUsed = Timer.getRandom(19_000, 1000);
+
     @Override
-    public void update(){
+    public void update() {
         super.update();
         // Last gui usage >20s ago, close gui
         if (bot.isRunning() && guiUsed.isInactive()) {
@@ -39,7 +38,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     @Override
-    public boolean show(boolean value){
+    public boolean show(boolean value) {
         guiUsed.activate();
         return super.show(value);
     }
@@ -141,7 +140,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     @Override
-    public void overrideSelectedRetriever(Retriever retriever){
+    public void overrideSelectedRetriever(Retriever retriever) {
         mediator.overrideSelectedRetriever(retriever);
     }
 
