@@ -45,13 +45,16 @@ public class DispatchMediator extends Updatable implements API.Singleton {
     @ToString
     private static class Retriever extends Auto implements DispatchAPI.Retriever {
         private boolean isAvailable = false;
-        private String id, type, name, descriptionId = "";
+        private String iconId, type, name, descriptionId = "";
+        private double durationLeft = -1;
         private double duration = -1;
+        private int id = -1;
         private int slotId = -1;
         private int tier = -1;
         @Getter(AccessLevel.NONE)
         private final ObjArray costListArr = ObjArray.ofVector(true);
         private final List<Cost> costList = new ArrayList<>();
+        private Cost instantCost = new Cost();
 
         @Override
         public void update() {
@@ -59,16 +62,20 @@ public class DispatchMediator extends Updatable implements API.Singleton {
             isAvailable = API.readMemoryBoolean(address + 0x20);
             long dispatchModule = API.readMemoryPtr(address + 0x30);
             this.slotId = API.readMemoryInt(dispatchModule + 0x24);
-            this.duration = API.readMemoryDouble(dispatchModule + 0x28); // time left in seconds
+            this.durationLeft = API.readMemoryDouble(dispatchModule + 0x28); // time left in seconds
 
             long retrieverDefinition = API.readMemoryPtr(address + 0x38);
+            this.id = API.readMemoryInt(retrieverDefinition + 0x20); // 1
             this.tier = API.readMemoryInt(retrieverDefinition + 0x24); // 1
-            this.id = API.readMemoryString(retrieverDefinition, 0x30); // dispatch_retriever_r01
+            this.duration = API.readMemoryDouble(retrieverDefinition + 0x28); // time left in seconds
+            this.iconId = API.readMemoryString(retrieverDefinition, 0x30); // dispatch_retriever_r01
             this.name = API.readMemoryString(retrieverDefinition, 0x38); // R-01
             this.type = API.readMemoryString(retrieverDefinition, 0x40); // resource
             this.descriptionId = API.readMemoryString(retrieverDefinition, 0x48); // dispatch_label_description_retriever_r01
             costListArr.update(API.readMemoryPtr(retrieverDefinition + 0x50));
             costListArr.sync(costList, Cost::new);
+
+            instantCost.update(retrieverDefinition + 0x58);
         }
 
     }
