@@ -26,7 +26,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
 
     @Override
     public void update() {
-        long dispatchRetrieverData = API.readMemoryPtr(address + 80);
+        long dispatchRetrieverData = API.readMemoryPtr(address + 0x50);
         availableSlots = API.readMemoryInt(dispatchRetrieverData + 0x40);
         totalSlots = API.readMemoryInt(dispatchRetrieverData + 0x44);
 
@@ -42,6 +42,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
     @Getter
     @ToString
     private static class Retriever extends Auto implements DispatchAPI.Retriever {
+        private boolean isAvailable = false;
         private String id, type, name, descriptionId = "";
         private double duration = -1;
         private int slotId = -1;
@@ -52,16 +53,18 @@ public class DispatchMediator extends Updatable implements API.Singleton {
         @Override
         public void update() {
             if (address <= 0) return;
+            isAvailable = API.readMemoryBoolean(address + 0x20);
             long dispatchModule = API.readMemoryPtr(address + 0x30);
+            this.slotId = API.readMemoryInt(dispatchModule + 0x24);
+            this.duration = API.readMemoryDouble(dispatchModule + 0x28); // time in seconds
 
-            this.slotId = API.readMemoryInt(dispatchModule + 0x20); // 1
-            this.tier = API.readMemoryInt(dispatchModule + 0x24); // 1
-            this.name = API.readMemoryString(dispatchModule, 0x30); // dispatch_retriever_r01
-            this.type = API.readMemoryString(dispatchModule, 0x38); // resource
-            this.id = API.readMemoryString(dispatchModule, 0x48); // R-01
-            this.descriptionId = API.readMemoryString(dispatchModule, 0x50); // dispatch_label_description_retriever_r01
-            this.duration = API.readMemoryDouble(dispatchModule + 0x58); // time in seconds
-            costListArr.update(API.readMemoryPtr(dispatchModule + 0x28));
+            long retrieverDefinition = API.readMemoryPtr(address + 0x38);
+            this.tier = API.readMemoryInt(retrieverDefinition + 0x24); // 1
+            this.id = API.readMemoryString(retrieverDefinition, 0x30); // dispatch_retriever_r01
+            this.name = API.readMemoryString(retrieverDefinition, 0x38); // R-01
+            this.type = API.readMemoryString(retrieverDefinition, 0x40); // resource
+            this.descriptionId = API.readMemoryString(retrieverDefinition, 0x48); // dispatch_label_description_retriever_r01
+            costListArr.update(API.readMemoryPtr(retrieverDefinition + 0x50));
             costListArr.sync(costList, Cost::new);
         }
 
@@ -69,7 +72,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
 
     @Getter
     @ToString
-    private static class Cost extends Auto  implements DispatchAPI.Cost{
+    private static class Cost extends Auto implements DispatchAPI.Cost {
         private String lootId = "";
         private int amount = -1;
 
