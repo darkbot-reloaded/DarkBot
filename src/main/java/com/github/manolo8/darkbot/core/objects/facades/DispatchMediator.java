@@ -60,11 +60,11 @@ public class DispatchMediator extends Updatable implements API.Singleton {
             this.isAvailable = API.readMemoryBoolean(address + 0x20);
 
             this.slotId = API.readMemoryInt(address, 0x30, 0x24);
+            this.duration = API.readMemoryDouble(address, 0x30, 0x28); // time left in seconds
 
             long retrieverDefinition = API.readMemoryPtr(address + 0x38);
             this.id = API.readMemoryInt(retrieverDefinition + 0x20); // 1
             this.tier = API.readMemoryInt(retrieverDefinition + 0x24); // 1
-            this.duration = API.readMemoryDouble(retrieverDefinition + 0x28); // time left in seconds
             this.iconId = API.readMemoryString(retrieverDefinition, 0x30); // dispatch_retriever_r01
             this.name = API.readMemoryString(retrieverDefinition, 0x38); // R-01
             this.type = API.readMemoryString(retrieverDefinition, 0x40); // resource
