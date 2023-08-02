@@ -59,20 +59,21 @@ public class DispatchMediator extends Updatable implements API.Singleton {
 
             this.isAvailable = API.readMemoryBoolean(address + 0x20);
 
-            this.slotId = API.readMemoryInt(address, 0x30, 0x24);
+            long dispatchModule = API.readMemoryPtr(address + 0x30);
+            this.slotId = API.readMemoryInt(dispatchModule + 0x24); // 0 for available, 1 to 5 for in-progress
+            this.duration = API.readMemoryDouble(dispatchModule + 0x28); // time left in seconds, or total time
 
             long retrieverDefinition = API.readMemoryPtr(address + 0x38);
-            this.id = API.readMemoryInt(retrieverDefinition + 0x20); // 1
-            this.tier = API.readMemoryInt(retrieverDefinition + 0x24); // 1
-            this.duration = API.readMemoryDouble(retrieverDefinition + 0x28); // time left in seconds
+            this.id = API.readMemoryInt(retrieverDefinition + 0x20); // 1 to 18
+            this.tier = API.readMemoryInt(retrieverDefinition + 0x24); // 1, 2, 3, 4, 5 or 6
             this.iconId = API.readMemoryString(retrieverDefinition, 0x30); // dispatch_retriever_r01
             this.name = API.readMemoryString(retrieverDefinition, 0x38); // R-01
             this.type = API.readMemoryString(retrieverDefinition, 0x40); // resource
             this.descriptionId = API.readMemoryString(retrieverDefinition, 0x48); // dispatch_label_description_retriever_r01
-            costListArr.update(API.readMemoryPtr(retrieverDefinition + 0x50));
-            costListArr.sync(costList, Cost::new);
+            this.costListArr.update(API.readMemoryPtr(retrieverDefinition + 0x50));
+            this.costListArr.sync(costList, Cost::new);
 
-            instantCost.update(retrieverDefinition + 0x58);
+            this.instantCost.update(API.readMemoryPtr(retrieverDefinition + 0x58));
         }
 
     }
