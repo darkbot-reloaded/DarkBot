@@ -72,7 +72,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
             costListArr.update(API.readMemoryPtr(retrieverDefinition + 0x50));
             costListArr.sync(costList, Cost::new);
 
-            instantCost.update(retrieverDefinition + 0x58);
+            instantCost.update(API.readMemoryPtr(retrieverDefinition + 0x58));
         }
 
     }
