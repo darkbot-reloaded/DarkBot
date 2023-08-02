@@ -38,4 +38,5 @@ public class DispatchProxy extends Updatable implements API.Singleton {
             this.lootId = API.readMemoryString(address, 0x28);
         }
     }
+
 }

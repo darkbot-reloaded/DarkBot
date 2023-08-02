@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.core.objects.facades;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.API;
 import eu.darkbot.api.managers.DispatchAPI;
 import lombok.AccessLevel;
@@ -96,11 +95,8 @@ public class DispatchMediator extends Updatable implements API.Singleton {
     }
 
     public void overrideSelectedRetriever(DispatchAPI.Retriever retriever) {
-        if (retriever == null) {
-            Main.API.writeLong((Main.API.readMemoryLong(address + 0x50) & ByteUtils.ATOM_MASK) + 0x68, 0L);
-        } else if (this.selectedRetriever.address != ((DispatchMediator.Retriever) retriever).address) {
-            Main.API.writeLong((Main.API.readMemoryLong(address + 0x50) & ByteUtils.ATOM_MASK) + 0x68,
-                    ((DispatchMediator.Retriever) retriever).address);
-        }
+        if (selectedRetriever == retriever) return;
+        long value = retriever == null ? 0L : ((DispatchMediator.Retriever) retriever).address;
+        Main.API.writeLong(Main.API.readMemoryPtr(address + 0x50) + 0x68, value);
     }
 }

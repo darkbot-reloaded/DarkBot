@@ -53,7 +53,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
     @Getter
     @ToString
-    public static class Recipe extends Auto implements AssemblyAPI.Recipe {
+    private static class Recipe extends Auto implements AssemblyAPI.Recipe {
         @Getter(AccessLevel.NONE)
         @ToString.Exclude
         private final ObjArray rewardsArr = ObjArray.ofVector(true),

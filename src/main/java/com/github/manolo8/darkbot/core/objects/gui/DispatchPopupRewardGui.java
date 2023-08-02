@@ -6,8 +6,9 @@ import eu.darkbot.api.API;
 public class DispatchPopupRewardGui extends Gui implements API.Singleton {
     @Override
     public boolean show(boolean value) {
-        if (!value && visible && isAnimationDone()) {
-            click(width, 5);
+        if (trySetShowing(value)) {
+            if (value) throw new UnsupportedOperationException("Cannot show(true) on dispatch rewards gui");
+            else click(width - 5, 5);
         }
         return value == visible && isAnimationDone();
     }

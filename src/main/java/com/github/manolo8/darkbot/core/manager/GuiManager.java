@@ -181,7 +181,6 @@ public class GuiManager implements Manager, GameScreenAPI {
         return guiAddress;
     }
 
-
     public void tick() {
         guis.update();
 

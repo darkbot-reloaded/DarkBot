@@ -18,9 +18,9 @@ import java.util.List;
 public class DispatchManager extends Gui implements DispatchAPI {
     private final DispatchProxy proxy;
     private final DispatchMediator mediator;
-    private final DispatchPopupRewardGui dispatchPopupRewardGui;
-    private final DispatchIconGui icon;
-    private final DispatchIconOkGui iconOk;
+    private final DispatchIconGui iconGui;
+    private final DispatchIconOkGui iconOkGui;
+    private final DispatchPopupRewardGui rewardsGui;
     private final BotAPI bot;
 
     private final Timer guiUsed = Timer.getRandom(19_000, 1000);
@@ -30,16 +30,16 @@ public class DispatchManager extends Gui implements DispatchAPI {
         super.update();
         // Last gui usage >20s ago, close gui
         if (bot.isRunning() && guiUsed.isInactive()) {
-            this.icon.clickDeclinePopup();
-            this.iconOk.clickCloseOkPopup();
-            this.dispatchPopupRewardGui.show(false);
+            this.iconGui.clickDeclinePopup();
+            this.iconOkGui.clickCloseOkPopup();
+            this.rewardsGui.show(false);
             this.show(false);
         }
     }
 
     @Override
     public boolean show(boolean value) {
-        guiUsed.activate();
+        if (value) guiUsed.activate();
         return super.show(value);
     }
 
@@ -124,19 +124,19 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean clickAcceptPopup() {
-        return icon.clickAcceptPopup();
+        return iconGui.clickAcceptPopup();
     }
 
     public boolean clickDeclinePopup() {
-        return icon.clickDeclinePopup();
+        return iconGui.clickDeclinePopup();
     }
 
     public boolean clickOkRewardsPopup(int i) {
-        return iconOk.clickOkRewardsPopup(i);
+        return iconOkGui.clickOkRewardsPopup(i);
     }
 
     public boolean clickCloseOkPopup() {
-        return iconOk.clickCloseOkPopup();
+        return iconOkGui.clickCloseOkPopup();
     }
 
     @Override
