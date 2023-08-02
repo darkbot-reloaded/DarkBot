@@ -37,6 +37,6 @@ public class DispatchProxy extends Updatable implements API.Singleton {
             this.amount = API.readMemoryInt(address + 0x20);
             this.lootId = API.readMemoryString(address, 0x28);
         }
-
     }
+
 }

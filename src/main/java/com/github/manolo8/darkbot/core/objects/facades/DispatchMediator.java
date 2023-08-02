@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import eu.darkbot.api.API;
@@ -42,30 +43,36 @@ public class DispatchMediator extends Updatable implements API.Singleton {
     @Getter
     @ToString
     private static class Retriever extends Auto implements DispatchAPI.Retriever {
-        private boolean isAvailable = false;
-        private String id, type, name, descriptionId = "";
+        private int id = -1, slotId = -1, tier = -1;
+        private String iconId = "", type = "", name = "", descriptionId = "";
         private double duration = -1;
-        private int slotId = -1;
-        private int tier = -1;
+        private boolean isAvailable = false;
+
+        @Getter(AccessLevel.NONE)
         private final ObjArray costListArr = ObjArray.ofVector(true);
         private final List<Cost> costList = new ArrayList<>();
+        private final Cost instantCost = new Cost();
 
         @Override
         public void update() {
             if (address <= 0) return;
-            isAvailable = API.readMemoryBoolean(address + 0x20);
-            long dispatchModule = API.readMemoryPtr(address + 0x30);
-            this.slotId = API.readMemoryInt(dispatchModule + 0x24);
-            this.duration = API.readMemoryDouble(dispatchModule + 0x28); // time in seconds
+
+            this.isAvailable = API.readMemoryBoolean(address + 0x20);
+
+            this.slotId = API.readMemoryInt(address, 0x30, 0x24);
 
             long retrieverDefinition = API.readMemoryPtr(address + 0x38);
+            this.id = API.readMemoryInt(retrieverDefinition + 0x20); // 1
             this.tier = API.readMemoryInt(retrieverDefinition + 0x24); // 1
-            this.id = API.readMemoryString(retrieverDefinition, 0x30); // dispatch_retriever_r01
+            this.duration = API.readMemoryDouble(retrieverDefinition + 0x28); // time left in seconds
+            this.iconId = API.readMemoryString(retrieverDefinition, 0x30); // dispatch_retriever_r01
             this.name = API.readMemoryString(retrieverDefinition, 0x38); // R-01
             this.type = API.readMemoryString(retrieverDefinition, 0x40); // resource
             this.descriptionId = API.readMemoryString(retrieverDefinition, 0x48); // dispatch_label_description_retriever_r01
             costListArr.update(API.readMemoryPtr(retrieverDefinition + 0x50));
             costListArr.sync(costList, Cost::new);
+
+            instantCost.update(retrieverDefinition + 0x58);
         }
 
     }
@@ -83,5 +90,11 @@ public class DispatchMediator extends Updatable implements API.Singleton {
             this.lootId = API.readMemoryString(address, 0x28);
         }
 
+    }
+
+    public void overrideSelectedRetriever(DispatchAPI.Retriever retriever) {
+        if (selectedRetriever == retriever) return;
+        long value = retriever == null ? 0L : ((DispatchMediator.Retriever) retriever).address;
+        Main.API.writeLong(Main.API.readMemoryPtr(address + 0x50) + 0x68, value);
     }
 }
