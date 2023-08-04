@@ -6,6 +6,7 @@ import eu.darkbot.api.config.annotations.Dropdown;
 import eu.darkbot.api.extensions.PluginInfo;
 import eu.darkbot.api.managers.I18nAPI;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,16 +17,17 @@ public class EnumDropdownOptions<E extends Enum<E>> implements Dropdown.Options<
     private final I18nAPI i18n;
     private final PluginInfo context;
     private final List<E> options;
-    private final String baseKey;
+    private final @Nullable String baseKey;
 
     public EnumDropdownOptions(PluginAPI api, PluginInfo context, Class<E> e) {
-        this(api, context, e, e.getAnnotation(Configuration.class).value());
+        this(api, context, e,
+                e.isAnnotationPresent(Configuration.class) ? e.getAnnotation(Configuration.class).value() : null);
     }
 
-    public EnumDropdownOptions(PluginAPI api, PluginInfo context, Class<E> e, String baseKey) {
+    public EnumDropdownOptions(PluginAPI api, PluginInfo context, Class<E> e, @Nullable String baseKey) {
         this.i18n = api.requireAPI(I18nAPI.class);
         this.context = context;
-        this.options = Arrays.asList(e.getEnumConstants());;
+        this.options = Arrays.asList(e.getEnumConstants());
         this.baseKey = baseKey;
     }
 
@@ -38,12 +40,12 @@ public class EnumDropdownOptions<E extends Enum<E>> implements Dropdown.Options<
     public @NotNull String getText(E option) {
         if (option == null) return "";
         String name = option.name().toLowerCase(Locale.ROOT);
-        return i18n.getOrDefault(context, baseKey + "." + name, name);
+        return baseKey != null ? i18n.getOrDefault(context, baseKey + "." + name, name) : name;
     }
 
     @Override
     public String getTooltip(E option) {
-        if (option == null) return null;
+        if (option == null || baseKey == null) return null;
         String name = option.name().toLowerCase(Locale.ROOT);
         return i18n.getOrDefault(context, baseKey + "." + name + ".desc", null);
     }
