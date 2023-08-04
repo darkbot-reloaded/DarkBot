@@ -30,9 +30,6 @@ public class IssueHandler {
         handleFeatureException(defaultLevel, "bot.issue.feature.failed_to_tick", e);
     }
 
-    /**
-     * @return true if feature have any critical issue, false otherwise
-     */
     public void handleFeatureException(PluginIssue.Level defaultLevel, String defaultMessage, Throwable e) {
         FeatureException fe = FeatureException.find(e);
         if (fe != null) {
@@ -59,17 +56,22 @@ public class IssueHandler {
     }
 
     public static String createDescription(Throwable e) {
-        return createDescription(e, false)
+        return createDescription(e, null);
+    }
+
+    public static String createDescription(Throwable e, String header) {
+        return createDescription(e, header, false)
                 .collect(Collectors.joining("<br>", "<html>", "</html>"));
     }
 
-    private static Stream<String> createDescription(Throwable e, boolean isCause) {
+    private static Stream<String> createDescription(Throwable e, String header, boolean isCause) {
+        if (header == null) header = e.toString();
         Stream<String> stream = Stream.concat(
-                Stream.of("<strong>" + (isCause ? "Caused By: " : "") + e.toString() + "</strong>"),
+                Stream.of("<strong>" + (isCause ? "Caused By: " : "") + header + "</strong>"),
                 Arrays.stream(e.getStackTrace()).map(IssueHandler::toSimpleString)
         ).limit(100);
         if (e.getCause() == null) return stream;
-        return Stream.concat(stream, createDescription(e.getCause(), true));
+        return Stream.concat(stream, createDescription(e.getCause(), null, true));
     }
 
     /**
