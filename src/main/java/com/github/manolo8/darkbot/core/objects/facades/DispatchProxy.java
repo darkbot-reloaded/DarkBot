@@ -28,7 +28,7 @@ public class DispatchProxy extends Updatable implements API.Singleton {
 
     @Getter
     @ToString
-    public static class RewardLoot extends Auto implements DispatchAPI.RewardLoot {
+    private static class RewardLoot extends Auto implements DispatchAPI.RewardLoot {
         private String lootId;
         private int amount;
 
@@ -37,6 +37,6 @@ public class DispatchProxy extends Updatable implements API.Singleton {
             this.amount = API.readMemoryInt(address + 0x20);
             this.lootId = API.readMemoryString(address, 0x28);
         }
-
     }
+
 }
