@@ -8,14 +8,18 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.gui.components.ExitConfirmation;
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
+import com.github.manolo8.darkbot.gui.utils.DeathRecorder;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.ToolTipManager;
+import java.awt.BorderLayout;
+import java.awt.HeadlessException;
+import java.awt.Image;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
@@ -35,6 +39,9 @@ public class MainGui extends JFrame {
     public static final Image ICON = UIUtils.getImage("icon");
     public static final int DEFAULT_WIDTH = 640, DEFAULT_HEIGHT = 480;
     private int lastTick;
+
+    private final Consumer<Boolean> deathRecorderListener;
+    private DeathRecorder deathRecorder;
 
     public MainGui(Main main) throws HeadlessException {
         super("DarkBot");
@@ -97,6 +104,16 @@ public class MainGui extends JFrame {
             }
             main.configManager.saveConfig();
         }));
+
+        ConfigSetting<Boolean> recordDeath = main.configHandler.requireConfig("bot_settings.other.record_death");
+        recordDeath.addListener(deathRecorderListener = (value -> {
+            if (value && deathRecorder == null) deathRecorder = new DeathRecorder(this);
+            else if (!value && deathRecorder != null) deathRecorder = null;
+        }));
+
+        if (recordDeath.getValue()) {
+            this.deathRecorder = new DeathRecorder(this);
+        }
     }
 
     private void setComponentPosition() {
@@ -147,6 +164,20 @@ public class MainGui extends JFrame {
 
         if ((lastTick++ % main.config.BOT_SETTINGS.MAP_DISPLAY.REFRESH_DELAY) == 0) {
             mapDrawer.repaint();
+        }
+
+        // prevent race condition
+        DeathRecorder recorder = deathRecorder;
+        if (recorder != null) {
+            recorder.onTick();
+        }
+    }
+
+    public void onDeath() {
+        // prevent race condition
+        DeathRecorder recorder = deathRecorder;
+        if (recorder != null) {
+            recorder.onDeath();
         }
     }
 

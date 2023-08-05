@@ -163,7 +163,9 @@ public class MapDrawer extends JPanel {
     }
 
     protected void onPaint() {
-        drawBackgroundImage();
+        if (!isPaintingForPrint()) {
+            drawBackgroundImage();
+        }
 
         for (Drawable drawable : drawableHandler.getDrawables()) {
             drawable.onDraw(mapGraphics);

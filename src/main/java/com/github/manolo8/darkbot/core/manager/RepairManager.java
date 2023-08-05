@@ -122,6 +122,7 @@ public class RepairManager implements Manager, RepairAPI {
         }
 
         if (!destroyed) {
+            main.getGui().onDeath();
             shouldInstantRepair = true;
             destroyed = true;
             deaths++;

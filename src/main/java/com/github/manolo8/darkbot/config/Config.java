@@ -287,6 +287,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean DISABLE_MASTER_PASSWORD = false;
             public @Option @Number(min = 10, max = 300) int ZONE_RESOLUTION = 30;
             public @Option @Visibility(Level.DEVELOPER) @Number(min = 10, max = 250) int MIN_TICK = 15;
+            public @Option @Visibility(Level.ADVANCED) boolean RECORD_DEATH = false;
             public @Option @Visibility(Level.ADVANCED) boolean DEV_STUFF = false;
         }
     }

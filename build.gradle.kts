@@ -56,6 +56,11 @@ dependencies {
     api("com.formdev", "flatlaf-extras", flatLafVersion)
     api("org.jgrapht", "jgrapht-core", "1.3.0")
 
+    //contains JNI libraries
+    //api("org.lz4:lz4-java:1.8.0")
+    api("org.lz4:lz4-pure-java:1.8.0")
+    api("org.jcodec:jcodec:0.2.5")
+
     compileOnly("org.jetbrains", "annotations", "23.0.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
