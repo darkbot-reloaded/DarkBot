@@ -5,8 +5,11 @@ import com.github.manolo8.darkbot.core.objects.facades.DispatchMediator;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconOkGui;
+import com.github.manolo8.darkbot.core.objects.gui.DispatchPopupRewardGui;
 import com.github.manolo8.darkbot.utils.Time;
+import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.DispatchAPI;
+import eu.darkbot.util.Timer;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -15,8 +18,30 @@ import java.util.List;
 public class DispatchManager extends Gui implements DispatchAPI {
     private final DispatchProxy proxy;
     private final DispatchMediator mediator;
-    private final DispatchIconGui icon;
-    private final DispatchIconOkGui iconOk;
+    private final DispatchIconGui iconGui;
+    private final DispatchIconOkGui iconOkGui;
+    private final DispatchPopupRewardGui rewardsGui;
+    private final BotAPI bot;
+
+    private final Timer guiUsed = Timer.getRandom(19_000, 1000);
+
+    @Override
+    public void update() {
+        super.update();
+        // Last gui usage >20s ago, close gui
+        if (bot.isRunning() && guiUsed.isInactive()) {
+            this.iconGui.clickDeclinePopup();
+            this.iconOkGui.clickCloseOkPopup();
+            this.rewardsGui.show(false);
+            this.show(false);
+        }
+    }
+
+    @Override
+    public boolean show(boolean value) {
+        if (value) guiUsed.activate();
+        return super.show(value);
+    }
 
     @Override
     public List<? extends RewardLoot> getRewardLoot() {
@@ -99,19 +124,24 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     public boolean clickAcceptPopup() {
-        return icon.clickAcceptPopup();
+        return iconGui.clickAcceptPopup();
     }
 
     public boolean clickDeclinePopup() {
-        return icon.clickDeclinePopup();
+        return iconGui.clickDeclinePopup();
     }
 
     public boolean clickOkRewardsPopup(int i) {
-        return iconOk.clickOkRewardsPopup(i);
+        return iconOkGui.clickOkRewardsPopup(i);
     }
 
     public boolean clickCloseOkPopup() {
-        return iconOk.clickCloseOkPopup();
+        return iconOkGui.clickCloseOkPopup();
+    }
+
+    @Override
+    public void overrideSelectedRetriever(Retriever retriever) {
+        mediator.overrideSelectedRetriever(retriever);
     }
 
 }
