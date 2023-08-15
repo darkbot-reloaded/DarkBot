@@ -547,4 +547,9 @@ public class MapManager implements Manager, StarSystemAPI {
     public Portal findNext(GameMap targetMap) {
         return starManager.next(main.hero, starManager.byId(targetMap.getId()));
     }
+
+    @Override
+    public boolean isAccessible(GameMap map) {
+        return starManager.isAccessible((Map) map);
+    }
 }

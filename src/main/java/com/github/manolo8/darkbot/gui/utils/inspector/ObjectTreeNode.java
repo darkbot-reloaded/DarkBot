@@ -45,8 +45,8 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
     @Override
     public String toString() {
         ObjectInspector.Slot slot = (ObjectInspector.Slot) (this.getUserObject());
-        return String.format("%03X %-25s  %-25s %s",
-                slot.offset, (slot.name.length() >= 25) ? slot.name.substring(25) : slot.name, slot.getType(), strValue);
+        return String.format("%03X %-30s  %-30s %s",
+                slot.offset, (slot.name.length() >= 30) ? (slot.name.substring(0, 27) + "...") : slot.name, slot.getType(), strValue);
     }
 
     public void trimChildren(int maxSize) {

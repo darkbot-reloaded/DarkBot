@@ -1,12 +1,15 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.IconGui;
-import com.github.manolo8.darkbot.core.objects.IconOkGui;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchMediator;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
+import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
+import com.github.manolo8.darkbot.core.objects.gui.DispatchIconOkGui;
+import com.github.manolo8.darkbot.core.objects.gui.DispatchPopupRewardGui;
 import com.github.manolo8.darkbot.utils.Time;
+import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.DispatchAPI;
+import eu.darkbot.util.Timer;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -15,8 +18,30 @@ import java.util.List;
 public class DispatchManager extends Gui implements DispatchAPI {
     private final DispatchProxy proxy;
     private final DispatchMediator mediator;
-    private final IconGui icon;
-    private final IconOkGui iconOk;
+    private final DispatchIconGui iconGui;
+    private final DispatchIconOkGui iconOkGui;
+    private final DispatchPopupRewardGui rewardsGui;
+    private final BotAPI bot;
+
+    private final Timer guiUsed = Timer.getRandom(19_000, 1000);
+
+    @Override
+    public void update() {
+        super.update();
+        // Last gui usage >20s ago, close gui
+        if (bot.isRunning() && guiUsed.isInactive()) {
+            this.iconGui.clickDeclinePopup();
+            this.iconOkGui.clickCloseOkPopup();
+            this.rewardsGui.show(false);
+            this.show(false);
+        }
+    }
+
+    @Override
+    public boolean show(boolean value) {
+        if (value) guiUsed.activate();
+        return super.show(value);
+    }
 
     @Override
     public List<? extends RewardLoot> getRewardLoot() {
@@ -96,6 +121,27 @@ public class DispatchManager extends Gui implements DispatchAPI {
             return true;
         }
         return false;
+    }
+
+    public boolean clickAcceptPopup() {
+        return iconGui.clickAcceptPopup();
+    }
+
+    public boolean clickDeclinePopup() {
+        return iconGui.clickDeclinePopup();
+    }
+
+    public boolean clickOkRewardsPopup(int i) {
+        return iconOkGui.clickOkRewardsPopup(i);
+    }
+
+    public boolean clickCloseOkPopup() {
+        return iconOkGui.clickCloseOkPopup();
+    }
+
+    @Override
+    public void overrideSelectedRetriever(Retriever retriever) {
+        mediator.overrideSelectedRetriever(retriever);
     }
 
 }

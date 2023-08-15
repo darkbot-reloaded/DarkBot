@@ -1,7 +1,8 @@
-package com.github.manolo8.darkbot.core.objects;
+package com.github.manolo8.darkbot.core.objects.gui;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.Capability;
+import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import eu.darkbot.api.API;
 import eu.darkbot.api.utils.NativeAction;

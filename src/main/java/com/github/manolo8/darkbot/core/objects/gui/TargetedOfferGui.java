@@ -1,4 +1,6 @@
-package com.github.manolo8.darkbot.core.objects;
+package com.github.manolo8.darkbot.core.objects.gui;
+
+import com.github.manolo8.darkbot.core.objects.Gui;
 
 public class TargetedOfferGui extends Gui {
 

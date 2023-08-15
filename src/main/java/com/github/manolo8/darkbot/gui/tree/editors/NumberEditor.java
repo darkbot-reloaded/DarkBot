@@ -9,15 +9,16 @@ import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
 
 import javax.swing.*;
-import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.text.DecimalFormat;
-import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NumberEditor extends JPanel implements OptionEditor<Number> {
 
     private final JCheckBox checkBox = new BooleanEditor();
-    private final NumberSpinner spinner = new NumberSpinner();
+    private final Map<Class<? extends Number>, NumberSpinner<?>> spinners = new HashMap<>();
+    private NumberSpinner<?> spinner;
 
     private Number disabledValue;
 
@@ -35,9 +36,15 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
 
     @Override
     public JComponent getEditorComponent(ConfigSetting<Number> number) {
+        if (this.spinner != null) remove(spinner);
+
+        this.spinner = spinners.computeIfAbsent(number.getType(), NumberSpinner::new);
+
         disabledValue = MathUtils.toNumber(number.getMetadata("disabled"), number.getType());
 
-        checkBox.setSelected(disabledValue == null || !disabledValue.equals(number.getValue()));
+        boolean isEnabled = disabledValue == null || !disabledValue.equals(number.getValue());
+        checkBox.setSelected(isEnabled);
+        spinner.setEnabled(isEnabled);
         spinner.setEditing(number);
         if (disabledValue == null) return spinner;
 
@@ -53,7 +60,7 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
     @Override
     public Number getEditorValue() {
         if (disabledValue != null && !checkBox.isSelected()) return disabledValue;
-        else return spinner.model.getNumber();
+        else return (Number) spinner.getValue();
     }
 
     @Override
@@ -61,13 +68,18 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
         return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
-    private class NumberSpinner extends JSpinner {
-        private final NumberFormatEditor integer, decimal;
-        private SpinnerNumberMinMaxFix model;
+    private class NumberSpinner<T extends Number> extends JSpinner {
+        private final DecimalFormat format;
+        private final double avgCharWidth;
 
-        public NumberSpinner() {
-            integer = new NumberFormatEditor("");
-            decimal = new NumberFormatEditor("0.0");
+        public NumberSpinner(Class<T> type) {
+            super(new SpinnerNumberMinMaxFix(
+                    MathUtils.toNumber(0, type), null, null, MathUtils.toNumber(1, type)));
+
+            NumberEditor editor = (NumberEditor) getEditor();
+            this.format = editor.getFormat();
+            editor.getTextField().setFocusLostBehavior(JFormattedTextField.COMMIT);
+            avgCharWidth = editor.getFontMetrics(editor.getFont()).stringWidth("1234567890") * 0.105d;
         }
 
         public void setEditing(ConfigSetting<Number> number) {
@@ -79,8 +91,6 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
 
             Class<? extends Number> type = number.getType();
 
-            NumberFormatEditor nfe = type == Double.class || type == Float.class ? decimal : integer;
-
             Number value = number.getValue();
             if (disabledValue != null && disabledValue.equals(value)) {
                 value = MathUtils.toNumber(number.getMetadata("disabled-default"), number.getType());
@@ -88,38 +98,20 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
                     throw new IllegalArgumentException("Disabled was set without a disabled-default!");
             }
 
-            setEditor(nfe.editor);
-            setModel(model = new SpinnerNumberMinMaxFix(
+            setModel(new SpinnerNumberMinMaxFix(
                     NumberHandler.enforceLimit(value, min, max),
                     MathUtils.toComparable(min, type),
                     MathUtils.toComparable(max, type),
                     MathUtils.toNumber(step, type)));
             fireStateChanged(); // Force editor to pick up new value
 
-            int length;
-            try {
-                length = nfe.formatter.valueToString(max).length();
-            } catch (ParseException e) {
-                length = String.valueOf(number.getValue()).length();
-            }
-
-            setPreferredSize(new Dimension(25 + (length * 9), AdvancedConfig.EDITOR_HEIGHT));
+            double width = Math.ceil(format.format(max).length() * avgCharWidth);
+            setPreferredSize(new Dimension(33 + (int) width, AdvancedConfig.EDITOR_HEIGHT));
         }
 
         @Override
         public Dimension getPreferredSize() {
             return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
-        }
-
-        private class NumberFormatEditor {
-            private final NumberFormatter formatter;
-            private final JSpinner.NumberEditor editor;
-
-            public NumberFormatEditor(String format) {
-                this.formatter = new NumberFormatter(new DecimalFormat(format));
-                this.editor = new JSpinner.NumberEditor(NumberSpinner.this, format);
-                this.editor.getTextField().setFocusLostBehavior(JFormattedTextField.COMMIT);
-            }
         }
 
     }
