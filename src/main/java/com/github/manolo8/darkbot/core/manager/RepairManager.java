@@ -207,6 +207,10 @@ public class RepairManager implements Manager, RepairAPI {
         deaths = 0;
     }
 
+    public void overwriteDeathsCount(int newDeathsCount) {
+        deaths = newDeathsCount;
+    }
+
     private int optionAvailableIn(int repairOption) {
         if (repairOption == -1) return -1;
         return API.readInt(repairTypes.get(repairOption) + 48);

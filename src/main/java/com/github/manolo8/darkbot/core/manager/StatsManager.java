@@ -168,6 +168,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return runningTime + (lastStatus ? (System.currentTimeMillis() - started) : 0);
     }
 
+    public long startingTime() { return started; }
+
     public double runningHours() {
         // Intentionally lose millisecond precision, in hopes of better double precision.
         long runningSeconds = runningTime / 1000;
@@ -199,6 +201,28 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         this.earnedExperience = 0;
 
         eventBroker.sendEvent(new StatsResetEvent());
+    }
+
+    public void overwriteStats(long startingTime, long runningTime,
+                               double credits, double earnedCredits,
+                               double uridium, double earnedUridium,
+                               double experience, double earnedExperience,
+                               double honor, double earnedHonor)
+    {
+        if (startingTime > 0)
+            this.started = startingTime;
+
+        if (runningTime > 0)
+            this.runningTime = runningTime;
+
+        this.credits = credits;
+        this.earnedCredits = earnedCredits;
+        this.uridium = uridium;
+        this.earnedUridium = earnedUridium;
+        this.experience = experience;
+        this.earnedExperience = earnedExperience;
+        this.honor = honor;
+        this.earnedHonor = earnedHonor;
     }
 
     @Override
