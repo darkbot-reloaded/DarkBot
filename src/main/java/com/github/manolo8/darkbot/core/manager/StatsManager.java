@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
@@ -39,6 +40,21 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     public double earnedHonor;
     public volatile String sid;
     public volatile String instance;
+
+    private int teleportBonusAmount;
+
+    private int greenKeysAmount;
+    private int empyrianKeysAmount;
+    private int redKeysAmount;
+    private int blueKeysAmount;
+    private int silverKeysAmount;
+    private int astralKeysAmount;
+    private int astralSupremeKeysAmount;
+    private int blackLightCodeAmount;
+    private int blackLightDecoderAmount;
+    private int lucentKeysAmount;
+
+    private boolean premium;
 
     private long address;
     private long started = System.currentTimeMillis();
@@ -88,6 +104,21 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         // novaEnergy = API.readInt(novaData + 0x98);
         long novaData = readAtom(0x100);
         novaEnergy = API.readInt(novaData + 0x28);
+
+        teleportBonusAmount = API.readMemoryInt(address + 0x50);
+
+        greenKeysAmount = API.readMemoryInt(address + 0x54);
+        blueKeysAmount = API.readMemoryInt(address + 0x58);
+        redKeysAmount = API.readMemoryInt(address + 0x5c);
+        silverKeysAmount = API.readMemoryInt(address + 0x60);
+        blackLightCodeAmount = API.readMemoryInt(address + 0x70);
+        blackLightDecoderAmount = API.readMemoryInt(address + 0x74);
+        astralKeysAmount = API.readMemoryInt(address + 0x7c);
+        astralSupremeKeysAmount = API.readMemoryInt(address + 0x80);
+        empyrianKeysAmount = API.readMemoryInt(address + 0x84);
+        lucentKeysAmount = API.readMemoryInt(address + 0x88);
+
+        premium = API.readMemoryBoolean((API.readMemoryLong(address + 0xF0) & ByteUtils.ATOM_MASK) + 0x20);
     }
 
     public int getLevel() {
@@ -285,6 +316,54 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     public AverageStats getMemoryStats() {
         return memoryStat;
+    }
+
+    public int getTeleportBonusAmount() {
+        return teleportBonusAmount;
+    }
+
+    public int getGreenKeysAmount() {
+        return greenKeysAmount;
+    }
+
+    public int getEmpyrianKeysAmount() {
+        return empyrianKeysAmount;
+    }
+
+    public int getRedKeysAmount() {
+        return redKeysAmount;
+    }
+
+    public int getBlueKeysAmount() {
+        return blueKeysAmount;
+    }
+
+    public int getSilverKeysAmount() {
+        return silverKeysAmount;
+    }
+
+    public int getBlackLightCodeAmount() {
+        return blackLightCodeAmount;
+    }
+
+    public int getBlackLightDecoderAmount() {
+        return blackLightDecoderAmount;
+    }
+
+    public int getAstralKeysAmount() {
+        return astralKeysAmount;
+    }
+
+    public int getAstralSupremeKeysAmount() {
+        return astralSupremeKeysAmount;
+    }
+
+    public int getLucentKeysAmount() {
+        return lucentKeysAmount;
+    }
+
+    public boolean isPremium() {
+        return premium;
     }
 
     @Override
