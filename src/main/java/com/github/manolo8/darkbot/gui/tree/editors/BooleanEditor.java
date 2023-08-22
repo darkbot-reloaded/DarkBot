@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.gui.tree.editors;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.util.OptionEditor;
-import eu.darkbot.api.config.util.ValueHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,7 +23,7 @@ public class BooleanEditor extends JCheckBox implements OptionEditor<Boolean> {
 
     @Override
     public Insets getInsets() {
-        return new Insets(0, -1, 0, 0);
+        return new Insets(0, 0, 0, 0);
     }
 
     @Override

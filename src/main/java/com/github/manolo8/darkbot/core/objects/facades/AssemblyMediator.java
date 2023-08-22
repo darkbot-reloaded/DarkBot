@@ -53,21 +53,24 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
     @Getter
     @ToString
-    public static class Recipe extends Auto implements AssemblyAPI.Recipe {
+    private static class Recipe extends Auto implements AssemblyAPI.Recipe {
         @Getter(AccessLevel.NONE)
         @ToString.Exclude
         private final ObjArray rewardsArr = ObjArray.ofVector(true),
                 resourcesRequiredArr = ObjArray.ofVector(true);
 
-        private String recipeId = "";
+        private String recipeId, visibility = "";
         private final List<String> rewards = new ArrayList<>();
         private final List<ResourceRequired> resourcesRequired = new ArrayList<>();
-        private boolean isCraftable = false;
+        private boolean isCraftable, isInProgress, isCollectable = false;
 
         @Override
         public void update() {
             isCraftable = API.readBoolean(address + 0x20);
             recipeId = API.readMemoryString(address, 0x58, 0x48);
+            visibility = API.readMemoryString(address, 0x58, 0x40, 0x20, 0x90);
+            isInProgress = visibility != null && visibility.equalsIgnoreCase("ON_SCHEDULE");
+            isCollectable = !isCraftable && !isInProgress && API.readDouble(API.readMemoryPtr(address, 0x40, 0x20) + 0x28) == 1.0;
         }
 
         @Override
@@ -88,7 +91,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
     @Getter
     @ToString
-    public static class ResourceRequired extends Auto implements AssemblyAPI.ResourceRequired {
+    private static class ResourceRequired extends Auto implements AssemblyAPI.ResourceRequired {
         private String resourceId = "";
         private double amountRequired;
 
@@ -102,7 +105,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     }
 
     @ToString
-    public static class RowFilter extends Reporting {
+    private static class RowFilter extends Reporting {
         private final ItemFilter first = new ItemFilter();
         private final ItemFilter second = new ItemFilter();
 
@@ -117,17 +120,19 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
     @Getter
     @ToString
-    public static class ItemFilter extends Reporting implements AssemblyAPI.Filter {
+    private static class ItemFilter extends Reporting implements AssemblyAPI.Filter {
         private String filterName = "";
         private boolean isChecked;
         private int row, col;
+        private double x, y;
 
         @Override
         public boolean updateAndReport() {
             if (address <= 0) return false;
             filterName = API.readString(address, 0x20);
             isChecked = API.readBoolean(address, 0x28, 0x1D0);
-
+            x = API.readDouble(address, 0x28, 0x158);
+            y = API.readDouble(address, 0x28, 0x160);
             // Always false, we only care about address itself changing, which reports true regardless
             return false;
         }
