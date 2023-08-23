@@ -53,6 +53,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     private int blackLightCodeAmount;
     private int blackLightDecoderAmount;
     private int lucentKeysAmount;
+    private int apocalypseKeysAmount;
 
     private boolean premium;
 
@@ -111,6 +112,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         blueKeysAmount = API.readMemoryInt(address + 0x58);
         redKeysAmount = API.readMemoryInt(address + 0x5c);
         silverKeysAmount = API.readMemoryInt(address + 0x60);
+        apocalypseKeysAmount = API.readMemoryInt(address + 0x64);
         blackLightCodeAmount = API.readMemoryInt(address + 0x70);
         blackLightDecoderAmount = API.readMemoryInt(address + 0x74);
         astralKeysAmount = API.readMemoryInt(address + 0x7c);
@@ -340,6 +342,10 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     public int getSilverKeysAmount() {
         return silverKeysAmount;
+    }
+
+    public int getApocalypseKeysAmount() {
+        return apocalypseKeysAmount;
     }
 
     public int getBlackLightCodeAmount() {
