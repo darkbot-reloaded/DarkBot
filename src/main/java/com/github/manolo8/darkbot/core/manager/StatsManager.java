@@ -4,15 +4,25 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
+import com.github.manolo8.darkbot.core.utils.TimeSeriesImpl;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
-import com.github.manolo8.darkbot.utils.Time;
+import eu.darkbot.api.game.stats.Stats;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StatsAPI;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+import lombok.experimental.Accessors;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -21,134 +31,112 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     private final Main main;
     private final EventBrokerAPI eventBroker;
 
-    private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
+    private long address;
 
-    @Deprecated
-    public long currentBox; // Pretty out of place, but will work
-    public double credits;
-    public double uridium;
-    public double experience;
-    public double honor;
-    public int novaEnergy;
-    public int deposit;
-    public int depositTotal;
     public int userId;
-    public double earnedCredits;
-    public double earnedUridium;
-    public double earnedExperience;
-    public double earnedHonor;
     public volatile String sid;
     public volatile String instance;
 
-    private long address;
-    private long started = System.currentTimeMillis();
-    private long runningTime = Time.SECOND; // Assume running for 1 second by default
-    private boolean lastStatus;
+    private final Map<StatKey, StatImpl> statistics = new HashMap<>();
+
+    private final StatImpl runtime;
+    private final StatImpl credits, uridium, experience, honor, cargo, maxCargo, novaEnergy;
+    private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
 
     public StatsManager(Main main, EventBrokerAPI eventBroker) {
         this.main = main;
         this.eventBroker = eventBroker;
 
-        this.main.status.add(this::toggle);
+        register(Stats.Bot.RUNTIME, runtime = createStat());
 
-        this.cpuStat = new AverageStats(true);
-        this.pingStat = new AverageStats(false);
-        this.tickStat = new AverageStats(true);
-        this.memoryStat = new AverageStats(false);
+        register(Stats.General.CREDITS, credits = createStat());
+        register(Stats.General.URIDIUM, uridium = createStat());
+        register(Stats.General.EXPERIENCE, experience = createStat());
+        register(Stats.General.HONOR, honor = createStat());
+        register(Stats.General.CARGO, cargo = createStat());
+        register(Stats.General.MAX_CARGO, maxCargo = createStat());
+        register(Stats.General.NOVA_ENERGY, novaEnergy = createStat());
+
+        register(Stats.Bot.PING, pingStat = new AverageStats(false));
+        register(Stats.Bot.TICK_TIME, tickStat = new AverageStats(true));
+        register(Stats.Bot.MEMORY, memoryStat = new AverageStats(false));
+        register(Stats.Bot.CPU, cpuStat = new AverageStats(true));
     }
 
     @Override
     public void install(BotInstaller botInstaller) {
-        botInstaller.invalid.add(value -> userId = 0);
+        botInstaller.invalid.add(value -> {
+            address = 0;
+            userId = 0;
+        });
         botInstaller.heroInfoAddress.add(value -> address = value);
     }
 
     public void tick() {
+        updateNonZero(runtime, System.currentTimeMillis());
+
         if (address == 0) return;
 
-        updateCredits(readDouble(352));
-        updateUridium(readDouble(360));
-        updateExperience(readDouble(376));
-        updateHonor(readDouble(384));
+        updateNonZero(credits, readDouble(352));
+        updateNonZero(uridium, readDouble(360));
+        updateNonZero(experience, readDouble(376));
+        checkHonor(updateNonZero(honor, readDouble(384)));
 
-        deposit = readIntHolder(304);
-        depositTotal = readIntHolder(312);
-
-        //currentBox = API.readMemoryLong(address + 0xE8);
+        cargo.track(readIntHolder(304));
+        maxCargo.track(readIntHolder(312));
 
         sid = readString(200);
         userId = readInt(48);
+        if (main.settingsManager.getAddress() != 0) {
+            instance = main.settingsManager.readString(664);
+        }
 
-        //is that even possible to happen?
-        if (main.settingsManager.getAddress() == 0) return;
-        instance = main.settingsManager.readString(664);
+        novaEnergy.track(readInt(0x100, 0x28));
+    }
 
-        // Both memory location gives same value
-        // long novaData = API.readMemoryLong(address + 0xC0) & ByteUtils.ATOM_MASK;
-        // novaEnergy = API.readInt(novaData + 0x98);
-        long novaData = readAtom(0x100);
-        novaEnergy = API.readInt(novaData + 0x28);
+    @Override
+    public Stat getStat(Key key) {
+        return statistics.get(StatKey.of(key));
+    }
+
+    @Override
+    public Stat registerStat(Key key) {
+        if (key.namespace() == null) throw new UnsupportedOperationException();
+        StatImpl stat = createStat();
+        register(key, stat);
+        return stat;
+    }
+
+    private void register(Key key, StatImpl stat) {
+        statistics.put(StatKey.of(key), stat);
+    }
+
+    @Override
+    public void setStatValue(Key key, double v) {
+        if (key.namespace() == null) throw new UnsupportedOperationException();
+        StatImpl stat = statistics.get(StatKey.of(key));
+        if (stat != null) stat.track(v);
+    }
+
+    private double updateNonZero(StatImpl stat, double value) {
+        if (value == 0) return 0;
+        return stat.track(value);
     }
 
     public int getLevel() {
-        return Math.max(1, (int) (Math.log(experience / 10_000) / Math.log(2)) + 2);
+        return Math.max(1, (int) (Math.log(getTotalExperience() / 10_000) / Math.log(2)) + 2);
     }
 
-    public void toggle(boolean running) {
-        lastStatus = running;
-
-        if (running) {
-            started = System.currentTimeMillis();
-        } else {
-            runningTime += System.currentTimeMillis() - started;
-        }
-    }
-
-    public void tickAverageStats(long timeDelta) {
+    public void tickAverageStats(long tickTime) {
         int p = getPing();
-        if (p > 0) pingStat.accept(timeDelta, p);
+        if (p > 0) pingStat.track(p);
 
-        cpuStat.accept(timeDelta, API.getCpuUsage());
-        tickStat.accept(timeDelta, main.getTickTime());
-        memoryStat.accept(timeDelta, API.getMemoryUsage());
+        cpuStat.track(API.getCpuUsage());
+        tickStat.track(tickTime);
+        memoryStat.track(API.getMemoryUsage());
     }
 
-    private void updateCredits(double credits) {
-        double diff = credits - this.credits;
-
-        if (this.credits != 0 && diff > 0 && updateStats()) {
-            earnedCredits += diff;
-        }
-
-        this.credits = credits;
-    }
-
-    private void updateUridium(double uridium) {
-        double diff = uridium - this.uridium;
-
-        if (this.uridium != 0 && diff > 0 && updateStats()) {
-            earnedUridium += diff;
-        }
-
-        this.uridium = uridium;
-    }
-
-    private void updateExperience(double experience) {
-        if (experience == 0) return;
-        if (this.experience != 0 && updateStats()) {
-            earnedExperience += experience - this.experience;
-        }
-        this.experience = experience;
-    }
-
-    private void updateHonor(double honor) {
-        if (honor == 0) return;
-        double honorDiff = honor - this.honor;
-        if (this.honor != 0 && updateStats()) {
-            earnedHonor += honorDiff;
-        }
-        this.honor = honor;
-
+    private void checkHonor(double honorDiff) {
         if (honorDiff > -10_000) return;
 
         System.out.println("Paused bot, lost " + honorDiff + " honor.");
@@ -164,40 +152,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return main.isRunning() || main.config.MISCELLANEOUS.UPDATE_STATS_WHILE_PAUSED;
     }
 
-    public long runningTime() {
-        return runningTime + (lastStatus ? (System.currentTimeMillis() - started) : 0);
-    }
-
-    public double runningHours() {
-        // Intentionally lose millisecond precision, in hopes of better double precision.
-        long runningSeconds = runningTime / 1000;
-        return runningSeconds / 3600d;
-    }
-
-    public double earnedCredits() {
-        return earnedCredits / runningHours();
-    }
-
-    public double earnedUridium() {
-        return earnedUridium / runningHours();
-    }
-
-    public double earnedExperience() {
-        return earnedExperience / runningHours();
-    }
-
-    public double earnedHonor() {
-        return earnedHonor / runningHours();
-    }
-
     public void resetValues() {
-        this.started = System.currentTimeMillis();
-        this.runningTime = Time.SECOND;
-        this.earnedCredits = 0;
-        this.earnedUridium = 0;
-        this.earnedHonor = 0;
-        this.earnedExperience = 0;
-
+        statistics.values().forEach(StatImpl::reset);
         eventBroker.sendEvent(new StatsResetEvent());
     }
 
@@ -208,17 +164,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     @Override
     public Duration getRunningTime() {
-        return Duration.ofMillis(runningTime());
-    }
-
-    @Override
-    public int getCargo() {
-        return deposit;
-    }
-
-    @Override
-    public int getMaxCargo() {
-        return depositTotal;
+        return Duration.ofMillis((long) runtime.getEarned());
     }
 
     @Override
@@ -226,50 +172,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         resetValues();
     }
 
-    @Override
-    public double getTotalCredits() {
-        return credits;
-    }
-
-    @Override
-    public double getEarnedCredits() {
-        return earnedCredits;
-    }
-
-    @Override
-    public double getTotalUridium() {
-        return uridium;
-    }
-
-    @Override
-    public double getEarnedUridium() {
-        return earnedUridium;
-    }
-
-    @Override
-    public double getTotalExperience() {
-        return experience;
-    }
-
-    @Override
-    public double getEarnedExperience() {
-        return earnedExperience;
-    }
-
-    @Override
-    public double getTotalHonor() {
-        return honor;
-    }
-
-    @Override
-    public double getEarnedHonor() {
-        return earnedHonor;
-    }
-
-    @Override
-    public int getNovaEnergy() {
-        return novaEnergy;
-    }
 
     public AverageStats getCpuStats() {
         return cpuStat;
@@ -292,38 +194,103 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return address;
     }
 
-    public static class AverageStats {
+
+    @Value
+    @Accessors(fluent = true)
+    private static class StatKey implements StatsAPI.Key {
+        String namespace;
+        String category;
+        String name;
+
+        public static StatKey of(StatsAPI.Key key) {
+            return new StatKey(key.namespace(), key.category(), key.name());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof StatsAPI.Key)) return false;
+            StatsAPI.Key other = (StatsAPI.Key) o;
+            return Objects.equals(namespace, other.namespace())
+                    && Objects.equals(category, other.category())
+                    && Objects.equals(name, other.name());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(namespace, category, name);
+        }
+    }
+
+    private StatImpl createStat() {
+        return new StatImpl(this::updateStats);
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    private static class StatImpl implements Stat {
+        private final Supplier<Boolean> trackDiff;
+        protected double initial = Double.NaN;
+        protected double earned, spent;
+        protected double current;
+        protected TimeSeriesImpl timeSeries = new TimeSeriesImpl();
+
+        protected double track(double value) {
+            double diff = value - this.current;
+
+            if (Double.isNaN(initial)) {
+                initial = value;
+            } else if (trackDiff.get()) {
+                if (diff > 0) earned += diff;
+                else spent -= diff;
+            }
+            current = value;
+            timeSeries.track(earned - spent);
+
+            return diff;
+        }
+
+        private void reset() {
+            earned = spent = 0;
+        }
+
+        @Override
+        public @Nullable TimeSeries getTimeSeries() {
+            return timeSeries;
+        }
+    }
+
+    public static class AverageStats extends StatImpl {
         private static final DecimalFormat ONE_PLACE_FORMAT = new DecimalFormat("0.0");
 
-        private double last, average, max = Double.MIN_VALUE;
+        @Getter
+        private double average, max = Double.MIN_VALUE;
         private final boolean showDecimal;
+
+        private long lastTime = System.currentTimeMillis();
 
         private Consumer<String> onChange;
 
         public AverageStats(boolean showDecimal) {
+            super(() -> true);
             this.showDecimal = showDecimal;
         }
 
-        public void accept(long timeDelta, double value) {
-            double adjustFactor = timeDelta / 10_000d;
-            average = average + adjustFactor * (value - average);
+        protected double track(double value) {
+            long now = System.currentTimeMillis();
+            double diff = super.track(value);
 
-            max += adjustFactor * 0.2 * (average - max);
-            max = Math.max(max, value);
+            double adjustFactor = (now - lastTime) / 10_000d;
+            average += adjustFactor * (value - average); // 1s of data would be 1/10th of the avg
+            max += adjustFactor * 0.2 * (average - max); // 1s of data would be 1/50th of adjustment towards avg
+            max = Math.max(max, value); // If this IS a max, keep it
 
-            if (last != value && onChange != null) {
+            if (diff != 0 && onChange != null) {
                 String s = showDecimal ? ONE_PLACE_FORMAT.format(value) : String.valueOf((int) value);
                 onChange.accept(s);
             }
-            last = value;
-        }
-
-        public double getMax() {
-            return max;
-        }
-
-        public double getAverage() {
-            return average;
+            lastTime = now;
+            return diff;
         }
 
         public void setListener(Consumer<String> onChange) {
