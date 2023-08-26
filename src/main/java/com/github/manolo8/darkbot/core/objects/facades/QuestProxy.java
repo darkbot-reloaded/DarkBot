@@ -14,9 +14,9 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 public class QuestProxy extends Updatable implements API.Singleton {
-    private Quest currentQuest = new Quest();
+    private @Nullable Quest currentQuest = new Quest();
 
-    private final List<Quest> questItems = new ArrayList<>();
+    private final List<QuestListItem> questItems = new ArrayList<>();
 
     private final ObjArray questItemsArr = ObjArray.ofVector(true);
 
@@ -43,7 +43,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
         }
 
         questItemsArr.update(API.readMemoryPtr(0x58));
-        questItemsArr.sync(questItems, Quest::new);
+        questItemsArr.sync(questItems, QuestListItem::new);
 
         long questGiverSelectedAddr = API.readMemoryLong(questClass + 0x0A8) & ByteUtils.ATOM_MASK;
         if (questGiverSelectedAddr == 0) {
@@ -57,15 +57,26 @@ public class QuestProxy extends Updatable implements API.Singleton {
         }
     }
 
-    public @Nullable Quest getCurrentQuest() {
+    public @Nullable Quest getCurrentQuestDisplayed() {
         return currentQuest;
     }
 
+    public @Nullable QuestListItem getCurrentQuestSeleted() {
+        return questGiverSelected;
+    }
+
+    public @Nullable List<QuestListItem> getCurrestQuests() {
+        return questItems;
+    }
+
     public static class QuestListItem extends Auto {
+        private int id;
         private boolean selected;
         private boolean completed;
         private String title;
         private String type;
+        private int levelRequired;
+        private boolean activable;
 
         @Override
         public void update() {
@@ -73,10 +84,31 @@ public class QuestProxy extends Updatable implements API.Singleton {
                 return;
             }
 
-            this.selected = API.readBoolean(address + 0x34);
-            this.completed = API.readBoolean(address + 0x38);
+            this.id = API.readMemoryInt(address + 0x24);
+            this.levelRequired = API.readMemoryInt(address + 0x28);
+            this.selected = API.readMemoryBoolean(address + 0x34);
+            this.completed = API.readMemoryBoolean(address + 0x38);
+            this.activable = API.readMemoryBoolean(address + 0x3C);
             this.title = API.readMemoryString(address, 0x58);
+
+            /*
+             * Types:
+             * questType_kill - NPC/Player Kill
+             * questType_collect - Resources Farm
+             * questType_epic - Various types
+             * questType_discovery - Go to x points
+             * questType_daily1
+             */
+
             this.type = API.readMemoryString(address, 0x70);
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public int getLevelRequired() {
+            return levelRequired;
         }
 
         public boolean isSelected() {
@@ -93,6 +125,10 @@ public class QuestProxy extends Updatable implements API.Singleton {
 
         public String getType() {
             return type;
+        }
+
+        public boolean isActivable() {
+            return activable;
         }
     }
 
