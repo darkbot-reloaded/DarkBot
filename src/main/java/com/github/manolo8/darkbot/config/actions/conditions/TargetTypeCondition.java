@@ -8,24 +8,30 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
+import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
+import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
+import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.core.entities.Ship;
 
 import eu.darkbot.api.game.entities.Npc;
-import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.game.other.EntityInfo.Diplomacy;
 
-@ValueData(name = "target-is", description = "Checks the target type", example = "target-is(Enemy)")
+@ValueData(name = "is-relationship", description = "Checks the target type", example = "is-relationship(npc, target())")
 public class TargetTypeCondition implements Condition, Parser {
     public TargetType type;
+    public Value<Ship> ship;
 
     @Override
     public @NotNull Condition.Result get(Main main) {
+        Ship target;
+
         if (type == null) {
             return Result.ABSTAIN;
         }
 
-        Lockable target = main.hero.getLocalTarget();
+        target = Value.get(ship, main);
         if (target == null || !target.isValid()) {
             return type == TargetType.NO_TARGET ? Result.ALLOW : Result.DENY;
         }
@@ -71,19 +77,24 @@ public class TargetTypeCondition implements Condition, Parser {
 
     @Override
     public String toString() {
-        return "target-is(" + type + ")";
+        return "is-relationship(" + type + ", " + ship + ")";
     }
 
     @Override
     public String parse(String str) throws SyntaxException {
-        String[] params = str.split("\\)", 2);
+        String[] params = str.split(" *, *", 2);
 
         type = TargetType.of(params[0].trim());
 
         if (type == null) {
-            throw new SyntaxException("Unknown target-is: '" + params[0] + "'", str, TargetType.class);
+            throw new SyntaxException("Unknown is-relationship: '" + params[0] + "'", str, TargetType.class);
         }
 
-        return ParseUtil.separate(params, getClass(), ")");
+        str = ParseUtil.separate(params, getClass(), ",");
+
+        ParseResult<Ship> pr = ValueParser.parse(str, Ship.class);
+        ship = pr.value;
+
+        return ParseUtil.separate(pr.leftover.trim(), getClass(), ")");
     }
 }
