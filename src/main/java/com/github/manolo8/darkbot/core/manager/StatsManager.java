@@ -54,6 +54,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     private int blackLightDecoderAmount;
     private int lucentKeysAmount;
     private int apocalypseKeysAmount;
+    private int obsidianMicrochipAmount;
+    private int prosperousFragmentAmount;
 
     private boolean premium;
 
@@ -113,8 +115,10 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         redKeysAmount = API.readMemoryInt(address + 0x5c);
         silverKeysAmount = API.readMemoryInt(address + 0x60);
         apocalypseKeysAmount = API.readMemoryInt(address + 0x64);
+        obsidianMicrochipAmount = API.readMemoryInt(address + 0x6c);
         blackLightCodeAmount = API.readMemoryInt(address + 0x70);
         blackLightDecoderAmount = API.readMemoryInt(address + 0x74);
+        prosperousFragmentAmount = API.readMemoryInt(address + 0x78);
         astralKeysAmount = API.readMemoryInt(address + 0x7c);
         astralSupremeKeysAmount = API.readMemoryInt(address + 0x80);
         empyrianKeysAmount = API.readMemoryInt(address + 0x84);
@@ -348,12 +352,20 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return apocalypseKeysAmount;
     }
 
+    public int getObSidianMicrochipAmount() {
+        return obsidianMicrochipAmount;
+    }
+
     public int getBlackLightCodeAmount() {
         return blackLightCodeAmount;
     }
 
     public int getBlackLightDecoderAmount() {
         return blackLightDecoderAmount;
+    }
+
+    public int getProsperousFragmentAmount() {
+        return prosperousFragmentAmount;
     }
 
     public int getAstralKeysAmount() {
