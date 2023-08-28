@@ -4,10 +4,10 @@ import com.github.manolo8.darkbot.config.tree.ConfigField;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
-import com.github.manolo8.darkbot.gui.tree.utils.TableSearchField;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.utils.ToolTipHeader;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.table.TableCharEditor;
@@ -89,7 +89,7 @@ public abstract class InfoTable<T extends TableModel, E> extends JTable implemen
 
         component = new JPanel(new MigLayout("ins 0, gap 0, fill", "[grow][][][]", "[][grow]"));
 
-        component.add(new TableSearchField<>(sorter), "grow, cell 0 0");
+        component.add(SearchField.forTable(sorter), "grow, cell 0 0");
         component.add(new JScrollPane(this), "grow, span, cell 0 1");
 
         if (data != null && listener != null) {
