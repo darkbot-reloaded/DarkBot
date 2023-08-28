@@ -56,6 +56,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     private int apocalypseKeysAmount;
     private int obsidianMicrochipAmount;
     private int prosperousFragmentAmount;
+    private int prometheusKeysAmount;
 
     private boolean premium;
 
@@ -115,6 +116,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         redKeysAmount = API.readMemoryInt(address + 0x5c);
         silverKeysAmount = API.readMemoryInt(address + 0x60);
         apocalypseKeysAmount = API.readMemoryInt(address + 0x64);
+        prometheusKeysAmount = API.readMemoryInt(address + 0x68);
         obsidianMicrochipAmount = API.readMemoryInt(address + 0x6c);
         blackLightCodeAmount = API.readMemoryInt(address + 0x70);
         blackLightDecoderAmount = API.readMemoryInt(address + 0x74);
@@ -350,6 +352,10 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     public int getApocalypseKeysAmount() {
         return apocalypseKeysAmount;
+    }
+
+    public int getPrometheusKeysAmount() {
+        return prometheusKeysAmount;
     }
 
     public int getObSidianMicrochipAmount() {
