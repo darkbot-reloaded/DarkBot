@@ -319,7 +319,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return teleportBonusAmount;
     }
 
-    public int getKeysAmountByType(BootyKeyType type) {
+    public int getKeyAmountByType(BootyKeyType type) {
         if (bootyKeyValues.containsKey(type)) {
             return bootyKeyValues.get(type);
         }
