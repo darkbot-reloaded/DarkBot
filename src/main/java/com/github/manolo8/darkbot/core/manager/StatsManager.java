@@ -13,6 +13,8 @@ import eu.darkbot.api.managers.StatsAPI;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -43,27 +45,14 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     private int teleportBonusAmount;
 
-    private int greenKeysAmount;
-    private int empyrianKeysAmount;
-    private int redKeysAmount;
-    private int blueKeysAmount;
-    private int silverKeysAmount;
-    private int astralKeysAmount;
-    private int astralSupremeKeysAmount;
-    private int blackLightCodeAmount;
-    private int blackLightDecoderAmount;
-    private int lucentKeysAmount;
-    private int apocalypseKeysAmount;
-    private int obsidianMicrochipAmount;
-    private int prosperousFragmentAmount;
-    private int prometheusKeysAmount;
-
     private boolean premium;
 
     private long address;
     private long started = System.currentTimeMillis();
     private long runningTime = Time.SECOND; // Assume running for 1 second by default
     private boolean lastStatus;
+
+    private HashMap<BootyKeyType, Integer> bootyKeyValues = new HashMap<BootyKeyType, Integer>();
 
     public StatsManager(Main main, EventBrokerAPI eventBroker) {
         this.main = main;
@@ -84,7 +73,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     }
 
     public void tick() {
-        if (address == 0) return;
+        if (address == 0)
+            return;
 
         updateCredits(readDouble(352));
         updateUridium(readDouble(360));
@@ -94,13 +84,14 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         deposit = readIntHolder(304);
         depositTotal = readIntHolder(312);
 
-        //currentBox = API.readMemoryLong(address + 0xE8);
+        // currentBox = API.readMemoryLong(address + 0xE8);
 
         sid = readString(200);
         userId = readInt(48);
 
-        //is that even possible to happen?
-        if (main.settingsManager.getAddress() == 0) return;
+        // is that even possible to happen?
+        if (main.settingsManager.getAddress() == 0)
+            return;
         instance = main.settingsManager.readString(664);
 
         // Both memory location gives same value
@@ -111,20 +102,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
         teleportBonusAmount = API.readMemoryInt(address + 0x50);
 
-        greenKeysAmount = API.readMemoryInt(address + 0x54);
-        blueKeysAmount = API.readMemoryInt(address + 0x58);
-        redKeysAmount = API.readMemoryInt(address + 0x5c);
-        silverKeysAmount = API.readMemoryInt(address + 0x60);
-        apocalypseKeysAmount = API.readMemoryInt(address + 0x64);
-        prometheusKeysAmount = API.readMemoryInt(address + 0x68);
-        obsidianMicrochipAmount = API.readMemoryInt(address + 0x6c);
-        blackLightCodeAmount = API.readMemoryInt(address + 0x70);
-        blackLightDecoderAmount = API.readMemoryInt(address + 0x74);
-        prosperousFragmentAmount = API.readMemoryInt(address + 0x78);
-        astralKeysAmount = API.readMemoryInt(address + 0x7c);
-        astralSupremeKeysAmount = API.readMemoryInt(address + 0x80);
-        empyrianKeysAmount = API.readMemoryInt(address + 0x84);
-        lucentKeysAmount = API.readMemoryInt(address + 0x88);
+        updateBootyKeys();
 
         premium = API.readMemoryBoolean((API.readMemoryLong(address + 0xF0) & ByteUtils.ATOM_MASK) + 0x20);
     }
@@ -145,11 +123,18 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     public void tickAverageStats(long timeDelta) {
         int p = getPing();
-        if (p > 0) pingStat.accept(timeDelta, p);
+        if (p > 0)
+            pingStat.accept(timeDelta, p);
 
         cpuStat.accept(timeDelta, API.getCpuUsage());
         tickStat.accept(timeDelta, main.getTickTime());
         memoryStat.accept(timeDelta, API.getMemoryUsage());
+    }
+
+    private void updateBootyKeys() {
+        for (BootyKeyType type : BootyKeyType.values()) {
+            bootyKeyValues.put(type, API.readMemoryInt(address + type.getOffset()));
+        }
     }
 
     private void updateCredits(double credits) {
@@ -173,7 +158,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     }
 
     private void updateExperience(double experience) {
-        if (experience == 0) return;
+        if (experience == 0)
+            return;
         if (this.experience != 0 && updateStats()) {
             earnedExperience += experience - this.experience;
         }
@@ -181,14 +167,16 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     }
 
     private void updateHonor(double honor) {
-        if (honor == 0) return;
+        if (honor == 0)
+            return;
         double honorDiff = honor - this.honor;
         if (this.honor != 0 && updateStats()) {
             earnedHonor += honorDiff;
         }
         this.honor = honor;
 
-        if (honorDiff > -10_000) return;
+        if (honorDiff > -10_000)
+            return;
 
         System.out.println("Paused bot, lost " + honorDiff + " honor.");
         double friendlies = Math.log(Math.abs(honorDiff) / 100) / Math.log(2);
@@ -208,7 +196,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     }
 
     public double runningHours() {
-        // Intentionally lose millisecond precision, in hopes of better double precision.
+        // Intentionally lose millisecond precision, in hopes of better double
+        // precision.
         long runningSeconds = runningTime / 1000;
         return runningSeconds / 3600d;
     }
@@ -330,60 +319,11 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return teleportBonusAmount;
     }
 
-    public int getGreenKeysAmount() {
-        return greenKeysAmount;
-    }
-
-    public int getEmpyrianKeysAmount() {
-        return empyrianKeysAmount;
-    }
-
-    public int getRedKeysAmount() {
-        return redKeysAmount;
-    }
-
-    public int getBlueKeysAmount() {
-        return blueKeysAmount;
-    }
-
-    public int getSilverKeysAmount() {
-        return silverKeysAmount;
-    }
-
-    public int getApocalypseKeysAmount() {
-        return apocalypseKeysAmount;
-    }
-
-    public int getPrometheusKeysAmount() {
-        return prometheusKeysAmount;
-    }
-
-    public int getObSidianMicrochipAmount() {
-        return obsidianMicrochipAmount;
-    }
-
-    public int getBlackLightCodeAmount() {
-        return blackLightCodeAmount;
-    }
-
-    public int getBlackLightDecoderAmount() {
-        return blackLightDecoderAmount;
-    }
-
-    public int getProsperousFragmentAmount() {
-        return prosperousFragmentAmount;
-    }
-
-    public int getAstralKeysAmount() {
-        return astralKeysAmount;
-    }
-
-    public int getAstralSupremeKeysAmount() {
-        return astralSupremeKeysAmount;
-    }
-
-    public int getLucentKeysAmount() {
-        return lucentKeysAmount;
+    public int getKeysAmountByType(BootyKeyType type) {
+        if (bootyKeyValues.containsKey(type)) {
+            return bootyKeyValues.get(type);
+        }
+        return 0;
     }
 
     public boolean isPremium() {
@@ -437,6 +377,38 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         public String toString() {
             return "Max=" + ONE_PLACE_FORMAT.format(getMax()) +
                     "\nAverage=" + ONE_PLACE_FORMAT.format(getAverage());
+        }
+    }
+
+    public enum BootyKeyType {
+        GREEN(0x54),
+        BLUE(0x58),
+        RED(0x5c),
+        SILVER(0x60),
+        APOCALYPSE(0x64),
+        PROMETHEUS(0x68),
+        OBSIDIAN_MICROCHIP(0x6c),
+        BLACK_LIGHT_CODE(0x70),
+        BLACK_LIGHT_DECODER(0x74),
+        PROSPEROUS_FRAGMENT(0x78),
+        ASTRAL(0x7c),
+        ASTRAL_SUPREME(0x80),
+        EMPYRIAN(0x84),
+        LUCENT(0x88);
+
+        private long offset;
+
+        private BootyKeyType(long offset) {
+            this.offset = offset;
+        }
+
+        @Override
+        public String toString() {
+            return name().toLowerCase(Locale.ROOT).replace("_", "-");
+        }
+
+        public long getOffset() {
+            return offset;
         }
     }
 }
