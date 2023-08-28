@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.modules;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.itf.Module;
@@ -20,6 +19,11 @@ import static com.github.manolo8.darkbot.Main.API;
 import static java.lang.Math.cos;
 import static java.lang.StrictMath.sin;
 
+/**
+ * @deprecated Use {@link eu.darkbot.shared.modules.CollectorModule}
+ */
+@Deprecated(forRemoval = true)
+@SuppressWarnings("removal")
 @Feature(name = "Collector (Legacy)", description = "Resource-only collector module. Can cloack.")
 public class CollectorModule implements Module {
 
@@ -196,7 +200,7 @@ public class CollectorModule implements Module {
         return box.boxInfo.collect
                 && !box.isCollected()
                 && drive.getClosestDistance(box.locationInfo.now) < 200
-                && (!isResource(box.type) || main.statsManager.deposit < main.statsManager.depositTotal)
+                && (!isResource(box.type) || main.statsManager.getCargo() < main.statsManager.getMaxCargo())
                 && !isContested(box);
     }
 

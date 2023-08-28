@@ -117,7 +117,6 @@ public class GroupManager extends Gui implements GroupAPI {
         if (pending != null || !canKick() || config.INVITE_TAG == null || !config.KICK_NO_INVITED) return;
         for (GroupMember member : group.members) {
             if (config.INVITE_TAG.has(main.config.PLAYER_INFOS.get(member.id))) continue;
-            if (main.config.PLAYER_INFOS.get(member.id).hasTag(config.INVITE_TAG)) continue;
 
             Long inviteTime = inviteTimeout.get(member.username);
             if (inviteTime != null && System.currentTimeMillis() < inviteTime) continue;
