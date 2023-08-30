@@ -6,14 +6,8 @@ import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JLabel;
-import javax.swing.JMenuBar;
-import javax.swing.SwingConstants;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import javax.swing.*;
+import java.awt.*;
 
 public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
 
@@ -25,7 +19,7 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
 
         add(new ExtraButton(main, frame));
         add(new ConfigButton(frame));
-        add(new StatsButton(frame));
+        add(new StatsButton(main, frame));
         add(new StartButton(main, frame));
         add(new BackpageButton(main, frame));
 
