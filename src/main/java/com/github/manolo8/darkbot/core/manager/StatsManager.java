@@ -42,12 +42,12 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     private final Map<StatKey, StatImpl> statistics = new HashMap<>();
 
     private final StatImpl runtime;
-    private final StatImpl credits, uridium, experience, honor, cargo, maxCargo, novaEnergy;
+    private final StatImpl credits, uridium, experience, honor, cargo, maxCargo, novaEnergy, teleportBonus;
     private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
 
     private int teleportBonusAmount;
     private boolean premium;
-    private HashMap<BootyKeyType, Integer> bootyKeyValues = new HashMap<BootyKeyType, Integer>();
+    private final Map<BootyKey, StatImpl> bootyKeyValues = new HashMap<>();
 
     public StatsManager(Main main, EventBrokerAPI eventBroker) {
         this.main = main;
@@ -62,11 +62,19 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         register(Stats.General.CARGO, cargo = createStat());
         register(Stats.General.MAX_CARGO, maxCargo = createStat());
         register(Stats.General.NOVA_ENERGY, novaEnergy = createStat());
+        register(Stats.General.TELEPORT_BONUS_AMOUNT, teleportBonus = createStat());
 
         register(Stats.Bot.PING, pingStat = new AverageStats(false));
         register(Stats.Bot.TICK_TIME, tickStat = new AverageStats(true));
         register(Stats.Bot.MEMORY, memoryStat = new AverageStats(false));
         register(Stats.Bot.CPU, cpuStat = new AverageStats(true));
+
+        for (BootyKey key : BootyKey.values()) {
+            StatImpl keyStat = createStat();
+
+            bootyKeyValues.put(key, keyStat);
+            register(key, keyStat);
+        }
     }
 
     @Override
@@ -98,9 +106,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         }
 
         novaEnergy.track(readInt(0x100, 0x28));
-
-        teleportBonusAmount = API.readMemoryInt(address + 0x50);
-        premium = API.readMemoryBoolean((API.readMemoryLong(address + 0xF0) & ByteUtils.ATOM_MASK) + 0x20);
+        teleportBonus.track(readInt(0x50));
+        premium = API.readBoolean((API.readMemoryLong(address + 0xF0) & ByteUtils.ATOM_MASK) + 0x20);
         updateBootyKeys();
     }
 
@@ -163,8 +170,17 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     }
 
     private void updateBootyKeys() {
-        for (BootyKeyType type : BootyKeyType.values()) {
-            bootyKeyValues.put(type, API.readInt(address + type.getOffset()));
+        for (BootyKey key : BootyKey.values()) {
+            BootyKeyType type = BootyKeyType.of(key);
+
+            if (type == null) {
+                continue;
+            }
+
+            StatImpl keyStat = bootyKeyValues.get(key);
+            keyStat.track(readInt(type.getOffset()));
+
+            bootyKeyValues.put(key, keyStat);
         }
     }
 
@@ -202,13 +218,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     public AverageStats getMemoryStats() {
         return memoryStat;
-    }
-
-    public int getKeyAmountByType(BootyKeyType type) {
-        if (bootyKeyValues.containsKey(type)) {
-            return bootyKeyValues.get(type);
-        }
-        return 0;
     }
 
     public int getTeleportBonusAmount() {
@@ -335,6 +344,36 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         }
     }
 
+    public enum BootyKey implements BotKey {
+        GREEN,
+        BLUE,
+        RED,
+        SILVER,
+        APOCALYPSE,
+        PROMETHEUS,
+        OBSIDIAN_MICROCHIP,
+        BLACK_LIGHT_CODE,
+        BLACK_LIGHT_DECODER,
+        PROSPEROUS_FRAGMENT,
+        ASTRAL,
+        ASTRAL_SUPREME,
+        EMPYRIAN,
+        LUCENT,
+        PERSEUS
+    }
+
+    private interface BotKey extends StatsAPI.Key {
+        @Override
+        default String namespace() {
+            return null;
+        }
+
+        @Override
+        default String category() {
+            return getClass().getSimpleName();
+        }
+    }
+
     public enum BootyKeyType {
         GREEN(0x54),
         BLUE(0x58),
@@ -352,9 +391,9 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         LUCENT(0x88),
         PERSEUS(0x8c);
 
-        private long offset;
+        private int offset;
 
-        private BootyKeyType(long offset) {
+        private BootyKeyType(int offset) {
             this.offset = offset;
         }
 
@@ -363,8 +402,18 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
             return name().toLowerCase(Locale.ROOT).replace("_", "-");
         }
 
-        public long getOffset() {
+        public int getOffset() {
             return offset;
+        }
+
+        public static BootyKeyType of(BootyKey bootyKey) {
+            for (BootyKeyType t : BootyKeyType.values()) {
+                if (t.name().equals(bootyKey.name())) {
+                    return t;
+                }
+            }
+
+            return null;
         }
     }
 }
