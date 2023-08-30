@@ -349,7 +349,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         ASTRAL(0x7c),
         ASTRAL_SUPREME(0x80),
         EMPYRIAN(0x84),
-        LUCENT(0x88);
+        LUCENT(0x88),
+        PERSEUS(0x8c);
 
         private long offset;
 
