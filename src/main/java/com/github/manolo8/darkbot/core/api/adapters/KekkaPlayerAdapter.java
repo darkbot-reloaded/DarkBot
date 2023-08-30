@@ -90,7 +90,7 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
     @Override
     public boolean useItem(Item item) {
         if (direct.checkSignature(true, "23(sendRequest)(2626)1016221500",
-                18, direct.botInstaller.connectionManagerAddress.get()))
+                19, direct.botInstaller.connectionManagerAddress.get()))
             return itemUseCaller.useItem(item);
 
         return false;

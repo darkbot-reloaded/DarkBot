@@ -45,7 +45,7 @@ public class TanosAdapter extends GameAPIImpl<
 
     @Override
     public boolean useItem(Item item) {
-        return direct.tanos.useItem(0, item.id, 0, 0);
+        return direct.tanos.useItem(direct.botInstaller.connectionManagerAddress.get(), item.id, 19);
     }
 
     public static class DirectInteractionManager extends NoopAPIAdapter.NoOpDirectInteraction {
