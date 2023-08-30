@@ -48,7 +48,7 @@ public class TimeSeriesImpl implements StatsAPI.TimeSeries {
         if (size < t.length) return;
 
         // 16 -> 64 -> 256 -> 1024
-        if (t.length < 64) {
+        if (t.length < MAX_SIZE) {
             int newSize = t.length << 2;
             t = Arrays.copyOf(t, newSize);
             v = Arrays.copyOf(v, newSize);
