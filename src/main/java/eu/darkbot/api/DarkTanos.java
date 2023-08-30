@@ -55,4 +55,5 @@ public class DarkTanos implements GameAPI.Window, GameAPI.Handler, GameAPI.Memor
     public native void      refine          (long refineUtilAddress, int oreId, int amount);
     public native boolean   useItem         (long screenManager, String check, int methodIdx, long... args);
     public native long      callMethod      (long object, int index, long... arguments);
+    public native int checkMethodSignature(long obj, int methodIdx, boolean includeMethodName, String signature);
 }

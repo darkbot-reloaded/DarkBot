@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.GameAPIImpl;
+import com.github.manolo8.darkbot.core.api.InvalidNativeSignature;
 import com.github.manolo8.darkbot.core.api.Utils;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
@@ -13,6 +14,9 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.DarkTanos;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class TanosAdapter extends GameAPIImpl<
         DarkTanos,
@@ -45,7 +49,12 @@ public class TanosAdapter extends GameAPIImpl<
 
     @Override
     public boolean useItem(Item item) {
-        return direct.tanos.useItem(direct.botInstaller.connectionManagerAddress.get(), item.id, 19);
+        if (direct.checkSignature(true, "23(sendRequest)(2626)1016221500",
+                18, direct.botInstaller.connectionManagerAddress.get())) {
+            return direct.tanos.useItem(direct.botInstaller.connectionManagerAddress.get(), item.id, 19, 0);
+        }
+
+        return false;
     }
 
     public static class DirectInteractionManager extends NoopAPIAdapter.NoOpDirectInteraction {
@@ -53,6 +62,7 @@ public class TanosAdapter extends GameAPIImpl<
         private final Main main;
         private final DarkTanos tanos;
         private final BotInstaller botInstaller;
+        private final Set<String> methodSignatureCache = new HashSet<>();
 
         public DirectInteractionManager(Main main, DarkTanos tanos, BotInstaller botInstaller) {
             this.main = main;
@@ -95,7 +105,25 @@ public class TanosAdapter extends GameAPIImpl<
 
         @Override
         public boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments) {
-            callMethod(index, arguments);
+            if (checkSignature(checkName, signature, index, arguments[0])) {
+                callMethod(index, arguments);
+                return true;
+            }
+            return false;
+        }
+
+        private boolean checkSignature(boolean checkName, String signature, int index, long object) {
+            if (index <= 2 || !ByteUtils.isValidPtr(object)) return false;
+            if (!methodSignatureCache.contains(signature)) {
+                // -1 or -2 == memory read error, 0 == invalid signature, 1 == valid
+                int ret = tanos.checkMethodSignature(object, index, checkName, signature);
+
+                if (ret == 1) methodSignatureCache.add(signature);
+                else if (ret == 0) {
+                    throw new InvalidNativeSignature("Invalid flash method signature! " + signature);
+                } else return false;
+            }
+
             return true;
         }
     }
