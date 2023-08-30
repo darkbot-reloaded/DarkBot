@@ -77,21 +77,21 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
         if (address == 0) return;
 
-        updateNonZero(credits, readDouble(352));
-        updateNonZero(uridium, readDouble(360));
-        updateNonZero(experience, readDouble(376));
-        checkHonor(updateNonZero(honor, readDouble(384)));
+        updateNonZero(credits, readDouble(0x168));
+        updateNonZero(uridium, readDouble(0x170));
+        updateNonZero(experience, readDouble(0x180));
+        checkHonor(updateNonZero(honor, readDouble(0x188)));
 
-        cargo.track(readIntHolder(304));
-        maxCargo.track(readIntHolder(312));
+        cargo.track(readIntHolder(0x138));
+        maxCargo.track(readIntHolder(0x140));
 
-        sid = readString(200);
-        userId = readInt(48);
+        sid = readString(0xd0);
+        userId = readInt(0x30);
         if (main.settingsManager.getAddress() != 0) {
-            instance = main.settingsManager.readString(664);
+            instance = main.settingsManager.readString(0x298);
         }
 
-        novaEnergy.track(readInt(0x100, 0x28));
+        novaEnergy.track(readInt(0x108, 0x28));
     }
 
     @Override
