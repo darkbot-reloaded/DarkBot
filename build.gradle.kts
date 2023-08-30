@@ -24,7 +24,7 @@ repositories {
 }
 
 group = "eu.darkbot"
-version = "1.126"
+version = "1.128"
 description = "DarkBot"
 java.sourceCompatibility = JavaVersion.VERSION_11
 java.targetCompatibility = JavaVersion.VERSION_11
@@ -43,7 +43,7 @@ publishing {
 }
 
 dependencies {
-    val apiVersion = "0.7.10"
+    val apiVersion = "0.8.0"
     val flatLafVersion = "3.1.1"
 
     // use this if you want to use local(mavenLocal) darkbot API
@@ -55,6 +55,9 @@ dependencies {
     api("com.formdev", "flatlaf", flatLafVersion)
     api("com.formdev", "flatlaf-extras", flatLafVersion)
     api("org.jgrapht", "jgrapht-core", "1.3.0")
+
+    // Testing stat time-series requires this
+    //api("org.knowm.xchart", "xchart", "3.8.5")
 
     compileOnly("org.jetbrains", "annotations", "23.0.0")
 

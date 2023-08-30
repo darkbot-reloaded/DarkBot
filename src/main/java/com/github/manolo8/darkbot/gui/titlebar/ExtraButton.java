@@ -146,7 +146,7 @@ public class ExtraButton extends TitleBarButton<JFrame> {
                 ConfigEntity.changed();
             }));
             list.add(create(i18n.get(p + "reset_stats"), e -> {
-                main.statsManager.resetValues();
+                main.statsManager.resetStats();
                 main.repairManager.resetDeaths();
             }));
 
