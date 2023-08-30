@@ -123,10 +123,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return stat.track(value);
     }
 
-    public int getLevel() {
-        return Math.max(1, (int) (Math.log(getTotalExperience() / 10_000) / Math.log(2)) + 2);
-    }
-
     public void tickAverageStats(long tickTime) {
         int p = getPing();
         if (p > 0) pingStat.track(p);
