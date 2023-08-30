@@ -47,7 +47,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     private int teleportBonusAmount;
     private boolean premium;
-    private final Map<BootyKey, StatImpl> bootyKeyValues = new HashMap<>();
+    private final Map<Stats.BootyKey, StatImpl> bootyKeyValues = new HashMap<>();
 
     public StatsManager(Main main, EventBrokerAPI eventBroker) {
         this.main = main;
@@ -69,7 +69,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         register(Stats.Bot.MEMORY, memoryStat = new AverageStats(false));
         register(Stats.Bot.CPU, cpuStat = new AverageStats(true));
 
-        for (BootyKey key : BootyKey.values()) {
+        for (Stats.BootyKey key : Stats.BootyKey.values()) {
             StatImpl keyStat = createStat();
 
             bootyKeyValues.put(key, keyStat);
@@ -170,7 +170,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     }
 
     private void updateBootyKeys() {
-        for (BootyKey key : BootyKey.values()) {
+        for (Stats.BootyKey key : Stats.BootyKey.values()) {
             BootyKeyType type = BootyKeyType.of(key);
 
             if (type == null) {
@@ -344,36 +344,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         }
     }
 
-    public enum BootyKey implements BotKey {
-        GREEN,
-        BLUE,
-        RED,
-        SILVER,
-        APOCALYPSE,
-        PROMETHEUS,
-        OBSIDIAN_MICROCHIP,
-        BLACK_LIGHT_CODE,
-        BLACK_LIGHT_DECODER,
-        PROSPEROUS_FRAGMENT,
-        ASTRAL,
-        ASTRAL_SUPREME,
-        EMPYRIAN,
-        LUCENT,
-        PERSEUS
-    }
-
-    private interface BotKey extends StatsAPI.Key {
-        @Override
-        default String namespace() {
-            return null;
-        }
-
-        @Override
-        default String category() {
-            return getClass().getSimpleName();
-        }
-    }
-
     public enum BootyKeyType {
         GREEN(0x54),
         BLUE(0x58),
@@ -406,7 +376,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
             return offset;
         }
 
-        public static BootyKeyType of(BootyKey bootyKey) {
+        public static BootyKeyType of(Stats.BootyKey bootyKey) {
             for (BootyKeyType t : BootyKeyType.values()) {
                 if (t.name().equals(bootyKey.name())) {
                     return t;
