@@ -38,21 +38,15 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     public int userId;
     public volatile String sid;
     public volatile String instance;
-  
-  
-    private int teleportBonusAmount;
-    private boolean premium;
 
-    private long address;
-    private long started = System.currentTimeMillis();
-    private long runningTime = Time.SECOND; // Assume running for 1 second by default
-    private boolean lastStatus;
     private final Map<StatKey, StatImpl> statistics = new HashMap<>();
 
     private final StatImpl runtime;
     private final StatImpl credits, uridium, experience, honor, cargo, maxCargo, novaEnergy;
     private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
 
+    private int teleportBonusAmount;
+    private boolean premium;
     private HashMap<BootyKeyType, Integer> bootyKeyValues = new HashMap<BootyKeyType, Integer>();
 
     public StatsManager(Main main, EventBrokerAPI eventBroker) {
@@ -103,12 +97,11 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
             instance = main.settingsManager.readString(664);
         }
 
-        teleportBonusAmount = API.readMemoryInt(address + 0x50);
-
-        updateBootyKeys();
-
-        premium = API.readMemoryBoolean((API.readMemoryLong(address + 0xF0) & ByteUtils.ATOM_MASK) + 0x20);
         novaEnergy.track(readInt(0x100, 0x28));
+
+        teleportBonusAmount = API.readMemoryInt(address + 0x50);
+        premium = API.readMemoryBoolean((API.readMemoryLong(address + 0xF0) & ByteUtils.ATOM_MASK) + 0x20);
+        updateBootyKeys();
     }
 
     @Override
@@ -122,12 +115,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         StatImpl stat = createStat();
         register(key, stat);
         return stat;
-    }
-
-    private void updateBootyKeys() {
-        for (BootyKeyType type : BootyKeyType.values()) {
-            bootyKeyValues.put(type, API.readMemoryInt(address + type.getOffset()));
-        }
     }
 
     private void register(Key key, StatImpl stat) {
@@ -175,6 +162,12 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return main.isRunning() || main.config.MISCELLANEOUS.UPDATE_STATS_WHILE_PAUSED;
     }
 
+    private void updateBootyKeys() {
+        for (BootyKeyType type : BootyKeyType.values()) {
+            bootyKeyValues.put(type, API.readInt(address + type.getOffset()));
+        }
+    }
+
     public void resetValues() {
         statistics.values().forEach(StatImpl::reset);
         eventBroker.sendEvent(new StatsResetEvent());
@@ -195,7 +188,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         resetValues();
     }
 
-
     public AverageStats getCpuStats() {
         return cpuStat;
     }
@@ -212,11 +204,25 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return memoryStat;
     }
 
+    public int getKeyAmountByType(BootyKeyType type) {
+        if (bootyKeyValues.containsKey(type)) {
+            return bootyKeyValues.get(type);
+        }
+        return 0;
+    }
+
+    public int getTeleportBonusAmount() {
+        return teleportBonusAmount;
+    }
+
+    public boolean isPremium() {
+        return premium;
+    }
+
     @Override
     public long getAddress() {
         return address;
     }
-
 
     @Value
     @Accessors(fluent = true)
@@ -258,43 +264,31 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         protected double current;
         protected TimeSeriesImpl timeSeries = new TimeSeriesImpl();
 
-    public int getTeleportBonusAmount() {
-        return teleportBonusAmount;
-    }
+        protected double track(double value) {
+            double diff = value - this.current;
 
-    public int getKeyAmountByType(BootyKeyType type) {
-        if (bootyKeyValues.containsKey(type)) {
-            return bootyKeyValues.get(type);
+            if (Double.isNaN(initial)) {
+                initial = value;
+            } else if (trackDiff.get()) {
+                if (diff > 0)
+                    earned += diff;
+                else
+                    spent -= diff;
+            }
+            current = value;
+            timeSeries.track(earned - spent);
+
+            return diff;
         }
-        return 0;
-    }
 
-    public boolean isPremium() {
-        return premium;
-    }
-
-    protected double track(double value) {
-        double diff = value - this.current;
-
-        if (Double.isNaN(initial)) {
-            initial = value;
-        } else if (trackDiff.get()) {
-            if (diff > 0) earned += diff;
-            else spent -= diff;
+        private void reset() {
+            earned = spent = 0;
         }
-        current = value;
-        timeSeries.track(earned - spent);
 
-        return diff;
-    }
-
-    private void reset() {
-        earned = spent = 0;
-    }
-
-    @Override
-    public @Nullable TimeSeries getTimeSeries() {
-        return timeSeries;
+        @Override
+        public @Nullable TimeSeries getTimeSeries() {
+            return timeSeries;
+        }
     }
 
     public static class AverageStats extends StatImpl {
