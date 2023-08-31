@@ -47,7 +47,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     private int teleportBonusAmount;
     private boolean premium;
-    private final Map<Stats.BootyKey, StatImpl> bootyKeyValues = new HashMap<>();
 
     public StatsManager(Main main, EventBrokerAPI eventBroker) {
         this.main = main;
@@ -70,10 +69,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         register(Stats.Bot.CPU, cpuStat = new AverageStats(true));
 
         for (Stats.BootyKey key : Stats.BootyKey.values()) {
-            StatImpl keyStat = createStat();
-
-            bootyKeyValues.put(key, keyStat);
-            register(key, keyStat);
+            register(key, createStat());
         }
     }
 
@@ -177,10 +173,10 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
                 continue;
             }
 
-            StatImpl keyStat = bootyKeyValues.get(key);
-            keyStat.track(readInt(type.getOffset()));
-
-            bootyKeyValues.put(key, keyStat);
+            StatImpl stat = statistics.get(StatKey.of(key));
+            if (stat != null) {
+                stat.track(readInt(type.getOffset()));
+            }
         }
     }
 
