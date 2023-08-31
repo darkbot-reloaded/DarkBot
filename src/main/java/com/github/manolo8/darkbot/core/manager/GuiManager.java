@@ -59,6 +59,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final Gui returnLogin;
     public final Gui minimap;
     public final Gui targetedOffers;
+    public final Gui commandCenter;
     public final LogoutGui logout;
     public final Gui eventProgress;
     public final Gui eternalGate;
@@ -120,6 +121,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.quests = register("quests");
         this.monthlyDeluxe = register("monthly_deluxe");
         this.returnLogin = register("returnee_login");
+        this.commandCenter = register("command_center");
         this.minimap = register("minimap");
         this.targetedOffers = register("targetedOffers", TargetedOfferGui.class);
         this.logout = register("logout", LogoutGui.class);
@@ -140,7 +142,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
         register("ggBuilder", GateSpinnerGui.class);
 
-        this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
+        this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin, commandCenter);
     }
 
     private Gui register(String key) {
