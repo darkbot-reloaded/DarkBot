@@ -49,7 +49,7 @@ public class TanosAdapter extends GameAPIImpl<
     @Override
     public boolean useItem(Item item) {
         if (direct.checkSignature(true, "23(sendRequest)(2626)1016221500",
-                18, direct.botInstaller.connectionManagerAddress.get())) {
+                19, direct.botInstaller.connectionManagerAddress.get())) {
             return direct.tanos.useItem(direct.botInstaller.connectionManagerAddress.get(), item.id, 19, 0);
         }
 
