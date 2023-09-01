@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -326,7 +325,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         }
     }
 
-    public enum BootyKeyType {
+    private enum BootyKeyType {
         GREEN(0x54, Stats.BootyKey.GREEN),
         BLUE(0x58, Stats.BootyKey.BLUE),
         RED(0x5c, Stats.BootyKey.RED),
@@ -351,27 +350,12 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
             this.key = key;
         }
 
-        @Override
-        public String toString() {
-            return name().toLowerCase(Locale.ROOT).replace("_", "-");
-        }
-
         public int getOffset() {
             return offset;
         }
 
         public StatsAPI.Key getStatsKey() {
             return key;
-        }
-
-        public static BootyKeyType of(Stats.BootyKey bootyKey) {
-            for (BootyKeyType t : BootyKeyType.values()) {
-                if (t.getStatsKey().equals(bootyKey)) {
-                    return t;
-                }
-            }
-
-            return null;
         }
     }
 }
