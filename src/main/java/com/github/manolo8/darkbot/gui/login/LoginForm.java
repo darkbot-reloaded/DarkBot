@@ -93,23 +93,20 @@ public class LoginForm extends JPanel {
         @Override
         protected LoginData doInBackground() {
             try {
-                LoginScreen selectedComponent = (LoginScreen) tabbedPane.getSelectedComponent();
-                if (selectedComponent instanceof SavedLogins) {
-                    publish(new Message(false, "Trying to login via saved SID", null));
-                    if (((SavedLogins) selectedComponent).trySavedSidLogin(loginData)) {
-                        return loginData;
-                    }
-                }
+                loginData.reset();
 
                 publish(new Message(false, I18n.get("gui.login.info.logging_in"), null));
-                Message msg = selectedComponent.tryLogin(loginData);
+                Message msg = ((LoginScreen) tabbedPane.getSelectedComponent()).tryLogin(loginData, this::publish);
                 if (msg != null) {
                     publish(msg);
                     failed = true;
                     return null;
                 }
-                publish(new Message(false, I18n.get("gui.login.info.loading_spacemap"), null));
-                LoginUtils.findPreloader(loginData);
+
+                if (loginData.isNotInitialized()) {
+                    publish(new Message(false, I18n.get("gui.login.info.loading_spacemap"), null));
+                    LoginUtils.findPreloader(loginData);
+                }
                 return loginData;
             } catch (SSLHandshakeException e) {
                 publish(new Message(true, I18n.get("gui.login.error.unsupported_java"),

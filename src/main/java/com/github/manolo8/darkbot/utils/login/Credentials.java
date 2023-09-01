@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.utils.Encryption;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import lombok.Getter;
 
 import java.lang.reflect.Type;
 import java.security.GeneralSecurityException;
@@ -24,6 +25,7 @@ public class Credentials {
 
     private byte[] salt;
     private String data; // Encrypted data
+    @Getter
     private transient List<Credentials.User> users = new ArrayList<>(); // Non-encrypted data, not stored
 
     public static Credentials create() {
@@ -35,10 +37,6 @@ public class Credentials {
 
     public boolean isEmpty() {
         return data == null;
-    }
-
-    public List<Credentials.User> getUsers() {
-        return users;
     }
 
     public void decrypt(char[] password) throws GeneralSecurityException {
