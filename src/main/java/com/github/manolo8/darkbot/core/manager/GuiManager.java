@@ -140,7 +140,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
         register("ggBuilder", GateSpinnerGui.class);
 
-        this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
+        this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin, register("command_center"));
     }
 
     private Gui register(String key) {
