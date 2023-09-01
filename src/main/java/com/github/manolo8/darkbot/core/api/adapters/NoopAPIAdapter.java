@@ -232,12 +232,12 @@ public class NoopAPIAdapter extends GameAPIImpl<
         }
 
         @Override
-        public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
+        public void collectBox(Box box) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void collectBox(Box box) {
+        public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
             throw new UnsupportedOperationException();
         }
 
