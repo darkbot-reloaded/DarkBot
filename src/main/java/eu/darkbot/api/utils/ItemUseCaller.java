@@ -33,7 +33,7 @@ public class ItemUseCaller {
 
     public boolean useItem(Item item) {
         if (checkUsable()) {
-            kekkaPlayer.useItem(screenManager, item.getId(), 18, connectionManager, useItemCommand);
+            kekkaPlayer.useItem(screenManager, item.getId(), 19, connectionManager, useItemCommand);
             return true;
         }
 

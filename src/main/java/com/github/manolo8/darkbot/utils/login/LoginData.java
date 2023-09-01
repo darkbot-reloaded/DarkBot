@@ -3,27 +3,36 @@ package com.github.manolo8.darkbot.utils.login;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.google.gson.reflect.TypeToken;
 import eu.darkbot.api.managers.ConfigAPI;
+import lombok.Getter;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class LoginData {
     private static final Type PARAMS_TYPE = new TypeToken<Map<String, String>>() {}.getType();
 
-    private int userId;
+    private transient BiConsumer<String, String> onSetSid;
+
     private Map<String, String> params;
+    @Getter
+    private int userId;
+    @Getter
     private String username, password, sid, url, fullUrl, preloaderUrl;
 
-    public void setCredentials(String username, String password) {
+    public void setCredentials(String username, String password, BiConsumer<String, String> onSetSid) {
         this.username = username;
         this.password = password;
+        this.onSetSid = onSetSid;
     }
 
     public void setSid(String sid, String url) {
         this.sid = sid;
         this.url = url;
-        this.fullUrl = "https://" + url + "/";
+        this.fullUrl = url == null ? null : "https://" + url + "/";
+
+        if (onSetSid != null) onSetSid.accept(sid, url);
     }
 
     public void setPreloader(String preloaderUrl, String params) {
@@ -36,30 +45,6 @@ public class LoginData {
         }
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getSid() {
-        return sid;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getFullUrl() {
-        return fullUrl;
-    }
-
-    public String getPreloaderUrl() {
-        return preloaderUrl;
-    }
-
     public String getParams(ConfigAPI config) {
         if (isNotInitialized()) return null;
         // create copy of params to keep original values
@@ -70,8 +55,12 @@ public class LoginData {
         return preloaderUrl == null || params == null;
     }
 
-    public int getUserId() {
-        return userId;
+    public void reset() {
+        setCredentials(null, null, null);
+        setSid(null, null);
+        userId = 0;
+        preloaderUrl = null;
+        params = null;
     }
 
     @Override

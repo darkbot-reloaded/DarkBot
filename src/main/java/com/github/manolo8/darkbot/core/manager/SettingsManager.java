@@ -40,30 +40,30 @@ public class SettingsManager implements Manager, Tickable, API.Singleton, Native
 
     @Override
     public void tick() {
-        this.config = readInt(92);
+        this.config = readInt(0x5c);
 
         // x-1 & x-2 maps enemy counter
-        this.enemyCount = readInt(600, 40);
-        this.attackViaSlotbar = readBoolean(164);
+        this.enemyCount = readInt(0x258, 40);
+        this.attackViaSlotbar = readBoolean(0xa4);
 
-        this.nextMap = readInt(244);
-        this.currMap = readInt(248);
+        this.nextMap = readInt(0xf4);
+        this.currMap = readInt(0xf8);
 
-        this.force2d = readInt(792, 32);
+        this.force2d = readInt(0x318, 32);
 
-        this.lang = readString(648);
+        this.lang = readString(0x288);
 
-        this.uiWrapper = readLong(872);
-        this.hudWrapper = readLong(864);
+        this.hudWrapper = readLong(0x360);
+        this.uiWrapper = readLong(0x368);
 
         // Enforce GPU capabilities support - it still may be an issue on Windows & 2D mode
         if (is2DForced() && main.config.BOT_SETTINGS.API_CONFIG.ENFORCE_HW_ACCEL) {
-            replaceInt(0, 1, 332);
-            replaceInt(0, 1, 340);
+            replaceInt(0, 1, 0x14c);
+            replaceInt(0, 1, 0x154);
         }
 
         if (!driverNamePrinted) {
-            this.driver = readString(440);
+            this.driver = readString(0x1b8);
 
             if (driver != null && !driver.isEmpty()) {
                 System.out.println("Game is using: " + driver + " | force2d: " + force2d);
@@ -74,7 +74,7 @@ public class SettingsManager implements Manager, Tickable, API.Singleton, Native
 
     @Override
     public int modifyOffset(int offset) {
-        if (offset >= 392) offset += 8; // 19.07.2023 - jumpGateResourceHash
+        if (offset >= 0x188) offset += 8; // 19.07.2023 - jumpGateResourceHash
         return offset;
     }
 

@@ -5,11 +5,13 @@ import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.GeneralDocumentListener;
 import com.github.manolo8.darkbot.gui.utils.Popups;
+import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.login.Credentials;
 import com.github.manolo8.darkbot.utils.login.LoginData;
 import com.github.manolo8.darkbot.utils.login.LoginUtils;
+import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -17,11 +19,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 public class SavedLogins extends JPanel implements LoginScreen {
     public LoginForm loginForm;
 
     private char[] password;
+    @Getter
     private boolean loaded = false;
     private final Credentials credentials = LoginUtils.loadCredentials();
 
@@ -76,10 +83,6 @@ public class SavedLogins extends JPanel implements LoginScreen {
                 if (users.getCellBounds(idx, idx).contains(e.getPoint())) loginForm.startLogin();
             }
         });
-    }
-
-    public boolean isLoaded() {
-        return loaded;
     }
 
     public int getLogins() {
@@ -153,12 +156,33 @@ public class SavedLogins extends JPanel implements LoginScreen {
     }
 
     @Override
-    public LoginForm.Message tryLogin(LoginData login) {
+    public LoginForm.Message tryLogin(LoginData login, Consumer<LoginForm.Message> publish) {
         Credentials.User user = users.getSelectedValue();
         if (user == null) return new LoginForm.Message(true,
                 I18n.get("gui.login.error.no_user"), I18n.get("gui.login.error.no_user.desc"));
 
-        login.setCredentials(user.u, user.p);
+        login.setCredentials(user.u, user.p, (sid, sv) -> {
+            if (Objects.equals(user.s, sid) && Objects.equals(user.sv, sv)) return;
+            user.setSid(sid, sv);
+            try {
+                LoginUtils.saveCredentials(credentials, password);
+            } catch (GeneralSecurityException e) {
+                System.err.println("Failed to write sid & server to credentials file");
+            }
+        });
+
+        if (!Strings.isEmpty(user.s) && !Strings.isEmpty(user.sv)) {
+            publish.accept(new LoginForm.Message(false, "Trying to login via saved SID", null));
+            try {
+                login.setSid(user.s, user.sv);
+                LoginUtils.findPreloader(login);
+                if (!login.isNotInitialized()) return null;
+            } catch (LoginUtils.WrongCredentialsException | IOException ignored) {}
+
+            // Fall-back to normal login
+            publish.accept(new LoginForm.Message(false, I18n.get("gui.login.info.logging_in"), null));
+        }
+
         LoginUtils.usernameLogin(login);
         return null;
     }

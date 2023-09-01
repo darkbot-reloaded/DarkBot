@@ -57,17 +57,17 @@ public class TimeSeriesImpl implements StatsAPI.TimeSeries {
 
         // Time to compact the time series!
         double smallestErr = Double.POSITIVE_INFINITY;
-        int smallestErrIdx = -1;
+        int smallestErrIdx = 0; // Worst case scenario, remove oldest datapoint
         for (int i = 1; i < t.length - 1; i++) {
             double err = err(v[i - 1], v[i], v[i + 1], t[i - 1], t[i], t[i + 1]);
-            if (smallestErr > err) {
+            if (err < smallestErr) {
                 smallestErr = err;
                 smallestErrIdx = i;
             }
         }
         remove(smallestErrIdx);
         // Accept up to error +20%, avoids re-locations
-        maxErr = smallestErr + 1.2;
+        if (smallestErrIdx != 0) maxErr = smallestErr * 1.2;
     }
 
     private void remove(int i) {
