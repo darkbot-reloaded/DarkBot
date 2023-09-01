@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.TimeSeriesImpl;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
@@ -45,7 +44,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     private final StatImpl credits, uridium, experience, honor, cargo, maxCargo, novaEnergy, teleportBonus;
     private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
 
-    private int teleportBonusAmount;
     private boolean premium;
 
     public StatsManager(Main main, EventBrokerAPI eventBroker) {
@@ -103,7 +101,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
         novaEnergy.track(readInt(0x100, 0x28));
         teleportBonus.track(readInt(0x50));
-        premium = API.readBoolean((API.readMemoryLong(address + 0xF0) & ByteUtils.ATOM_MASK) + 0x20);
+        premium = readBoolean(0xF0, 0x20);
         updateBootyKeys();
     }
 
@@ -129,6 +127,16 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         if (key.namespace() == null) throw new UnsupportedOperationException();
         StatImpl stat = statistics.get(StatKey.of(key));
         if (stat != null) stat.track(v);
+    }
+
+
+    private void updateBootyKeys() {
+        for (BootyKeyType key: BootyKeyType.values()) {
+            StatImpl stat = statistics.get(StatKey.of(key.getStatsKey()));
+            if (stat != null) {
+                stat.track(readInt(key.getOffset()));
+            }
+        }
     }
 
     private double updateNonZero(StatImpl stat, double value) {
@@ -159,21 +167,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     private boolean updateStats() {
         return main.isRunning() || main.config.MISCELLANEOUS.UPDATE_STATS_WHILE_PAUSED;
-    }
-
-    private void updateBootyKeys() {
-        for (Stats.BootyKey key : Stats.BootyKey.values()) {
-            BootyKeyType type = BootyKeyType.of(key);
-
-            if (type == null) {
-                continue;
-            }
-
-            StatImpl stat = statistics.get(StatKey.of(key));
-            if (stat != null) {
-                stat.track(readInt(type.getOffset()));
-            }
-        }
     }
 
     public void resetValues() {
@@ -210,10 +203,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     public AverageStats getMemoryStats() {
         return memoryStat;
-    }
-
-    public int getTeleportBonusAmount() {
-        return teleportBonusAmount;
     }
 
     public boolean isPremium() {
@@ -337,26 +326,28 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     }
 
     public enum BootyKeyType {
-        GREEN(0x54),
-        BLUE(0x58),
-        RED(0x5c),
-        SILVER(0x60),
-        APOCALYPSE(0x64),
-        PROMETHEUS(0x68),
-        OBSIDIAN_MICROCHIP(0x6c),
-        BLACK_LIGHT_CODE(0x70),
-        BLACK_LIGHT_DECODER(0x74),
-        PROSPEROUS_FRAGMENT(0x78),
-        ASTRAL(0x7c),
-        ASTRAL_SUPREME(0x80),
-        EMPYRIAN(0x84),
-        LUCENT(0x88),
-        PERSEUS(0x8c);
+        GREEN(0x54, Stats.BootyKey.GREEN),
+        BLUE(0x58, Stats.BootyKey.BLUE),
+        RED(0x5c, Stats.BootyKey.RED),
+        SILVER(0x60, Stats.BootyKey.SILVER),
+        APOCALYPSE(0x64, Stats.BootyKey.APOCALYPSE),
+        PROMETHEUS(0x68, Stats.BootyKey.PROMETHEUS),
+        OBSIDIAN_MICROCHIP(0x6c, Stats.BootyKey.OBSIDIAN_MICROCHIP),
+        BLACK_LIGHT_CODE(0x70, Stats.BootyKey.BLACK_LIGHT_CODE),
+        BLACK_LIGHT_DECODER(0x74, Stats.BootyKey.BLACK_LIGHT_DECODER),
+        PROSPEROUS_FRAGMENT(0x78, Stats.BootyKey.PROSPEROUS_FRAGMENT),
+        ASTRAL(0x7c, Stats.BootyKey.ASTRAL),
+        ASTRAL_SUPREME(0x80, Stats.BootyKey.ASTRAL_SUPREME),
+        EMPYRIAN(0x84, Stats.BootyKey.EMPYRIAN),
+        LUCENT(0x88, Stats.BootyKey.LUCENT),
+        PERSEUS(0x8c, Stats.BootyKey.PERSEUS);
 
         private int offset;
+        private final StatsAPI.Key key;
 
-        private BootyKeyType(int offset) {
+        private BootyKeyType(int offset, StatsAPI.Key key) {
             this.offset = offset;
+            this.key = key;
         }
 
         @Override
@@ -368,9 +359,13 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
             return offset;
         }
 
+        public StatsAPI.Key getStatsKey() {
+            return key;
+        }
+
         public static BootyKeyType of(Stats.BootyKey bootyKey) {
             for (BootyKeyType t : BootyKeyType.values()) {
-                if (t.name().equals(bootyKey.name())) {
+                if (t.getStatsKey().equals(bootyKey)) {
                     return t;
                 }
             }
