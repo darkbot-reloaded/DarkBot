@@ -260,10 +260,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
             if (Double.isNaN(initial)) {
                 initial = value;
             } else if (trackDiff.get()) {
-                if (diff > 0)
-                    earned += diff;
-                else
-                    spent -= diff;
+                if (diff > 0) earned += diff;
+                else spent -= diff;
             }
             current = value;
             timeSeries.track(earned - spent);
