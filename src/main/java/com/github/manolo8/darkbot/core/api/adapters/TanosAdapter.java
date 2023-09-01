@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.GameAPIImpl;
-import com.github.manolo8.darkbot.core.api.InvalidNativeSignature;
 import com.github.manolo8.darkbot.core.api.Utils;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
@@ -57,7 +56,8 @@ public class TanosAdapter extends GameAPIImpl<
         return false;
     }
 
-    public static class DirectInteractionManager extends NoopAPIAdapter.NoOpDirectInteraction {
+    public static class DirectInteractionManager extends NoopAPIAdapter.NoOpDirectInteraction
+            implements Utils.SignatureChecker {
 
         private final Main main;
         private final DarkTanos tanos;
@@ -68,6 +68,22 @@ public class TanosAdapter extends GameAPIImpl<
             this.main = main;
             this.tanos = tanos;
             this.botInstaller = botInstaller;
+
+            botInstaller.invalid.add(v -> methodSignatureCache.clear());
+        }
+
+        @Override
+        public Set<String> signatureCache() {
+            return methodSignatureCache;
+        }
+
+        @Override
+        public boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments) {
+            if (checkSignature(checkName, signature, index, arguments[0])) {
+                callMethod(index, arguments);
+                return true;
+            }
+            return false;
         }
 
         @Override
@@ -81,14 +97,14 @@ public class TanosAdapter extends GameAPIImpl<
 
         @Override
         public void moveShip(Locatable dest) {
-            callMethod(10, tanos.readLong(main.mapManager.eventAddress), (long) dest.getX(), (long) dest.getY());
+            if (checkGotoMethod(tanos, botInstaller))
+                callMethod(10, tanos.readLong(main.mapManager.eventAddress), (long) dest.getX(), (long) dest.getY());
         }
 
         @Override
         public void collectBox(Box box) {
-            callMethod(10,
-                    tanos.readLong(main.mapManager.eventAddress),
-                    box.locationInfo.x(), box.locationInfo.y(), box.address, 0);
+            if (checkGotoMethod(tanos, botInstaller))
+                callMethod(10, tanos.readLong(main.mapManager.eventAddress), box.locationInfo.x(), box.locationInfo.y(), box.address, 0);
         }
 
         @Override
@@ -104,27 +120,10 @@ public class TanosAdapter extends GameAPIImpl<
         }
 
         @Override
-        public boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments) {
-            if (checkSignature(checkName, signature, index, arguments[0])) {
-                callMethod(index, arguments);
-                return true;
-            }
-            return false;
+        public int checkMethodSignature(long obj, int methodIdx, boolean includeMethodName, String signature) {
+            return tanos.checkMethodSignature(obj, methodIdx, includeMethodName, signature);
         }
 
-        private boolean checkSignature(boolean checkName, String signature, int index, long object) {
-            if (index <= 2 || !ByteUtils.isValidPtr(object)) return false;
-            if (!methodSignatureCache.contains(signature)) {
-                // -1 or -2 == memory read error, 0 == invalid signature, 1 == valid
-                int ret = tanos.checkMethodSignature(object, index, checkName, signature);
-
-                if (ret == 1) methodSignatureCache.add(signature);
-                else if (ret == 0) {
-                    throw new InvalidNativeSignature("Invalid flash method signature! " + signature);
-                } else return false;
-            }
-
-            return true;
-        }
     }
+
 }

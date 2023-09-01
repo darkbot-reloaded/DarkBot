@@ -1,11 +1,14 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import com.github.manolo8.darkbot.utils.MathUtils;
+
+import java.util.Set;
 
 public class Utils {
     public static final String SELECT_MAP_ASSET = "MapAssetNotificationTRY_TO_SELECT_MAPASSET";
@@ -68,4 +71,33 @@ public class Utils {
         int offset = (int) (Math.random() * max * 0.05);
         return val < 0 ? offset : max - offset;
     }
+
+    public interface SignatureChecker extends GameAPI.DirectInteraction {
+
+        Set<String> signatureCache();
+
+        default boolean checkGotoMethod(GameAPI.Memory mem, BotInstaller installer) {
+            String signature = "26(267726?2?)42407911700";
+            if (signatureCache().contains(signature)) return true;
+
+            long eventManager = mem.readLong(installer.screenManagerAddress.get(), 200);
+            return checkSignature(false, signature, 10, eventManager);
+        }
+
+        default boolean checkSignature(boolean checkName, String signature, int index, long object) {
+            if (index <= 2 || !ByteUtils.isValidPtr(object)) return false;
+            if (!signatureCache().contains(signature)) {
+                // -1 or -2 == memory read error, 0 == invalid signature, 1 == valid
+                int ret = checkMethodSignature(object, index, checkName, signature);
+
+                if (ret == 1) signatureCache().add(signature);
+                else if (ret == 0) {
+                    throw new InvalidNativeSignature("Invalid flash method signature! " + signature);
+                } else return false;
+            }
+
+            return true;
+        }
+    }
+
 }
