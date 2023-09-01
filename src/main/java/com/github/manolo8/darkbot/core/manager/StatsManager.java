@@ -124,7 +124,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     @Override
     public void setStatValue(Key key, double v) {
-        if (key.namespace() == null) throw new UnsupportedOperationException();
         StatImpl stat = statistics.get(StatKey.of(key));
         if (stat != null) stat.track(v);
     }
@@ -132,10 +131,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     private void updateBootyKeys() {
         for (BootyKeyType key: BootyKeyType.values()) {
-            StatImpl stat = statistics.get(StatKey.of(key.getStatsKey()));
-            if (stat != null) {
-                stat.track(readInt(key.getOffset()));
-            }
+            setStatValue(key.getStatsKey(), readInt(key.getOffset()));
         }
     }
 
