@@ -9,6 +9,7 @@ import eu.darkbot.api.extensions.Drawable;
 import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.MapGraphics;
 import eu.darkbot.api.game.other.Point;
+import eu.darkbot.api.game.stats.Stats;
 import eu.darkbot.api.managers.BoosterAPI;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.GroupAPI;
@@ -37,12 +38,15 @@ public class OverlayDrawer implements Drawable {
     private final StatsAPI stats;
     private final RepairAPI repair;
 
+    private final StatsAPI.Stat runtime;
+
     private final ConfigSetting<Integer> maxDeaths;
 
     public OverlayDrawer(BoosterAPI boosters, GroupAPI group, StatsAPI stats, RepairAPI repair, ConfigAPI config) {
         this.boosters = boosters;
         this.group = group;
         this.stats = stats;
+        this.runtime = stats.getStat(Stats.Bot.RUNTIME);
         this.repair = repair;
 
         this.maxDeaths = config.requireConfig("general.safety.max_deaths");
@@ -110,13 +114,14 @@ public class OverlayDrawer implements Drawable {
                     "uri/h " + toEarnedPerHour(stats.getEarnedUridium()),
                     "exp/h " + toEarnedPerHour(stats.getEarnedExperience()),
                     "hon/h " + toEarnedPerHour(stats.getEarnedHonor()),
-                    "cargo " + stats.getCargo() + "/" + stats.getMaxCargo(),
+                    "cargo " + stats.getCargo() + '/' + stats.getMaxCargo(),
                     "death " + repair.getDeathAmount() + '/' + (maxDeaths.getValue() > -1 ? maxDeaths.getValue() : "∞"));
 
     }
 
     private String toEarnedPerHour(double value) {
-        long seconds = stats.getRunningTime().toMillis() / TimeUtils.SECOND;
+        // Lose millisecond precision, in hopes of better double precision, at least always 1s runtime
+        long seconds = Math.max((long) (runtime.getEarned() / TimeUtils.SECOND), 1L);
         return STAT_FORMAT.format(value / (seconds / 3600d));
     }
 
@@ -131,7 +136,7 @@ public class OverlayDrawer implements Drawable {
                                       Renderer<T> renderer,
                                       ToIntFunction<T> widthGetter,
                                       Collection<T> toRender) {
-        if (toRender.size() == 0) return;
+        if (toRender.isEmpty()) return;
         mg.setFont("small");
 
         int width = toRender.stream().mapToInt(widthGetter).max().orElse(0) + 8;
@@ -140,7 +145,7 @@ public class OverlayDrawer implements Drawable {
         int left = align == MapGraphics.StringAlign.RIGHT ? mg.getWidth() - width : 0;
 
         mg.setColor("texts_background");
-        mg.drawRect(left, top, width, height, true);
+        mg.drawRect((double) left, top, width, height, true);
         mg.setColor("text");
 
         for (T render : toRender) {

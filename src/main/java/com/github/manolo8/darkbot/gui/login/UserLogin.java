@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.utils.login.LoginUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import java.util.function.Consumer;
 
 public class UserLogin extends JPanel implements LoginScreen {
     private final JTextField username = new JTextField(16), password = new JPasswordField(16);
@@ -33,8 +34,8 @@ public class UserLogin extends JPanel implements LoginScreen {
     }
 
     @Override
-    public LoginForm.Message tryLogin(LoginData login) {
-        login.setCredentials(username.getText(), password.getText());
+    public LoginForm.Message tryLogin(LoginData login, Consumer<LoginForm.Message> publish) {
+        login.setCredentials(username.getText(), password.getText(), null);
         LoginUtils.usernameLogin(login);
         return null;
     }

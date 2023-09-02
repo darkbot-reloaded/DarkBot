@@ -2,7 +2,6 @@ package eu.darkbot.api;
 
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.utils.LibUtils;
-import eu.darkbot.api.managers.OreAPI;
 
 public class DarkTanos implements GameAPI.Window, GameAPI.Handler, GameAPI.Memory, GameAPI.Interaction, API.Singleton {
 
@@ -55,5 +54,6 @@ public class DarkTanos implements GameAPI.Window, GameAPI.Handler, GameAPI.Memor
     public native void      selectEntity    (long clickableAddress, long confirmAddress, boolean doubleClick);
     public native void      refine          (long refineUtilAddress, int oreId, int amount);
     public native boolean   useItem         (long screenManager, String check, int methodIdx, long... args);
-    public native long      callMethod      (long object, int index, long[] arguments);
+    public native long      callMethod      (long object, int index, long... arguments);
+    public native int checkMethodSignature(long obj, int methodIdx, boolean includeMethodName, String signature);
 }

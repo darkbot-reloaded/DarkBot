@@ -60,7 +60,7 @@ import java.util.Objects;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.127");
+    public static final Version VERSION      = new Version("1.128.3");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -188,7 +188,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     @Override
     @SuppressWarnings("InfiniteLoopStatement")
     public void run() {
-        long time, last = System.currentTimeMillis();
+        long time;
 
         while (true) {
             time = System.currentTimeMillis();
@@ -203,11 +203,15 @@ public class Main extends Thread implements PluginListener, BotAPI {
             long current = System.currentTimeMillis();
             avgTick = ((avgTick * 9) + (current - time)) / 10;
 
-            statsManager.tickAverageStats(current - last);
-            last = current;
-
             Time.sleepMax(time, botInstaller.invalid.get() ? 250 :
                     Math.max(config.BOT_SETTINGS.OTHER.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
+
+            try {
+                // Just in case, we can't risk the main loop dying.
+                statsManager.tickAverageStats(current - time);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         }
     }
 

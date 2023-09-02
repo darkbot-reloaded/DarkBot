@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
 import com.github.manolo8.darkbot.gui.utils.table.ExtraNpcInfoEditor;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.annotations.Table;
-import eu.darkbot.api.config.util.ValueHandler;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +35,7 @@ public class TableHelpers {
                 m.accept(setting.getValue());
 
                 // Register selection of maps as a filter
-                sorter.putRowFilter("map", new RowFilter<NpcTableModel, Integer>() {
+                sorter.putRowFilter("map", new RowFilter<>() {
                     @Override
                     public boolean include(Entry<? extends NpcTableModel, ? extends Integer> entry) {
                         if (m.getSelectedMaps().isEmpty()) return true;
