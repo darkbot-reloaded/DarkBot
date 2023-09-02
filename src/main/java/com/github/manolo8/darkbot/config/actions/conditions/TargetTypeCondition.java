@@ -20,38 +20,35 @@ import eu.darkbot.api.game.other.EntityInfo.Diplomacy;
 
 @ValueData(name = "is-relationship", description = "Checks the target type", example = "is-relationship(npc, target())")
 public class TargetTypeCondition implements Condition, Parser {
-    public TargetType type;
-    public Value<Ship> ship;
+    private TargetType type;
+    private Value<Ship> ship;
 
     @Override
     public @NotNull Condition.Result get(Main main) {
-        Ship target;
-
         if (type == null) {
             return Result.ABSTAIN;
         }
 
-        target = Value.get(ship, main);
-        if (target == null || !target.isValid()) {
-            return type == TargetType.NO_TARGET ? Result.ALLOW : Result.DENY;
+        return Result.fromBoolean(matches(Value.get(ship, main)));
+    }
+
+    private boolean matches(Ship target) {
+        switch (type) {
+            case NO_TARGET:
+                return target == null || !target.isValid();
+            case NPC:
+                return target instanceof Npc;
+            case ENEMY:
+                return target != null && target.isValid() && target.getEntityInfo().isEnemy();
+            case ALLIED:
+                return target != null && target.isValid()
+                        && target.getEntityInfo().getClanDiplomacy() == Diplomacy.ALLIED;
+            case NOT_ATTACK_PACT:
+                return target != null && target.isValid()
+                        && target.getEntityInfo().getClanDiplomacy() == Diplomacy.NOT_ATTACK_PACT;
         }
 
-        if (type == TargetType.NPC && target instanceof Npc) {
-            return Result.ALLOW;
-        }
-
-        if (type == TargetType.ENEMY && target.getEntityInfo().isEnemy()) {
-            return Result.ALLOW;
-        }
-
-        Diplomacy diplomacy = target.getEntityInfo().getClanDiplomacy();
-        if (diplomacy == Diplomacy.ALLIED) {
-            return type == TargetType.ALLIED ? Result.ALLOW : Result.DENY;
-        } else if (diplomacy == Diplomacy.NOT_ATTACK_PACT) {
-            return type == TargetType.NOT_ATTACK_PACT ? Result.ALLOW : Result.DENY;
-        }
-
-        return Result.ABSTAIN;
+        return false;
     }
 
     public enum TargetType {
