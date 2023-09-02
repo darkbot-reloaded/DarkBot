@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.config.actions.values;
 
 import java.util.Locale;
-import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -11,46 +10,56 @@ import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
-import com.github.manolo8.darkbot.core.manager.StatsManager;
 
-@ValueData(name = "stat-type", description = "Gets a certain Stat type from a bot", example = "stat-type(total-credits)")
+import eu.darkbot.api.game.stats.Stats;
+import eu.darkbot.api.managers.StatsAPI;
+
+@ValueData(name = "stat-type", description = "Gets a certain Stat type from a bot", example = "stat-type(EXPERIENCE, earned)")
 public class StatTypeValue implements Value<Number>, Parser {
-    public StatsManager statsManager;
-    public StatType statType;
+    private StatsAPI.Key statKey;
+    private StatData dataType;
 
     @Override
     public @Nullable Number get(Main main) {
-        statsManager = main.statsManager;
-        return statType != null ? statType.getter.apply(statsManager) : null;
+        if (dataType == null || statKey == null) {
+            return null;
+        }
+
+        if (dataType == StatData.CURRENT) {
+            return main.statsManager.getStat(statKey).getCurrent();
+        } else if (dataType == StatData.EARNED) {
+            return main.statsManager.getStat(statKey).getEarned();
+        } else if (dataType == StatData.SPENT) {
+            return main.statsManager.getStat(statKey).getSpent();
+        }
+
+        return null;
     }
 
-    public enum StatType {
-        TOTAL_CREDITS(StatsManager::getTotalCredits),
-        EARNED_CREDITS(StatsManager::getEarnedCredits),
-        TOTAL_URIDIUM(StatsManager::getTotalUridium),
-        EARNED_UDIDIUM(StatsManager::getEarnedUridium),
-        TOTAL_EXPERIENCIE(StatsManager::getTotalExperience),
-        EARNED_EXPERIENCIE(StatsManager::getEarnedExperience),
-        TOTAL_HONOR(StatsManager::getTotalHonor),
-        EARNED_HONOR(StatsManager::getEarnedHonor),
-        CARGO(StatsManager::getCargo),
-        MAX_CARGO(StatsManager::getMaxCargo);
-
-        private final Function<StatsManager, Number> getter;
-
-        StatType(Function<StatsManager, Number> getter) {
-            this.getter = getter;
+    private StatsAPI.Key getKeyFromString(String key) {
+        for (StatsAPI.Key stat : Stats.General.values()) {
+            if (stat.name().equals(key)) {
+                return stat;
+            }
         }
+
+        return null;
+    }
+
+    public enum StatData {
+        CURRENT,
+        EARNED,
+        SPENT;
 
         @Override
         public String toString() {
             return name().toLowerCase(Locale.ROOT).replace("_", "-");
         }
 
-        public static StatType of(String statType) {
-            for (StatType ht : StatType.values()) {
-                if (ht.toString().equals(statType))
-                    return ht;
+        public static StatData of(String sd) {
+            for (StatData sD : StatData.values()) {
+                if (sD.toString().equals(sd))
+                    return sD;
             }
             return null;
         }
@@ -58,17 +67,25 @@ public class StatTypeValue implements Value<Number>, Parser {
 
     @Override
     public String toString() {
-        return "stat-type(" + statType + ")";
+        return "stat-type(" + statKey + "," + dataType + ")";
     }
 
     @Override
     public String parse(String str) throws SyntaxException {
-        String[] params = str.split("\\)", 2);
+        String[] params = str.split(" *, *", 2);
 
-        statType = StatType.of(params[0].trim());
+        statKey = getKeyFromString(params[0].trim());
 
-        if (statType == null) {
-            throw new SyntaxException("Unknown stat-type: '" + params[0] + "'", str, StatType.class);
+        if (statKey == null) {
+            throw new SyntaxException("Unknown stat-type: '" + params[0] + "'", str, Stats.General.class);
+        }
+
+        params = (ParseUtil.separate(params, getClass(), ",")).split("\\)", 2);
+
+        dataType = StatData.of(params[0]);
+
+        if (dataType == null) {
+            throw new SyntaxException("Unknown data-type: '" + params[0] + "'", params[0], StatData.class);
         }
 
         return ParseUtil.separate(params, getClass(), ")");
