@@ -47,7 +47,7 @@ public class SettingsGui extends Gui implements API.Singleton {
 
     public void revalidateKeyBinds() {
         if (assignKeyBindTimer.isInactive())
-            assignKeyBindTimer.disarm();
+            assignKeyBindTimer.tryActivate();
     }
 
     private long[] assignKeyBinds(boolean emptyOnly, boolean assignEmpty) {
