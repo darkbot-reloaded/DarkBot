@@ -65,8 +65,8 @@ public class TargetTypeCondition implements Condition, Parser {
 
         public static TargetType of(String targetType) {
             for (TargetType tt : TargetType.values()) {
-                if (tT.toString().equals(targetType))
-                    return tT;
+                if (tt.toString().equals(targetType))
+                    return tt;
             }
             return null;
         }
