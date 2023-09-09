@@ -57,9 +57,9 @@ public class StatTypeValue implements Value<Number>, Parser {
         }
 
         public static StatData of(String sd) {
-            for (StatData sd : StatData.values()) {
-                if (sD.toString().equals(sd))
-                    return sD;
+            for (StatData statdata : StatData.values()) {
+                if (statdata.toString().equals(sd))
+                    return statdata;
             }
             return null;
         }
