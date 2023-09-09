@@ -98,7 +98,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
             instance = main.settingsManager.readString(0x298);
         }
 
-        novaEnergy.track(readInt(0x100, 0x28));
+        novaEnergy.track(readInt(0x108, 0x28));
         teleportBonus.track(readInt(0x50));
         premium = readBoolean(0xF0, 0x20);
         updateBootyKeys();
@@ -345,7 +345,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
         private BootyKeyType(int offset, StatsAPI.Key key) {
             this.offset = offset;
-            this.key = StatKey.of(key)
+            this.key = StatKey.of(key);
         }
 
         public int getOffset() {
