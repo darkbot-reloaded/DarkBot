@@ -31,6 +31,8 @@ public class StatTypeValue implements Value<Number>, Parser {
             return main.statsManager.getStat(statKey).getEarned();
         } else if (dataType == StatData.SPENT) {
             return main.statsManager.getStat(statKey).getSpent();
+        } else if (dataType == StatData.INITIAL) {
+            return main.statsManager.getStat(statKey).getInitial();
         }
 
         return null;
@@ -47,6 +49,7 @@ public class StatTypeValue implements Value<Number>, Parser {
     }
 
     public enum StatData {
+        INITIAL,
         CURRENT,
         EARNED,
         SPENT;
