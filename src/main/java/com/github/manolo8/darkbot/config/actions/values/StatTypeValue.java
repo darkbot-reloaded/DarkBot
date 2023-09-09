@@ -33,6 +33,8 @@ public class StatTypeValue implements Value<Number>, Parser {
             return main.statsManager.getStat(statKey).getSpent();
         } else if (dataType == StatData.INITIAL) {
             return main.statsManager.getStat(statKey).getInitial();
+        } else if (dataType == StatData.DIFFERENCE) {
+            return main.statsManager.getStat(statKey).getCurrent() - main.statsManager.getStat(statKey).getInitial();
         }
 
         return null;
@@ -52,6 +54,7 @@ public class StatTypeValue implements Value<Number>, Parser {
         INITIAL,
         CURRENT,
         EARNED,
+        DIFFERENCE,
         SPENT;
 
         @Override
