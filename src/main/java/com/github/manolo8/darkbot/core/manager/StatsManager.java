@@ -345,7 +345,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
         private BootyKeyType(int offset, StatsAPI.Key key) {
             this.offset = offset;
-            this.key = key;
+            this.key = StatKey.of(key)
         }
 
         public int getOffset() {
