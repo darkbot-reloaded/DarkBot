@@ -40,27 +40,35 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     private final Map<StatKey, StatImpl> statistics = new HashMap<>();
 
     private final StatImpl runtime;
-    private final StatImpl credits, uridium, experience, honor, cargo, maxCargo, novaEnergy;
+    private final StatImpl credits, uridium, experience, honor, cargo, maxCargo, novaEnergy, teleportBonus;
     private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
+
+    @Getter
+    private boolean premium;
 
     public StatsManager(Main main, EventBrokerAPI eventBroker) {
         this.main = main;
         this.eventBroker = eventBroker;
 
-        register(Stats.Bot.RUNTIME, runtime = createStat());
+        registerImpl(Stats.Bot.RUNTIME, runtime = createStat());
 
-        register(Stats.General.CREDITS, credits = createStat());
-        register(Stats.General.URIDIUM, uridium = createStat());
-        register(Stats.General.EXPERIENCE, experience = createStat());
-        register(Stats.General.HONOR, honor = createStat());
-        register(Stats.General.CARGO, cargo = createStat());
-        register(Stats.General.MAX_CARGO, maxCargo = createStat());
-        register(Stats.General.NOVA_ENERGY, novaEnergy = createStat());
+        registerImpl(Stats.General.CREDITS, credits = createStat());
+        registerImpl(Stats.General.URIDIUM, uridium = createStat());
+        registerImpl(Stats.General.EXPERIENCE, experience = createStat());
+        registerImpl(Stats.General.HONOR, honor = createStat());
+        registerImpl(Stats.General.CARGO, cargo = createStat());
+        registerImpl(Stats.General.MAX_CARGO, maxCargo = createStat());
+        registerImpl(Stats.General.NOVA_ENERGY, novaEnergy = createStat());
+        registerImpl(Stats.General.TELEPORT_BONUS_AMOUNT, teleportBonus = createStat());
 
-        register(Stats.Bot.PING, pingStat = new AverageStats(false));
-        register(Stats.Bot.TICK_TIME, tickStat = new AverageStats(true));
-        register(Stats.Bot.MEMORY, memoryStat = new AverageStats(false));
-        register(Stats.Bot.CPU, cpuStat = new AverageStats(true));
+        registerImpl(Stats.Bot.PING, pingStat = new AverageStats(false));
+        registerImpl(Stats.Bot.TICK_TIME, tickStat = new AverageStats(true));
+        registerImpl(Stats.Bot.MEMORY, memoryStat = new AverageStats(false));
+        registerImpl(Stats.Bot.CPU, cpuStat = new AverageStats(true));
+
+        for (Stats.BootyKey key : Stats.BootyKey.values()) {
+            registerImpl(key, createStat());
+        }
     }
 
     @Override
@@ -92,6 +100,11 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         }
 
         novaEnergy.track(readInt(0x108, 0x28));
+        teleportBonus.track(readInt(0x50));
+        premium = readBoolean(0xF0, 0x20);
+
+        for (BootyKeyType key: BootyKeyType.values())
+            track(key.getStatKey(), readInt(key.getOffset()));
     }
 
     @Override
@@ -102,19 +115,22 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     @Override
     public Stat registerStat(Key key) {
         if (key.namespace() == null) throw new UnsupportedOperationException();
-        StatImpl stat = createStat();
-        register(key, stat);
-        return stat;
+        StatKey statKey = StatKey.of(key);
+        return statistics.computeIfAbsent(statKey, k -> createStat());
     }
 
-    private void register(Key key, StatImpl stat) {
+    private void registerImpl(Key key, StatImpl stat) {
         statistics.put(StatKey.of(key), stat);
     }
 
     @Override
     public void setStatValue(Key key, double v) {
         if (key.namespace() == null) throw new UnsupportedOperationException();
-        StatImpl stat = statistics.get(StatKey.of(key));
+        track(StatKey.of(key), v);
+    }
+
+    private void track(StatKey key, double v) {
+        StatImpl stat = statistics.get(key);
         if (stat != null) stat.track(v);
     }
 
@@ -168,7 +184,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         resetValues();
     }
 
-
     public AverageStats getCpuStats() {
         return cpuStat;
     }
@@ -189,7 +204,6 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     public long getAddress() {
         return address;
     }
-
 
     @Value
     @Accessors(fluent = true)
@@ -298,5 +312,33 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
             return "Max=" + ONE_PLACE_FORMAT.format(getMax()) +
                     "\nAverage=" + ONE_PLACE_FORMAT.format(getAverage());
         }
+    }
+
+    @Getter
+    private enum BootyKeyType {
+        GREEN(0x54, Stats.BootyKey.GREEN),
+        BLUE(0x58, Stats.BootyKey.BLUE),
+        RED(0x5c, Stats.BootyKey.RED),
+        SILVER(0x60, Stats.BootyKey.SILVER),
+        APOCALYPSE(0x64, Stats.BootyKey.APOCALYPSE),
+        PROMETHEUS(0x68, Stats.BootyKey.PROMETHEUS),
+        OBSIDIAN_MICROCHIP(0x6c, Stats.BootyKey.OBSIDIAN_MICROCHIP),
+        BLACK_LIGHT_CODE(0x70, Stats.BootyKey.BLACK_LIGHT_CODE),
+        BLACK_LIGHT_DECODER(0x74, Stats.BootyKey.BLACK_LIGHT_DECODER),
+        PROSPEROUS_FRAGMENT(0x78, Stats.BootyKey.PROSPEROUS_FRAGMENT),
+        ASTRAL(0x7c, Stats.BootyKey.ASTRAL),
+        ASTRAL_SUPREME(0x80, Stats.BootyKey.ASTRAL_SUPREME),
+        EMPYRIAN(0x84, Stats.BootyKey.EMPYRIAN),
+        LUCENT(0x88, Stats.BootyKey.LUCENT),
+        PERSEUS(0x8c, Stats.BootyKey.PERSEUS);
+
+        private final int offset;
+        private final StatKey statKey;
+
+        BootyKeyType(int offset, StatsAPI.Key key) {
+            this.offset = offset;
+            this.statKey = StatKey.of(key);
+        }
+
     }
 }
