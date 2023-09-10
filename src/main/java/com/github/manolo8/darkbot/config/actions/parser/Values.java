@@ -27,6 +27,7 @@ import com.github.manolo8.darkbot.config.actions.values.NumberConstant;
 import com.github.manolo8.darkbot.config.actions.values.PercentConstant;
 import com.github.manolo8.darkbot.config.actions.values.ShipLocationValue;
 import com.github.manolo8.darkbot.config.actions.values.ShipName;
+import com.github.manolo8.darkbot.config.actions.values.StatTypeValue;
 import com.github.manolo8.darkbot.config.actions.values.StringConstant;
 import com.github.manolo8.darkbot.config.actions.values.TargetValue;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
@@ -62,6 +63,7 @@ public class Values {
                     ShipLocationValue.class,
                     ShipName.class,
                     HeroMap.class,
+                    StatTypeValue.class,
                     HealthTypeValue.class,
                     HealthValue.class,
                     HeroValue.class,
