@@ -1,52 +1,44 @@
 package com.github.manolo8.darkbot.config.actions.values;
 
-import java.util.Locale;
-
-import org.jetbrains.annotations.Nullable;
-
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
-
 import eu.darkbot.api.game.stats.Stats;
 import eu.darkbot.api.managers.StatsAPI;
+import org.jetbrains.annotations.Nullable;
 
-@ValueData(name = "stat-type", description = "Gets a certain Stat type from a bot", example = "stat-type(EXPERIENCE, earned)")
+import java.util.Locale;
+
+@ValueData(name = "stat-type", description = "Gets a certain Stat type from a bot", example = "stat-type(experience, earned)")
 public class StatTypeValue implements Value<Number>, Parser {
-    private StatsAPI.Key statKey;
+    private Stats.General key;
+    private StatsAPI.Stat stat;
     private StatData dataType;
 
     @Override
     public @Nullable Number get(Main main) {
-        if (dataType == null || statKey == null) {
+        if (stat == null && key != null) stat = main.statsManager.getStat(key);
+        if (dataType == null || key == null || stat == null) {
             return null;
         }
 
-        if (dataType == StatData.CURRENT) {
-            return main.statsManager.getStat(statKey).getCurrent();
-        } else if (dataType == StatData.EARNED) {
-            return main.statsManager.getStat(statKey).getEarned();
-        } else if (dataType == StatData.SPENT) {
-            return main.statsManager.getStat(statKey).getSpent();
-        } else if (dataType == StatData.INITIAL) {
-            return main.statsManager.getStat(statKey).getInitial();
-        } else if (dataType == StatData.DIFFERENCE) {
-            return main.statsManager.getStat(statKey).getCurrent() - main.statsManager.getStat(statKey).getInitial();
+        switch (dataType) {
+            case INITIAL: return stat.getInitial();
+            case CURRENT: return stat.getCurrent();
+            case EARNED: return stat.getEarned();
+            case SPENT: return stat.getSpent();
+            case DIFFERENCE: return stat.getEarned() - stat.getSpent();
+            default: throw new IllegalStateException("Undefined operation " + dataType);
         }
-
-        return null;
     }
 
-    private StatsAPI.Key getKeyFromString(String key) {
-        for (StatsAPI.Key stat : Stats.General.values()) {
-            if (stat.name().equals(key)) {
-                return stat;
-            }
+    private Stats.General getKeyFromString(String key) {
+        for (Stats.General stat : Stats.General.values()) {
+            if (stat.name().equalsIgnoreCase(key)) return stat;
         }
-
         return null;
     }
 
@@ -54,18 +46,17 @@ public class StatTypeValue implements Value<Number>, Parser {
         INITIAL,
         CURRENT,
         EARNED,
-        DIFFERENCE,
-        SPENT;
+        SPENT,
+        DIFFERENCE;
 
         @Override
         public String toString() {
-            return name().toLowerCase(Locale.ROOT).replace("_", "-");
+            return name().toLowerCase(Locale.ROOT);
         }
 
         public static StatData of(String sd) {
-            for (StatData statdata : StatData.values()) {
-                if (statdata.toString().equals(sd))
-                    return statdata;
+            for (StatData statData : StatData.values()) {
+                if (statData.toString().equalsIgnoreCase(sd)) return statData;
             }
             return null;
         }
@@ -73,22 +64,23 @@ public class StatTypeValue implements Value<Number>, Parser {
 
     @Override
     public String toString() {
-        return "stat-type(" + statKey + "," + dataType + ")";
+        return "stat-type(" + key.name().toLowerCase(Locale.ROOT) + "," + dataType + ")";
     }
 
     @Override
     public String parse(String str) throws SyntaxException {
         String[] params = str.split(" *, *", 2);
 
-        statKey = getKeyFromString(params[0].trim());
+        key = getKeyFromString(params[0].trim());
+        stat = null;
 
-        if (statKey == null) {
+        if (key == null) {
             throw new SyntaxException("Unknown stat-type: '" + params[0] + "'", str, Stats.General.class);
         }
 
-        params = (ParseUtil.separate(params, getClass(), ",")).split("\\)", 2);
+        params = ParseUtil.separate(params, getClass(), ",").split("\\)", 2);
 
-        dataType = StatData.of(params[0]);
+        dataType = StatData.of(params[0].trim());
 
         if (dataType == null) {
             throw new SyntaxException("Unknown data-type: '" + params[0] + "'", params[0], StatData.class);
