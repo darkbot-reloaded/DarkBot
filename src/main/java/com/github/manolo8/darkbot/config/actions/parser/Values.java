@@ -13,6 +13,7 @@ import com.github.manolo8.darkbot.config.actions.conditions.HasFormationConditio
 import com.github.manolo8.darkbot.config.actions.conditions.NoneCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NumericalCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.OneCondition;
+import com.github.manolo8.darkbot.config.actions.conditions.TargetTypeCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.UntilCondition;
 import com.github.manolo8.darkbot.config.actions.values.BooleanConstant;
 import com.github.manolo8.darkbot.config.actions.values.DistanceValue;
@@ -53,6 +54,7 @@ public class Values {
                     EqualCondition.class,
                     HasEffectCondition.class,
                     HasFormationCondition.class,
+                    TargetTypeCondition.class,
                     // Stateful conditions
                     AfterCondition.class,
                     UntilCondition.class,
