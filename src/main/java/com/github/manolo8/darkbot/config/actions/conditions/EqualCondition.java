@@ -6,8 +6,8 @@ import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.types.Condition;
@@ -51,18 +51,14 @@ public class EqualCondition implements LegacyCondition, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        ParseResult<?> prA = ValueParser.parse(str);
+    public void parse(ParsingNode node) throws SyntaxException {
+        node.requireParamSize(2, getClass());
+
+        ParseResult<?> prA = ValueParser.parseGeneric(node.getParam(0));
         a = prA.value;
-
-        str = ParseUtil.separate(prA.leftover.trim(), getClass(), ",");
-
-        ParseResult<?> prB = ValueParser.parse(str, prA.type);
-        b = prB.value;
+        b = ValueParser.parse(node.getParam(1), prA.type);
 
         isComparable = null;
-
-        return ParseUtil.separate(prB.leftover.trim(), getClass(), ")");
     }
 
 }

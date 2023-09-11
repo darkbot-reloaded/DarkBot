@@ -5,9 +5,8 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.types.Condition;
@@ -60,11 +59,12 @@ public class HasFormationCondition implements LegacyCondition, Parser {
             return name().toLowerCase(Locale.ROOT).replace("_", "-");
         }
 
-        public static Formation of(String operation) {
+        public static Formation of(ParsingNode node) {
+            String formation = node.getString();
             for (Formation f : Formation.values()) {
-                if (f.toString().equals(operation)) return f;
+                if (f.toString().equals(formation)) return f;
             }
-            return null;
+            throw new SyntaxException("Unknown formation: '" + formation + "'", node, Formation.class);
         }
     }
 
@@ -74,17 +74,10 @@ public class HasFormationCondition implements LegacyCondition, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        String[] params = str.split(" *, *", 2);
-        formation = Formation.of(params[0].trim());
-        if (formation == null)
-            throw new SyntaxException("Unknown formation: '" + params[0] + "'", str, Formation.class);
+    public void parse(ParsingNode node) throws SyntaxException {
+        node.requireParamSize(2, getClass());
 
-        str = ParseUtil.separate(params, getClass(), ",");
-
-        ParseResult<Ship> pr = ValueParser.parse(str, Ship.class);
-        ship = pr.value;
-
-        return ParseUtil.separate(pr.leftover.trim(), getClass(), ")");
+        formation = Formation.of(node.getParam(0));
+        ship = ValueParser.parse(node.getParam(1), Ship.class);
     }
 }

@@ -5,10 +5,8 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
-import com.github.manolo8.darkbot.config.actions.parser.Values;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 
 import java.util.Locale;
@@ -46,11 +44,12 @@ public class HealthTypeValue implements Value<Number>, Parser {
             return name().toLowerCase(Locale.ROOT).replace("_", "-");
         }
 
-        public static HealthType of(String healthType) {
+        public static HealthType of(ParsingNode node) {
+            String healthType = node.getString();
             for (HealthType ht : HealthType.values()) {
                 if (ht.toString().equals(healthType)) return ht;
             }
-            return null;
+            throw new SyntaxException("Unknown hp-type: '" + healthType + "'", node, HealthType.class);
         }
     }
 
@@ -60,17 +59,9 @@ public class HealthTypeValue implements Value<Number>, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        String[] params = str.split(" *, *", 2);
-        healthType = HealthType.of(params[0].trim());
-        if (healthType == null)
-            throw new SyntaxException("Unknown hp-type: '" + params[0] + "'", str, HealthType.class);
-
-        str = ParseUtil.separate(params, getClass(), ",");
-
-        ParseResult<HealthHolder> pr = ValueParser.parse(str, HealthHolder.class);
-        health = pr.value;
-
-        return ParseUtil.separate(pr.leftover.trim(), getClass(), ")");
+    public void parse(ParsingNode node) throws SyntaxException {
+        node.requireParamSize(2, getClass());
+        healthType = HealthType.of(node.getParam(0));
+        health = ValueParser.parse(node.getParam(1), HealthHolder.class);
     }
 }

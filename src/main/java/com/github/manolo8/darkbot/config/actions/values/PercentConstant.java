@@ -5,8 +5,8 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 
 @ValueData(name = "percent", description = "Creates a percent constant", example = "percent(5)")
 public class PercentConstant implements Value<Number>, Parser {
@@ -24,18 +24,14 @@ public class PercentConstant implements Value<Number>, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        String[] params = str.split("\\)", 2);
+    public void parse(ParsingNode node) throws SyntaxException {
+        node.requireParamSize(1, getClass());
 
-        if (params[0].isEmpty())
-            throw new SyntaxException("Empty percent, add digits", str, Values.getMeta(getClass()));
-
+        ParsingNode val = node.getParam(0);
         try {
-            percent = Double.parseDouble(params[0]) / 100;
+            percent = Double.parseDouble(val.getString()) / 100;
         } catch (NumberFormatException e) {
-            throw new SyntaxException("Failed to parse percent '" + params[0] + "'", str, Values.getMeta(getClass()));
+            throw new SyntaxException("Failed to parse percent '" + val.getFunction() + "'", val, Values.getMeta(getClass()));
         }
-
-        return ParseUtil.separate(params, getClass(), ")");
     }
 }

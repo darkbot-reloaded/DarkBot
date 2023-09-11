@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.config.actions.tree;
 
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
+import com.github.manolo8.darkbot.config.actions.Value;
+import com.github.manolo8.darkbot.config.actions.parser.Values;
 import com.github.manolo8.darkbot.gui.utils.highlight.Locatable;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,7 +28,14 @@ public class ParsingNode implements TreeNode, Locatable {
     private int totalChildren;
 
     public ParsingNode() {
-        this(null);
+        parent = null;
+    }
+
+    public ParsingNode(DocumentReader reader) {
+        this();
+        reader.reset();
+        parse(reader);
+        reader.done();
     }
 
     private ParsingNode(ParsingNode parent) {
@@ -86,7 +95,7 @@ public class ParsingNode implements TreeNode, Locatable {
                         .collect(Collectors.joining(", ", "(", ")")));
     }
 
-    private static String escape(String val) {
+    public static String escape(String val) {
         for (char c : val.toCharArray()) {
             if (c == '(' || c == ',' || c == ')' || c == ' ')
                 return '"' + val.replaceAll("([\\\\\"])", "\\$1") + '"';
@@ -105,6 +114,28 @@ public class ParsingNode implements TreeNode, Locatable {
         return this;
     }
 
+    public void requireParamSize(int size, Class<? extends Value<?>> type) {
+        if ((children == null ? -1 : children.size()) != size) {
+            String curr = children == null ? "none" : String.valueOf(getChildCount());
+            String expected = size == -1 ? "none" : String.valueOf(size);
+            throw new SyntaxException("Invalid parameter count, found " + curr + " but expected " + expected, this, Values.getMeta(type));
+        }
+    }
+
+    public ParsingNode getParam(int idx) {
+        if (idx >= getChildCount()) throw new SyntaxException("Missing parameter #" + (idx + 1), this);
+        return children.get(idx);
+    }
+
+    public String getParamStr(int idx) {
+        return getParam(idx).getString();
+    }
+
+    public String getString() {
+        if (children != null) throw new SyntaxException("Expected no parameters", this);
+        return function;
+    }
+
     @Override
     public ParsingNode getChildAt(int childIndex) {
         return children.get(childIndex);
@@ -112,7 +143,7 @@ public class ParsingNode implements TreeNode, Locatable {
 
     @Override
     public int getChildCount() {
-        return children.size();
+        return children == null ? 0 : children.size();
     }
 
     @Override

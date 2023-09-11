@@ -5,9 +5,8 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.types.Condition;
@@ -74,11 +73,12 @@ public class HasEffectCondition implements LegacyCondition, Parser {
             return name().toLowerCase(Locale.ROOT).replace("_", "-");
         }
 
-        public static Effect of(String operation) {
+        public static Effect of(ParsingNode node) {
+            String effect = node.getString();
             for (Effect ef : Effect.values()) {
-                if (ef.toString().equals(operation)) return ef;
+                if (ef.toString().equals(effect)) return ef;
             }
-            return null;
+            throw new SyntaxException("Unknown effect: '" + effect + "'", node, Effect.class);
         }
 
     }
@@ -89,17 +89,10 @@ public class HasEffectCondition implements LegacyCondition, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        String[] params = str.split(" *, *", 2);
-        effect = Effect.of(params[0].trim());
-        if (effect == null)
-            throw new SyntaxException("Unknown effect: '" + params[0] + "'", str, Effect.class);
+    public void parse(ParsingNode node) throws SyntaxException {
+        node.requireParamSize(2, getClass());
 
-        str = ParseUtil.separate(params, getClass(), ",");
-
-        ParseResult<Ship> pr = ValueParser.parse(str, Ship.class);
-        ship = pr.value;
-
-        return ParseUtil.separate(pr.leftover.trim(), getClass(), ")");
+        effect = Effect.of(node.getParam(0));
+        ship = ValueParser.parse(node.getParam(1), Ship.class);
     }
 }

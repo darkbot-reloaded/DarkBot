@@ -4,9 +4,8 @@ import com.github.manolo8.darkbot.config.actions.LegacyCondition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.types.Condition;
 
@@ -51,18 +50,10 @@ public abstract class AbstractCondition implements LegacyCondition, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        boolean hasNext;
-        do {
-            ParseResult<Result> pr = ValueParser.parse(str, Result.class);
-
-            children.add(pr.asCondition(str, getClass()));
-            str = pr.leftover.trim();
-
-            hasNext = !str.isEmpty() && str.charAt(0) == ',';
-            str = ParseUtil.separate(str, getClass(), ",", ")");
-        } while (hasNext);
-        return str;
+    public void parse(ParsingNode node) throws SyntaxException {
+        for (ParsingNode child : node.getChildren()) {
+            children.add(ValueParser.parseCondition(child));
+        }
     }
 
 }

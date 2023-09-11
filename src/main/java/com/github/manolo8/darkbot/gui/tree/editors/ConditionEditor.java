@@ -118,7 +118,7 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
             return;
         }
 
-        int start = e.getIdx(parsedText);
+        int start = e.getAt();
 
         setHighlight(start, parsedText.length(), parsedText.isEmpty());
 
@@ -247,7 +247,7 @@ public class ConditionEditor extends JTextField implements OptionEditor<Conditio
                     try {
                         ValueParser.parseCondition(text);
                     } catch (SyntaxException e) {
-                        lastLoc = text.lastIndexOf(e.getAt());
+                        lastLoc = e.getAt();
                         if (e.getExpected().length != 1) break;
                         text = text.substring(0, lastLoc) + e.getExpected()[0] + text.substring(lastLoc);
                         lastLoc += e.getExpected()[0].length();

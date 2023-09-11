@@ -63,6 +63,11 @@ public class DocumentReader {
         return remaining;
     }
 
+    public void done() {
+        if (nextIdx < document.getLength())
+            throw new SyntaxException("Unused characters after end", nextIdx);
+    }
+
     public char peekNext() {
         if (nextIdx >= document.getLength()) return '\04'; // EOF
         return charAt(nextIdx);

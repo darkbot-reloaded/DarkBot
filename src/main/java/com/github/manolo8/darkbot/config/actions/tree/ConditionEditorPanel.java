@@ -48,7 +48,7 @@ public class ConditionEditorPanel extends JPanel {
                 root.parse(reader);
                 errorHighlight.remove();
             } catch (SyntaxException ex) {
-                errorHighlight.setHighlight(ex.getIdx(""), textArea.getDocument().getLength());
+                errorHighlight.setHighlight(ex.getAt(), textArea.getDocument().getLength());
             }
 
             treeModel.updateListeners();

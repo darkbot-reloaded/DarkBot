@@ -15,6 +15,7 @@ import com.github.manolo8.darkbot.config.actions.conditions.NumericalCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.OneCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.TargetTypeCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.UntilCondition;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 import com.github.manolo8.darkbot.config.actions.values.BooleanConstant;
 import com.github.manolo8.darkbot.config.actions.values.DistanceValue;
 import com.github.manolo8.darkbot.config.actions.values.HealthTypeValue;
@@ -96,18 +97,18 @@ public class Values {
         throw new SyntaxException("Error: failed to find value meta for " + type.getSimpleName(), null);
     }
 
-    public static <T> Meta<T> getMeta(String name, String ex, Class<T> type) throws SyntaxException {
+    public static <T> Meta<T> getMeta(ParsingNode node, Class<T> type) throws SyntaxException {
         //noinspection unchecked
-        Meta<T> meta = (Meta<T>) VALUES.get(name);
+        Meta<T> meta = (Meta<T>) VALUES.get(node.getFunction());
 
         List<Meta<?>> params = VALUES.values().stream()
                 .filter(v -> type.isAssignableFrom(v.type))
                 .collect(Collectors.toList());
 
         if (meta == null)
-            throw new SyntaxException("Unknown value type '" + name + "'", ex, params);
+            throw new SyntaxException("Unknown value type '" + node.getFunction() + "'", node, params);
         if (!type.isAssignableFrom(meta.type))
-            throw new SyntaxException("Invalid type, expected '" + type.getSimpleName() + "'", ex, params);
+            throw new SyntaxException("Invalid type, expected '" + type.getSimpleName() + "'", node, params);
 
         return meta;
     }

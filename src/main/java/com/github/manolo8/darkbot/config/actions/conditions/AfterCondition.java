@@ -4,9 +4,8 @@ import com.github.manolo8.darkbot.config.actions.LegacyCondition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 import com.github.manolo8.darkbot.config.actions.values.NumberConstant;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.types.Condition;
@@ -36,16 +35,10 @@ public class AfterCondition implements LegacyCondition, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        String[] params = str.split(" *, *", 2);
+    public void parse(ParsingNode node) throws SyntaxException {
+        node.requireParamSize(2, getClass());
 
-        time = (long) (NumberConstant.parseNumber(params[0], str, getClass()).doubleValue() * 1000);
-
-        str = ParseUtil.separate(params, getClass(), ",");
-
-        ParseResult<Result> pr = ValueParser.parse(str, Result.class);
-        condition = pr.asCondition(str, getClass());
-
-        return ParseUtil.separate(pr.leftover.trim(), getClass(), ")");
+        time = (long) (NumberConstant.parseNumber(node.getParam(0), getClass()).doubleValue() * 1000);
+        condition = ValueParser.parseCondition(node.getParam(1));
     }
 }

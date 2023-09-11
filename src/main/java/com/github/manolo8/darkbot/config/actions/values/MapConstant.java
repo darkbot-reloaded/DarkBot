@@ -5,8 +5,8 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.Values;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.objects.Map;
@@ -35,28 +35,26 @@ public class MapConstant implements Value<Map>, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        String[] params = str.split("\\)", 2);
+    public void parse(ParsingNode node) throws SyntaxException {
+        node.requireParamSize(1, getClass());
+        String name = node.getParamStr(0);
 
-        params[0] = params[0].trim().toLowerCase(Locale.ROOT);
         map = StarManager.getAllMaps().stream()
                 .filter(m -> m.id > 0)
-                .filter(m -> m.name.equalsIgnoreCase(params[0]) ||
-                        (m.shortName != null && m.shortName.equalsIgnoreCase(params[0])))
+                .filter(m -> m.name.equalsIgnoreCase(name) ||
+                        (m.shortName != null && m.shortName.equalsIgnoreCase(name)))
                 .findFirst().orElse(null);
 
         if (map == null)
-            throw new SyntaxException("Unknown map: '" + params[0] + "'", str, Values.getMeta(getClass()),
+            throw new SyntaxException("Unknown map: '" + name + "'", node.getParam(0), Values.getMeta(getClass()),
                     StarManager.getAllMaps().stream()
                             .filter(m -> m.id > 0)
-                            .filter(m -> HeroManager.instance.map == m || (params[0].isEmpty() ?
+                            .filter(m -> HeroManager.instance.map == m || (name.isEmpty() ?
                                     ACCESSIBLE_MAPS.contains(m.name) :
-                                    m.name.toLowerCase(Locale.ROOT).contains(params[0])))
+                                    m.name.toLowerCase(Locale.ROOT).contains(name)))
                             .map(m -> m.shortName != null ? m.shortName : m.name)
                             .distinct()
                             .toArray(String[]::new));
-
-        return ParseUtil.separate(params, getClass(), ")");
     }
 
 }
