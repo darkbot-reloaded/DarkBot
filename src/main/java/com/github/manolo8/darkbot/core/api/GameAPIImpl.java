@@ -447,6 +447,11 @@ public class GameAPIImpl<
 
     @Override
     public void handleRefresh() {
+        handleRefresh(false);
+    }
+
+    @Override
+    public void handleRefresh(boolean useFakeDailyLogin) {
         // No login has happened? Make a first attempt
         if (hasCapability(Capability.LOGIN) && loginData.getUrl() == null) {
             handleRelogin();
@@ -454,9 +459,12 @@ public class GameAPIImpl<
 
         setData(); //always set data to update possible settings changes
         refreshCount++;
-        handler.reload();
-
+        reload(useFakeDailyLogin);
         extraMemoryReader.resetCache();
+    }
+
+    protected void reload(boolean useFakeDailyLogin) {
+        handler.reload();
     }
 
     @Override
