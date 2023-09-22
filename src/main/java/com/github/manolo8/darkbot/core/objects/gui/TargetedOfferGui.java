@@ -29,11 +29,12 @@ public class TargetedOfferGui extends Gui {
 
     public boolean show(boolean value) {
         if (value) throw new UnsupportedOperationException("Can't set showing a targeted offer!");
-        if (trySetShowing(false)) {
-            click(width - 3, 3);
-            return false;
-        }
-        return isAnimationDone();
+        return super.show(false);
+    }
+
+    @Override
+    protected void legacyToggle(boolean show) {
+        click(width - 3, 3);
     }
 
     @Override
