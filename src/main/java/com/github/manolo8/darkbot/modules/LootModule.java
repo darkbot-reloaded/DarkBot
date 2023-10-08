@@ -20,6 +20,11 @@ import java.util.List;
 import static java.lang.Double.min;
 import static java.lang.Math.random;
 
+/**
+ * @deprecated Use {@link eu.darkbot.shared.modules.LootModule}
+ */
+@Deprecated(forRemoval = true)
+@SuppressWarnings("removal")
 @Feature(name = "Npc Killer (Legacy)", description = "Npc-only module. Will never pick up resources.")
 public class LootModule implements Module {
 

@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.modules.utils.SafetyFinder;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 
+@SuppressWarnings("removal")
 public class DisconnectModule extends TemporalModule {
 
     private final Long pauseTime;

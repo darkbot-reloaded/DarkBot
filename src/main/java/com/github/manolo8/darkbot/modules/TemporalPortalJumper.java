@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.game.entities.Portal;
 import eu.darkbot.api.game.other.GameMap;
+import eu.darkbot.shared.modules.TemporalModule;
 import eu.darkbot.shared.utils.PortalJumper;
 
 public class TemporalPortalJumper extends TemporalModule {
@@ -13,6 +14,7 @@ public class TemporalPortalJumper extends TemporalModule {
     private final PortalJumper portalJumper;
 
     public TemporalPortalJumper(Main main, Portal target) {
+        super(main);
         this.main = main;
         this.target = target;
         this.portalJumper = new PortalJumper(main.pluginAPI);
@@ -36,14 +38,14 @@ public class TemporalPortalJumper extends TemporalModule {
     }
 
     @Override
-    public void tick() {
+    public void onTickModule() {
         if (main.hero.drive.movementInterrupted(500) || !target.isValid()) {
             goBack();
         } else portalJumper.travelAndJump(target);
     }
 
     @Override
-    public void tickStopped() {
-        tick();
+    public void onTickStopped() {
+        onTickModule();
     }
 }

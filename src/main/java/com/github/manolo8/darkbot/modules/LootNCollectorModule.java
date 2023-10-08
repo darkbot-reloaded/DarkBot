@@ -12,6 +12,11 @@ import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.utils.I18n;
 
+/**
+ * @deprecated Use {@link eu.darkbot.shared.modules.LootCollectorModule}
+ */
+@Deprecated(forRemoval = true)
+@SuppressWarnings("removal")
 @Feature(name = "Kill & Collect (Legacy)", description = "Kills npcs and collects resources at the same time.")
 public class LootNCollectorModule implements Module {
 

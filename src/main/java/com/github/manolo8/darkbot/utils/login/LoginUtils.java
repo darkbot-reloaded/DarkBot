@@ -73,7 +73,7 @@ public class LoginUtils {
         }
 
         LoginData loginData = new LoginData();
-        loginData.setCredentials(params.getUsername(), password);
+        loginData.setCredentials(params.getUsername(), password, null);
 
         System.out.println("Auto logging in using " + (params.shouldSIDLogin() ? "server & SID" : "user & password") + " (1/2)");
         try {

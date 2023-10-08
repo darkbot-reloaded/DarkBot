@@ -1,9 +1,9 @@
 package com.github.manolo8.darkbot.gui.tree.editors;
 
 import com.github.manolo8.darkbot.gui.components.MainButton;
-import com.github.manolo8.darkbot.gui.tree.utils.TableSearchField;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
+import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.utils.ToolTipHeader;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.table.TableCharEditor;
@@ -124,7 +124,7 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
                 Table.Control control = controls[i];
                 JComponent component;
                 if (control == Table.Control.SEARCH)
-                    component = new TableSearchField<>(sorter,
+                    component = SearchField.forTable(sorter,
                             setting.getOrCreateMetadata("table.searchModel", PlainDocument::new));
                 else if (control == Table.Control.ADD)
                     component = new AddButton(api, this.setting, tableModel, type);

@@ -168,5 +168,9 @@ public interface GameAPI {
         default boolean callMethodAsync(int index, long... arguments) {
             throw new UnsupportedOperationException();
         }
+
+        default int checkMethodSignature(long obj, int methodIdx, boolean includeMethodName, String signature) {
+            throw new UnsupportedOperationException();
+        }
     }
 }
