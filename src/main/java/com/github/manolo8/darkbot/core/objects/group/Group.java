@@ -21,6 +21,7 @@ public class Group extends Updatable.Auto {
     public int maxSize;
     public boolean isOpen; // if the group is open to allowing anyone to invite
     public boolean isLeader;
+    public boolean isBlocked;
 
     private ObjArray membersPtr = ObjArray.ofVector(true);
 

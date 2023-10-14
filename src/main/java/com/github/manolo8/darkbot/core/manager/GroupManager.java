@@ -82,6 +82,7 @@ public class GroupManager extends Gui implements GroupAPI {
 
         this.config = main.config.GROUP;
 
+        tryBlockInvites();
         tryQueueLeave();
         tryQueueAcceptInvite();
         tryOpenInvites();
@@ -138,6 +139,12 @@ public class GroupManager extends Gui implements GroupAPI {
             pending = () -> sendInvite(player.username, inviteTime == null ? 60_000 : 120_000);
             break;
         }
+    }
+
+    public void tryBlockInvites() {
+        if (pending != null) return;
+
+        if (config.BLOCK_INVITES == group.isBlocked) pending = () -> runClicks(getPoint(GroupAction.CAN_INVITE));
     }
 
     public void tryQueueLeave() {
