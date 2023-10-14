@@ -127,7 +127,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
             API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
     }
 
-    private boolean close() {
+    protected boolean close() {
         // 0 = without close animation, 1 = with close animation(250ms)
         return API.hasCapability(Capability.DIRECT_CALL_METHOD)
                 && API.callMethodChecked(true, "23(cleanup)(262?)11167211000", 159, address, 0);
@@ -150,8 +150,12 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
         return false;
     }
 
+    protected int animationTime() {
+        return 1000;
+    }
+
     public boolean isAnimationDone() {
-        return !isTweening && System.currentTimeMillis() - 1000 > time;
+        return !isTweening && System.currentTimeMillis() - animationTime() > time;
     }
 
     /**

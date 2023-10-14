@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.bases.BaseRepairStation;
 import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.core.objects.SpriteObject;
 import com.github.manolo8.darkbot.core.objects.swf.IntArray;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
@@ -151,6 +152,9 @@ public class RepairManager implements Manager, RepairAPI {
 
     // return true if clicked, false if should wait
     public boolean tryRevive() {
+        // game did cleanup in Repair Manager, nothing to do here anymore. if nothing happens then only reload left
+        if (repairOptions.getSize() <= 0) return false;
+
         int repairOption = getRepairOptionFromType(reviveHandler.getBest());
         int availableIn = optionAvailableIn(repairOption);
 
@@ -165,7 +169,15 @@ public class RepairManager implements Manager, RepairAPI {
         if (repairOption != -1)
             API.writeMemoryLong(repairAddress + 32, repairOption);
 
-        API.mouseClick(MapManager.clientWidth / 2, (MapManager.clientHeight / 2) + 190);
+        int selected = API.readInt(repairAddress + 32);
+        // if any of these is selected, call this method with null param may result in crash
+        if (selected == 0 || selected == 9
+                || !API.callMethodChecked(false, "23(2626)1016341800", 5, repairAddress, 0L)) {
+            SpriteObject repairGui = new SpriteObject();
+            repairGui.update(Main.API.readLong(repairAddress + 48));
+            repairGui.update();
+            API.mouseClick(repairGui.x() + 263, repairGui.y() + 426);
+        }
         lastReviveAttempt = System.currentTimeMillis();
 
         return true;
