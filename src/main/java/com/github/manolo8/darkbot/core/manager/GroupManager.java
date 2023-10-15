@@ -73,7 +73,7 @@ public class GroupManager extends Gui implements GroupAPI {
         inviteDict.sync(invites, () -> new Invite(main.hero), invite -> invite.valid);
 
         long groupMediatorAddress = main.facadeManager.groupMediator.address;
-        isBlockingInvites = API.readBoolean(API.readMemoryPtr(groupMediatorAddress, 0x30), 0xD4);
+        isBlockingInvites = API.readMemoryBoolean(groupMediatorAddress, 0x30, 0xD4);
     }
 
     public void tick() {
