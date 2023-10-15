@@ -150,7 +150,7 @@ public class GroupManager extends Gui implements GroupAPI {
         if (pending != null) return;
         if (group.isValid()) return;
 
-        if((config.BLOCK_INVITES && !isBlockingInvites) || (!config.BLOCK_INVITES && isBlockingInvites)){
+        if(config.BLOCK_INVITES != isBlockingInvites) {
             pending = () -> click(MARGIN_WIDTH + INVITE_WIDTH + BUTTON_WIDTH + (BUTTON_WIDTH / 2), HEADER_HEIGHT + (BUTTON_HEIGHT / 2));
         }
     }
