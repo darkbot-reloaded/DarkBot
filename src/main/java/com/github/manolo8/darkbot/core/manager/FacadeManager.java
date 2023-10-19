@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.objects.facades.AgatusEventProxy;
 import com.github.manolo8.darkbot.core.objects.facades.AssemblyMediator;
 import com.github.manolo8.darkbot.core.objects.facades.AstralGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
@@ -18,6 +19,7 @@ import com.github.manolo8.darkbot.core.objects.facades.GalaxyBuilderProxy;
 import com.github.manolo8.darkbot.core.objects.facades.GauntletPlutusProxy;
 import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
+import com.github.manolo8.darkbot.core.objects.facades.DefaultNpcEventProxy;
 import com.github.manolo8.darkbot.core.objects.facades.NpcEventProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
@@ -55,9 +57,9 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final HighlightProxy highlight;
     public final SpaceMapWindowProxy spaceMapWindowProxy;
     public final GauntletPlutusProxy plutus;
-    public final NpcEventProxy npcEventProxy;
+    public final DefaultNpcEventProxy npcEventProxy;
     public final WorldBossOverviewProxy worldBossOverview;
-    public final NpcEventProxy agatusEvent;
+    public final DefaultNpcEventProxy agatusEvent;
     public final Updatable group;
 
     public FacadeManager(PluginAPI pluginApi) {
@@ -80,7 +82,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.plutus         = registerProxy("plutus",                 GauntletPlutusProxy.class);
         this.npcEventProxy  = registerProxy("npc_event",              NpcEventProxy.class);
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
-        this.agatusEvent    = registerProxy("agatus_event",           NpcEventProxy.class);
+        this.agatusEvent    = registerProxy("agatus_event",           AgatusEventProxy.class);
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
 
         registerProxy("dispatch", DispatchProxy.class);
