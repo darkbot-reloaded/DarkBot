@@ -9,7 +9,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class NpcEventProxy extends Updatable implements NpcEventAPI {
     public double time;
     public String eventID;
-    public String eventName;
+    public String npcName;
     public String eventDescriptionID;
     public String eventDescription;
     public String npcLeftDescription;
@@ -23,8 +23,8 @@ public class NpcEventProxy extends Updatable implements NpcEventAPI {
     }
 
     @Override
-    public String getEventName() {
-        return eventName;
+    public String getNpcName() {
+        return npcName;
     }
 
     @Override
@@ -70,7 +70,7 @@ public class NpcEventProxy extends Updatable implements NpcEventAPI {
         this.npcLeftDescription = API.readMemoryString(API.readMemoryLong(data + 0x68));
         this.eventDescriptionID = API.readMemoryString(API.readMemoryLong(data + 0x70));
         this.eventID = API.readMemoryString(API.readMemoryLong(data + 0x78));
-        this.eventName = API.readMemoryString(API.readMemoryLong(data + 0x80));
+        this.npcName = API.readMemoryString(API.readMemoryLong(data + 0x80));
         this.npcCount = API.readInt(data + 0x88);
         this.bossCount = API.readInt(data + 0x90);
     }
