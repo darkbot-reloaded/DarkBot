@@ -141,6 +141,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.assembly = register("assembly");
 
         register("ggBuilder", GateSpinnerGui.class);
+        register("refinement_count");
 
         this.commandCenter = register("command_center");
 

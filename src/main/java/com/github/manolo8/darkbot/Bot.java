@@ -55,7 +55,11 @@ public class Bot {
             UIManager.put("Table.cellFocusColor", new Color(0, 0, 0, 160));
 
             // set icon here to use it in login popup, java check popup etc.
-            Popups.setDefaultIcon(MainGui.ICON);
+            try {
+                Popups.setDefaultIcon(MainGui.ICON);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             // Not recommended to keep for production
             //FlatInspector.install("ctrl shift alt X");

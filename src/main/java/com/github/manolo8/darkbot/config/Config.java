@@ -294,6 +294,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         public @Option @Visibility(Level.INTERMEDIATE) Other OTHER = new Other();
         public static class Other {
+            public @Option boolean SHOW_INSTRUCTIONS = true;
             public @Option boolean DISABLE_MASTER_PASSWORD = false;
             public @Option boolean ALWAYS_SHOW_CAPTCHA = false;
             public @Option @Number(min = 10, max = 300) int ZONE_RESOLUTION = 30;

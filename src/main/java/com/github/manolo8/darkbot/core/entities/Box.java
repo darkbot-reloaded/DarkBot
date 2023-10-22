@@ -3,7 +3,9 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.config.BoxInfo;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.api.Capability;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.utils.Offsets;
+import eu.darkbot.api.game.other.Location;
 import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +27,10 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
 
     public BoxInfo boxInfo;
 
+
+    private Box(int id) {
+        super(id);
+    }
 
     public Box(int id, long address) {
         super(id);
@@ -134,5 +140,62 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
         public Beacon(int id, long address) {
             super(id, address);
         }
+    }
+
+    public static class FakeBox extends Box implements eu.darkbot.api.game.entities.FakeEntity.FakeBox {
+        private static int CURR_ID = Integer.MIN_VALUE;
+        private Timer timeout;
+        private long removeDistance;
+        private boolean isRemoveWhenAttemptSelect;
+
+        public FakeBox(String boxName, Location loc, long removeDistance, long keepAlive, boolean isRemoveWhenAttemptSelect) {
+            super(CURR_ID++);
+            super.locationInfo.updatePosition(loc.x(), loc.y());
+            super.main = HeroManager.instance.main;
+            super.type = boxName;
+            super.boxInfo = ConfigEntity.INSTANCE.getOrCreateBoxInfo(type);
+            super.removed = false;
+            setRemoveDistance(removeDistance);
+            setTimeout(keepAlive);
+            setRemoveWhenAttemptSelect(isRemoveWhenAttemptSelect);
+        }
+
+        public void setTimeout(long keepAlive) {
+            if (keepAlive != -1) {
+                timeout = Timer.get(keepAlive);
+                timeout.activate();
+            }
+            else timeout = null;
+        }
+
+        public void setRemoveDistance(long removeDistance) {
+            this.removeDistance = removeDistance;
+        }
+
+        public void setRemoveWhenAttemptSelect(boolean removeWhenAttemptSelect) {
+            isRemoveWhenAttemptSelect = removeWhenAttemptSelect;
+        }
+
+        public String getHash() {
+            return type + locationInfo.getCurrent();
+        }
+
+        public boolean tryCollect() {
+            return trySelect(false);
+        }
+
+        public boolean isInvalid(long mapAddress) {
+            if (timeout != null && timeout.isInactive()) return false;
+            return HeroManager.instance.distanceTo(this) < removeDistance;
+        }
+
+        public boolean trySelect(boolean tryAttack) {
+            if (isRemoveWhenAttemptSelect) removed();
+            return false;
+        }
+
+        public void update() {}
+
+        public void update(long address) {}
     }
 }

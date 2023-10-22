@@ -23,6 +23,7 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.factory.EntityFactory;
 import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
+import eu.darkbot.api.game.entities.FakeEntity;
 import eu.darkbot.api.game.entities.Mist;
 import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.EntitiesAPI;
@@ -126,6 +127,24 @@ public class EntityList extends Updatable implements EntitiesAPI {
             this.obstacles.add((Obstacle) entity);
 
         this.eventBroker.sendEvent(new EntityCreateEvent(entity));
+    }
+
+    public FakeEntity.FakeMine createFakeMine(int typeId, eu.darkbot.api.game.other.Location  loc, long removeDistance, long keepAlive) {
+        return register(new Mine.FakeMine(typeId, loc, removeDistance, keepAlive), mines);
+    }
+
+    public FakeEntity.FakeBox createFakeBox(String boxName, eu.darkbot.api.game.other.Location loc, long removeDistance, long keepAlive, boolean removeIfAttemptSelect) {
+        return register(new Box.FakeBox(boxName, loc, removeDistance, keepAlive, removeIfAttemptSelect), boxes);
+    }
+
+    public FakeEntity.FakeShip createFakeNpc(String npcName, eu.darkbot.api.game.other.Location loc, long removeDistance, long keepAlive, boolean removeIfAttemptSelect) {
+        return register(new Npc.FakeNpc(npcName, loc, removeDistance, keepAlive, removeIfAttemptSelect), npcs);
+    }
+
+    private <T extends Entity> T register(T entity, Collection<? super T> collection) {
+        collection.add(entity);
+        onEntityCreate(entity);
+        return entity;
     }
 
     @SuppressWarnings("unchecked")
