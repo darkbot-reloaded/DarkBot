@@ -131,7 +131,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
         private int id;
         private boolean completed;
 
-        private final List<Contition> conditionItems = new ArrayList<>();
+        private final List<Condition> conditionItems = new ArrayList<>();
         private final ObjArray conditionItemsArr = ObjArray.ofArrObj(true);
 
         private final List<Reward> rewardItems = new ArrayList<>();
@@ -154,7 +154,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
             this.completed = API.readMemoryBoolean(conditionsAddr, 0x38);
 
             conditionItemsArr.update(API.readMemoryPtr(conditionsAddr + 0x40));
-            conditionItemsArr.sync(conditionItems, Contition::new);
+            conditionItemsArr.sync(conditionItems, Condition::new);
 
             rewardItemsArr.update(API.readMemoryPtr(address + 0x50));
             rewardItemsArr.sync(rewardItems, Reward::new);
@@ -188,7 +188,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
             return completed;
         }
 
-        public List<Contition> getConditions() {
+        public List<Condition> getConditions() {
             return conditionItems;
         }
 
@@ -220,13 +220,13 @@ public class QuestProxy extends Updatable implements API.Singleton {
         }
     }
 
-    public static class Contition extends Auto {
+    public static class Condition extends Auto {
         private String description;
         private double goalReached;
         private double goal;
         private boolean completed;
 
-        private final List<Contition> conditionItems = new ArrayList<>();
+        private final List<Condition> conditionItems = new ArrayList<>();
         private final ObjArray conditionItemsArr = ObjArray.ofArrObj(true);
 
         private String conditionType;
@@ -246,7 +246,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
             this.conditionType = API.readMemoryString(definitionAddr, 0x28);
 
             conditionItemsArr.update(API.readMemoryPtr(address + 0x48));
-            conditionItemsArr.sync(conditionItems, Contition::new);
+            conditionItemsArr.sync(conditionItems, Condition::new);
         }
 
         public String getDescription() {
@@ -269,7 +269,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
             return conditionType;
         }
 
-        public List<Contition> getConditions() {
+        public List<Condition> getConditions() {
             return conditionItems;
         }
 
