@@ -14,13 +14,15 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 public class QuestProxy extends Updatable implements API.Singleton {
-    private @Nullable Quest currentQuest = new Quest();
+    private @Nullable Quest currentQuest;
 
     private final List<QuestListItem> questItems = new ArrayList<>();
 
     private final ObjArray questItemsArr = ObjArray.ofVector(true);
 
-    private @Nullable QuestListItem questGiverSelected = new QuestListItem();
+    private @Nullable Quest questGiverSelected;
+
+    private boolean visibleQuestGiver;
 
     @Override
     public void update() {
@@ -29,6 +31,8 @@ public class QuestProxy extends Updatable implements API.Singleton {
         }
 
         long questClass = API.readMemoryLong(address + 0x98) & ByteUtils.ATOM_MASK;
+
+        this.visibleQuestGiver = API.readMemoryBoolean(address, 0x40);
 
         long currentQuestAddr = API.readMemoryLong(questClass + 0x28) & ByteUtils.ATOM_MASK;
 
@@ -45,12 +49,12 @@ public class QuestProxy extends Updatable implements API.Singleton {
         questItemsArr.update(API.readMemoryPtr(0x58));
         questItemsArr.sync(questItems, QuestListItem::new);
 
-        long questGiverSelectedAddr = API.readMemoryLong(questClass + 0x0A8) & ByteUtils.ATOM_MASK;
+        long questGiverSelectedAddr = API.readMemoryLong(address + 0xB0) & ByteUtils.ATOM_MASK;
         if (questGiverSelectedAddr == 0) {
             this.questGiverSelected = null;
         } else {
             if (this.questGiverSelected == null) {
-                this.questGiverSelected = new QuestListItem();
+                this.questGiverSelected = new Quest();
             }
 
             this.questGiverSelected.update(questGiverSelectedAddr);
@@ -61,12 +65,16 @@ public class QuestProxy extends Updatable implements API.Singleton {
         return currentQuest;
     }
 
-    public @Nullable QuestListItem getCurrentQuestSeleted() {
+    public @Nullable Quest getCurrentQuestSeleted() {
         return questGiverSelected;
     }
 
     public @Nullable List<QuestListItem> getCurrestQuests() {
         return questItems;
+    }
+
+    public boolean isVisibleQuestGiver() {
+        return visibleQuestGiver;
     }
 
     public static class QuestListItem extends Auto {
