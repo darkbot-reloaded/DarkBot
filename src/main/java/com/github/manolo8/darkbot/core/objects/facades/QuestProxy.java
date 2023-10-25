@@ -18,11 +18,13 @@ public class QuestProxy extends Updatable implements API.Singleton {
 
     private final List<QuestListItem> questItems = new ArrayList<>();
 
-    private final ObjArray questItemsArr = ObjArray.ofVector(true);
+    private final ObjArray questItemsArr = ObjArray.ofArrObj(true);
 
     private @Nullable Quest questGiverSelected;
+    private @Nullable QuestListItem questInfoGiverSelected;
 
     private boolean visibleQuestGiver;
+    private int tabSelected;
 
     @Override
     public void update() {
@@ -33,6 +35,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
         long questClass = API.readMemoryLong(address + 0x98) & ByteUtils.ATOM_MASK;
 
         this.visibleQuestGiver = API.readMemoryBoolean(address, 0x40);
+        this.tabSelected = API.readMemoryInt(address, 0X50);
 
         long currentQuestAddr = API.readMemoryLong(questClass + 0x28) & ByteUtils.ATOM_MASK;
 
@@ -48,6 +51,17 @@ public class QuestProxy extends Updatable implements API.Singleton {
 
         questItemsArr.update(API.readMemoryPtr(0x58));
         questItemsArr.sync(questItems, QuestListItem::new);
+
+        long questInfoGiverSelectedAddr = API.readMemoryLong(address + 0xA8) & ByteUtils.ATOM_MASK;
+        if (questInfoGiverSelectedAddr == 0) {
+            this.questInfoGiverSelected = null;
+        } else {
+            if (this.questInfoGiverSelected == null) {
+                this.questInfoGiverSelected = new QuestListItem();
+            }
+
+            this.questInfoGiverSelected.update(questInfoGiverSelectedAddr);
+        }
 
         long questGiverSelectedAddr = API.readMemoryLong(address + 0xB0) & ByteUtils.ATOM_MASK;
         if (questGiverSelectedAddr == 0) {
@@ -69,12 +83,20 @@ public class QuestProxy extends Updatable implements API.Singleton {
         return questGiverSelected;
     }
 
+    public @Nullable QuestListItem getCurrentQuestInfoSeleted() {
+        return questInfoGiverSelected;
+    }
+
     public @Nullable List<QuestListItem> getCurrestQuests() {
         return questItems;
     }
 
     public boolean isVisibleQuestGiver() {
         return visibleQuestGiver;
+    }
+
+    public int getTabSelected() {
+        return tabSelected;
     }
 
     public static class QuestListItem extends Auto {
