@@ -255,6 +255,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
         private double goalReached;
         private double goal;
         private boolean completed;
+        private boolean enabled;
 
         private final List<Condition> conditionItems = new ArrayList<>();
         private final ObjArray conditionItemsArr = ObjArray.ofArrObj(true);
@@ -267,6 +268,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
                 return;
             }
 
+            this.enabled = API.readMemoryBoolean(address + 0x24);
             this.completed = API.readMemoryBoolean(address, 0x34);
             this.description = API.readMemoryString(address, 0x60);
             this.goalReached = API.readMemoryDouble(address + 0x78);
@@ -277,6 +279,10 @@ public class QuestProxy extends Updatable implements API.Singleton {
 
             conditionItemsArr.update(API.readMemoryPtr(address + 0x48));
             conditionItemsArr.sync(conditionItems, Condition::new);
+        }
+
+        public boolean isEnabled() {
+            return enabled;
         }
 
         public String getDescription() {
