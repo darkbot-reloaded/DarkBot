@@ -49,6 +49,8 @@ public class GroupManager extends Gui implements GroupAPI {
 
     private long lastValidTime; // Last time group had members for isLoaded check
 
+    private boolean isBlockingInvites;
+
     public GroupManager(Main main) {
         this.main = main;
 
@@ -69,6 +71,9 @@ public class GroupManager extends Gui implements GroupAPI {
         inviteDict.update(API.readMemoryLong(groupAddress + 0x48));
 
         inviteDict.sync(invites, () -> new Invite(main.hero), invite -> invite.valid);
+
+        long groupMediatorAddress = main.facadeManager.groupMediator.address;
+        isBlockingInvites = API.readMemoryBoolean(groupMediatorAddress, 0x30, 0xD4);
     }
 
     public void tick() {
@@ -82,6 +87,7 @@ public class GroupManager extends Gui implements GroupAPI {
 
         this.config = main.config.GROUP;
 
+        tryBlockInvites();
         tryQueueLeave();
         tryQueueAcceptInvite();
         tryOpenInvites();
@@ -137,6 +143,15 @@ public class GroupManager extends Gui implements GroupAPI {
 
             pending = () -> sendInvite(player.username, inviteTime == null ? 60_000 : 120_000);
             break;
+        }
+    }
+
+    public void tryBlockInvites() {
+        if (pending != null) return;
+        if (group.isValid()) return;
+
+        if(config.BLOCK_INVITES != isBlockingInvites) {
+            pending = () -> click(MARGIN_WIDTH + INVITE_WIDTH + BUTTON_WIDTH + (BUTTON_WIDTH / 2), HEADER_HEIGHT + (BUTTON_HEIGHT / 2));
         }
     }
 

@@ -61,6 +61,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final WorldBossOverviewProxy worldBossOverview;
     public final DefaultNpcEventProxy agatusEvent;
     public final Updatable group;
+    public final Updatable groupMediator;
 
     public FacadeManager(PluginAPI pluginApi) {
         this.pluginAPI = pluginApi;
@@ -84,6 +85,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
         this.agatusEvent    = registerProxy("agatus_event",           AgatusEventProxy.class);
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
+        this.groupMediator  = registerMediator("GroupSystemMediator", Updatable.NoOp.class);
 
         registerProxy("dispatch", DispatchProxy.class);
         registerProxy("ggBuilder", GalaxyBuilderProxy.class);
