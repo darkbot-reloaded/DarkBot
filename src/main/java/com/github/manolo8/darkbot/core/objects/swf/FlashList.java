@@ -238,7 +238,9 @@ public abstract class FlashList<E> extends AbstractList<E> implements NativeUpda
         @Override
         public void update(long address) {
             if (this.address != address && valueType == null) {
-                String type = Main.API.readString(address, 32, 48, 144);
+                String type = threadSafe
+                        ? Main.API.readStringDirect(address, 32, 48, 144)
+                        : Main.API.readString(address, 32, 48, 144);
                 switch (type) {
                     case "uint":
                     case "int":
