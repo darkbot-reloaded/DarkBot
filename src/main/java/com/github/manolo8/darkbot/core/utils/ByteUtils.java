@@ -144,6 +144,31 @@ public class ByteUtils {
         return Main.API.readString(object, 0x10, 0x28, 0x90);
     }
 
+    public static String readObjectNameDirect(long object) {
+        return Main.API.readStringDirect(object, 0x10, 0x28, 0x90);
+    }
+
+    public static String readStringDirect(long address) {
+        long sizeAndFlags = Main.API.readLong(address + 32);
+
+        int size = (int) sizeAndFlags; // lower 32bits
+        if (size == 0) return "";
+
+        int flags = (int) (sizeAndFlags >> 32); // high 32bits
+        int width = (flags & 0b001);
+
+        size <<= width;
+        if (size > 1024 || size < 0) return null;
+
+        boolean dependent = ((flags & 0b110) >> 1) == ExtraMemoryReader.TYPE_DEPENDENT;
+        address = dependent
+                ? Main.API.readLong(address, 24, 16) + Main.API.readInt(address + 16)
+                : Main.API.readLong(address + 16);
+
+        return new String(Main.API.readBytes(address, size),
+                width == ExtraMemoryReader.WIDTH_8 ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_16LE);
+    }
+
     public static class ExtraMemoryReader implements GameAPI.ExtraMemoryReader {
         private static final int TYPE_DYNAMIC = 0, TYPE_STATIC = 1, TYPE_DEPENDENT = 2;
         private static final int WIDTH_AUTO = -1, WIDTH_8 = 0, WIDTH_16 = 1;

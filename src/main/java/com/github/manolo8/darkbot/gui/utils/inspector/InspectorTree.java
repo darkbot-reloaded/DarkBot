@@ -10,7 +10,6 @@ import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
@@ -43,7 +42,7 @@ public class InspectorTree extends JTree {
 
         addTreeWillExpandListener(new TreeWillExpandListener() {
             @Override
-            public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
+            public void treeWillExpand(TreeExpansionEvent event) {
                 TreePath path = event.getPath();
                 if (path.getLastPathComponent() instanceof ObjectTreeNode) {
                     ObjectTreeNode node = (ObjectTreeNode) path.getLastPathComponent();
@@ -52,7 +51,12 @@ public class InspectorTree extends JTree {
             }
 
             @Override
-            public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {
+            public void treeWillCollapse(TreeExpansionEvent event) {
+                TreePath path = event.getPath();
+                if (path.getLastPathComponent() instanceof ObjectTreeNode) {
+                    ObjectTreeNode node = (ObjectTreeNode) path.getLastPathComponent();
+                    node.unloadChildren(InspectorTree.this);
+                }
             }
         });
 
@@ -61,8 +65,12 @@ public class InspectorTree extends JTree {
             public void ancestorAdded(AncestorEvent event) {
                 if (timer == null) {
                     timer = new Timer(delay, e -> {
-                        ((ObjectTreeNode) model.getRoot()).update(InspectorTree.this);
-                        invalidate();
+                        try {
+                            ((ObjectTreeNode) model.getRoot()).update(InspectorTree.this);
+                            invalidate();
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
                     });
                     timer.setRepeats(true);
                     timer.start();
@@ -81,9 +89,13 @@ public class InspectorTree extends JTree {
             }
         });
 
-        DefaultTreeCellRenderer cellRender = new DefaultTreeCellRenderer();
-        cellRender.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        setCellRenderer(cellRender);
+        setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        setCellRenderer(new InspectorTreeCellRenderer());
+    }
+
+    @Override
+    public boolean hasBeenExpanded(TreePath path) {
+        return false;
     }
 
     @Override
@@ -106,13 +118,36 @@ public class InspectorTree extends JTree {
     private void editValue(boolean primitivesOnly) {
         ObjectTreeNode node = getSelectedNode();
         if (node != null && node.isMemoryWritable()) {
-            ObjectInspector.Slot slot = (ObjectInspector.Slot) node.getUserObject();
+            ObjectInspector.Slot slot = node.getSlot();
             if (primitivesOnly && slot.slotType == ObjectInspector.Slot.Type.OBJECT) return;
 
             String result = JOptionPane.showInputDialog(getRootPane(),
                     "Edit value of " + slot.type + " " + slot.name, "Edit value", JOptionPane.PLAIN_MESSAGE);
             if (result != null && !result.isEmpty())
                 node.memoryWrite(result);
+        }
+    }
+
+    private static class InspectorTreeCellRenderer extends DefaultTreeCellRenderer {
+        private Color bgColor;
+
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+            Component treeCellRendererComponent = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+            ObjectTreeNode node = (ObjectTreeNode) value;
+
+            bgColor = node.getBackgroundColor(sel ? super.getBackgroundSelectionColor() : super.getBackgroundNonSelectionColor());
+            return treeCellRendererComponent;
+        }
+
+        @Override
+        public Color getBackgroundNonSelectionColor() {
+            return bgColor == null ? super.getBackgroundNonSelectionColor() : bgColor;
+        }
+
+        @Override
+        public Color getBackgroundSelectionColor() {
+            return bgColor == null ? super.getBackgroundSelectionColor() : bgColor;
         }
     }
 
@@ -126,11 +161,11 @@ public class InspectorTree extends JTree {
             JMenuItem editValueItem = new JMenuItem("Edit value");
             copyValueItem.addActionListener(a -> {
                 ObjectTreeNode node = getSelectedNode();
-                if (node != null) SystemUtils.toClipboard(node.strValue);
+                if (node != null) SystemUtils.toClipboard(node.getText());
             });
             copyAddressItem.addActionListener(a -> {
                 ObjectTreeNode node = getSelectedNode();
-                if (node != null) SystemUtils.toClipboard(String.format("0x%x", node.address.get()));
+                if (node != null) SystemUtils.toClipboard(String.format("0x%x", node.address.getAsLong()));
             });
             editValueItem.addActionListener(a -> editValue(false));
             add(copyValueItem);

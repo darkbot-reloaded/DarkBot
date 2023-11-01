@@ -8,6 +8,9 @@ public interface NativeUpdatable {
 
     long getAddress();
 
+    default void update() {}
+    default void update(long address) {}
+
     default int modifyOffset(int offset) {
         return offset;
     }

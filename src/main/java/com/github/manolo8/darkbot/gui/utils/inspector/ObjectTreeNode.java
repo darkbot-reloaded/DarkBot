@@ -1,74 +1,146 @@
 package com.github.manolo8.darkbot.gui.utils.inspector;
 
-import com.github.manolo8.darkbot.core.objects.swf.IntArray;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import com.github.manolo8.darkbot.core.objects.swf.PairArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
+import com.github.manolo8.darkbot.core.objects.swf.FlashMap;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.debug.ObjectInspector;
 import eu.darkbot.util.Popups;
+import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
-import java.util.Locale;
-import java.util.Vector;
-import java.util.function.Supplier;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
+import java.awt.*;
+import java.util.*;
+import java.util.List;
+import java.util.function.LongSupplier;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class ObjectTreeNode extends DefaultMutableTreeNode {
+    @Getter protected String text;
+    @Getter protected ObjectInspector.Slot slot;
 
-    public final Supplier<Long> address;
-    private final boolean addressIsValue;
-
+    protected LongSupplier address;
+    protected boolean staticAddress, readChildren;
     protected long value = -1;
-    protected String strValue;
 
-    public ObjectTreeNode(ObjectInspector.Slot slot, Supplier<Long> address, boolean addressIsValue) {
-        super(slot);
+    private double percentChange;
+    private long lastChange;
+
+    protected ObjectTreeNode(ObjectInspector.Slot slot, LongSupplier address, boolean staticAddress) {
+        this.slot = slot;
         this.address = address;
-        this.addressIsValue = addressIsValue;
+        this.staticAddress = staticAddress;
     }
 
-    public static ObjectTreeNode root(String name, Supplier<Long> addr) {
-        return new ObjectTreeNode(
-                new ObjectInspector.Slot(name, "Object", null, 0, 8),
-                addr, true);
+    public static ObjectTreeNode root(String name, LongSupplier address) {
+        return new ObjectTreeNode(new ObjectInspector.Slot(name, "Object", null, 0, 8), address, false);
+    }
+
+    private static String extractType(String slotName) {
+        int i = slotName.indexOf(".<");
+        return i == -1 ? slotName : slotName.substring(0, i);
+    }
+
+    private static String extractTemplateType(String slotName) {
+        int i = slotName.indexOf(".<");
+        if (i == -1) return null;
+
+        int j = slotName.lastIndexOf("::");
+        return slotName.substring((j == -1 ? i : j) + 2, slotName.length() - 1);
+    }
+
+    private static ObjectInspector.Slot createSlot(ObjectTreeNode parent, String name, Object value, int offset) {
+        String type = "";
+        String templateType = null;
+
+        if (value instanceof Long) {
+            String s = ByteUtils.readObjectNameDirect((Long) value);
+            if (!s.equals("ERROR")) {
+                type = extractType(s);
+                templateType = extractTemplateType(s);
+            }
+        } else {
+            if (parent.slot.templateType != null) {
+                type = parent.slot.templateType;
+            } else {
+                type = value.getClass().getSimpleName();
+            }
+        }
+
+        int size = value instanceof Integer || value instanceof Boolean ? 4 : 8;
+        ObjectInspector.Slot slot = new ObjectInspector.Slot(name, type, templateType, offset, size);
+
+        slot.isInArray = true;
+        slot.valueText = value instanceof Long ? String.format("0x%x", value) : value.toString();
+        return slot;
+    }
+
+    private static ObjectTreeNode createNode(long address, ObjectInspector.Slot slot, boolean staticAddress) {
+        long object = staticAddress ? API.readMemoryPtr(address) : address;
+        if (object == 0) new ObjectTreeNode(slot, () -> address, false);
+
+        boolean hasHashMap = FlashMap.hasHashMap(object);
+
+        //todo move & fix in ObjectInspector#getObjectSlots method
+        if (slot.slotType == ObjectInspector.Slot.Type.ARRAY
+                || slot.slotType == ObjectInspector.Slot.Type.VECTOR
+                || slot.slotType == ObjectInspector.Slot.Type.DICTIONARY
+                || slot.slotType == ObjectInspector.Slot.Type.PLAIN_OBJECT
+                || slot.slotType == ObjectInspector.Slot.Type.OBJECT) {
+
+            String name = ByteUtils.readObjectNameDirect(object);
+            if (!name.equals("ERROR")) {
+                String type = extractType(name);
+                String templateType = extractTemplateType(name);
+
+                slot.type = type;
+                if (templateType != null)
+                    slot.templateType = templateType;
+                slot.slotType = ObjectInspector.Slot.Type.of(slot);
+            }
+        }
+
+        switch (slot.slotType) {
+            case ARRAY:
+                if (!hasHashMap)
+                    return new ListNode(slot, () -> address, staticAddress, false);
+            case DICTIONARY:
+                return new FlashMapNode(slot, () -> address, staticAddress);
+            case VECTOR:
+                return new ListNode(slot, () -> address, staticAddress, true);
+            case PLAIN_OBJECT:
+                if (hasHashMap)
+                    return new FlashMapNode(slot, () -> address, staticAddress);
+            default:
+                return new ObjectTreeNode(slot, () -> address, staticAddress);
+        }
     }
 
     @Override
     public boolean isLeaf() {
-        ObjectInspector.Slot slot = (ObjectInspector.Slot) (this.getUserObject());
-        return value == 0 || slot.size < 8 || slot.type.equals("Number") || slot.type.equals("String");
-    }
-
-    @Override
-    public String toString() {
-        ObjectInspector.Slot slot = (ObjectInspector.Slot) (this.getUserObject());
-        return String.format("%03X %-30s  %-30s %s",
-                slot.offset, (slot.name.length() >= 30) ? (slot.name.substring(0, 27) + "...") : slot.name, slot.getType(), strValue);
-    }
-
-    public void trimChildren(int maxSize) {
-        if (children == null) return;
-        while (children.size() > maxSize) {
-            remove(children.size() - 1);
-        }
+        return address.getAsLong() <= 0xFFFF || (staticAddress && value < 0xFFFF)
+                || slot.size < 8
+                || slot.slotType == ObjectInspector.Slot.Type.DOUBLE
+                || slot.slotType == ObjectInspector.Slot.Type.STRING;
     }
 
     public boolean isMemoryWritable() {
-        ObjectInspector.Slot slot = (ObjectInspector.Slot) getUserObject();
-        return slot.slotType == ObjectInspector.Slot.Type.INT
+        return address.getAsLong() > 0xFFFF &&
+                (slot.slotType == ObjectInspector.Slot.Type.INT
                 || slot.slotType == ObjectInspector.Slot.Type.UINT
                 || slot.slotType == ObjectInspector.Slot.Type.DOUBLE
                 || slot.slotType == ObjectInspector.Slot.Type.BOOLEAN
-                || slot.slotType == ObjectInspector.Slot.Type.OBJECT;
+                || slot.slotType == ObjectInspector.Slot.Type.OBJECT);
     }
 
     public void memoryWrite(String text) {
         text = text.trim();
 
-        ObjectInspector.Slot slot = (ObjectInspector.Slot) getUserObject();
         switch (slot.slotType) {
             case BOOLEAN:
                 Boolean result = null;
@@ -77,217 +149,266 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                 if (text.equalsIgnoreCase("false") || text.equalsIgnoreCase("0")) result = false;
 
                 if (result != null) {
-                    API.writeInt(address.get(), result ? 1 : 0);
+                    API.writeInt(address.getAsLong(), result ? 1 : 0);
                     return;
                 }
                 break;
             case INT:
             case UINT:
                 try {
-                    int i = Integer.parseInt(text);
-                    API.writeInt(address.get(), i);
+                    API.writeInt(address.getAsLong(), Integer.parseInt(text));
                     return;
-                } catch (NumberFormatException ignore) {}
+                } catch (NumberFormatException ignore) {
+                }
                 break;
             case DOUBLE:
                 try {
-                    double v = Double.parseDouble(text);
-                    API.writeLong(address.get(), Double.doubleToLongBits(v));
+                    API.writeLong(address.getAsLong(), Double.doubleToLongBits(Double.parseDouble(text)));
                     return;
-                } catch (NumberFormatException ignore) {}
+                } catch (NumberFormatException ignore) {
+                }
                 break;
             case OBJECT:
                 Long l = ObjectInspectorUI.parseAddress(text);
                 if (l != null) {
-                    API.writeLong(address.get(), l);
+                    API.writeLong(address.getAsLong(), l);
                     return;
                 }
                 break;
         }
         String name = slot.slotType.name().toLowerCase(Locale.ROOT);
         Popups.of("Invalid " + name + " value",
-                "Expected a " + name + " value, but got '" + text + "'",
-                JOptionPane.ERROR_MESSAGE).showAsync();
+                "Expected a " + name + " value, but got '" + text + "'", JOptionPane.ERROR_MESSAGE).showAsync();
+    }
+
+    public @Nullable Color getBackgroundColor(Color bg) {
+        return percentChange > 0 ? UIUtils.darker(bg, 1 - percentChange * 0.25) : null;
     }
 
     public void update(InspectorTree tree) {
-        long address = this.address.get();
-        if (address == 0) {
-            return;
-        }
-
-        ObjectInspector.Slot slot = (ObjectInspector.Slot) (this.getUserObject());
-
+        long address = this.address.getAsLong();
         long oldValue = value;
-        if (addressIsValue) {
-            value = address;
-        } else {
+        if (staticAddress) {
             if (slot.size == 8) {
-                value = API.readMemoryLong(address);
+                value = API.readMemoryPtr(address);
             } else if (slot.size == 4) {
                 value = API.readMemoryInt(address);
             } else if (slot.size == 1) {
                 value = API.readInt(address);
             }
+        } else value = address;
 
-            // Non-leaf means it's an object, which we need to remove atom mask from.
-            if (!isLeaf()) value &= ByteUtils.ATOM_MASK;
-        }
-
-        boolean changed = oldValue != value;
-        if (changed) {
-            if (slot.type.equals("Number")) {
-                strValue = String.format("%.2f", Double.longBitsToDouble(value));
-            } else if (slot.type.equals("String")) {
-                strValue = value == 0 ? "null" : String.format("%s", API.readString(value));
-            } else if (slot.type.equals("Boolean")) {
-                strValue = (value == 1) ? "true" : (value == 0 ? "false" : String.format("Boolean(%d)", this.value));
+        if (oldValue != value) {
+            if (slot.slotType == ObjectInspector.Slot.Type.DOUBLE) {
+                text = String.format("%.3f", Double.longBitsToDouble(value));
+            } else if (slot.slotType == ObjectInspector.Slot.Type.STRING) {
+                text = value == 0 ? "null" : String.format("%s", API.readStringDirect(value));
+            } else if (slot.slotType == ObjectInspector.Slot.Type.BOOLEAN) {
+                text = (value == 1) ? "true" : (value == 0 ? "false" : String.format("Boolean(%d)", this.value));
             } else if (slot.size == 4) {
-                strValue = String.format("%d", this.value);
+                text = String.format("%d", this.value);
             } else {
-                strValue = value == 0 ? "null" : String.format("0x%x", this.value);
+                text = value == 0 ? "null" : String.format("0x%x", this.value);
+            }
+
+            // do not change color on init
+            if (lastChange == 0) {
+                lastChange = 1;
+            } else {
+                lastChange = System.currentTimeMillis();
+                percentChange = 1;
+            }
+            tree.getModel().nodeChanged(this);
+        } else {
+            double percent = Math.max(0, (double) (lastChange + 1000 - System.currentTimeMillis()) / 1000);
+            if (this.percentChange != percent) {
+                this.percentChange = percent;
+                tree.getModel().nodeChanged(this);
             }
         }
 
-        if (children != null && tree.isExpanded(new TreePath(tree.getModel().getPathToRoot(this)))) {
-            children.forEach(child -> ((ObjectTreeNode) child).update(tree));
+        updateChildren(tree, readChildren);
+
+        if (children != null) {
+            for (TreeNode child : children) {
+                ObjectTreeNode node = (ObjectTreeNode) child;
+                node.update(tree);
+            }
         }
-        if (changed) tree.getModel().nodeChanged(this);
+    }
+
+    protected void updateChildren(InspectorTree tree, boolean update) {
     }
 
     public void loadChildren(InspectorTree tree) {
-        if (children != null) return;
-        children = new Vector<>();
-
-        if (value == -1) update(tree);
-
-        for (ObjectInspector.Slot childSlot : ObjectInspector.getObjectSlots(this.value)) {
-            ObjectTreeNode child;
-            switch (childSlot.type) {
-                case "Dictionary":
-                    child = new DictionaryTreeNode(childSlot, () -> this.value + childSlot.offset);
-                    break;
-                case "Array":
-                    child = new ArrayTreeNode(childSlot, () -> API.readLong(this.value + childSlot.offset));
-                    break;
-                case "Vector":
-                    child = new VectorTreeNode(childSlot, () -> this.value + childSlot.offset);
-                    break;
-                default:
-                    child = new ObjectTreeNode(childSlot, () -> this.value + childSlot.offset, false);
-                    break;
-            }
-            child.setParent(this);
-            children.add(child);
+        update(tree);
+        for (ObjectInspector.Slot slot : ObjectInspector.getObjectSlots(this.value)) {
+            ObjectTreeNode child = createNode(this.value + slot.offset, slot, true);
+            add(child);
         }
 
-        tree.getModel().nodeStructureChanged(this);
-        children.forEach(ch -> ((ObjectTreeNode) ch).update(tree));
+        if (getChildCount() > 0) {
+            tree.getModel().nodeStructureChanged(this);
+
+            for (TreeNode child : children) {
+                ObjectTreeNode node = (ObjectTreeNode) child;
+                node.update(tree);
+            }
+        }
     }
 
-    private static class DictionaryTreeNode extends ObjectTreeNode {
-        public DictionaryTreeNode(ObjectInspector.Slot slot, Supplier<Long> address) {
-            super(slot, address, false);
+    public void unloadChildren(InspectorTree tree) {
+        if (children != null) {
+            remove(tree, new ArrayList<>(children));
+        }
+    }
+
+    protected void remove(InspectorTree tree, List<TreeNode> toRemove) {
+        for (TreeNode node : toRemove) {
+            tree.getModel().removeNodeFromParent((MutableTreeNode) node);
+        }
+    }
+
+    protected void trimChildren(InspectorTree tree, int maxSize) {
+        if (children == null) return;
+
+        List<TreeNode> list = new ArrayList<>();
+        for (int i = maxSize; i < children.size(); i++) {
+            list.add(children.get(i));
+        }
+        remove(tree, list);
+    }
+
+    @Override
+    public String toString() {
+        return String.format((slot.isInArray ? "%03d" : "%03X") + " %-30s  %-30s %s", slot.offset,
+                (slot.name.length() >= 30) ? (slot.name.substring(0, 27) + "...") : slot.name,
+                slot.getType(), slot.isInArray ? slot.valueText : text);
+    }
+
+    private static class ListNode extends ObjectTreeNode {
+        private final FlashList<?> list;
+        private int oldSize;
+
+        public ListNode(ObjectInspector.Slot slot, LongSupplier address, boolean staticAddress, boolean isVector) {
+            super(slot, address, staticAddress);
+            this.list = isVector ? FlashList.ofVectorUnknown() : FlashList.ofArrayUnknown();
+            this.list.setThreadsafe();
         }
 
         @Override
         public void loadChildren(InspectorTree tree) {
-            PairArray dict = PairArray.ofDictionary();
-            dict.update(this.value);
-            dict.update();
-
-            for (int index = 0; index < dict.getSize(); index++) {
-                PairArray.Pair p = dict.get(index);
-                ObjectInspector.Slot valueSlot = new ObjectInspector.Slot(p.key, ByteUtils.readObjectName(p.value), null, index, 8);
-                ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> p.value, true);
-                tree.getModel().insertNodeInto(child, this, index);
-                child.update(tree);
-            }
-        }
-    }
-
-    private static class ArrayTreeNode extends ObjectTreeNode {
-        public ArrayTreeNode(ObjectInspector.Slot slot, Supplier<Long> address) {
-            super(slot, address, false);
+            readChildren = true;
+            update(tree);
         }
 
         @Override
-        public void update(InspectorTree tree) {
-            int denseLength = API.readInt(this.value + 0x28);
+        protected void updateChildren(InspectorTree tree, boolean update) {
+            list.update(value);
+            list.update();
+            if (oldSize != list.size()) {
+                tree.getModel().nodeChanged(this);
+                oldSize = list.size();
+            }
+            if (!update) return;
 
-            if (denseLength != 0) {
-                IntArray arr = IntArray.ofArray(true);
-                arr.update(this.value);
+            List<Integer> insertedIndexes = new ArrayList<>();
+            for (int i = 0; i < list.size(); i++) {
+                Object o = list.get(i);
 
-                for (int index = 0; index < arr.elements.length; index++) {
-                    ObjectInspector.Slot valueSlot = new ObjectInspector.Slot("", "int", null, index, 4);
-                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> this.value, false);
-                    tree.getModel().insertNodeInto(child, this, index);
-                    child.update(tree);
-                }
-                trimChildren(arr.getSize());
-            } else {
-                PairArray dict = PairArray.ofArray();
-                dict.setAutoUpdatable(true);
-                dict.setIgnoreEmpty(false);
-                dict.update(this.value);
+                ObjectInspector.Slot valueSlot = createSlot(this, "", o, i + 1);
+                if (getChildCount() > i) {
+                    ObjectTreeNode child = (ObjectTreeNode) getChildAt(i);
 
-                int c = 0;
-
-                for (int index = 0; index < dict.getSize(); index++) {
-                    PairArray.Pair p = dict.get(index);
-                    if (p == null) {
-                        break;
+                    child.address = () -> o instanceof Long ? (Long) o : 0;
+                    if (!child.slot.equals(valueSlot)) {
+                        child.slot = valueSlot;
+                        tree.getModel().nodeChanged(child);
                     }
-                    c++;
-                    String objectName = ByteUtils.readObjectName(p.value);
-                    ObjectInspector.Slot valueSlot = new ObjectInspector.Slot(p.key, objectName, null, index, 8);
-                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> p.value, true);
-                    tree.getModel().insertNodeInto(child, this, index);
+                } else {
+                    ObjectTreeNode child = createNode(o instanceof Long ? (long) o : 0L, valueSlot, false);
+                    add(child);
+                    insertedIndexes.add(i);
                 }
-                trimChildren(c);
             }
+
+            if (!insertedIndexes.isEmpty())
+                tree.getModel().nodesWereInserted(this, insertedIndexes.stream().mapToInt(Integer::intValue).toArray());
+            trimChildren(tree, list.size());
         }
 
         @Override
-        public void loadChildren(InspectorTree model) {
-            // Children are populated in update method for arrays
+        public void unloadChildren(InspectorTree tree) {
+            readChildren = false;
+            super.unloadChildren(tree);
+        }
+
+        @Override
+        public String toString() {
+            return super.toString() + " " + list;
         }
     }
 
-    private static class VectorTreeNode extends ObjectTreeNode {
-        public VectorTreeNode(ObjectInspector.Slot slot, Supplier<Long> address) {
-            super(slot, address, false);
+    private static class FlashMapNode extends ObjectTreeNode {
+        private final FlashMap<?, ?> map = FlashMap.ofUnknown().makeThreadSafe();
+        private int oldSize;
+
+        public FlashMapNode(ObjectInspector.Slot slot, LongSupplier address, boolean staticAddress) {
+            super(slot, address, staticAddress);
         }
 
         @Override
         public void loadChildren(InspectorTree tree) {
-            ObjectInspector.Slot slot = (ObjectInspector.Slot) (this.getUserObject());
+            readChildren = true;
+            update(tree);
+        }
 
-            if (slot.templateType.equals("uint") || slot.templateType.equals("int")) {
-                IntArray vec = IntArray.ofVector(this.value);
-                vec.update();
-                for (int index = 0; index < vec.elements.length; index++) {
-                    ObjectInspector.Slot valueSlot = new ObjectInspector.Slot("", slot.templateType, null, index, 4);
-                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> this.value + slot.offset, false);
-                    tree.getModel().insertNodeInto(child, this, index);
-                    child.update(tree);
-                }
-                trimChildren(vec.getSize());
-            } else {
-                ObjArray vec = ObjArray.ofVector();
-                vec.update(this.value);
-                vec.update();
-                for (int index = 0; index < vec.getSize(); index++) {
-                    long object = vec.getPtr(index);
-                    ObjectInspector.Slot valueSlot = new ObjectInspector.Slot("", ByteUtils.readObjectName(object), null, index, 8);
-                    ObjectTreeNode child = new ObjectTreeNode(valueSlot, () -> object & ByteUtils.ATOM_MASK, true);
-                    tree.getModel().insertNodeInto(child, this, index);
-                    child.update(tree);
-                }
-                trimChildren(vec.getSize());
+        @Override
+        protected void updateChildren(InspectorTree tree, boolean update) {
+            map.update(value);
+            map.update(); // read size of map;
+            if (oldSize != map.size()) {
+                tree.getModel().nodeChanged(this);
+                oldSize = map.size();
             }
+            if (!update) return;
+
+            int i = 0;
+            List<Integer> insertedIndexes = new ArrayList<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                Object o = entry.getValue();
+
+                ObjectInspector.Slot valueSlot = createSlot(this, entry.getKey().toString(), o, i + 1);
+                if (getChildCount() > i) {
+                    ObjectTreeNode child = (ObjectTreeNode) getChildAt(i);
+
+                    child.address = () -> o instanceof Long ? (Long) o : 0;
+                    if (!child.slot.equals(valueSlot)) {
+                        child.slot = valueSlot;
+                        tree.getModel().nodeChanged(child);
+                    }
+                } else {
+                    ObjectTreeNode child = createNode(o instanceof Long ? (long) o : 0L, valueSlot, false);
+                    add(child);
+                    insertedIndexes.add(i);
+                }
+                i++;
+            }
+
+            if (!insertedIndexes.isEmpty())
+                tree.getModel().nodesWereInserted(this, insertedIndexes.stream().mapToInt(Integer::intValue).toArray());
+            trimChildren(tree, i);
+        }
+
+        @Override
+        public void unloadChildren(InspectorTree tree) {
+            readChildren = false;
+            super.unloadChildren(tree);
+        }
+
+        @Override
+        public String toString() {
+            return super.toString() + " FlashMap[" + map.size() + "]";
         }
     }
-
 }
