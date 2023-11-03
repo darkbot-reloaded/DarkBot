@@ -109,9 +109,14 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
     public boolean show(boolean value) {
         if (trySetShowing(value)) {
-            if (!(minimizable && toggleVisibility()) && !(closable && close()))
-                legacyToggle(value);
+            // visibility state != value
+            if (minimizable && toggleVisibility())
+                return false;
+            // closable windows can only be closed, but for now we are going to redirect to legacyToggle
+            if (!value && closable && close())
+                return false;
 
+            legacyToggle(value);
             return false;
         }
         return value == visible && isAnimationDone();
