@@ -34,11 +34,20 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
 
     private double percentChange;
     private long lastChange;
+    private int slotsCount;
 
     protected ObjectTreeNode(ObjectInspector.Slot slot, LongSupplier address, boolean staticAddress) {
         this.slot = slot;
         this.address = address;
         this.staticAddress = staticAddress;
+
+        //todo should keep slot count?
+        if (slot.size == 8 && slot.slotType != ObjectInspector.Slot.Type.DOUBLE
+                && slot.slotType != ObjectInspector.Slot.Type.STRING) {
+            long adr = staticAddress ? API.readLong(address.getAsLong()) : address.getAsLong();
+            List<ObjectInspector.Slot> objectSlots = ObjectInspector.getObjectSlots(adr);
+            slotsCount = objectSlots.size();
+        }
     }
 
     public static boolean maxTextLengthChanged() {
@@ -68,9 +77,9 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         return slotName.substring((j == -1 ? i : j) + 2, slotName.length() - 1);
     }
 
-    private static ObjectTreeNode createNode(long address, ObjectInspector.Slot slot, boolean staticAddress) {
-        long object = staticAddress ? API.readMemoryPtr(address) : address;
-        if (object == 0) new ObjectTreeNode(slot, () -> address, false);
+    private static ObjectTreeNode createNode(LongSupplier address, ObjectInspector.Slot slot, boolean staticAddress) {
+        long object = staticAddress ? API.readMemoryPtr(address.getAsLong()) : address.getAsLong();
+        if (object == 0) new ObjectTreeNode(slot, address, staticAddress);
 
         boolean hasHashMap = FlashMap.hasHashMap(object);
 
@@ -95,16 +104,16 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
 
         switch (slot.slotType) {
             case ARRAY:
-                return new CollectionNode(slot, () -> address, staticAddress, hasHashMap, false);
+                return new CollectionNode(slot, address, staticAddress, hasHashMap, false);
             case DICTIONARY:
-                return new CollectionNode(slot, () -> address, staticAddress, true, false);
+                return new CollectionNode(slot, address, staticAddress, true, false);
             case VECTOR:
-                return new CollectionNode(slot, () -> address, staticAddress, false, true);
+                return new CollectionNode(slot, address, staticAddress, false, true);
             case PLAIN_OBJECT:
                 if (hasHashMap)
-                    return new CollectionNode(slot, () -> address, staticAddress, true, false);
+                    return new CollectionNode(slot, address, staticAddress, true, false);
             default:
-                return new ObjectTreeNode(slot, () -> address, staticAddress);
+                return new ObjectTreeNode(slot, address, staticAddress);
         }
     }
 
@@ -233,7 +242,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
     public void loadChildren(InspectorTree tree) {
         update(tree);
         for (ObjectInspector.Slot slot : ObjectInspector.getObjectSlots(this.value)) {
-            ObjectTreeNode child = createNode(this.value + slot.offset, slot, true);
+            ObjectTreeNode child = createNode(() -> this.value + slot.offset, slot, true);
             add(child);
         }
 
@@ -278,7 +287,8 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         return String.format(format, slot.offset,
                 (slot.name.length() > nameLength) ? (slot.name.substring(0, nameLength - 3) + "...") : slot.name,
                 (slot.getType().length() > typeLength) ? (slot.getType().substring(0, typeLength - 3) + "...") : slot.getType(),
-                slot.isInArray ? slot.valueText : text);
+                slot.isInArray ? slot.valueText : text)
+                + (slotsCount > 0 ? " [" + slotsCount + "]" : "");
     }
 
     private static class CollectionNode extends ObjectTreeNode {
@@ -363,7 +373,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                     treeModel.nodeChanged(child);
                 }
             } else {
-                ObjectTreeNode child = createNode(o instanceof Number ? ((Number) o).longValue() : 0L, valueSlot, false);
+                ObjectTreeNode child = createNode(() -> o instanceof Number ? ((Number) o).longValue() : 0L, valueSlot, false);
                 add(child);
                 return true;
             }

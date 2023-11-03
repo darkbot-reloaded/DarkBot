@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.OSUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,8 @@ public class ObjectInspector {
         // obj -> vtable -> vtable init -> vtable scope -> abc env -> const pool
         long pool = API.readLong(address, 0x10, 0x10, 0x18, 0x10, 0x8);
         long traits = API.readLong(address, 0x10, 0x28);
+        if (pool == 0 || traits == 0)
+            return Collections.emptyList();
         return getTraitsBinding(traits, pool);
     }
 
