@@ -75,15 +75,15 @@ public class QuestProxy extends Updatable implements API.Singleton {
         }
     }
 
-    public @Nullable Quest getCurrentQuestDisplayed() {
+    public @Nullable Quest getDisplayedQuest() {
         return currentQuest;
     }
 
-    public @Nullable Quest getCurrentQuestSeleted() {
+    public @Nullable Quest getSelectedQuest() {
         return questGiverSelected;
     }
 
-    public @Nullable QuestListItem getCurrentQuestInfoSeleted() {
+    public @Nullable QuestListItem getSelectedQuestInfo() {
         return questInfoGiverSelected;
     }
 
@@ -91,11 +91,11 @@ public class QuestProxy extends Updatable implements API.Singleton {
         return questItems;
     }
 
-    public boolean isVisibleQuestGiver() {
+    public boolean isQuestGiverOpen() {
         return visibleQuestGiver;
     }
 
-    public int getTabSelected() {
+    public int getSelectedTab() {
         return tabSelected;
     }
 
@@ -285,7 +285,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
             return description;
         }
 
-        public double getGoalReached() {
+        public double getProgress() {
             return goalReached;
         }
 
@@ -297,7 +297,7 @@ public class QuestProxy extends Updatable implements API.Singleton {
             return completed;
         }
 
-        public String getRequirementType() {
+        public String getType() {
             return requirementType;
         }
 
