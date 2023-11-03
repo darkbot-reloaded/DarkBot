@@ -446,11 +446,6 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void handleRefresh() {
-        handleRefresh(false);
-    }
-
-    @Override
     public void handleRefresh(boolean useFakeDailyLogin) {
         // No login has happened? Make a first attempt
         if (hasCapability(Capability.LOGIN) && loginData.getUrl() == null) {
