@@ -6,9 +6,17 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.gui.MainGui;
 import net.miginfocom.swing.MigLayout;
 
-import javax.swing.*;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.UIManager;
 import javax.swing.tree.DefaultTreeModel;
-import java.awt.*;
+import java.awt.Insets;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -18,7 +26,7 @@ import java.util.function.Supplier;
 
 public class ObjectInspectorUI extends JFrame {
 
-    public ObjectInspectorUI() {
+    public ObjectInspectorUI(JMenuItem menuItem) {
         super("Object Inspector");
         setLayout(new MigLayout("ins 0, gap 0"));
         setSize(600, 600);
@@ -44,6 +52,14 @@ public class ObjectInspectorUI extends JFrame {
         add(addressCombo, "grow");
         add(delaySpinner, "wrap");
         add(new JScrollPane(treeView), "push, grow, span");
+
+        menuItem.setEnabled(false);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                menuItem.setEnabled(true);
+            }
+        });
     }
 
     private static class AddressCombo extends JComboBox<AddressEntry> {
@@ -61,7 +77,6 @@ public class ObjectInspectorUI extends JFrame {
                 } else {
                     putClientProperty("JComponent.outline", null);
                 }
-
 
                 String objectName = ByteUtils.readObjectNameDirect(addr);
                 if (!Objects.equals(objectName, "ERROR")) {

@@ -297,6 +297,11 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
         return address;
     }
 
+    @Override
+    public String toString() {
+        return "FlashMap[" + size() + "]";
+    }
+
     private static class UpdatableWrapper {
         private final Updatable value;
 

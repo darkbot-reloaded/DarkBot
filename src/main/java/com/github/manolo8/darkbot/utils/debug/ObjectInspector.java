@@ -5,7 +5,9 @@ import com.github.manolo8.darkbot.utils.OSUtil;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -222,6 +224,8 @@ public class ObjectInspector {
     }
 
     public static class Slot {
+        private static final Map<String, String> TYPE_REPLACEMENTS = new HashMap<>();
+
         public String name;
         public String type;
         public String templateType;
@@ -234,12 +238,25 @@ public class ObjectInspector {
 
         public Slot(String name, String type, String templateType, long offset, long size) {
             this.name = name;
-            this.type = type;
+            setType(type);
             this.templateType = templateType;
             this.offset = offset;
             this.size = size;
 
             this.slotType = Type.of(this);
+        }
+
+        public void setType(String type) {
+            this.type = TYPE_REPLACEMENTS.getOrDefault(type, type);
+        }
+
+        public void setTemplateType(String templateType) {
+            this.templateType = templateType;
+        }
+
+        public void setReplacement(String replacement) {
+            TYPE_REPLACEMENTS.put(type, replacement);
+            setType(replacement);
         }
 
         long getOffset() {

@@ -9,8 +9,9 @@ import eu.darkbot.util.Popups;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.awt.*;
@@ -21,12 +22,15 @@ import java.util.function.LongSupplier;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class ObjectTreeNode extends DefaultMutableTreeNode {
+    private static int nameLastLength = 25, nameCurrentLength = 25;
+    private static int typeLastLength = 25, typeCurrentLength = 25;
+
     @Getter protected String text;
     @Getter protected ObjectInspector.Slot slot;
 
     protected LongSupplier address;
     protected boolean staticAddress, readChildren;
-    protected long value = -1;
+    protected long value = Long.MIN_VALUE;
 
     private double percentChange;
     private long lastChange;
@@ -37,8 +41,18 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         this.staticAddress = staticAddress;
     }
 
-    public static ObjectTreeNode root(String name, LongSupplier address) {
-        return new ObjectTreeNode(new ObjectInspector.Slot(name, "Object", null, 0, 8), address, false);
+    public static boolean maxTextLengthChanged() {
+        boolean changed = nameLastLength != nameCurrentLength || typeLastLength != typeCurrentLength;
+        nameLastLength = nameCurrentLength;
+        typeLastLength = typeCurrentLength;
+
+        typeCurrentLength = 25;
+        nameCurrentLength = 25;
+        return changed;
+    }
+
+    public static ObjectTreeNode root(String type, LongSupplier address) {
+        return new ObjectTreeNode(new ObjectInspector.Slot("-", type, null, 0, 8), address, false);
     }
 
     private static String extractType(String slotName) {
@@ -52,32 +66,6 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
 
         int j = slotName.lastIndexOf("::");
         return slotName.substring((j == -1 ? i : j) + 2, slotName.length() - 1);
-    }
-
-    private static ObjectInspector.Slot createSlot(ObjectTreeNode parent, String name, Object value, int offset) {
-        String type = "";
-        String templateType = null;
-
-        if (value instanceof Long) {
-            String s = ByteUtils.readObjectNameDirect((Long) value);
-            if (!s.equals("ERROR")) {
-                type = extractType(s);
-                templateType = extractTemplateType(s);
-            }
-        } else {
-            if (parent.slot.templateType != null) {
-                type = parent.slot.templateType;
-            } else {
-                type = value.getClass().getSimpleName();
-            }
-        }
-
-        int size = value instanceof Integer || value instanceof Boolean ? 4 : 8;
-        ObjectInspector.Slot slot = new ObjectInspector.Slot(name, type, templateType, offset, size);
-
-        slot.isInArray = true;
-        slot.valueText = value instanceof Long ? String.format("0x%x", value) : value.toString();
-        return slot;
     }
 
     private static ObjectTreeNode createNode(long address, ObjectInspector.Slot slot, boolean staticAddress) {
@@ -98,24 +86,23 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                 String type = extractType(name);
                 String templateType = extractTemplateType(name);
 
-                slot.type = type;
+                slot.setType(type);
                 if (templateType != null)
-                    slot.templateType = templateType;
+                    slot.setTemplateType(templateType);
                 slot.slotType = ObjectInspector.Slot.Type.of(slot);
             }
         }
 
         switch (slot.slotType) {
             case ARRAY:
-                if (!hasHashMap)
-                    return new ListNode(slot, () -> address, staticAddress, false);
+                return new CollectionNode(slot, () -> address, staticAddress, hasHashMap, false);
             case DICTIONARY:
-                return new FlashMapNode(slot, () -> address, staticAddress);
+                return new CollectionNode(slot, () -> address, staticAddress, true, false);
             case VECTOR:
-                return new ListNode(slot, () -> address, staticAddress, true);
+                return new CollectionNode(slot, () -> address, staticAddress, false, true);
             case PLAIN_OBJECT:
                 if (hasHashMap)
-                    return new FlashMapNode(slot, () -> address, staticAddress);
+                    return new CollectionNode(slot, () -> address, staticAddress, true, false);
             default:
                 return new ObjectTreeNode(slot, () -> address, staticAddress);
         }
@@ -235,6 +222,9 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                 node.update(tree);
             }
         }
+
+        nameCurrentLength = Math.max(nameCurrentLength, slot.name.length());
+        typeCurrentLength = Math.max(typeCurrentLength, slot.getType().length());
     }
 
     protected void updateChildren(InspectorTree tree, boolean update) {
@@ -270,7 +260,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
     }
 
     protected void trimChildren(InspectorTree tree, int maxSize) {
-        if (children == null) return;
+        if (children == null || maxSize >= children.size()) return;
 
         List<TreeNode> list = new ArrayList<>();
         for (int i = maxSize; i < children.size(); i++) {
@@ -281,60 +271,38 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
 
     @Override
     public String toString() {
-        return String.format((slot.isInArray ? "%03d" : "%03X") + " %-30s  %-30s %s", slot.offset,
-                (slot.name.length() >= 30) ? (slot.name.substring(0, 27) + "...") : slot.name,
-                slot.getType(), slot.isInArray ? slot.valueText : text);
+        int nameLength = nameLastLength;
+        int typeLength = typeLastLength;
+        String format = (slot.isInArray ? "%03d" : "%03X") + " %-" + nameLength + "s  %-" + typeLength + "s %s";
+
+        return String.format(format, slot.offset,
+                (slot.name.length() > nameLength) ? (slot.name.substring(0, nameLength - 3) + "...") : slot.name,
+                (slot.getType().length() > typeLength) ? (slot.getType().substring(0, typeLength - 3) + "...") : slot.getType(),
+                slot.isInArray ? slot.valueText : text);
     }
 
-    private static class ListNode extends ObjectTreeNode {
+    private static class CollectionNode extends ObjectTreeNode {
         private final FlashList<?> list;
+        private final FlashMap<?, ?> map;
+
         private int oldSize;
 
-        public ListNode(ObjectInspector.Slot slot, LongSupplier address, boolean staticAddress, boolean isVector) {
+        protected CollectionNode(ObjectInspector.Slot slot, LongSupplier address, boolean staticAddress,
+                                 boolean isMap, boolean isVector) {
             super(slot, address, staticAddress);
-            this.list = isVector ? FlashList.ofVectorUnknown() : FlashList.ofArrayUnknown();
-            this.list.setThreadsafe();
+            if (isMap) {
+                this.map = FlashMap.ofUnknown().makeThreadSafe();
+                this.list = null;
+            } else {
+                this.map = null;
+                this.list = (isVector ? FlashList.ofVectorUnknown() : FlashList.ofArrayUnknown()).makeThreadSafe();
+            }
         }
 
         @Override
         public void loadChildren(InspectorTree tree) {
             readChildren = true;
             update(tree);
-        }
-
-        @Override
-        protected void updateChildren(InspectorTree tree, boolean update) {
-            list.update(value);
-            list.update();
-            if (oldSize != list.size()) {
-                tree.getModel().nodeChanged(this);
-                oldSize = list.size();
-            }
-            if (!update) return;
-
-            List<Integer> insertedIndexes = new ArrayList<>();
-            for (int i = 0; i < list.size(); i++) {
-                Object o = list.get(i);
-
-                ObjectInspector.Slot valueSlot = createSlot(this, "", o, i + 1);
-                if (getChildCount() > i) {
-                    ObjectTreeNode child = (ObjectTreeNode) getChildAt(i);
-
-                    child.address = () -> o instanceof Long ? (Long) o : 0;
-                    if (!child.slot.equals(valueSlot)) {
-                        child.slot = valueSlot;
-                        tree.getModel().nodeChanged(child);
-                    }
-                } else {
-                    ObjectTreeNode child = createNode(o instanceof Long ? (long) o : 0L, valueSlot, false);
-                    add(child);
-                    insertedIndexes.add(i);
-                }
-            }
-
-            if (!insertedIndexes.isEmpty())
-                tree.getModel().nodesWereInserted(this, insertedIndexes.stream().mapToInt(Integer::intValue).toArray());
-            trimChildren(tree, list.size());
         }
 
         @Override
@@ -344,55 +312,38 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         }
 
         @Override
-        public String toString() {
-            return super.toString() + " " + list;
-        }
-    }
-
-    private static class FlashMapNode extends ObjectTreeNode {
-        private final FlashMap<?, ?> map = FlashMap.ofUnknown().makeThreadSafe();
-        private int oldSize;
-
-        public FlashMapNode(ObjectInspector.Slot slot, LongSupplier address, boolean staticAddress) {
-            super(slot, address, staticAddress);
-        }
-
-        @Override
-        public void loadChildren(InspectorTree tree) {
-            readChildren = true;
-            update(tree);
-        }
-
-        @Override
         protected void updateChildren(InspectorTree tree, boolean update) {
-            map.update(value);
-            map.update(); // read size of map;
-            if (oldSize != map.size()) {
-                tree.getModel().nodeChanged(this);
-                oldSize = map.size();
+            int size;
+            if (map != null) {
+                map.update(value);
+                map.update(); // read size of map;
+                size = map.size();
+            } else {
+                list.update(value);
+                list.update();
+                size = list.size();
             }
+
+            if (oldSize != size) {
+                tree.getModel().nodeChanged(this);
+                oldSize = size;
+            }
+
             if (!update) return;
+            List<Integer> insertedIndexes = new ArrayList<>();
 
             int i = 0;
-            List<Integer> insertedIndexes = new ArrayList<>();
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
-                Object o = entry.getValue();
-
-                ObjectInspector.Slot valueSlot = createSlot(this, entry.getKey().toString(), o, i + 1);
-                if (getChildCount() > i) {
-                    ObjectTreeNode child = (ObjectTreeNode) getChildAt(i);
-
-                    child.address = () -> o instanceof Long ? (Long) o : 0;
-                    if (!child.slot.equals(valueSlot)) {
-                        child.slot = valueSlot;
-                        tree.getModel().nodeChanged(child);
-                    }
-                } else {
-                    ObjectTreeNode child = createNode(o instanceof Long ? (long) o : 0L, valueSlot, false);
-                    add(child);
-                    insertedIndexes.add(i);
+            if (map != null) {
+                for (Map.Entry<?, ?> entry : map.entrySet()) {
+                    if (updateChild(i, entry.getValue(), entry.getKey().toString(), tree.getModel()))
+                        insertedIndexes.add(i);
+                    i++;
                 }
-                i++;
+            } else {
+                for (; i < list.size(); i++) {
+                    if (updateChild(i, list.get(i), "", tree.getModel()))
+                        insertedIndexes.add(i);
+                }
             }
 
             if (!insertedIndexes.isEmpty())
@@ -400,15 +351,55 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
             trimChildren(tree, i);
         }
 
-        @Override
-        public void unloadChildren(InspectorTree tree) {
-            readChildren = false;
-            super.unloadChildren(tree);
+        // true -> inserted
+        private boolean updateChild(int i, Object o, String name, DefaultTreeModel treeModel) {
+            ObjectInspector.Slot valueSlot = createSlot(name, o, i + 1);
+            if (getChildCount() > i) {
+                ObjectTreeNode child = (ObjectTreeNode) getChildAt(i);
+
+                child.address = () -> o instanceof Number ? ((Number) o).longValue() : 0;
+                if (!child.slot.equals(valueSlot)) {
+                    child.slot = valueSlot;
+                    treeModel.nodeChanged(child);
+                }
+            } else {
+                ObjectTreeNode child = createNode(o instanceof Number ? ((Number) o).longValue() : 0L, valueSlot, false);
+                add(child);
+                return true;
+            }
+            return false;
+        }
+
+        private ObjectInspector.Slot createSlot(String name, Object value, int offset) {
+            String type = "";
+            String templateType = null;
+
+            if (value instanceof Long) {
+                String s = ByteUtils.readObjectNameDirect((Long) value);
+                if (!s.equals("ERROR")) {
+                    type = extractType(s);
+                    templateType = extractTemplateType(s);
+                }
+            } else {
+                if (this.slot.templateType != null && !this.slot.templateType.equals("ERROR")) {
+                    type = this.slot.templateType;
+                } else {
+                    type = value.getClass().getSimpleName();
+                }
+            }
+
+            int size = value instanceof Integer || value instanceof Boolean ? 4 : 8;
+            ObjectInspector.Slot slot = new ObjectInspector.Slot(name, type, templateType, offset, size);
+
+            slot.isInArray = true;
+            slot.valueText = value instanceof Long ? String.format("0x%x", value) : value.toString();
+            return slot;
         }
 
         @Override
         public String toString() {
-            return super.toString() + " FlashMap[" + map.size() + "]";
+            if (value <= 0xFFFF) return super.toString();
+            return super.toString() + " " + (map == null ? list : map);
         }
     }
 }

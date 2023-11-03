@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.utils.inspector;
 
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.SystemUtils;
 import com.github.manolo8.darkbot.utils.debug.ObjectInspector;
 
@@ -10,9 +11,14 @@ import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -67,6 +73,9 @@ public class InspectorTree extends JTree {
                     timer = new Timer(delay, e -> {
                         try {
                             ((ObjectTreeNode) model.getRoot()).update(InspectorTree.this);
+                            if (ObjectTreeNode.maxTextLengthChanged())
+                                notifyNodesChanged(model, (TreeNode) model.getRoot());
+
                             invalidate();
                         } catch (Throwable t) {
                             t.printStackTrace();
@@ -91,6 +100,12 @@ public class InspectorTree extends JTree {
 
         setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         setCellRenderer(new InspectorTreeCellRenderer());
+    }
+
+    private static void notifyNodesChanged(DefaultTreeModel treeModel, TreeNode node) {
+        treeModel.nodeChanged(node);
+        node.children().asIterator()
+                .forEachRemaining(c -> notifyNodesChanged(treeModel, c));
     }
 
     @Override
@@ -158,7 +173,10 @@ public class InspectorTree extends JTree {
 
             JMenuItem copyValueItem = new JMenuItem("Copy value");
             JMenuItem copyAddressItem = new JMenuItem("Copy address");
+            JMenuItem copyClosureAddressItem = new JMenuItem("Copy class address");
+            JMenuItem copyClassStructureItem = new JMenuItem("Copy class structure");
             JMenuItem editValueItem = new JMenuItem("Edit value");
+            JMenuItem editTypeNameItem = new JMenuItem("Edit type name");
             copyValueItem.addActionListener(a -> {
                 ObjectTreeNode node = getSelectedNode();
                 if (node != null) SystemUtils.toClipboard(node.getText());
@@ -167,10 +185,109 @@ public class InspectorTree extends JTree {
                 ObjectTreeNode node = getSelectedNode();
                 if (node != null) SystemUtils.toClipboard(String.format("0x%x", node.address.getAsLong()));
             });
+
+            copyClosureAddressItem.addActionListener(a -> {
+                ObjectTreeNode node = getSelectedNode();
+                if (node != null) {
+                    ObjectInspector.Slot slot = node.getSlot();
+                    if (slot.slotType == ObjectInspector.Slot.Type.OBJECT && !slot.name.contains("$")) {
+                        SystemUtils.toClipboard(String.format("0x%x", ByteUtils.getClassClosure(node.value)));
+                    }
+                }
+            });
+
+            copyClassStructureItem.addActionListener(this::generateClass);
             editValueItem.addActionListener(a -> editValue(false));
+            editTypeNameItem.addActionListener(a -> {
+                ObjectTreeNode node = getSelectedNode();
+                if (node != null) {
+                    ObjectInspector.Slot slot = node.getSlot();
+                    String result = JOptionPane.showInputDialog(getRootPane(),
+                            "Edit type name of " + slot.type + " " + slot.name, "Edit type name", JOptionPane.PLAIN_MESSAGE);
+                    if (result != null && !result.isEmpty())
+                        slot.setReplacement(result);
+                }
+            });
+
+            copyValueItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, 0));
+            copyAddressItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
+            copyClosureAddressItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, 0));
+            copyClassStructureItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
+            editValueItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, 0));
+
             add(copyValueItem);
             add(copyAddressItem);
+            add(copyClosureAddressItem);
+            add(copyClassStructureItem);
             add(editValueItem);
+            add(editTypeNameItem);
+        }
+
+        private void generateClass(ActionEvent e) {
+            ObjectTreeNode node = getSelectedNode();
+            if (node != null) {
+                ObjectInspector.Slot slot = node.getSlot();
+                if (slot.slotType == ObjectInspector.Slot.Type.OBJECT || slot.slotType == ObjectInspector.Slot.Type.PLAIN_OBJECT) {
+
+                    StringBuilder clazzBuilder = new StringBuilder("import com.github.manolo8.darkbot.core.itf.Updatable;");
+                    clazzBuilder.append(System.lineSeparator())
+                            .append(System.lineSeparator())
+                            .append("public class ")
+                            .append(slot.name.replace("-", ""))
+                            .append(" extends Updatable {")
+                            .append(System.lineSeparator());
+
+                    StringBuilder updateMethod = new StringBuilder();
+                    updateMethod.append("    @Override")
+                            .append(System.lineSeparator())
+                            .append("    public void update() {");
+
+                    for (ObjectInspector.Slot objectSlot : ObjectInspector.getObjectSlots(node.value)) {
+                        clazzBuilder.append(System.lineSeparator())
+                                .append("    private ");
+
+                        String slotName = objectSlot.name.replace("-", "");
+                        updateMethod.append(System.lineSeparator())
+                                .append("        this.")
+                                .append(slotName)
+                                .append(" = ");
+
+                        switch (objectSlot.slotType) {
+                            case INT:
+                            case UINT:
+                            case BOOLEAN:
+                                clazzBuilder.append("int");
+                                updateMethod.append("readInt");
+                                break;
+                            case DOUBLE:
+                                clazzBuilder.append("double");
+                                updateMethod.append("readDouble");
+                                break;
+                            case STRING:
+                                clazzBuilder.append("String");
+                                updateMethod.append("readString");
+                                break;
+                            default:
+                                clazzBuilder.append("long");
+                                updateMethod.append("readLong");
+                        }
+
+                        updateMethod.append("(").append(objectSlot.offset).append(");");
+                        clazzBuilder.append(" ").append(slotName).append(";");
+                    }
+
+                    updateMethod.append(System.lineSeparator())
+                            .append("    }");
+
+                    clazzBuilder.append(System.lineSeparator());
+                    clazzBuilder.append(System.lineSeparator());
+                    clazzBuilder.append(updateMethod);
+                    clazzBuilder.append(System.lineSeparator())
+                            .append("}");
+
+                    SystemUtils.toClipboard(clazzBuilder.toString());
+                }
+            }
         }
     }
 

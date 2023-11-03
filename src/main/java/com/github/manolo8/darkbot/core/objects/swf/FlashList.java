@@ -85,7 +85,7 @@ public abstract class FlashList<E> extends AbstractList<E> implements NativeUpda
 
     public abstract void update();
 
-    public FlashList<E> setThreadsafe() {
+    public FlashList<E> makeThreadSafe() {
         this.threadSafe = true;
         return this;
     }
