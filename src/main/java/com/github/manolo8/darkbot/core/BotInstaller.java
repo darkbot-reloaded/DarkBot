@@ -141,12 +141,12 @@ public class BotInstaller implements API.Singleton {
 
         } else if (!invalidTimer.isArmed()) invalidTimer.activate(150_000); // 2.5 min
 
-        // timer is disarmed on refresh and on valid tick
+        // timer is disarmed, so is potentially stuck on loading
         if (invalidTimer.tryDisarm()) {
             if (API.hasCapability(Capability.HANDLER_CLEAR_CACHE))
                 API.clearCache(".*");
 
-            API.handleRefresh();
+            API.handleRefresh(true);
             System.out.println("Triggering refresh: stuck at loading screen for too long!");
         }
     }
