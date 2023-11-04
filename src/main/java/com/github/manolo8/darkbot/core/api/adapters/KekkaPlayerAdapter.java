@@ -132,6 +132,13 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         window.setBlockingPatterns(result.toArray(new String[0]));
     }
 
+    @Override
+    public void reload(boolean useFakeDailyLogin) {
+        if (!useFakeDailyLogin && window.getVersion() >= 26)
+            window.normalReload();
+        else handler.reload();
+    }
+
     public static class KekkaPlayerDirectInteraction extends NoopAPIAdapter.NoOpDirectInteraction
             implements Utils.SignatureChecker {
         private final KekkaPlayer kekkaPlayer;

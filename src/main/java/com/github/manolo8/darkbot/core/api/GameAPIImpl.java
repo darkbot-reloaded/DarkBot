@@ -351,7 +351,9 @@ public class GameAPIImpl<
     @Override
     public byte[] readMemory(long address, int length) {
         if (!ByteUtils.isValidPtr(address)) return new byte[0];
-        return memory.readBytes(address, length);
+        synchronized (memory) {
+            return memory.readBytes(address, length);
+        }
     }
 
     @Override
@@ -360,7 +362,9 @@ public class GameAPIImpl<
             Arrays.fill(buffer, 0, length, (byte) 0);
             return;
         }
-        memory.readBytes(address, buffer, length);
+        synchronized (memory) {
+            memory.readBytes(address, buffer, length);
+        }
     }
 
     @Override
@@ -446,7 +450,7 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void handleRefresh() {
+    public void handleRefresh(boolean useFakeDailyLogin) {
         // No login has happened? Make a first attempt
         if (hasCapability(Capability.LOGIN) && loginData.getUrl() == null) {
             handleRelogin();
@@ -454,9 +458,12 @@ public class GameAPIImpl<
 
         setData(); //always set data to update possible settings changes
         refreshCount++;
-        handler.reload();
-
+        reload(useFakeDailyLogin);
         extraMemoryReader.resetCache();
+    }
+
+    protected void reload(boolean useFakeDailyLogin) {
+        handler.reload();
     }
 
     @Override
@@ -612,5 +619,13 @@ public class GameAPIImpl<
     @Override
     public long lastInternetReadTime() {
         return handler.lastInternetReadTime();
+    }
+
+    @Override
+    public String readStringDirect(long address) {
+        if (!ByteUtils.isValidPtr(address)) return FALLBACK_STRING;
+        String s = ByteUtils.readStringDirect(address);
+
+        return s == null ? FALLBACK_STRING : s;
     }
 }

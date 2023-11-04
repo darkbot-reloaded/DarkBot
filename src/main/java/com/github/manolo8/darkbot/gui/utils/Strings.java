@@ -13,6 +13,8 @@ public class Strings {
     private static final Pattern SIMPLIFY_NAME_MATCHES = Pattern.compile("^[^\\d]+\\d{1,3}$");
     private static final Pattern SIMPLIFY_NAME_REPLACEMENT = Pattern.compile("\\d{1,3}$");
 
+    private static final String[] GEAR_FUZZY_MATCHER_EXCLUDES = {"StreuneR"};
+
     public static String fileName(String path) {
         if (path == null || path.isEmpty()) return "-";
         int split = path.lastIndexOf(File.separatorChar);
@@ -34,12 +36,23 @@ public class Strings {
     }
 
     public static String fuzzyMatcher(String string) {
-        string = string.toLowerCase(Locale.ROOT)
+        if (shouldUseLowerCase(string))
+            string = string.toLowerCase(Locale.ROOT);
+
+        string = string
                 .replace("-x-", "") // Fixes "-x-[ NAME ]-x-", used in frozen labyrinth
                 .replace("xx", "") // Fixes Chaos Protegit
                 .replace("referee binary bot", "referee bot");
         string = NON_CHARACTER_REPLACEMENT.matcher(string).replaceAll(""); // Keep only alphanumerical
         return MIMESIS_REPLACEMENT.matcher(string).replaceAll("mimesis"); // Replace mim35i5 with mimesis
+    }
+
+    private static boolean shouldUseLowerCase(String name) {
+        for (String s : GEAR_FUZZY_MATCHER_EXCLUDES) {
+            if (name.contains(s))
+                return false;
+        }
+        return true;
     }
 
     public static boolean isEmpty(String s) {

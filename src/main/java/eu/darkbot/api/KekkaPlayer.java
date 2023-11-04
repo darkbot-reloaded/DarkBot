@@ -67,7 +67,11 @@ public class KekkaPlayer implements GameAPI.Window, GameAPI.Handler, GameAPI.Mem
 
     // When enabled browser is further hidden, lowering CPU usage, but doesn't work on all systems
     public native void    setMinimized(boolean minimized); // Hidden actually
+
+    // will enforce to use fake dailyLogin, so can keep backwards compatibility
     public native void    reload();
+    // without enforcing
+    public native void    normalReload();
     public native long    getMemoryUsage();
     public native void    setMaxFps(int maxFps);
     public native int     getVersion();
