@@ -217,6 +217,12 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
         return readMemoryBoolean(address);
     }
 
+    String readStringDirect(long address);
+
+    default String readStringDirect(long address, int... offsets) {
+        return readStringDirect(readLong(address, offsets));
+    }
+
     @Override
     default String readString(long address) {
         return readMemoryString(address);

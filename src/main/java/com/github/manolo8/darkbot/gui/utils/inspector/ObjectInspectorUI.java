@@ -6,27 +6,38 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.gui.MainGui;
 import net.miginfocom.swing.MigLayout;
 
-import javax.swing.*;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.UIManager;
 import javax.swing.tree.DefaultTreeModel;
-import java.awt.*;
+import java.awt.Insets;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 
 public class ObjectInspectorUI extends JFrame {
 
-    public ObjectInspectorUI() {
+    public ObjectInspectorUI(JMenuItem menuItem) {
         super("Object Inspector");
         setLayout(new MigLayout("ins 0, gap 0"));
         setSize(600, 600);
         setIconImage(MainGui.ICON);
         setLocationRelativeTo(null);
-        setAlwaysOnTop(true);
-
+        setJMenuBar(new InspectorTitleBar(this));
         DefaultTreeModel treeModel = new DefaultTreeModel(ObjectTreeNode.root("-", () -> 0L));
+
+        Object paintLines = UIManager.put("Tree.paintLines", true);
         InspectorTree treeView = new InspectorTree(treeModel);
+        UIManager.put("Tree.paintLines", paintLines);
 
         JComboBox<AddressEntry> addressCombo = new AddressCombo((name, addr) -> {
             ObjectTreeNode root = ObjectTreeNode.root(name, addr);
@@ -41,26 +52,33 @@ public class ObjectInspectorUI extends JFrame {
         add(addressCombo, "grow");
         add(delaySpinner, "wrap");
         add(new JScrollPane(treeView), "push, grow, span");
+
+        menuItem.setEnabled(false);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                menuItem.setEnabled(true);
+            }
+        });
     }
 
     private static class AddressCombo extends JComboBox<AddressEntry> {
 
-        public AddressCombo(BiConsumer<String, Supplier<Long>> onRootUpdate) {
+        public AddressCombo(BiConsumer<String, LongSupplier> onRootUpdate) {
             putClientProperty("FlatLaf.style", Map.of("padding", new Insets(0, 5, 0, 5)));
 
             addActionListener(ae -> {
-                Supplier<Long> addrSupplier = getSelectedAddr();
-                Long addr;
+                LongSupplier addrSupplier = getSelectedAddr();
+                long addr;
 
-                if (addrSupplier == null || (addr = addrSupplier.get()) == null || addr == 0) {
+                if (addrSupplier == null || (addr = addrSupplier.getAsLong()) == 0) {
                     putClientProperty("JComponent.outline", "error");
                     return;
                 } else {
                     putClientProperty("JComponent.outline", null);
                 }
 
-
-                String objectName = ByteUtils.readObjectName(addr);
+                String objectName = ByteUtils.readObjectNameDirect(addr);
                 if (!Objects.equals(objectName, "ERROR")) {
                     onRootUpdate.accept(objectName, addrSupplier);
                 }
@@ -79,10 +97,13 @@ public class ObjectInspectorUI extends JFrame {
             addItem(new AddressEntry("Settings Address", b.settingsAddress::get));
         }
 
-        private Supplier<Long> getSelectedAddr() {
+        private LongSupplier getSelectedAddr() {
             Object selectedItem = getSelectedItem();
             if (selectedItem instanceof AddressEntry) {
-                return ((AddressEntry) selectedItem).address;
+                return () -> {
+                    Long l = ((AddressEntry) selectedItem).address.get();
+                    return l == null ? 0 : l;
+                };
             } else if (selectedItem instanceof String) {
                 Long addr = parseAddress((String) selectedItem);
                 if (addr != null) return () -> addr;
