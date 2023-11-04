@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
@@ -154,15 +155,12 @@ public class QuestProxy extends Updatable implements API.Singleton {
 
     public static class Quest extends Auto {
         private boolean active;
-        private String category;
         private String description;
         private String title;
-        private int requirementCount;
         private int id;
         private boolean completed;
 
-        private final List<Requirement> requirementItems = new ArrayList<>();
-        private final ObjArray requirementItemsArr = ObjArray.ofArrObj(true);
+        private final FlashList<Requirement> requirementItems = FlashList.ofArray(Requirement.class);
 
         private final List<Reward> rewardItems = new ArrayList<>();
         private final ObjArray rewardItemsArr = ObjArray.ofArrObj(true);
@@ -175,16 +173,14 @@ public class QuestProxy extends Updatable implements API.Singleton {
 
             this.id = API.readMemoryInt(address + 0x20);
             this.active = API.readMemoryBoolean(address + 0x24);
-            this.category = API.readMemoryString(address, 0x48);
             this.title = API.readMemoryString(address, 0x68);
             this.description = API.readMemoryString(address, 0x70);
 
             long requirementAddr = API.readMemoryLong(address + 0x38) & ByteUtils.ATOM_MASK;
-            this.requirementCount = API.readMemoryInt(requirementAddr + 0x30);
             this.completed = API.readMemoryBoolean(requirementAddr, 0x38);
 
-            requirementItemsArr.update(API.readMemoryPtr(requirementAddr + 0x40));
-            requirementItemsArr.sync(requirementItems, Requirement::new);
+            requirementItems.update(API.readMemoryPtr(address + 0x40));
+            requirementItems.update();
 
             rewardItemsArr.update(API.readMemoryPtr(address + 0x50));
             rewardItemsArr.sync(rewardItems, Reward::new);
@@ -198,20 +194,12 @@ public class QuestProxy extends Updatable implements API.Singleton {
             return active;
         }
 
-        public String getCategory() {
-            return category;
-        }
-
         public String getTitle() {
             return title;
         }
 
         public String getDescription() {
             return description;
-        }
-
-        public int getRequirementsCount() {
-            return requirementCount;
         }
 
         public boolean isCompleted() {
