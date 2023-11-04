@@ -165,7 +165,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         this.performanceManager = pluginAPI.requireInstance(PerformanceManager.class);
 
         this.botInstaller.install(settingsManager, facadeManager, effectManager, guiManager, mapManager,
-                hero, statsManager, pingManager, repairManager);
+                hero, statsManager, pingManager, repairManager, performanceManager);
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();
