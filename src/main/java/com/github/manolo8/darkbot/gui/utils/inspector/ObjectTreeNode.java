@@ -104,7 +104,8 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
 
         switch (slot.slotType) {
             case ARRAY:
-                return new CollectionNode(slot, address, staticAddress, hasHashMap, false);
+                boolean denseUsed = API.readInt(object + 52) != 0;
+                return new CollectionNode(slot, address, staticAddress, hasHashMap && !denseUsed, false);
             case DICTIONARY:
                 return new CollectionNode(slot, address, staticAddress, true, false);
             case VECTOR:

@@ -71,15 +71,11 @@ public class InspectorTree extends JTree {
             public void ancestorAdded(AncestorEvent event) {
                 if (timer == null) {
                     timer = new Timer(delay, e -> {
-                        try {
-                            ((ObjectTreeNode) model.getRoot()).update(InspectorTree.this);
-                            if (ObjectTreeNode.maxTextLengthChanged())
-                                notifyNodesChanged(model, (TreeNode) model.getRoot());
+                        ((ObjectTreeNode) model.getRoot()).update(InspectorTree.this);
+                        if (ObjectTreeNode.maxTextLengthChanged())
+                            notifyNodesChanged(model, (TreeNode) model.getRoot());
 
-                            invalidate();
-                        } catch (Throwable t) {
-                            t.printStackTrace();
-                        }
+                        invalidate();
                     });
                     timer.setRepeats(true);
                     timer.start();
@@ -227,68 +223,14 @@ public class InspectorTree extends JTree {
             ObjectTreeNode node = getSelectedNode();
             if (node != null) {
                 ObjectInspector.Slot slot = node.getSlot();
-                if (slot.slotType == ObjectInspector.Slot.Type.OBJECT || slot.slotType == ObjectInspector.Slot.Type.PLAIN_OBJECT) {
+                if (slot.slotType == ObjectInspector.Slot.Type.OBJECT
+                        || slot.slotType == ObjectInspector.Slot.Type.PLAIN_OBJECT) {
 
-                    StringBuilder clazzBuilder = new StringBuilder("import com.github.manolo8.darkbot.core.itf.Updatable;");
-                    clazzBuilder.append(System.lineSeparator())
-                            .append(System.lineSeparator())
-                            .append("public class ")
-                            .append(slot.name.replace("-", ""))
-                            .append(" extends Updatable {")
-                            .append(System.lineSeparator());
-
-                    StringBuilder updateMethod = new StringBuilder();
-                    updateMethod.append("    @Override")
-                            .append(System.lineSeparator())
-                            .append("    public void update() {");
-
-                    for (ObjectInspector.Slot objectSlot : ObjectInspector.getObjectSlots(node.value)) {
-                        clazzBuilder.append(System.lineSeparator())
-                                .append("    private ");
-
-                        String slotName = objectSlot.name.replace("-", "");
-                        updateMethod.append(System.lineSeparator())
-                                .append("        this.")
-                                .append(slotName)
-                                .append(" = ");
-
-                        switch (objectSlot.slotType) {
-                            case INT:
-                            case UINT:
-                            case BOOLEAN:
-                                clazzBuilder.append("int");
-                                updateMethod.append("readInt");
-                                break;
-                            case DOUBLE:
-                                clazzBuilder.append("double");
-                                updateMethod.append("readDouble");
-                                break;
-                            case STRING:
-                                clazzBuilder.append("String");
-                                updateMethod.append("readString");
-                                break;
-                            default:
-                                clazzBuilder.append("long");
-                                updateMethod.append("readLong");
-                        }
-
-                        updateMethod.append("(").append(objectSlot.offset).append(");");
-                        clazzBuilder.append(" ").append(slotName).append(";");
-                    }
-
-                    updateMethod.append(System.lineSeparator())
-                            .append("    }");
-
-                    clazzBuilder.append(System.lineSeparator());
-                    clazzBuilder.append(System.lineSeparator());
-                    clazzBuilder.append(updateMethod);
-                    clazzBuilder.append(System.lineSeparator())
-                            .append("}");
-
-                    SystemUtils.toClipboard(clazzBuilder.toString());
+                    String generated = ClassGenerator.generate(slot.name.replace("-", ""),
+                            ObjectInspector.getObjectSlots(node.value));
+                    SystemUtils.toClipboard(generated);
                 }
             }
         }
     }
-
 }
