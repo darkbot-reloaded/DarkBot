@@ -55,6 +55,8 @@ public class LoginUtils {
             System.out.println("Closed login panel, exited without logging in");
             System.exit(0);
         }
+
+        LoginCaptchaTask.firstLogin = false;
         return loginData;
     }
 

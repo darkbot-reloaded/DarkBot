@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 public class LoginCaptchaTask extends BackpageTask implements CaptchaAPI {
     // use only on first login
-    private static boolean used;
+    public static boolean firstLogin = true;
 
     public LoginCaptchaTask() {
         super(null, null);
@@ -26,7 +26,7 @@ public class LoginCaptchaTask extends BackpageTask implements CaptchaAPI {
         try {
             Version version = readVersionFile();
             if (version == null || version.isOlderThan(new Version("1.3.0")))
-                return "";
+                return null;
 
             Process process = new ProcessBuilder(BACKPAGE_PATH.resolve(EXECUTABLE_NAME).toAbsolutePath().toString(),
                     "--captcha", siteKey,
@@ -59,22 +59,17 @@ public class LoginCaptchaTask extends BackpageTask implements CaptchaAPI {
 
     @Override
     public Map<String, String> solveCaptcha(URL url, String webpage) {
-        if (used) return Collections.emptyMap();
+        if (!firstLogin) return Collections.emptyMap();
 
         Pattern p = Pattern.compile("data-sitekey=\"([^\"]+)\"");
         Matcher matcher = p.matcher(webpage);
 
         if (matcher.find()) {
             String captcha = getCaptcha(url.toString(), matcher.group(1));
-            if (captcha == null) throw new IllegalStateException();
-            // return empty map if is used with old backpage version
-            if (captcha.isEmpty()) return Collections.emptyMap();
-
-            used = true;
-            return Map.of("g-recaptcha-response", captcha,
-                    "h-captcha-response", captcha);
+            if (captcha != null)
+                return Map.of("g-recaptcha-response", captcha,
+                        "h-captcha-response", captcha);
         }
-
-        throw new IllegalStateException();
+        return Collections.emptyMap();
     }
 }
