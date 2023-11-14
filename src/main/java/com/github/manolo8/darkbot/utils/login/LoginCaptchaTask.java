@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LoginCaptchaTask extends BackpageTask implements CaptchaAPI {
+class LoginCaptchaTask extends BackpageTask implements CaptchaAPI {
     // use only on first login
-    public static boolean firstLogin = true;
+    static boolean firstLogin = true;
 
-    public LoginCaptchaTask() {
+    LoginCaptchaTask() {
         super(null, null);
     }
 
