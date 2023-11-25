@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.objects.Map;
 import eu.darkbot.api.API;
 import eu.darkbot.api.config.annotations.Dropdown;
-import eu.darkbot.api.managers.StarSystemAPI;
+import org.jetbrains.annotations.NotNull;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
@@ -242,16 +242,6 @@ public class StarManager implements API.Singleton {
                                 .thenComparing(p -> hero.locationInfo.distance(p.locationInfo))).orElse(null);
     }
 
-    public Map byName(String name) {
-        return starSystem.vertexSet().stream().filter(m -> m.name.equals(name)).findAny()
-                .orElseGet(() -> addMap(new Map(--INVALID_MAP_ID, name, false, false)));
-    }
-
-    public Map getByName(String name) throws StarSystemAPI.MapNotFoundException {
-        return starSystem.vertexSet().stream().filter(m -> m.name.equals(name)).findAny()
-                .orElseThrow(() -> new StarSystemAPI.MapNotFoundException(name));
-    }
-
     public Stream<Map> mapSet() {
         return starSystem.vertexSet().stream();
     }
@@ -265,9 +255,9 @@ public class StarManager implements API.Singleton {
                 .orElseGet(() -> addMap(new Map(id, "Unknown map " + id, false, false)));
     }
 
-    public Map getById(int id) throws StarSystemAPI.MapNotFoundException {
-        return starSystem.vertexSet().stream().filter(m -> m.id == id).findAny()
-                .orElseThrow(() -> new StarSystemAPI.MapNotFoundException(id));
+    public Map byName(String name) {
+        return starSystem.vertexSet().stream().filter(m -> m.name.equals(name)).findAny()
+                .orElseGet(() -> addMap(new Map(--INVALID_MAP_ID, name, false, false)));
     }
 
     private Map addMap(Map map) {
@@ -346,7 +336,7 @@ public class StarManager implements API.Singleton {
         }
 
         @Override
-        public String getText(Integer option) {
+        public @NotNull String getText(Integer option) {
             if (option == null) return "";
             return star.byId(option).getName();
         }

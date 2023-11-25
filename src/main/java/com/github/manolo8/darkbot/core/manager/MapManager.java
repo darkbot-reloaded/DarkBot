@@ -31,13 +31,11 @@ import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 import eu.darkbot.util.Timer;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -57,7 +55,6 @@ public class MapManager implements Manager, StarSystemAPI {
     private long viewAddress;
     private long boundsAddress;
     public long eventAddress;
-    private long settings3DAddress;
 
     public static int id = -1;
     public Lazy<Map> mapChange = new Lazy.NoCache<>();
@@ -486,6 +483,11 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     @Override
+    public GameMap getOrCreateMap(String mapName) {
+        return starManager.byName(mapName);
+    }
+
+    @Override
     public Optional<GameMap> findMap(int mapId) {
         return starManager.getMaps().stream()
                 .filter(map -> map.getId() == mapId)
@@ -499,21 +501,6 @@ public class MapManager implements Manager, StarSystemAPI {
                 .filter(map -> Objects.equals(map.getName(), mapName))
                 .map(map -> (GameMap) map)
                 .findFirst();
-    }
-
-    @Override
-    public GameMap getById(int mapId) throws MapNotFoundException {
-        return starManager.getById(mapId);
-    }
-
-    @Override
-    public GameMap getOrCreateMapById(int mapId) {
-        return starManager.byId(mapId);
-    }
-
-    @Override
-    public GameMap getByName(@NotNull String mapName) throws MapNotFoundException {
-        return starManager.getByName(mapName);
     }
 
     @Override
