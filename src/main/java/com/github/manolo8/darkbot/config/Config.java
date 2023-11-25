@@ -237,10 +237,8 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean FORCE_GAME_LANGUAGE = false;
             public @Option boolean ENFORCE_HW_ACCEL = true;
             public @Option boolean USE_3D = false;
-            public @Option boolean DISABLE_RENDER = false;
             public @Option boolean USE_PROXY = false;
             public @Option boolean CLEAR_CACHE_ON_STUCK = true;
-            public @Option @Number(min = 1, max = 60) @Number.Disabled(value = 0, def = 30) int MAX_FPS = 0;
 
             @Option @Dropdown(multi = true)
             public Set<HookAdapter.Flag> DARK_HOOK_FLAGS = EnumSet.allOf(HookAdapter.Flag.class);
@@ -283,11 +281,21 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option ImageWrapper IMAGE = new ImageWrapper();
         }
 
+        public @Option Performance PERFORMANCE = new Performance();
+        public static class Performance {
+            public @Option boolean ALWAYS_ENABLED = true;
+            public @Option("config.bot_settings.api_config.disable_render") boolean DISABLE_RENDER = false;
+            public @Option("config.bot_settings.api_config.max_fps")
+            @Number(min = 1, max = 60) @Number.Disabled(value = 0, def = 15) int MAX_FPS = 0;
+
+            public @Option("config.bot_settings.other.min_tick") @Visibility(Level.ADVANCED)
+            @Number(min = 10, max = 250) @Number.Disabled(value = 15, def = 15) int MIN_TICK = 15;
+        }
+
         public @Option @Visibility(Level.INTERMEDIATE) Other OTHER = new Other();
         public static class Other {
             public @Option boolean DISABLE_MASTER_PASSWORD = false;
             public @Option @Number(min = 10, max = 300) int ZONE_RESOLUTION = 30;
-            public @Option @Visibility(Level.DEVELOPER) @Number(min = 10, max = 250) int MIN_TICK = 15;
             public @Option @Visibility(Level.ADVANCED) boolean DEV_STUFF = false;
         }
     }

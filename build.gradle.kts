@@ -43,7 +43,7 @@ publishing {
 }
 
 dependencies {
-    val apiVersion = "0.8.2"
+    val apiVersion = "0.8.3"
     val flatLafVersion = "3.1.1"
 
     // use this if you want to use local(mavenLocal) darkbot API
