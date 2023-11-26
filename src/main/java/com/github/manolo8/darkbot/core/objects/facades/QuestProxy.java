@@ -35,9 +35,6 @@ public class QuestProxy extends Updatable implements QuestAPI {
 
         long questClass = API.readMemoryPtr(address + 0x98);
 
-        this.visibleQuestGiver = API.readMemoryBoolean(address, 0x40);
-        this.tabSelected = API.readMemoryInt(address, 0X50);
-
         long currentQuestAddr = API.readMemoryPtr(questClass + 0x28);
 
         if (currentQuestAddr == 0) {
@@ -49,6 +46,16 @@ public class QuestProxy extends Updatable implements QuestAPI {
 
             this.currentQuest.update(currentQuestAddr);
         }
+
+        this.visibleQuestGiver = API.readMemoryBoolean(address, 0x40);
+
+        if (!visibleQuestGiver) {
+            this.questInfoGiverSelected = null;
+            this.questGiverSelected = null;
+            return;
+        }
+
+        this.tabSelected = API.readMemoryInt(address, 0X50);
 
         long questInfoGiverSelectedAddr = API.readMemoryPtr(address + 0xA8);
         if (questInfoGiverSelectedAddr == 0) {
