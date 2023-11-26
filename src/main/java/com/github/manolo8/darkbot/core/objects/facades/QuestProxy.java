@@ -33,12 +33,12 @@ public class QuestProxy extends Updatable implements QuestAPI {
             return;
         }
 
-        long questClass = API.readMemoryLong(address + 0x98) & ByteUtils.ATOM_MASK;
+        long questClass = API.readMemoryPtr(address + 0x98);
 
         this.visibleQuestGiver = API.readMemoryBoolean(address, 0x40);
         this.tabSelected = API.readMemoryInt(address, 0X50);
 
-        long currentQuestAddr = API.readMemoryLong(questClass + 0x28) & ByteUtils.ATOM_MASK;
+        long currentQuestAddr = API.readMemoryPtr(questClass + 0x28);
 
         if (currentQuestAddr == 0) {
             this.currentQuest = null;
@@ -50,10 +50,7 @@ public class QuestProxy extends Updatable implements QuestAPI {
             this.currentQuest.update(currentQuestAddr);
         }
 
-        questItemsArr.update(API.readMemoryPtr(0x58));
-        questItemsArr.sync(questItems, QuestListItem::new);
-
-        long questInfoGiverSelectedAddr = API.readMemoryLong(address + 0xA8) & ByteUtils.ATOM_MASK;
+        long questInfoGiverSelectedAddr = API.readMemoryPtr(address + 0xA8);
         if (questInfoGiverSelectedAddr == 0) {
             this.questInfoGiverSelected = null;
         } else {
@@ -64,7 +61,7 @@ public class QuestProxy extends Updatable implements QuestAPI {
             this.questInfoGiverSelected.update(questInfoGiverSelectedAddr);
         }
 
-        long questGiverSelectedAddr = API.readMemoryLong(address + 0xB0) & ByteUtils.ATOM_MASK;
+        long questGiverSelectedAddr = API.readMemoryPtr(address + 0xB0);
         if (questGiverSelectedAddr == 0) {
             this.questGiverSelected = null;
         } else {
@@ -93,6 +90,9 @@ public class QuestProxy extends Updatable implements QuestAPI {
 
     @Override
     public @Nullable List<? extends QuestAPI.QuestListItem> getCurrestQuests() {
+        questItemsArr.update(API.readMemoryPtr(address + 0x58));
+        questItemsArr.sync(questItems, QuestListItem::new);
+
         return questItems;
     }
 
