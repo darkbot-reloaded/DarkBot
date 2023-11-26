@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
-import eu.darkbot.api.API;
+import eu.darkbot.api.managers.QuestAPI;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -14,15 +14,15 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
-public class QuestProxy extends Updatable implements API.Singleton {
-    private @Nullable Quest currentQuest;
+public class QuestProxy extends Updatable implements QuestAPI {
+    private @Nullable QuestProxy.Quest currentQuest;
 
-    private final List<QuestListItem> questItems = new ArrayList<>();
+    private final List<QuestProxy.QuestListItem> questItems = new ArrayList<>();
 
     private final ObjArray questItemsArr = ObjArray.ofArrObj(true);
 
-    private @Nullable Quest questGiverSelected;
-    private @Nullable QuestListItem questInfoGiverSelected;
+    private @Nullable QuestProxy.Quest questGiverSelected;
+    private @Nullable QuestProxy.QuestListItem questInfoGiverSelected;
 
     private boolean visibleQuestGiver;
     private int tabSelected;
@@ -76,31 +76,37 @@ public class QuestProxy extends Updatable implements API.Singleton {
         }
     }
 
-    public @Nullable Quest getDisplayedQuest() {
+    @Override
+    public @Nullable QuestAPI.Quest getDisplayedQuest() {
         return currentQuest;
     }
 
-    public @Nullable Quest getSelectedQuest() {
+    @Override
+    public @Nullable QuestAPI.Quest getSelectedQuest() {
         return questGiverSelected;
     }
 
-    public @Nullable QuestListItem getSelectedQuestInfo() {
+    @Override
+    public @Nullable QuestAPI.QuestListItem getSelectedQuestInfo() {
         return questInfoGiverSelected;
     }
 
-    public @Nullable List<QuestListItem> getCurrestQuests() {
+    @Override
+    public @Nullable List<? extends QuestAPI.QuestListItem> getCurrestQuests() {
         return questItems;
     }
 
+    @Override
     public boolean isQuestGiverOpen() {
         return visibleQuestGiver;
     }
 
+    @Override
     public int getSelectedTab() {
         return tabSelected;
     }
 
-    public static class QuestListItem extends Auto {
+    public static class QuestListItem extends Auto implements QuestAPI.QuestListItem {
         private int id;
         private boolean selected;
         private boolean completed;
@@ -124,45 +130,52 @@ public class QuestProxy extends Updatable implements API.Singleton {
             this.type = API.readMemoryString(address, 0x70);
         }
 
+        @Override
         public int getId() {
             return id;
         }
 
+        @Override
         public int getLevelRequired() {
             return levelRequired;
         }
 
+        @Override
         public boolean isSelected() {
             return selected;
         }
 
+        @Override
         public boolean isCompleted() {
             return completed;
         }
 
+        @Override
         public String getTitle() {
             return title;
         }
 
+        @Override
         public String getType() {
             return type;
         }
 
+        @Override
         public boolean isActivable() {
             return activable;
         }
     }
 
-    public static class Quest extends Auto {
+    public static class Quest extends Auto implements QuestAPI.Quest {
         private boolean active;
         private String description;
         private String title;
         private int id;
         private boolean completed;
 
-        private final FlashList<Requirement> requirementItems = FlashList.ofArray(Requirement.class);
+        private final FlashList<QuestProxy.Requirement> requirementItems = FlashList.ofArray(Requirement.class);
 
-        private final List<Reward> rewardItems = new ArrayList<>();
+        private final List<QuestProxy.Reward> rewardItems = new ArrayList<>();
         private final ObjArray rewardItemsArr = ObjArray.ofArrObj(true);
 
         @Override
@@ -186,36 +199,43 @@ public class QuestProxy extends Updatable implements API.Singleton {
             rewardItemsArr.sync(rewardItems, Reward::new);
         }
 
+        @Override
         public int getId() {
             return id;
         }
 
+        @Override
         public boolean isActive() {
             return active;
         }
 
+        @Override
         public String getTitle() {
             return title;
         }
 
+        @Override
         public String getDescription() {
             return description;
         }
 
+        @Override
         public boolean isCompleted() {
             return completed;
         }
 
-        public List<Requirement> getRequirements() {
+        @Override
+        public List<? extends QuestAPI.Requirement> getRequirements() {
             return requirementItems;
         }
 
-        public List<Reward> getRewards() {
+        @Override
+        public List<? extends QuestAPI.Reward> getRewards() {
             return rewardItems;
         }
     }
 
-    public static class Reward extends Auto {
+    public static class Reward extends Auto implements QuestAPI.Reward {
         private int amount;
         private String type;
 
@@ -229,23 +249,25 @@ public class QuestProxy extends Updatable implements API.Singleton {
             this.type = API.readMemoryString(address, 0x28);
         }
 
+        @Override
         public int getAmount() {
             return amount;
         }
 
+        @Override
         public String getType() {
             return type;
         }
     }
 
-    public static class Requirement extends Auto {
+    public static class Requirement extends Auto implements QuestAPI.Requirement {
         private String description;
         private double goalReached;
         private double goal;
         private boolean completed;
         private boolean enabled;
 
-        private final List<Requirement> requirementItems = new ArrayList<>();
+        private final List<QuestProxy.Requirement> requirementItems = new ArrayList<>();
         private final ObjArray requirementItemsArr = ObjArray.ofArrObj(true);
 
         private String requirementType;
@@ -269,30 +291,37 @@ public class QuestProxy extends Updatable implements API.Singleton {
             requirementItemsArr.sync(requirementItems, Requirement::new);
         }
 
+        @Override
         public String getDescription() {
             return description;
         }
 
+        @Override
         public double getProgress() {
             return goalReached;
         }
 
+        @Override
         public double getGoal() {
             return goal;
         }
 
+        @Override
         public boolean isCompleted() {
             return completed;
         }
 
+        @Override
         public String getType() {
             return requirementType;
         }
 
-        public List<Requirement> getRequirements() {
+        @Override
+        public List<? extends QuestAPI.Requirement> getRequirements() {
             return requirementItems;
         }
 
+        @Override
         public boolean isEnabled() {
             return enabled;
         }
