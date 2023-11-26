@@ -3,7 +3,6 @@ package com.github.manolo8.darkbot.core.objects.facades;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
 
 import eu.darkbot.api.managers.QuestAPI;
 
@@ -36,16 +35,10 @@ public class QuestProxy extends Updatable implements QuestAPI {
         long questClass = API.readMemoryPtr(address + 0x98);
 
         long currentQuestAddr = API.readMemoryPtr(questClass + 0x28);
-
-        if (currentQuestAddr == 0) {
-            this.currentQuest = null;
-        } else {
-            if (this.currentQuest == null) {
-                this.currentQuest = new Quest();
-            }
-
-            this.currentQuest.update(currentQuestAddr);
+        if (this.currentQuest == null) {
+            this.currentQuest = new Quest();
         }
+        this.currentQuest.update(currentQuestAddr);
 
         this.visibleQuestGiver = API.readMemoryBoolean(address, 0x40);
 
@@ -55,44 +48,34 @@ public class QuestProxy extends Updatable implements QuestAPI {
             return;
         }
 
-        this.tabSelected = API.readMemoryInt(address, 0X50);
+        this.tabSelected = API.readMemoryInt(address, 0x50);
 
         long questInfoGiverSelectedAddr = API.readMemoryPtr(address + 0xA8);
-        if (questInfoGiverSelectedAddr == 0) {
-            this.questInfoGiverSelected = null;
-        } else {
-            if (this.questInfoGiverSelected == null) {
-                this.questInfoGiverSelected = new QuestListItem();
-            }
-
-            this.questInfoGiverSelected.update(questInfoGiverSelectedAddr);
+        if (this.questInfoGiverSelected == null) {
+            this.questInfoGiverSelected = new QuestListItem();
         }
+        this.questInfoGiverSelected.update(questInfoGiverSelectedAddr);
 
         long questGiverSelectedAddr = API.readMemoryPtr(address + 0xB0);
-        if (questGiverSelectedAddr == 0) {
-            this.questGiverSelected = null;
-        } else {
-            if (this.questGiverSelected == null) {
-                this.questGiverSelected = new Quest();
-            }
-
-            this.questGiverSelected.update(questGiverSelectedAddr);
+        if (this.questGiverSelected == null) {
+            this.questGiverSelected = new Quest();
         }
+        this.questGiverSelected.update(questGiverSelectedAddr);
     }
 
     @Override
     public @Nullable QuestAPI.Quest getDisplayedQuest() {
-        return currentQuest;
+        return currentQuest == null || currentQuest.address == 0 ? null : currentQuest;
     }
 
     @Override
     public @Nullable QuestAPI.Quest getSelectedQuest() {
-        return questGiverSelected;
+        return questGiverSelected == null || questGiverSelected.address == 0 ? null : questGiverSelected;
     }
 
     @Override
     public @Nullable QuestAPI.QuestListItem getSelectedQuestInfo() {
-        return questInfoGiverSelected;
+        return questInfoGiverSelected == null || questInfoGiverSelected.address == 0 ? null : questInfoGiverSelected;
     }
 
     @Override
@@ -196,11 +179,15 @@ public class QuestProxy extends Updatable implements QuestAPI {
             this.title = API.readMemoryString(address, 0x68);
             this.description = API.readMemoryString(address, 0x70);
 
-            long requirementAddr = API.readMemoryLong(address + 0x38) & ByteUtils.ATOM_MASK;
+            long requirementAddr = API.readMemoryPtr(address + 0x38);
             this.completed = API.readMemoryBoolean(requirementAddr, 0x38);
 
             requirementItems.update(API.readMemoryPtr(address + 0x40));
             requirementItems.update();
+
+            if (this.rewardItems.size() > 0) {
+                return;
+            }
 
             rewardItemsArr.update(API.readMemoryPtr(address + 0x50));
             rewardItemsArr.sync(rewardItems, Reward::new);
@@ -291,7 +278,7 @@ public class QuestProxy extends Updatable implements QuestAPI {
             this.goalReached = API.readMemoryDouble(address + 0x78);
             this.goal = API.readMemoryDouble(address + 0x80);
 
-            long definitionAddr = API.readMemoryLong(address + 0x58) & ByteUtils.ATOM_MASK;
+            long definitionAddr = API.readMemoryPtr(address + 0x58);
             this.requirementType = API.readMemoryString(definitionAddr, 0x28);
 
             requirementItemsArr.update(API.readMemoryPtr(address + 0x48));
