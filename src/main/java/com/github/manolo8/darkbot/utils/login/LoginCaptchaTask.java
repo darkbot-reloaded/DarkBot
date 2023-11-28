@@ -1,8 +1,11 @@
 package com.github.manolo8.darkbot.utils.login;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.extensions.util.Version;
+import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.titlebar.BackpageTask;
 import com.github.manolo8.darkbot.utils.CaptchaAPI;
+import eu.darkbot.api.config.ConfigSetting;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,16 +62,19 @@ class LoginCaptchaTask extends BackpageTask implements CaptchaAPI {
 
     @Override
     public Map<String, String> solveCaptcha(URL url, String webpage) {
-        if (!firstLogin) return Collections.emptyMap();
+        ConfigSetting<Boolean> showCaptcha = Main.INSTANCE.configHandler.requireConfig("bot_settings.other.always_show_captcha");
 
-        Pattern p = Pattern.compile("data-sitekey=\"([^\"]+)\"");
-        Matcher matcher = p.matcher(webpage);
+        MainGui gui = Main.INSTANCE.getGui();
+        if (firstLogin || (gui != null && gui.hasFocus()) || showCaptcha.getValue()) {
+            Pattern p = Pattern.compile("data-sitekey=\"([^\"]+)\"");
+            Matcher matcher = p.matcher(webpage);
 
-        if (matcher.find()) {
-            String captcha = getCaptcha(url.toString(), matcher.group(1));
-            if (captcha != null)
-                return Map.of("g-recaptcha-response", captcha,
-                        "h-captcha-response", captcha);
+            if (matcher.find()) {
+                String captcha = getCaptcha(url.toString(), matcher.group(1));
+                if (captcha != null)
+                    return Map.of("g-recaptcha-response", captcha,
+                            "h-captcha-response", captcha);
+            }
         }
         return Collections.emptyMap();
     }
