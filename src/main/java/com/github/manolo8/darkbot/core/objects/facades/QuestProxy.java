@@ -14,14 +14,15 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 public class QuestProxy extends Updatable implements QuestAPI {
-    private @Nullable QuestProxy.Quest currentQuest;
+    private @Nullable QuestProxy.Quest currentQuest = new Quest();
 
     private final List<QuestProxy.QuestListItem> questItems = new ArrayList<>();
+    private boolean questsUpdated = false;
 
     private final ObjArray questItemsArr = ObjArray.ofArrObj(true);
 
-    private @Nullable QuestProxy.Quest questGiverSelected;
-    private @Nullable QuestProxy.QuestListItem questInfoGiverSelected;
+    private @Nullable QuestProxy.Quest questGiverSelected = new Quest();
+    private @Nullable QuestProxy.QuestListItem questInfoGiverSelected = new QuestListItem();
 
     private boolean visibleQuestGiver;
     private int tabSelected;
@@ -32,56 +33,52 @@ public class QuestProxy extends Updatable implements QuestAPI {
             return;
         }
 
+        this.questsUpdated = false;
+
         long questClass = API.readMemoryPtr(address + 0x98);
 
         long currentQuestAddr = API.readMemoryPtr(questClass + 0x28);
-        if (this.currentQuest == null) {
-            this.currentQuest = new Quest();
-        }
         this.currentQuest.update(currentQuestAddr);
 
         this.visibleQuestGiver = API.readMemoryBoolean(address, 0x40);
 
         if (!visibleQuestGiver) {
-            this.questInfoGiverSelected = null;
-            this.questGiverSelected = null;
             return;
         }
 
         this.tabSelected = API.readMemoryInt(address, 0x50);
 
         long questInfoGiverSelectedAddr = API.readMemoryPtr(address + 0xA8);
-        if (this.questInfoGiverSelected == null) {
-            this.questInfoGiverSelected = new QuestListItem();
-        }
         this.questInfoGiverSelected.update(questInfoGiverSelectedAddr);
 
         long questGiverSelectedAddr = API.readMemoryPtr(address + 0xB0);
-        if (this.questGiverSelected == null) {
-            this.questGiverSelected = new Quest();
-        }
         this.questGiverSelected.update(questGiverSelectedAddr);
     }
 
     @Override
     public @Nullable QuestAPI.Quest getDisplayedQuest() {
-        return currentQuest == null || currentQuest.address == 0 ? null : currentQuest;
+        return currentQuest.address == 0 ? null : currentQuest;
     }
 
     @Override
     public @Nullable QuestAPI.Quest getSelectedQuest() {
-        return questGiverSelected == null || questGiverSelected.address == 0 ? null : questGiverSelected;
+        return !this.visibleQuestGiver || questGiverSelected.address == 0 ? null
+                : questGiverSelected;
     }
 
     @Override
     public @Nullable QuestAPI.QuestListItem getSelectedQuestInfo() {
-        return questInfoGiverSelected == null || questInfoGiverSelected.address == 0 ? null : questInfoGiverSelected;
+        return !this.visibleQuestGiver || questInfoGiverSelected.address == 0 ? null
+                : questInfoGiverSelected;
     }
 
     @Override
     public @Nullable List<? extends QuestAPI.QuestListItem> getCurrestQuests() {
-        questItemsArr.update(API.readMemoryPtr(address + 0x58));
-        questItemsArr.sync(questItems, QuestListItem::new);
+        if (!questsUpdated) {
+            questsUpdated = true;
+            questItemsArr.update(API.readMemoryPtr(address + 0x58));
+            questItemsArr.sync(questItems, QuestListItem::new);
+        }
 
         return questItems;
     }
