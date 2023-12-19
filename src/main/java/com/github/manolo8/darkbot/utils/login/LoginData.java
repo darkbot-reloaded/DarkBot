@@ -7,12 +7,17 @@ import lombok.Getter;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 public class LoginData {
     private static final Type PARAMS_TYPE = new TypeToken<Map<String, String>>() {}.getType();
 
+    @Getter
+    private transient final Map<Integer, LoginData> accounts = new ConcurrentHashMap<>();
     private transient BiConsumer<String, String> onSetSid;
 
     private Map<String, String> params;
@@ -20,6 +25,8 @@ public class LoginData {
     private int userId;
     @Getter
     private String username, password, sid, url, fullUrl, preloaderUrl;
+    public transient long nextUpdate;
+    public transient int status;
 
     public void setCredentials(String username, String password, BiConsumer<String, String> onSetSid) {
         this.username = username;
@@ -71,5 +78,23 @@ public class LoginData {
                 ", preloaderUrl='" + preloaderUrl + '\'' +
                 ", params='" + params + '\'' +
                 '}';
+    }
+
+    public boolean hasAnotherAccounts() {
+        return accounts != null && accounts.size() > 1;
+    }
+
+    public void setAccounts(List<LoginData> accounts) {
+        this.accounts.putAll(accounts.stream().collect(Collectors.toMap(LoginData::getUserId, loginData -> loginData)));
+    }
+
+    public synchronized void switchAccount(int userId) {
+        LoginData account = accounts.get(userId);
+        if (account == null) return;
+        setCredentials(account.username, account.password, onSetSid);
+        setSid(account.sid, account.url);
+        params = account.params;
+        preloaderUrl = account.preloaderUrl;
+        this.userId = account.userId;
     }
 }

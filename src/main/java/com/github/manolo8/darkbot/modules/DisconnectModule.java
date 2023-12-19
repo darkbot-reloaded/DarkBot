@@ -81,7 +81,12 @@ public class DisconnectModule extends TemporalModule {
             // Bot done. Pause "forever" (unless a behaviour restarts it).
             if (pauseTime == null) main.setRunning(false);
             else if (pauseTime == 0) goBack();
-            else {
+            // -10101 is a magic number for preventing automatic switching config after manual switch while bot was active
+            else if(pauseTime == -10101L) refreshing = true;
+            else if (main.config.MISCELLANEOUS.CONFIG_AFTER_PAUSE != null && I18n.get("module.disconnect.reason.break").equals(reason)) {
+                main.configChange.send(main.config.MISCELLANEOUS.CONFIG_AFTER_PAUSE);
+                refreshing = true;
+            } else {
                 pauseUntil = System.currentTimeMillis() + pauseTime;
                 main.setRunning(false);
             }

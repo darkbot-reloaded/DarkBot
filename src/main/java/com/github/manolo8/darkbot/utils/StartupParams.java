@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.utils;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import eu.darkbot.api.API;
 import eu.darkbot.util.function.ThrowingFunction;
+import lombok.Getter;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -10,9 +11,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -139,49 +143,36 @@ public class StartupParams implements API.Singleton {
             System.out.println("Loaded startup properties file");
         }
 
-        private String getProperty(PropertyKey key) {
-            return prop.getProperty(key.toString());
-        }
-
-        private void setProperty(PropertyKey key, String val) {
-            prop.setProperty(key.toString(), val);
-        }
-
         public String getUsername() {
-            return getProperty(PropertyKey.USERNAME);
+            return getAccount().username.orElse(null);
         }
 
         public String getPassword() {
-            return getProperty(PropertyKey.PASSWORD);
+            return getAccount().password.orElse(null);
         }
 
         public char[] getMasterPassword() {
-            String masterPassword = getProperty(PropertyKey.MASTER_PASSWORD);
-            return masterPassword == null ? null : masterPassword.toCharArray();
+            return getAccount().masterPassword.orElse(null);
         }
 
         public String getServer() {
-            return getProperty(PropertyKey.SERVER);
+            return getAccount().server.orElse(null);
         }
 
         public String getSID() {
-            return getProperty(PropertyKey.SID);
+            return getAccount().sid.orElse(null);
         }
 
         public boolean isAllowStoreSID() {
-            return Boolean.parseBoolean(getProperty(PropertyKey.ALLOW_STORE_SID));
-        }
-
-        public boolean shouldSIDLogin() {
-            return !Strings.isEmpty(getSID()) && !Strings.isEmpty(getServer());
+            return getAccount().allowStore;
         }
 
         public void setServer(String server) {
-            setProperty(PropertyKey.SERVER, server);
+            getAccount().setServer(server);
         }
 
         public void setSID(String sid) {
-            setProperty(PropertyKey.SID, sid);
+            getAccount().setSid(sid);
         }
 
         public void updateLoginFile() {
@@ -189,6 +180,82 @@ public class StartupParams implements API.Singleton {
                 prop.store(writer, null);
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+
+        public AccountCredential getAccount() {
+            return new AccountCredential(null);
+        }
+
+        public List<AccountCredential> getAccounts() {
+            List<AccountCredential> accounts = new ArrayList<>();
+            accounts.add(getAccount());
+
+            for(int i = 1;; i++) {
+                AccountCredential account = new AccountCredential(i);
+                if(!account.isValid()) break;
+                accounts.add(account);
+            }
+
+            return accounts;
+        }
+
+        public class AccountCredential {
+            @Getter
+            private Optional<String> username, password, server, sid;
+            @Getter
+            private Optional<char[]> masterPassword;
+            @Getter
+            private final boolean allowStore;
+
+            private final String index;
+
+            private AccountCredential(Integer i) {
+                this.index = i == null ? "" : String.valueOf(i);
+                this.username = Optional.ofNullable(toNullEmpty(prop.getProperty(PropertyKey.USERNAME + index)));
+                this.password = Optional.ofNullable(toNullEmpty(prop.getProperty(PropertyKey.PASSWORD + index)));
+                this.server = Optional.ofNullable(toNullEmpty(prop.getProperty(PropertyKey.SERVER + index)));
+                this.sid = Optional.ofNullable(toNullEmpty(prop.getProperty(PropertyKey.SID + index)));
+                this.masterPassword = Optional.ofNullable(toNullEmpty(prop.getProperty(PropertyKey.MASTER_PASSWORD.toString()))).map(String::toCharArray);
+                this.allowStore = Boolean.parseBoolean(toNullEmpty(prop.getProperty(PropertyKey.ALLOW_STORE_SID.toString())));
+            }
+
+            public void setUsername(String username) {
+                this.username = Optional.ofNullable(toNullEmpty(username));
+                prop.setProperty(PropertyKey.USERNAME + index, username);
+            }
+
+            public void setPassword(String password) {
+                this.password = Optional.ofNullable(toNullEmpty(password));
+                prop.setProperty(PropertyKey.PASSWORD + index, password);
+            }
+
+            public void setServer(String server) {
+                this.server = Optional.ofNullable(toNullEmpty(server));
+                prop.setProperty(PropertyKey.SERVER + index, server);
+            }
+
+            public void setSid(String sid) {
+                this.sid = Optional.ofNullable(toNullEmpty(sid));
+                prop.setProperty(PropertyKey.SID + index, sid);
+            }
+
+            public boolean flush() {
+                if (!allowStore) return  false;
+                updateLoginFile();
+                return true;
+            }
+
+            public boolean hasServerAndSid() {
+                return server.isPresent() && sid.isPresent();
+            }
+
+            private boolean isValid() {
+                return username.isPresent() && password.isPresent() || hasServerAndSid();
+            }
+
+            private String toNullEmpty(String val) {
+                return Strings.isEmpty(val) ? null : val;
             }
         }
     }

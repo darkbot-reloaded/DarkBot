@@ -73,6 +73,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     private long configTime;
     private long formationTime;
     private long portalTime;
+    private int previousId;
 
     public HeroManager(Main main,
                        SettingsManager settingsManager,
@@ -112,6 +113,11 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     public void tick() {
         long address = API.readMemoryLong(staticAddress);
         if (this.address != address) update(address);
+        if (getId() != previousId) {
+            playerInfo.username = "";
+            playerInfo.clanTag = "";
+            previousId = getId();
+        }
 
         update();
 

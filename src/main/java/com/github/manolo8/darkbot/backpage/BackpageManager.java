@@ -2,7 +2,9 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.Capability;
+import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
+import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
@@ -24,6 +26,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -75,6 +79,20 @@ public class BackpageManager extends Thread implements BackpageAPI {
         setDaemon(true);
     }
 
+    private BackpageManager(LoginData loginData) {
+        legacyHangarManager = null;
+        hangarManager = null;
+        auctionManager = null;
+        novaManager = null;
+        main = null;
+        setLoginData(loginData);
+    }
+
+    public Collection<Integer> getAccountIds() {
+        if(loginData == null || loginData.isEmpty() || !loginData.get().hasAnotherAccounts()) return Collections.emptyList();
+        return loginData.get().getAccounts().keySet();
+    }
+
     private static String getRandomAction() {
         return ACTIONS[(int) (Math.random() * ACTIONS.length)];
     }
@@ -84,6 +102,34 @@ public class BackpageManager extends Thread implements BackpageAPI {
     public void run() {
         while (true) {
             Time.sleep(100);
+            if(userId != 0
+                    && main.config.MISCELLANEOUS.LINKED_ACCOUNT_TO_CONFIG != 0
+                    && userId != main.config.MISCELLANEOUS.LINKED_ACCOUNT_TO_CONFIG
+                    && loginData != null
+                    && loginData.isPresent()
+                    && loginData.get().hasAnotherAccounts()
+                    && loginData.get().getAccounts().containsKey(main.config.MISCELLANEOUS.LINKED_ACCOUNT_TO_CONFIG)
+            ) {
+                boolean isRunning = main.isRunning();
+                if (isRunning && !(main.getModule() instanceof DisconnectModule))
+                    main.setModule(new DisconnectModule(-10101L, "Switching account"));
+                if (!isRunning || main.guiManager.lostConnection.isVisible()) {
+                    main.setRunning(false);
+                    synchronized (main.pluginHandler.getBackgroundLock()) {
+                        main.pluginHandler.updatePlugins();
+                        loginData.get().switchAccount(main.config.MISCELLANEOUS.LINKED_ACCOUNT_TO_CONFIG);
+                        this.isInvalid();
+                        Main.API.handleRefresh();
+                        LoginData targetLoginData = loginData.get().getAccounts().get(main.config.MISCELLANEOUS.LINKED_ACCOUNT_TO_CONFIG);
+                        sidLastUpdate = System.currentTimeMillis();
+                        sidNextUpdate = targetLoginData.nextUpdate;
+                        sidStatus = targetLoginData.status;
+                        HeroManager.instance.playerInfo.username = "";
+                    }
+                    if (isRunning) main.setRunning(true);
+                }
+                if (main.getModule() instanceof DisconnectModule) continue;
+            }
 
             synchronized (main.pluginHandler.getBackgroundLock()) {
                 for (Task task : tasks) {
@@ -113,10 +159,24 @@ public class BackpageManager extends Thread implements BackpageAPI {
             }
 
             this.hangarManager.tick();
-            if (System.currentTimeMillis() > sidNextUpdate) {
-                int waitTime = sidCheck();
-                sidLastUpdate = System.currentTimeMillis();
-                sidNextUpdate = sidLastUpdate + (int) (waitTime + waitTime * Math.random());
+            if (loginData.isPresent()) {
+                LoginData loginDataInstance = loginData.get();
+
+                if (System.currentTimeMillis() > sidNextUpdate) {
+                    int waitTime = sidCheck();
+                    sidLastUpdate = System.currentTimeMillis();
+                    sidNextUpdate = sidLastUpdate + (int) (waitTime + waitTime * Math.random());
+                    loginDataInstance.getAccounts().get(userId).nextUpdate = sidNextUpdate;
+                }
+
+                if (loginDataInstance.hasAnotherAccounts())
+                    for (LoginData backgroundLoginData : loginDataInstance.getAccounts().values())
+                        if (System.currentTimeMillis() > backgroundLoginData.nextUpdate) {
+                            BackpageManager backpageManager = new BackpageManager(backgroundLoginData);
+                            int waitTime = backpageManager.sidCheck();
+                            backgroundLoginData.nextUpdate = System.currentTimeMillis() + (int) (waitTime + waitTime * Math.random());
+                            backgroundLoginData.status = backpageManager.sidStatus;
+                        }
             }
 
             if (System.currentTimeMillis() > checkDrones) {
@@ -178,7 +238,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
                 this.instanceURI = tryParse(this.instance);
             }
         }
-        return sid == null || instance == null || sid.isEmpty() || instance.isEmpty() || this.userId == 0;
+        return !isInstanceValid();
     }
 
     private URI tryParse(String uri) {

@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.config.actions.Condition;
+import com.github.manolo8.darkbot.config.types.suppliers.AccountSupplier;
 import com.github.manolo8.darkbot.config.types.suppliers.BrowserApi;
 import com.github.manolo8.darkbot.config.types.suppliers.DisplayFlag;
 import com.github.manolo8.darkbot.config.types.suppliers.LanguageSupplier;
@@ -31,6 +32,7 @@ import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.shared.config.ProfileNames;
 import eu.darkbot.shared.modules.LootCollectorModule;
 import org.jetbrains.annotations.Nullable;
 
@@ -193,6 +195,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option boolean REFRESH_AFTER_REVIVE = false;
         public @Option @Number(max = 60 * 12, step = 10) int REFRESH_TIME = 60;
         public @Option @Number(max = 60 * 12, step = 10) int PAUSE_FOR = 0;
+        public @Option @Dropdown(options = ProfileNames.class) String CONFIG_AFTER_PAUSE;
         public @Option boolean RESET_REFRESH = true;
         public @Option boolean SOLVE_BACKPAGE_CAPTCHA = false;
         public @Option @Visibility(Level.INTERMEDIATE) boolean UPDATE_STATS_WHILE_PAUSED = true;
@@ -203,6 +206,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option @Visibility(Level.INTERMEDIATE) boolean AVOID_MINES = true;
         public @Option @Visibility(Level.INTERMEDIATE) boolean AVOID_RADIATION = true;
         public @Option @Visibility(Level.INTERMEDIATE) boolean USERNAME_ON_TITLE = false;
+        public @Option @Visibility(Level.ADVANCED) @Dropdown(options = AccountSupplier.class) int LINKED_ACCOUNT_TO_CONFIG = 0;
         public @Option @Visibility(Level.ADVANCED) boolean AUTO_REFINE = false;
     }
 

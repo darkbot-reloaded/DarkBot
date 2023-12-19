@@ -57,7 +57,7 @@ public class GameAPIImpl<
     protected final EnumSet<Capability> capabilities;
 
     protected final String version;
-
+    protected final Main main;
     private final ConfigAPI config;
 
     protected final LoginData loginData; // Used only if api supports LOGIN
@@ -94,7 +94,7 @@ public class GameAPIImpl<
                 interaction.getVersion() + "i" +
                 direct.getVersion() + "d";
 
-        Main main = HeroManager.instance.main;
+        main = HeroManager.instance.main;
         config = main.configHandler;
 
         this.loginData = hasCapability(Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
@@ -133,14 +133,18 @@ public class GameAPIImpl<
 
         try {
             System.out.println("Reloading, updating flash vars/preloader");
-            LoginUtils.findPreloader(loginData);
+            synchronized (main.pluginHandler.getBackgroundLock()) {
+                LoginUtils.findPreloader(loginData);
+            }
         } catch (IOException e) {
             System.out.println("Failed to find preloader, aborting re-login");
             e.printStackTrace();
             lastFailedLogin = System.currentTimeMillis();
         } catch (LoginUtils.WrongCredentialsException e) {
             // SID probably expired, time to log in again
-            performRelogin();
+            synchronized (main.pluginHandler.getBackgroundLock()) {
+                performRelogin();
+            }
         }
     }
 
