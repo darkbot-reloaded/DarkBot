@@ -182,7 +182,7 @@ public class QuestProxy extends Updatable implements QuestAPI {
             requirementItems.update(API.readMemoryPtr(address + 0x40));
             requirementItems.update();
 
-            if (this.rewardItems.size() > 0) {
+            if (!this.rewardItems.isEmpty()) {
                 return;
             }
 
