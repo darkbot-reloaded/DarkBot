@@ -61,7 +61,7 @@ import java.util.Objects;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.128.3");
+    public static final Version VERSION      = new Version("1.129 beta");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
