@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.BackpageAPI;
 import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.util.IOUtils;
 import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,12 +37,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
     public static final Gson GSON = new Gson();
 
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
-    protected static final String[] ACTIONS = new String[]{
-            "internalStart", "internalDock", "internalAuction", "internalPilotSheet"};
-
-    protected static class SidStatus {
-        private static final int NO_SID = -1, ERROR = -2, UNKNOWN = -3;
-    }
 
     public final LegacyHangarManager legacyHangarManager;
     public final HangarManager hangarManager;
@@ -58,12 +54,10 @@ public class BackpageManager extends Thread implements BackpageAPI {
     protected Timer refreshTimer = Timer.get(300_000L);
 
     protected long checkDrones = Long.MAX_VALUE;
-    protected int sidStatus = -1;
 
     private int userId;
     private Optional<LoginData> loginData;
-
-    private final Gson gson = new Gson();
+    private Status status = Status.UNKNOWN;
 
     public BackpageManager(Main main, ConfigAPI configAPI) {
         super("BackpageManager");
@@ -75,74 +69,104 @@ public class BackpageManager extends Thread implements BackpageAPI {
         setDaemon(true);
     }
 
-    private static String getRandomAction() {
-        return ACTIONS[(int) (Math.random() * ACTIONS.length)];
-    }
-
     @Override
     @SuppressWarnings("InfiniteLoopStatement")
     public void run() {
         while (true) {
             Time.sleep(100);
 
-            synchronized (main.pluginHandler.getBackgroundLock()) {
-                for (Task task : tasks) {
-                    try {
-                        task.onBackgroundTick();
-                    } catch (Throwable e) {
-                        main.featureRegistry.getFeatureDefinition(task)
-                                .getIssues()
-                                .handleTickFeatureException(PluginIssue.Level.WARNING, e);
-                    }
-                }
-            }
+            tickTasks(Task::onBackgroundTick);
 
-            // For apis that support login, we can re-login if invalid
-            if (Main.API.hasCapability(Capability.LOGIN)
-                    && (isInvalid() || sidStatus == 302)
-                    && refreshTimer.tryActivate()) {
-                Main.API.handleRelogin();
-                continue;
-            }
+            // tick tasks only on valid SID?
+            if (checkSidValid()) {
+                hangarManager.tick();
 
-            if (isInvalid()) {
-                sidStatus = SidStatus.NO_SID;
-                continue;
-            } else if (sidStatus == SidStatus.NO_SID) {
-                sidStatus = SidStatus.UNKNOWN;
+                // is it even useful now?
+                //checkDrones();
+                tickTasks(Task::onTickTask);
             }
+        }
+    }
 
-            this.hangarManager.tick();
-            if (System.currentTimeMillis() > sidNextUpdate) {
-                int waitTime = sidCheck();
-                sidLastUpdate = System.currentTimeMillis();
-                sidNextUpdate = sidLastUpdate + (int) (waitTime + waitTime * Math.random());
-            }
-
-            if (System.currentTimeMillis() > checkDrones) {
+    private void tickTasks(Consumer<Task> tickConsumer) {
+        synchronized (main.pluginHandler.getBackgroundLock()) {
+            for (Task task : tasks) {
                 try {
-                    boolean checked = hangarManager.checkDrones();
-
-                    System.out.println("Checked/repaired drones, all successful: " + checked);
-
-                    checkDrones = !checked ? System.currentTimeMillis() + 30_000 : Long.MAX_VALUE;
-                } catch (Exception e) {
-                    System.err.println("Failed to check & repair drones, retry in 5m");
-                    checkDrones = System.currentTimeMillis() + 300_000;
-                    e.printStackTrace();
+                    tickConsumer.accept(task);
+                } catch (Throwable e) {
+                    main.featureRegistry.getFeatureDefinition(task)
+                            .getIssues()
+                            .handleTickFeatureException(PluginIssue.Level.WARNING, e);
                 }
             }
+        }
+    }
 
-            synchronized (main.pluginHandler.getBackgroundLock()) {
-                for (Task task : tasks) {
-                    try {
-                        task.onTickTask();
-                    } catch (Throwable e) {
-                        main.featureRegistry.getFeatureDefinition(task)
-                                .getIssues()
-                                .handleTickFeatureException(PluginIssue.Level.WARNING, e);
+    private boolean checkSidValid() {
+        // basically isInvalid() should never return true with LOGIN capability
+        if (isInvalid()) {
+            status = Status.NO_SID;
+            return false;
+        } else if (status == Status.NO_SID) {
+            status = Status.UNKNOWN;
+        }
+
+        if (sidNextUpdate < System.currentTimeMillis()) {
+            try {
+                // do not follow redirects
+                int shopResponse = getConnection("indexInternal.es?action=internalDock&tpl=internalDockAmmo")
+                        .getResponseCode();
+
+                status = Status.of(shopResponse);
+                if (status == Status.VALID) {
+                    HttpURLConnection conn = postHttp("ajax/shop.php", 3000)
+                            .setParam("action", "purchase")
+                            .setParam("category", "battery")
+                            .setParam("itemId", "ammunition_laser_lcb-10")
+                            .setParam("amount", 1)
+                            .setParam("selectedName", "")
+                            .setHeader("Referer", instance + "indexInternal.es?action=internalDock&tpl=internalDockAmmo")
+                            .getConnection();
+
+                    status = Status.of(conn.getResponseCode());
+                    if (status == Status.VALID) {
+                        String content = IOUtils.read(conn.getInputStream(), true);
+                        if (content.contains("redirectToLogin")) {
+                            status = Status.INVALID;
+                        }
                     }
                 }
+            } catch (Exception e) {
+                status = Status.ERROR;
+                e.printStackTrace();
+            }
+
+            int waitTime = (status == Status.ERROR ? 5 : 8) * Time.MINUTE;
+            sidLastUpdate = System.currentTimeMillis();
+            sidNextUpdate = sidLastUpdate + (int) (waitTime + waitTime * Math.random());
+        }
+
+        // only try to relogin on `302` response code or `redirectToLogin` message while buying ammo
+        if (Main.API.hasCapability(Capability.LOGIN) && status.shouldRelogin() && refreshTimer.tryActivate()) {
+            Main.API.handleRelogin(true);
+            sidNextUpdate = System.currentTimeMillis();
+        }
+
+        return status == Status.VALID;
+    }
+
+    private void checkDrones() {
+        if (System.currentTimeMillis() > checkDrones) {
+            try {
+                boolean checked = hangarManager.checkDrones();
+
+                System.out.println("Checked/repaired drones, all successful: " + checked);
+
+                checkDrones = !checked ? System.currentTimeMillis() + 30_000 : Long.MAX_VALUE;
+            } catch (Exception e) {
+                System.err.println("Failed to check & repair drones, retry in 5m");
+                checkDrones = System.currentTimeMillis() + 300_000;
+                e.printStackTrace();
             }
         }
     }
@@ -188,21 +212,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
         } catch (URISyntaxException e) {
             return null;
         }
-    }
-
-    private int sidCheck() {
-        try {
-            sidStatus = sidKeepAlive();
-        } catch (Exception e) {
-            sidStatus = SidStatus.ERROR;
-            e.printStackTrace();
-            return 5 * Time.MINUTE;
-        }
-        return 10 * Time.MINUTE;
-    }
-
-    private int sidKeepAlive() throws Exception {
-        return getConnection("indexInternal.es?action=" + getRandomAction(), 5000).getResponseCode();
     }
 
     public HttpURLConnection getConnection(String path, int minWait) throws Exception {
@@ -266,25 +275,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public synchronized String sidStatus() {
-        return sidStat() + (sidStatus != SidStatus.NO_SID && sidStatus != 302 ?
+        return status + (status.displayTime() ?
                 " " + Time.toString(System.currentTimeMillis() - sidLastUpdate) + "/" +
                         Time.toString(sidNextUpdate - sidLastUpdate) : "");
-    }
-
-    private String sidStat() {
-        switch (sidStatus) {
-            case SidStatus.NO_SID:
-            case SidStatus.UNKNOWN:
-                return "--";
-            case SidStatus.ERROR:
-                return "ERR";
-            case 200:
-                return "OK";
-            case 302:
-                return "KO";
-            default:
-                return String.valueOf(sidStatus);
-        }
     }
 
     public Gson getGson() {
@@ -301,7 +294,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     @Override
     public String getSidStatus() {
-        return sidStat();
+        return status.toString();
     }
 
     @Override
@@ -332,5 +325,36 @@ public class BackpageManager extends Thread implements BackpageAPI {
     @Override
     public Optional<String> findReloadToken(@NotNull String body) {
         return Optional.ofNullable(getReloadToken(body));
+    }
+
+    private enum Status {
+        UNKNOWN("?"),
+        NO_SID("--"),
+        VALID("OK"),
+        ERROR("ERR"),
+        INVALID("KO");
+
+        private final String status;
+
+        Status(String status) {
+            this.status = status;
+        }
+
+        boolean shouldRelogin() {
+            return this == ERROR || this == INVALID;
+        }
+
+        boolean displayTime() {
+            return this != UNKNOWN && this != NO_SID;
+        }
+
+        @Override
+        public String toString() {
+            return status;
+        }
+
+        static Status of(int responseCode) {
+            return responseCode == 200 ? VALID : responseCode == 302 ? INVALID : ERROR;
+        }
     }
 }

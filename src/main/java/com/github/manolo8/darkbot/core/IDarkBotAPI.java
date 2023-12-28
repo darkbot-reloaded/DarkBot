@@ -139,7 +139,11 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     void handleRefresh(boolean useFakeDailyLogin);
 
-    void handleRelogin();
+    default void handleRelogin() {
+        handleRelogin(false);
+    }
+
+    void handleRelogin(boolean forceRelogin);
 
     void resetCache();
 

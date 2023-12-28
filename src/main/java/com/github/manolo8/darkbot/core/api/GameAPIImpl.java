@@ -118,7 +118,7 @@ public class GameAPIImpl<
         }
     }
 
-    protected void tryRelogin() {
+    protected void tryRelogin(boolean forceRelogin) {
         if (!hasCapability(Capability.LOGIN)
                 || loginData == null
                 || loginData.getUsername() == null) {
@@ -128,6 +128,11 @@ public class GameAPIImpl<
 
         if (lastFailedLogin + 30_000 > System.currentTimeMillis()) {
             System.out.println("Last failed login was <30s ago, ignoring re-login attempt.");
+            return;
+        }
+
+        if (forceRelogin) {
+            performRelogin();
             return;
         }
 
@@ -145,7 +150,7 @@ public class GameAPIImpl<
     }
 
     /**
-     * This is reserved internally for use in {@link #tryRelogin()}, use that instead,
+     * This is reserved internally for use in {@link #tryRelogin(boolean)}, use that instead,
      * which will safeguard against bad use (ie: calling too often or calling when no login data exists.
      */
     protected void performRelogin() {
@@ -457,9 +462,9 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void handleRelogin() {
+    public void handleRelogin(boolean forceRelogin) {
         if (hasCapability(Capability.LOGIN)) {
-            tryRelogin();
+            tryRelogin(forceRelogin);
             setData();
         }
     }
