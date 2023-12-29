@@ -341,7 +341,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
         }
 
         boolean shouldRelogin() {
-            return this == ERROR || this == INVALID;
+            return this == INVALID;
         }
 
         boolean displayTime() {
