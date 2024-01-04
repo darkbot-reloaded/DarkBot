@@ -24,6 +24,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SpaceMapWindowProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.WorldBossOverviewProxy;
+import com.github.manolo8.darkbot.core.objects.facades.QuestProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
 
@@ -58,6 +59,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final NpcEventProxy npcEventProxy;
     public final WorldBossOverviewProxy worldBossOverview;
     public final Updatable group;
+    public final QuestProxy quests;
     public final Updatable groupMediator;
 
     public FacadeManager(PluginAPI pluginApi) {
@@ -82,6 +84,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
         this.groupMediator  = registerMediator("GroupSystemMediator", Updatable.NoOp.class);
+        this.quests         = registerProxy("QuestProxy", QuestProxy.class);
 
         registerProxy("dispatch", DispatchProxy.class);
         registerProxy("ggBuilder", GalaxyBuilderProxy.class);
@@ -125,6 +128,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         // Currently commands are not used by the bot and they represent
         // a decently big cpu chunk in ticking. Leaving them out reduces tick time significantly.
         //commands.update();
+
         proxies.update();
         mediators.update();
 
