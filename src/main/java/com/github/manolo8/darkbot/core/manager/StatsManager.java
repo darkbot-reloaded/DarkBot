@@ -4,15 +4,25 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
+import com.github.manolo8.darkbot.core.utils.TimeSeriesImpl;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
-import com.github.manolo8.darkbot.utils.Time;
+import eu.darkbot.api.game.stats.Stats;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StatsAPI;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+import lombok.experimental.Accessors;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -21,134 +31,124 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     private final Main main;
     private final EventBrokerAPI eventBroker;
 
-    private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
+    private long address;
 
-    @Deprecated
-    public long currentBox; // Pretty out of place, but will work
-    public double credits;
-    public double uridium;
-    public double experience;
-    public double honor;
-    public int novaEnergy;
-    public int deposit;
-    public int depositTotal;
     public int userId;
-    public double earnedCredits;
-    public double earnedUridium;
-    public double earnedExperience;
-    public double earnedHonor;
     public volatile String sid;
     public volatile String instance;
 
-    private long address;
-    private long started = System.currentTimeMillis();
-    private long runningTime = Time.SECOND; // Assume running for 1 second by default
-    private boolean lastStatus;
+    private final Map<StatKey, StatImpl> statistics = new HashMap<>();
+
+    private final StatImpl runtime;
+    private final StatImpl credits, uridium, experience, honor, cargo, maxCargo, novaEnergy, teleportBonus;
+    private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
+
+    @Getter
+    private boolean premium;
 
     public StatsManager(Main main, EventBrokerAPI eventBroker) {
         this.main = main;
         this.eventBroker = eventBroker;
 
-        this.main.status.add(this::toggle);
+        registerImpl(Stats.Bot.RUNTIME, runtime = createStat());
 
-        this.cpuStat = new AverageStats(true);
-        this.pingStat = new AverageStats(false);
-        this.tickStat = new AverageStats(true);
-        this.memoryStat = new AverageStats(false);
+        registerImpl(Stats.General.CREDITS, credits = createStat());
+        registerImpl(Stats.General.URIDIUM, uridium = createStat());
+        registerImpl(Stats.General.EXPERIENCE, experience = createStat());
+        registerImpl(Stats.General.HONOR, honor = createStat());
+        registerImpl(Stats.General.CARGO, cargo = createStat());
+        registerImpl(Stats.General.MAX_CARGO, maxCargo = createStat());
+        registerImpl(Stats.General.NOVA_ENERGY, novaEnergy = createStat());
+        registerImpl(Stats.General.TELEPORT_BONUS_AMOUNT, teleportBonus = createStat());
+
+        registerImpl(Stats.Bot.PING, pingStat = new AverageStats(false));
+        registerImpl(Stats.Bot.TICK_TIME, tickStat = new AverageStats(true));
+        registerImpl(Stats.Bot.MEMORY, memoryStat = new AverageStats(false));
+        registerImpl(Stats.Bot.CPU, cpuStat = new AverageStats(true));
+
+        for (Stats.BootyKey key : Stats.BootyKey.values()) {
+            registerImpl(key, createStat());
+        }
     }
 
     @Override
     public void install(BotInstaller botInstaller) {
-        botInstaller.invalid.add(value -> userId = 0);
+        botInstaller.invalid.add(value -> {
+            address = 0;
+            userId = 0;
+        });
         botInstaller.heroInfoAddress.add(value -> address = value);
     }
 
     public void tick() {
+        updateNonZero(runtime, System.currentTimeMillis());
+
         if (address == 0) return;
 
-        updateCredits(readDouble(352));
-        updateUridium(readDouble(360));
-        updateExperience(readDouble(376));
-        updateHonor(readDouble(384));
+        updateNonZero(credits, readDouble(0x168));
+        updateNonZero(uridium, readDouble(0x170));
+        updateNonZero(experience, readDouble(0x180));
+        checkHonor(updateNonZero(honor, readDouble(0x188)));
 
-        deposit = readIntHolder(304);
-        depositTotal = readIntHolder(312);
+        cargo.track(readIntHolder(0x138));
+        maxCargo.track(readIntHolder(0x140));
 
-        //currentBox = API.readMemoryLong(address + 0xE8);
-
-        sid = readString(200);
-        userId = readInt(48);
-
-        //is that even possible to happen?
-        if (main.settingsManager.getAddress() == 0) return;
-        instance = main.settingsManager.readString(664);
-
-        // Both memory location gives same value
-        // long novaData = API.readMemoryLong(address + 0xC0) & ByteUtils.ATOM_MASK;
-        // novaEnergy = API.readInt(novaData + 0x98);
-        long novaData = readAtom(0x100);
-        novaEnergy = API.readInt(novaData + 0x28);
-    }
-
-    public int getLevel() {
-        return Math.max(1, (int) (Math.log(experience / 10_000) / Math.log(2)) + 2);
-    }
-
-    public void toggle(boolean running) {
-        lastStatus = running;
-
-        if (running) {
-            started = System.currentTimeMillis();
-        } else {
-            runningTime += System.currentTimeMillis() - started;
+        sid = readString(0xd0);
+        userId = readInt(0x30);
+        if (main.settingsManager.getAddress() != 0) {
+            instance = main.settingsManager.readString(0x298);
         }
+
+        novaEnergy.track(readInt(0x108, 0x28));
+        teleportBonus.track(readInt(0x50));
+        premium = readBoolean(0xF0, 0x20);
+
+        for (BootyKeyType key: BootyKeyType.values())
+            track(key.getStatKey(), readInt(key.getOffset()));
     }
 
-    public void tickAverageStats(long timeDelta) {
+    @Override
+    public Stat getStat(Key key) {
+        return statistics.get(StatKey.of(key));
+    }
+
+    @Override
+    public Stat registerStat(Key key) {
+        if (key.namespace() == null) throw new UnsupportedOperationException();
+        StatKey statKey = StatKey.of(key);
+        return statistics.computeIfAbsent(statKey, k -> createStat());
+    }
+
+    private void registerImpl(Key key, StatImpl stat) {
+        statistics.put(StatKey.of(key), stat);
+    }
+
+    @Override
+    public void setStatValue(Key key, double v) {
+        if (key.namespace() == null) throw new UnsupportedOperationException();
+        track(StatKey.of(key), v);
+    }
+
+    private void track(StatKey key, double v) {
+        StatImpl stat = statistics.get(key);
+        if (stat != null) stat.track(v);
+    }
+
+    private double updateNonZero(StatImpl stat, double value) {
+        if (value == 0) return 0;
+        return stat.track(value);
+    }
+
+    public void tickAverageStats(long tickTime) {
         int p = getPing();
-        if (p > 0) pingStat.accept(timeDelta, p);
+        if (p > 0) pingStat.track(p);
 
-        cpuStat.accept(timeDelta, API.getCpuUsage());
-        tickStat.accept(timeDelta, main.getTickTime());
-        memoryStat.accept(timeDelta, API.getMemoryUsage());
+        cpuStat.track(API.getCpuUsage());
+        tickStat.track(tickTime);
+        memoryStat.track(API.getMemoryUsage());
     }
 
-    private void updateCredits(double credits) {
-        double diff = credits - this.credits;
-
-        if (this.credits != 0 && diff > 0 && updateStats()) {
-            earnedCredits += diff;
-        }
-
-        this.credits = credits;
-    }
-
-    private void updateUridium(double uridium) {
-        double diff = uridium - this.uridium;
-
-        if (this.uridium != 0 && diff > 0 && updateStats()) {
-            earnedUridium += diff;
-        }
-
-        this.uridium = uridium;
-    }
-
-    private void updateExperience(double experience) {
-        if (experience == 0) return;
-        if (this.experience != 0 && updateStats()) {
-            earnedExperience += experience - this.experience;
-        }
-        this.experience = experience;
-    }
-
-    private void updateHonor(double honor) {
-        if (honor == 0) return;
-        double honorDiff = honor - this.honor;
-        if (this.honor != 0 && updateStats()) {
-            earnedHonor += honorDiff;
-        }
-        this.honor = honor;
-
+    private void checkHonor(double honorDiff) {
         if (honorDiff > -10_000) return;
 
         System.out.println("Paused bot, lost " + honorDiff + " honor.");
@@ -164,40 +164,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return main.isRunning() || main.config.MISCELLANEOUS.UPDATE_STATS_WHILE_PAUSED;
     }
 
-    public long runningTime() {
-        return runningTime + (lastStatus ? (System.currentTimeMillis() - started) : 0);
-    }
-
-    public double runningHours() {
-        // Intentionally lose millisecond precision, in hopes of better double precision.
-        long runningSeconds = runningTime / 1000;
-        return runningSeconds / 3600d;
-    }
-
-    public double earnedCredits() {
-        return earnedCredits / runningHours();
-    }
-
-    public double earnedUridium() {
-        return earnedUridium / runningHours();
-    }
-
-    public double earnedExperience() {
-        return earnedExperience / runningHours();
-    }
-
-    public double earnedHonor() {
-        return earnedHonor / runningHours();
-    }
-
     public void resetValues() {
-        this.started = System.currentTimeMillis();
-        this.runningTime = Time.SECOND;
-        this.earnedCredits = 0;
-        this.earnedUridium = 0;
-        this.earnedHonor = 0;
-        this.earnedExperience = 0;
-
+        statistics.values().forEach(StatImpl::reset);
         eventBroker.sendEvent(new StatsResetEvent());
     }
 
@@ -208,67 +176,12 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     @Override
     public Duration getRunningTime() {
-        return Duration.ofMillis(runningTime());
-    }
-
-    @Override
-    public int getCargo() {
-        return deposit;
-    }
-
-    @Override
-    public int getMaxCargo() {
-        return depositTotal;
+        return Duration.ofMillis((long) runtime.getEarned());
     }
 
     @Override
     public void resetStats() {
         resetValues();
-    }
-
-    @Override
-    public double getTotalCredits() {
-        return credits;
-    }
-
-    @Override
-    public double getEarnedCredits() {
-        return earnedCredits;
-    }
-
-    @Override
-    public double getTotalUridium() {
-        return uridium;
-    }
-
-    @Override
-    public double getEarnedUridium() {
-        return earnedUridium;
-    }
-
-    @Override
-    public double getTotalExperience() {
-        return experience;
-    }
-
-    @Override
-    public double getEarnedExperience() {
-        return earnedExperience;
-    }
-
-    @Override
-    public double getTotalHonor() {
-        return honor;
-    }
-
-    @Override
-    public double getEarnedHonor() {
-        return earnedHonor;
-    }
-
-    @Override
-    public int getNovaEnergy() {
-        return novaEnergy;
     }
 
     public AverageStats getCpuStats() {
@@ -292,38 +205,102 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return address;
     }
 
-    public static class AverageStats {
+    @Value
+    @Accessors(fluent = true)
+    private static class StatKey implements StatsAPI.Key {
+        String namespace;
+        String category;
+        String name;
+
+        public static StatKey of(StatsAPI.Key key) {
+            return new StatKey(key.namespace(), key.category(), key.name());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof StatsAPI.Key)) return false;
+            StatsAPI.Key other = (StatsAPI.Key) o;
+            return Objects.equals(namespace, other.namespace())
+                    && Objects.equals(category, other.category())
+                    && Objects.equals(name, other.name());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(namespace, category, name);
+        }
+    }
+
+    private StatImpl createStat() {
+        return new StatImpl(this::updateStats);
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    private static class StatImpl implements Stat {
+        private final Supplier<Boolean> trackDiff;
+        protected double initial = Double.NaN;
+        protected double earned, spent;
+        protected double current;
+        protected TimeSeriesImpl timeSeries = new TimeSeriesImpl();
+
+        protected double track(double value) {
+            double diff = value - this.current;
+
+            if (Double.isNaN(initial)) {
+                initial = value;
+            } else if (trackDiff.get()) {
+                if (diff > 0) earned += diff;
+                else spent -= diff;
+            }
+            current = value;
+            timeSeries.track(earned - spent);
+
+            return diff;
+        }
+
+        private void reset() {
+            earned = spent = 0;
+        }
+
+        @Override
+        public @Nullable TimeSeries getTimeSeries() {
+            return timeSeries;
+        }
+    }
+
+    public static class AverageStats extends StatImpl {
         private static final DecimalFormat ONE_PLACE_FORMAT = new DecimalFormat("0.0");
 
-        private double last, average, max = Double.MIN_VALUE;
+        @Getter
+        private double average, max = Double.MIN_VALUE;
         private final boolean showDecimal;
+
+        private long lastTime = System.currentTimeMillis();
 
         private Consumer<String> onChange;
 
         public AverageStats(boolean showDecimal) {
+            super(() -> true);
             this.showDecimal = showDecimal;
         }
 
-        public void accept(long timeDelta, double value) {
-            double adjustFactor = timeDelta / 10_000d;
-            average = average + adjustFactor * (value - average);
+        protected double track(double value) {
+            long now = System.currentTimeMillis();
+            double diff = super.track(value);
 
-            max += adjustFactor * 0.2 * (average - max);
-            max = Math.max(max, value);
+            double adjustFactor = (now - lastTime) / 10_000d;
+            average += adjustFactor * (value - average); // 1s of data would be 1/10th of the avg
+            max += adjustFactor * 0.2 * (average - max); // 1s of data would be 1/50th of adjustment towards avg
+            max = Math.max(max, value); // If this IS a max, keep it
 
-            if (last != value && onChange != null) {
+            if (diff != 0 && onChange != null) {
                 String s = showDecimal ? ONE_PLACE_FORMAT.format(value) : String.valueOf((int) value);
                 onChange.accept(s);
             }
-            last = value;
-        }
-
-        public double getMax() {
-            return max;
-        }
-
-        public double getAverage() {
-            return average;
+            lastTime = now;
+            return diff;
         }
 
         public void setListener(Consumer<String> onChange) {
@@ -335,5 +312,33 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
             return "Max=" + ONE_PLACE_FORMAT.format(getMax()) +
                     "\nAverage=" + ONE_PLACE_FORMAT.format(getAverage());
         }
+    }
+
+    @Getter
+    private enum BootyKeyType {
+        GREEN(0x54, Stats.BootyKey.GREEN),
+        BLUE(0x58, Stats.BootyKey.BLUE),
+        RED(0x5c, Stats.BootyKey.RED),
+        SILVER(0x60, Stats.BootyKey.SILVER),
+        APOCALYPSE(0x64, Stats.BootyKey.APOCALYPSE),
+        PROMETHEUS(0x68, Stats.BootyKey.PROMETHEUS),
+        OBSIDIAN_MICROCHIP(0x6c, Stats.BootyKey.OBSIDIAN_MICROCHIP),
+        BLACK_LIGHT_CODE(0x70, Stats.BootyKey.BLACK_LIGHT_CODE),
+        BLACK_LIGHT_DECODER(0x74, Stats.BootyKey.BLACK_LIGHT_DECODER),
+        PROSPEROUS_FRAGMENT(0x78, Stats.BootyKey.PROSPEROUS_FRAGMENT),
+        ASTRAL(0x7c, Stats.BootyKey.ASTRAL),
+        ASTRAL_SUPREME(0x80, Stats.BootyKey.ASTRAL_SUPREME),
+        EMPYRIAN(0x84, Stats.BootyKey.EMPYRIAN),
+        LUCENT(0x88, Stats.BootyKey.LUCENT),
+        PERSEUS(0x8c, Stats.BootyKey.PERSEUS);
+
+        private final int offset;
+        private final StatKey statKey;
+
+        BootyKeyType(int offset, StatsAPI.Key key) {
+            this.offset = offset;
+            this.statKey = StatKey.of(key);
+        }
+
     }
 }

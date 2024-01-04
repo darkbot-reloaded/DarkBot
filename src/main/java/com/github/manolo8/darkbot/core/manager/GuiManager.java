@@ -74,6 +74,8 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     public final Gui assembly;
 
+    private final Gui commandCenter;
+
     public final Timer loggedInTimer = Timer.get(15_000);
     private LoadStatus checks = LoadStatus.WAITING;
 
@@ -140,6 +142,8 @@ public class GuiManager implements Manager, GameScreenAPI {
 
         register("ggBuilder", GateSpinnerGui.class);
 
+        this.commandCenter = register("command_center");
+
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }
 
@@ -189,10 +193,13 @@ public class GuiManager implements Manager, GameScreenAPI {
         if (checks != LoadStatus.DONE && checks.canAdvance.test(this))
             checks = LoadStatus.values()[checks.ordinal() + 1];
 
-        guiCloser.tick();
+        if (main.isRunning()) {
+            // GuiCloser closes just once per restart, targeted & cmd center can appear after port jumps
+            guiCloser.tick();
 
-        // GuiCloser closes just once per restart, targeted can appear after port jumps
-        targetedOffers.show(false);
+            targetedOffers.show(false);
+            commandCenter.show(false);
+        }
 
         this.deaths = repairManager.getDeathAmount();
     }
@@ -285,7 +292,6 @@ public class GuiManager implements Manager, GameScreenAPI {
         } else {
             lastDeath = -1;
         }
-
 
         HeroManager hero = main.hero;
         if (this.needRefresh && System.currentTimeMillis() - lastRepairAttempt > 5_000) {

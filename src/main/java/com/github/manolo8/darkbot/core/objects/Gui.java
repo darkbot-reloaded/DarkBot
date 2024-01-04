@@ -29,7 +29,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
     private ObjArray tempArray;
     private ObjArray tempChildArray;
-    private boolean minimizable;
+    private boolean minimizable, closable;
 
     public void update() {
         if (address == 0) return;
@@ -58,6 +58,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
         isTweening = API.readMemoryBoolean(address + 0xC4);
         minimizable = API.readBoolean(featureWindowDefinition + 40);
+        closable = API.readBoolean(featureWindowDefinition + 32);
     }
 
     @Override
@@ -108,9 +109,14 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
     public boolean show(boolean value) {
         if (trySetShowing(value)) {
-            if (minimizable) toggleVisibility();
-            else legacyToggle(value);
+            // visibility state != value
+            if (minimizable && toggleVisibility())
+                return false;
+            // closable windows can only be closed, but for now we are going to redirect to legacyToggle
+            if (!value && closable && close())
+                return false;
 
+            legacyToggle(value);
             return false;
         }
         return value == visible && isAnimationDone();
@@ -126,9 +132,15 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
             API.mouseClick((int) minimized.x + 5, (int) minimized.y + 5);
     }
 
-    public void toggleVisibility() {
-        if (!API.hasCapability(Capability.DIRECT_CALL_METHOD)) return;
-        API.callMethodChecked(true, "23(toggleVisibility)(2626?)1116321600", 183, address);
+    protected boolean close() {
+        // 0 = without close animation, 1 = with close animation(250ms)
+        return API.hasCapability(Capability.DIRECT_CALL_METHOD)
+                && API.callMethodChecked(true, "23(cleanup)(262?)11167211000", 159, address, 0);
+    }
+
+    private boolean toggleVisibility() {
+        return API.hasCapability(Capability.DIRECT_CALL_METHOD)
+                && API.callMethodChecked(true, "23(toggleVisibility)(2626?)1116321600", 183, address);
     }
 
     /**
@@ -143,8 +155,12 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
         return false;
     }
 
+    protected int animationTime() {
+        return 1000;
+    }
+
     public boolean isAnimationDone() {
-        return !isTweening && System.currentTimeMillis() - 1000 > time;
+        return !isTweening && System.currentTimeMillis() - animationTime() > time;
     }
 
     /**

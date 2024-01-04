@@ -13,6 +13,7 @@ import javax.swing.SwingUtilities;
 
 import eu.darkbot.util.Popups;
 
+@SuppressWarnings("removal")
 public class DisconnectModule extends TemporalModule {
 
     private final Long pauseTime;

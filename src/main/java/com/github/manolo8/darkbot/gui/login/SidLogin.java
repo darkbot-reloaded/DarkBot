@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.utils.login.LoginData;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import java.util.function.Consumer;
 
 public class SidLogin extends JPanel implements LoginScreen {
     private final JTextField sv = new JTextField(4), sid = new JTextField(16);
@@ -18,7 +19,7 @@ public class SidLogin extends JPanel implements LoginScreen {
     }
 
     @Override
-    public LoginForm.Message tryLogin(LoginData login) {
+    public LoginForm.Message tryLogin(LoginData login, Consumer<LoginForm.Message> publish) {
         login.setSid(sid.getText(), sv.getText() + ".darkorbit.com");
         return null;
     }

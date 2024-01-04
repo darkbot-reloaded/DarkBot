@@ -91,7 +91,7 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     boolean readMemoryBoolean(long address);
     default boolean readMemoryBoolean(long address, int... offsets) {
-        for (int i = 0; i < offsets.length - 1; i++) address = readMemoryLong(address + offsets[i]);
+        for (int i = 0; i < offsets.length - 1; i++) address = readMemoryPtr(address + offsets[i]);
         return readMemoryBoolean(address + offsets[offsets.length - 1]);
     }
 
@@ -133,7 +133,11 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
         else setVisible(visible);
     }
 
-    void handleRefresh();
+    default void handleRefresh() {
+        handleRefresh(false);
+    }
+
+    void handleRefresh(boolean useFakeDailyLogin);
 
     void handleRelogin();
 
@@ -211,6 +215,12 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     @Override
     default boolean readBoolean(long address) {
         return readMemoryBoolean(address);
+    }
+
+    String readStringDirect(long address);
+
+    default String readStringDirect(long address, int... offsets) {
+        return readStringDirect(readLong(address, offsets));
     }
 
     @Override

@@ -26,10 +26,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class BackpageTask extends Thread {
-    private static final Path BACKPAGE_PATH = OSUtil.getDataPath("backpage");
+    protected static final Path BACKPAGE_PATH = OSUtil.getDataPath("backpage");
     private static final Path VERSION_PATH = BACKPAGE_PATH.resolve(".version");
 
-    private static final String EXECUTABLE_NAME = "dark_backpage";
+    protected static final String EXECUTABLE_NAME = "dark_backpage";
     private static final String RELEASE_URL = "https://api.github.com/repos/darkbot-reloaded/DarkBackpage/releases/latest";
 
     private static final Timer VERSION_CHECK_TIMER = Timer.get(Time.HOUR * 12);
@@ -168,7 +168,7 @@ public class BackpageTask extends Thread {
         SwingUtilities.invokeLater(() -> progressBar.setValue(progress));
     }
 
-    private @Nullable Version readVersionFile() throws IOException {
+    protected @Nullable Version readVersionFile() throws IOException {
         if (Files.notExists(VERSION_PATH)) return null;
         return new Version(Files.readString(VERSION_PATH));
     }

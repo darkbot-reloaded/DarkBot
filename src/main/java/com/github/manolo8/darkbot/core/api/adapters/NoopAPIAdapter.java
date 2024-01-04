@@ -1,11 +1,11 @@
 package com.github.manolo8.darkbot.core.api.adapters;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.api.GameAPIImpl;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
@@ -63,7 +63,7 @@ public class NoopAPIAdapter extends GameAPIImpl<
 
         @Override
         public long getMemoryUsage() {
-            return HeroManager.instance.main.facadeManager.stats.getMemory();
+            return Main.INSTANCE.facadeManager.stats.getMemory();
         }
 
         @Override
@@ -232,12 +232,12 @@ public class NoopAPIAdapter extends GameAPIImpl<
         }
 
         @Override
-        public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
+        public void collectBox(Box box) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void collectBox(Box box) {
+        public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
             throw new UnsupportedOperationException();
         }
 

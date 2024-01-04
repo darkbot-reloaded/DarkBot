@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.GameAPIImpl;
-import com.github.manolo8.darkbot.core.api.InvalidNativeSignature;
 import com.github.manolo8.darkbot.core.api.Utils;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
@@ -90,7 +89,7 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
     @Override
     public boolean useItem(Item item) {
         if (direct.checkSignature(true, "23(sendRequest)(2626)1016221500",
-                18, direct.botInstaller.connectionManagerAddress.get()))
+                19, direct.botInstaller.connectionManagerAddress.get()))
             return itemUseCaller.useItem(item);
 
         return false;
@@ -133,7 +132,15 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         window.setBlockingPatterns(result.toArray(new String[0]));
     }
 
-    public static class KekkaPlayerDirectInteraction extends NoopAPIAdapter.NoOpDirectInteraction {
+    @Override
+    public void reload(boolean useFakeDailyLogin) {
+        if (!useFakeDailyLogin && window.getVersion() >= 26)
+            window.normalReload();
+        else handler.reload();
+    }
+
+    public static class KekkaPlayerDirectInteraction extends NoopAPIAdapter.NoOpDirectInteraction
+            implements Utils.SignatureChecker {
         private final KekkaPlayer kekkaPlayer;
         private final BotInstaller botInstaller;
 
@@ -147,13 +154,13 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         }
 
         @Override
-        public void setMaxFps(int maxFps) {
-            kekkaPlayer.setMaxFps(maxFps);
+        public Set<String> signatureCache() {
+            return methodSignatureCache;
         }
 
         @Override
-        public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
-            kekkaPlayer.refine(refineUtilAddress, oreType.getId(), amount);
+        public void setMaxFps(int maxFps) {
+            kekkaPlayer.setMaxFps(maxFps);
         }
 
         @Override
@@ -180,14 +187,19 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
 
         @Override
         public void moveShip(Locatable destination) {
-            if (checkGotoMethod())
+            if (checkGotoMethod(kekkaPlayer, botInstaller))
                 kekkaPlayer.moveShip(botInstaller.screenManagerAddress.get(), (long) destination.getX(), (long) destination.getY(), 0);
         }
 
         @Override
         public void collectBox(Box box) {
-            if (checkGotoMethod())
+            if (checkGotoMethod(kekkaPlayer, botInstaller))
                 kekkaPlayer.moveShip(botInstaller.screenManagerAddress.get(), (long) box.getX(), (long) box.getY(), box.address);
+        }
+
+        @Override
+        public void refine(long refineUtilAddress, OreAPI.Ore oreType, int amount) {
+            kekkaPlayer.refine(refineUtilAddress, oreType.getId(), amount);
         }
 
         @Override
@@ -195,27 +207,10 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
             return kekkaPlayer.callMethodSync(index, arguments);
         }
 
-        private boolean checkGotoMethod() {
-            String signature = "26(267726?2?)42407911700";
-            if (methodSignatureCache.contains(signature)) return true;
-
-            long eventManager = kekkaPlayer.readLong(botInstaller.screenManagerAddress.get(), 200);
-            return checkSignature(false, signature, 10, eventManager);
+        @Override
+        public int checkMethodSignature(long obj, int methodIdx, boolean includeMethodName, String signature) {
+            return kekkaPlayer.checkMethodSignature(obj, methodIdx, includeMethodName, signature);
         }
 
-        private boolean checkSignature(boolean checkName, String signature, int index, long object) {
-            if (index <= 2 || !ByteUtils.isValidPtr(object)) return false;
-            if (!methodSignatureCache.contains(signature)) {
-                // -1 or -2 == memory read error, 0 == invalid signature, 1 == valid
-                int ret = kekkaPlayer.checkMethodSignature(object, index, checkName, signature);
-
-                if (ret == 1) methodSignatureCache.add(signature);
-                else if (ret == 0) {
-                    throw new InvalidNativeSignature("Invalid flash method signature! " + signature);
-                } else return false;
-            }
-
-            return true;
-        }
     }
 }

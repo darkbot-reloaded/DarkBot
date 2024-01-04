@@ -14,7 +14,9 @@ import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
+import com.google.gson.TypeAdapter;
+import com.google.gson.TypeAdapterFactory;
+import com.google.gson.reflect.TypeToken;
 import eu.darkbot.api.API;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.types.PercentRange;
@@ -43,6 +45,19 @@ import java.util.List;
  */
 public class ConfigManager implements API.Singleton {
 
+    private static class ApiInterfacesFactory implements TypeAdapterFactory {
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (ShipMode.class == type.getType()) {
+                return gson.getAdapter((Class<T>) Config.ShipConfig.class);
+            }
+            if (PercentRange.class == type.getType()) {
+                return gson.getAdapter((Class<T>) Config.PercentRange.class);
+            }
+            return null;
+        }
+    }
+
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .setLenient()
@@ -51,11 +66,10 @@ public class ConfigManager implements API.Singleton {
             .registerTypeAdapter(Color.class, new ColorAdapter())
             .registerTypeAdapter(File.class, new FileEditor.JsonAdapter())
             .registerTypeAdapter(Font.class, new FontAdapter())
-            .registerTypeAdapter(ShipMode.class, (InstanceCreator<ShipMode>) type -> new Config.ShipConfig())
-            .registerTypeAdapter(PercentRange.class, (InstanceCreator<PercentRange>) type -> new Config.PercentRange())
             .registerTypeAdapterFactory(new SpecialTypeAdapter())
             .registerTypeAdapterFactory(new ConditionTypeAdapterFactory())
             .registerTypeAdapterFactory(new PlayerTagTypeAdapterFactory())
+            .registerTypeAdapterFactory(new ApiInterfacesFactory())
             .create();
 
     public static final String DEFAULT = "config",

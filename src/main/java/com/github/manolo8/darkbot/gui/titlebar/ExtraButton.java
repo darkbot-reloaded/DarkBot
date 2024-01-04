@@ -146,7 +146,7 @@ public class ExtraButton extends TitleBarButton<JFrame> {
                 ConfigEntity.changed();
             }));
             list.add(create(i18n.get(p + "reset_stats"), e -> {
-                main.statsManager.resetValues();
+                main.statsManager.resetStats();
                 main.repairManager.resetDeaths();
             }));
 
@@ -165,8 +165,8 @@ public class ExtraButton extends TitleBarButton<JFrame> {
                 list.add(create("Save SWF", e -> main.addTask(SWFUtils::dumpMainSWF)));
                 list.add(create("Reset keybinds", e -> main.addTask(() -> main.guiManager.settingsGui.setKeyBinds(false))));
                 list.add(create("Object inspector", e -> {
-                    JFrame frame = new ObjectInspectorUI();
-                    frame.setSize(600, 600);
+                    JFrame frame = new ObjectInspectorUI((JMenuItem) e.getSource());
+                    frame.setSize(800, 600);
                     frame.setVisible(true);
                 }));
             }

@@ -31,13 +31,11 @@ import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 import eu.darkbot.util.Timer;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -57,7 +55,6 @@ public class MapManager implements Manager, StarSystemAPI {
     private long viewAddress;
     private long boundsAddress;
     public long eventAddress;
-    private long settings3DAddress;
 
     public static int id = -1;
     public Lazy<Map> mapChange = new Lazy.NoCache<>();
@@ -85,12 +82,7 @@ public class MapManager implements Manager, StarSystemAPI {
     private final Location pingLocationCache = new Location();
     public Location pingLocation = null;
 
-    private ConfigSetting<Boolean> disableRender;
     private ConfigSetting<Boolean> avoidRadiation;
-
-    // If the disableRender setting has been properly applied, or needs re-checking
-    private boolean disableRenderApplied = false;
-    private final Consumer<Boolean> invalidateRender = b -> disableRenderApplied = false;
 
     public MapManager(Main main,
                       PluginAPI pluginAPI,
@@ -119,13 +111,7 @@ public class MapManager implements Manager, StarSystemAPI {
                 switchMap(starManager.byId(-1));
                 checkNextMap(-1);
             }
-
-            settings3DAddress = 0;
-            disableRenderApplied = false;
         });
-
-        this.disableRender = config.requireConfig("bot_settings.api_config.disable_render");
-        this.disableRender.addListener(invalidateRender);
 
         this.avoidRadiation = config.requireConfig("miscellaneous.avoid_radiation");
     }
@@ -144,7 +130,6 @@ public class MapManager implements Manager, StarSystemAPI {
 
         updateBounds();
         checkMirror();
-        checkUpdateRender();
     }
 
     private void update(long address) {
@@ -166,23 +151,6 @@ public class MapManager implements Manager, StarSystemAPI {
         entities.update(address);
     }
 
-    private void checkUpdateRender() {
-        if (!is3DView || disableRenderApplied) return;
-
-        if (!ByteUtils.isValidPtr(settings3DAddress)) {
-            settings3DAddress = API.searchClassClosure(l -> ByteUtils.readObjectName(l).equals("Settings3D$"));
-            return;
-        }
-
-        if (ByteUtils.isScriptableObjectValid(settings3DAddress)) {
-            int render = disableRender.getValue() ? 0 : 1;
-            int oldValue = render == 1 ? 0 : 1;
-            API.replaceInt(API.readLong(settings3DAddress, 0xf8) + 0x20, oldValue, render);
-        }
-
-        disableRenderApplied = true;
-    }
-
     private int lastNextMap;
     public void checkNextMap(int next) {
         if (next != lastNextMap)
@@ -202,6 +170,10 @@ public class MapManager implements Manager, StarSystemAPI {
             main.hero.nextCpuMapDuration = System.currentTimeMillis() + (duration * 1000L) + 500;
             main.hero.nextCpuMap = main.starManager.byId(next);
         }
+    }
+
+    public boolean is3D() {
+        return is3DView;
     }
 
     private void switchMap(Map next) {
@@ -337,8 +309,6 @@ public class MapManager implements Manager, StarSystemAPI {
 
         if (viewAddress != temp) {
             viewAddress = temp;
-
-            disableRenderApplied = false;
             is3DView = !main.settingsManager.is2DForced()
                        && ByteUtils.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
             boundsAddress = API.readMemoryLong(viewAddress + (is3DView ? 216 : 208));
@@ -513,6 +483,11 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     @Override
+    public GameMap getOrCreateMap(String mapName) {
+        return starManager.byName(mapName);
+    }
+
+    @Override
     public Optional<GameMap> findMap(int mapId) {
         return starManager.getMaps().stream()
                 .filter(map -> map.getId() == mapId)
@@ -526,21 +501,6 @@ public class MapManager implements Manager, StarSystemAPI {
                 .filter(map -> Objects.equals(map.getName(), mapName))
                 .map(map -> (GameMap) map)
                 .findFirst();
-    }
-
-    @Override
-    public GameMap getById(int mapId) throws MapNotFoundException {
-        return starManager.getById(mapId);
-    }
-
-    @Override
-    public GameMap getOrCreateMapById(int mapId) {
-        return starManager.byId(mapId);
-    }
-
-    @Override
-    public GameMap getByName(@NotNull String mapName) throws MapNotFoundException {
-        return starManager.getByName(mapName);
     }
 
     @Override

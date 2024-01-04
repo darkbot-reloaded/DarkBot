@@ -210,8 +210,7 @@ public class InfosDrawer implements Drawable {
     public static void drawHealth(MapGraphics mg, Health health, Point pos, double width, double height, int margin) {
         boolean displayAmount = height >= 8 && mg.hasDisplayFlag(DisplayFlag.HP_SHIELD_NUM);
 
-        int totalMaxHealth = health.getMaxHp() + health.getHull();
-        double hullWidth = totalMaxHealth == 0 ? 0 : (health.getHull() * width / totalMaxHealth);
+        double hullWidth = health.getMaxHull() == 0 ? 0 : (health.getHull() * width / health.getMaxHull());
 
         mg.setFont("small");
         mg.setColor(mg.getColor("health").darker());

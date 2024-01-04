@@ -45,6 +45,11 @@ public class SettingsGui extends Gui implements API.Singleton {
             show(false);
     }
 
+    @Override
+    protected int animationTime() {
+        return 1500;
+    }
+
     public void revalidateKeyBinds() {
         if (assignKeyBindTimer.isInactive())
             assignKeyBindTimer.disarm();
@@ -66,7 +71,8 @@ public class SettingsGui extends Gui implements API.Singleton {
                         actions.add(scrollDown());
                 });
 
-        return saveAndCloseAction(actions);
+        actions.add(NativeAction.Mouse.CLICK.of(x() + 65, y() + 485)); // Save settings
+        return actions.stream().mapToLong(l -> l).toArray();
     }
 
     public void setKeyBinds(boolean fake) {
@@ -77,8 +83,8 @@ public class SettingsGui extends Gui implements API.Singleton {
     private List<Long> openKeyBindsTab() {
         List<Long> actions = new ArrayList<>();
 
-        actions.add(NativeAction.Mouse.CLICK.of((int) getX2() - 50, y + 30)); // key binds tab
-        actions.add(NativeAction.Mouse.CLICK.of(x + 200, y + 200)); // get focus on key binds tab
+        actions.add(NativeAction.Mouse.CLICK.of((int) getX2() - 50, y() + 30)); // key binds tab
+        actions.add(NativeAction.Mouse.CLICK.of(x() + 200, y() + 200)); // get focus on key binds tab
 
         // scroll up few times
         for (int i = 0; i < 5; i++)
@@ -87,23 +93,16 @@ public class SettingsGui extends Gui implements API.Singleton {
         return actions;
     }
 
-    private long[] saveAndCloseAction(List<Long> actions) {
-        actions.add(NativeAction.Mouse.CLICK.of(x + 65, y + 485)); // Save settings
-        actions.add(NativeAction.Mouse.CLICK.of((int) minimized.x + 5, (int) minimized.y + 5)); // Close settings
-
-        return actions.stream().mapToLong(l -> l).toArray();
-    }
-
     private void addKeyBind(List<Long> actions, int offset, int key) {
-        actions.add(NativeAction.Mouse.CLICK.of(x + KEYBIND_X_OFFSET, y + KEYBIND_Y_OFFSET + offset * 30));
+        actions.add(NativeAction.Mouse.CLICK.of(x() + KEYBIND_X_OFFSET, y() + KEYBIND_Y_OFFSET + offset * 30));
         actions.add(NativeAction.Key.CLICK.of(fake ? 0 : key));
     }
 
     private long scrollUp() {
-        return NativeAction.MouseWheel.up(x + 200, y + 200);
+        return NativeAction.MouseWheel.up(x() + 200, y() + 200);
     }
 
     private long scrollDown() {
-        return NativeAction.MouseWheel.down(x + 200, y + 200);
+        return NativeAction.MouseWheel.down(x() + 200, y() + 200);
     }
 }

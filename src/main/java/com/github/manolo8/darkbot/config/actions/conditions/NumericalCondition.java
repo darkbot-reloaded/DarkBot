@@ -23,8 +23,8 @@ public class NumericalCondition implements Condition, Parser {
     @Override
     public @NotNull Condition.Result get(Main main) {
         Number numA, numB;
-        if ((numA = Value.get(a, main)) == null || (numB = Value.get(b, main)) == null ||
-                operation == null) return Condition.Result.ABSTAIN;
+        if ((numA = Value.get(a, main)) == null || (numB = Value.get(b, main)) == null || operation == null)
+            return Condition.Result.ABSTAIN;
 
         return Condition.Result.fromBoolean(operation.check.test(numA, numB));
     }

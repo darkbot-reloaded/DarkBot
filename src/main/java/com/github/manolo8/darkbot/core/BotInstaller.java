@@ -71,8 +71,8 @@ public class BotInstaller implements API.Singleton {
             int speed = API.readMemoryInt(closure + 56);
             int bool = API.readMemoryInt(closure + 60);
             int val = API.readMemoryInt(closure + 64);
-            int cargo = API.readMemoryInt(API.readMemoryLong(closure + 304) + 40);
-            int maxCargo = API.readMemoryInt(API.readMemoryLong(closure + 312) + 40);
+            int cargo = API.readMemoryInt(API.readMemoryLong(closure + 0x138) + 40);
+            int maxCargo = API.readMemoryInt(API.readMemoryLong(closure + 0x140) + 40);
 
             return heroId == API.readMemoryInt(closure + 0x30)
                    && level >= 0 && level <= 100
@@ -141,12 +141,12 @@ public class BotInstaller implements API.Singleton {
 
         } else if (!invalidTimer.isArmed()) invalidTimer.activate(150_000); // 2.5 min
 
-        // timer is disarmed on refresh and on valid tick
+        // timer is disarmed, so is potentially stuck on loading
         if (invalidTimer.tryDisarm()) {
             if (API.hasCapability(Capability.HANDLER_CLEAR_CACHE))
                 API.clearCache(".*");
 
-            API.handleRefresh();
+            API.handleRefresh(true);
             System.out.println("Triggering refresh: stuck at loading screen for too long!");
         }
     }

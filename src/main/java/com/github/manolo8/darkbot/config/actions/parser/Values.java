@@ -13,6 +13,7 @@ import com.github.manolo8.darkbot.config.actions.conditions.HasFormationConditio
 import com.github.manolo8.darkbot.config.actions.conditions.NoneCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NumericalCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.OneCondition;
+import com.github.manolo8.darkbot.config.actions.conditions.TargetTypeCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.UntilCondition;
 import com.github.manolo8.darkbot.config.actions.values.BooleanConstant;
 import com.github.manolo8.darkbot.config.actions.values.DistanceValue;
@@ -26,6 +27,7 @@ import com.github.manolo8.darkbot.config.actions.values.NumberConstant;
 import com.github.manolo8.darkbot.config.actions.values.PercentConstant;
 import com.github.manolo8.darkbot.config.actions.values.ShipLocationValue;
 import com.github.manolo8.darkbot.config.actions.values.ShipName;
+import com.github.manolo8.darkbot.config.actions.values.StatTypeValue;
 import com.github.manolo8.darkbot.config.actions.values.StringConstant;
 import com.github.manolo8.darkbot.config.actions.values.TargetValue;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
@@ -52,6 +54,7 @@ public class Values {
                     EqualCondition.class,
                     HasEffectCondition.class,
                     HasFormationCondition.class,
+                    TargetTypeCondition.class,
                     // Stateful conditions
                     AfterCondition.class,
                     UntilCondition.class,
@@ -60,6 +63,7 @@ public class Values {
                     ShipLocationValue.class,
                     ShipName.class,
                     HeroMap.class,
+                    StatTypeValue.class,
                     HealthTypeValue.class,
                     HealthValue.class,
                     HeroValue.class,

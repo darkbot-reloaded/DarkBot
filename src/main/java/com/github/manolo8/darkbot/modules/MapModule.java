@@ -5,6 +5,11 @@ import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.modules.utils.MapTraveler;
 import com.github.manolo8.darkbot.utils.I18n;
 
+/**
+ * @deprecated Use {@link eu.darkbot.shared.modules.MapModule}
+ */
+@Deprecated(forRemoval = true)
+@SuppressWarnings("removal")
 public class MapModule extends TemporalModule {
 
     private MapTraveler traveler;
