@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.config;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.tree.ConfigBuilder;
+import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
@@ -15,6 +17,7 @@ import eu.darkbot.api.managers.ExtensionsAPI;
 import eu.darkbot.api.utils.Inject;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
 public class ConfigHandler implements ConfigAPI, Listener {
@@ -23,6 +26,7 @@ public class ConfigHandler implements ConfigAPI, Listener {
 
     private final ConfigManager loader;
     private final ConfigBuilder builder;
+    private final Lazy<String> configChange;
 
     private final ConfigSetting.Parent<Config> configuration;
 
@@ -32,6 +36,7 @@ public class ConfigHandler implements ConfigAPI, Listener {
         this.pluginAPI = api;
         this.loader = loader;
         this.builder = builder;
+        this.configChange = api.requireInstance(Main.class).configChange;
         this.configuration = builder.of(Config.class, "Configuration", null);
         this.configuration.setValue(loader.getConfig());
     }
@@ -48,8 +53,19 @@ public class ConfigHandler implements ConfigAPI, Listener {
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public <T> ConfigSetting.Parent<T> getConfigRoot() {
         return (ConfigSetting.Parent<T>) configuration;
+    }
+
+    @Override
+    public List<String> getConfigProfiles() {
+        return loader.getAvailableConfigs();
+    }
+
+    @Override
+    public void setConfigProfile(String profile) {
+        configChange.send(profile);
     }
 
     public <T> ConfigSetting.Parent<T> getFeatureConfig(FeatureDefinition<?> fd) {
