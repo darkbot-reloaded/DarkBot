@@ -12,6 +12,7 @@ import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.BackpageAPI;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.util.IOUtils;
+import eu.darkbot.util.TimeUtils;
 import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +27,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -37,6 +39,10 @@ public class BackpageManager extends Thread implements BackpageAPI {
     public static final Gson GSON = new Gson();
 
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
+
+    private static final String SHOP_PATH = "ajax/shop.php";
+    private static final String[] ACTIONS = new String[]{
+            "internalDock", "internalDock&tpl=internalDockAmmo", "internalSkylab"};
 
     public final LegacyHangarManager legacyHangarManager;
     public final HangarManager hangarManager;
@@ -51,7 +57,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
     protected long lastRequest;
     protected long sidLastUpdate = System.currentTimeMillis();
     protected long sidNextUpdate = sidLastUpdate;
-    protected Timer refreshTimer = Timer.get(300_000L);
+    protected final Timer refreshTimer = Timer.get(TimeUtils.MINUTE * 5);
+    protected final Timer shopTimer = Timer.get(TimeUtils.MINUTE * 20);
 
     protected long checkDrones = Long.MAX_VALUE;
 
@@ -113,26 +120,30 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
         if (sidNextUpdate < System.currentTimeMillis()) {
             try {
-                // do not follow redirects
-                int shopResponse = getConnection("indexInternal.es?action=internalDock&tpl=internalDockAmmo")
-                        .getResponseCode();
+                if (shopTimer.isInactive()) {
+                    String action = ACTIONS[(int) (Math.random() * ACTIONS.length)];
+                    status = Status.of(getResponseCode(action));
+                } else {
+                    // do not follow redirects
+                    int shopResponse = getResponseCode("internalDock&tpl=internalDockAmmo");
 
-                status = Status.of(shopResponse);
-                if (status == Status.VALID) {
-                    HttpURLConnection conn = postHttp("ajax/shop.php", 3000)
-                            .setParam("action", "purchase")
-                            .setParam("category", "battery")
-                            .setParam("itemId", "ammunition_laser_lcb-10")
-                            .setParam("amount", 1)
-                            .setParam("selectedName", "")
-                            .setHeader("Referer", instance + "indexInternal.es?action=internalDock&tpl=internalDockAmmo")
-                            .getConnection();
-
-                    status = Status.of(conn.getResponseCode());
+                    status = Status.of(shopResponse);
                     if (status == Status.VALID) {
-                        String content = IOUtils.read(conn.getInputStream(), true);
-                        if (content.contains("redirectToLogin")) {
-                            status = Status.INVALID;
+                        HttpURLConnection conn = postHttp(SHOP_PATH, 3000)
+                                .setParam("action", "purchase")
+                                .setParam("category", "battery")
+                                .setParam("itemId", "ammunition_laser_lcb-10")
+                                .setParam("amount", 1)
+                                .setParam("selectedName", "")
+                                .setHeader("Referer", instance + "indexInternal.es?action=internalDock&tpl=internalDockAmmo")
+                                .getConnection();
+
+                        status = Status.of(conn.getResponseCode());
+                        if (status == Status.VALID) {
+                            String content = IOUtils.read(conn.getInputStream(), true);
+                            if (content.contains("redirectToLogin")) {
+                                status = Status.INVALID;
+                            }
                         }
                     }
                 }
@@ -153,6 +164,10 @@ public class BackpageManager extends Thread implements BackpageAPI {
         }
 
         return status == Status.VALID;
+    }
+
+    private int getResponseCode(String action) throws Exception {
+        return getConnection("indexInternal.es?action=" + action).getResponseCode();
     }
 
     private void checkDrones() {
@@ -221,6 +236,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     public HttpURLConnection getConnection(String params) throws Exception {
         if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        if (params.toLowerCase(Locale.ROOT).contains(SHOP_PATH))
+            shopTimer.activate();
+
         HttpURLConnection conn = (HttpURLConnection) new URL(this.instance + params)
                 .openConnection();
         conn.setConnectTimeout(30_000);
@@ -239,6 +257,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     public Http getConnection(String params, Method method) {
         if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        if (params.toLowerCase(Locale.ROOT).contains(SHOP_PATH))
+            shopTimer.activate();
+
         return Http.create(this.instance + params, method)
                 .setRawHeader("Cookie", "dosid=" + this.sid)
                 .addSupplier(() -> lastRequest = System.currentTimeMillis());
