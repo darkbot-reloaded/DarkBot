@@ -33,6 +33,20 @@ public class Bot {
 
         LogUtils.setupLogOutput();
 
+        setupUI();
+
+        LibSetup.setupLibraries();
+        StartupParams params = new StartupParams(args);
+
+        System.out.println("Starting DarkBot " + Main.VERSION);
+        //noinspection ThrowableNotThrown
+        Runtime.getRuntime().addShutdownHook(new Thread(() ->
+                new Throwable("DarkBot shutdown peacefully!").printStackTrace()));
+
+        SwingUtilities.invokeLater(() -> new Main(params));
+    }
+
+    public static void setupUI() {
         try {
             UIManager.put("MenuItem.selectionType", "underline");
             UIManager.getFont("Label.font"); // Prevents a linux crash
@@ -63,16 +77,6 @@ public class Bot {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-
-        LibSetup.setupLibraries();
-        StartupParams params = new StartupParams(args);
-
-        System.out.println("Starting DarkBot " + Main.VERSION);
-        //noinspection ThrowableNotThrown
-        Runtime.getRuntime().addShutdownHook(new Thread(() ->
-                new Throwable("DarkBot shutdown peacefully!").printStackTrace()));
-
-        SwingUtilities.invokeLater(() -> new Main(params));
     }
 
     @SuppressWarnings("removal")

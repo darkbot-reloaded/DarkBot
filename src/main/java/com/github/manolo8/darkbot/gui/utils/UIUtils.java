@@ -18,6 +18,7 @@ public class UIUtils {
             RED = Color.decode("#6E2B28"),
             RED_HIGHLIGHT = new Color(0x40FF1300, true),
             GREEN_HIGHLIGHT = new Color(0x1A00FF00, true),
+            BLUE_HIGHLIGHT = new Color(0xFF0088DD, true),
             BACKGROUND = UIManager.getColor("Viewport.background"), // Normal background of things
             BORDER = UIManager.getColor("Component.borderColor"), // Normal border of things
             TAB_HIGLIGHT = UIManager.getColor("TabbedPane.underlineColor");

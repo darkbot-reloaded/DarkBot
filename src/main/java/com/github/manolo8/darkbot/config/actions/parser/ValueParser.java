@@ -1,52 +1,67 @@
 package com.github.manolo8.darkbot.config.actions.parser;
 
-import com.github.manolo8.darkbot.config.actions.Condition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
+import com.github.manolo8.darkbot.config.actions.tree.DocumentReader;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
+import com.github.manolo8.darkbot.gui.utils.highlight.Locatable;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
+import eu.darkbot.api.config.types.Condition;
+
+import javax.swing.text.Document;
 
 public class ValueParser {
 
-    public static Condition parseCondition(String str) throws SyntaxException {
-        ParseResult<Condition.Result> result = parse(str, Condition.Result.class);
-        if (!result.leftover.trim().isEmpty())
-            throw new SyntaxException("Unused characters after end", result.leftover);
-        return (Condition) result.value;
+    public static Condition parseCondition(String str) {
+        return parseCondition(new DocumentReader(str));
     }
 
-    public static Value<?> parseValue(String str) throws SyntaxException {
-        ParseResult<?> result = parse(str);
-        if (!result.leftover.trim().isEmpty())
-            throw new SyntaxException("Unused characters after end", result.leftover);
-        return result.value;
+    public static Condition parseCondition(Document document) {
+        return parseCondition(new DocumentReader(document));
     }
 
-    public static ParseResult<?> parse(String str) throws SyntaxException {
-        return parse(str, Object.class);
+    public static Condition parseCondition(DocumentReader reader) throws SyntaxException {
+        reader.reset();
+        ParsingNode root = new ParsingNode(reader);
+        return parseCondition(root);
     }
 
-    public static <T> ParseResult<T> parse(String str, Class<T> type) throws SyntaxException {
-        String[] parts = str.trim().split(" *\\( *", 2);
+    public static Condition parseCondition(ParsingNode node) {
+        // Technically it's a Value<legacy result> that is implemented by api Condition.
+        return (Condition) parseImpl(node, com.github.manolo8.darkbot.config.actions.Condition.Result.class).value;
+    }
 
-        Values.Meta<T> vm = Values.getMeta(parts[0].trim(), str, type);
+    public static <T> Value<T> parse(ParsingNode node, Class<T> type) {
+        return parseImpl(node, type).value;
+    }
 
-        str = ParseUtil.separate(parts, vm, "(");
+    public static ParseResult<?> parseGeneric(ParsingNode node) {
+        return parseImpl(node, Object.class);
+    }
+
+    private static <T> ParseResult<T> parseImpl(ParsingNode node, Class<T> type) {
+        Values.Meta<T> vm = Values.getMeta(node, type);
 
         Value<T> val = ReflectionUtils.createInstance(vm.clazz);
-        if (val instanceof Parser) str = ((Parser) val).parse(str);
+        if (val instanceof Parser) ((Parser) val).parse(node);
         else {
-            for (Values.Param param : vm.params) {
-                ParseResult<?> pr = parse(str, param.type);
-                ReflectionUtils.set(param.field, val, pr.value);
-
-                str = ParseUtil.separate(pr.leftover.trim(), vm, param == vm.params[vm.params.length - 1] ? ")" : ",");
+            if (vm.params.length > node.getChildCount()) {
+                int p = node.getEnd().getOffset() - 1;
+                throw new SyntaxException("Missing separator in '" + node.getFunction() + "'", Locatable.of(p, p), vm, ",");
+            } else if (vm.params.length < node.getChildCount()) {
+                throw new SyntaxException("Too many parameters, expected " + vm.params.length, Locatable.of(
+                        node.getChildAt(vm.params.length).getStart().getOffset(),
+                        node.getChildAt(node.getChildCount() - 1).getEnd().getOffset()), vm);
             }
 
-            if (vm.params.length == 0) str = ParseUtil.separate(str, vm, ")");
+            int idx = 0;
+            for (Values.Param param : vm.params) {
+                ReflectionUtils.set(param.field, val, parseImpl(node.getParam(idx++), param.type).value);
+            }
         }
 
-        return new ParseResult<>(val, vm.type, str);
+        return new ParseResult<>(val, vm.type);
     }
 
 }

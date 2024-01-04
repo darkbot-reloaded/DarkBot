@@ -1,27 +1,27 @@
 package com.github.manolo8.darkbot.config.actions.conditions;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.actions.Condition;
+import com.github.manolo8.darkbot.config.actions.LegacyCondition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.types.Condition;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiPredicate;
 
 @ValueData(name = "if", description = "Compares two numbers", example = "if(a > b)")
-public class NumericalCondition implements Condition, Parser {
+public class NumericalCondition implements LegacyCondition, Parser {
 
     public Value<Number> a;
     public Operation operation;
     public Value<Number> b;
 
     @Override
-    public @NotNull Condition.Result get(Main main) {
+    public @NotNull Condition.Result get(PluginAPI main) {
         Number numA, numB;
         if ((numA = Value.get(a, main)) == null || (numB = Value.get(b, main)) == null || operation == null)
             return Condition.Result.ABSTAIN;
@@ -49,11 +49,12 @@ public class NumericalCondition implements Condition, Parser {
             return display;
         }
 
-        public static Operation of(String operation) {
+        public static Operation of(ParsingNode node) {
+            String operation = node.getString();
             for (Operation op : Operation.values()) {
                 if (op.toString().equals(operation)) return op;
             }
-            return null;
+            throw new SyntaxException("Unknown operation '" + operation + "'", node, Operation.class);
         }
 
     }
@@ -64,20 +65,11 @@ public class NumericalCondition implements Condition, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        ParseResult<Number> prA = ValueParser.parse(str, Number.class);
-        a = prA.value;
-        str = prA.leftover.trim();
+    public void parse(ParsingNode node) throws SyntaxException {
+        node.requireParamSize(3, getClass());
 
-        int chars = Math.min(str.length(), str.length() > 1 && str.charAt(1) == '=' ? 2 : 1);
-
-        String op = str.substring(0, chars);
-        operation = Operation.of(op);
-        if (operation == null)
-            throw new SyntaxException("Unknown operation '" + op + "'", str, Operation.class);
-
-        ParseResult<Number> prB = ValueParser.parse(str.substring(chars), Number.class);
-        b = prB.value;
-        return ParseUtil.separate(prB.leftover.trim(), getClass(), ")");
+        a = ValueParser.parse(node.getParam(0), Number.class);
+        operation = Operation.of(node.getParam(1));
+        a = ValueParser.parse(node.getParam(2), Number.class);
     }
 }

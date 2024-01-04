@@ -5,8 +5,7 @@ import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
-import com.github.manolo8.darkbot.config.actions.parser.Values;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 import com.github.manolo8.darkbot.core.utils.Location;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,17 +25,12 @@ public class LocationConstant implements Value<Location>, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        String[] params = str.split(" *, *", 2);
-
-        double x = NumberConstant.parseNumber(params[0], str, getClass()).doubleValue();
-
-        params = (str = ParseUtil.separate(params, getClass(), ",")).split("\\)", 2);
-        double y = NumberConstant.parseNumber(params[0], str, getClass()).doubleValue();
+    public void parse(ParsingNode node) throws SyntaxException {
+        node.requireParamSize(2, getClass());
+        double x = NumberConstant.parseNumber(node.getParam(0), getClass()).doubleValue();
+        double y = NumberConstant.parseNumber(node.getParam(1), getClass()).doubleValue();
 
         location = new Location(x, y);
-
-        return ParseUtil.separate(params, getClass(), ")");
     }
 
 }

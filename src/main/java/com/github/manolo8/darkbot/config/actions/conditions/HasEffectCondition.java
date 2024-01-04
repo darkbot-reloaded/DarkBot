@@ -1,31 +1,31 @@
 package com.github.manolo8.darkbot.config.actions.conditions;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.actions.Condition;
+import com.github.manolo8.darkbot.config.actions.LegacyCondition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 import com.github.manolo8.darkbot.core.entities.Ship;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.types.Condition;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
 @ValueData(name = "has-effect", description = "Checks if a ship has an effect", example = "has-effect(effect, ship)")
-public class HasEffectCondition implements Condition, Parser {
+public class HasEffectCondition implements LegacyCondition, Parser {
 
     public Effect effect;
     public Value<Ship> ship;
 
     @Override
-    public @NotNull Condition.Result get(Main main) {
+    public @NotNull Condition.Result get(PluginAPI api) {
         Ship sh;
-        if ((effect == null) || (sh = Value.get(ship, main)) == null) return Result.ABSTAIN;
+        if ((effect == null) || (sh = Value.get(ship, api)) == null) return Condition.Result.ABSTAIN;
 
-        return Result.fromBoolean(main.effectManager.hasEffect(sh, effect.id));
+        return Condition.Result.fromBoolean(sh.hasEffect(effect.id));
     }
 
     public enum Effect {
@@ -73,11 +73,12 @@ public class HasEffectCondition implements Condition, Parser {
             return name().toLowerCase(Locale.ROOT).replace("_", "-");
         }
 
-        public static Effect of(String operation) {
+        public static Effect of(ParsingNode node) {
+            String effect = node.getString();
             for (Effect ef : Effect.values()) {
-                if (ef.toString().equals(operation)) return ef;
+                if (ef.toString().equals(effect)) return ef;
             }
-            return null;
+            throw new SyntaxException("Unknown effect: '" + effect + "'", node, Effect.class);
         }
 
     }
@@ -88,17 +89,10 @@ public class HasEffectCondition implements Condition, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        String[] params = str.split(" *, *", 2);
-        effect = Effect.of(params[0].trim());
-        if (effect == null)
-            throw new SyntaxException("Unknown effect: '" + params[0] + "'", str, Effect.class);
+    public void parse(ParsingNode node) throws SyntaxException {
+        node.requireParamSize(2, getClass());
 
-        str = ParseUtil.separate(params, getClass(), ",");
-
-        ParseResult<Ship> pr = ValueParser.parse(str, Ship.class);
-        ship = pr.value;
-
-        return ParseUtil.separate(pr.leftover.trim(), getClass(), ")");
+        effect = Effect.of(node.getParam(0));
+        ship = ValueParser.parse(node.getParam(1), Ship.class);
     }
 }

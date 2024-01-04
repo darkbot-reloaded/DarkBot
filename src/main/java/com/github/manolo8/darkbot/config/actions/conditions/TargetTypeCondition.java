@@ -1,15 +1,15 @@
 package com.github.manolo8.darkbot.config.actions.conditions;
 
-import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.actions.Condition;
+import com.github.manolo8.darkbot.config.actions.LegacyCondition;
 import com.github.manolo8.darkbot.config.actions.Parser;
 import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
-import com.github.manolo8.darkbot.config.actions.parser.ParseResult;
-import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
 import com.github.manolo8.darkbot.config.actions.parser.ValueParser;
+import com.github.manolo8.darkbot.config.actions.tree.ParsingNode;
 import com.github.manolo8.darkbot.core.entities.Ship;
+import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.config.types.Condition;
 import eu.darkbot.api.game.entities.Npc;
 import eu.darkbot.api.game.other.EntityInfo.Diplomacy;
 import org.jetbrains.annotations.NotNull;
@@ -17,17 +17,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Locale;
 
 @ValueData(name = "has-relation", description = "Checks the target type", example = "has-relation(npc, target())")
-public class TargetTypeCondition implements Condition, Parser {
+public class TargetTypeCondition implements LegacyCondition, Parser {
     private TargetType type;
     private Value<Ship> ship;
 
     @Override
-    public @NotNull Condition.Result get(Main main) {
+    public @NotNull Condition.Result get(PluginAPI api) {
         if (type == null) {
-            return Result.ABSTAIN;
+            return Condition.Result.ABSTAIN;
         }
 
-        return Result.fromBoolean(matches(Value.get(ship, main)));
+        return Condition.Result.fromBoolean(matches(Value.get(ship, api)));
     }
 
     private boolean matches(Ship target) {
@@ -61,11 +61,12 @@ public class TargetTypeCondition implements Condition, Parser {
             return name().toLowerCase(Locale.ROOT).replace("_", "-");
         }
 
-        public static TargetType of(String targetType) {
+        public static TargetType of(ParsingNode node) {
+            String targetType = node.getString();
             for (TargetType tt : TargetType.values()) {
                 if (tt.toString().equals(targetType)) return tt;
             }
-            return null;
+            throw new SyntaxException("Unknown type: '" + targetType + "'", node, TargetType.class);
         }
     }
 
@@ -75,20 +76,9 @@ public class TargetTypeCondition implements Condition, Parser {
     }
 
     @Override
-    public String parse(String str) throws SyntaxException {
-        String[] params = str.split(" *, *", 2);
-
-        type = TargetType.of(params[0].trim());
-
-        if (type == null) {
-            throw new SyntaxException("Unknown has-relation: '" + params[0] + "'", str, TargetType.class);
-        }
-
-        str = ParseUtil.separate(params, getClass(), ",");
-
-        ParseResult<Ship> pr = ValueParser.parse(str, Ship.class);
-        ship = pr.value;
-
-        return ParseUtil.separate(pr.leftover.trim(), getClass(), ")");
+    public void parse(ParsingNode node) throws SyntaxException {
+        node.requireParamSize(2, getClass());
+        type = TargetType.of(node.getParam(0));
+        ship = ValueParser.parse(node.getParam(1), Ship.class);
     }
 }
