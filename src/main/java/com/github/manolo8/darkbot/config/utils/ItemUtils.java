@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.config.utils;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
@@ -13,7 +12,7 @@ import java.util.Optional;
 public class ItemUtils {
 
     public static Optional<Item> findAssociatedItem(@Nullable ItemCategory category, Character c) {
-        Main main = HeroManager.instance.main;
+        Main main = Main.INSTANCE;
 
         SettingsProxy.KeyBind k = main.facadeManager.settings.getAtChar(c);
         if (k == null || k.getType() == null) return Optional.empty();

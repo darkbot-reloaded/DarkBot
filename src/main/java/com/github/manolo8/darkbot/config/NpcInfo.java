@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.config;
 
-import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.Main;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Option;
 import eu.darkbot.api.config.types.NpcFlag;
@@ -110,7 +110,7 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     }
 
     private static HeroItemsAPI getHeroItems() {
-        return HeroManager.instance.main.facadeManager.slotBars;
+        return Main.INSTANCE.facadeManager.slotBars;
     }
 
     @Override

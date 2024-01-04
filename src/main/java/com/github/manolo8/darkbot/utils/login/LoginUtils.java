@@ -55,6 +55,8 @@ public class LoginUtils {
             System.out.println("Closed login panel, exited without logging in");
             System.exit(0);
         }
+
+        LoginCaptchaTask.firstLogin = false;
         return loginData;
     }
 
@@ -153,7 +155,9 @@ public class LoginUtils {
                 throw LoginException.translated("gui.login.error.captcha_fail", t);
             }
         } else if (frontPage.contains("class=\"bgcdw_captcha\"")) {
-            throw CaptchaException.translated("gui.login.error.captcha");
+            extraPostParams = new LoginCaptchaTask().solveCaptcha(url, frontPage);
+            if (extraPostParams.isEmpty())
+                throw CaptchaException.translated("gui.login.error.captcha");
         }
 
         String loginUrl = getLoginUrl(frontPage);

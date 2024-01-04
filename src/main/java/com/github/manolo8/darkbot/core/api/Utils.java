@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.core.api;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
@@ -14,7 +14,7 @@ public class Utils {
     public static final String SELECT_MAP_ASSET = "MapAssetNotificationTRY_TO_SELECT_MAPASSET";
 
     public static long[] createSelectEntityArgs(Entity entity) {
-        RectangleImpl viewBounds = HeroManager.instance.main.mapManager.viewBounds.polygon.getBounds();
+        RectangleImpl viewBounds = Main.INSTANCE.mapManager.viewBounds.polygon.getBounds();
         double bx = viewBounds.getX(), by = viewBounds.getY();
         double bw = viewBounds.getWidth(), bh = viewBounds.getHeight();
         int cw = MapManager.clientWidth, ch = MapManager.clientHeight;

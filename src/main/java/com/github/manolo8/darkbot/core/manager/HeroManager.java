@@ -44,6 +44,7 @@ import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyB
 
 public class HeroManager extends Player implements Manager, HeroAPI {
 
+    @Deprecated(forRemoval = true)
     public static HeroManager instance;
     public final Main main;
     public final Pet pet;

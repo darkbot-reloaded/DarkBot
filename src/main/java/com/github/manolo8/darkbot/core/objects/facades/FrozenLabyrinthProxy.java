@@ -5,6 +5,8 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.FrozenLabyrinthAPI;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
+
 import static com.github.manolo8.darkbot.Main.API;
 
 public class FrozenLabyrinthProxy extends Updatable implements FrozenLabyrinthAPI {
@@ -48,7 +50,8 @@ public class FrozenLabyrinthProxy extends Updatable implements FrozenLabyrinthAP
     public @Nullable MapZone getSynkMapZone() {
         if (synkMap == null || synkZone < 1 || synkZone > 4) return null;
         try {
-            return LabMap.valueOf(synkMap.replace(" ", "_")).z(synkZone - 1);
+            return LabMap.valueOf(synkMap.toUpperCase(Locale.ROOT).replace(' ', '_'))
+                    .z(synkZone - 1);
         } catch (IllegalArgumentException e) {
             System.err.println("Couldn't find LabMap for '" + synkMap + "' and zone '" + synkZone + "'");
             return null;

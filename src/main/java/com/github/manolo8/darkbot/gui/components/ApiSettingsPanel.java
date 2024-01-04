@@ -5,7 +5,6 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.GameAPI;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.gui.utils.FloatingDialog;
 import com.github.manolo8.darkbot.gui.utils.SpinnerNumberMinMaxFix;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -104,7 +103,7 @@ public class ApiSettingsPanel extends JPanel {
 
         if (Main.API.hasCapability(Capability.DIRECT_CALL_METHOD)) {
             JSlider s = new JSlider(1, 100);
-            s.setValue((int) Math.min(100, Math.max(1,  HeroManager.instance.main.mapManager.getZoom() * 100.0)));
+            s.setValue((int) Math.min(100, Math.max(1, Main.INSTANCE.mapManager.getZoom() * 100.0)));
             s.addChangeListener(l -> main.mapManager.setZoom(s.getValue() / 100.0));
             s.setPreferredSize(new Dimension(90, 12));
 
