@@ -3,8 +3,8 @@ package com.github.manolo8.darkbot.core.objects.swf;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import eu.darkbot.api.PluginAPI;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
@@ -20,6 +20,8 @@ import java.util.function.Consumer;
 // int lengthIfSimple = Main.API.readInt(address + 60);
 // int canBeSimple = Main.API.readInt(address + 64);
 public abstract class FlashList<E> extends AbstractList<E> implements NativeUpdatable {
+    private static final PluginAPI PLUGIN_API = Main.INSTANCE.pluginAPI;
+
     private static final int MAX_SIZE = 8192;
     private static final byte[] BUFFER = new byte[MAX_SIZE * Long.BYTES]; //64kb
 
@@ -308,7 +310,7 @@ public abstract class FlashList<E> extends AbstractList<E> implements NativeUpda
 
         private ElementWrapper() {
             if (valueUpdatable)
-                this.value = HeroManager.instance.main.pluginAPI.requireInstance(valueType);
+                this.value = PLUGIN_API.requireInstance(valueType);
         }
 
         private ElementWrapper(E value) {

@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.core.manager;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.types.suppliers.OptionList;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.objects.Map;
@@ -220,7 +221,7 @@ public class StarManager implements API.Singleton {
     }
 
     public Portal getOrCreate(int id, int type, int x, int y) {
-        Portal portal = starSystem.outgoingEdgesOf(HeroManager.instance.map).stream()
+        Portal portal = starSystem.outgoingEdgesOf(Main.INSTANCE.hero.map).stream()
                 .filter(p -> p.matches(x, y, type))
                 .findFirst()
                 .orElse(null);

@@ -1,14 +1,21 @@
 package com.github.manolo8.darkbot.core.objects.swf;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import eu.darkbot.api.PluginAPI;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -16,6 +23,7 @@ import static com.github.manolo8.darkbot.Main.API;
  * Object[K] = V, Array[K] = V, Dictionary[K] = V
  */
 public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable {
+    private static final PluginAPI PLUGIN_API = Main.INSTANCE.pluginAPI;
     /**
      * since identifiers are always interned strings, they can't be 0,
      * so we can use 0 as the empty value.
@@ -340,9 +348,9 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
 
         public Entry() {
             if (keyUpdatable)
-                this.key = HeroManager.instance.main.pluginAPI.requireInstance(keyType);
+                this.key = PLUGIN_API.requireInstance(keyType);
             if (valueUpdatable)
-                this.value = HeroManager.instance.main.pluginAPI.requireInstance(valueType);
+                this.value = PLUGIN_API.requireInstance(valueType);
         }
 
         private void set(long keyAtom, long valueAtom, AtomKind keyKind, AtomKind valueKind) {

@@ -1,20 +1,14 @@
 package com.github.manolo8.darkbot.gui.utils.inspector;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.gui.MainGui;
 import net.miginfocom.swing.MigLayout;
 
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JMenuItem;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Map;
@@ -86,13 +80,13 @@ public class ObjectInspectorUI extends JFrame {
 
             setEditable(true);
 
-            BotInstaller b = HeroManager.instance.main.pluginAPI.requireInstance(BotInstaller.class);
+            BotInstaller b = Main.INSTANCE.pluginAPI.requireInstance(BotInstaller.class);
             addItem(new AddressEntry("GuiManager", b.guiManagerAddress::get));
             addItem(new AddressEntry("ScreenManager", b.screenManagerAddress::get));
             addItem(new AddressEntry("ConnectionManager", b.connectionManagerAddress::get));
             addItem(new AddressEntry("Main Address", b.mainAddress::get));
             addItem(new AddressEntry("MainApp Address", b.mainApplicationAddress::get));
-            addItem(new AddressEntry("Hero Address", () -> HeroManager.instance.address));
+            addItem(new AddressEntry("Hero Address", () -> Main.INSTANCE.hero.address));
             addItem(new AddressEntry("HeroInfo Address", b.heroInfoAddress::get));
             addItem(new AddressEntry("Settings Address", b.settingsAddress::get));
         }

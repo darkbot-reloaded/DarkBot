@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.MapNpc;
 import com.github.manolo8.darkbot.core.entities.Ship;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
@@ -94,7 +93,7 @@ public class GameAPIImpl<
                 interaction.getVersion() + "i" +
                 direct.getVersion() + "d";
 
-        Main main = HeroManager.instance.main;
+        Main main = Main.INSTANCE;
         config = main.configHandler;
 
         this.loginData = hasCapability(Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
@@ -211,7 +210,7 @@ public class GameAPIImpl<
 
             int result = Popups.of("Select flash process", pidSelector, JOptionPane.QUESTION_MESSAGE)
                     .optionType(JOptionPane.OK_CANCEL_OPTION)
-                    .parent(HeroManager.instance.main.getGui())
+                    .parent(Main.INSTANCE.getGui())
                     .showOptionSync();
 
             if (result != JOptionPane.OK_OPTION) return;
@@ -249,7 +248,7 @@ public class GameAPIImpl<
     public boolean isValid() {
         boolean isValid = handler.isValid();
         if (!autoHidden && isValid && params.getAutoHide()) {
-            setVisible(false, HeroManager.instance.main.config.BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API);
+            setVisible(false, Main.INSTANCE.config.BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API);
             autoHidden = true;
         }
         return isValid;
