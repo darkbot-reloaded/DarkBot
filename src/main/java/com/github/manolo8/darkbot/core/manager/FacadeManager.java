@@ -19,21 +19,24 @@ import com.github.manolo8.darkbot.core.objects.facades.GauntletPlutusProxy;
 import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
 import com.github.manolo8.darkbot.core.objects.facades.NpcEventProxy;
+import com.github.manolo8.darkbot.core.objects.facades.QuestProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SpaceMapWindowProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.WorldBossOverviewProxy;
-import com.github.manolo8.darkbot.core.objects.facades.QuestProxy;
 import com.github.manolo8.darkbot.core.objects.swf.PairArray;
 import eu.darkbot.api.PluginAPI;
+import eu.darkbot.api.managers.NpcEventAPI;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
+public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, NpcEventAPI {
     private final PairArray commands         = PairArray.ofArray();
     private final PairArray proxies          = PairArray.ofArray();
     private final PairArray mediators        = PairArray.ofArray();
@@ -59,8 +62,9 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
     public final NpcEventProxy npcEventProxy;
     public final WorldBossOverviewProxy worldBossOverview;
     public final Updatable group;
-    public final QuestProxy quests;
     public final Updatable groupMediator;
+
+    private final Map<EventType, NpcEventProxy> npcEvents = new HashMap<>();
 
     public FacadeManager(PluginAPI pluginApi) {
         this.pluginAPI = pluginApi;
@@ -80,16 +84,23 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton {
         this.highlight      = registerProxy("HighlightProxy",         HighlightProxy.class);
         this.spaceMapWindowProxy = registerProxy("spacemap",          SpaceMapWindowProxy.class);
         this.plutus         = registerProxy("plutus",                 GauntletPlutusProxy.class);
-        this.npcEventProxy  = registerProxy("npc_event",              NpcEventProxy.class);
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
         this.groupMediator  = registerMediator("GroupSystemMediator", Updatable.NoOp.class);
-        this.quests         = registerProxy("QuestProxy", QuestProxy.class);
 
         registerProxy("dispatch", DispatchProxy.class);
         registerProxy("ggBuilder", GalaxyBuilderProxy.class);
         registerMediator("dispatch_retriever", DispatchMediator.class);
         registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
+        registerProxy("QuestProxy", QuestProxy.class);
+
+        npcEvents.put(EventType.GENERIC, this.npcEventProxy = registerProxy("npc_event", NpcEventProxy.class));
+        npcEvents.put(EventType.AGATUS, registerProxy("agatus_event", NpcEventProxy.class));
+    }
+
+    @Override
+    public NpcEvent getEvent(EventType eventType) {
+        return npcEvents.get(eventType);
     }
 
     private <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
