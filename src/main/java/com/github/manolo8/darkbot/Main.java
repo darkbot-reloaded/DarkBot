@@ -61,6 +61,9 @@ import java.util.Objects;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
+    /** Do not use in plugins! Only for bot internal usage */
+    @Deprecated public static Main INSTANCE;
+
     public static final Version VERSION      = new Version("1.129");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
@@ -119,6 +122,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     public Main(StartupParams params) {
         super("Main");
+        INSTANCE = this;
 
         this.params = params;
 
