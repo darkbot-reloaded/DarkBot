@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class LoginCaptchaTask extends BackpageTask implements CaptchaAPI {
+    private static final Version CAPTCHA_MIN_VERSION = new Version("1.3.0");
     // use only on first login
     static boolean firstLogin = true;
 
@@ -27,7 +28,7 @@ class LoginCaptchaTask extends BackpageTask implements CaptchaAPI {
     private String getCaptcha(String url, String siteKey) {
         String result = null;
         try {
-            if (!BackpageTask.isSupported(new Version("1.3.0")))
+            if (!BackpageTask.isSupported(CAPTCHA_MIN_VERSION))
                 return null;
 
             Process process = BackpageTask.createBrowser("--captcha", siteKey,

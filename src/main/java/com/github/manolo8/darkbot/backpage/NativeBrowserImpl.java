@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 
 public class NativeBrowserImpl implements NativeBrowserAPI {
+    private static final Version OPEN_LINK_MIN_VERSION = new Version("1.3.0");
 
     private final BackpageManager backpageManager;
 
@@ -17,16 +18,14 @@ public class NativeBrowserImpl implements NativeBrowserAPI {
 
     @Override
     public boolean isSupported() {
-        return BackpageTask.isSupported(new Version("1.3.0"));
+        return BackpageTask.isSupported(OPEN_LINK_MIN_VERSION);
     }
 
     @Override
     public @Nullable Process openLink(String link) {
-        if (isSupported() && backpageManager.isInstanceValid()) {
+        if (isSupported()) {
             try {
-                return BackpageTask.createBrowser("--sid " + backpageManager.getSid(),
-                        "--url " + backpageManager.getInstanceURI().toString(), // for sid
-                        "--fullurl " + link);
+                return BackpageTask.createBrowser("--url", link);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -36,6 +35,15 @@ public class NativeBrowserImpl implements NativeBrowserAPI {
 
     @Override
     public @Nullable Process openGameLink(String path) {
-        return openLink(backpageManager.getInstanceURI().toString() + path);
+        if (isSupported() && backpageManager.isInstanceValid()) {
+            try {
+                return BackpageTask.createBrowser("--sid " + backpageManager.getSid(),
+                        "--url " + backpageManager.getInstanceURI().toString(), // for sid
+                        "--fullurl " + backpageManager.getInstanceURI().toString() + path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }
