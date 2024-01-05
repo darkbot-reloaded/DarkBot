@@ -139,11 +139,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
                                 .getConnection();
 
                         status = Status.of(conn.getResponseCode());
-                        if (status == Status.VALID) {
-                            String content = IOUtils.read(conn.getInputStream(), true);
-                            if (content.contains("redirectToLogin")) {
-                                status = Status.INVALID;
-                            }
+                        if (status == Status.VALID && IOUtils.read(conn.getInputStream(), true)
+                                .contains("redirectToLogin")) {
+                            status = Status.INVALID;
                         }
                     }
                 }
