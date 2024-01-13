@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.core.entities;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.manager.EffectManager;

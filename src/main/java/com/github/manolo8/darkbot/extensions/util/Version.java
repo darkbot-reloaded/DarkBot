@@ -68,11 +68,11 @@ public class Version implements eu.darkbot.api.utils.Version {
     }
 
     public boolean isBeta() {
-        return beta != Integer.MAX_VALUE;
+        return beta != Integer.MAX_VALUE && beta != -1;
     }
 
     public boolean isAlpha() {
-        return alpha != Integer.MAX_VALUE;
+        return alpha != Integer.MAX_VALUE && alpha != -1;
     }
 
     private String getVersionString() {

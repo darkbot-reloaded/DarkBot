@@ -5,16 +5,20 @@ import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.PluginAPI;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
+import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -58,6 +62,21 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
     private EntrySet entrySet;
     private Map<K, UpdatableWrapper> updatables;
     private boolean threadSafe;
+
+    // a read-only view into the values
+    @Getter(lazy = true)
+    private final List<V> valueList = new AbstractList<>() {
+        @Override
+        public V get(int index) {
+            Objects.checkIndex(index, size);
+            return entries[index].value;
+        }
+
+        @Override
+        public int size() {
+            return size;
+        }
+    };
 
     private FlashMap(Class<K> keyType, Class<V> valueType) {
         if (keyType == null || valueType == null) {
@@ -131,11 +150,9 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
     }
 
     public void update(long address) {
-        if (this.address != address) {
-            clearMap();
-        }
-
+        if (this.address != address) clearMap();
         this.address = address;
+        update();
     }
 
     private int getCapacity(int logCapacity, @SuppressWarnings("unused") boolean hasIterIndexes) {
@@ -341,6 +358,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
     private class Entry implements Map.Entry<K, V> {
         private long keyAtomCache, valueAtomCache;
 
+        @Getter
         private K key;
         private V value;
 
@@ -374,10 +392,6 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
             } else if (value instanceof Updatable) {
                 ((Updatable) value).update();
             }
-        }
-
-        public K getKey() {
-            return key;
         }
 
         private void setKey(K key) {

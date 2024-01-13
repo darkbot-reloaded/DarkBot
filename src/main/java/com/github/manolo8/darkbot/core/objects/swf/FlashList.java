@@ -93,10 +93,9 @@ public abstract class FlashList<E> extends AbstractList<E> implements NativeUpda
     }
 
     public void update(long address) {
-        if (this.address != address) {
-            clearInternal();
-        }
+        if (this.address != address) clearInternal();
         this.address = address;
+        update();
     }
 
     @Override

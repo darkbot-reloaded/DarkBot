@@ -9,14 +9,16 @@ import eu.darkbot.util.Popups;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.function.LongSupplier;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -327,11 +329,9 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
             int size;
             if (map != null) {
                 map.update(value);
-                map.update(); // read size of map;
                 size = map.size();
             } else {
                 list.update(value);
-                list.update();
                 size = list.size();
             }
 
