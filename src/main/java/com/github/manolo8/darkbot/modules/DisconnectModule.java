@@ -7,6 +7,12 @@ import com.github.manolo8.darkbot.modules.utils.SafetyFinder;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.Time;
 
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
+import eu.darkbot.util.Popups;
+
 @SuppressWarnings("removal")
 public class DisconnectModule extends TemporalModule {
 
@@ -23,13 +29,25 @@ public class DisconnectModule extends TemporalModule {
 
     private Long pauseUntil = null;
     private boolean refreshing = false;
+    private boolean closeBot = false;
+    private boolean popupOpened = false;
 
     /**
-     * @param pauseTime null for infinite pause, otherwise pause for that amount of MS.
+     * @param pauseTime null for infinite pause, otherwise pause for that amount of
+     *                  MS.
      */
     public DisconnectModule(Long pauseTime, String reason) {
         this.reason = reason;
         this.pauseTime = pauseTime;
+    }
+
+    /**
+     * @param pauseTime null for infinite pause, otherwise pause for that amount of
+     *                  MS.
+     */
+    public DisconnectModule(Long pauseTime, String reason, boolean closeBot) {
+        this(pauseTime, reason);
+        this.closeBot = closeBot;
     }
 
     @Override
@@ -55,6 +73,7 @@ public class DisconnectModule extends TemporalModule {
 
     @Override
     public void tick() {
+        showClosePopup();
         // Just in case refresh was super quick, don't go back to normal tick.
         if (refreshing) {
             tickStopped();
@@ -63,8 +82,10 @@ public class DisconnectModule extends TemporalModule {
         main.guiManager.pet.setEnabled(false);
         safety.setRefreshing(true);
         safety.tick();
-        if (hero.locationInfo.isMoving() || safety.state() != SafetyFinder.Escaping.WAITING) return;
-        if (!logout.visible) logoutStart = System.currentTimeMillis();
+        if (hero.locationInfo.isMoving() || safety.state() != SafetyFinder.Escaping.WAITING)
+            return;
+        if (!logout.visible)
+            logoutStart = System.currentTimeMillis();
         logout.show(true);
         // Prevent bug where logout gets to 0 and doesn't log out, just force a reload
         if (System.currentTimeMillis() - logoutStart > 25_000) {
@@ -76,14 +97,23 @@ public class DisconnectModule extends TemporalModule {
 
     @Override
     public void tickStopped() {
+        showClosePopup();
         if (main.isRunning()) {
-            if (!lostConnection.visible) return;
+            if (!lostConnection.visible)
+                return;
             // Bot done. Pause "forever" (unless a behaviour restarts it).
-            if (pauseTime == null) main.setRunning(false);
-            else if (pauseTime == 0) goBack();
+            if (pauseTime == null)
+                main.setRunning(false);
+            else if (pauseTime == 0)
+                goBack();
             else {
                 pauseUntil = System.currentTimeMillis() + pauseTime;
                 main.setRunning(false);
+
+                if (closeBot) {
+                    System.out.println("Exit by the Disconnect module, exiting");
+                    System.exit(0);
+                }
             }
         } else if (pauseUntil != null && System.currentTimeMillis() > pauseUntil - 10_000) {
             if (!refreshing) {
@@ -104,7 +134,32 @@ public class DisconnectModule extends TemporalModule {
 
     @Override
     public String stoppedStatus() {
-        if (pauseUntil == null) return I18n.get("module.disconnect.status_stopped", reason);
-        else return I18n.get("module.disconnect.status_paused", reason, Time.toString(Math.max(0, pauseUntil - System.currentTimeMillis())));
+        if (pauseUntil == null)
+            return I18n.get("module.disconnect.status_stopped", reason);
+        else
+            return I18n.get("module.disconnect.status_paused", reason,
+                    Time.toString(Math.max(0, pauseUntil - System.currentTimeMillis())));
+    }
+
+    private void showClosePopup() {
+        if (!closeBot || popupOpened) {
+            return;
+        }
+
+        this.popupOpened = true;
+        JButton okBtn = new JButton(I18n.get("module.disconnect.popup.ok_btn"));
+        JButton cancelBtn = new JButton(I18n.get("module.disconnect.popup.cancel_btn"));
+        okBtn.addActionListener(e -> {
+            SwingUtilities.getWindowAncestor(okBtn).setVisible(false);
+        });
+        cancelBtn.addActionListener(e -> {
+            closeBot = false;
+            SwingUtilities.getWindowAncestor(cancelBtn).setVisible(false);
+        });
+
+        Popups.of(I18n.get("module.disconnect.popup.title"),
+                new JOptionPane(I18n.get("module.disconnect.popup.message"), JOptionPane.INFORMATION_MESSAGE,
+                        JOptionPane.DEFAULT_OPTION, null, new Object[] { okBtn, cancelBtn }))
+                .showAsync();
     }
 }
