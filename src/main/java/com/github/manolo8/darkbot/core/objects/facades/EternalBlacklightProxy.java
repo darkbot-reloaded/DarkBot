@@ -86,8 +86,7 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
     @Override
     public boolean selectBooster(EternalBlacklightGateAPI.Booster booster) {
         Gui blacklightGate = main.guiManager.blacklightGate;
-        boolean hasPoints = getBoosterPoints() > 0;
-        if (!hasPoints || boostersOptions.size() < 3) {
+        if (getBoosterPoints() <= 0 || boostersOptions.size() < 3) {
             blacklightGate.hide();
             return false;
         }
