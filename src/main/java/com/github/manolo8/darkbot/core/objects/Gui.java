@@ -122,6 +122,12 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
         return value == visible && isAnimationDone();
     }
 
+    // without checking #isAnimationDone()
+    public void hide() {
+        if (!visible) return;
+        setVisible(false);
+    }
+
     protected void legacyToggle(boolean show) {
         if (show || minimized.address != 0) clickMinimized();
         else click(5, 5);
