@@ -136,7 +136,7 @@ public enum EntityFactory implements EntityBuilder {
     }
 
     private static String getZoneKey(long address) {
-        return API.readMemoryString(address, 136).trim();
+        return API.readString(address, 136).trim();
     }
 
     private static boolean isZone(String asset, long address) {
@@ -145,7 +145,7 @@ public enum EntityFactory implements EntityBuilder {
     }
 
     private static boolean isPet(String asset, long address) {
-        return API.readMemoryString(address, 192, 144).trim().equals("pet");
+        return API.readString(address, 192, 144).trim().equals("pet");
     }
 
     private static boolean isShip(String asset, long address) {
@@ -171,8 +171,8 @@ public enum EntityFactory implements EntityBuilder {
 
     private static Portal getOrCreatePortal(int id, long address) {
         int portalType = API.readMemoryInt(address + Portal.TYPE_OFFSET);
-        int x          = (int) API.readMemoryDouble(address, 64, 32);
-        int y          = (int) API.readMemoryDouble(address, 64, 40);
+        int x          = (int) API.readDouble(address, 64, 32);
+        int y          = (int) API.readDouble(address, 64, 40);
 
         Portal portal = StarManager.getInstance().getOrCreate(id, portalType, x, y);
         portal.update(address);

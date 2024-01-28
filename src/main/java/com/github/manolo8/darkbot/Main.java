@@ -217,7 +217,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
             try {
                 // Just in case, we can't risk the main loop dying.
-                statsManager.tickAverageStats(current - time);
+                statsManager.tickAverageStats(avgTick);
             } catch (Throwable e) {
                 e.printStackTrace();
             }

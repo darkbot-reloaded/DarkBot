@@ -45,7 +45,7 @@ public class BattleStation
 
     @Override
     public Lock getLockType() {
-        return Lock.of(API.readMemoryInt(lockPtr, 48, 40));
+        return Lock.of(API.readInt(lockPtr, 48, 40));
     }
 
     @Override
@@ -95,7 +95,7 @@ public class BattleStation
             super.update();
 
             if (info.username.isEmpty()) {
-                info.username = Main.API.readString(traits.getLast(), "", 56, 40);
+                info.username = Main.API.readString(traits.getLastElement(), "", 56, 40);
             }
         }
     }
@@ -174,7 +174,7 @@ public class BattleStation
             health.update(findInTraits(TraitPattern::ofHealth));
             lockPtr = findInTraits(TraitPattern::ofLockType);
 
-            target.update(findInTraits(ptr -> API.readMemoryString(ptr, 48, 32).startsWith("attack")));
+            target.update(findInTraits(ptr -> API.readString(ptr, 48, 32).startsWith("attack")));
         }
 
         @Override

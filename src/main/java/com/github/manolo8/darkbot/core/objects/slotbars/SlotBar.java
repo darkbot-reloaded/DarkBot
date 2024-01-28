@@ -2,23 +2,20 @@ package com.github.manolo8.darkbot.core.objects.slotbars;
 
 import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class SlotBar extends MenuBar {
-    private final ObjArray slotsArr = ObjArray.ofVector(true);
     private final CategoryBar categoryBar;
     private final SlotBarsProxy.Type slotType;
     public boolean isVisible;
     public Point stickOffset = new Point();
-    public List<Slot> slots = new ArrayList<>();
+    public FlashList<Slot> slots = FlashList.ofVector(Slot::new);
 
     public SlotBar(CategoryBar categoryBar, SlotBarsProxy.Type type) {
         this.categoryBar = categoryBar;
@@ -33,8 +30,7 @@ public class SlotBar extends MenuBar {
         this.isVisible = API.readMemoryBoolean(address + 56);
         this.stickOffset.update(API.readMemoryLong(address + 72));
 
-        this.slotsArr.update(API.readMemoryLong(address + 64));
-        this.slotsArr.sync(slots, Slot::new);
+        this.slots.update(API.readMemoryLong(address + 64));
     }
 
     public class Slot extends Auto {
@@ -51,7 +47,7 @@ public class SlotBar extends MenuBar {
         public void update() {
             this.slotNumber = API.readMemoryInt(address + 32);
             this.premium = API.readMemoryBoolean(address + 36);
-            this.slotBarId = API.readMemoryString(address, 48);
+            this.slotBarId = API.readString(address, 48);
             long itemPtr = API.readMemoryLong(address + 40);
 
             if (itemPtr == 0 && item != null) {

@@ -4,12 +4,11 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
-import eu.darkbot.api.PluginAPI;
+import com.github.manolo8.darkbot.core.utils.FilteredList;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Modifier;
 import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
@@ -19,7 +18,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.RandomAccess;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -27,7 +29,6 @@ import static com.github.manolo8.darkbot.Main.API;
  * Object[K] = V, Array[K] = V, Dictionary[K] = V
  */
 public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable {
-    private static final PluginAPI PLUGIN_API = Main.INSTANCE.pluginAPI;
     /**
      * since identifiers are always interned strings, they can't be 0,
      * so we can use 0 as the empty value.
@@ -45,12 +46,12 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
 
     private static final int MAX_SIZE = 2048;
     private static final int MAX_CAPACITY = MAX_SIZE * Long.BYTES * 2;
-    private static final byte[] BUFFER = new byte[MAX_CAPACITY]; //32kb
 
     private final AtomKind keyKind;
     private final AtomKind valueKind;
 
-    private final Class<K> keyType;
+    //private final Class<K> keyType;
+    private final Supplier<V> valueConstructor;
     private final Class<V> valueType;
 
     private final boolean keyUpdatable, valueUpdatable;
@@ -61,11 +62,13 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
     private long address;
     private EntrySet entrySet;
     private Map<K, UpdatableWrapper> updatables;
-    private boolean threadSafe;
+    private boolean threadSafe, autoUpdate = true;;
 
     // a read-only view into the values
     @Getter(lazy = true)
-    private final List<V> valueList = new AbstractList<>() {
+    private final List<V> valueList = new ValuesList();
+
+    private class ValuesList extends AbstractList<V> implements RandomAccess {
         @Override
         public V get(int index) {
             Objects.checkIndex(index, size);
@@ -76,24 +79,25 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
         public int size() {
             return size;
         }
-    };
+    }
 
     private FlashMap(Class<K> keyType, Class<V> valueType) {
         if (keyType == null || valueType == null) {
             this.keyKind = null;
             this.valueKind = null;
 
-            this.keyType = null;
+            //this.keyType = null;
             this.valueType = null;
 
             this.keyUpdatable = false;
             this.valueUpdatable = false;
 
+            this.valueConstructor = null;
         } else {
             this.keyKind = AtomKind.of(keyType);
             this.valueKind = AtomKind.of(valueType);
 
-            this.keyType = keyType;
+            //this.keyType = keyType;
             this.valueType = valueType;
             if (keyKind.isNotSupported() || valueKind.isNotSupported())
                 throw new UnsupportedOperationException("Provided java types are not supported!");
@@ -103,8 +107,11 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
 
             if (keyUpdatable)
                 throw new UnsupportedOperationException("Key as updatable is not supported!");
-            if (valueUpdatable && Modifier.isAbstract(valueType.getModifiers()))
-                throw new UnsupportedOperationException("Abstract updatable value type is not supported!");
+            if (valueUpdatable) {
+                //noinspection unchecked
+                Class<V> constructorClass = valueType == Updatable.class ? (Class<V>) Updatable.NoOp.class : valueType;
+                this.valueConstructor = () -> Main.INSTANCE.pluginAPI.requireInstance(constructorClass);
+            } else this.valueConstructor = null;
         }
 
         clearMap();
@@ -133,6 +140,15 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
         return this;
     }
 
+    public FlashMap<K, V> noAuto() {
+        this.autoUpdate = false;
+        return this;
+    }
+
+    public List<V> asFiltered(Predicate<V> filter) {
+        return new FilteredList<>(getValueList(), filter);
+    }
+
     public void update() {
         if (address == 0) return;
 
@@ -152,7 +168,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
     public void update(long address) {
         if (this.address != address) clearMap();
         this.address = address;
-        update();
+        if (autoUpdate) update();
     }
 
     private int getCapacity(int logCapacity, @SuppressWarnings("unused") boolean hasIterIndexes) {
@@ -165,41 +181,32 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
         return logCapacity * Long.BYTES;
     }
 
-    private void ensureBuffer(long atoms, int capacity) {
-        if (!threadSafe) {
-            API.readMemory(atoms, BUFFER, capacity);
-        }
-    }
-
-    private long getLong(long atoms, int offset) {
-        if (threadSafe) return API.readLong(atoms + offset);
-        return ByteUtils.getLong(BUFFER, offset);
+    private long getAtom(long atoms, int offset) {
+        return API.readLong(atoms + offset);
     }
 
     private void readHashTable(long table) {
         long atomsAndFlags = API.readLong(table);
         long atoms = (atomsAndFlags & ByteUtils.ATOM_MASK) + 8;
 
-        int size = API.readMemoryInt(table + 8); // includes deleted items
-        int capacity = getCapacity(API.readMemoryInt(table + 12), (atomsAndFlags & HAS_ITER_INDEX) != 0);
+        int size = API.readInt(table, 8); // includes deleted items
+        int capacity = getCapacity(API.readInt(table, 12), (atomsAndFlags & HAS_ITER_INDEX) != 0);
 
         //noinspection unused
         boolean hasDeletedItems = (atomsAndFlags & HAS_DELETED_ITEMS) != 0;
 
         if (size <= 0 || size > MAX_SIZE || capacity <= 0 || capacity > MAX_CAPACITY) {
-            resetOldEntries(0);
+            setSize(0);
             resetUpdatablesIfNoRef();
-            this.size = 0;
             return;
         }
         if (entries.length < size) {
             entries = Arrays.copyOf(entries, (int) Math.min(size * 1.25, MAX_SIZE));
         }
 
-        ensureBuffer(atoms, capacity);
         int currentSize = 0, realSize = 0;
         for (int offset = 0; offset < capacity && currentSize < size; offset += 8) {
-            long keyAtom = getLong(atoms, offset);
+            long keyAtom = getAtom(atoms, offset);
 
             if (keyAtom == EMPTY_ITEM) continue;
             if (keyAtom == DELETED_ITEM) {
@@ -222,7 +229,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
                 break;
             }
 
-            long valueAtom = getLong(atoms, (offset += 8));
+            long valueAtom = getAtom(atoms, (offset += 8));
             AtomKind valueKind = AtomKind.of(valueAtom);
             if (this.valueKind != null && valueKind != this.valueKind) {
                 System.out.println("Invalid valueKind! expected: " + this.valueKind + ", read: " + valueKind);
@@ -239,14 +246,12 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
             currentSize++;
         }
 
-        resetOldEntries(realSize);
+        setSize(realSize);
         resetUpdatablesIfNoRef();
-
-        this.size = realSize;
     }
 
     private void clearMap() {
-        this.size = 0;
+        setSize(0);
         //noinspection unchecked
         this.entries = (Entry[]) Array.newInstance(Entry.class, 0);
         if (updatables != null)
@@ -278,11 +283,12 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
         return -1;
     }
 
-    private void resetOldEntries(int realSize) {
+    private void setSize(int realSize) {
         for (int i = realSize; i < size(); i++) {
             Entry entry = entries[i];
             if (entry != null) entry.reset();
         }
+        this.size = realSize;
     }
 
     private void resetUpdatablesIfNoRef() {
@@ -310,6 +316,12 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
     public V get(Object key) {
         int i = indexOf(key);
         return i == -1 ? null : entries[i].getValue();
+    }
+
+    @Override
+    public V getOrDefault(Object key, V defaultValue) {
+        int i = indexOf(key);
+        return i == -1 ? defaultValue : entries[i].getValue();
     }
 
     @Override
@@ -365,10 +377,8 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
         private UpdatableWrapper wrapper;
 
         public Entry() {
-            if (keyUpdatable)
-                this.key = PLUGIN_API.requireInstance(keyType);
-            if (valueUpdatable)
-                this.value = PLUGIN_API.requireInstance(valueType);
+            if (valueConstructor != null)
+                this.value = valueConstructor.get();
         }
 
         private void set(long keyAtom, long valueAtom, AtomKind keyKind, AtomKind valueKind) {

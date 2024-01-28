@@ -48,7 +48,7 @@ public class Clickable extends Updatable {
 
         this.radius = this.defRadius = API.readMemoryInt(address + 40);
         this.priority = this.defPriority = API.readMemoryInt(address + 44);
-        this.enabled = API.readMemoryBoolean(address, 64, 32);
+        this.enabled = API.readBoolean(address, 64, 32);
     }
 
     @Override

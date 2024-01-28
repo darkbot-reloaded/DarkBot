@@ -20,14 +20,14 @@ public class TraitPattern {
      * Filters if given address is instance of Health in-game
      */
     public static boolean ofHealth(long address) {
-        long classType = API.readMemoryLong(address, 48, 0x10);
+        long classType = API.readLong(address, 48, 0x10);
 
         return classType != 0 &&
-                API.readMemoryLong(address, 48 + 8, 0x10) == classType &&
-                API.readMemoryLong(address, 48 + 8 * 2, 0x10) == classType &&
-                API.readMemoryLong(address, 48 + 8 * 3, 0x10) == classType &&
-                API.readMemoryLong(address, 48 + 8 * 4, 0x10) == classType &&
-                API.readMemoryLong(address, 48 + 8 * 5, 0x10) == classType;
+                API.readLong(address, 48 + 8, 0x10) == classType &&
+                API.readLong(address, 48 + 8 * 2, 0x10) == classType &&
+                API.readLong(address, 48 + 8 * 3, 0x10) == classType &&
+                API.readLong(address, 48 + 8 * 4, 0x10) == classType &&
+                API.readLong(address, 48 + 8 * 5, 0x10) == classType;
     }
 
     /**

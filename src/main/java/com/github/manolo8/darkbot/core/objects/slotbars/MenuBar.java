@@ -17,8 +17,8 @@ public abstract class MenuBar extends Updatable.Auto {
     @Override
     public void update(long address) {
         if (address != this.address) {
-            this.barId = API.readMemoryString(address, 32);
-            this.layoutId = API.readMemoryString(address, 40);
+            this.barId = API.readString(address, 32);
+            this.layoutId = API.readString(address, 40);
         }
 
         super.update(address);

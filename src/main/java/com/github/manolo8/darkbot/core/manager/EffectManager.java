@@ -4,7 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import eu.darkbot.api.API;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class EffectManager implements Manager, API.Singleton {
     private long mapAddressStatic;
 
-    private final ObjArray effectsPtr = ObjArray.ofVector(true);
+    private final FlashList<Long> effectsPtr = FlashList.ofVector(Long.class);
     private final Map<Long, List<Integer>> effects = new HashMap<>();
 
     public EffectManager(Main main) {
@@ -26,18 +26,24 @@ public class EffectManager implements Manager, API.Singleton {
 
     @Override
     public void install(BotInstaller botInstaller) {
+        effects.clear();
         botInstaller.screenManagerAddress.add(value -> mapAddressStatic = value + 256);
     }
 
     public void tick() {
-        long addr = API.readMemoryLong(API.readMemoryLong(mapAddressStatic), 128, 48);
+        effectsPtr.update(API.readLong(API.readLong(mapAddressStatic), 128, 48));
 
-        effectsPtr.update(addr);
-        effects.clear();
+        // clear if over 200 entries in map, otherwise just clear the lists
+        if (effects.size() > 200) effects.clear();
+        else {
+            for (List<Integer> e : effects.values()) {
+                e.clear();
+            }
+        }
 
-        for (int i = 0; i < effectsPtr.getSize(); i++) {
-            int id      = API.readMemoryInt( effectsPtr.get(i) + 0x24);
-            long entity = API.readMemoryLong(effectsPtr.get(i) + 0x48);
+        for (long addr : effectsPtr) {
+            int id = API.readMemoryInt(addr + 0x24);
+            long entity = API.readMemoryLong(addr + 0x48);
 
             effects.computeIfAbsent(entity, list -> new ArrayList<>()).add(id);
         }

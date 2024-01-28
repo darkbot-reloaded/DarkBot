@@ -8,6 +8,7 @@ import static com.github.manolo8.darkbot.Main.API;
 /**
  * Reads arrays in flash.
  * Instead of ArrayObj, VectorPtr & SpriteArray
+ * Used for SpriteArray
  */
 public class ObjArray extends SwfPtrCollection {
     private static final int MAX_SIZE = 8192;
@@ -105,7 +106,7 @@ public class ObjArray extends SwfPtrCollection {
 
     @Override
     public void update(long address) {
-        super.update(isSprite() ? API.readMemoryLong(address, 0x48, 0x40) : address);
+        super.update(isSprite() ? API.readLong(address, 0x48, 0x40) : address);
         if (autoUpdatable) update();
     }
 

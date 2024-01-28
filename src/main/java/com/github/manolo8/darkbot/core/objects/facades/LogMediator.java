@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
@@ -15,7 +15,7 @@ public class LogMediator extends Updatable implements GameLogAPI, Listener {
     public final Lazy<String> logs = new Lazy.NoCache<>(); // Can't cache the value, same log could appear twice
 
     private final EventBrokerAPI eventBroker;
-    private final ObjArray messageBuffer = ObjArray.ofArrStr();
+    private final FlashList<Long> messageBuffer = FlashList.ofArray(Long.class);
 
     public LogMediator(EventBrokerAPI eventBroker) {
         this.eventBroker = eventBroker;
@@ -25,7 +25,7 @@ public class LogMediator extends Updatable implements GameLogAPI, Listener {
     @Override
     public void update() {
         messageBuffer.update(API.readMemoryLong(address + 0x60));
-        if (messageBuffer.size <= 0 || 50 < messageBuffer.size) return;
+        if (messageBuffer.isEmpty() || messageBuffer.size() > 50) return;
 
         messageBuffer.forEachIncremental(this::handleLogMessage);
     }

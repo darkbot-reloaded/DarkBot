@@ -42,8 +42,6 @@ public class GameAPIImpl<
         I extends GameAPI.Interaction,
         D extends GameAPI.DirectInteraction> implements IDarkBotAPI {
 
-    private static final String FALLBACK_STRING = "ERROR";
-
     protected final StartupParams params;
 
     protected final W window;

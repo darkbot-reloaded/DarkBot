@@ -228,8 +228,8 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
     }
 
     @Override
-    default String readString(long address) {
-        return readMemoryString(address);
+    default String readString(long address, String fallback) {
+        return readMemoryStringFallback(address, fallback);
     }
 
     @Override

@@ -20,7 +20,7 @@ import com.github.manolo8.darkbot.core.entities.SpaceBall;
 import com.github.manolo8.darkbot.core.entities.StaticEntity;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.utils.factory.EntityFactory;
 import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
 import eu.darkbot.api.game.entities.Mist;
@@ -74,7 +74,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
     private final Main main;
     private final EventBrokerAPI eventBroker;
     private final Set<Integer> ids = new HashSet<>();
-    private final ObjArray entitiesArr = ObjArray.ofVector();
+    private final FlashList<Long> entitiesArr = FlashList.ofVector(Long.class).noAuto();
 
     private final Timer lastLocatorMatch = Timer.get(5_000);
     private Location lastLocatorLocation = new Location();
@@ -141,9 +141,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
     private void refreshEntities() {
         entitiesArr.update();
-        for (int i = 0; i < entitiesArr.getSize(); i++) {
-            long entityPtr = entitiesArr.get(i);
-
+        for (long entityPtr : entitiesArr) {
             int id = API.readMemoryInt(entityPtr + 56);
             if (ids.add(id))
                 entityRegistry.sendEntity(id, entityPtr);
@@ -166,7 +164,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
         this.obstacles.removeIf(Obstacle::isRemoved);
         for (List<? extends Entity> entities : allEntities)
-            entities.removeIf(Predicate.not(Entity::isValid));
+            entities.removeIf(e -> !e.isValid());
     }
 
     public void clear() {

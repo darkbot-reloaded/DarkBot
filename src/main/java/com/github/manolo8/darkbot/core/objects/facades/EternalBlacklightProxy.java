@@ -2,8 +2,8 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.EternalBlacklightGateAPI;
 import eu.darkbot.util.Timer;
@@ -11,23 +11,19 @@ import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 @ApiStatus.Internal
 public class EternalBlacklightProxy extends Updatable implements EternalBlacklightGateAPI {
-    private final ObjArray activeBoostersArr = ObjArray.ofVector(true);
-    private final ObjArray boostersOptionsArr = ObjArray.ofVector(true);
-    private final ObjArray topRankersArr = ObjArray.ofVector(true);
     private final Timer boosterClickTimer = Timer.get(500);
 
     private final Main main;
 
-    public List<EternalBlacklightProxy.Booster> activeBoosters  = new ArrayList<>();
-    public List<EternalBlacklightProxy.Booster> boostersOptions = new ArrayList<>();
-    public List<EternalBlacklightProxy.Leaderboard> topRankers  = new ArrayList<>();
+    public FlashList<EternalBlacklightProxy.Booster> activeBoosters  = FlashList.ofVector(Booster::new);
+    public FlashList<EternalBlacklightProxy.Booster> boostersOptions = FlashList.ofVector(Booster::new);
+    public FlashList<EternalBlacklightProxy.Leaderboard> topRankers  = FlashList.ofVector(Leaderboard::new);
 
     public Leaderboard myRank = new Leaderboard();
 
@@ -53,14 +49,10 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
         this.cpuCount        = API.readMemoryInt(API.readMemoryLong(data + 0x68) + 0x28);
         this.currentWave     = API.readMemoryInt(API.readMemoryLong(data + 0x70) + 0x28);
 
-        this.activeBoostersArr.update(API.readMemoryLong(data + 0x78));
-        this.boostersOptionsArr.update(API.readMemoryLong(data + 0x80));
-        this.topRankersArr.update(API.readMemoryLong(data + 0x90));
+        this.activeBoosters.update(API.readMemoryLong( data + 0x78));
+        this.boostersOptions.update(API.readMemoryLong(data + 0x80));
+        this.topRankers.update(API.readMemoryLong(data + 0x90));
         this.myRank.update(API.readMemoryLong(data + 0x98));
-
-        this.activeBoostersArr.sync(activeBoosters, EternalBlacklightProxy.Booster::new);
-        this.boostersOptionsArr.sync(boostersOptions, EternalBlacklightProxy.Booster::new);
-        this.topRankersArr.sync(topRankers, EternalBlacklightProxy.Leaderboard::new);
     }
 
     @Override
@@ -144,8 +136,8 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
         public void update() {
             this.waves = API.readMemoryInt(address + 0x20);
             this.rank = API.readMemoryInt(address + 0x24);
-            this.lastUpdateTime = API.readMemoryString(address, 0x28);
-            this.name = API.readMemoryString(address, 0x30);
+            this.lastUpdateTime = API.readString(address, 0x28);
+            this.name = API.readString(address, 0x30);
         }
 
         @Override

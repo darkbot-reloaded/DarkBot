@@ -81,12 +81,6 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
     }
 
     @Override
-    public void tick() {
-        super.tick();
-        itemUseCaller.tick();
-    }
-
-    @Override
     public boolean useItem(Item item) {
         if (direct.checkSignature(true, "23(sendRequest)(2626)1016221500",
                 19, direct.botInstaller.connectionManagerAddress.get()))

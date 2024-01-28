@@ -1,11 +1,10 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.EternalGateAPI;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -13,11 +12,8 @@ import static com.github.manolo8.darkbot.Main.API;
 public class EternalGateProxy extends Updatable implements EternalGateAPI {
     public int keys, boosterPoints, currentWave, furthestWave;
 
-    public List<Booster> activeBoosters  = new ArrayList<>();
-    public List<Booster> boostersOptions = new ArrayList<>();
-
-    private final ObjArray activeBoostersArr   = ObjArray.ofVector(true);
-    private final ObjArray boostersOptionsArr  = ObjArray.ofVector(true);
+    public FlashList<Booster> activeBoosters  = FlashList.ofVector(Booster::new);
+    public FlashList<Booster> boostersOptions = FlashList.ofVector(Booster::new);
 
     @Override
     public void update() {
@@ -30,11 +26,8 @@ public class EternalGateProxy extends Updatable implements EternalGateAPI {
         this.keys          = API.readMemoryInt(API.readMemoryLong(data + 0x58) + 0x28);
         this.boosterPoints = API.readMemoryInt(API.readMemoryLong(data + 0x60) + 0x28);
 
-        this.activeBoostersArr.update(API.readMemoryLong( data + 0x68));
-        this.boostersOptionsArr.update(API.readMemoryLong(data + 0x70));
-
-        this.activeBoostersArr.sync(activeBoosters, Booster::new);
-        this.boostersOptionsArr.sync(boostersOptions, Booster::new);
+        this.activeBoosters.update(API.readMemoryLong( data + 0x68));
+        this.boostersOptions.update(API.readMemoryLong(data + 0x70));
     }
 
     public static class Booster extends Auto implements EternalGateAPI.Booster {

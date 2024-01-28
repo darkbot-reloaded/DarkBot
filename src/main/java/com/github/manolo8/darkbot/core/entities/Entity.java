@@ -1,15 +1,13 @@
 package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
-import eu.darkbot.api.game.other.Lockable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -28,7 +26,7 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     public Map<String, Object> metadata;
     public LocationInfo locationInfo = new LocationInfo();
     public Clickable clickable = new Clickable();
-    public ObjArray traits = ObjArray.ofVector(true);
+    public FlashList<Long> traits = FlashList.ofVector(Long.class);
 
     public int id;
     public boolean removed;
@@ -81,13 +79,10 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     }
 
     protected long findInTraits(Predicate<Long> filter) {
-        ObjArray traits = this.traits;
-
-        for (int i = 0; i < traits.getSize(); i++) {
-            long ptr = traits.getPtr(i);
-            if (filter.test(ptr)) return ptr;
+        for (long ptr : traits) {
+            if (filter.test(ptr))
+                return ptr;
         }
-
         return ByteUtils.NULL;
     }
 

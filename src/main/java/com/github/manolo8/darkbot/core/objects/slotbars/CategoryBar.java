@@ -1,11 +1,10 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -16,15 +15,12 @@ import java.util.stream.Stream;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class CategoryBar extends MenuBar {
-    public final List<Category> categories = new ArrayList<>();
-
-    private final ObjArray categoriesArr = ObjArray.ofVector(true);
+    public final FlashList<Category> categories = FlashList.ofVector(Category::new);
 
     @Override
     public void update() {
         super.update();
-        this.categoriesArr.update(API.readMemoryLong(address + 56));
-        this.categoriesArr.sync(this.categories, Category::new);
+        this.categories.update(API.readMemoryLong(address + 56));
     }
 
     @Deprecated
@@ -85,12 +81,10 @@ public class CategoryBar extends MenuBar {
     }
 
     public static class Category extends Auto {
-        public String categoryId;
-        public List<Item> items = new ArrayList<>();
-
-        private final ObjArray itemsArr = ObjArray.ofVector(true);
-
         private ItemCategory itemCategory;
+
+        public String categoryId;
+        public FlashList<Item> items = FlashList.ofVector(() -> new Item(itemCategory));
 
         public @Nullable Item findItem(SelectableItem item) {
             return items.stream()
@@ -101,14 +95,13 @@ public class CategoryBar extends MenuBar {
 
         @Override
         public void update() {
-            this.itemsArr.update(API.readMemoryLong(address + 40));
-            this.itemsArr.sync(this.items, () -> new Item(itemCategory));
+            this.items.update(API.readMemoryLong(address + 40));
         }
 
         @Override
         public void update(long address) {
             if (this.address != address || categoryId == null || categoryId.isEmpty()) {
-                this.categoryId = API.readMemoryString(address, 32);
+                this.categoryId = API.readString(address, 32);
                 this.itemCategory = ItemCategory.of(categoryId);
             }
             super.update(address);

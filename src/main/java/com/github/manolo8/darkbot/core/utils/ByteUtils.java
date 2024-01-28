@@ -313,7 +313,8 @@ public class ByteUtils {
             long mainAddress = botInstaller.mainApplicationAddress.get();
             if (mainAddress == 0) return 0;
 
-            long table = Main.API.readMemoryLong(mainAddress, 0x10, 0x10, 0x18, 0x10, 0x28);
+            long table = Main.API.readLong(mainAddress, 0x10, 0x10, 0x18);
+            table = Main.API.readLong(table, 0x10, 0x28);
             int capacity = Main.API.readMemoryInt(table + 8) * 8; // capacity generally is always the same.
 
             if (capacity > MAX_TABLE_SIZE) return 0;

@@ -11,7 +11,7 @@ import com.github.manolo8.darkbot.core.entities.Pet;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.SpriteObject;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.handlers.PetGearSelectorHandler;
 import com.github.manolo8.darkbot.gui.utils.Strings;
@@ -68,12 +68,11 @@ public class PetManager extends Gui implements PetAPI {
     private Ship target;
     private boolean enabled = false;
 
-    private final ObjArray gearsArr = ObjArray.ofArrObj();
-    private final List<Gear> gearList = new ArrayList<>();
+    private final FlashList<Gear> gearList = FlashList.ofArray(Gear::new);
     private final List<PetGear> newGears = new ArrayList<>();
 
-    private final ObjArray locatorWrapper = ObjArray.ofArrObj(), locatorNpcList = ObjArray.ofArrObj();
-    private final List<Gear> locatorList = new ArrayList<>();
+    private final FlashList<Long> locatorWrapper = FlashList.ofArray(Long.class);
+    private final FlashList<Gear> locatorList = FlashList.ofArray(Gear::new).noAuto();
 
     private final List<Integer> petBuffsIds = new ArrayList<>();
 
@@ -295,8 +294,7 @@ public class PetManager extends Gui implements PetAPI {
         if (address == 0) return;
 
         long gearsSprite = getSpriteChild(address, -1);
-        gearsArr.update(API.readMemoryLong(gearsSprite, 176, 224));
-        gearsArr.syncAndReport(gearList, Gear::new);
+        gearList.update(API.readLong(gearsSprite, 176, 224));
         if (modulesChanged()) {
             newGears.clear();
             for (Gear gear : gearList)
@@ -314,7 +312,7 @@ public class PetManager extends Gui implements PetAPI {
         long element = getSpriteElement(elementsListAddress, 67);
 
         boolean wasRepaired = repaired;
-        repaired = API.readMemoryLong(getSpriteChildWrapper(element, 0), 0x148) == 0;
+        repaired = API.readLong(getSpriteChildWrapper(element, 0), 0x148) == 0;
 
         if (!wasRepaired && repaired) repairCount++;
 
@@ -362,9 +360,9 @@ public class PetManager extends Gui implements PetAPI {
 
     private void updateCurrentModule(long elementsListAddress) {
         long temp = getSpriteElement(elementsListAddress, 72);
-        temp = API.readMemoryLong(getSpriteChild(temp, 0), 176); //get first sprite child then read 176 offset
+        temp = API.readLong(getSpriteChild(temp, 0), 176); //get first sprite child then read 176 offset
 
-        long currGearCheck = API.readMemoryLong(getSpriteChild(temp, 1), 152, 16);
+        long currGearCheck = API.readLong(getSpriteChild(temp, 1), 152, 16);
 
         currentSubmodules.clear();
         currentModule = findGear(gearList, currGearCheck);
@@ -399,22 +397,22 @@ public class PetManager extends Gui implements PetAPI {
     private void updateNpcLocatorList(long gearsSprite) {
         locatorWrapper.update(API.readMemoryLong(gearsSprite + 168));
 
-        long locatorBaseAddr = locatorWrapper.get(0);
+        long locatorBaseAddr = locatorWrapper.getOrDefault(0, 0L);
         if (locatorBaseAddr == 0) {
-            locatorList.clear();
+            locatorList.update(0);
             return;
         }
         locatorTab.update(locatorBaseAddr);
         locatorTab.update();
-        int oldSize = locatorNpcList.getSize();
-        locatorNpcList.update(API.readMemoryLong(locatorBaseAddr + 224));
+        int oldSize = locatorList.size();
+        locatorList.update(API.readMemoryLong(locatorBaseAddr + 224));
 
         // Sometimes the NPC list will be half-updated and there may be way less npcs than before.
         // If we have a recent update and list is smaller, we'll ignore updating for a bit
-        if (locatorNpcList.getSize() < oldSize && validUntil > System.currentTimeMillis()) return;
+        if (locatorList.size() < oldSize && validUntil > System.currentTimeMillis()) return;
 
         validUntil = System.currentTimeMillis() + 100;
-        if (locatorNpcList.syncAndReport(locatorList, Gear::new)) {
+        if (locatorList.updateAndReport()) {
             eventBroker.sendEvent(new LocatorNpcListChangeEvent(getLocatorNpcs()));
         }
     }
@@ -483,8 +481,8 @@ public class PetManager extends Gui implements PetAPI {
 
         private void update(long elementsListAddress, int id) {
             long address = getAddress(elementsListAddress, id);
-            curr = API.readMemoryDouble(address, 0x118);
-            total = API.readMemoryDouble(address, 0x120);
+            curr = API.readDouble(address, 0x118);
+            total = API.readDouble(address, 0x120);
         }
 
         private long getAddress(long elementsListAddress, int id) {
@@ -715,7 +713,7 @@ public class PetManager extends Gui implements PetAPI {
             this.parentId = parentId;
             this.name = name;
             this.fuzzyName = Strings.fuzzyMatcher(name);
-            this.check = API.readMemoryLong(address, 208, 152, 0x10);
+            this.check = readLong(208, 152, 16);
             return true;
         }
 

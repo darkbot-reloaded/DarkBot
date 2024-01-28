@@ -67,16 +67,18 @@ public class BotInstaller implements API.Singleton {
         if (heroId == 0) return;
 
         long address = API.searchClassClosure(closure -> {
-            int level = API.readMemoryInt(closure + 52);
-            int speed = API.readMemoryInt(closure + 56);
-            int bool = API.readMemoryInt(closure + 60);
-            int val = API.readMemoryInt(closure + 64);
-            int cargo = API.readMemoryInt(API.readMemoryLong(closure + 0x138) + 40);
-            int maxCargo = API.readMemoryInt(API.readMemoryLong(closure + 0x140) + 40);
+            if (heroId != API.readMemoryInt(closure + 0x30)) return false;
 
-            return heroId == API.readMemoryInt(closure + 0x30)
-                   && level >= 0 && level <= 100
-                   && speed > 50 && speed < 2000
+            int level = API.readMemoryInt(closure + 0x34);
+            // speed is updated few seconds later, basically heroId alone is enough
+            // int speed = API.readMemoryInt(closure + 56);
+            int bool = API.readMemoryInt(closure + 0x3c);
+            int val = API.readMemoryInt(closure + 0x40);
+            int cargo = API.readMemoryInt(API.readMemoryLong(closure + 0x138) + 0x28);
+            int maxCargo = API.readMemoryInt(API.readMemoryLong(closure + 0x140) + 0x28);
+
+            return level >= 0 && level <= 100
+                   //&& speed > 50 && speed < 2000
                    && (bool == 1 || bool == 2)
                    && val == 0
                    && cargo >= 0

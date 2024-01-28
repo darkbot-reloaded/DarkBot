@@ -2,14 +2,14 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.PairArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashMap;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.API;
 
 public class HighlightProxy extends Updatable implements API.Singleton {
 
-    private final PairArray proxyDictionary = PairArray.ofDictionary().setAutoUpdatable(true);
-    private final PairArray highlightItems = PairArray.ofDictionary().setAutoUpdatable(true);
+    private final FlashMap<String, Long> proxyDictionary = FlashMap.of(String.class, Long.class);
+    private final FlashMap<String, Long> highlightItems = FlashMap.of(String.class, Long.class);
 
     private boolean attacking;
 
@@ -24,17 +24,15 @@ public class HighlightProxy extends Updatable implements API.Singleton {
     }
 
     private boolean checkAttacking(String key) {
-        long categoryHighlightItem = proxyDictionary.getPtr(key);
+        long categoryHighlightItem = proxyDictionary.getOrDefault(key, 0L);
 
         if (ByteUtils.isValidPtr(categoryHighlightItem)) {
             highlightItems.update(categoryHighlightItem);
-
-            for (int i = 0; i < highlightItems.getSize(); i++) {
-                if (Main.API.readInt(highlightItems.getPtr(i) + 0x38) > 0)
+            for (Long addr : highlightItems.values()) {
+                if (Main.API.readInt(addr + 0x38) > 0)
                     return true;
             }
         }
-
         return false;
     }
 

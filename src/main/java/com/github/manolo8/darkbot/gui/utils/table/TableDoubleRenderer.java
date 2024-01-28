@@ -15,6 +15,12 @@ public class TableDoubleRenderer extends TableDelegateRenderer<JSpinner> {
     }
 
     private static class RenderSpinner extends JSpinner {
+
+        @Override
+        public Insets getInsets() {
+            return new Insets(0, 0, 0, 0);
+        }
+
         /**
          * No-op methods improve performance when using this as a cell renderer, and they are not needed anyways.
          */

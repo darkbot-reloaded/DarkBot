@@ -4,7 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.gui.GateSpinnerGui;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.game.galaxy.GalaxyGate;
 import eu.darkbot.api.game.galaxy.GalaxyInfo;
@@ -136,7 +136,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     @Data
     @EqualsAndHashCode(callSuper = true)
     private static class BuilderData extends Updatable.Auto implements GalaxyInfo {
-        private final ObjArray gatesArr = ObjArray.ofArrObj(true);
+        private final FlashList<Long> gates = FlashList.ofArray(Long.class);
         private final Map<GalaxyGate, GateInfoImpl> gateData = new EnumMap<>(GalaxyGate.class);
         private int freeEnergy, selectedSpinAmount, energyCost, selectedGateId;
         private boolean initialized;
@@ -163,10 +163,13 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
             if (initialized) {
                 int multiplier = readInt(224, 32);
-                this.gatesArr.update(readLong(112));
-                for (GalaxyGate gate : GalaxyGate.values()) {
+                this.gates.update(readLong(112));
+
+                GalaxyGate[] values = GalaxyGate.values();
+                for (int i = 0; i < gates.size() && i < values.length; i++) {
+                    GalaxyGate gate = values[i];
                     GateInfoImpl gateInfo = gateData.get(gate);
-                    gateInfo.update(gatesArr.getPtr(gate.getId() - 1));
+                    gateInfo.update(gates.get(i));
 
                     if (isSelectedGate(gate)) {
                         // Current gate multiplier

@@ -1,12 +1,11 @@
 package com.github.manolo8.darkbot.core.objects.gui;
 
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import eu.darkbot.api.API;
 import eu.darkbot.api.managers.OreAPI;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
@@ -14,14 +13,9 @@ import java.util.stream.Stream;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class RefinementGui extends Gui implements API.Singleton {
-
-    private final ObjArray basicOresArr      = ObjArray.ofArrObj();
-    private final ObjArray upgradableOresArr = ObjArray.ofArrObj();
-    private final ObjArray upgradedLabArr    = ObjArray.ofArrObj();
-
-    private final List<Ore> basicOres      = new ArrayList<>();
-    private final List<Ore> upgradableOres = new ArrayList<>();
-    private final List<Ore> upgradedLab = new ArrayList<>();
+    private final FlashList<Ore> basicOres      = FlashList.ofArray(Ore::new);
+    private final FlashList<Ore> upgradableOres =  FlashList.ofArray(Ore::new);
+    private final FlashList<Ore> upgradedLab =  FlashList.ofArray(Ore::new);
 
     /**
      * Use {@link OreAPI#getAmount(OreAPI.Ore)}
@@ -59,13 +53,9 @@ public class RefinementGui extends Gui implements API.Singleton {
         super.update();
         if (address == 0) return;
 
-        basicOresArr.update(API.readMemoryLong(getElementsList(37), 184));
-        upgradableOresArr.update(API.readMemoryLong(getElementsList(31), 184));
-        upgradedLabArr.update(API.readMemoryLong(getElementsList(32), 184));
-
-        basicOresArr.sync(basicOres, Ore::new);
-        upgradableOresArr.sync(upgradableOres, Ore::new);
-        upgradedLabArr.sync(upgradedLab, Ore::new);
+        basicOres.update(API.readLong(getElementsList(37), 184));
+        upgradableOres.update(API.readLong(getElementsList(31), 184));
+        upgradedLab.update(API.readLong(getElementsList(32), 184));
     }
 
     @Getter
@@ -75,20 +65,20 @@ public class RefinementGui extends Gui implements API.Singleton {
 
         @Override
         public void update() {
-            amount = API.readMemoryInt(address, 0xf0);
+            amount = API.readInt(address, 0xf0);
         }
 
         @Override
         public void update(long address) {
             if (address != this.address || name == null || (!name.contains("ore") && !name.contains("lab"))) {
-                name = API.readMemoryString(address, 184);
+                name = API.readString(address, 184);
 
                 if (name != null && !name.isEmpty()) {
                     String processedName;
                     if (name.contains("lab_")) {
-                        processedName = API.readMemoryString(address,0x108).toLowerCase(Locale.ROOT);
+                        processedName = API.readString(address,0x108).toLowerCase(Locale.ROOT);
                         // int upgradeOreId = API.readMemoryInt(address, 0x118, 0xB8);
-                        upgradedOre = API.readMemoryString(address, 0x118, 0xC8).replace("lab_effect_", "");
+                        upgradedOre = API.readString(address, 0x118, 0xC8).replace("lab_effect_", "");
                     }else{
                         processedName = name.replace("ore_", "");
                     }

@@ -12,7 +12,7 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SpaceMapWindowProxy;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Lazy;
@@ -78,7 +78,7 @@ public class MapManager implements Manager, StarSystemAPI {
     public final RectangleImpl screenBound = new RectangleImpl();
     private final RectangleImpl mapBound = new RectangleImpl();
 
-    private final ObjArray minimapLayers = ObjArray.ofVector(true);
+    private final FlashList<Long> minimapLayers = FlashList.ofVector(Long.class);
     private final Location pingLocationCache = new Location();
     public Location pingLocation = null;
 
@@ -380,29 +380,29 @@ public class MapManager implements Manager, StarSystemAPI {
         temp = API.readMemoryLong(temp + 0xA8); // Vector<Layer>
         minimapLayers.update(temp);
 
-        for (int i = minimapLayers.getSize() - 1; i >= 0; i--) {
+        for (int i = minimapLayers.size() - 1; i >= 0; i--) {
             long layer = minimapLayers.get(i); // Seems to be offset by 1 for some reason.
             long layerIdx = API.readMemoryInt(layer + 0xA8);
 
             if (layerIdx != Integer.MAX_VALUE) continue;
 
             double scale = (internalWidth / minimapX) / 20;
-            long sprites = API.readMemoryLong(layer, 0x48);
+            long sprites = API.readLong(layer, 0x48);
             if (findMarker(sprites, scale, pingLocationCache)) return pingLocationCache;
         }
         return null;
     }
 
     private boolean findMarker(long spriteArray, double scale, Location result) {
-        int size = API.readMemoryInt(spriteArray, 0x40, 0x18 + Offsets.SPRITE_OFFSET);
+        int size = API.readInt(spriteArray, 0x40, 0x18 + Offsets.SPRITE_OFFSET);
         // Always try to iterate at least once.
         // With 0 or 1 elements, it seems to be implemented as a singleton and size isn't updated.
         // With 2 or more elements, it's a linked list of elements to follow at 0x18.
         if (size == 0)
-            return isMarker(API.readMemoryLong(spriteArray, 0x20), scale, result);
+            return isMarker(API.readLong(spriteArray, 0x20), scale, result);
 
-        long marker = API.readMemoryLong(spriteArray, 0x20);
-        for (int i = 0; i < size; i++, marker = API.readMemoryLong(marker, 0x18)) {
+        long marker = API.readLong(spriteArray, 0x20);
+        for (int i = 0; i < size; i++, marker = API.readLong(marker, 0x18)) {
             if (isMarker(marker, scale, result)) return true;
         }
 
@@ -420,10 +420,10 @@ public class MapManager implements Manager, StarSystemAPI {
         // Ignore if 0,0, or further away from the center of the map than corner in manhattan distance
         if ((x == 0 && y == 0) || result.distance(halfWidth, halfHeight) > halfWidth + halfHeight) return false;
 
-        String name = API.readMemoryString(API.readMemoryLong(sprite, 0x1B8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
+        String name = API.readMemoryString(API.readLong(sprite, 0x1B8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
         if (name != null && name.equals("minimapmarker")) return true;
 
-        String pointer = API.readMemoryString(API.readMemoryLong(sprite, 0xD8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
+        String pointer = API.readMemoryString(API.readLong(sprite, 0xD8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
         return pointer == null || !pointer.equals("minimapPointer");
     }
 

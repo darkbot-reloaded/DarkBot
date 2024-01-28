@@ -2,27 +2,19 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import eu.darkbot.api.API;
 import eu.darkbot.api.managers.DispatchAPI;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 @Getter
 public class DispatchMediator extends Updatable implements API.Singleton {
-    @Getter(AccessLevel.NONE)
-    private final ObjArray availableRetrieverArr = ObjArray.ofVector(true),
-            inProgressRetrieverArr = ObjArray.ofVector(true);
-
     private int availableSlots, totalSlots;
-    private final List<Retriever> availableRetrievers = new ArrayList<>();
-    private final List<Retriever> inProgressRetrievers = new ArrayList<>();
+    private final FlashList<Retriever> availableRetrievers = FlashList.ofVector(Retriever::new);
+    private final FlashList<Retriever> inProgressRetrievers = FlashList.ofVector(Retriever::new);
     private final Retriever selectedRetriever = new Retriever();
 
     @Override
@@ -31,11 +23,8 @@ public class DispatchMediator extends Updatable implements API.Singleton {
         availableSlots = API.readMemoryInt(dispatchRetrieverData + 0x40);
         totalSlots = API.readMemoryInt(dispatchRetrieverData + 0x44);
 
-        availableRetrieverArr.update(API.readMemoryPtr(dispatchRetrieverData + 0x58));
-        availableRetrieverArr.sync(availableRetrievers, Retriever::new);
-
-        inProgressRetrieverArr.update(API.readMemoryPtr(dispatchRetrieverData + 0x60));
-        inProgressRetrieverArr.sync(inProgressRetrievers, Retriever::new);
+        availableRetrievers.update(API.readMemoryPtr(dispatchRetrieverData + 0x58));
+        inProgressRetrievers.update(API.readMemoryPtr(dispatchRetrieverData + 0x60));
 
         selectedRetriever.update(API.readMemoryPtr(dispatchRetrieverData + 0x68));
     }
@@ -48,9 +37,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
         private double duration = -1;
         private boolean isAvailable = false;
 
-        @Getter(AccessLevel.NONE)
-        private final ObjArray costListArr = ObjArray.ofVector(true);
-        private final List<Cost> costList = new ArrayList<>();
+        private final FlashList<Cost> costList =  FlashList.ofVector(Cost::new);
         private final Cost instantCost = new Cost();
 
         @Override
@@ -66,12 +53,11 @@ public class DispatchMediator extends Updatable implements API.Singleton {
             long retrieverDefinition = API.readMemoryPtr(address + 0x38);
             this.id = API.readMemoryInt(retrieverDefinition + 0x20); // 1 to 18
             this.tier = API.readMemoryInt(retrieverDefinition + 0x24); // 1, 2, 3, 4, 5 or 6
-            this.iconId = API.readMemoryString(retrieverDefinition, 0x30); // dispatch_retriever_r01
-            this.name = API.readMemoryString(retrieverDefinition, 0x38); // R-01
-            this.type = API.readMemoryString(retrieverDefinition, 0x40); // resource
-            this.descriptionId = API.readMemoryString(retrieverDefinition, 0x48); // dispatch_label_description_retriever_r01
-            this.costListArr.update(API.readMemoryPtr(retrieverDefinition + 0x50));
-            this.costListArr.sync(costList, Cost::new);
+            this.iconId = API.readString(retrieverDefinition, 0x30); // dispatch_retriever_r01
+            this.name = API.readString(retrieverDefinition, 0x38); // R-01
+            this.type = API.readString(retrieverDefinition, 0x40); // resource
+            this.descriptionId = API.readString(retrieverDefinition, 0x48); // dispatch_label_description_retriever_r01
+            this.costList.update(API.readMemoryPtr(retrieverDefinition + 0x50));
 
             this.instantCost.update(API.readMemoryPtr(retrieverDefinition + 0x58));
         }
@@ -88,7 +74,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
         public void update() {
             if (address <= 0) return;
             this.amount = API.readMemoryInt(address + 0x20);
-            this.lootId = API.readMemoryString(address, 0x28);
+            this.lootId = API.readString(address, 0x28);
         }
 
     }

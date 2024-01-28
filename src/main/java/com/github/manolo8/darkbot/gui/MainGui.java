@@ -99,6 +99,10 @@ public class MainGui extends JFrame {
         }));
     }
 
+    public ConfigGui getConfigGui() {
+        return configGui;
+    }
+
     private void setComponentPosition() {
         setJMenuBar(titleBar = new MainTitleBar(main, this));
 

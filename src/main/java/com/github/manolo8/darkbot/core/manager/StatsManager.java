@@ -139,7 +139,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         return stat.track(value);
     }
 
-    public void tickAverageStats(long tickTime) {
+    public void tickAverageStats(double tickTime) {
         int p = getPing();
         if (p > 0) pingStat.track(p);
 
@@ -228,7 +228,10 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
         @Override
         public int hashCode() {
-            return Objects.hash(namespace, category, name);
+            int result = Objects.hashCode(namespace);
+            result = 31 * result + Objects.hashCode(category);
+            result = 31 * result + Objects.hashCode(name);
+            return result;
         }
     }
 

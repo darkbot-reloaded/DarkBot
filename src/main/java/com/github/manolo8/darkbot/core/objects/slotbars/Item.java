@@ -67,7 +67,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
         visible = BUFFER[16] == 1;
         quantity = ByteUtils.getDouble(BUFFER, 92);
 
-        long timerAdr = API.readMemoryLong(ByteUtils.getLong(BUFFER, 52), 40);
+        long timerAdr = API.readLong(ByteUtils.getLong(BUFFER, 52), 40);
         if (itemTimer.address != timerAdr) this.itemTimer.update(timerAdr);
         this.itemTimer.update();
     }
@@ -75,10 +75,10 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
     @Override
     public void update(long address) {
         if (this.address != address) {
-            this.id = API.readMemoryString(address, 64);
-            this.counterType = API.readMemoryString(address, 72);
-            this.actionStyle = API.readMemoryString(address, 80);
-            this.iconLootId = API.readMemoryString(address, 96);
+            this.id = API.readString(address, 64);
+            this.counterType = API.readString(address, 72);
+            this.actionStyle = API.readString(address, 80);
+            this.iconLootId = API.readString(address, 96);
 
             if (itemCategory != null)
                 this.selectableItem = SelectableItem.ALL_ITEMS.get(itemCategory).stream()
@@ -223,11 +223,9 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
 
         @Override
         public void update(long address) {
+            if (this.address != address) reset();
             this.address = address;
-            if (address == 0) {
-                reset();
-                return;
-            }
+            if (address == 0) return;
 
             this.isActivated = API.readString(Item.this.address, 88, 32).equals(ACTIVE_ITEM_STATE);
 

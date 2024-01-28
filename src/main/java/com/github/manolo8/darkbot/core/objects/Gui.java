@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.objects;
 
 import com.github.manolo8.darkbot.core.api.Capability;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.utils.Offsets;
 import eu.darkbot.api.API;
@@ -27,7 +28,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
     protected long time;
     protected long update;
 
-    private ObjArray tempArray;
+    private FlashList<Long> tempArray;
     private ObjArray tempChildArray;
     private boolean minimizable, closable;
 
@@ -179,7 +180,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
         if (tempChildArray == null) tempChildArray = ObjArray.ofSprite();
 
         tempChildArray.update(spriteAddress);
-        tempChildArray.forEach(l -> consumer.accept(API.readMemoryLong(l, 216)));
+        tempChildArray.forEach(l -> consumer.accept(API.readLong(l, 216)));
     }
 
     /**
@@ -189,7 +190,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
      * @param childIndex set -1 to get last.
      */
     public long getSpriteChild(long spriteAddress, int childIndex) {
-        return API.readMemoryLong(getSpriteChildWrapper(spriteAddress, childIndex), 0xD8 + Offsets.SPRITE_OFFSET);
+        return API.readLong(getSpriteChildWrapper(spriteAddress, childIndex), 0xD8 + Offsets.SPRITE_OFFSET);
     }
 
     /**
@@ -215,11 +216,13 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
     public long getSpriteElement(long elementsListAddress, int elementId) {
         if (elementsListAddress == 0) return 0;
+        if (tempArray == null) tempArray = FlashList.ofArray(Long.class);
 
-        tempArray.update(API.readMemoryLong(elementsListAddress, 184));
-        for (int i = 0; i < tempArray.getSize(); i++)
-            if (API.readMemoryInt(tempArray.getPtr(i), 168) == elementId)
-                return tempArray.get(i);
+        tempArray.update(API.readLong(elementsListAddress, 184));
+        for (long addr : tempArray) {
+            if (API.readInt(addr, 168) == elementId)
+                return addr;
+        }
 
         return 0;
     }
@@ -228,13 +231,13 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
      * An Array of Sprites Array with ids.
      */
     public long getElementsList(int elementsListId) {
-        if (tempArray == null) tempArray = ObjArray.ofArrObj();
+        if (tempArray == null) tempArray = FlashList.ofArray(Long.class);
 
-        tempArray.update(API.readMemoryLong(address, 400));
-        for (int i = 0; i < tempArray.getSize(); i++)
-            if (API.readMemoryInt(tempArray.getPtr(i), 172) == elementsListId)
-                return tempArray.get(i);
-
+        tempArray.update(API.readLong(address, 400));
+        for (long addr : tempArray) {
+            if (API.readInt(addr, 172) == elementsListId)
+                return addr;
+        }
         return 0;
     }
 

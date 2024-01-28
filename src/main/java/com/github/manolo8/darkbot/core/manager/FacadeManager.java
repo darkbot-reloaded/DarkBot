@@ -25,22 +25,19 @@ import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SpaceMapWindowProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.WorldBossOverviewProxy;
-import com.github.manolo8.darkbot.core.objects.swf.PairArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashMap;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.managers.NpcEventAPI;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, NpcEventAPI {
-    private final PairArray commands         = PairArray.ofArray();
-    private final PairArray proxies          = PairArray.ofArray();
-    private final PairArray mediators        = PairArray.ofArray();
-    private final List<Updatable> updatables = new ArrayList<>();
+    private final FlashMap<String, Updatable> commands = FlashMap.of(String.class, Updatable.class).noAuto();
+    private final FlashMap<String, Updatable> proxies = FlashMap.of(String.class, Updatable.class).noAuto();
+    private final FlashMap<String, Updatable> mediators = FlashMap.of(String.class, Updatable.class).noAuto();
 
     private final PluginAPI pluginAPI;
 
@@ -104,24 +101,15 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
     }
 
     private <T extends Updatable> T registerCommand(String key, Class<T> commandClass) {
-        T command = pluginAPI.requireInstance(commandClass);
-        this.commands.addLazy(key, ((Updatable) command)::update);
-        updatables.add(command);
-        return command;
+        return this.commands.putUpdatable(key, pluginAPI.requireInstance(commandClass));
     }
 
     private <T extends Updatable> T registerProxy(String key, Class<T> proxyClass) {
-        T proxy = pluginAPI.requireInstance(proxyClass);
-        this.proxies.addLazy(key, ((Updatable) proxy)::update);
-        this.updatables.add(proxy);
-        return proxy;
+        return this.proxies.putUpdatable(key, pluginAPI.requireInstance(proxyClass));
     }
 
     private <T extends Updatable> T registerMediator(String key, Class<T> mediatorClass) {
-        T mediator = pluginAPI.requireInstance(mediatorClass);
-        this.mediators.addLazy(key, ((Updatable) mediator)::update);
-        updatables.add(mediator);
-        return mediator;
+        return this.mediators.putUpdatable(key, pluginAPI.requireInstance(mediatorClass));
     }
 
     @Override
@@ -129,9 +117,9 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
         botInstaller.mainAddress.add(mainAddr -> {
             long facade = API.readMemoryLong(mainAddr + 544);
 
-            commands.update(API.readMemoryLong(facade, 0x28, 0x20));
-            proxies.update(API.readMemoryLong(facade, 0x38, 0x30));
-            mediators.update(API.readMemoryLong(facade, 0x40, 0x38));
+            commands.update(API.readLong(facade, 0x28, 0x20));
+            proxies.update(API.readLong(facade, 0x38, 0x30));
+            mediators.update(API.readLong(facade, 0x40, 0x38));
         });
     }
 
@@ -142,9 +130,5 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
 
         proxies.update();
         mediators.update();
-
-        for (Updatable updatable : updatables) {
-            if (updatable.address != 0) updatable.update();
-        }
     }
 }

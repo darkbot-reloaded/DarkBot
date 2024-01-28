@@ -47,7 +47,7 @@ public class ReadObjNames {
 
     public static void of(long address, int maxOffset) {
         updateReplacements();
-        String result = API.readMemoryString(address, 0x10, 0x28, 0x90);
+        String result = API.readString(address, 0x10, 0x28, 0x90);
         System.out.println("\n==========[" + replacements.getOrDefault(result, result) + "]==========");
 
         for (int offset = 0; offset < maxOffset; offset++) {
@@ -55,7 +55,7 @@ public class ReadObjNames {
             Type type = null;
 
             if (!isInvalid(addr)) {
-                type = printObjName(API.readMemoryLong(addr, 0x10, 0x28, 0x90), offset);
+                type = printObjName(API.readLong(addr, 0x10, 0x28, 0x90), offset);
             }
 
             if (type == null) {
