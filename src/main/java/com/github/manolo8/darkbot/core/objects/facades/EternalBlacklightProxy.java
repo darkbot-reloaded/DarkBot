@@ -7,12 +7,16 @@ import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.EternalBlacklightGateAPI;
 import eu.darkbot.util.Timer;
+import lombok.Getter;
+import lombok.ToString;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
+@ApiStatus.Internal
 public class EternalBlacklightProxy extends Updatable implements EternalBlacklightGateAPI {
     private final ObjArray activeBoostersArr = ObjArray.ofVector(true);
     private final ObjArray boostersOptionsArr = ObjArray.ofVector(true);
@@ -27,6 +31,7 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
 
     public Leaderboard myRank = new Leaderboard();
 
+    @Getter
     public int cpuCount, currentWave, furthestWave, boosterPoints;
     public boolean isEventEnabled;
 
@@ -64,26 +69,6 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
     }
 
     @Override
-    public int getCpuCount() {
-        return cpuCount;
-    }
-
-    @Override
-    public int getBoosterPoints() {
-        return boosterPoints;
-    }
-
-    @Override
-    public int getCurrentWave() {
-        return currentWave;
-    }
-
-    @Override
-    public int getFurthestWave() {
-        return furthestWave;
-    }
-
-    @Override
     public boolean selectBooster(EternalBlacklightGateAPI.Booster booster) {
         Gui blacklightGate = main.guiManager.blacklightGate;
         if (getBoosterPoints() <= 0 || boostersOptions.size() < 3) {
@@ -97,8 +82,9 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
                 return clickedTab = true;
             }
 
-            int i = boostersOptions.indexOf(booster);
-            if (i == -1) throw new IllegalArgumentException("Booster argument have to be value from #getBoosterOptions() list!");
+            int i;
+            if (!(booster instanceof EternalBlacklightProxy.Booster) || (i = boostersOptions.indexOf(booster)) == -1)
+                throw new IllegalArgumentException("Booster argument have to be value from #getBoosterOptions() list!");
 
             clickedTab = false;
             blacklightGate.click(15 + (110 * (i + 1)), 215);
@@ -127,10 +113,12 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
         return topRankers;
     }
 
+    @ApiStatus.Internal
+    @Getter
+    @ToString
     public static class Booster extends Auto implements EternalBlacklightGateAPI.Booster {
         public int percentage;
         public String category;
-
         private Category categoryType;
 
         @Override
@@ -143,23 +131,11 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
             }
             this.category = category;
         }
-
-        @Override
-        public int getPercentage() {
-            return percentage;
-        }
-
-        @Override
-        public String getCategory() {
-            return category;
-        }
-
-        @Override
-        public Category getCategoryType() {
-            return categoryType;
-        }
     }
 
+    @ApiStatus.Internal
+    @Getter
+    @ToString
     public static class Leaderboard extends Auto implements UserRank {
         public int waves, rank;
         public String lastUpdateTime, name;
@@ -170,16 +146,6 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
             this.rank = API.readMemoryInt(address + 0x24);
             this.lastUpdateTime = API.readMemoryString(address, 0x28);
             this.name = API.readMemoryString(address, 0x30);
-        }
-
-        @Override
-        public String toString() {
-            return "Leaderboard{" +
-                    "waves=" + waves +
-                    ", rank=" + rank +
-                    ", lastUpdateTime=" + lastUpdateTime +
-                    ", name=" + name + '\'' +
-                    '}';
         }
 
         @Override
