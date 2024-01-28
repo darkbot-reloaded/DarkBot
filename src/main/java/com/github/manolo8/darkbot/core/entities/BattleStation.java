@@ -94,7 +94,7 @@ public class BattleStation
         public void update() {
             super.update();
 
-            if (info.username.isEmpty()) {
+            if (info.username.isEmpty() && !traits.isEmpty()) {
                 info.username = Main.API.readString(traits.getLastElement(), "", 56, 40);
             }
         }
