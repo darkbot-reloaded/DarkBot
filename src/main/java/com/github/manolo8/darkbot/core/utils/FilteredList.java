@@ -52,25 +52,35 @@ public class FilteredList<E> extends AbstractList<E> {
 
     @Override
     public @NotNull Iterator<E> iterator() {
-        return new Iterator<E>() {
-            private final Iterator<E> unfiltered = FilteredList.this.unfiltered.iterator();
-            private E next;
+        return new Iterator<>() {
+            private final Iterator<E> iterator = FilteredList.this.unfiltered.iterator();
+            private boolean nextObjectSet;
+            private E nextObject;
 
             @Override
             public boolean hasNext() {
-                while (unfiltered.hasNext()) {
-                    E element = unfiltered.next();
-                    if (filter.test(element)) {
-                        next = element;
-                        return true;
-                    }
-                }
-                return false;
+                return nextObjectSet || setNextObject();
             }
 
             @Override
             public E next() {
-                return next;
+                if (!nextObjectSet && !setNextObject()) {
+                    throw new NoSuchElementException();
+                }
+                nextObjectSet = false;
+                return nextObject;
+            }
+
+            private boolean setNextObject() {
+                while (iterator.hasNext()) {
+                    final E object = iterator.next();
+                    if (filter.test(object)) {
+                        nextObject = object;
+                        nextObjectSet = true;
+                        return true;
+                    }
+                }
+                return false;
             }
         };
     }
@@ -164,8 +174,17 @@ public class FilteredList<E> extends AbstractList<E> {
         }
 
         @Override
+        public Comparator<? super E> getComparator() {
+            return unfiltered.getComparator();
+        }
+
+        @Override
         public int characteristics() {
-            return unfiltered.characteristics();
+            return unfiltered.characteristics()
+                    & (Spliterator.DISTINCT
+                    | Spliterator.NONNULL
+                    | Spliterator.ORDERED
+                    | Spliterator.SORTED);
         }
     }
 }
