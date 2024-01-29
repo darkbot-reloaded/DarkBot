@@ -136,18 +136,22 @@ public class PetManager extends Gui implements PetAPI {
             return;
         }
         if (!enabled) {
-            show(false);
+            hide();
             return;
         }
         updatePetTarget();
-        int moduleId = gearSupplier.get().getId();
+        PetGear petGear = gearSupplier.get();
 
         if (target != null && !(target instanceof Npc) && !target.playerInfo.isEnemy()) {
-            moduleId = PetGear.PASSIVE.getId();
+            petGear = PetGear.PASSIVE;
+        }
+        if (hasCooldown(petGear)) {
+            hide();
+            return;
         }
 
         int submoduleId = -1, submoduleIdx = -1;
-        if (moduleId == PetGear.ENEMY_LOCATOR.getId()) {
+        if (petGear == PetGear.ENEMY_LOCATOR) {
             NpcPick submodule = main.config.LOOT.NPC_INFOS.entrySet()
                     .stream()
                     .filter(e -> e.getValue().extra.has(NpcExtra.PET_LOCATOR))
@@ -165,11 +169,11 @@ public class PetManager extends Gui implements PetAPI {
         if (submoduleId == -1) selectedNpc = null;
 
         if (selection != ModuleStatus.SELECTED
-                || (currentModule != null && currentModule.id != moduleId)
+                || (currentModule != null && currentModule.id != petGear.getId())
                 || (currentSubmodules.isEmpty() && submoduleIdx != -1)
                 || (!currentSubmodules.isEmpty() && !currentSubmodules.contains(submoduleId))) {
-            if (show(true)) this.selectModule(moduleId, submoduleIdx);
-        } else if (System.currentTimeMillis() > this.selectModuleTime) show(false);
+            if (show(true)) this.selectModule(petGear, submoduleIdx);
+        } else if (System.currentTimeMillis() > this.selectModuleTime) hide();
     }
 
     private class NpcPick {
@@ -253,12 +257,12 @@ public class PetManager extends Gui implements PetAPI {
         }
     }
 
-    private void selectModule(int moduleId, int submoduleIdx) {
+    private void selectModule(PetGear petGear, int submoduleIdx) {
         if (System.currentTimeMillis() < this.selectModuleTime) return;
 
         Gear gear = null;
         if (submoduleIdx == -1) {
-            int moduleIdx = moduleIdToIndex(moduleId);
+            int moduleIdx = moduleIdToIndex(petGear.getId());
             if (moduleIdx < gearList.size()) gear = gearList.get(moduleIdx);
         } else {
             gear = locatorList.get(submoduleIdx);
