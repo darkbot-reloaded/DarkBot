@@ -103,6 +103,10 @@ public class MainGui extends JFrame {
         return configGui;
     }
 
+    public boolean isHidden() {
+        return !isVisible() || getState() == ICONIFIED;
+    }
+
     private void setComponentPosition() {
         setJMenuBar(titleBar = new MainTitleBar(main, this));
 

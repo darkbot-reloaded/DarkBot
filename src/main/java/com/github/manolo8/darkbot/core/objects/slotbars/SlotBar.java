@@ -39,6 +39,8 @@ public class SlotBar extends MenuBar {
         public String slotBarId;
         public @Nullable Item item;
 
+        public @Nullable Item categoryItem;
+
         /*public Item getItem() {
             return item.address == 0 ? null : item;
         }*/
@@ -51,28 +53,31 @@ public class SlotBar extends MenuBar {
             long itemPtr = API.readMemoryLong(address + 40);
 
             if (itemPtr == 0 && item != null) {
-                editItem(item.id, i -> i.removeSlot(slotType, slotNumber));
+                editAndGetItem(item.id, i -> i.removeSlot(slotType, slotNumber));
 
                 this.item = null;
+                this.categoryItem = null;
             } else if (itemPtr != 0 && item == null) {
                 this.item = new Item();
                 item.update(itemPtr);
 
-                editItem(item.id, i -> i.addSlot(slotType, slotNumber));
+                categoryItem = editAndGetItem(item.id, i -> i.addSlot(slotType, slotNumber));
             } else if (itemPtr != 0 && itemPtr != item.address) {
-                editItem(item.id, i -> i.removeSlot(slotType, slotNumber));
+                editAndGetItem(item.id, i -> i.removeSlot(slotType, slotNumber));
 
                 item.update(itemPtr);
-                editItem(item.id, i -> i.addSlot(slotType, slotNumber));
+                categoryItem = editAndGetItem(item.id, i -> i.addSlot(slotType, slotNumber));
             } else if (item != null) item.update();
         }
 
-        private void editItem(String itemId, Consumer<Item> consumer) {
-            categoryBar.categories.stream()
+        private Item editAndGetItem(String itemId, Consumer<Item> consumer) {
+            Item item = categoryBar.categories.stream()
                     .flatMap(category -> category.items.stream())
                     .filter(i -> Objects.equals(i.id, itemId))
-                    .findAny()
-                    .ifPresent(consumer);
+                    .findAny().orElse(null);
+
+            if (item != null) consumer.accept(item);
+            return item;
         }
     }
 }

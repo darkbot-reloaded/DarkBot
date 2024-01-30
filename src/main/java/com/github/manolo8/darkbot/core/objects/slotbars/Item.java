@@ -29,14 +29,16 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
     private long lastUsed;
 
     private final ItemCategory itemCategory;
+    private final Map<SelectableItem, Item> itemsMap;
     public SelectableItem selectableItem;
 
     public Item() {
-        this(null);
+        this(null, null);
     }
 
-    public Item(ItemCategory itemCategory) {
+    public Item(ItemCategory itemCategory, Map<SelectableItem, Item> itemsMap) {
         this.itemCategory = itemCategory;
+        this.itemsMap = itemsMap;
     }
 
     void removeSlot(SlotBarsProxy.Type slotType, int slotNumber) {
@@ -80,11 +82,15 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
             this.actionStyle = API.readString(address, 80);
             this.iconLootId = API.readString(address, 96);
 
-            if (itemCategory != null)
+            if (itemCategory != null) {
                 this.selectableItem = SelectableItem.ALL_ITEMS.get(itemCategory).stream()
                         .filter(i -> i.getId().equals(id))
                         .findFirst()
                         .orElse(null);
+
+                if (selectableItem != null && itemsMap != null)
+                    itemsMap.put(selectableItem, this);
+            }
         }
         super.update(address);
     }

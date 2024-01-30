@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
 import com.github.manolo8.darkbot.core.utils.TimeSeriesImpl;
+import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.game.stats.Stats;
@@ -16,12 +17,11 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 
-import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -61,10 +61,10 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         registerImpl(Stats.General.NOVA_ENERGY, novaEnergy = createStat());
         registerImpl(Stats.General.TELEPORT_BONUS_AMOUNT, teleportBonus = createStat());
 
-        registerImpl(Stats.Bot.PING, pingStat = new AverageStats(false));
-        registerImpl(Stats.Bot.TICK_TIME, tickStat = new AverageStats(true));
-        registerImpl(Stats.Bot.MEMORY, memoryStat = new AverageStats(false));
-        registerImpl(Stats.Bot.CPU, cpuStat = new AverageStats(true));
+        registerImpl(Stats.Bot.PING, pingStat = new AverageStats());
+        registerImpl(Stats.Bot.TICK_TIME, tickStat = new AverageStats());
+        registerImpl(Stats.Bot.MEMORY, memoryStat = new AverageStats());
+        registerImpl(Stats.Bot.CPU, cpuStat = new AverageStats());
 
         for (Stats.BootyKey key : Stats.BootyKey.values()) {
             registerImpl(key, createStat());
@@ -274,19 +274,15 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     }
 
     public static class AverageStats extends StatImpl {
-        private static final DecimalFormat ONE_PLACE_FORMAT = new DecimalFormat("0.0");
 
         @Getter
         private double average, max = Double.MIN_VALUE;
-        private final boolean showDecimal;
-
         private long lastTime = System.currentTimeMillis();
 
-        private Consumer<String> onChange;
+        private DoubleConsumer onChange;
 
-        public AverageStats(boolean showDecimal) {
+        public AverageStats() {
             super(() -> true);
-            this.showDecimal = showDecimal;
         }
 
         protected double track(double value) {
@@ -299,21 +295,20 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
             max = Math.max(max, value); // If this IS a max, keep it
 
             if (diff != 0 && onChange != null) {
-                String s = showDecimal ? ONE_PLACE_FORMAT.format(value) : String.valueOf((int) value);
-                onChange.accept(s);
+                onChange.accept(value);
             }
             lastTime = now;
             return diff;
         }
 
-        public void setListener(Consumer<String> onChange) {
+        public void setListener(DoubleConsumer onChange) {
             this.onChange = onChange;
         }
 
         @Override
         public String toString() {
-            return "Max=" + ONE_PLACE_FORMAT.format(getMax()) +
-                    "\nAverage=" + ONE_PLACE_FORMAT.format(getAverage());
+            return "Max=" + Strings.ONE_PLACE_FORMAT.format(getMax()) +
+                    "\nAverage=" + Strings.ONE_PLACE_FORMAT.format(getAverage());
         }
     }
 

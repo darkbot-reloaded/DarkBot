@@ -6,8 +6,10 @@ import eu.darkbot.api.game.items.SelectableItem;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -17,10 +19,26 @@ import static com.github.manolo8.darkbot.Main.API;
 public class CategoryBar extends MenuBar {
     public final FlashList<Category> categories = FlashList.ofVector(Category::new);
 
+    private final Map<SelectableItem, Item> itemsMap = new HashMap<>(
+            (int) SelectableItem.ALL_ITEMS.values().stream()
+                    .mapToLong(List::size).sum());
+
     @Override
     public void update() {
         super.update();
-        this.categories.update(API.readMemoryLong(address + 56));
+        long categoriesAddress = readLong(56);
+        if (categories.getAddress() != categoriesAddress) {
+            itemsMap.clear();
+        }
+        this.categories.update(categoriesAddress);
+    }
+
+    // assume the parameter is enum from SelectableItems itf
+    public Item getItem(SelectableItem selectableItem) {
+        Item item = itemsMap.get(selectableItem);
+        if (item != null) return item;
+
+        return findItem(selectableItem).orElse(null);
     }
 
     @Deprecated
@@ -80,11 +98,11 @@ public class CategoryBar extends MenuBar {
         return Optional.ofNullable(category.findItem(item));
     }
 
-    public static class Category extends Auto {
+    public class Category extends Auto {
         private ItemCategory itemCategory;
 
         public String categoryId;
-        public FlashList<Item> items = FlashList.ofVector(() -> new Item(itemCategory));
+        public FlashList<Item> items = FlashList.ofVector(() -> new Item(itemCategory, itemsMap));
 
         public @Nullable Item findItem(SelectableItem item) {
             return items.stream()
