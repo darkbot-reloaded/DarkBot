@@ -398,7 +398,7 @@ public class PetManager extends Gui implements PetAPI {
     private void updateNpcLocatorList(long gearsSprite) {
         locatorWrapper.update(API.readMemoryLong(gearsSprite + 168));
 
-        long locatorBaseAddr = locatorWrapper.getLong(0);
+        long locatorBaseAddr = locatorWrapper.getOrDefault(0, 0);
         if (locatorBaseAddr == 0) {
             locatorList.update(0);
             return;

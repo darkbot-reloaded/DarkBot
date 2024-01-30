@@ -165,14 +165,12 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
             if (initialized) {
                 int multiplier = readInt(224, 32);
-                FlashListLong gates1 = this.gates;
-                gates1.update(readLong(112));
+                this.gates.update(readLong(112));
 
-                GalaxyGate[] values = GATE_VALUES;
-                for (int i = 0; i < gates1.size() && i < values.length; i++) {
-                    GalaxyGate gate = values[i];
+                for (int i = 0; i < gates.size() && i < GATE_VALUES.length; i++) {
+                    GalaxyGate gate = GATE_VALUES[i];
                     GateInfoImpl gateInfo = gateData.get(gate);
-                    gateInfo.update(gates1.getLong(i));
+                    gateInfo.update(gates.getLong(i));
 
                     if (isSelectedGate(gate)) {
                         // Current gate multiplier

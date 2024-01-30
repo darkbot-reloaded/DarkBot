@@ -6,6 +6,7 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.Offsets;
 import it.unimi.dsi.fastutil.longs.AbstractLongList;
 
+import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.function.LongConsumer;
 
@@ -17,8 +18,8 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
     protected long[] elements = new long[0];
 
     private long address;
-    private int size;
     private long lastPointer;
+    private int size;
 
     private boolean autoUpdate = true;
 
@@ -62,14 +63,9 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
     @Override
     public abstract void update();
 
-    /**
-     * does not throw {@link IndexOutOfBoundsException}, returns 0 instead
-     * to check if value is correct check size first
-     */
     @Override
     public long getLong(int index) {
-        if (index < 0 || index >= size()) return 0L;
-        return elements[index];
+        return elements[Objects.checkIndex(index, size())];
     }
 
     @Override
@@ -97,8 +93,16 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
             consumer.accept(lastPointer = getLong(i));
     }
 
+    public long getOrDefault(int index, long fallback) {
+        if (index < 0 || index >= size()) return fallback;
+        return getLong(index);
+    }
+
+    /**
+     * @return last element or 0 if is empty
+     */
     public long getLastElement() {
-        return getLong(size() -1);
+        return getOrDefault(size() - 1, 0);
     }
 
     protected void setSize(int size) {

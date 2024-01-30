@@ -219,7 +219,7 @@ public class RepairManager implements Manager, RepairAPI {
 
     private int optionAvailableIn(int repairOption) {
         if (repairOption == -1) return -1;
-        return API.readInt(repairTypes.getLong(repairOption) + 48);
+        return API.readInt(repairTypes.getOrDefault(repairOption, 0) + 48);
     }
 
     private String formatLogMessage(String message) {

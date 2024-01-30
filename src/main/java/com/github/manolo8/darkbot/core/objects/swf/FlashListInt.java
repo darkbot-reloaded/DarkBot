@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import it.unimi.dsi.fastutil.ints.AbstractIntList;
 
+import java.util.Objects;
 import java.util.RandomAccess;
 
 public abstract class FlashListInt extends AbstractIntList implements NativeUpdatable, RandomAccess {
@@ -34,8 +35,7 @@ public abstract class FlashListInt extends AbstractIntList implements NativeUpda
      */
     @Override
     public int getInt(int index) {
-        if (index < 0 || index >= size()) return 0;
-        return elements[index];
+        return elements[Objects.checkIndex(index, size())];
     }
 
     @Override
@@ -70,8 +70,16 @@ public abstract class FlashListInt extends AbstractIntList implements NativeUpda
         if (autoUpdate) update();
     }
 
+    public int getOrDefault(int index, int fallback) {
+        if (index < 0 || index >= size()) return fallback;
+        return getInt(index);
+    }
+
+    /**
+     * @return last element or 0 if is empty
+     */
     public int getLastElement() {
-        return getInt(size() - 1);
+        return getOrDefault(size() - 1, 0);
     }
 
     protected void setSize(int size) {

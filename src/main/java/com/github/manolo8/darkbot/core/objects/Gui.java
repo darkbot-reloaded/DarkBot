@@ -202,7 +202,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
         if (tempChildArray == null) tempChildArray = FlashListLong.ofSprite();
 
         tempChildArray.update(spriteAddress);
-        return childIndex != -1 ? tempChildArray.getLong(childIndex) : tempChildArray.getLastElement();
+        return childIndex != -1 ? tempChildArray.getOrDefault(childIndex, 0) : tempChildArray.getLastElement();
     }
 
     /**
