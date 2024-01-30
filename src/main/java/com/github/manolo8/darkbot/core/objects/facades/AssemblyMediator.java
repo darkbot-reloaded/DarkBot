@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.objects.facades;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.FlashList;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import eu.darkbot.api.managers.AssemblyAPI;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -49,7 +50,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     private static class Recipe extends Auto implements AssemblyAPI.Recipe {
         @Getter(AccessLevel.NONE)
         @ToString.Exclude
-        private final FlashList<Long> rewardsArr = FlashList.ofVector(Long.class);
+        private final FlashListLong rewardsArr = FlashListLong.ofVector();
 
         private String recipeId, visibility = "";
         private final List<String> rewards = new ArrayList<>();

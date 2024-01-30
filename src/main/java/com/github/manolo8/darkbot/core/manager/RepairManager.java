@@ -6,8 +6,8 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.bases.BaseRepairStation;
 import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.objects.SpriteObject;
-import com.github.manolo8.darkbot.core.objects.swf.FlashList;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListInt;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.extensions.features.handlers.ReviveSelectorHandler;
 import com.github.manolo8.darkbot.utils.LogUtils;
@@ -37,9 +37,9 @@ public class RepairManager implements Manager, RepairAPI {
     private final ReviveSelectorHandler reviveHandler;
 
     private final Map<String, OutputStream> streams = new HashMap<>();
-    private final FlashList<Integer> repairOptions = FlashList.ofArray(Integer.class);
+    private final FlashListInt repairOptions = FlashListInt.ofArray();
 
-    private final FlashList<Long> repairTypes = FlashList.ofVector(Long.class);
+    private final FlashListLong repairTypes = FlashListLong.ofVector();
 
     private final byte[] patternCache = new byte[40];
 
@@ -177,7 +177,7 @@ public class RepairManager implements Manager, RepairAPI {
     }
 
     // basically hero shouldn't move if this sprite has childrens
-    private final ObjArray blocker = ObjArray.ofSprite(true);
+    private final FlashListLong blocker = FlashListLong.ofSprite();
     private boolean isAlive() {
         if (repairAddress != 0) return !API.readMemoryBoolean(repairAddress + 0x28);
 
@@ -187,7 +187,7 @@ public class RepairManager implements Manager, RepairAPI {
 
         if (userDataAddress == 0 || API.readMemoryBoolean(userDataAddress + 0x4C)) {
             blocker.update(API.readLong(screenManager, 0x58));
-            if (blocker.getSize() == 0) return true;
+            if (blocker.isEmpty()) return true;
 
             long repairClosure = API.searchClassClosure(this::repairClosurePattern);
             if (repairClosure == 0) return true;
@@ -219,7 +219,7 @@ public class RepairManager implements Manager, RepairAPI {
 
     private int optionAvailableIn(int repairOption) {
         if (repairOption == -1) return -1;
-        return API.readInt(repairTypes.getOrDefault(repairOption, 0L) + 48);
+        return API.readInt(repairTypes.getLong(repairOption) + 48);
     }
 
     private String formatLogMessage(String message) {
@@ -257,7 +257,8 @@ public class RepairManager implements Manager, RepairAPI {
     }
 
     private int getRepairOptionFromType(ReviveLocation reviveLocation) {
-        for (int repairOption : repairOptions) {
+        for (int i = 0; i < repairOptions.size(); i++) {
+            int repairOption = repairOptions.getInt(i);
             if (ReviveLocation.of(repairOption) == reviveLocation) {
                 return repairOption;
             }

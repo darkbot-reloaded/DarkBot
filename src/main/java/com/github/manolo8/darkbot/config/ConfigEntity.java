@@ -1,10 +1,12 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.core.entities.Entity;
+import com.github.manolo8.darkbot.core.entities.Npc;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.api.managers.EventBrokerAPI;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -17,11 +19,25 @@ public class ConfigEntity {
     private final ConfigSetting<Config> root;
     private final ConfigSetting<Map<String, NpcInfo>> npcInfos;
     private final ConfigSetting<Map<String, BoxInfo>> boxInfos;
+    private final EventBrokerAPI eventBroker;
 
-    public ConfigEntity(ConfigAPI configAPI) {
+    public ConfigEntity(ConfigAPI configAPI, EventBrokerAPI eventBroker) {
         this.root = configAPI.getConfigRoot();
         this.npcInfos = configAPI.requireConfig("loot.npc_infos");
         this.boxInfos = configAPI.requireConfig("collect.box_infos");
+        this.eventBroker = eventBroker;
+    }
+
+    public NpcInfo getOrCreateNpcInfo(Npc npc) {
+        String username = npc.getEntityInfo().getUsername();
+
+        Map<String, NpcInfo> npcs = npcInfos.getValue();
+        boolean unknown = npcs.get(username) == null;
+
+        NpcInfo npcInfo = getOrCreateNpcInfo(username);
+        if (unknown)
+            eventBroker.sendEvent(new eu.darkbot.api.config.types.NpcInfo.NpcInfoCreateEvent(npc, npcInfo));
+        return npcInfo;
     }
 
     public NpcInfo getOrCreateNpcInfo(String name) {

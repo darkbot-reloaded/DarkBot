@@ -10,6 +10,7 @@ import static com.github.manolo8.darkbot.Main.API;
  * Instead of ArrayObj, VectorPtr & SpriteArray
  * Used for SpriteArray
  */
+@Deprecated
 public class ObjArray extends SwfPtrCollection {
     private static final int MAX_SIZE = 8192;
     private static final byte[] BUFFER = new byte[8192 * 8]; //64kb

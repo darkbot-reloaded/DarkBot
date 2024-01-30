@@ -104,7 +104,7 @@ public class QuestProxy extends Updatable implements QuestAPI {
         private boolean completed;
         private String title;
         private String description;
-        private final FlashList<QuestProxy.Requirement> requirements = FlashList.ofArray(Requirement.class);
+        private final FlashList<QuestProxy.Requirement> requirements = FlashList.ofArray(Requirement::new);
         private final FlashList<QuestProxy.Reward> rewards = FlashList.ofArray(Reward::new);
 
         @Override

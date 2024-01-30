@@ -5,7 +5,7 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
-import com.github.manolo8.darkbot.core.objects.swf.FlashList;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +26,7 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     public Map<String, Object> metadata;
     public LocationInfo locationInfo = new LocationInfo();
     public Clickable clickable = new Clickable();
-    public FlashList<Long> traits = FlashList.ofVector(Long.class);
+    public FlashListLong traits = FlashListLong.ofVector();
 
     public int id;
     public boolean removed;
@@ -79,7 +79,8 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     }
 
     protected long findInTraits(Predicate<Long> filter) {
-        for (long ptr : traits) {
+        for (int i = 0; i < traits.size(); i++) {
+            long ptr = traits.getLong(i);
             if (filter.test(ptr))
                 return ptr;
         }

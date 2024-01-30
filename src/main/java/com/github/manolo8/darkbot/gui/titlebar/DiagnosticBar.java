@@ -7,19 +7,22 @@ import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.manager.StatsManager;
 import com.github.manolo8.darkbot.gui.components.DiagnosticsPanel;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JLayer;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.LayerUI;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.GridLayout;
 import java.awt.event.MouseEvent;
 import java.util.function.Function;
 
@@ -51,24 +54,34 @@ public class DiagnosticBar extends JButton {
     private DiagnosticBar(Main main) {
         StatsManager stats = main.statsManager;
 
-        setBorder(BorderFactory.createEmptyBorder());
-        setLayout(new MigLayout("ins 0, gap 0", "3px:5px[][right]3px:5px", "[15px!][15px!]"));
+        setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS);
 
         JLabel tick = createLabel("tick_time", "Tick time", false,
                 color -> UIUtils.getTrafficLight(main.getTickTime(), 30), stats.getTickStats());
         JLabel ping = createLabel("ping", "In-game ping", false,
                 color -> UIUtils.getTrafficLight(main.statsManager.getPing(), 300), stats.getPingStats());
-        add(tick, "cell 0 0");
-        add(ping, "cell 0 1");
+
+        JPanel left = new JPanel(new GridLayout(2, 1));
+        left.setOpaque(false);
+        left.add(tick);
+        left.add(ping);
+        add(left);
 
         if (Main.API.hasCapability(Capability.HANDLER_CPU_USAGE, Capability.HANDLER_RAM_USAGE)) {
             JLabel cpu = createLabel("cpu", "Cpu usage", true,
                     color -> UIUtils.getTrafficLight(Main.API.getCpuUsage(), 100), stats.getCpuStats());
             JLabel ram = createLabel("ram", "Ram usage", true,
                     color -> UIUtils.getTrafficLight(Main.API.getMemoryUsage(), 2500), stats.getMemoryStats());
-            add(cpu, "cell 1 0, gapleft 5px");
-            add(ram, "cell 1 1, gapleft 5px");
+
+            add(Box.createHorizontalStrut(5));
+
+            JPanel right = new JPanel(new GridLayout(2, 1));
+            right.setOpaque(false);
+            right.add(cpu);
+            right.add(ram);
+            add(right);
         }
 
         addActionListener(l -> new DiagnosticsPanel(main, this));

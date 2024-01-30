@@ -3,14 +3,14 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.itf.Manager;
-import com.github.manolo8.darkbot.core.objects.swf.FlashList;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListInt;
 import eu.darkbot.api.API;
 import eu.darkbot.util.Timer;
 
 public class PingManager implements Manager, API.Singleton {
     private static final int PING_INTERVAL = 15_000;
 
-    private final FlashList<Integer> lastPings = FlashList.ofVector(Integer.class).noAuto();
+    private final FlashListInt lastPings = FlashListInt.ofVector().noAuto();
 
     public int ping = -1;
     private long pingStatsAddress;

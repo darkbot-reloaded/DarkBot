@@ -4,7 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.gui.GateSpinnerGui;
-import com.github.manolo8.darkbot.core.objects.swf.FlashList;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.game.galaxy.GalaxyGate;
 import eu.darkbot.api.game.galaxy.GalaxyInfo;
@@ -136,7 +136,9 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
     @Data
     @EqualsAndHashCode(callSuper = true)
     private static class BuilderData extends Updatable.Auto implements GalaxyInfo {
-        private final FlashList<Long> gates = FlashList.ofArray(Long.class);
+        private static final GalaxyGate[] GATE_VALUES = GalaxyGate.values();
+
+        private final FlashListLong gates = FlashListLong.ofArray();
         private final Map<GalaxyGate, GateInfoImpl> gateData = new EnumMap<>(GalaxyGate.class);
         private int freeEnergy, selectedSpinAmount, energyCost, selectedGateId;
         private boolean initialized;
@@ -145,7 +147,7 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
         private int uridium;
 
         public BuilderData() {
-            for (GalaxyGate gate : GalaxyGate.values()) {
+            for (GalaxyGate gate : GATE_VALUES) {
                 gateData.put(gate, new GateInfoImpl());
             }
         }
@@ -163,13 +165,14 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
             if (initialized) {
                 int multiplier = readInt(224, 32);
-                this.gates.update(readLong(112));
+                FlashListLong gates1 = this.gates;
+                gates1.update(readLong(112));
 
-                GalaxyGate[] values = GalaxyGate.values();
-                for (int i = 0; i < gates.size() && i < values.length; i++) {
+                GalaxyGate[] values = GATE_VALUES;
+                for (int i = 0; i < gates1.size() && i < values.length; i++) {
                     GalaxyGate gate = values[i];
                     GateInfoImpl gateInfo = gateData.get(gate);
-                    gateInfo.update(gates.get(i));
+                    gateInfo.update(gates1.getLong(i));
 
                     if (isSelectedGate(gate)) {
                         // Current gate multiplier

@@ -31,7 +31,7 @@ import java.util.function.Supplier;
  * sparse uses hashtable
  */
 public abstract class FlashList<E> extends AbstractList<E> implements NativeUpdatable, RandomAccess {
-    private static final int MAX_SIZE = 8192;
+    public static final int MAX_SIZE = 8192;
     private static final long ATOM_NOT_FOUND = 0;
 
     protected final Supplier<E> constructor;

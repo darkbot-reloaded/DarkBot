@@ -114,7 +114,7 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
             return;
         }
 
-        type = Offsets.getTraitAssetId(traits.getOrDefault(0, 0L));
+        type = Offsets.getTraitAssetId(traits.getLong(0));
         hash = API.readString(address, 160);
 
         if (type.length() > 5) type = type.split(",")[0].replace("box_", "").replace("_box", "");

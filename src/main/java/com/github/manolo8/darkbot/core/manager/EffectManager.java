@@ -4,22 +4,22 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
-import com.github.manolo8.darkbot.core.objects.swf.FlashList;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import eu.darkbot.api.API;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class EffectManager implements Manager, API.Singleton {
     private long mapAddressStatic;
 
-    private final FlashList<Long> effectsPtr = FlashList.ofVector(Long.class);
-    private final Map<Long, List<Integer>> effects = new HashMap<>();
+    private final FlashListLong effectsPtr = FlashListLong.ofVector();
+    private final Long2ObjectMap<List<Integer>> effects = new Long2ObjectOpenHashMap<>();
 
     public EffectManager(Main main) {
     }
@@ -32,7 +32,6 @@ public class EffectManager implements Manager, API.Singleton {
 
     public void tick() {
         effectsPtr.update(API.readLong(API.readLong(mapAddressStatic), 128, 48));
-
         // clear if over 200 entries in map, otherwise just clear the lists
         if (effects.size() > 200) effects.clear();
         else {
@@ -41,7 +40,8 @@ public class EffectManager implements Manager, API.Singleton {
             }
         }
 
-        for (long addr : effectsPtr) {
+        for (int i = 0; i < effectsPtr.size(); i++) {
+            long addr = effectsPtr.getLong(i);
             int id = API.readMemoryInt(addr + 0x24);
             long entity = API.readMemoryLong(addr + 0x48);
 

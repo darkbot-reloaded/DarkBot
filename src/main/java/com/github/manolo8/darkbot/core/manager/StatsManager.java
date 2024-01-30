@@ -103,7 +103,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         teleportBonus.track(readInt(0x50));
         premium = readBoolean(0xF0, 0x20);
 
-        for (BootyKeyType key: BootyKeyType.values())
+        for (BootyKeyType key: BootyKeyType.VALUES)
             track(key.getStatKey(), readInt(key.getOffset()));
     }
 
@@ -334,6 +334,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         EMPYRIAN(0x84, Stats.BootyKey.EMPYRIAN),
         LUCENT(0x88, Stats.BootyKey.LUCENT),
         PERSEUS(0x8c, Stats.BootyKey.PERSEUS);
+
+        private static final BootyKeyType[] VALUES = values();
 
         private final int offset;
         private final StatKey statKey;

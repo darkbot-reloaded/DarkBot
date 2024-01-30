@@ -12,6 +12,7 @@ import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.SpriteObject;
 import com.github.manolo8.darkbot.core.objects.swf.FlashList;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.handlers.PetGearSelectorHandler;
 import com.github.manolo8.darkbot.gui.utils.Strings;
@@ -71,7 +72,7 @@ public class PetManager extends Gui implements PetAPI {
     private final FlashList<Gear> gearList = FlashList.ofArray(Gear::new);
     private final List<PetGear> newGears = new ArrayList<>();
 
-    private final FlashList<Long> locatorWrapper = FlashList.ofArray(Long.class);
+    private final FlashListLong locatorWrapper = FlashListLong.ofArray();
     private final FlashList<Gear> locatorList = FlashList.ofArray(Gear::new).noAuto();
 
     private final List<Integer> petBuffsIds = new ArrayList<>();
@@ -397,7 +398,7 @@ public class PetManager extends Gui implements PetAPI {
     private void updateNpcLocatorList(long gearsSprite) {
         locatorWrapper.update(API.readMemoryLong(gearsSprite + 168));
 
-        long locatorBaseAddr = locatorWrapper.getOrDefault(0, 0L);
+        long locatorBaseAddr = locatorWrapper.getLong(0);
         if (locatorBaseAddr == 0) {
             locatorList.update(0);
             return;

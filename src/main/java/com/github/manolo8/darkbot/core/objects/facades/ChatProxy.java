@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.objects.facades;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.FlashList;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import eu.darkbot.api.events.EventHandler;
@@ -45,7 +46,7 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
 
     public static class ChatRoom extends Auto {
         private String chatName;
-        private final FlashList<Long> messagesArr = FlashList.ofVector(Long.class);
+        private final FlashListLong messagesArr = FlashListLong.ofVector();
 
         @Override
         public void update() {

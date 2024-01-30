@@ -12,7 +12,7 @@ import com.github.manolo8.darkbot.core.itf.Manager;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.objects.facades.SpaceMapWindowProxy;
-import com.github.manolo8.darkbot.core.objects.swf.FlashList;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.EntityList;
 import com.github.manolo8.darkbot.core.utils.Lazy;
@@ -78,7 +78,7 @@ public class MapManager implements Manager, StarSystemAPI {
     public final RectangleImpl screenBound = new RectangleImpl();
     private final RectangleImpl mapBound = new RectangleImpl();
 
-    private final FlashList<Long> minimapLayers = FlashList.ofVector(Long.class);
+    private final FlashListLong minimapLayers = FlashListLong.ofVector();
     private final Location pingLocationCache = new Location();
     public Location pingLocation = null;
 
@@ -381,7 +381,7 @@ public class MapManager implements Manager, StarSystemAPI {
         minimapLayers.update(temp);
 
         for (int i = minimapLayers.size() - 1; i >= 0; i--) {
-            long layer = minimapLayers.get(i); // Seems to be offset by 1 for some reason.
+            long layer = minimapLayers.getLong(i); // Seems to be offset by 1 for some reason.
             long layerIdx = API.readMemoryInt(layer + 0xA8);
 
             if (layerIdx != Integer.MAX_VALUE) continue;
