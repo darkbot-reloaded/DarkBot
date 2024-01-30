@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.FlashMap;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +15,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singleton {
 
     private final Character[] keycodes = new Character[KeyBind.values().length];
-    private final FlashMap<Integer, Long> keycodesDictionary = FlashMap.of(Integer.class, Long.class);
+    private final FlashListLong keycodesDictionary = FlashListLong.ofMapValues();
     private final Main main;
 
     public SettingsProxy(Main main) {
@@ -72,17 +72,17 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
         long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
         keycodesDictionary.update(API.readMemoryLong(data + 240));
 
-        int i = 0;
         Character[] keycodes = this.keycodes;
-        for (long addr : keycodesDictionary.values()) {
+        for (int i = 0; i < keycodesDictionary.size() && i < keycodes.length; i++) {
+            long addr = keycodesDictionary.getLong(i);
             int arrSize = API.readMemoryInt(addr + 64);
             if (arrSize <= 0) {
-                keycodes[i++] = null;
+                keycodes[i] = null;
                 continue;
             }
             //read first encounter in int vector
             int keycode = API.readInt(addr, 48, 4);
-            keycodes[i++] = keycode <= 0 || keycode > 222 ? null : (char) keycode;
+            keycodes[i] = keycode <= 0 || keycode > 222 ? null : (char) keycode;
         }
     }
 

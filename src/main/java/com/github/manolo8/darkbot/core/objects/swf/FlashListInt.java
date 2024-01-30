@@ -28,6 +28,10 @@ public abstract class FlashListInt extends AbstractIntList implements NativeUpda
         return this;
     }
 
+    /**
+     * does not throw {@link IndexOutOfBoundsException}, returns 0 instead
+     * to check if value is correct check size first
+     */
     @Override
     public int getInt(int index) {
         if (index < 0 || index >= size()) return 0;

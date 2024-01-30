@@ -33,19 +33,19 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
      * since identifiers are always interned strings, they can't be 0,
      * so we can use 0 as the empty value.
      */
-    private static final int EMPTY_ITEM = 0x0;
+    public static final int EMPTY_ITEM = 0x0;
 
     // DELETED is stored as the key for deleted items
-    private static final int DELETED_ITEM = 0x4;
+    public static final int DELETED_ITEM = 0x4;
 
     private static final int DONT_ENUM_BIT = 0x01;
     private static final int HAS_DELETED_ITEMS = 0x02;
     private static final int HAS_ITER_INDEX = 0x04;
 
-    private static final int DICTIONARY_FLAG = 1 << 4;
+    public static final int DICTIONARY_FLAG = 1 << 4;
 
-    private static final int MAX_SIZE = 2048;
-    private static final int MAX_CAPACITY = MAX_SIZE * Long.BYTES * 2;
+    public static final int MAX_SIZE = 2048;
+    public static final int MAX_CAPACITY = MAX_SIZE * Long.BYTES * 2;
 
     private final AtomKind keyKind;
     private final AtomKind valueKind;
@@ -54,7 +54,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
     private final Supplier<V> valueConstructor;
     private final Class<V> valueType;
 
-    private final boolean keyUpdatable, valueUpdatable;
+    private final boolean valueUpdatable;
 
     private int size;
     private Entry[] entries;
@@ -62,7 +62,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
     private long address;
     private EntrySet entrySet;
     private Map<K, UpdatableWrapper> updatables;
-    private boolean threadSafe, autoUpdate = true;;
+    private boolean threadSafe, autoUpdate = true;
 
     // a read-only view into the values
     @Getter(lazy = true)
@@ -88,10 +88,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
 
             //this.keyType = null;
             this.valueType = null;
-
-            this.keyUpdatable = false;
             this.valueUpdatable = false;
-
             this.valueConstructor = null;
         } else {
             this.keyKind = AtomKind.of(keyType);
@@ -101,12 +98,10 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
             this.valueType = valueType;
             if (keyKind.isNotSupported() || valueKind.isNotSupported())
                 throw new UnsupportedOperationException("Provided java types are not supported!");
-
-            this.keyUpdatable = Updatable.class.isAssignableFrom(keyType);
-            this.valueUpdatable = Updatable.class.isAssignableFrom(valueType);
-
-            if (keyUpdatable)
+            if (Updatable.class.isAssignableFrom(keyType))
                 throw new UnsupportedOperationException("Key as updatable is not supported!");
+
+            this.valueUpdatable = Updatable.class.isAssignableFrom(valueType);
             if (valueUpdatable) {
                 //noinspection unchecked
                 Class<V> constructorClass = valueType == Updatable.class ? (Class<V>) Updatable.NoOp.class : valueType;
@@ -393,10 +388,6 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
                 valueAtomCache = valueAtom;
             }
 
-            if (key instanceof Updatable) {
-                ((Updatable) key).update();
-            }
-
             if (wrapper != null) {
                 wrapper.value.update();
             } else if (value instanceof Updatable) {
@@ -405,9 +396,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
         }
 
         private void setKey(K key) {
-            if (this.key instanceof Updatable)
-                updateIfChanged((Updatable) this.key, (long) key);
-            else this.key = key;
+            this.key = key;
         }
 
         public V getValue() {
@@ -421,8 +410,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
         }
 
         private void setVal(V value) {
-            if (keyKind != AtomKind.OBJECT && valueKind == AtomKind.OBJECT) {
-
+            if (valueUpdatable) {
                 UpdatableWrapper v = updatables == null ? null : updatables.get(key);
                 if (v != null) {
                     if (v != wrapper) {
@@ -448,9 +436,6 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
         }
 
         private void reset() {
-            if (key instanceof Updatable)
-                updateIfChanged((Updatable) key, 0);
-
             if (value instanceof Updatable)
                 updateIfChanged((Updatable) value, 0);
 

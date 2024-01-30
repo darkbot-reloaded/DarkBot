@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.core.objects.swf.FlashMap;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.API;
@@ -9,7 +10,7 @@ import eu.darkbot.api.API;
 public class HighlightProxy extends Updatable implements API.Singleton {
 
     private final FlashMap<String, Long> proxyDictionary = FlashMap.of(String.class, Long.class);
-    private final FlashMap<String, Long> highlightItems = FlashMap.of(String.class, Long.class);
+    private final FlashListLong highlightItems = FlashListLong.ofMapValues();
 
     private boolean attacking;
 
@@ -28,8 +29,8 @@ public class HighlightProxy extends Updatable implements API.Singleton {
 
         if (ByteUtils.isValidPtr(categoryHighlightItem)) {
             highlightItems.update(categoryHighlightItem);
-            for (Long addr : highlightItems.values()) {
-                if (Main.API.readInt(addr + 0x38) > 0)
+            for (int i = 0; i < highlightItems.size(); i++) {
+                if (Main.API.readInt(highlightItems.getLong(i) + 0x38) > 0)
                     return true;
             }
         }

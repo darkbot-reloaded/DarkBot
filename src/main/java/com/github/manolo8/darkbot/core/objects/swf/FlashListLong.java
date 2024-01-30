@@ -9,6 +9,9 @@ import it.unimi.dsi.fastutil.longs.AbstractLongList;
 import java.util.RandomAccess;
 import java.util.function.LongConsumer;
 
+import static com.github.manolo8.darkbot.Main.API;
+import static com.github.manolo8.darkbot.core.objects.swf.FlashMap.DICTIONARY_FLAG;
+
 public abstract class FlashListLong extends AbstractLongList implements NativeUpdatable, RandomAccess {
 
     protected long[] elements = new long[0];
@@ -31,6 +34,14 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
         return new SpriteList();
     }
 
+    public static FlashListLong ofMapKeys() {
+        return new FlashMapValues(true);
+    }
+
+    public static FlashListLong ofMapValues() {
+        return new FlashMapValues(false);
+    }
+
     public FlashListLong noAuto() {
         this.autoUpdate = false;
         return this;
@@ -51,6 +62,10 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
     @Override
     public abstract void update();
 
+    /**
+     * does not throw {@link IndexOutOfBoundsException}, returns 0 instead
+     * to check if value is correct check size first
+     */
     @Override
     public long getLong(int index) {
         if (index < 0 || index >= size()) return 0L;
@@ -90,11 +105,11 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
         this.size = size;
     }
 
-    protected boolean insufficientCapacity(int size) {
-        if (size <= 0 || size > FlashList.MAX_SIZE) return true;
+    protected boolean insufficientCapacity(int size, int maxSize) {
+        if (size <= 0 || size > maxSize) return true;
         // don't need a copy, just create new
         if (size > elements.length)
-            elements = new long[Math.min((int) (size * 1.25), FlashList.MAX_SIZE)];
+            elements = new long[Math.min((int) (size * 1.25), maxSize)];
         return false;
     }
 
@@ -102,7 +117,7 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
         if (getAddress() == 0) return;
 
         int size = readInt(sizeOffset);
-        if (insufficientCapacity(size)) {
+        if (insufficientCapacity(size, FlashList.MAX_SIZE)) {
             setSize(0);
         } else {
             int maxLength = size * 8;
@@ -144,6 +159,68 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
         @Override
         public void update(long address) {
             super.update(Main.API.readLong(address, 72, 64));
+        }
+    }
+
+    public static class FlashMapValues extends FlashListLong {
+        private final boolean ofKeys;
+
+        public FlashMapValues(boolean ofKeys) {
+            this.ofKeys = ofKeys;
+        }
+
+        @Override
+        public void update() {
+            if (getAddress() == 0) return;
+            long traits = readLong(16, 40);
+
+            int tableOffset = API.readInt(traits, 236);
+            if (tableOffset == 0) return;
+
+            boolean isDictionary = (API.readInt(traits, 248) & DICTIONARY_FLAG) != 0;
+            if (isDictionary) {
+                readHashTable(readLong(tableOffset) + 8); //read hash table ptr & skip cpp vtable
+            } else {
+                readHashTable(getAddress() + tableOffset);
+            }
+        }
+
+        private int getCapacity(int logCapacity) {
+            if (logCapacity <= 0) return 0;
+            return (1 << (logCapacity - 1)) * Long.BYTES;
+        }
+
+        private void readHashTable(long table) {
+            int size = API.readInt(table, 8); // includes deleted items
+            int capacity = getCapacity(API.readInt(table, 12));
+            if (capacity <= 0 || capacity > FlashMap.MAX_CAPACITY || insufficientCapacity(size, FlashMap.MAX_SIZE)) {
+                setSize(0);
+            } else {
+                long atomsAndFlags = API.readLong(table);
+                long atoms = (atomsAndFlags & ByteUtils.ATOM_MASK) + 8;
+
+                int currentSize = 0, realSize = 0;
+                for (int offset = 0; offset < capacity && currentSize < size; offset += 8) {
+                    long keyAtom = API.readLong(atoms, offset);
+
+                    if (keyAtom == FlashMap.EMPTY_ITEM) continue;
+                    offset += 8; // value is always after the key even if is deleted
+
+                    if (keyAtom == FlashMap.DELETED_ITEM) {
+                        currentSize++;
+                        continue; // skip deleted pair
+                    }
+                    if (ofKeys) {
+                        elements[realSize] = keyAtom & ByteUtils.ATOM_MASK;
+                    } else {
+                        long valueAtom = API.readLong(atoms, offset);
+                        elements[realSize] = valueAtom & ByteUtils.ATOM_MASK;
+                    }
+                    realSize++;
+                    currentSize++;
+                }
+                setSize(realSize);
+            }
         }
     }
 }
