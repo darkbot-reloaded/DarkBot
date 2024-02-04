@@ -112,10 +112,9 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                 return new CollectionNode(slot, address, staticAddress, true, false);
             case VECTOR:
                 return new CollectionNode(slot, address, staticAddress, false, true);
-            case PLAIN_OBJECT:
+            default:
                 if (hasHashMap)
                     return new CollectionNode(slot, address, staticAddress, true, false);
-            default:
                 return new ObjectTreeNode(slot, address, staticAddress);
         }
     }

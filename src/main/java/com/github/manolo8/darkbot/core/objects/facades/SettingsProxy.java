@@ -123,6 +123,8 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
         PREMIUM_0(SlotBarsProxy.Type.PREMIUM_BAR, 9, 19, KeyEvent.VK_F10),
         TOGGLE_PRO_ACTION(39,  KeyEvent.VK_SHIFT);
 
+        private static final KeyBind[] VALUES = values();
+
         private final SlotBarsProxy.Type type;
         private final int slotIdx, settingIdx, defaultKey;
 
@@ -142,8 +144,8 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
         }
 
         public static KeyBind of(int index) {
-            if (index < 0 || index >= values().length) return null;
-            return values()[index];
+            if (index < 0 || index >= VALUES.length) return null;
+            return VALUES[index];
         }
 
         public static KeyBind of(SlotBarsProxy.Type slotType, int slotNumber) {

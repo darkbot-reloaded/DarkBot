@@ -36,7 +36,7 @@ public interface NativeUpdatable {
 
     // it is a native class which holds min[32], max[36] & value[40] members
     default int readIntHolder(int offset) {
-        return Main.API.readInt(readLong(offset) + 40);
+        return readInt(offset, 40);
     }
 
     default long readLong(int o1) {
