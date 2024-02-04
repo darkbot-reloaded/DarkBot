@@ -117,7 +117,7 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     public void tick() {
-        long temp = API.readMemoryLong(mapAddressStatic);
+        long temp = API.readLong(mapAddressStatic);
 
         checkJumpCpu();
         checkNextMap(main.settingsManager.nextMap);
@@ -135,14 +135,14 @@ public class MapManager implements Manager, StarSystemAPI {
     private void update(long address) {
         mapAddress = address;
 
-        internalWidth = API.readMemoryInt(address + 68);
-        internalHeight = API.readMemoryInt(address + 72);
+        internalWidth = API.readInt(address + 68);
+        internalHeight = API.readInt(address + 72);
         if (internalHeight == 13100) internalHeight = 13500;
         if (internalHeight == 26200) internalHeight = 27000;
 
         mapBound.set(0, 0, internalWidth, internalHeight);
 
-        int currMap = API.readMemoryInt(address + 76);
+        int currMap = API.readInt(address + 76);
         boolean switched = currMap != id;
 
         if (switched)
@@ -207,10 +207,10 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     private void checkMirror() {
-        long temp = API.readMemoryLong(eventAddress) + 4 * 14;
+        long temp = API.readLong(eventAddress) + 4 * 14;
 
-        if (API.readMemoryBoolean(temp)) {
-            API.writeMemoryInt(temp, 0);
+        if (API.readBoolean(temp)) {
+            API.writeInt(temp, 0);
         }
     }
 
@@ -305,27 +305,27 @@ public class MapManager implements Manager, StarSystemAPI {
 
     private boolean is3DView;
     private void updateBounds() {
-        long temp = API.readMemoryLong(viewAddressStatic);
+        long temp = API.readLong(viewAddressStatic);
 
         if (viewAddress != temp) {
             viewAddress = temp;
             is3DView = !main.settingsManager.is2DForced()
                        && ByteUtils.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
-            boundsAddress = API.readMemoryLong(viewAddress + (is3DView ? 216 : 208));
+            boundsAddress = API.readLong(viewAddress + (is3DView ? 216 : 208));
         }
 
-        clientWidth = API.readMemoryInt(boundsAddress + 0xA8);
-        clientHeight = API.readMemoryInt(boundsAddress + 0xAC);
+        clientWidth = API.readInt(boundsAddress + 0xA8);
+        clientHeight = API.readInt(boundsAddress + 0xAC);
 
-        long updated = API.readMemoryLong(boundsAddress + (is3DView ? 320 : 280));
-        updated = API.readMemoryLong(updated + 112);
+        long updated = API.readLong(boundsAddress + (is3DView ? 320 : 280));
+        updated = API.readLong(updated + 112);
 
         viewBounds.update(updated);
 
-        boundX = API.readMemoryDouble(updated + 80);
-        boundY = API.readMemoryDouble(updated + 88);
-        boundMaxX = API.readMemoryDouble(updated + 112);
-        boundMaxY = API.readMemoryDouble(updated + 120);
+        boundX = API.readDouble(updated + 80);
+        boundY = API.readDouble(updated + 88);
+        boundMaxX = API.readDouble(updated + 112);
+        boundMaxY = API.readDouble(updated + 120);
         screenBound.set(boundX, boundY, boundMaxX, boundMaxY);
         width = boundMaxX - boundX;
         height = boundMaxY - boundY;
@@ -353,8 +353,8 @@ public class MapManager implements Manager, StarSystemAPI {
 
             @Override
             public void update() {
-                this.x = API.readMemoryDouble(address);
-                this.y = API.readMemoryDouble(address + 8);
+                this.x = API.readDouble(address);
+                this.y = API.readDouble(address + 8);
             }
 
             @Override
@@ -373,16 +373,16 @@ public class MapManager implements Manager, StarSystemAPI {
         if (!main.hero.hasEffect(EffectManager.Effect.LOCATOR))
             return null;
 
-        long temp = API.readMemoryLong(minimapAddressStatic); // Minimap
-        double minimapX = API.readMemoryInt(temp + 0xA8);
+        long temp = API.readLong(minimapAddressStatic); // Minimap
+        double minimapX = API.readInt(temp + 0xA8);
 
-        temp = API.readMemoryLong(temp + 0xF8); // LayeredSprite
-        temp = API.readMemoryLong(temp + 0xA8); // Vector<Layer>
+        temp = API.readLong(temp + 0xF8); // LayeredSprite
+        temp = API.readLong(temp + 0xA8); // Vector<Layer>
         minimapLayers.update(temp);
 
         for (int i = minimapLayers.size() - 1; i >= 0; i--) {
             long layer = minimapLayers.getLong(i); // Seems to be offset by 1 for some reason.
-            long layerIdx = API.readMemoryInt(layer + 0xA8);
+            long layerIdx = API.readInt(layer + 0xA8);
 
             if (layerIdx != Integer.MAX_VALUE) continue;
 
@@ -412,23 +412,23 @@ public class MapManager implements Manager, StarSystemAPI {
     private boolean isMarker(long sprite, double scale, Location result) {
         if (sprite == 0) return false;
 
-        int x = API.readMemoryInt(sprite + 0x58);
-        int y = API.readMemoryInt(sprite + 0x5C);
+        int x = API.readInt(sprite + 0x58);
+        int y = API.readInt(sprite + 0x5C);
         result.set(scale * x, scale * y);
 
         int halfWidth = internalWidth / 2, halfHeight = internalHeight / 2;
         // Ignore if 0,0, or further away from the center of the map than corner in manhattan distance
         if ((x == 0 && y == 0) || result.distance(halfWidth, halfHeight) > halfWidth + halfHeight) return false;
 
-        String name = API.readMemoryString(API.readLong(sprite, 0x1B8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
+        String name = API.readString(API.readLong(sprite, 0x1B8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
         if (name != null && name.equals("minimapmarker")) return true;
 
-        String pointer = API.readMemoryString(API.readLong(sprite, 0xD8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
+        String pointer = API.readString(API.readLong(sprite, 0xD8 + Offsets.SPRITE_OFFSET, 0x10, 0x28, 0x90));
         return pointer == null || !pointer.equals("minimapPointer");
     }
 
     public boolean isTarget(Entity entity) {
-        return API.readMemoryLong(API.readMemoryLong(mapAddress + 120) + 40) == entity.address;
+        return API.readLong(API.readLong(mapAddress + 120) + 40) == entity.address;
     }
 
     public boolean setTarget(long entity) {
@@ -449,11 +449,11 @@ public class MapManager implements Manager, StarSystemAPI {
                     .map(Lockable::isOwned)
                     .orElse(false);
 
-        long temp = API.readMemoryLong(viewAddressStatic);
-        temp = API.readMemoryLong(temp + 216); //
-        temp = API.readMemoryLong(temp + 200); //
-        temp = API.readMemoryLong(temp + 48); // get _target
-        int lockStatus = API.readMemoryInt(temp + 40); // IntHolder.value
+        long temp = API.readLong(viewAddressStatic);
+        temp = API.readLong(temp + 216); //
+        temp = API.readLong(temp + 200); //
+        temp = API.readLong(temp + 48); // get _target
+        int lockStatus = API.readInt(temp + 40); // IntHolder.value
         // 1 = selected & owned
         // 2 = selected & someone else owns it
         // 3 = ?

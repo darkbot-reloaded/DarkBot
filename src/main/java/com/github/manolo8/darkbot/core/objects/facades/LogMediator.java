@@ -24,14 +24,14 @@ public class LogMediator extends Updatable implements GameLogAPI, Listener {
 
     @Override
     public void update() {
-        messageBuffer.update(API.readMemoryLong(address + 0x60));
+        messageBuffer.update(API.readLong(address + 0x60));
         if (messageBuffer.isEmpty() || messageBuffer.size() > 50) return;
 
         messageBuffer.forEachIncremental(this::handleLogMessage);
     }
 
     private void handleLogMessage(long pointer) {
-        String val = API.readMemoryString(API.readMemoryLong(pointer + 0x28));
+        String val = API.readString(API.readLong(pointer + 0x28));
         if (val != null && !val.trim().isEmpty())
             eventBroker.sendEvent(new LogMessageEvent(val));
     }

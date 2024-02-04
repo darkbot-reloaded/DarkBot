@@ -30,18 +30,18 @@ public class GroupMember extends PartialGroupMember implements eu.darkbot.api.ga
 
     @Override
     public void update() {
-        location.set(API.readMemoryInt(address + 0x38), API.readMemoryInt(address + 0x3C));
-        memberInfo.update(API.readMemoryLong(address + 0x78));
-        targetInfo.update(API.readMemoryLong(address + 0x80));
+        location.set(API.readInt(address + 0x38), API.readInt(address + 0x3C));
+        memberInfo.update(API.readLong(address + 0x78));
+        targetInfo.update(API.readLong(address + 0x80));
 
-        factionId = API.readMemoryInt(address + 0x24);
-        level = API.readMemoryInt(address + 0x28);
-        mapId = API.readMemoryInt(address + 0x34);
-        isAttacked = API.readMemoryBoolean(address + 0x44);
-        isCloacked = API.readMemoryBoolean(address + 0x48);
-        isLeader = API.readMemoryBoolean(address + 0x50);
-        isDead = API.readMemoryBoolean(address + 0x54);
-        isLocked = API.readMemoryBoolean(address + 0x60);
+        factionId = API.readInt(address + 0x24);
+        level = API.readInt(address + 0x28);
+        mapId = API.readInt(address + 0x34);
+        isAttacked = API.readBoolean(address + 0x44);
+        isCloacked = API.readBoolean(address + 0x48);
+        isLeader = API.readBoolean(address + 0x50);
+        isDead = API.readBoolean(address + 0x54);
+        isLocked = API.readBoolean(address + 0x60);
 
         super.update();
     }

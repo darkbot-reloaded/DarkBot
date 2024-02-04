@@ -72,11 +72,11 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             super.update(address);
 
             if (!addrChanged) return;
-            rewardsArr.update(API.readMemoryPtr(address + 0x60));
+            rewardsArr.update(API.readAtom(address + 0x60));
             rewards.clear();
             rewardsArr.forEach(ptr -> rewards.add(API.readString(ptr, 0x48)));
 
-            resourcesRequired.update(API.readMemoryPtr(address + 0x50));
+            resourcesRequired.update(API.readAtom(address + 0x50));
         }
 
     }
@@ -105,8 +105,8 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         public boolean updateAndReport() {
             if (address <= 0) return false;
 
-            return first.updateAndReport(Main.API.readMemoryPtr(address + 0x20))
-                    || second.updateAndReport(Main.API.readMemoryPtr(address + 0x28));
+            return first.updateAndReport(Main.API.readAtom(address + 0x20))
+                    || second.updateAndReport(Main.API.readAtom(address + 0x28));
         }
     }
 

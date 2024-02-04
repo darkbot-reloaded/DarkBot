@@ -27,10 +27,10 @@ public class SlotBar extends MenuBar {
         if (address == 0) return;
         super.update();
 
-        this.isVisible = API.readMemoryBoolean(address + 56);
-        this.stickOffset.update(API.readMemoryLong(address + 72));
+        this.isVisible = API.readBoolean(address + 56);
+        this.stickOffset.update(API.readLong(address + 72));
 
-        this.slots.update(API.readMemoryLong(address + 64));
+        this.slots.update(API.readLong(address + 64));
     }
 
     public class Slot extends Auto {
@@ -47,10 +47,10 @@ public class SlotBar extends MenuBar {
 
         @Override
         public void update() {
-            this.slotNumber = API.readMemoryInt(address + 32);
-            this.premium = API.readMemoryBoolean(address + 36);
+            this.slotNumber = API.readInt(address + 32);
+            this.premium = API.readBoolean(address + 36);
             this.slotBarId = API.readString(address, 48);
-            long itemPtr = API.readMemoryLong(address + 40);
+            long itemPtr = API.readLong(address + 40);
 
             if (itemPtr == 0 && item != null) {
                 editAndGetItem(item.id, i -> i.removeSlot(slotType, slotNumber));

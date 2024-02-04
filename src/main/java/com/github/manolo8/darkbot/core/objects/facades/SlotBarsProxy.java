@@ -38,11 +38,11 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
 
     @Override
     public void update() {
-        this.categoryBar.update(API.readMemoryLong(address + 88));
+        this.categoryBar.update(API.readLong(address + 88));
 
-        this.proActionBar.update(API.readMemoryLong(address + 112));
-        this.premiumBar.update(API.readMemoryLong(address + 104));
-        this.standardBar.update(API.readMemoryLong(address + 96));
+        this.proActionBar.update(API.readLong(address + 112));
+        this.premiumBar.update(API.readLong(address + 104));
+        this.standardBar.update(API.readLong(address + 96));
     }
 
     public boolean isCategoryBarVisible() {

@@ -63,10 +63,10 @@ public class GroupManager extends Gui implements GroupAPI {
 
         long groupAddress = main.facadeManager.group.address;
         if (groupAddress == 0) return;
-        group.update(API.readMemoryLong(groupAddress + 0x30));
+        group.update(API.readLong(groupAddress + 0x30));
 
-        pinging = API.readMemoryBoolean(groupAddress + 0x40);
-        inviteDict.update(API.readMemoryLong(groupAddress + 0x48));
+        pinging = API.readBoolean(groupAddress + 0x40);
+        inviteDict.update(API.readLong(groupAddress + 0x48));
 
         long groupMediatorAddress = main.facadeManager.groupMediator.address;
         isBlockingInvites = API.readBoolean(groupMediatorAddress, 0x30, 0xD4);

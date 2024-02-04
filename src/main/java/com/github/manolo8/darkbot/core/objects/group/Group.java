@@ -34,19 +34,19 @@ public class Group extends Updatable.Auto {
 
     @Override
     public void update() {
-        id = API.readMemoryInt(address + 0x1F);
+        id = API.readInt(address + 0x1F);
 //        size = API.readMemoryInt(address + 0x23);
-        maxSize = API.readMemoryInt(address + 0x27);
-        isOpen = API.readMemoryBoolean(address + 0x2B);
+        maxSize = API.readInt(address + 0x27);
+        isOpen = API.readBoolean(address + 0x2B);
 
         if (!isValid()) {
             if (!allMembers.isEmpty()) reset();
             return;
         }
 
-        long selectedAddr = API.readMemoryLong(address + 0x3F);
+        long selectedAddr = API.readLong(address + 0x3F);
         synchronized (Main.UPDATE_LOCKER) {
-            allMembers.update(API.readMemoryLong(address + 0x37));
+            allMembers.update(API.readLong(address + 0x37));
         }
 
         heroMember = allMembers.stream().filter(m -> m.id == hero.id).findAny().orElse(null);

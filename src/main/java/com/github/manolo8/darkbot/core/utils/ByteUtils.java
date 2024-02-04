@@ -315,23 +315,23 @@ public class ByteUtils {
 
             long table = Main.API.readLong(mainAddress, 0x10, 0x10, 0x18);
             table = Main.API.readLong(table, 0x10, 0x28);
-            int capacity = Main.API.readMemoryInt(table + 8) * 8; // capacity generally is always the same.
+            int capacity = Main.API.readInt(table + 8) * 8; // capacity generally is always the same.
 
             if (capacity > MAX_TABLE_SIZE) return 0;
 
             if (tableData == null || tableData.length < capacity) {
                 tableData = new byte[capacity];
-                Main.API.readMemory(table + 0x10, tableData, capacity);
+                Main.API.readBytes(table + 0x10, tableData, capacity);
                 timer.activate();
 
             } else if (timer.tryActivate())
-                Main.API.readMemory(table + 0x10, tableData, capacity);
+                Main.API.readBytes(table + 0x10, tableData, capacity);
 
             for (int i = 0; i < capacity; i += 8) {
                 long entry = ByteUtils.getLong(tableData, i);
                 if (entry == 0) continue;
 
-                long closure = Main.API.readMemoryLong(entry + 0x20);
+                long closure = Main.API.readLong(entry + 0x20);
                 if (closure == 0 || closure == 0x200000001L) continue;
 
                 if (pattern.test(closure)) return closure;

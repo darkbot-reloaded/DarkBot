@@ -42,8 +42,8 @@ public class EffectManager implements Manager, API.Singleton {
 
         for (int i = 0; i < effectsPtr.size(); i++) {
             long addr = effectsPtr.getLong(i);
-            int id = API.readMemoryInt(addr + 0x24);
-            long entity = API.readMemoryLong(addr + 0x48);
+            int id = API.readInt(addr + 0x24);
+            long entity = API.readLong(addr + 0x48);
 
             effects.computeIfAbsent(entity, list -> new ArrayList<>()).add(id);
         }

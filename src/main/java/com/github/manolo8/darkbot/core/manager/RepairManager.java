@@ -128,7 +128,7 @@ public class RepairManager implements Manager, RepairAPI {
             if (userDataAddress != 0) // only if hero was alive
                 deathLocation = main.hero.getLocationInfo().getCurrent().copy();
 
-            killerName = API.readMemoryStringFallback(API.readMemoryLong(repairAddress + 0x68), null);
+            killerName = API.readString(repairAddress, null, 0x68);
 
             String killerMessage = killerName == null || killerName.isEmpty()
                     ? "You were destroyed by a radiation/mine/unknown"
@@ -139,8 +139,8 @@ public class RepairManager implements Manager, RepairAPI {
                 writeToFile("deaths_" + LogUtils.START_TIME, formatLogMessage(killerMessage));
         }
 
-        repairOptions.update(API.readMemoryLong(repairAddress + 0x58));
-        repairTypes.update(API.readMemoryLong(repairAddress + 0x60));
+        repairOptions.update(API.readLong(repairAddress + 0x58));
+        repairTypes.update(API.readLong(repairAddress + 0x60));
     }
 
     // return true if clicked, false if should wait
@@ -160,7 +160,7 @@ public class RepairManager implements Manager, RepairAPI {
         if (System.currentTimeMillis() - afterAvailableWait < 1000) return false;
 
         if (repairOption != -1)
-            API.writeMemoryLong(repairAddress + 32, repairOption);
+            API.writeLong(repairAddress + 32, repairOption);
 
         int selected = API.readInt(repairAddress + 32);
         // if any of these is selected, call this method with null param may result in crash
@@ -179,13 +179,13 @@ public class RepairManager implements Manager, RepairAPI {
     // basically hero shouldn't move if this sprite has childrens
     private final FlashListLong blocker = FlashListLong.ofSprite();
     private boolean isAlive() {
-        if (repairAddress != 0) return !API.readMemoryBoolean(repairAddress + 0x28);
+        if (repairAddress != 0) return !API.readBoolean(repairAddress + 0x28);
 
         if (main.mapManager.mapAddress == 0 || main.guiManager.lostConnection.isVisible()
                 || main.guiManager.connecting.isVisible() || (main.hero.address != 0 && main.hero.id != 0))
             return true;
 
-        if (userDataAddress == 0 || API.readMemoryBoolean(userDataAddress + 0x4C)) {
+        if (userDataAddress == 0 || API.readBoolean(userDataAddress + 0x4C)) {
             blocker.update(API.readLong(screenManager, 0x58));
             if (blocker.isEmpty()) return true;
 
@@ -244,7 +244,7 @@ public class RepairManager implements Manager, RepairAPI {
     }
 
     private boolean repairClosurePattern(long addr) {
-        API.readMemory(addr + 48, patternCache);
+        API.readBytes(addr + 48, patternCache);
 
         return ByteUtils.getInt(patternCache, 0) == 0
                 && ByteUtils.getInt(patternCache, 4) == 1

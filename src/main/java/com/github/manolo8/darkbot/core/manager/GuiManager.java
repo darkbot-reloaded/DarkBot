@@ -180,7 +180,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
         botInstaller.guiManagerAddress.add(value -> {
             guiAddress = value;
-            guis.update(API.readMemoryLong(guiAddress + 112));
+            guis.update(API.readLong(guiAddress + 112));
 
             guis.values().forEach(Gui::reset);
             checks = LoadStatus.WAITING;

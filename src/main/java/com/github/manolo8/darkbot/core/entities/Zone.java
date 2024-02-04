@@ -23,7 +23,7 @@ public class Zone extends Entity implements eu.darkbot.api.game.entities.Zone {
     public void update() {
         super.update();
 
-        if (points.updateAndReport(API.readMemoryLong(address + 216)) && points.size() >= 3) {
+        if (points.updateAndReport(API.readLong(address + 216)) && points.size() >= 3) {
             zoneArea.invalidateBounds();
             useBounds = isRectangle(zoneArea);
         }
@@ -60,8 +60,8 @@ public class Zone extends Entity implements eu.darkbot.api.game.entities.Zone {
         @Override
         public boolean updateAndReport() {
             if (address == 0) return false;
-            double newX = API.readMemoryDouble(address + 32),
-                    newY = API.readMemoryDouble(address + 40);
+            double newX = API.readDouble(address + 32),
+                    newY = API.readDouble(address + 40);
 
             if (this.x == newX && this.y == newY) return false;
             this.x = newX;

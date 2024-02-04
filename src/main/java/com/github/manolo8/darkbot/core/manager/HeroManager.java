@@ -111,7 +111,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     }
 
     public void tick() {
-        long address = API.readMemoryLong(staticAddress);
+        long address = API.readLong(staticAddress);
         if (this.address != address) update(address);
 
         update();
@@ -128,7 +128,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         config = settings.config;
         configuration = Configuration.of(config);
 
-        long petAddress = API.readMemoryLong(address + 176);
+        long petAddress = API.readLong(address + 176);
         if (petAddress != pet.address) pet.update(petAddress);
         pet.update();
 
@@ -146,8 +146,8 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     public void update(long address) {
         super.update(address);
 
-        pet.update(API.readMemoryLong(address + 176));
-        id = API.readMemoryInt(address + 56);
+        pet.update(API.readLong(address + 176));
+        id = API.readInt(address + 56);
     }
 
     public boolean hasTarget() {

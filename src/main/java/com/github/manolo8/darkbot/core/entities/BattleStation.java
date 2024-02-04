@@ -125,8 +125,8 @@ public class BattleStation
             super.update(address);
 
             deflectorId = API.readInt(address + 112);
-            hullId = API.readMemoryInt(address + 116);
-            info.update(API.readMemoryLong(address + 120));
+            hullId = API.readInt(address + 116);
+            info.update(API.readLong(address + 120));
 
             deflectorExpansion = API.readDouble(address + 136);
             hullExpansion = API.readDouble(address + 144);
@@ -167,10 +167,10 @@ public class BattleStation
         public void update(long address) {
             super.update(address);
             this.moduleIdTemp = API.readLong(address + 112);
-            this.moduleId = API.readMemoryString(moduleIdTemp);
+            this.moduleId = API.readString(moduleIdTemp);
             this.moduleType = Type.of(moduleId);
 
-            info.update(API.readMemoryLong(address + 120));
+            info.update(API.readLong(address + 120));
             health.update(findInTraits(TraitPattern::ofHealth));
             lockPtr = findInTraits(TraitPattern::ofLockType);
 

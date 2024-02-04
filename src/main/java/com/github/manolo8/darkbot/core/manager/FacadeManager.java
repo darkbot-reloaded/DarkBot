@@ -115,7 +115,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
     @Override
     public void install(BotInstaller botInstaller) {
         botInstaller.mainAddress.add(mainAddr -> {
-            long facade = API.readMemoryLong(mainAddr + 544);
+            long facade = API.readLong(mainAddr + 544);
 
             commands.update(API.readLong(facade, 0x28, 0x20));
             proxies.update(API.readLong(facade, 0x38, 0x30));

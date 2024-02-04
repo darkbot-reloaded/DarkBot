@@ -21,7 +21,7 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
             return;
         }
 
-        long data = API.readMemoryPtr(address + 48);
+        long data = API.readAtom(address + 48);
 
         this.highScore = API.readInt(data + 64);
         this.currentRift = API.readInt(data, 80, 40);
@@ -29,8 +29,8 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
         this.cpuCount = API.readInt(data, 96, 40);
         this.canEquip = API.readBoolean(data, 0x0B0, 0x20);
 
-        rewardItems.update(API.readMemoryPtr(data + 0x88));
-        inventoryItems.update(API.readMemoryPtr(data + 0x0A0));
+        rewardItems.update(API.readAtom(data + 0x88));
+        inventoryItems.update(API.readAtom(data + 0x0A0));
     }
 
     @Override
@@ -81,12 +81,12 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
             }
 
             this.equipped = API.readBoolean(address + 0x24);
-            long itemData = API.readMemoryPtr(address + 0x30);
+            long itemData = API.readAtom(address + 0x30);
             this.upgradeLevel = API.readInt(itemData + 0x2C);
 
             this.lootId = API.readString(itemData, 0x48);
 
-            itemStats.update(API.readMemoryLong(address + 0x38));
+            itemStats.update(API.readLong(address + 0x38));
         }
 
         @Override

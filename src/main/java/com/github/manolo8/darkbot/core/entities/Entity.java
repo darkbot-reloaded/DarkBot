@@ -57,8 +57,8 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
 
     public boolean isInvalid(long mapAddress) {
         if (address == 0) return true;
-        int  id        = API.readMemoryInt(address + 56);
-        long container = API.readMemoryLong(address + 96);
+        int  id        = API.readInt(address + 56);
+        long container = API.readLong(address + 96);
 
         return container != mapAddress || this.id != id;
     }
@@ -72,8 +72,8 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     public void update(long address) {
         super.update(address);
 
-        this.locationInfo.update(API.readMemoryLong(address + 64));
-        this.traits.update(API.readMemoryLong(address + 48));
+        this.locationInfo.update(API.readLong(address + 64));
+        this.traits.update(API.readLong(address + 48));
 
         this.clickable.update(findInTraits(TraitPattern::ofClickable));
     }

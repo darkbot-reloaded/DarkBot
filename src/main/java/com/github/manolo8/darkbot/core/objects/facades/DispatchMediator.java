@@ -19,14 +19,14 @@ public class DispatchMediator extends Updatable implements API.Singleton {
 
     @Override
     public void update() {
-        long dispatchRetrieverData = API.readMemoryPtr(address + 0x50);
-        availableSlots = API.readMemoryInt(dispatchRetrieverData + 0x40);
-        totalSlots = API.readMemoryInt(dispatchRetrieverData + 0x44);
+        long dispatchRetrieverData = API.readAtom(address + 0x50);
+        availableSlots = API.readInt(dispatchRetrieverData + 0x40);
+        totalSlots = API.readInt(dispatchRetrieverData + 0x44);
 
-        availableRetrievers.update(API.readMemoryPtr(dispatchRetrieverData + 0x58));
-        inProgressRetrievers.update(API.readMemoryPtr(dispatchRetrieverData + 0x60));
+        availableRetrievers.update(API.readAtom(dispatchRetrieverData + 0x58));
+        inProgressRetrievers.update(API.readAtom(dispatchRetrieverData + 0x60));
 
-        selectedRetriever.update(API.readMemoryPtr(dispatchRetrieverData + 0x68));
+        selectedRetriever.update(API.readAtom(dispatchRetrieverData + 0x68));
     }
 
     @Getter
@@ -44,22 +44,22 @@ public class DispatchMediator extends Updatable implements API.Singleton {
         public void update() {
             if (address <= 0) return;
 
-            this.isAvailable = API.readMemoryBoolean(address + 0x20);
+            this.isAvailable = API.readBoolean(address + 0x20);
 
-            long dispatchModule = API.readMemoryPtr(address + 0x30);
-            this.slotId = API.readMemoryInt(dispatchModule + 0x24); // 0 for available, 1 to 5 for in-progress
-            this.duration = API.readMemoryDouble(dispatchModule + 0x28); // time left in seconds, or total time
+            long dispatchModule = API.readAtom(address + 0x30);
+            this.slotId = API.readInt(dispatchModule + 0x24); // 0 for available, 1 to 5 for in-progress
+            this.duration = API.readDouble(dispatchModule + 0x28); // time left in seconds, or total time
 
-            long retrieverDefinition = API.readMemoryPtr(address + 0x38);
-            this.id = API.readMemoryInt(retrieverDefinition + 0x20); // 1 to 18
-            this.tier = API.readMemoryInt(retrieverDefinition + 0x24); // 1, 2, 3, 4, 5 or 6
+            long retrieverDefinition = API.readAtom(address + 0x38);
+            this.id = API.readInt(retrieverDefinition + 0x20); // 1 to 18
+            this.tier = API.readInt(retrieverDefinition + 0x24); // 1, 2, 3, 4, 5 or 6
             this.iconId = API.readString(retrieverDefinition, 0x30); // dispatch_retriever_r01
             this.name = API.readString(retrieverDefinition, 0x38); // R-01
             this.type = API.readString(retrieverDefinition, 0x40); // resource
             this.descriptionId = API.readString(retrieverDefinition, 0x48); // dispatch_label_description_retriever_r01
-            this.costList.update(API.readMemoryPtr(retrieverDefinition + 0x50));
+            this.costList.update(API.readAtom(retrieverDefinition + 0x50));
 
-            this.instantCost.update(API.readMemoryPtr(retrieverDefinition + 0x58));
+            this.instantCost.update(API.readAtom(retrieverDefinition + 0x58));
         }
 
     }
@@ -73,7 +73,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
         @Override
         public void update() {
             if (address <= 0) return;
-            this.amount = API.readMemoryInt(address + 0x20);
+            this.amount = API.readInt(address + 0x20);
             this.lootId = API.readString(address, 0x28);
         }
 
@@ -82,6 +82,6 @@ public class DispatchMediator extends Updatable implements API.Singleton {
     public void overrideSelectedRetriever(DispatchAPI.Retriever retriever) {
         if (selectedRetriever == retriever) return;
         long value = retriever == null ? 0L : ((DispatchMediator.Retriever) retriever).address;
-        Main.API.writeLong(Main.API.readMemoryPtr(address + 0x50) + 0x68, value);
+        Main.API.writeLong(Main.API.readAtom(address + 0x50) + 0x68, value);
     }
 }

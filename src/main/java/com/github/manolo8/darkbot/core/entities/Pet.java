@@ -26,7 +26,7 @@ public class Pet extends Ship implements eu.darkbot.api.game.entities.Pet {
     public void update() {
         if (address == 0) return;
         super.update();
-        id = API.readMemoryInt(address + 56);
+        id = API.readInt(address + 56);
         level = API.readInt(address, 0x130, 0x28, 0x28);
 
         int newPlayerId = API.readInt(address, 0x130, 0x30, 0x28);

@@ -117,7 +117,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
     public void update(long address) {
         super.update(address);
         this.clear();
-        this.entitiesArr.update(API.readMemoryLong(address + 40));
+        this.entitiesArr.update(API.readLong(address + 40));
     }
 
     private void onEntityCreate(Entity entity) {
@@ -143,7 +143,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
         entitiesArr.update();
         for (int i = 0; i < entitiesArr.size(); i++) {
             long entityPtr = entitiesArr.getLong(i);
-            int id = API.readMemoryInt(entityPtr + 56);
+            int id = API.readInt(entityPtr + 56);
             if (ids.add(id))
                 entityRegistry.sendEntity(id, entityPtr);
         }

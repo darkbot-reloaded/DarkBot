@@ -55,6 +55,10 @@ public interface NativeUpdatable {
         return Main.API.readLong(getAddress(), modifyOffset(o1), o2, o3, o4);
     }
 
+    default long readLong(int o1, int o2, int o3, int o4, int o5) {
+        return Main.API.readLong(getAddress(), modifyOffset(o1), o2, o3, o4, o5);
+    }
+
     default long readLong(int... offsets) {
         return Main.API.readLong(getAddress(), modifyOffset(offsets));
     }
@@ -141,8 +145,8 @@ public interface NativeUpdatable {
         return Main.API.readString(getAddress(), modifyOffset(o1), o2, o3, o4);
     }
 
-    default String readString(int... offsets) {
-        return Main.API.readString(getAddress(), modifyOffset(offsets));
+    default String readString(int o1, int o2, int o3, int o4, int o5) {
+        return Main.API.readString(getAddress(), modifyOffset(o1), o2, o3, o4, o5);
     }
 
     default String readString(String fallback, int o1) {
@@ -156,15 +160,13 @@ public interface NativeUpdatable {
 
     default String readString(String fallback, int o1, int o2, int o3) {
         return Main.API.readString(getAddress(), fallback, modifyOffset(o1), o2, o3);
-
     }
     default String readString(String fallback, int o1, int o2, int o3, int o4) {
         return Main.API.readString(getAddress(), fallback, modifyOffset(o1), o2, o3, o4);
-
     }
 
-    default String readString(String fallback, int... offsets) {
-        return Main.API.readString(getAddress(), fallback, modifyOffset(offsets));
+    default String readString(String fallback, int o1, int o2, int o3, int o4, int o5) {
+        return Main.API.readString(getAddress(), fallback, modifyOffset(o1), o2, o3, o4, o5);
     }
 
     default void replaceInt(int oldValue, int newValue, int offset) {

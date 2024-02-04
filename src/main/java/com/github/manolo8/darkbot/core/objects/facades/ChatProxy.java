@@ -34,8 +34,8 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
 
     @Override
     public void update() {
-        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
-        this.chats.update(API.readMemoryLong(data + 64));
+        long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;
+        this.chats.update(API.readLong(data + 64));
 
         for (ChatRoom chat : chats) {
             if (chat.messagesArr.size() > 150) continue;
@@ -51,7 +51,7 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
         @Override
         public void update() {
             this.chatName = API.readString(address, 56);
-            this.messagesArr.update(API.readMemoryLong(address + 80));
+            this.messagesArr.update(API.readLong(address + 80));
         }
     }
 

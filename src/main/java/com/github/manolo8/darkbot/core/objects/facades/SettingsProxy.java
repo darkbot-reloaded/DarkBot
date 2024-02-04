@@ -69,13 +69,13 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
 
     @Override
     public void update() {
-        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
-        keycodesDictionary.update(API.readMemoryLong(data + 240));
+        long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;
+        keycodesDictionary.update(API.readLong(data + 240));
 
         Character[] keycodes = this.keycodes;
         for (int i = 0; i < keycodesDictionary.size() && i < keycodes.length; i++) {
             long addr = keycodesDictionary.getLong(i);
-            int arrSize = API.readMemoryInt(addr + 64);
+            int arrSize = API.readInt(addr + 64);
             if (arrSize <= 0) {
                 keycodes[i] = null;
                 continue;

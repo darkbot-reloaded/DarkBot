@@ -356,7 +356,7 @@ public class PetManager extends Gui implements PetAPI {
         temp = getSpriteChild(temp, 0);
 
         petBuffsIds.clear();
-        forEachSpriteChild(temp, l -> petBuffsIds.add(API.readMemoryInt(l + 168)));
+        forEachSpriteChild(temp, l -> petBuffsIds.add(API.readInt(l + 168)));
     }
 
     private void updateCurrentModule(long elementsListAddress) {
@@ -396,7 +396,7 @@ public class PetManager extends Gui implements PetAPI {
 
     private final SpriteObject locatorTab = new SpriteObject();
     private void updateNpcLocatorList(long gearsSprite) {
-        locatorWrapper.update(API.readMemoryLong(gearsSprite + 168));
+        locatorWrapper.update(API.readLong(gearsSprite + 168));
 
         long locatorBaseAddr = locatorWrapper.getOrDefault(0, 0);
         if (locatorBaseAddr == 0) {
@@ -406,7 +406,7 @@ public class PetManager extends Gui implements PetAPI {
         locatorTab.update(locatorBaseAddr);
         locatorTab.update();
         int oldSize = locatorList.size();
-        locatorList.update(API.readMemoryLong(locatorBaseAddr + 224));
+        locatorList.update(API.readLong(locatorBaseAddr + 224));
 
         // Sometimes the NPC list will be half-updated and there may be way less npcs than before.
         // If we have a recent update and list is smaller, we'll ignore updating for a bit
@@ -704,9 +704,9 @@ public class PetManager extends Gui implements PetAPI {
             sprite.update(address);
             sprite.update();
 
-            int id = API.readMemoryInt(address + 172);
-            int parentId = API.readMemoryInt(address + 176); //assume, -1 if none
-            String name = API.readMemoryString(API.readMemoryLong(address + 200));
+            int id = API.readInt(address + 172);
+            int parentId = API.readInt(address + 176); //assume, -1 if none
+            String name = API.readString(API.readLong(address + 200));
 
             if (this.id == id && this.parentId == parentId && this.name.equals(name)) return false;
 

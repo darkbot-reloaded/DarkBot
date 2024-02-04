@@ -29,7 +29,7 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
         String oldName = playerInfo.username;
         super.update();
 
-        npcId = API.readMemoryInt(API.readMemoryLong(address + 192) + 80);
+        npcId = API.readInt(API.readLong(address + 192) + 80);
         ish = hasEffect(EffectManager.Effect.NPC_ISH);
 
         if (!Objects.equals(oldName, playerInfo.username)) {

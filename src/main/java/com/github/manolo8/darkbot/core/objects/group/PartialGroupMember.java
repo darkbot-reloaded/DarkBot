@@ -15,8 +15,8 @@ public class PartialGroupMember extends Updatable.Auto implements eu.darkbot.api
 
     @Override
     public void update() {
-        id         = API.readMemoryInt(address + 0x20);
-        username   = API.readMemoryStringFallback(API.readMemoryLong(address + 0x68), null);
+        id         = API.readInt(address + 0x20);
+        username   = API.readString(API.readLong(address + 0x68), null);
     }
 
     @Override

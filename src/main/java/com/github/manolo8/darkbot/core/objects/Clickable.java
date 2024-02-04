@@ -39,15 +39,15 @@ public class Clickable extends Updatable {
      * @return prevent swf crash
      */
     public boolean isInvalid() {
-        return defRadius <= 0 || address == 0 || API.readMemoryLong(address) != BotInstaller.SCRIPT_OBJECT_VTABLE;
+        return defRadius <= 0 || address == 0 || API.readLong(address) != BotInstaller.SCRIPT_OBJECT_VTABLE;
     }
 
     @Override
     public void update() {
-        if (address == 0 || API.readMemoryLong(address) != BotInstaller.SCRIPT_OBJECT_VTABLE) return;
+        if (address == 0 || API.readLong(address) != BotInstaller.SCRIPT_OBJECT_VTABLE) return;
 
-        this.radius = this.defRadius = API.readMemoryInt(address + 40);
-        this.priority = this.defPriority = API.readMemoryInt(address + 44);
+        this.radius = this.defRadius = API.readInt(address + 40);
+        this.priority = this.defPriority = API.readInt(address + 44);
         this.enabled = API.readBoolean(address, 64, 32);
     }
 
@@ -55,7 +55,7 @@ public class Clickable extends Updatable {
     public void update(long address) {
         super.update(address);
         if (address == 0) return;
-        this.radius = defRadius = API.readMemoryInt(address + 40);
-        this.priority = defPriority = API.readMemoryInt(address + 44);
+        this.radius = defRadius = API.readInt(address + 40);
+        this.priority = defPriority = API.readInt(address + 44);
     }
 }

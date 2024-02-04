@@ -19,15 +19,15 @@ public class EternalGateProxy extends Updatable implements EternalGateAPI {
     public void update() {
         if (address == 0) return;
 
-        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
+        long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;
 
-        this.currentWave   = API.readMemoryInt(data + 0x40);
-        this.furthestWave  = API.readMemoryInt(data + 0x44);
-        this.keys          = API.readMemoryInt(API.readMemoryLong(data + 0x58) + 0x28);
-        this.boosterPoints = API.readMemoryInt(API.readMemoryLong(data + 0x60) + 0x28);
+        this.currentWave   = API.readInt(data + 0x40);
+        this.furthestWave  = API.readInt(data + 0x44);
+        this.keys          = API.readInt(API.readLong(data + 0x58) + 0x28);
+        this.boosterPoints = API.readInt(API.readLong(data + 0x60) + 0x28);
 
-        this.activeBoosters.update(API.readMemoryLong( data + 0x68));
-        this.boostersOptions.update(API.readMemoryLong(data + 0x70));
+        this.activeBoosters.update(API.readLong( data + 0x68));
+        this.boostersOptions.update(API.readLong(data + 0x70));
     }
 
     public static class Booster extends Auto implements EternalGateAPI.Booster {
@@ -36,8 +36,8 @@ public class EternalGateProxy extends Updatable implements EternalGateAPI {
 
         @Override
         public void update() {
-            this.percentage = API.readMemoryInt(address + 0x20);
-            this.category   = API.readMemoryString(API.readMemoryLong(address + 0x28));
+            this.percentage = API.readInt(address + 0x20);
+            this.category   = API.readString(API.readLong(address + 0x28));
         }
 
         @Override

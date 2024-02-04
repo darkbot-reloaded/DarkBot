@@ -90,14 +90,14 @@ public class ObjArray extends SwfPtrCollection {
 
     @Override
     public void update() {
-        size = API.readMemoryInt(address + sizeOffset);
+        size = API.readInt(address + sizeOffset);
 
         if (size < 0 || size > MAX_SIZE || address == 0) return;
         if (elements.length < size) elements = new long[Math.min((int) (size * 1.25), MAX_SIZE)];
 
-        long table = API.readMemoryLong(address + tableOffset) + bytesOffset;
+        long table = API.readLong(address + tableOffset) + bytesOffset;
         int length = size * 8;
-        API.readMemory(table, BUFFER, length);
+        API.readBytes(table, BUFFER, length);
 
         for (int i = 0, offset = 0; offset < length && i < size; offset += 8) {
             long value = ByteUtils.getLong(BUFFER, offset);

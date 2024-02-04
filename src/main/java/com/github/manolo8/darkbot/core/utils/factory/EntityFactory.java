@@ -149,11 +149,11 @@ public enum EntityFactory implements EntityBuilder {
     }
 
     private static boolean isShip(String asset, long address) {
-        int id      = API.readMemoryInt(address + 56);
-        int isNpc   = API.readMemoryInt(address + 112);
-        int visible = API.readMemoryInt(address + 116);
-        int c       = API.readMemoryInt(address + 120);
-        int d       = API.readMemoryInt(address + 124);
+        int id      = API.readInt(address + 56);
+        int isNpc   = API.readInt(address + 112);
+        int visible = API.readInt(address + 116);
+        int c       = API.readInt(address + 120);
+        int d       = API.readInt(address + 124);
 
         return id > 0 && (isNpc == 1 || isNpc == 0) &&
                 (visible == 1 || visible == 0) && (c == 1 || c == 0) && d == 0;
@@ -165,12 +165,12 @@ public enum EntityFactory implements EntityBuilder {
     }
 
     private static EntityBuilder defineShipType(long address) {
-        int isNpc = API.readMemoryInt(address + 112);
+        int isNpc = API.readInt(address + 112);
         return isNpc == 1 ? NPC : isNpc == 0 ? PLAYER : createUnknown(null);
     }
 
     private static Portal getOrCreatePortal(int id, long address) {
-        int portalType = API.readMemoryInt(address + Portal.TYPE_OFFSET);
+        int portalType = API.readInt(address + Portal.TYPE_OFFSET);
         int x          = (int) API.readDouble(address, 64, 32);
         int y          = (int) API.readDouble(address, 64, 40);
 

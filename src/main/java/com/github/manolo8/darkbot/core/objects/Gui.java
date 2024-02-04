@@ -35,12 +35,12 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
         if (address == 0) return;
         super.update();
 
-        pos.update(API.readMemoryLong(addressInfo + 9 * 8));
-        size.update(API.readMemoryLong(addressInfo + 10 * 8));
+        pos.update(API.readLong(addressInfo + 9 * 8));
+        size.update(API.readLong(addressInfo + 10 * 8));
         // 11 * 8 = FeatureDefinitionVo
         // 12 * 8 = help text
         // 13 * 8 = tool tip
-        minimized.update(API.readMemoryLong(addressInfo + 14 * 8));
+        minimized.update(API.readLong(addressInfo + 14 * 8));
 
         width = (int) Math.round(size.x);
         height = (int) Math.round(size.y);
@@ -50,13 +50,13 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
         x = super.x;
         y = super.y;
 
-        visible = API.readMemoryBoolean(addressInfo + 32); // Maximized
+        visible = API.readBoolean(addressInfo + 32); // Maximized
         // API.readMemoryBoolean(addressInfo + 36); // Toggle maximize (set to true/false when pressing H to show/hide)
         // API.readMemoryBoolean(addressInfo + 40); // Maximized changed (set to true when toggling maximized)
         // API.readMemoryBoolean(addressInfo + 44); // Settings on server
         // API.readMemoryBoolean(addressInfo + 48); // show on top
 
-        isTweening = API.readMemoryBoolean(address + 0xC4);
+        isTweening = API.readBoolean(address + 0xC4);
         minimizable = API.readBoolean(featureWindowDefinition + 40);
         closable = API.readBoolean(featureWindowDefinition + 32);
     }
@@ -67,7 +67,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
             reset();
         } else {
             super.update(address);
-            this.addressInfo = API.readMemoryLong(address + 496);
+            this.addressInfo = API.readLong(address + 496);
             this.featureWindowDefinition = API.readLong(addressInfo + 88);
             this.update = System.currentTimeMillis();
         }

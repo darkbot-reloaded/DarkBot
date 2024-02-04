@@ -113,7 +113,7 @@ public class CategoryBar extends MenuBar {
 
         @Override
         public void update() {
-            this.items.update(API.readMemoryLong(address + 40));
+            this.items.update(API.readLong(address + 40));
         }
 
         @Override
