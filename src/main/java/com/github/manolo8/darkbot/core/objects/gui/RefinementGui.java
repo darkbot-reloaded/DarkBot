@@ -12,7 +12,7 @@ import java.util.EnumMap;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class RefinementGui extends Gui implements API.Singleton {
-    private final EnumMap<OreAPI.UpgradePlace, Upgrade> upgrades = new EnumMap<>(OreAPI.UpgradePlace.class);
+    private final EnumMap<OreAPI.UpgradeSlot, Upgrade> upgrades = new EnumMap<>(OreAPI.UpgradeSlot.class);
     private final FlashListLong oresArray = FlashListLong.ofArray();
 
     private final int[] ores;
@@ -26,8 +26,8 @@ public class RefinementGui extends Gui implements API.Singleton {
         return ores[ore.ordinal()];
     }
 
-    public OreAPI.Upgrade getUpgrade(OreAPI.UpgradePlace upgradePlace) {
-        return upgrades.get(upgradePlace);
+    public OreAPI.Upgrade getUpgrade(OreAPI.UpgradeSlot upgradeSlot) {
+        return upgrades.get(upgradeSlot);
     }
 
     @Override
@@ -54,12 +54,12 @@ public class RefinementGui extends Gui implements API.Singleton {
             if (API.readInt(addr, 0xA8) != 46) continue;
 
             int typeId = API.readInt(addr, 0xB0);
-            OreAPI.UpgradePlace upgradePlace = OreAPI.UpgradePlace.of(typeId - 1);
-            if (upgradePlace != null) {
+            OreAPI.UpgradeSlot upgradeSlot = OreAPI.UpgradeSlot.of(typeId - 1);
+            if (upgradeSlot != null) {
                 OreAPI.Ore ore = OreAPI.Ore.of(API.readInt(addr, 0x118, 0xB8));
                 if (ore != null) {
                     int amount = API.readInt(addr, 0xF0);
-                    upgrades.computeIfAbsent(upgradePlace, u -> new Upgrade())
+                    upgrades.computeIfAbsent(upgradeSlot, u -> new Upgrade())
                             .set(ore, amount);
                 }
             }
