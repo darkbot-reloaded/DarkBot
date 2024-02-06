@@ -62,7 +62,7 @@ public class OreTradeGui extends Gui implements OreAPI {
 
     @Nullable
     @Override
-    public Upgrade getUpgrade(@NotNull OreAPI.UpgradePlace upgradePlace) {
-        return refinement.getUpgrade(upgradePlace);
+    public Upgrade getUpgrade(@NotNull OreAPI.UpgradeSlot upgradeSlot) {
+        return refinement.getUpgrade(upgradeSlot);
     }
 }
