@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import eu.darkbot.api.game.other.Locatable;
-import eu.darkbot.api.managers.MemoryAPI;
 import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.managers.WindowAPI;
 import org.intellij.lang.annotations.Language;
