@@ -83,10 +83,10 @@ public class ItemInfo extends Item {
             if (json.isJsonArray()) return context.deserialize(json, typeOfT);
             if (json.isJsonObject()) {
                 final JsonObject obj = json.getAsJsonObject();
-                return obj.keySet().stream().map(key -> {
-                    Map<String, Object> map = context.deserialize(obj.get(key), Map.class);
-                    map.put("level", key);
-                    return  map;
+                return obj.entrySet().stream().map(entry -> {
+                    Map<String, Object> map = context.deserialize(entry.getValue(), Map.class);
+                    map.put("level", entry.getKey());
+                    return map;
                 }).collect(Collectors.toList());
             }
             return null;
