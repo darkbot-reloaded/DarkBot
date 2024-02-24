@@ -7,9 +7,7 @@ import eu.darkbot.api.API;
  * <p>
  * Those calls should be generally safe,
  * every access violation error is handled by native code
- *
- * @deprecated Plugins should not rely on modifying memory to access functions, and should use other APIs instead.
- */
+*/
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.ExcessivePublicCount", "unused"})
 public interface MemoryAPI extends API.Singleton {
     long NULL = 0;
