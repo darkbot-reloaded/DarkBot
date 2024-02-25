@@ -139,6 +139,6 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
 
     @Override
     public Collection<Integer> getEffects() {
-        return main == null ? Collections.emptyList() : main.effectManager.getEffects(this);
+        return main == null ? Collections.emptySet() : main.effectManager.getEffects(this);
     }
 }
