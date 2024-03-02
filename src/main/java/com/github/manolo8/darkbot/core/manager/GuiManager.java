@@ -65,6 +65,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final Gui blacklightGate;
     public final Gui astralGate;
     public final Gui astralSelection;
+    public final Gui seasonPass;
     public final RefinementGui refinement;
     public final PetManager pet;
     public final OreTradeGui oreTrade;
@@ -130,6 +131,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.blacklightGate = register("eternal_blacklight");
         this.astralGate = register("rogue_lite");
         this.astralSelection = register("rogue_lite_selection");
+        this.seasonPass = register("seasonPass");
         this.refinement = register("refinement", RefinementGui.class);
         this.chat = register("chat", ChatGui.class);
         this.settingsGui = register("settings", SettingsGui.class);
