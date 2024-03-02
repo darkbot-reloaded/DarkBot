@@ -18,6 +18,10 @@ public abstract class Updatable implements NativeUpdatable {
         return address;
     }
 
+    public boolean isValid() {
+        return address != 0;
+    }
+
     /**
      * Updatable which automatically calls update() after an address change.
      * Unless you want different logic in address updates and normal updates, you should use this.
