@@ -19,6 +19,7 @@ import com.github.manolo8.darkbot.core.objects.facades.GauntletPlutusProxy;
 import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
 import com.github.manolo8.darkbot.core.objects.facades.NpcEventProxy;
+import com.github.manolo8.darkbot.core.objects.facades.QuestGiverMediator;
 import com.github.manolo8.darkbot.core.objects.facades.SeassonPassMediator;
 import com.github.manolo8.darkbot.core.objects.facades.QuestProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
@@ -95,6 +96,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
         registerMediator("dispatch_retriever", DispatchMediator.class);
         registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
         registerProxy("QuestProxy", QuestProxy.class);
+        registerMediator("QuestGiverWindowMediator", QuestGiverMediator.class);
         this.seassonPassMediator = registerMediator("seasonPass", SeassonPassMediator.class);
 
         npcEvents.put(EventType.GENERIC, this.npcEventProxy = registerProxy("npc_event", NpcEventProxy.class));
