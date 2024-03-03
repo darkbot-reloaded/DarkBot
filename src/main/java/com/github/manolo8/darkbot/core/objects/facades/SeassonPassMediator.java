@@ -96,6 +96,8 @@ public class SeassonPassMediator extends Updatable {
         private boolean goldLocked;
         private boolean oncePreMission;
 
+        private int status;
+
         @Getter(AccessLevel.NONE)
         private final QuestProxy.Quest quest = new Quest();
 
@@ -104,6 +106,15 @@ public class SeassonPassMediator extends Updatable {
             this.isGoldMission = readBoolean(20);
             this.goldLocked = readBoolean(24);
             this.oncePreMission = readBoolean(28);
+
+            long questStatus = API.readMemoryPtr(address + 0x48);
+
+            /**
+             * 0 = Not completed
+             * 2 = Gold locked
+             * 3 = Completed
+             */
+            this.status = API.readInt(questStatus + 0x20);
 
             this.quest.update(API.readMemoryPtr(address, 0x40));
         }
