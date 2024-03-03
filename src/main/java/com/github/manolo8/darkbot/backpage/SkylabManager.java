@@ -127,7 +127,8 @@ public class SkylabManager implements API.Singleton {
         Element currentModule = elements.first();
         Element footer = xPath("//[@class=skylab_module_footer]").evaluate(currentModule).getElements().first();
 
-        if (module instanceof Refinery refinery) {
+        if (module instanceof Refinery) {
+            Refinery refinery = (Refinery) module;
             refinery.efficiency = parseInt(xPath("//[@class=module_info_efficiency]/text()").evaluate(footer).get());
             refinery.countProduce = parseInt(xPath("//[@id*=content]/[@id*=overview_large]//[@class=ore_"+refinery.oreProduce.getName()+"]/strong/text()")
                     .evaluate(currentModule).get().replaceAll("\\D", ""));
@@ -135,14 +136,16 @@ public class SkylabManager implements API.Singleton {
                     .evaluate(currentModule).get().replaceAll("\\D", ""))));
         }
 
-        if (module instanceof Collector collector) {
+        if (module instanceof Collector) {
+            Collector collector = (Collector) module;
             collector.countProduce = parseInt(xPath("//[@id*=content]//[@class*=collector_info]/text()").evaluate(currentModule).get().split("-")[1]);
             collector.activeRobots = parseInt(xPath("//[@id=productivity_container]//[@id*=skylabActiveRobots]/text()").evaluate(currentModule).get());
             collector.pendingRobots = parseInt(xPath("//[@id=productivity_container]//[@id*=skylabPendingRobots]/text()").evaluate(currentModule).get());
             collector.robotBonus = parseInt(xPath("//[@id=productivity_container]//[@id*=skylabRobotBonus]/text()").evaluate(currentModule).get());
         }
 
-        if (module instanceof SolarModule solar) {
+        if (module instanceof SolarModule) {
+            SolarModule solar = (SolarModule) module;
             solar.producingEnergy = parseInt(xPath("//[@class='power skylab_font_power']/text()").evaluate(elements.prev().first()).get().split("/")[1]);
         }
 
@@ -151,18 +154,18 @@ public class SkylabManager implements API.Singleton {
         module.hasMaxLevel = xPath("//[@class=upgrade_container_max]/text()").evaluate(currentModule).get() != null;
         String state = xPath("//[@class*=module_info_active_state]/img/@src").evaluate(footer).get();
         switch (state.substring(state.lastIndexOf('/')+7, state.indexOf('?')-4)) {
-            case "on" -> {
+            case "on":
                 module.isActive = true;
                 module.isToggleStateAvailable = true;
-            }
-            case "off" -> {
+                break;
+            case "off":
                 module.isActive = false;
                 module.isToggleStateAvailable = true;
-            }
-            case "disabled" -> {
+                break;
+            case "disabled":
                 module.isToggleStateAvailable = false;
                 module.isActive = true;
-            }
+                break;
         }
         String timerConfig = xPath("//script[@language='javascript']/html()").evaluate(currentModule).get();
         timerConfig = timerConfig != null ? timerConfig.replaceAll("\\s+|\\n", " ") : "";
