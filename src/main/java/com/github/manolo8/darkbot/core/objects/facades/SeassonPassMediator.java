@@ -26,7 +26,9 @@ public class SeassonPassMediator extends Updatable {
     @Getter
     private boolean seassonPassAvailable = false;
 
-    private final FlashList<SeassonPassQuest> allQuests = FlashList.ofVector(SeassonPassQuest.class);
+    private final FlashList<SeassonPassQuest> dailyQuests = FlashList.ofVector(SeassonPassQuest.class);
+    private final FlashList<SeassonPassQuest> weeklyQuests = FlashList.ofVector(SeassonPassQuest.class);
+    private final FlashList<SeassonPassQuest> seassonQuests = FlashList.ofVector(SeassonPassQuest.class);
 
     @Override
     public void update() {
@@ -46,11 +48,24 @@ public class SeassonPassMediator extends Updatable {
         this.currentLevelInfo.update(API.readMemoryPtr(data + 0x68));
 
         long questDataAddr = API.readMemoryPtr(address + 0x78);
-        allQuests.update(API.readMemoryPtr(questDataAddr + 0x58));
+
+        // allQuests.update(API.readMemoryPtr(questDataAddr + 0x58));
+
+        dailyQuests.update(API.readMemoryPtr(questDataAddr + 0x60));
+        weeklyQuests.update(API.readMemoryPtr(questDataAddr + 0x68));
+        seassonQuests.update(API.readMemoryPtr(questDataAddr + 0x70));
+    }
+
+    public List<? extends SeassonPassQuest> getDailyQuests() {
+        return this.dailyQuests;
+    }
+
+    public List<? extends SeassonPassQuest> getWeeklyQuests() {
+        return this.weeklyQuests;
     }
 
     public List<? extends SeassonPassQuest> getSeassonQuests() {
-        return this.allQuests;
+        return this.seassonQuests;
     }
 
     @Getter
