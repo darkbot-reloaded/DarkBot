@@ -77,18 +77,18 @@ public class SeassonPassMediator extends Updatable {
     @Getter
     @ToString
     public class SeassonPassQuest extends Updatable {
-        private int isGoldMission;
-        private int goldLocked;
-        private int oncePreMission;
+        private boolean isGoldMission;
+        private boolean goldLocked;
+        private boolean oncePreMission;
 
         @Getter(AccessLevel.NONE)
         private final QuestProxy.Quest quest = new Quest();
 
         @Override
         public void update() {
-            this.isGoldMission = readInt(32);
-            this.goldLocked = readInt(36);
-            this.oncePreMission = readInt(40);
+            this.isGoldMission = readBoolean(20);
+            this.goldLocked = readBoolean(24);
+            this.oncePreMission = readBoolean(28);
 
             this.quest.update(API.readMemoryPtr(address, 0x40));
         }

@@ -64,6 +64,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
     public final WorldBossOverviewProxy worldBossOverview;
     public final Updatable group;
     public final Updatable groupMediator;
+    public final SeassonPassMediator seassonPassMediator;
 
     private final Map<EventType, NpcEventProxy> npcEvents = new HashMap<>();
 
@@ -94,7 +95,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
         registerMediator("dispatch_retriever", DispatchMediator.class);
         registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
         registerProxy("QuestProxy", QuestProxy.class);
-        registerMediator("seasonPass", SeassonPassMediator.class);
+        this.seassonPassMediator = registerMediator("seasonPass", SeassonPassMediator.class);
 
         npcEvents.put(EventType.GENERIC, this.npcEventProxy = registerProxy("npc_event", NpcEventProxy.class));
         npcEvents.put(EventType.AGATUS, registerProxy("agatus_event", NpcEventProxy.class));
