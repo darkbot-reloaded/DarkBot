@@ -30,10 +30,6 @@ public interface NativeUpdatable {
         return Main.API.readInt(getAddress(), modifyOffset(o1), o2, o3, o4);
     }
 
-    default int readInt(int... offsets) {
-        return Main.API.readInt(getAddress(), modifyOffset(offsets));
-    }
-
     // it is a native class which holds min[32], max[36] & value[40] members
     default int readIntHolder(int offset) {
         return readInt(offset, 40);
@@ -57,10 +53,6 @@ public interface NativeUpdatable {
 
     default long readLong(int o1, int o2, int o3, int o4, int o5) {
         return Main.API.readLong(getAddress(), modifyOffset(o1), o2, o3, o4, o5);
-    }
-
-    default long readLong(int... offsets) {
-        return Main.API.readLong(getAddress(), modifyOffset(offsets));
     }
 
     /**
@@ -102,10 +94,6 @@ public interface NativeUpdatable {
         return Main.API.readDouble(getAddress(), modifyOffset(o1), o2, o3, o4);
     }
 
-    default double readDouble(int... offsets) {
-        return Main.API.readDouble(getAddress(), modifyOffset(offsets));
-    }
-
     default boolean readBoolean(int o1) {
         return Main.API.readBoolean(getAddress(), modifyOffset(o1));
     }
@@ -122,13 +110,9 @@ public interface NativeUpdatable {
         return Main.API.readBoolean(getAddress(), modifyOffset(o1), o2, o3, o4);
     }
 
-    default boolean readBoolean(int... offsets) {
-        return Main.API.readBoolean(getAddress(), modifyOffset(offsets));
-    }
-
     /**
-     * @return the string or {@link eu.darkbot.api.managers.MemoryAPI#FALLBACK_STRING} if return value is null
-     * */
+     * @return the string or {@link com.github.manolo8.darkbot.core.MemoryAPI#FALLBACK_STRING} if return value is null
+     */
     default String readString(int o1) {
         return Main.API.readString(getAddress(), modifyOffset(o1));
     }
@@ -161,6 +145,7 @@ public interface NativeUpdatable {
     default String readString(String fallback, int o1, int o2, int o3) {
         return Main.API.readString(getAddress(), fallback, modifyOffset(o1), o2, o3);
     }
+
     default String readString(String fallback, int o1, int o2, int o3, int o4) {
         return Main.API.readString(getAddress(), fallback, modifyOffset(o1), o2, o3, o4);
     }
@@ -171,12 +156,5 @@ public interface NativeUpdatable {
 
     default void replaceInt(int oldValue, int newValue, int offset) {
         Main.API.replaceInt(getAddress() + modifyOffset(offset), oldValue, newValue);
-    }
-
-    private int[] modifyOffset(int... offsets) {
-        if (offsets.length > 0) {
-            offsets[0] = modifyOffset(offsets[0]);
-        }
-        return offsets;
     }
 }

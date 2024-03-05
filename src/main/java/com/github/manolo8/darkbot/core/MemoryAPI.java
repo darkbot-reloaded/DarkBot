@@ -2,14 +2,17 @@ package com.github.manolo8.darkbot.core;
 
 import eu.darkbot.api.API;
 
+import java.util.function.LongPredicate;
+
 /**
  * Provides access to read/write native memory
  * <p>
  * Those calls should be generally safe,
  * every access violation error is handled by native code
-*/
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.ExcessivePublicCount", "unused"})
+ */
 public interface MemoryAPI extends API.Singleton {
+    int BOOL_FALSE = 0, BOOL_TRUE = 1;
+
     long NULL = 0;
     long ATOM_KIND = 0b111L;
     long ATOM_MASK = ~ATOM_KIND;
@@ -43,15 +46,6 @@ public interface MemoryAPI extends API.Singleton {
         return readInt(readAtom(address, o1, o2, o3) + o4);
     }
 
-    default int readInt(long address, int... offsets) {
-        int i = 0;
-        for (; i < offsets.length - 1; i++) {
-            address = readLong(address + offsets[i]);
-        }
-
-        return readInt(address + offsets[i]);
-    }
-
     /**
      * Reads signed long value from memory.
      *
@@ -78,14 +72,6 @@ public interface MemoryAPI extends API.Singleton {
 
     default long readLong(long address, int o1, int o2, int o3, int o4, int o5) {
         return readLong(readLong(address, o1, o2, o3, o4) + o5);
-    }
-
-    default long readLong(long address, int... offsets) {
-        for (int offset : offsets) {
-            address = readLong(address + offset);
-        }
-
-        return address;
     }
 
     default long readAtom(long address) {
@@ -136,15 +122,6 @@ public interface MemoryAPI extends API.Singleton {
         return readDouble(readAtom(address, o1, o2, o3) + o4);
     }
 
-    default double readDouble(long address, int... offsets) {
-        int i = 0;
-        for (; i < offsets.length - 1; i++) {
-            address = readLong(address + offsets[i]);
-        }
-
-        return readDouble(address + offsets[i]);
-    }
-
     /**
      * Reads boolean value from memory.
      *
@@ -169,17 +146,39 @@ public interface MemoryAPI extends API.Singleton {
         return readBoolean(readAtom(address, o1, o2, o3) + o4);
     }
 
-    default boolean readBoolean(long address, int... offsets) {
-        int i = 0;
-        for (; i < offsets.length - 1; i++) {
-            address = readLong(address + offsets[i]);
-        }
+    /**
+     * Reads {@link String} from memory.
+     * Results may be cached for later use.
+     * Returns fallback if memory read failed, empty string is valid!
+     *
+     * @param address  to read from
+     * @param fallback to return in case of invalid memory read
+     * @return string from memory if present, fallback otherwise
+     */
+    String readString(long address, String fallback);
 
-        return readBoolean(address + offsets[i]);
+    default String readString(long address, String fallback, int o1) {
+        return readString(readAtom(address, o1), fallback);
+    }
+
+    default String readString(long address, String fallback, int o1, int o2) {
+        return readString(readAtom(address, o1, o2), fallback);
+    }
+
+    default String readString(long address, String fallback, int o1, int o2, int o3) {
+        return readString(readAtom(address, o1, o2, o3), fallback);
+    }
+
+    default String readString(long address, String fallback, int o1, int o2, int o3, int o4) {
+        return readString(readAtom(address, o1, o2, o3, o4), fallback);
+    }
+
+    default String readString(long address, String fallback, int o1, int o2, int o3, int o4, int o5) {
+        return readString(readAtom(address, o1, o2, o3, o4, o5), fallback);
     }
 
     /**
-     * Reads String from memory.
+     * Reads String from memory. Results may be cached for later use.
      *
      * @param address to read
      * @return the string from memory if present, {@link #FALLBACK_STRING} otherwise
@@ -209,33 +208,63 @@ public interface MemoryAPI extends API.Singleton {
     }
 
     /**
-     * Reads {@link String} from memory.
-     * Retruns fallback if memory read failed, empty string is valid!
+     * Reads {@link String} from memory directly, without using any cache etc.
+     * Returns fallback if memory read failed, empty string is valid!
      *
      * @param address  to read from
      * @param fallback to return in case of invalid memory read
      * @return string from memory if present, fallback otherwise
      */
-    String readString(long address, String fallback);
+    String readStringDirect(long address, String fallback);
 
-    default String readString(long address, String fallback, int o1) {
-        return readString(readAtom(address, o1), fallback);
+    default String readStringDirect(long address, String fallback, int o1) {
+        return readStringDirect(readAtom(address, o1), fallback);
     }
 
-    default String readString(long address, String fallback, int o1, int o2) {
-        return readString(readAtom(address, o1, o2), fallback);
+    default String readStringDirect(long address, String fallback, int o1, int o2) {
+        return readStringDirect(readAtom(address, o1, o2), fallback);
     }
 
-    default String readString(long address, String fallback, int o1, int o2, int o3) {
-        return readString(readAtom(address, o1, o2, o3), fallback);
+    default String readStringDirect(long address, String fallback, int o1, int o2, int o3) {
+        return readStringDirect(readAtom(address, o1, o2, o3), fallback);
     }
 
-    default String readString(long address, String fallback, int o1, int o2, int o3, int o4) {
-        return readString(readAtom(address, o1, o2, o3, o4), fallback);
+    default String readStringDirect(long address, String fallback, int o1, int o2, int o3, int o4) {
+        return readStringDirect(readAtom(address, o1, o2, o3, o4), fallback);
     }
 
-    default String readString(long address, String fallback, int o1, int o2, int o3, int o4, int o5) {
-        return readString(readAtom(address, o1, o2, o3, o4, o5), fallback);
+    default String readStringDirect(long address, String fallback, int o1, int o2, int o3, int o4, int o5) {
+        return readStringDirect(readAtom(address, o1, o2, o3, o4, o5), fallback);
+    }
+
+    /**
+     * Reads String from memory directly, without using any cache etc.
+     *
+     * @param address to read
+     * @return the string from memory if present, {@link #FALLBACK_STRING} otherwise
+     */
+    default String readStringDirect(long address) {
+        return readStringDirect(address, FALLBACK_STRING);
+    }
+
+    default String readStringDirect(long address, int o1) {
+        return readStringDirect(readAtom(address, o1));
+    }
+
+    default String readStringDirect(long address, int o1, int o2) {
+        return readStringDirect(readAtom(address, o1, o2));
+    }
+
+    default String readStringDirect(long address, int o1, int o2, int o3) {
+        return readStringDirect(readAtom(address, o1, o2, o3));
+    }
+
+    default String readStringDirect(long address, int o1, int o2, int o3, int o4) {
+        return readStringDirect(readAtom(address, o1, o2, o3, o4));
+    }
+
+    default String readStringDirect(long address, int o1, int o2, int o3, int o4, int o5) {
+        return readStringDirect(readAtom(address, o1, o2, o3, o4, o5));
     }
 
     /**
@@ -247,13 +276,24 @@ public interface MemoryAPI extends API.Singleton {
      */
     byte[] readBytes(long address, int length);
 
-    default byte[] readBytes(long address, int length, int... offsets) {
-        int i = 0;
-        for (; i < offsets.length - 1; i++) {
-            address = readLong(address + offsets[i]);
-        }
+    /**
+     * Reads bytes from memory and stores them in the specified buffer.
+     *
+     * @param address the address to read from.
+     * @param buffer  the buffer to store the read bytes.
+     * @param length  the number of bytes to read.
+     */
+    void readBytes(long address, byte[] buffer, int length);
 
-        return readBytes(address + offsets[i], length);
+    /**
+     * Reads bytes from memory and stores them in the provided buffer.
+     * This method is an overload that assumes the buffer length is the same as the number of bytes to read.
+     *
+     * @param address the address to read from.
+     * @param buffer  the buffer to store the read bytes (with a length equal to the number of bytes to read).
+     */
+    default void readBytes(long address, byte[] buffer) {
+        readBytes(address, buffer, buffer.length);
     }
 
     /**
@@ -389,7 +429,9 @@ public interface MemoryAPI extends API.Singleton {
      * @param address to be written at
      * @param value   which will be written
      */
-    void writeBoolean(long address, boolean value);
+    default void writeBoolean(long address, boolean value) {
+        writeInt(address, value ? BOOL_TRUE : BOOL_FALSE);
+    }
 
     default void writeBoolean(long address, boolean value, int... offsets) {
         int i = 0;
@@ -429,4 +471,21 @@ public interface MemoryAPI extends API.Singleton {
      * @return array of direct pointers to searched pattern
      */
     long[] searchPattern(int maxSize, byte... pattern);
+
+    /**
+     * Searches the current process memory for the given pattern.
+     * Returns a single direct pointer to the searched pattern.
+     *
+     * @param pattern The pattern to look for.
+     * @return A direct pointer to the searched pattern.
+     */
+    long searchPattern(byte... pattern);
+
+    /**
+     * Searches the current process memory for a AVM class closure that matches the given predicate.
+     *
+     * @param pattern The predicate to match against class closures.
+     * @return A direct pointer to the matched class closure.
+     */
+    long searchClassClosure(LongPredicate pattern);
 }
