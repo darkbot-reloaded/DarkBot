@@ -264,11 +264,10 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
 
     @Data
     @EqualsAndHashCode(callSuper = true)
-    private static class BonusRewardImpl extends Updatable implements GateInfo.BonusReward {
+    private static class BonusRewardImpl extends Updatable.Auto implements GateInfo.BonusReward {
         private String lootId;
         private int amount, countdown;
         private boolean claimed, valid;
-
         private long lastUpdate;
 
         @Override
@@ -279,17 +278,8 @@ public class GalaxyBuilderProxy extends Updatable implements GalaxySpinnerAPI {
             this.amount = readInt(32);
             this.claimed = readBoolean(36);
             this.countdown = readInt(40);
-        }
-
-        @Override
-        public void update(long address) {
-            boolean changed = address != this.address;
-            super.update(address);
-
-            if (changed && valid) {
-                this.lootId = readString(48);
-                this.lastUpdate = System.currentTimeMillis();
-            }
+            this.lootId = readString(48);
+            this.lastUpdate = System.currentTimeMillis();
         }
 
         public int getCountdown() {
