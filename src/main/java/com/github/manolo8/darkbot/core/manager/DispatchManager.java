@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.core.objects.Gui;
+import com.github.manolo8.darkbot.core.objects.facades.DispatchGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchRetrieverProxy;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
@@ -17,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DispatchManager extends Gui implements DispatchAPI {
     private final DispatchProxy proxy;
+    private final DispatchGateProxy gateProxy;
     private final DispatchRetrieverProxy retrieverProxy;
     private final DispatchIconGui iconGui;
     private final DispatchIconOkGui iconOkGui;
@@ -71,6 +73,10 @@ public class DispatchManager extends Gui implements DispatchAPI {
     @Override
     public Retriever getSelectedRetriever() {
         return retrieverProxy.getSelectedRetriever();
+    }
+
+    public List <? extends DispatchGateProxy.DispatchGate> getAvailableGates(){
+        return gateProxy.getAvailableGates();
     }
 
     public boolean openRetrieverTab() {
