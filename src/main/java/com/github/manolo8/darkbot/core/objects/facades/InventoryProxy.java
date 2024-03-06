@@ -17,22 +17,22 @@ import static com.github.manolo8.darkbot.Main.API;
 public class InventoryProxy extends Updatable implements InventoryAPI {
     @Getter(AccessLevel.NONE)
     public FlashList<Item> items = FlashList.ofVector(Item::new);
-    private final Timer updateTimer = Timer.get(10_000);
+    private long lastUpdate;
+    private boolean perTickUpdated;
 
     @Override
     public void update() {
-        if (updateTimer.tryActivate()) {
-            items.update(Main.API.readAtom(address, 0x30, 0x58));
-        }
+        if (address <= 0) return;
+        perTickUpdated = false;
     }
 
     @Override
     public List<? extends InventoryAPI.Item> getItems(int minWaitMs) {
-        long elapsedMs = 10_000L - updateTimer.getRemainingFuse();
-        if (elapsedMs > minWaitMs) {
-            updateTimer.tryDisarm();
+        if (!perTickUpdated && lastUpdate + minWaitMs <= System.currentTimeMillis()) {
+            perTickUpdated = true;
+            items.update(Main.API.readAtom(address, 0x30, 0x58));
+            lastUpdate = System.currentTimeMillis();
         }
-        update();
         return items;
     }
 
