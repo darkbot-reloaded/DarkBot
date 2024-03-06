@@ -21,7 +21,7 @@ public class DispatchGateProxy extends Updatable implements API.Singleton {
 
     @Getter
     @ToString
-    public static class DispatchGate extends Updatable implements DispatchAPI.Gate{
+    private static class DispatchGate extends Updatable implements DispatchAPI.Gate {
         private int status = -1, gateId = -1, duration = -1;
         private double timeLeft = -1;
         private String dispatchId = "", iconId = "", name = "";
