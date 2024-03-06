@@ -16,7 +16,7 @@ import static com.github.manolo8.darkbot.Main.API;
 @Getter
 public class InventoryProxy extends Updatable implements InventoryAPI {
     @Getter(AccessLevel.NONE)
-    public FlashList<Item> items = FlashList.ofVector(Item::new);
+    private FlashList<Item> items = FlashList.ofVector(Item::new);
     private long lastUpdate;
     private boolean perTickUpdated;
 
