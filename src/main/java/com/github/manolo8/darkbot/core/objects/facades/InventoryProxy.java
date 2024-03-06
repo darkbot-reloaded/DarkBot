@@ -22,7 +22,6 @@ public class InventoryProxy extends Updatable implements InventoryAPI {
 
     @Override
     public void update() {
-        if (address <= 0) return;
         perTickUpdated = false;
     }
 
