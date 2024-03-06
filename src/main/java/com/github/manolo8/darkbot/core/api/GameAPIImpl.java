@@ -608,10 +608,10 @@ public class GameAPIImpl<
     }
 
     @Override
-    public String readStringDirect(long address) {
-        if (!ByteUtils.isValidPtr(address)) return FALLBACK_STRING;
+    public String readStringDirect(long address, String fallback) {
+        if (!ByteUtils.isValidPtr(address)) return fallback;
         String s = ByteUtils.readStringDirect(address);
 
-        return s == null ? FALLBACK_STRING : s;
+        return s == null ? fallback : s;
     }
 }

@@ -127,39 +127,4 @@ public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     long lastInternetReadTime();
     //</editor-fold>
-
-    //<editor-fold desc="MemoryAPI">
-    String readStringDirect(long address);
-
-    default String readStringDirect(long address, int... offsets) {
-        return readStringDirect(readLong(address, offsets));
-    }
-
-    @Override
-    void replaceInt(long address, int oldValue, int newValue);
-
-    @Override
-    void replaceLong(long address, long oldValue, long newValue);
-
-    @Override
-    void replaceDouble(long address, double oldValue, double newValue);
-
-    @Override
-    void replaceBoolean(long address, boolean oldValue, boolean newValue);
-
-    @Override
-    default void writeBoolean(long address, boolean value) {
-        writeInt(address, value ? 1 : 0);
-    }
-
-    void readBytes(long address, byte[] buffer, int length);
-
-    default void readBytes(long address, byte[] buffer) {
-        readBytes(address, buffer, buffer.length);
-    }
-
-    long searchPattern(byte... query);
-
-    long searchClassClosure(LongPredicate pattern);
-    //</editor-fold>
 }
