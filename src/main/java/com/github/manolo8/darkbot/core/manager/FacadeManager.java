@@ -8,8 +8,9 @@ import com.github.manolo8.darkbot.core.objects.facades.AstralGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ChatProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ChrominProxy;
-import com.github.manolo8.darkbot.core.objects.facades.DispatchMediator;
+import com.github.manolo8.darkbot.core.objects.facades.DispatchGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
+import com.github.manolo8.darkbot.core.objects.facades.DispatchRetrieverProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EscortProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalBlacklightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.EternalGateProxy;
@@ -86,8 +87,9 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
         this.groupMediator  = registerMediator("GroupSystemMediator", Updatable.NoOp.class);
 
         registerProxy("dispatch", DispatchProxy.class);
+        registerProxy("dispatch_retriever", DispatchRetrieverProxy.class);
+        registerProxy("dispatch_gate", DispatchGateProxy.class);
         registerProxy("ggBuilder", GalaxyBuilderProxy.class);
-        registerMediator("dispatch_retriever", DispatchMediator.class);
         registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
         registerProxy("QuestProxy", QuestProxy.class);
 

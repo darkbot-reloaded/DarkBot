@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.facades.DispatchMediator;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
+import com.github.manolo8.darkbot.core.objects.facades.DispatchRetrieverProxy;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconOkGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchPopupRewardGui;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DispatchManager extends Gui implements DispatchAPI {
     private final DispatchProxy proxy;
-    private final DispatchMediator mediator;
+    private final DispatchRetrieverProxy retrieverProxy;
     private final DispatchIconGui iconGui;
     private final DispatchIconOkGui iconOkGui;
     private final DispatchPopupRewardGui rewardsGui;
@@ -50,27 +50,27 @@ public class DispatchManager extends Gui implements DispatchAPI {
 
     @Override
     public int getAvailableSlots() {
-        return mediator.getAvailableSlots();
+        return retrieverProxy.getAvailableSlots();
     }
 
     @Override
     public int getTotalSlots() {
-        return mediator.getTotalSlots();
+        return retrieverProxy.getTotalSlots();
     }
 
     @Override
     public List<? extends Retriever> getAvailableRetrievers() {
-        return mediator.getAvailableRetrievers();
+        return retrieverProxy.getAvailableRetrievers();
     }
 
     @Override
     public List<? extends Retriever> getInProgressRetrievers() {
-        return mediator.getInProgressRetrievers();
+        return retrieverProxy.getInProgressRetrievers();
     }
 
     @Override
     public Retriever getSelectedRetriever() {
-        return mediator.getSelectedRetriever();
+        return retrieverProxy.getSelectedRetriever();
     }
 
     public boolean openRetrieverTab() {
@@ -141,7 +141,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
 
     @Override
     public void overrideSelectedRetriever(Retriever retriever) {
-        mediator.overrideSelectedRetriever(retriever);
+        retrieverProxy.overrideSelectedRetriever(retriever);
     }
 
 }

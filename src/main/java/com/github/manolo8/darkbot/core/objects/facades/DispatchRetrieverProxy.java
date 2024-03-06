@@ -11,7 +11,7 @@ import lombok.ToString;
 import static com.github.manolo8.darkbot.Main.API;
 
 @Getter
-public class DispatchMediator extends Updatable implements API.Singleton {
+public class DispatchRetrieverProxy extends Updatable implements API.Singleton {
     private int availableSlots, totalSlots;
     private final FlashList<Retriever> availableRetrievers = FlashList.ofVector(Retriever::new);
     private final FlashList<Retriever> inProgressRetrievers = FlashList.ofVector(Retriever::new);
@@ -19,7 +19,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
 
     @Override
     public void update() {
-        long dispatchRetrieverData = API.readAtom(address + 0x50);
+        long dispatchRetrieverData = API.readAtom(address + 0x30);
         availableSlots = API.readInt(dispatchRetrieverData + 0x40);
         totalSlots = API.readInt(dispatchRetrieverData + 0x44);
 
@@ -47,7 +47,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
             this.isAvailable = API.readBoolean(address + 0x20);
 
             long dispatchModule = API.readAtom(address + 0x30);
-            this.slotId = API.readInt(dispatchModule + 0x24); // 0 for available, 1 to 5 for in-progress
+            this.slotId = API.readInt(dispatchModule + 0x20); // 0 for available, 1 to 5 for in-progress
             this.duration = API.readDouble(dispatchModule + 0x28); // time left in seconds, or total time
 
             long retrieverDefinition = API.readAtom(address + 0x38);
@@ -81,7 +81,7 @@ public class DispatchMediator extends Updatable implements API.Singleton {
 
     public void overrideSelectedRetriever(DispatchAPI.Retriever retriever) {
         if (selectedRetriever == retriever) return;
-        long value = retriever == null ? 0L : ((DispatchMediator.Retriever) retriever).address;
-        Main.API.writeLong(Main.API.readAtom(address + 0x50) + 0x68, value);
+        long value = retriever == null ? 0L : ((DispatchRetrieverProxy.Retriever) retriever).address;
+        Main.API.writeLong(Main.API.readAtom(address + 0x30) + 0x68, value);
     }
 }
