@@ -37,10 +37,10 @@ public class DispatchGateProxy extends Updatable implements API.Singleton {
 
             this.gateId = API.readInt(gateDefinition + 0x24);
             this.duration = API.readInt(gateDefinition + 0x28);
-            this.dispatchId = API.readString(gateDefinition + 0x30);
-            this.iconId = API.readString(gateDefinition + 0x38);
-            this.name = API.readString(gateDefinition + 0x40);
-            this.cost.update(API.readAtom(gateData + 0x48));
+            this.dispatchId = API.readString(gateDefinition, 0x30);
+            this.iconId = API.readString(gateDefinition, 0x38);
+            this.name = API.readString(gateDefinition, 0x40);
+            this.cost.update(API.readAtom(gateDefinition + 0x48));
         }
     }
 
