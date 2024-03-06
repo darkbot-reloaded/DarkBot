@@ -1,10 +1,10 @@
 package com.github.manolo8.darkbot.core.objects;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import eu.darkbot.api.game.other.EntityInfo;
 
 import static com.github.manolo8.darkbot.Main.API;
-import static com.github.manolo8.darkbot.core.manager.HeroManager.instance;
 
 public class PlayerInfo extends Updatable implements EntityInfo {
 
@@ -22,7 +22,7 @@ public class PlayerInfo extends Updatable implements EntityInfo {
 
         return getClanDiplomacy() != Diplomacy.ALLIED
                 && getClanDiplomacy() != Diplomacy.NOT_ATTACK_PACT
-                && getFaction() != instance.getEntityInfo().getFaction();
+                && getFaction() != Main.INSTANCE.hero.getEntityInfo().getFaction();
     }
 
     @Override
@@ -39,11 +39,11 @@ public class PlayerInfo extends Updatable implements EntityInfo {
     }
 
     private int readIntFromIntHolder(int holderOffset) {
-        return API.readMemoryInt(API.readMemoryLong(address + holderOffset) + 40);
+        return API.readInt(API.readLong(address + holderOffset) + 40);
     }
 
     private String readStringFromStringHolder(int holderOffset) {
-        return API.readMemoryStringFallback(API.readMemoryLong(API.readMemoryLong(address + holderOffset) + 40), "");
+        return API.readString(API.readLong(API.readLong(address + holderOffset) + 40), "");
     }
 
     @Override

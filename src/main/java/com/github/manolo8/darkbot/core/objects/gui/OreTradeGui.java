@@ -59,4 +59,10 @@ public class OreTradeGui extends Gui implements OreAPI {
     public boolean showTrade(boolean show, @Nullable Station.Refinery tradePoint) {
         return showTrade(show, (BasePoint) tradePoint);
     }
+
+    @Nullable
+    @Override
+    public Upgrade getUpgrade(@NotNull OreAPI.UpgradeSlot upgradeSlot) {
+        return refinement.getUpgrade(upgradeSlot);
+    }
 }

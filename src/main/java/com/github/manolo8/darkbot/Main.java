@@ -17,6 +17,7 @@ import com.github.manolo8.darkbot.core.manager.FacadeManager;
 import com.github.manolo8.darkbot.core.manager.GuiManager;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
+import com.github.manolo8.darkbot.core.manager.PerformanceManager;
 import com.github.manolo8.darkbot.core.manager.PingManager;
 import com.github.manolo8.darkbot.core.manager.RepairManager;
 import com.github.manolo8.darkbot.core.manager.SettingsManager;
@@ -51,6 +52,7 @@ import eu.darkbot.api.extensions.TemporalModule;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -60,7 +62,10 @@ import java.util.Objects;
 
 public class Main extends Thread implements PluginListener, BotAPI {
 
-    public static final Version VERSION      = new Version("1.128.3");
+    /** Do not use in plugins! Only for bot internal usage */
+    @ApiStatus.Internal public static Main INSTANCE;
+
+    public static final Version VERSION      = new Version("1.130 alpha 2");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
@@ -99,6 +104,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     public final RepairManager repairManager;
 
     private final EventBrokerAPI eventBroker;
+    private final PerformanceManager performanceManager;
 
     private final MainGui form;
     private final BotInstaller botInstaller;
@@ -117,6 +123,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     public Main(StartupParams params) {
         super("Main");
+        INSTANCE = this;
 
         this.params = params;
 
@@ -160,8 +167,10 @@ public class Main extends Thread implements PluginListener, BotAPI {
         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
         pluginAPI.addInstance(API);
 
+        this.performanceManager = pluginAPI.requireInstance(PerformanceManager.class);
+
         this.botInstaller.install(settingsManager, facadeManager, effectManager, guiManager, mapManager,
-                hero, statsManager, pingManager, repairManager);
+                hero, statsManager, pingManager, repairManager, performanceManager);
 
         this.botInstaller.invalid.add(value -> {
             if (!value) lastRefresh = System.currentTimeMillis();
@@ -188,10 +197,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
     @Override
     @SuppressWarnings("InfiniteLoopStatement")
     public void run() {
-        long time;
-
         while (true) {
-            time = System.currentTimeMillis();
+            long time = System.nanoTime();
 
             try {
                 tick();
@@ -200,15 +207,16 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 Time.sleep(1000);
             }
 
-            long current = System.currentTimeMillis();
-            avgTick = ((avgTick * 9) + (current - time)) / 10;
+            double elapsed = (System.nanoTime() - time) * 0.000001;
+            avgTick = ((avgTick * 9) + elapsed) * 0.1;
 
-            Time.sleepMax(time, botInstaller.invalid.get() ? 250 :
-                    Math.max(config.BOT_SETTINGS.OTHER.MIN_TICK, Math.min((int) (avgTick * 1.25), 100)));
+            int pause = botInstaller.invalid.get() ? 250 :
+                    Math.max(performanceManager.getMinTickTime(), Math.min((int) (avgTick * 1.25), 100));
+            Time.sleep((long) (pause - elapsed));
 
             try {
                 // Just in case, we can't risk the main loop dying.
-                statsManager.tickAverageStats(current - time);
+                statsManager.tickAverageStats(avgTick);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
@@ -262,6 +270,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         guiManager.tick();
         statsManager.tick();
         repairManager.tick();
+        performanceManager.tick();
         API.tick();
 
         tickingModule = running && guiManager.canTickModule();

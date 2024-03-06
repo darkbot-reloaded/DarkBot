@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.core.entities;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
@@ -30,11 +29,11 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
         String oldName = playerInfo.username;
         super.update();
 
-        npcId = API.readMemoryInt(API.readMemoryLong(address + 192) + 80);
+        npcId = API.readInt(API.readLong(address + 192) + 80);
         ish = hasEffect(EffectManager.Effect.NPC_ISH);
 
         if (!Objects.equals(oldName, playerInfo.username)) {
-            npcInfo = ConfigEntity.INSTANCE.getOrCreateNpcInfo(playerInfo.username);
+            npcInfo = ConfigEntity.INSTANCE.getOrCreateNpcInfo(this);
             npcInfo.npcId = npcId;
         }
     }

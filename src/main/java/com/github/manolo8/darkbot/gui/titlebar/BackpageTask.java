@@ -13,7 +13,9 @@ import eu.darkbot.util.Timer;
 import eu.darkbot.util.http.Http;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -43,6 +45,21 @@ public class BackpageTask extends Thread {
         this.button = button;
     }
 
+    public static boolean isSupported(Version minVersion) {
+        try {
+            Version version = readVersionFile();
+            return version != null && !version.isOlderThan(minVersion);
+        } catch (IOException ignored) {
+            return false;
+        }
+    }
+
+    public static Process createBrowser(String... args) throws IOException {
+        ProcessBuilder builder = new ProcessBuilder(BACKPAGE_PATH.resolve(EXECUTABLE_NAME).toAbsolutePath().toString());
+        builder.command().addAll(List.of(args));
+        return builder.start();
+    }
+
     private static ReleaseInfo getLatestRelease() throws IOException, JsonParseException {
         return Http.create(RELEASE_URL).fromJson(ReleaseInfo.class);
     }
@@ -52,10 +69,9 @@ public class BackpageTask extends Thread {
         if (main.backpage.isInstanceValid()) { // open backpage even if sid is KO
             try {
                 if (canRun()) {
-                    new ProcessBuilder(BACKPAGE_PATH.resolve(EXECUTABLE_NAME).toAbsolutePath().toString(),
-                            "--sid", main.backpage.getSid(),
+                    createBrowser("--sid", main.backpage.getSid(),
                             "--url", main.backpage.getInstanceURI().toString())
-                            .start().waitFor();
+                            .waitFor();
                 }
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
@@ -168,7 +184,7 @@ public class BackpageTask extends Thread {
         SwingUtilities.invokeLater(() -> progressBar.setValue(progress));
     }
 
-    private @Nullable Version readVersionFile() throws IOException {
+    private static @Nullable Version readVersionFile() throws IOException {
         if (Files.notExists(VERSION_PATH)) return null;
         return new Version(Files.readString(VERSION_PATH));
     }

@@ -1,6 +1,6 @@
 package com.github.manolo8.darkbot.config;
 
-import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.Main;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Option;
 import eu.darkbot.api.config.types.NpcFlag;
@@ -8,6 +8,7 @@ import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroItemsAPI;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -110,7 +111,7 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     }
 
     private static HeroItemsAPI getHeroItems() {
-        return HeroManager.instance.main.facadeManager.slotBars;
+        return Main.INSTANCE.facadeManager.slotBars;
     }
 
     @Override
@@ -121,6 +122,16 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     @Override
     public void setExtraFlag(Enum<?> flag, boolean active) {
         extra.set(getId(flag), active);
+    }
+
+    @Override
+    public Set<Integer> getMapIds() {
+        return Collections.unmodifiableSet(mapList);
+    }
+
+    @Override
+    public void addMapId(int mapId) {
+        mapList.add(mapId);
     }
 
     // Keep a cache of the last searched id.

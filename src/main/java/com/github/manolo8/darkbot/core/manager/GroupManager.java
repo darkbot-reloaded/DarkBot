@@ -8,14 +8,13 @@ import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.group.Group;
 import com.github.manolo8.darkbot.core.objects.group.GroupMember;
 import com.github.manolo8.darkbot.core.objects.group.Invite;
-import com.github.manolo8.darkbot.core.objects.swf.PairArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashMap;
 import com.github.manolo8.darkbot.core.utils.ClickPoint;
 import com.github.manolo8.darkbot.utils.Time;
 import eu.darkbot.api.managers.GroupAPI;
 import eu.darkbot.api.utils.NativeAction;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,9 +36,9 @@ public class GroupManager extends Gui implements GroupAPI {
 
     public Group group;
     public boolean pinging; // If the pinging button is enabled & you're ready to ping
-    public List<Invite> invites = new ArrayList<>();
 
-    private final PairArray inviteDict = PairArray.ofDictionary().setAutoUpdatable(true).setIgnoreEmpty(false);
+    private final FlashMap<String, Invite> inviteDict = FlashMap.of(String.class, Invite.class);
+    public List<Invite> invites = inviteDict.asFiltered(invite -> invite.valid);
 
     private long nextAction;
     private Runnable pending;
@@ -48,6 +47,8 @@ public class GroupManager extends Gui implements GroupAPI {
     private int shouldLeave = 0;
 
     private long lastValidTime; // Last time group had members for isLoaded check
+
+    private boolean isBlockingInvites;
 
     public GroupManager(Main main) {
         this.main = main;
@@ -58,17 +59,17 @@ public class GroupManager extends Gui implements GroupAPI {
     @Override
     public void update() {
         super.update();
-
         if (address == 0) return;
 
         long groupAddress = main.facadeManager.group.address;
         if (groupAddress == 0) return;
-        group.update(API.readMemoryLong(groupAddress + 0x30));
+        group.update(API.readLong(groupAddress + 0x30));
 
-        pinging = API.readMemoryBoolean(groupAddress + 0x40);
-        inviteDict.update(API.readMemoryLong(groupAddress + 0x48));
+        pinging = API.readBoolean(groupAddress + 0x40);
+        inviteDict.update(API.readLong(groupAddress + 0x48));
 
-        inviteDict.sync(invites, () -> new Invite(main.hero), invite -> invite.valid);
+        long groupMediatorAddress = main.facadeManager.groupMediator.address;
+        isBlockingInvites = API.readBoolean(groupMediatorAddress, 0x30, 0xD4);
     }
 
     public void tick() {
@@ -82,6 +83,7 @@ public class GroupManager extends Gui implements GroupAPI {
 
         this.config = main.config.GROUP;
 
+        tryBlockInvites();
         tryQueueLeave();
         tryQueueAcceptInvite();
         tryOpenInvites();
@@ -137,6 +139,15 @@ public class GroupManager extends Gui implements GroupAPI {
 
             pending = () -> sendInvite(player.username, inviteTime == null ? 60_000 : 120_000);
             break;
+        }
+    }
+
+    public void tryBlockInvites() {
+        if (pending != null) return;
+        if (group.isValid()) return;
+
+        if(config.BLOCK_INVITES != isBlockingInvites) {
+            pending = () -> click(MARGIN_WIDTH + INVITE_WIDTH + BUTTON_WIDTH + (BUTTON_WIDTH / 2), HEADER_HEIGHT + (BUTTON_HEIGHT / 2));
         }
     }
 
@@ -272,7 +283,7 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     private int getGroupHeight() {
-        return (Math.max(0, group.members.size()) * MEMBER_HEIGHT) +
+        return (group.members.size() * MEMBER_HEIGHT) +
                 (invites.size() * BUTTON_HEIGHT) +
                 ((group.isValid() && (group.isOpen || group.isLeader)) ? BUTTON_HEIGHT : 0);
     }
@@ -312,7 +323,7 @@ public class GroupManager extends Gui implements GroupAPI {
 
     @Override
     public int getSize() {
-        return group.members.size() == 0 ? 0 : group.members.size() + 1;
+        return group.members.isEmpty() ? 0 : group.members.size() + 1;
     }
 
     @Override

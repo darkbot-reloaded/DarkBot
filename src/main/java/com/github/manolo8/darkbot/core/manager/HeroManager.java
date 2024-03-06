@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.manager;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.LegacyShipMode;
+import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.Npc;
@@ -43,6 +44,7 @@ import static com.github.manolo8.darkbot.core.objects.facades.SettingsProxy.KeyB
 
 public class HeroManager extends Player implements Manager, HeroAPI {
 
+    @Deprecated(forRemoval = true)
     public static HeroManager instance;
     public final Main main;
     public final Pet pet;
@@ -109,7 +111,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     }
 
     public void tick() {
-        long address = API.readMemoryLong(staticAddress);
+        long address = API.readLong(staticAddress);
         if (this.address != address) update(address);
 
         update();
@@ -126,11 +128,11 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         config = settings.config;
         configuration = Configuration.of(config);
 
-        long petAddress = API.readMemoryLong(address + 176);
+        long petAddress = API.readLong(address + 176);
         if (petAddress != pet.address) pet.update(petAddress);
         pet.update();
 
-        long targetPtr = API.readMemoryLong(main.mapManager.mapAddress, 120, 40);
+        long targetPtr = API.readLong(main.mapManager.mapAddress, 120, 40);
 
         if (targetPtr == 0) inGameTarget = null;
         else if (targetPtr == petAddress) inGameTarget = pet;
@@ -144,8 +146,8 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     public void update(long address) {
         super.update(address);
 
-        pet.update(API.readMemoryLong(address + 176));
-        id = API.readMemoryInt(address + 56);
+        pet.update(API.readLong(address + 176));
+        id = API.readInt(address + 56);
     }
 
     public boolean hasTarget() {
@@ -195,8 +197,12 @@ public class HeroManager extends Player implements Manager, HeroAPI {
     public boolean attackMode(Npc target) {
         if (target == null) return attackMode();
         Config.ShipConfig config = this.main.config.GENERAL.OFFENSIVE;
-        return setMode(config.CONFIG, target.npcInfo.attackFormation != null ?
-                target.npcInfo.attackFormation : config.FORMATION);
+
+        boolean otherConfig = target.npcInfo.extra.has(NpcExtra.OPPOSITE_CONFIG);
+        return setMode(
+                otherConfig ? ((config.CONFIG % 2) + 1) : config.CONFIG,
+                target.npcInfo.attackFormation != null ?
+                        target.npcInfo.attackFormation : config.FORMATION);
     }
 
     public boolean runMode() {

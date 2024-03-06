@@ -11,7 +11,7 @@ public class PinButton extends TitleBarToggleButton<JFrame> {
 
     private static final Icon PIN = UIUtils.getIcon("pin"), UNPIN = UIUtils.getIcon("unpin");
 
-    PinButton(JFrame frame) {
+    public PinButton(JFrame frame) {
         super(PIN, frame);
         setSelectedIcon(UNPIN);
         setToolTipText(I18n.get("gui.pin_button"));

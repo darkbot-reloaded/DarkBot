@@ -36,7 +36,7 @@ public class BackpageButton extends TitleBarButton<MainGui> {
             progressBar.setValue(0);
             progressBar.setIndeterminate(true);
             add(progressBar, BorderLayout.SOUTH);
-            revalidate();
+            repaint();
         });
         return progressBar;
     }
@@ -44,7 +44,7 @@ public class BackpageButton extends TitleBarButton<MainGui> {
     public void removeProgressBar() {
         SwingUtilities.invokeLater(() -> {
             remove(progressBar);
-            revalidate();
+            repaint();
         });
     }
 }

@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.entities.MapNpc;
 import com.github.manolo8.darkbot.core.entities.Ship;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
@@ -31,7 +30,6 @@ import javax.swing.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.function.Consumer;
 import java.util.function.LongPredicate;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -43,8 +41,6 @@ public class GameAPIImpl<
         E extends GameAPI.ExtraMemoryReader,
         I extends GameAPI.Interaction,
         D extends GameAPI.DirectInteraction> implements IDarkBotAPI {
-
-    private static final String FALLBACK_STRING = "ERROR";
 
     protected final StartupParams params;
 
@@ -60,7 +56,6 @@ public class GameAPIImpl<
     protected final String version;
 
     private final ConfigAPI config;
-    private final Consumer<Integer> fpsLimitListener; // Needs to be kept as a strong reference to avoid GC
 
     protected final LoginData loginData; // Used only if api supports LOGIN
     protected int pid; // Used only if api supports ATTACH
@@ -96,7 +91,7 @@ public class GameAPIImpl<
                 interaction.getVersion() + "i" +
                 direct.getVersion() + "d";
 
-        Main main = HeroManager.instance.main;
+        Main main = Main.INSTANCE;
         config = main.configHandler;
 
         this.loginData = hasCapability(Capability.LOGIN) ? LoginUtils.performUserLogin(params) : null;
@@ -104,14 +99,6 @@ public class GameAPIImpl<
 
         this.initiallyShown = hasCapability(Capability.INITIALLY_SHOWN) && !params.getAutoHide();
         this.mapManager = main.mapManager;
-
-        if (hasCapability(Capability.DIRECT_LIMIT_FPS)) {
-            ConfigSetting<Integer> maxFps = config.requireConfig("bot_settings.api_config.max_fps");
-            maxFps.addListener(fpsLimitListener = this::setMaxFps);
-            setMaxFps(maxFps.getValue());
-        } else {
-            this.fpsLimitListener = null;
-        }
 
         if (hasCapability(Capability.PROXY)) {
             ConfigSetting<Boolean> useProxy = config.requireConfig("bot_settings.api_config.use_proxy");
@@ -128,7 +115,7 @@ public class GameAPIImpl<
         }
     }
 
-    protected void tryRelogin() {
+    protected void tryRelogin(boolean forceRelogin) {
         if (!hasCapability(Capability.LOGIN)
                 || loginData == null
                 || loginData.getUsername() == null) {
@@ -138,6 +125,11 @@ public class GameAPIImpl<
 
         if (lastFailedLogin + 30_000 > System.currentTimeMillis()) {
             System.out.println("Last failed login was <30s ago, ignoring re-login attempt.");
+            return;
+        }
+
+        if (forceRelogin) {
+            performRelogin();
             return;
         }
 
@@ -155,7 +147,7 @@ public class GameAPIImpl<
     }
 
     /**
-     * This is reserved internally for use in {@link #tryRelogin()}, use that instead,
+     * This is reserved internally for use in {@link #tryRelogin(boolean)}, use that instead,
      * which will safeguard against bad use (ie: calling too often or calling when no login data exists.
      */
     protected void performRelogin() {
@@ -221,7 +213,7 @@ public class GameAPIImpl<
 
             int result = Popups.of("Select flash process", pidSelector, JOptionPane.QUESTION_MESSAGE)
                     .optionType(JOptionPane.OK_CANCEL_OPTION)
-                    .parent(HeroManager.instance.main.getGui())
+                    .parent(Main.INSTANCE.getGui())
                     .showOptionSync();
 
             if (result != JOptionPane.OK_OPTION) return;
@@ -259,7 +251,7 @@ public class GameAPIImpl<
     public boolean isValid() {
         boolean isValid = handler.isValid();
         if (!autoHidden && isValid && params.getAutoHide()) {
-            setVisible(false, HeroManager.instance.main.config.BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API);
+            setVisible(false, Main.INSTANCE.config.BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API);
             autoHidden = true;
         }
         return isValid;
@@ -311,37 +303,31 @@ public class GameAPIImpl<
     }
 
     @Override
-    public double readMemoryDouble(long address) {
+    public double readDouble(long address) {
         if (!ByteUtils.isValidPtr(address)) return 0;
         return memory.readDouble(address);
     }
 
     @Override
-    public long readMemoryLong(long address) {
+    public long readLong(long address) {
         if (!ByteUtils.isValidPtr(address)) return 0;
         return memory.readLong(address);
     }
 
     @Override
-    public int readMemoryInt(long address) {
+    public int readInt(long address) {
         if (!ByteUtils.isValidPtr(address)) return 0;
         return memory.readInt(address);
     }
 
     @Override
-    public boolean readMemoryBoolean(long address) {
+    public boolean readBoolean(long address) {
         if (!ByteUtils.isValidPtr(address)) return false;
         return memory.readBoolean(address);
     }
 
     @Override
-    public String readMemoryString(long address) {
-        if (!ByteUtils.isValidPtr(address)) return FALLBACK_STRING;
-        return readMemoryStringFallback(address, FALLBACK_STRING);
-    }
-
-    @Override
-    public String readMemoryStringFallback(long address, String fallback) {
+    public String readString(long address, String fallback) {
         if (!ByteUtils.isValidPtr(address)) return fallback;
 
         String str = extraMemoryReader.readString(address);
@@ -349,18 +335,22 @@ public class GameAPIImpl<
     }
 
     @Override
-    public byte[] readMemory(long address, int length) {
+    public byte[] readBytes(long address, int length) {
         if (!ByteUtils.isValidPtr(address)) return new byte[0];
-        return memory.readBytes(address, length);
+        synchronized (memory) {
+            return memory.readBytes(address, length);
+        }
     }
 
     @Override
-    public void readMemory(long address, byte[] buffer, int length) {
+    public void readBytes(long address, byte[] buffer, int length) {
         if (!ByteUtils.isValidPtr(address)) {
             Arrays.fill(buffer, 0, length, (byte) 0);
             return;
         }
-        memory.readBytes(address, buffer, length);
+        synchronized (memory) {
+            memory.readBytes(address, buffer, length);
+        }
     }
 
     @Override
@@ -388,40 +378,40 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void writeMemoryInt(long address, int value) {
+    public void writeInt(long address, int value) {
         if (!ByteUtils.isValidPtr(address)) return;
         memory.writeInt(address, value);
     }
 
     @Override
-    public void writeMemoryLong(long address, long value) {
+    public void writeLong(long address, long value) {
         if (!ByteUtils.isValidPtr(address)) return;
         memory.writeLong(address, value);
     }
 
     @Override
-    public void writeMemoryDouble(long address, double value) {
+    public void writeDouble(long address, double value) {
         if (!ByteUtils.isValidPtr(address)) return;
         memory.writeDouble(address, value);
     }
 
     @Override
-    public long[] queryMemoryInt(int value, int maxQuantity) {
-        return memory.queryInt(value, maxQuantity);
+    public long[] searchInt(int value, int maxSize) {
+        return memory.queryInt(value, maxSize);
     }
 
     @Override
-    public long[] queryMemoryLong(long value, int maxQuantity) {
-        return memory.queryLong(value, maxQuantity);
+    public long[] searchLong(long value, int maxSize) {
+        return memory.queryLong(value, maxSize);
     }
 
     @Override
-    public long[] queryMemory(byte[] query, int maxQuantity) {
-        return memory.queryBytes(query, maxQuantity);
+    public long[] searchPattern(int maxSize, byte... pattern) {
+        return memory.queryBytes(pattern, maxSize);
     }
 
     @Override
-    public long queryMemory(byte... query) {
+    public long searchPattern(byte... query) {
         return memory.queryBytes(query);
     }
 
@@ -446,7 +436,7 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void handleRefresh() {
+    public void handleRefresh(boolean useFakeDailyLogin) {
         // No login has happened? Make a first attempt
         if (hasCapability(Capability.LOGIN) && loginData.getUrl() == null) {
             handleRelogin();
@@ -454,15 +444,18 @@ public class GameAPIImpl<
 
         setData(); //always set data to update possible settings changes
         refreshCount++;
-        handler.reload();
-
+        reload(useFakeDailyLogin);
         extraMemoryReader.resetCache();
     }
 
+    protected void reload(boolean useFakeDailyLogin) {
+        handler.reload();
+    }
+
     @Override
-    public void handleRelogin() {
+    public void handleRelogin(boolean forceRelogin) {
         if (hasCapability(Capability.LOGIN)) {
-            tryRelogin();
+            tryRelogin(forceRelogin);
             setData();
         }
     }
@@ -612,5 +605,13 @@ public class GameAPIImpl<
     @Override
     public long lastInternetReadTime() {
         return handler.lastInternetReadTime();
+    }
+
+    @Override
+    public String readStringDirect(long address) {
+        if (!ByteUtils.isValidPtr(address)) return FALLBACK_STRING;
+        String s = ByteUtils.readStringDirect(address);
+
+        return s == null ? FALLBACK_STRING : s;
     }
 }

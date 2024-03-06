@@ -81,12 +81,6 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
     }
 
     @Override
-    public void tick() {
-        super.tick();
-        itemUseCaller.tick();
-    }
-
-    @Override
     public boolean useItem(Item item) {
         if (direct.checkSignature(true, "23(sendRequest)(2626)1016221500",
                 19, direct.botInstaller.connectionManagerAddress.get()))
@@ -130,6 +124,13 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
         });
 
         window.setBlockingPatterns(result.toArray(new String[0]));
+    }
+
+    @Override
+    public void reload(boolean useFakeDailyLogin) {
+        if (!useFakeDailyLogin && window.getVersion() >= 26)
+            window.normalReload();
+        else handler.reload();
     }
 
     public static class KekkaPlayerDirectInteraction extends NoopAPIAdapter.NoOpDirectInteraction

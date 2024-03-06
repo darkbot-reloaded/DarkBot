@@ -3,15 +3,20 @@ package com.github.manolo8.darkbot.gui.utils;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.DecimalFormat;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class Strings {
+    public static final DecimalFormat ONE_PLACE_FORMAT = new DecimalFormat("0.0");
+
     private static final Pattern NON_CHARACTER_REPLACEMENT = Pattern.compile("[^a-z0-9]");
     private static final Pattern MIMESIS_REPLACEMENT = Pattern.compile("m[i1]m[e3][s5][i1][s5]");
 
     private static final Pattern SIMPLIFY_NAME_MATCHES = Pattern.compile("^[^\\d]+\\d{1,3}$");
     private static final Pattern SIMPLIFY_NAME_REPLACEMENT = Pattern.compile("\\d{1,3}$");
+
+    private static final String[] GEAR_FUZZY_MATCHER_EXCLUDES = {"StreuneR"};
 
     public static String fileName(String path) {
         if (path == null || path.isEmpty()) return "-";
@@ -34,12 +39,23 @@ public class Strings {
     }
 
     public static String fuzzyMatcher(String string) {
-        string = string.toLowerCase(Locale.ROOT)
+        if (shouldUseLowerCase(string))
+            string = string.toLowerCase(Locale.ROOT);
+
+        string = string
                 .replace("-x-", "") // Fixes "-x-[ NAME ]-x-", used in frozen labyrinth
                 .replace("xx", "") // Fixes Chaos Protegit
                 .replace("referee binary bot", "referee bot");
         string = NON_CHARACTER_REPLACEMENT.matcher(string).replaceAll(""); // Keep only alphanumerical
         return MIMESIS_REPLACEMENT.matcher(string).replaceAll("mimesis"); // Replace mim35i5 with mimesis
+    }
+
+    private static boolean shouldUseLowerCase(String name) {
+        for (String s : GEAR_FUZZY_MATCHER_EXCLUDES) {
+            if (name.contains(s))
+                return false;
+        }
+        return true;
     }
 
     public static boolean isEmpty(String s) {

@@ -47,15 +47,15 @@ public class ReadObjNames {
 
     public static void of(long address, int maxOffset) {
         updateReplacements();
-        String result = API.readMemoryString(address, 0x10, 0x28, 0x90);
+        String result = API.readString(address, 0x10, 0x28, 0x90);
         System.out.println("\n==========[" + replacements.getOrDefault(result, result) + "]==========");
 
         for (int offset = 0; offset < maxOffset; offset++) {
-            long addr = API.readMemoryLong(address + offset);
+            long addr = API.readLong(address + offset);
             Type type = null;
 
             if (!isInvalid(addr)) {
-                type = printObjName(API.readMemoryLong(addr, 0x10, 0x28, 0x90), offset);
+                type = printObjName(API.readLong(addr, 0x10, 0x28, 0x90), offset);
             }
 
             if (type == null) {
@@ -73,13 +73,13 @@ public class ReadObjNames {
     private static Type findType(long address, int offset) {
         if ((offset % 4) != 0) return null;
 
-        String strVal = API.readMemoryStringFallback(address + offset, null);
+        String strVal = API.readString(address + offset, null);
         if (strVal != null) {
             printStr( "\"" + strVal + "\"", offset, Type.STR);
             return Type.STR;
         }
 
-        long longVal = API.readMemoryLong(address + offset);
+        long longVal = API.readLong(address + offset);
         if (longVal == 0) return null;
 
         double dblVal = Double.longBitsToDouble(longVal);
@@ -103,7 +103,7 @@ public class ReadObjNames {
     }
 
     private static Type printObjName(long address, int offset) {
-        String result = API.readMemoryStringFallback(address, null);
+        String result = API.readString(address, null);
 
         if (result != null && !result.isEmpty()) {
             printStr(replacements.getOrDefault(result, result), offset, Type.OBJ);

@@ -38,11 +38,11 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
 
     @Override
     public void update() {
-        this.categoryBar.update(API.readMemoryLong(address + 88));
+        this.categoryBar.update(API.readLong(address + 88));
 
-        this.proActionBar.update(API.readMemoryLong(address + 112));
-        this.premiumBar.update(API.readMemoryLong(address + 104));
-        this.standardBar.update(API.readMemoryLong(address + 96));
+        this.proActionBar.update(API.readLong(address + 112));
+        this.premiumBar.update(API.readLong(address + 104));
+        this.standardBar.update(API.readLong(address + 96));
     }
 
     public boolean isCategoryBarVisible() {
@@ -121,6 +121,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     public @Nullable Item getItem(Character character) {
         SlotBar.Slot slot = getSlot(settings.getAtChar(character));
         if (slot == null || slot.item == null) return null;
+        if (slot.categoryItem != null) return slot.categoryItem;
 
         return categoryBar.findItem(slot.item).orElse(slot.item);
     }
@@ -129,6 +130,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
     public @Nullable Item getItem(Character keyBind, @NotNull ItemCategory itemCategory) {
         SlotBar.Slot slot = getSlot(settings.getAtChar(keyBind));
         if (slot == null || slot.item == null) return null;
+        if (slot.categoryItem != null) return slot.categoryItem;
 
         CategoryBar.Category category = categoryBar.get(itemCategory);
         if (category == null) return null;
@@ -164,7 +166,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         if (item == null) return null;
         if (item instanceof Item) return (Item) item;
 
-        return categoryBar.findItem(item).orElse(null);
+        return categoryBar.getItem(item);
     }
 
     public enum Type {

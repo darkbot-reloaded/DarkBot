@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.core.objects.gui;
 
+import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.objects.Gui;
 
 public class TargetedOfferGui extends Gui {
@@ -29,15 +31,23 @@ public class TargetedOfferGui extends Gui {
 
     public boolean show(boolean value) {
         if (value) throw new UnsupportedOperationException("Can't set showing a targeted offer!");
-        if (trySetShowing(false)) {
-            click(width - 3, 3);
-            return false;
-        }
-        return isAnimationDone();
+        return super.show(false);
     }
 
     @Override
-    public boolean isAnimationDone() {
-        return System.currentTimeMillis() - 2000 > time;
+    protected boolean close() {
+        // default "cleanup", doesn't free-up targeted offer mediator
+        return Main.API.hasCapability(Capability.DIRECT_CALL_METHOD)
+                && Main.API.callMethodChecked(false, "23(2626)1016321600", 279, address);
+    }
+
+    @Override
+    protected void legacyToggle(boolean show) {
+        click(width - 3, 3);
+    }
+
+    @Override
+    protected int animationTime() {
+        return 2000;
     }
 }

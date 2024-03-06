@@ -144,6 +144,31 @@ public class ByteUtils {
         return Main.API.readString(object, 0x10, 0x28, 0x90);
     }
 
+    public static String readObjectNameDirect(long object) {
+        return Main.API.readStringDirect(object, 0x10, 0x28, 0x90);
+    }
+
+    public static String readStringDirect(long address) {
+        long sizeAndFlags = Main.API.readLong(address + 32);
+
+        int size = (int) sizeAndFlags; // lower 32bits
+        if (size == 0) return "";
+
+        int flags = (int) (sizeAndFlags >> 32); // high 32bits
+        int width = (flags & 0b001);
+
+        size <<= width;
+        if (size > 1024 || size < 0) return null;
+
+        boolean dependent = ((flags & 0b110) >> 1) == ExtraMemoryReader.TYPE_DEPENDENT;
+        address = dependent
+                ? Main.API.readLong(address, 24, 16) + Main.API.readInt(address + 16)
+                : Main.API.readLong(address + 16);
+
+        return new String(Main.API.readBytes(address, size),
+                width == ExtraMemoryReader.WIDTH_8 ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_16LE);
+    }
+
     public static class ExtraMemoryReader implements GameAPI.ExtraMemoryReader {
         private static final int TYPE_DYNAMIC = 0, TYPE_STATIC = 1, TYPE_DEPENDENT = 2;
         private static final int WIDTH_AUTO = -1, WIDTH_8 = 0, WIDTH_16 = 1;
@@ -288,24 +313,25 @@ public class ByteUtils {
             long mainAddress = botInstaller.mainApplicationAddress.get();
             if (mainAddress == 0) return 0;
 
-            long table = Main.API.readMemoryLong(mainAddress, 0x10, 0x10, 0x18, 0x10, 0x28);
-            int capacity = Main.API.readMemoryInt(table + 8) * 8; // capacity generally is always the same.
+            long table = Main.API.readLong(mainAddress, 0x10, 0x10, 0x18);
+            table = Main.API.readLong(table, 0x10, 0x28);
+            int capacity = Main.API.readInt(table + 8) * 8; // capacity generally is always the same.
 
             if (capacity > MAX_TABLE_SIZE) return 0;
 
             if (tableData == null || tableData.length < capacity) {
                 tableData = new byte[capacity];
-                Main.API.readMemory(table + 0x10, tableData, capacity);
+                Main.API.readBytes(table + 0x10, tableData, capacity);
                 timer.activate();
 
             } else if (timer.tryActivate())
-                Main.API.readMemory(table + 0x10, tableData, capacity);
+                Main.API.readBytes(table + 0x10, tableData, capacity);
 
             for (int i = 0; i < capacity; i += 8) {
                 long entry = ByteUtils.getLong(tableData, i);
                 if (entry == 0) continue;
 
-                long closure = Main.API.readMemoryLong(entry + 0x20);
+                long closure = Main.API.readLong(entry + 0x20);
                 if (closure == 0 || closure == 0x200000001L) continue;
 
                 if (pattern.test(closure)) return closure;

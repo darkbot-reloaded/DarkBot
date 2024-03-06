@@ -5,6 +5,8 @@ import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.FrozenLabyrinthAPI;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
+
 import static com.github.manolo8.darkbot.Main.API;
 
 public class FrozenLabyrinthProxy extends Updatable implements FrozenLabyrinthAPI {
@@ -15,14 +17,14 @@ public class FrozenLabyrinthProxy extends Updatable implements FrozenLabyrinthAP
     public int synkZone;
 
     public void update() {
-        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
-        long labVoAddr = API.readMemoryLong(data + 0x70) & ByteUtils.ATOM_MASK;
+        long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;
+        long labVoAddr = API.readLong(data + 0x70) & ByteUtils.ATOM_MASK;
 
-        this.keys = API.readMemoryInt(API.readMemoryLong(data + 0x68) + 0x28);
-        this.time = API.readMemoryDouble(API.readMemoryLong(data + 0x58) + 0x38);
-        this.labStatus = API.readMemoryString(API.readMemoryLong(data+0x60));
-        this.synkMap = API.readMemoryString(API.readMemoryLong(labVoAddr + 0x28));
-        this.synkZone = API.readMemoryInt(labVoAddr + 0x20);
+        this.keys = API.readInt(API.readLong(data + 0x68) + 0x28);
+        this.time = API.readDouble(API.readLong(data + 0x58) + 0x38);
+        this.labStatus = API.readString(API.readLong(data+0x60));
+        this.synkMap = API.readString(API.readLong(labVoAddr + 0x28));
+        this.synkZone = API.readInt(labVoAddr + 0x20);
     }
 
     @Override
@@ -48,7 +50,8 @@ public class FrozenLabyrinthProxy extends Updatable implements FrozenLabyrinthAP
     public @Nullable MapZone getSynkMapZone() {
         if (synkMap == null || synkZone < 1 || synkZone > 4) return null;
         try {
-            return LabMap.valueOf(synkMap.replace(" ", "_")).z(synkZone - 1);
+            return LabMap.valueOf(synkMap.toUpperCase(Locale.ROOT).replace(' ', '_'))
+                    .z(synkZone - 1);
         } catch (IllegalArgumentException e) {
             System.err.println("Couldn't find LabMap for '" + synkMap + "' and zone '" + synkZone + "'");
             return null;

@@ -2,7 +2,7 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.PairArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +15,7 @@ import static com.github.manolo8.darkbot.Main.API;
 public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singleton {
 
     private final Character[] keycodes = new Character[KeyBind.values().length];
-    private final PairArray keycodesDictionary = PairArray.ofDictionary().setAutoUpdatable(true);
+    private final FlashListLong keycodesDictionary = FlashListLong.ofMapValues();
     private final Main main;
 
     public SettingsProxy(Main main) {
@@ -58,7 +58,7 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
     }
 
     private boolean isReady() {
-        return keycodesDictionary.getSize() > 30;
+        return keycodesDictionary.size() > 30;
     }
 
     @Nullable
@@ -69,20 +69,19 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
 
     @Override
     public void update() {
-        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
-
-        PairArray keycodesDictionary = this.keycodesDictionary;
-        keycodesDictionary.update(API.readMemoryLong(data + 240));
+        long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;
+        keycodesDictionary.update(API.readLong(data + 240));
 
         Character[] keycodes = this.keycodes;
-        int length = keycodes.length;
-        for (int i = 0; i < length && i < keycodesDictionary.getSize(); i++) {
-            // int vector size
-            int arrSize = API.readMemoryInt(keycodesDictionary.getPtr(i) + 64);
-            if (arrSize <= 0) keycodes[i] = null;
-
+        for (int i = 0; i < keycodesDictionary.size() && i < keycodes.length; i++) {
+            long addr = keycodesDictionary.getLong(i);
+            int arrSize = API.readInt(addr + 64);
+            if (arrSize <= 0) {
+                keycodes[i] = null;
+                continue;
+            }
             //read first encounter in int vector
-            int keycode = API.readMemoryInt(keycodesDictionary.getPtr(i), 48, 4);
+            int keycode = API.readInt(addr, 48, 4);
             keycodes[i] = keycode <= 0 || keycode > 222 ? null : (char) keycode;
         }
     }
@@ -124,6 +123,8 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
         PREMIUM_0(SlotBarsProxy.Type.PREMIUM_BAR, 9, 19, KeyEvent.VK_F10),
         TOGGLE_PRO_ACTION(39,  KeyEvent.VK_SHIFT);
 
+        private static final KeyBind[] VALUES = values();
+
         private final SlotBarsProxy.Type type;
         private final int slotIdx, settingIdx, defaultKey;
 
@@ -143,8 +144,8 @@ public class SettingsProxy extends Updatable implements eu.darkbot.api.API.Singl
         }
 
         public static KeyBind of(int index) {
-            if (index < 0 || index >= values().length) return null;
-            return values()[index];
+            if (index < 0 || index >= VALUES.length) return null;
+            return VALUES[index];
         }
 
         public static KeyBind of(SlotBarsProxy.Type slotType, int slotNumber) {

@@ -14,7 +14,6 @@ import com.github.manolo8.darkbot.gui.tree.editors.FontEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ImagePicker;
 import com.github.manolo8.darkbot.gui.tree.editors.MultiDropdownEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.NumberEditor;
-import com.github.manolo8.darkbot.gui.tree.editors.PercentEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.PlayerTagEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.RangeEditor;
 import com.github.manolo8.darkbot.gui.tree.editors.ShipModeEditor;
@@ -81,13 +80,12 @@ public class EditorProvider {
 
         defaultEditors.put(ImageWrapper.class, ImagePicker.class);
 
-        metadataEditors.put("isPercent", PercentEditor.class);
+        metadataEditors.put("isPercent", NumberEditor.class);
         metadataEditors.put("isTable", TableEditor.class);
         metadataEditors.put("isDropdown", DropdownEditor.class);
         metadataEditors.put("isMultiDropdown", MultiDropdownEditor.class);
     }
 
-    @SuppressWarnings("CopyConstructorMissesField")
     public EditorProvider(EditorProvider shared) {
         this(shared.api, new LegacyEditorManager(shared.legacy));
     }

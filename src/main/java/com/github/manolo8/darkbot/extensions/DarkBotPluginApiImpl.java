@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.extensions;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
 import com.github.manolo8.darkbot.backpage.FlashResManager;
+import com.github.manolo8.darkbot.backpage.NativeBrowserImpl;
 import com.github.manolo8.darkbot.config.ConfigHandler;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
 import com.github.manolo8.darkbot.core.manager.MapManager;
@@ -41,7 +42,8 @@ public class DarkBotPluginApiImpl extends PluginApiImpl {
                 AttackAPIImpl.class,
                 LegacyModules.class,
                 I18n.class,
-                ConfigHandler.class);
+                ConfigHandler.class,
+                NativeBrowserImpl.class);
         addDecorator(requireInstance(ListenerDecorator.class));
     }
 

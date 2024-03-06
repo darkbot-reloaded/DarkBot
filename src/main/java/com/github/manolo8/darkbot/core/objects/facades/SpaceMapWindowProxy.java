@@ -10,7 +10,7 @@ public class SpaceMapWindowProxy extends Updatable implements API.Singleton {
 
     @Override
     public void update() {
-        jumpInfo.update(Main.API.readMemoryLong(address + 80));
+        jumpInfo.update(Main.API.readLong(address + 80));
     }
 
     public static class JumpInfo extends Updatable.Auto {

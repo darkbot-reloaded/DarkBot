@@ -77,22 +77,22 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
         playerInfo.update();
         attackTarget.update();
 
-        formationId = API.readMemoryInt(address, 280, 40, 40);
-        invisible = API.readMemoryBoolean(API.readMemoryLong(address + 160) + 32);
+        formationId = API.readInt(address, 280, 40, 40);
+        invisible = API.readBoolean(API.readLong(address + 160) + 32);
 
         shipId = API.readInt(address, 192, 76);
-        lockType = Lock.of(API.readMemoryInt(lockPtr, 48, 40));
+        lockType = Lock.of(API.readInt(lockPtr, 48, 40));
     }
 
     @Override
     public void update(long address) {
         super.update(address);
 
-        playerInfo.update(API.readMemoryLong(address + 248));
-        health.update(API.readMemoryLong(address + 184));
-        shipInfo.update(API.readMemoryLong(address + 232));
+        playerInfo.update(API.readLong(address + 248));
+        health.update(API.readLong(address + 184));
+        shipInfo.update(API.readLong(address + 232));
 
-        attackTarget.update(findInTraits(ptr -> API.readMemoryString(ptr, 48, 32).equals("attackLaser")));
+        attackTarget.update(findInTraits(ptr -> API.readString(ptr, 48, 32).equals("attackLaser")));
 
         lockPtr = findInTraits(TraitPattern::ofLockType);
     }
@@ -150,10 +150,10 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
 
         @Override
         public void update() {
-            long targetPtr = API.readMemoryLong(address + 64);
+            long targetPtr = API.readLong(address + 64);
             laserAttacking = targetPtr != 0;
 
-            long entityPtr = laserAttacking ? API.readMemoryLong(targetPtr, 32) : 0;
+            long entityPtr = laserAttacking ? API.readLong(targetPtr, 32) : 0;
 
             if (entityPtr == 0) targetedEntity = null;
             else if (targetedEntity == null || entityPtr != targetedEntity.address) {
