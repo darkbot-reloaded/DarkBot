@@ -38,15 +38,15 @@ public class ShipInfo extends Updatable {
 
     @Override
     public void update() {
-        long newTarget = API.readMemoryLong(address + 112);
+        long newTarget = API.readLong(address + 112);
         if (newTarget != 0 || keepTargetTime > System.currentTimeMillis()) {
             target = newTarget;
             if (target != 0) keepTargetTime = System.currentTimeMillis() + 1000;
         }
-        angle = Math.toRadians(API.readMemoryInt(API.readMemoryLong(address + 48) + 32));
-        speed = API.readMemoryInt(API.readMemoryLong(address + 72) + 40);
+        angle = Math.toRadians(API.readInt(API.readLong(address + 48) + 32));
+        speed = API.readInt(API.readLong(address + 72) + 40);
 
-        destination.update(API.readMemoryLong(address + 96));
+        destination.update(API.readLong(address + 96));
         destination.update();
 
         updateSpeedAndAngle();

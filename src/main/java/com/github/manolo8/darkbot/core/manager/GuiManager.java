@@ -18,7 +18,7 @@ import com.github.manolo8.darkbot.core.objects.gui.OreTradeGui;
 import com.github.manolo8.darkbot.core.objects.gui.RefinementGui;
 import com.github.manolo8.darkbot.core.objects.gui.SettingsGui;
 import com.github.manolo8.darkbot.core.objects.gui.TargetedOfferGui;
-import com.github.manolo8.darkbot.core.objects.swf.PairArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashMap;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.managers.GameScreenAPI;
@@ -27,8 +27,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -42,15 +40,13 @@ public class GuiManager implements Manager, GameScreenAPI {
     private final StatsProxy statsProxy;
     private final RepairManager repairManager;
 
-    private final PairArray guis = PairArray.ofDictionary();
+    private final FlashMap<String, Gui> guis = FlashMap.of(String.class, Gui.class).noAuto();
 
     private long reconnectTime;
     private long lastDeath = -1;
     private long lastRepairAttempt;
     private long validTime;
     private long guiAddress;
-
-    private final Map<String, Gui> registeredGuis = new HashMap<>();
 
     public final Gui lostConnection;
     public final Gui connecting;
@@ -82,9 +78,25 @@ public class GuiManager implements Manager, GameScreenAPI {
     private enum LoadStatus {
         WAITING(gm -> gm.main.hero.address != 0 && !gm.connecting.isVisible()),
         AFTER_LOGIN(gm -> {
-            API.keyboardClick(gm.main.config.LOOT.AMMO_KEY, false);
-            API.keyboardClick(gm.main.config.LOOT.AMMO_KEY, false);
             gm.loggedInTimer.activate();
+            return true;
+        }),
+        CLICKING_ONE(gm -> {
+            if (gm.loggedInTimer.getRemainingFuse() > 13000) return false;
+            Character keyBind = gm.main.facadeManager.slotBars.getKeyBind(gm.main.hero.getFormation());
+            API.keyboardClick(keyBind == null ? gm.main.config.LOOT.AMMO_KEY : keyBind, false);
+            return true;
+        }),
+        CLICKING_TWO(gm -> {
+            if (gm.loggedInTimer.getRemainingFuse() > 12000) return false;
+            Character keyBind = gm.main.facadeManager.slotBars.getKeyBind(gm.main.hero.getFormation());
+            API.keyboardClick(keyBind == null ? gm.main.config.LOOT.AMMO_KEY : keyBind, false);
+            return true;
+        }),
+        CLICKING_THREE(gm -> {
+            if (gm.loggedInTimer.getRemainingFuse() > 11000) return false;
+            Character keyBind = gm.main.facadeManager.slotBars.getKeyBind(gm.main.hero.getFormation());
+            API.keyboardClick(keyBind == null ? gm.main.config.LOOT.AMMO_KEY : keyBind, false);
             return true;
         }),
         DONE(q -> false);
@@ -151,13 +163,8 @@ public class GuiManager implements Manager, GameScreenAPI {
         return register(key, Gui.class);
     }
 
-    @SuppressWarnings({"unchecked", "CastCanBeRemovedNarrowingVariableType"})
     private <T extends Gui> T register(String key, Class<T> gui) {
-        Gui guiFix = pluginAPI.requireInstance(gui); // Workaround for a java compiler assertion bug having issues with types
-        this.guis.addLazy(key, guiFix::update);
-        this.registeredGuis.put(key, guiFix);
-
-        return (T) guiFix;
+        return (T) guis.putUpdatable(key, pluginAPI.requireInstance(gui));
     }
 
     @Override
@@ -173,9 +180,9 @@ public class GuiManager implements Manager, GameScreenAPI {
 
         botInstaller.guiManagerAddress.add(value -> {
             guiAddress = value;
-            guis.update(API.readMemoryLong(guiAddress + 112));
+            guis.update(API.readLong(guiAddress + 112));
 
-            registeredGuis.values().forEach(Gui::reset);
+            guis.values().forEach(Gui::reset);
             checks = LoadStatus.WAITING;
             guiCloser.reset();
         });
@@ -187,8 +194,6 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     public void tick() {
         guis.update();
-
-        registeredGuis.values().forEach(Gui::update);
 
         if (checks != LoadStatus.DONE && checks.canAdvance.test(this))
             checks = LoadStatus.values()[checks.ordinal() + 1];
@@ -330,12 +335,12 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     @Override
     public Collection<? extends eu.darkbot.api.game.other.Gui> getGuis() {
-        return registeredGuis.values();
+        return guis.getValueList();
     }
 
     @Override
     public @Nullable Gui getGui(String key) {
-        return registeredGuis.get(key);
+        return guis.get(key);
     }
 
     @Override

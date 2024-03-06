@@ -10,10 +10,10 @@ public class GauntletPlutusProxy extends Updatable implements GauntletPlutusAPI 
     public String plutusStatus;
 
     public void update() {
-        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
-        long plutusVoAddr = API.readMemoryLong(data + 0x58) & ByteUtils.ATOM_MASK;
+        long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;
+        long plutusVoAddr = API.readLong(data + 0x58) & ByteUtils.ATOM_MASK;
 
-        this.plutusStatus = API.readMemoryString(API.readMemoryLong(plutusVoAddr + 0x30));
+        this.plutusStatus = API.readString(API.readLong(plutusVoAddr + 0x30));
     }
 
     @Override

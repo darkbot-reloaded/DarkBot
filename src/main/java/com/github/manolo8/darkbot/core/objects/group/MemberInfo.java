@@ -14,14 +14,14 @@ public class MemberInfo extends Health implements eu.darkbot.api.game.group.Memb
                 hullLast = hp, maxHullLast = maxHp,
                 shieldLast = shield, maxShieldLast = maxShield;
 
-        shipType  = API.readMemoryInt(address + 0x20);
-        hp        = API.readMemoryInt(address + 0x24);
-        maxHp     = API.readMemoryInt(address + 0x28);
-        hull      = API.readMemoryInt(address + 0x2C);
-        maxHull   = API.readMemoryInt(address + 0x30);
-        shield    = API.readMemoryInt(address + 0x34);
-        maxShield = API.readMemoryInt(address + 0x38);
-        username  = API.readMemoryString(API.readMemoryLong(address + 0x40));
+        shipType  = API.readInt(address + 0x20);
+        hp        = API.readInt(address + 0x24);
+        maxHp     = API.readInt(address + 0x28);
+        hull      = API.readInt(address + 0x2C);
+        maxHull   = API.readInt(address + 0x30);
+        shield    = API.readInt(address + 0x34);
+        maxShield = API.readInt(address + 0x38);
+        username  = API.readString(API.readLong(address + 0x40));
 
         checkHealth(hpLast, maxHpLast,
                 hullLast, maxHullLast,

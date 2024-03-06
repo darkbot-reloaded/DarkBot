@@ -12,6 +12,7 @@ import java.util.function.Supplier;
  * Represents a collection of pointers in SWF.
  * Contains an utility method for syncing the pointers with java object collections.
  */
+@Deprecated
 public abstract class SwfPtrCollection extends Updatable {
     private long lastPointer;
 

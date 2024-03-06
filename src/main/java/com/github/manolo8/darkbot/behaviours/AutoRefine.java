@@ -45,7 +45,7 @@ public class AutoRefine implements Behavior {
                 .ifPresent(ore -> {
                     int maxRefine = maxRefine(ore);
                     if (maxRefine <= 0 || !timer.tryActivate()) return;
-                    darkbotApi.refine(darkbotApi.readMemoryLong(guiManager.getAddress() + 0x78), ore, maxRefine);
+                    darkbotApi.refine(darkbotApi.readLong(guiManager.getAddress() + 0x78), ore, maxRefine);
                 });
     }
 

@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.core.itf;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
-import org.jetbrains.annotations.Nullable;
 
 public interface NativeUpdatable {
 
@@ -15,8 +14,20 @@ public interface NativeUpdatable {
         return offset;
     }
 
-    default int readInt(int offset) {
-        return Main.API.readInt(getAddress() + modifyOffset(offset));
+    default int readInt(int o1) {
+        return Main.API.readInt(getAddress(), modifyOffset(o1));
+    }
+
+    default int readInt(int o1, int o2) {
+        return Main.API.readInt(getAddress(), modifyOffset(o1), o2);
+    }
+
+    default int readInt(int o1, int o2, int o3) {
+        return Main.API.readInt(getAddress(), modifyOffset(o1), o2, o3);
+    }
+
+    default int readInt(int o1, int o2, int o3, int o4) {
+        return Main.API.readInt(getAddress(), modifyOffset(o1), o2, o3, o4);
     }
 
     default int readInt(int... offsets) {
@@ -25,11 +36,27 @@ public interface NativeUpdatable {
 
     // it is a native class which holds min[32], max[36] & value[40] members
     default int readIntHolder(int offset) {
-        return Main.API.readInt(readLong(offset) + 40);
+        return readInt(offset, 40);
     }
 
-    default long readLong(int offset) {
-        return Main.API.readLong(getAddress() + modifyOffset(offset));
+    default long readLong(int o1) {
+        return Main.API.readLong(getAddress(), modifyOffset(o1));
+    }
+
+    default long readLong(int o1, int o2) {
+        return Main.API.readLong(getAddress(), modifyOffset(o1), o2);
+    }
+
+    default long readLong(int o1, int o2, int o3) {
+        return Main.API.readLong(getAddress(), modifyOffset(o1), o2, o3);
+    }
+
+    default long readLong(int o1, int o2, int o3, int o4) {
+        return Main.API.readLong(getAddress(), modifyOffset(o1), o2, o3, o4);
+    }
+
+    default long readLong(int o1, int o2, int o3, int o4, int o5) {
+        return Main.API.readLong(getAddress(), modifyOffset(o1), o2, o3, o4, o5);
     }
 
     default long readLong(int... offsets) {
@@ -39,36 +66,107 @@ public interface NativeUpdatable {
     /**
      * @see ByteUtils#ATOM_MASK
      */
-    default long readAtom(int offset) {
-        return readLong(offset) & ByteUtils.ATOM_MASK;
+    default long readAtom(int o1) {
+        return Main.API.readAtom(getAddress(), modifyOffset(o1));
+    }
+
+    default long readAtom(int o1, int o2) {
+        return Main.API.readAtom(getAddress(), modifyOffset(o1), o2);
+    }
+
+    default long readAtom(int o1, int o2, int o3) {
+        return Main.API.readAtom(getAddress(), modifyOffset(o1), o2, o3);
+    }
+
+    default long readAtom(int o1, int o2, int o3, int o4) {
+        return Main.API.readAtom(getAddress(), modifyOffset(o1), o2, o3, o4);
     }
 
     default long getClassClosure() {
         return ByteUtils.getClassClosure(getAddress());
     }
 
-    default double readDouble(int offset) {
-        return Main.API.readDouble(getAddress() + modifyOffset(offset));
+    default double readDouble(int o1) {
+        return Main.API.readDouble(getAddress(), modifyOffset(o1));
+    }
+
+    default double readDouble(int o1, int o2) {
+        return Main.API.readDouble(getAddress(), modifyOffset(o1), o2);
+    }
+
+    default double readDouble(int o1, int o2, int o3) {
+        return Main.API.readDouble(getAddress(), modifyOffset(o1), o2, o3);
+    }
+
+    default double readDouble(int o1, int o2, int o3, int o4) {
+        return Main.API.readDouble(getAddress(), modifyOffset(o1), o2, o3, o4);
     }
 
     default double readDouble(int... offsets) {
         return Main.API.readDouble(getAddress(), modifyOffset(offsets));
     }
 
-    default boolean readBoolean(int offset) {
-        return Main.API.readBoolean(getAddress() + modifyOffset(offset));
+    default boolean readBoolean(int o1) {
+        return Main.API.readBoolean(getAddress(), modifyOffset(o1));
+    }
+
+    default boolean readBoolean(int o1, int o2) {
+        return Main.API.readBoolean(getAddress(), modifyOffset(o1), o2);
+    }
+
+    default boolean readBoolean(int o1, int o2, int o3) {
+        return Main.API.readBoolean(getAddress(), modifyOffset(o1), o2, o3);
+    }
+
+    default boolean readBoolean(int o1, int o2, int o3, int o4) {
+        return Main.API.readBoolean(getAddress(), modifyOffset(o1), o2, o3, o4);
     }
 
     default boolean readBoolean(int... offsets) {
         return Main.API.readBoolean(getAddress(), modifyOffset(offsets));
     }
 
-    default @Nullable String readString(int... offsets) {
-        return readString(null, offsets);
+    /**
+     * @return the string or {@link eu.darkbot.api.managers.MemoryAPI#FALLBACK_STRING} if return value is null
+     * */
+    default String readString(int o1) {
+        return Main.API.readString(getAddress(), modifyOffset(o1));
     }
 
-    default String readString(String fallback, int... offsets) {
-        return Main.API.readString(getAddress(), fallback, modifyOffset(offsets));
+    default String readString(int o1, int o2) {
+        return Main.API.readString(getAddress(), modifyOffset(o1), o2);
+    }
+
+    default String readString(int o1, int o2, int o3) {
+        return Main.API.readString(getAddress(), modifyOffset(o1), o2, o3);
+    }
+
+    default String readString(int o1, int o2, int o3, int o4) {
+        return Main.API.readString(getAddress(), modifyOffset(o1), o2, o3, o4);
+    }
+
+    default String readString(int o1, int o2, int o3, int o4, int o5) {
+        return Main.API.readString(getAddress(), modifyOffset(o1), o2, o3, o4, o5);
+    }
+
+    default String readString(String fallback, int o1) {
+        return Main.API.readString(getAddress(), fallback, modifyOffset(o1));
+    }
+
+    default String readString(String fallback, int o1, int o2) {
+        return Main.API.readString(getAddress(), fallback, modifyOffset(o1), o2);
+
+    }
+
+    default String readString(String fallback, int o1, int o2, int o3) {
+        return Main.API.readString(getAddress(), fallback, modifyOffset(o1), o2, o3);
+    }
+    default String readString(String fallback, int o1, int o2, int o3, int o4) {
+        return Main.API.readString(getAddress(), fallback, modifyOffset(o1), o2, o3, o4);
+    }
+
+    default String readString(String fallback, int o1, int o2, int o3, int o4, int o5) {
+        return Main.API.readString(getAddress(), fallback, modifyOffset(o1), o2, o3, o4, o5);
     }
 
     default void replaceInt(int oldValue, int newValue, int offset) {

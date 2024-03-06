@@ -42,8 +42,6 @@ public class GameAPIImpl<
         I extends GameAPI.Interaction,
         D extends GameAPI.DirectInteraction> implements IDarkBotAPI {
 
-    private static final String FALLBACK_STRING = "ERROR";
-
     protected final StartupParams params;
 
     protected final W window;
@@ -305,37 +303,31 @@ public class GameAPIImpl<
     }
 
     @Override
-    public double readMemoryDouble(long address) {
+    public double readDouble(long address) {
         if (!ByteUtils.isValidPtr(address)) return 0;
         return memory.readDouble(address);
     }
 
     @Override
-    public long readMemoryLong(long address) {
+    public long readLong(long address) {
         if (!ByteUtils.isValidPtr(address)) return 0;
         return memory.readLong(address);
     }
 
     @Override
-    public int readMemoryInt(long address) {
+    public int readInt(long address) {
         if (!ByteUtils.isValidPtr(address)) return 0;
         return memory.readInt(address);
     }
 
     @Override
-    public boolean readMemoryBoolean(long address) {
+    public boolean readBoolean(long address) {
         if (!ByteUtils.isValidPtr(address)) return false;
         return memory.readBoolean(address);
     }
 
     @Override
-    public String readMemoryString(long address) {
-        if (!ByteUtils.isValidPtr(address)) return FALLBACK_STRING;
-        return readMemoryStringFallback(address, FALLBACK_STRING);
-    }
-
-    @Override
-    public String readMemoryStringFallback(long address, String fallback) {
+    public String readString(long address, String fallback) {
         if (!ByteUtils.isValidPtr(address)) return fallback;
 
         String str = extraMemoryReader.readString(address);
@@ -343,7 +335,7 @@ public class GameAPIImpl<
     }
 
     @Override
-    public byte[] readMemory(long address, int length) {
+    public byte[] readBytes(long address, int length) {
         if (!ByteUtils.isValidPtr(address)) return new byte[0];
         synchronized (memory) {
             return memory.readBytes(address, length);
@@ -351,7 +343,7 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void readMemory(long address, byte[] buffer, int length) {
+    public void readBytes(long address, byte[] buffer, int length) {
         if (!ByteUtils.isValidPtr(address)) {
             Arrays.fill(buffer, 0, length, (byte) 0);
             return;
@@ -386,40 +378,40 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void writeMemoryInt(long address, int value) {
+    public void writeInt(long address, int value) {
         if (!ByteUtils.isValidPtr(address)) return;
         memory.writeInt(address, value);
     }
 
     @Override
-    public void writeMemoryLong(long address, long value) {
+    public void writeLong(long address, long value) {
         if (!ByteUtils.isValidPtr(address)) return;
         memory.writeLong(address, value);
     }
 
     @Override
-    public void writeMemoryDouble(long address, double value) {
+    public void writeDouble(long address, double value) {
         if (!ByteUtils.isValidPtr(address)) return;
         memory.writeDouble(address, value);
     }
 
     @Override
-    public long[] queryMemoryInt(int value, int maxQuantity) {
-        return memory.queryInt(value, maxQuantity);
+    public long[] searchInt(int value, int maxSize) {
+        return memory.queryInt(value, maxSize);
     }
 
     @Override
-    public long[] queryMemoryLong(long value, int maxQuantity) {
-        return memory.queryLong(value, maxQuantity);
+    public long[] searchLong(long value, int maxSize) {
+        return memory.queryLong(value, maxSize);
     }
 
     @Override
-    public long[] queryMemory(byte[] query, int maxQuantity) {
-        return memory.queryBytes(query, maxQuantity);
+    public long[] searchPattern(int maxSize, byte... pattern) {
+        return memory.queryBytes(pattern, maxSize);
     }
 
     @Override
-    public long queryMemory(byte... query) {
+    public long searchPattern(byte... query) {
         return memory.queryBytes(query);
     }
 

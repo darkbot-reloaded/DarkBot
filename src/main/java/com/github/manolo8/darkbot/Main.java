@@ -197,10 +197,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
     @Override
     @SuppressWarnings("InfiniteLoopStatement")
     public void run() {
-        long time;
-
         while (true) {
-            time = System.currentTimeMillis();
+            long time = System.nanoTime();
 
             try {
                 tick();
@@ -209,15 +207,16 @@ public class Main extends Thread implements PluginListener, BotAPI {
                 Time.sleep(1000);
             }
 
-            long current = System.currentTimeMillis();
-            avgTick = ((avgTick * 9) + (current - time)) / 10;
+            double elapsed = (System.nanoTime() - time) * 0.000001;
+            avgTick = ((avgTick * 9) + elapsed) * 0.1;
 
-            Time.sleepMax(time, botInstaller.invalid.get() ? 250 :
-                    Math.max(performanceManager.getMinTickTime(), Math.min((int) (avgTick * 1.25), 100)));
+            int pause = botInstaller.invalid.get() ? 250 :
+                    Math.max(performanceManager.getMinTickTime(), Math.min((int) (avgTick * 1.25), 100));
+            Time.sleep((long) (pause - elapsed));
 
             try {
                 // Just in case, we can't risk the main loop dying.
-                statsManager.tickAverageStats(current - time);
+                statsManager.tickAverageStats(avgTick);
             } catch (Throwable e) {
                 e.printStackTrace();
             }

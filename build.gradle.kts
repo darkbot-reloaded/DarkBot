@@ -43,8 +43,8 @@ publishing {
 }
 
 dependencies {
-    val apiVersion = "0.9.1"
-    val flatLafVersion = "3.1.1"
+    val apiVersion = "0.9.2"
+    val flatLafVersion = "3.3"
 
     // use this if you want to use local(mavenLocal) darkbot API
 //    api("eu.darkbot", "darkbot-impl", apiVersion)
@@ -55,6 +55,7 @@ dependencies {
     api("com.formdev", "flatlaf", flatLafVersion)
     api("com.formdev", "flatlaf-extras", flatLafVersion)
     api("org.jgrapht", "jgrapht-core", "1.3.0")
+    api("it.unimi.dsi:fastutil-core:8.5.12")
 
     // Testing stat time-series requires this
     //api("org.knowm.xchart", "xchart", "3.8.5")

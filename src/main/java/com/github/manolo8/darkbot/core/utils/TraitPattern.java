@@ -8,35 +8,35 @@ public class TraitPattern {
      * Filters if given address is instance of IntHolder which holds LockType.
      */
     public static boolean ofLockType(long address) {
-        long temp = API.readMemoryLong(address + 48);
-        int lockType = API.readMemoryInt(temp + 40);
+        long temp = API.readLong(address + 48);
+        int lockType = API.readInt(temp + 40);
 
         return (lockType == 1 || lockType == 2 || lockType == 3 || lockType == 4) &&
-                API.readMemoryInt(temp + 32) == Integer.MIN_VALUE &&
-                API.readMemoryInt(temp + 36) == Integer.MAX_VALUE;
+                API.readInt(temp + 32) == Integer.MIN_VALUE &&
+                API.readInt(temp + 36) == Integer.MAX_VALUE;
     }
 
     /**
      * Filters if given address is instance of Health in-game
      */
     public static boolean ofHealth(long address) {
-        long classType = API.readMemoryLong(address, 48, 0x10);
+        long classType = API.readLong(address, 48, 0x10);
 
         return classType != 0 &&
-                API.readMemoryLong(address, 48 + 8, 0x10) == classType &&
-                API.readMemoryLong(address, 48 + 8 * 2, 0x10) == classType &&
-                API.readMemoryLong(address, 48 + 8 * 3, 0x10) == classType &&
-                API.readMemoryLong(address, 48 + 8 * 4, 0x10) == classType &&
-                API.readMemoryLong(address, 48 + 8 * 5, 0x10) == classType;
+                API.readLong(address, 48 + 8, 0x10) == classType &&
+                API.readLong(address, 48 + 8 * 2, 0x10) == classType &&
+                API.readLong(address, 48 + 8 * 3, 0x10) == classType &&
+                API.readLong(address, 48 + 8 * 4, 0x10) == classType &&
+                API.readLong(address, 48 + 8 * 5, 0x10) == classType;
     }
 
     /**
      * Filters if given address is instance of Clickable in-game.
      */
     public static boolean ofClickable(long address) {
-        int radius = API.readMemoryInt(address + 40);
-        int priority = API.readMemoryInt(address + 44);
-        int someBool = API.readMemoryInt(address + 48);
+        int radius = API.readInt(address + 40);
+        int priority = API.readInt(address + 44);
+        int someBool = API.readInt(address + 48);
 
         boolean valid = radius >= 0 && radius < 4000 &&
                 priority > -4 && priority < 1000 &&
