@@ -76,7 +76,7 @@ public class DispatchManager extends Gui implements DispatchAPI {
     }
 
     @Override
-    public List <? extends DispatchGateProxy.DispatchGate> getAvailableGates(){
+    public List <? extends DispatchAPI.Gate> getAvailableGates(){
         return gateProxy.getAvailableGates();
     }
 
