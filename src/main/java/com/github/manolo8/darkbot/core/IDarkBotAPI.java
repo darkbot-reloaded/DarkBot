@@ -10,8 +10,6 @@ import eu.darkbot.api.managers.OreAPI;
 import eu.darkbot.api.managers.WindowAPI;
 import org.intellij.lang.annotations.Language;
 
-import java.util.function.LongPredicate;
-
 public interface IDarkBotAPI extends WindowAPI, MemoryAPI {
 
     //<editor-fold desc="WindowAPI">
