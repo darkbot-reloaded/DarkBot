@@ -70,6 +70,7 @@ public class SkylabManager implements API.Singleton {
     }
 
     public boolean refreshRequired() {
+        if (lastRefresh + Time.MINUTE > System.currentTimeMillis()) return false;
         if (lastRefresh + 15 * Time.MINUTE < System.currentTimeMillis()) return true;
         return SKYLAB_MODULES.stream().anyMatch(AbstractModule::isTimerLeft);
     }
