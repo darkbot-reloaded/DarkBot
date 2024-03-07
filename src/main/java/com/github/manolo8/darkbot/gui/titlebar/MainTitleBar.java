@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.utils.SimpleMouseListener;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +13,7 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
     private final TitleFiller titleFiller = new TitleFiller();
 
     public MainTitleBar(Main main, MainGui frame) {
-        setLayout(new MigLayout("fill, ins 0, gap 0, hidemode 2"));
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setBorder(BorderFactory.createEmptyBorder());
 
         add(new ExtraButton(main, frame));
@@ -23,8 +22,8 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
         add(new StartButton(main, frame));
         add(new BackpageButton(main, frame));
 
-        add(titleFiller, "grow, push");
-        add(DiagnosticBar.create(main), "hmax 30");
+        add(titleFiller);
+        add(DiagnosticBar.create(main, frame));
 
         add(new HookButton(frame));
         add(new VisibilityButton(main, frame));
@@ -40,7 +39,7 @@ public class MainTitleBar extends JMenuBar implements SimpleMouseListener {
         private final JLabel title = new JLabel();
 
         private TitleFiller() {
-            super(new Dimension(20, 0), new Dimension(120, 0), new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+            super(new Dimension(20, 0), new Dimension(120, 0), new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
             setLayout(new BorderLayout());
             setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 

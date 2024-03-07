@@ -3,10 +3,13 @@ package com.github.manolo8.darkbot.gui.utils;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.DecimalFormat;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class Strings {
+    public static final DecimalFormat ONE_PLACE_FORMAT = new DecimalFormat("0.0");
+
     private static final Pattern NON_CHARACTER_REPLACEMENT = Pattern.compile("[^a-z0-9]");
     private static final Pattern MIMESIS_REPLACEMENT = Pattern.compile("m[i1]m[e3][s5][i1][s5]");
 

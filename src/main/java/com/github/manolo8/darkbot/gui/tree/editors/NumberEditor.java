@@ -10,6 +10,7 @@ import eu.darkbot.api.config.util.OptionEditor;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,8 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
 
     private final JCheckBox checkBox = new BooleanEditor();
     private final Map<Class<? extends Number>, NumberSpinner<?>> spinners = new HashMap<>();
+    private final NumberSpinner<?> percentSpinner = new PercentSpinner();
+
     private NumberSpinner<?> spinner;
 
     private Number disabledValue;
@@ -28,8 +31,8 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
         setOpaque(false);
 
         add(checkBox);
-        checkBox.addChangeListener(e -> {
-            spinner.setEnabled(checkBox.isSelected());
+        checkBox.addItemListener(l -> {
+            spinner.setEnabled(l.getStateChange() == ItemEvent.SELECTED);
             SpinnerUtils.setError(spinner, false);
         });
     }
@@ -38,7 +41,12 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
     public JComponent getEditorComponent(ConfigSetting<Number> number) {
         if (this.spinner != null) remove(spinner);
 
-        this.spinner = spinners.computeIfAbsent(number.getType(), NumberSpinner::new);
+        Object oldSpinner = spinner;
+        if (number.getMetadata("isPercent") != null)
+            this.spinner = percentSpinner;
+        else this.spinner = spinners.computeIfAbsent(number.getType(), NumberSpinner::new);
+        if (spinner != oldSpinner)
+            SpinnerUtils.setError(spinner, false);
 
         disabledValue = MathUtils.toNumber(number.getMetadata("disabled"), number.getType());
 
@@ -68,6 +76,19 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
         return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
+    @Override
+    public Insets getInsets() {
+        return new Insets(0, 0, 0, 0);
+    }
+
+    private class PercentSpinner extends NumberSpinner<Double> {
+
+        private PercentSpinner() {
+            super(Double.class);
+            this.setEditor(new JSpinner.NumberEditor(this, "0%"));
+        }
+    }
+
     private class NumberSpinner<T extends Number> extends JSpinner {
         private final DecimalFormat format;
         private final double avgCharWidth;
@@ -78,7 +99,6 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
 
             NumberEditor editor = (NumberEditor) getEditor();
             this.format = editor.getFormat();
-            editor.getTextField().setFocusLostBehavior(JFormattedTextField.COMMIT);
             avgCharWidth = editor.getFontMetrics(editor.getFont()).stringWidth("1234567890") * 0.105d;
         }
 
@@ -106,14 +126,12 @@ public class NumberEditor extends JPanel implements OptionEditor<Number> {
             fireStateChanged(); // Force editor to pick up new value
 
             double width = Math.ceil(format.format(max).length() * avgCharWidth);
-            setPreferredSize(new Dimension(33 + (int) width, AdvancedConfig.EDITOR_HEIGHT));
+            setPreferredSize(new Dimension(Math.max(65, 33 + (int) width), AdvancedConfig.EDITOR_HEIGHT));
         }
 
         @Override
-        public Dimension getPreferredSize() {
-            return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
+        public Insets getInsets() {
+            return new Insets(0, 0,0 ,0);
         }
-
     }
-
 }

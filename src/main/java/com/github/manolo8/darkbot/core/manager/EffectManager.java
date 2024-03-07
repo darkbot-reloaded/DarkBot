@@ -4,48 +4,48 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
 import com.github.manolo8.darkbot.core.itf.Manager;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import eu.darkbot.api.API;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import lombok.Getter;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class EffectManager implements Manager, API.Singleton {
     private long mapAddressStatic;
 
-    private final ObjArray effectsPtr = ObjArray.ofVector(true);
-    private final Map<Long, List<Integer>> effects = new HashMap<>();
+    private final FlashListLong effectsPtr = FlashListLong.ofVector();
+    private final Long2ObjectMap<EffectIntSet> effects = new Long2ObjectOpenHashMap<>();
 
     public EffectManager(Main main) {
     }
 
     @Override
     public void install(BotInstaller botInstaller) {
+        effects.clear();
         botInstaller.screenManagerAddress.add(value -> mapAddressStatic = value + 256);
     }
 
     public void tick() {
-        long addr = API.readMemoryLong(API.readMemoryLong(mapAddressStatic), 128, 48);
+        effectsPtr.update(API.readLong(API.readLong(mapAddressStatic), 128, 48));
+        effects.values().removeIf(EffectIntSet::clearOrExpire);
 
-        effectsPtr.update(addr);
-        effects.clear();
+        for (int i = 0; i < effectsPtr.size(); i++) {
+            long addr = effectsPtr.getLong(i);
+            int id = API.readInt(addr + 0x24);
+            long entity = API.readLong(addr + 0x48);
 
-        for (int i = 0; i < effectsPtr.getSize(); i++) {
-            int id      = API.readMemoryInt( effectsPtr.get(i) + 0x24);
-            long entity = API.readMemoryLong(effectsPtr.get(i) + 0x48);
-
-            effects.computeIfAbsent(entity, list -> new ArrayList<>()).add(id);
+            effects.computeIfAbsent(entity, key -> new EffectIntSet()).add(id);
         }
     }
 
-    public List<Integer> getEffects(Entity entity) {
-        if (entity.address == 0) return Collections.emptyList();
-        return effects.getOrDefault(entity.address, Collections.emptyList());
+    public IntSet getEffects(Entity entity) {
+        if (entity.address == 0) return IntSet.of();
+        IntSet val = effects.get(entity.address);
+        return val != null ? val : IntSet.of();
     }
 
     public boolean hasEffect(Entity entity, Effect effect) {
@@ -56,6 +56,30 @@ public class EffectManager implements Manager, API.Singleton {
         return getEffects(entity).contains(effect);
     }
 
+    private static class EffectIntSet extends IntArraySet {
+        private int ticksSinceAdd;
+
+        public boolean clearOrExpire() {
+            if (ticksSinceAdd++ > 100) {
+                return true;
+            } else {
+                super.clear();
+                return false;
+            }
+        }
+
+        @Override
+        public boolean add(int k) {
+            ticksSinceAdd = 0;
+            return super.add(k);
+        }
+    }
+
+    /**
+     * @deprecated use eu.darkbot.api.game.enums.EntityEffect instead
+     */
+    @Deprecated
+    @Getter
     public enum Effect {
         UNDEFINED(-1),
         LOCATOR(1),
@@ -198,10 +222,6 @@ public class EffectManager implements Manager, API.Singleton {
         /*APRILS_FOOLS_TRAILS(1337)*/;
 
         private final int id;
-
-        public int getId() {
-            return id;
-        }
 
         Effect(int id) {
             this.id = id;

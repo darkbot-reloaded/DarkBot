@@ -2,7 +2,8 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import eu.darkbot.api.managers.AssemblyAPI;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,31 +16,24 @@ import static com.github.manolo8.darkbot.Main.API;
 
 @Getter
 public class AssemblyMediator extends Updatable implements AssemblyAPI {
-    @Getter(AccessLevel.NONE)
-    private final ObjArray recipesPtr = ObjArray.ofVector(true),
-            rowSettingsArr = ObjArray.ofVector(true);
-
     private int selectedRecipeIndex;
     private final Recipe selectedRecipe = new Recipe();
 
-    private final List<Recipe> recipes = new ArrayList<>();
+    private final FlashList<Recipe> recipes = FlashList.ofVector(Recipe::new);
     private final List<Filter> filters = new ArrayList<>();
-    private final List<RowFilter> rowSettings = new ArrayList<>();
+    private final FlashList<RowFilter> rowSettings = FlashList.ofVector(RowFilter::new);
 
     private boolean isFilterDropDownOpen;
 
     @Override
     public void update() {
         if (address == 0) return;
-        selectedRecipeIndex = Main.API.readInt(address + 0x48);
+        selectedRecipeIndex = readInt(0x48);
 
-        recipesPtr.update(Main.API.readMemoryPtr(address, 0x60, 0x20));
-        recipesPtr.sync(recipes, Recipe::new);
+        recipes.update(readAtom(0x60, 0x20));
+        selectedRecipe.update(readAtom(0x70));
 
-        selectedRecipe.update(Main.API.readMemoryPtr(address + 0x70));
-
-        rowSettingsArr.update(Main.API.readMemoryPtr(address, 0x78, 0xb0));
-        if (rowSettingsArr.syncAndReport(rowSettings, RowFilter::new)) {
+        if (rowSettings.updateAndReport(readAtom(0x78, 0xb0))) {
             filters.clear();
             for (int i = 0; i < rowSettings.size(); i++) {
                 RowFilter currRow = rowSettings.get(i);
@@ -48,7 +42,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             }
         }
 
-        isFilterDropDownOpen = API.readBoolean(address, 0x78, 0x60, 0x1D0);
+        isFilterDropDownOpen = readBoolean(0x78, 0x60, 0x1D0);
     }
 
     @Getter
@@ -56,21 +50,20 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     private static class Recipe extends Auto implements AssemblyAPI.Recipe {
         @Getter(AccessLevel.NONE)
         @ToString.Exclude
-        private final ObjArray rewardsArr = ObjArray.ofVector(true),
-                resourcesRequiredArr = ObjArray.ofVector(true);
+        private final FlashListLong rewardsArr = FlashListLong.ofVector();
 
         private String recipeId, visibility = "";
         private final List<String> rewards = new ArrayList<>();
-        private final List<ResourceRequired> resourcesRequired = new ArrayList<>();
+        private final FlashList<ResourceRequired> resourcesRequired = FlashList.ofVector(ResourceRequired::new);
         private boolean isCraftable, isInProgress, isCollectable = false;
 
         @Override
         public void update() {
-            isCraftable = API.readBoolean(address + 0x20);
-            recipeId = API.readMemoryString(address, 0x58, 0x48);
-            visibility = API.readMemoryString(address, 0x58, 0x40, 0x20, 0x90);
+            isCraftable = readBoolean(0x20);
+            recipeId = readString(0x58, 0x48);
+            visibility = readString(0x58, 0x40, 0x20, 0x90);
             isInProgress = visibility != null && visibility.equalsIgnoreCase("ON_SCHEDULE");
-            isCollectable = !isCraftable && !isInProgress && API.readDouble(API.readMemoryPtr(address, 0x40, 0x20) + 0x28) == 1.0;
+            isCollectable = !isCraftable && !isInProgress && readDouble(0x40, 0x20, 0x28) == 1.0;
         }
 
         @Override
@@ -79,12 +72,11 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             super.update(address);
 
             if (!addrChanged) return;
-            rewardsArr.update(API.readMemoryPtr(address + 0x60));
+            rewardsArr.update(API.readAtom(address + 0x60));
             rewards.clear();
-            rewardsArr.forEach(ptr -> rewards.add(API.readMemoryString(ptr, 0x48)));
+            rewardsArr.forEach(ptr -> rewards.add(API.readString(ptr, 0x48)));
 
-            resourcesRequiredArr.update(API.readMemoryPtr(address + 0x50));
-            resourcesRequiredArr.sync(resourcesRequired, ResourceRequired::new);
+            resourcesRequired.update(API.readAtom(address + 0x50));
         }
 
     }
@@ -97,7 +89,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
         public void update() {
             if (address <= 0) return;
-            resourceId = API.readMemoryString(address, 0x28, 0x48);
+            resourceId = API.readString(address, 0x28, 0x48);
             amountRequired = API.readDouble(address + 0x30);
             // this also gives back same value, not sure which is correct
             // amountRequired = API.readDouble(address + 0x38);
@@ -113,8 +105,8 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         public boolean updateAndReport() {
             if (address <= 0) return false;
 
-            return first.updateAndReport(Main.API.readMemoryPtr(address + 0x20))
-                    || second.updateAndReport(Main.API.readMemoryPtr(address + 0x28));
+            return first.updateAndReport(Main.API.readAtom(address + 0x20))
+                    || second.updateAndReport(Main.API.readAtom(address + 0x28));
         }
     }
 

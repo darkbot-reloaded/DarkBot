@@ -52,7 +52,7 @@ public class Health extends Updatable implements HealthHolder, eu.darkbot.api.ga
     }
 
     private int readIntFromIntHolder(int holderOffset) {
-        return API.readMemoryInt(API.readMemoryLong(address + holderOffset) + 40);
+        return API.readInt(API.readLong(address + holderOffset) + 40);
     }
 
     public double hpPercent() {

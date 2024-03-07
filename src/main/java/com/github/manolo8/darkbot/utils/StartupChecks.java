@@ -6,8 +6,6 @@ import com.github.manolo8.darkbot.utils.data.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -23,7 +21,7 @@ public class StartupChecks {
         if (params.has(StartupParams.LaunchArg.NO_WARN)) return;
         String java = System.getProperty("java.version");
 
-        if (!java.startsWith("11.") && !java.startsWith("17.") && !java.equals("17")) {
+        if (!java.startsWith("11.") && !java.startsWith("17.") && !java.equals("17") && !java.startsWith("21.")) {
             Popups.of(I18n.get("start.old_java_warn_title"),
                             I18n.get("start.old_java_warn_content", java),
                             JOptionPane.WARNING_MESSAGE)

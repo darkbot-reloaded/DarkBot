@@ -38,7 +38,7 @@ public class MouseManager extends Thread {
     public void clickLoc(Location loc) {
         clickPoint.set((int) loc.x, (int) loc.y);
 
-        point.update(Main.API.readMemoryLong(Main.API.readMemoryLong(map.eventAddress) + 64L));
+        point.update(Main.API.readLong(Main.API.readLong(map.eventAddress) + 64L));
         ClickPoint click = pointCenter(loc);
 
         waiting = false;
@@ -77,8 +77,8 @@ public class MouseManager extends Thread {
                     }
                 }
 
-                Main.API.writeMemoryDouble(point.address + 32L, clickPoint.x);
-                Main.API.writeMemoryDouble(point.address + 40L, clickPoint.y);
+                Main.API.writeDouble(point.address + 32L, clickPoint.x);
+                Main.API.writeDouble(point.address + 40L, clickPoint.y);
             }
         }
     }

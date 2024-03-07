@@ -1,15 +1,13 @@
 package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.EffectManager;
 import com.github.manolo8.darkbot.core.objects.Clickable;
 import com.github.manolo8.darkbot.core.objects.LocationInfo;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.core.utils.TraitPattern;
-import eu.darkbot.api.game.other.Lockable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -28,7 +26,7 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     public Map<String, Object> metadata;
     public LocationInfo locationInfo = new LocationInfo();
     public Clickable clickable = new Clickable();
-    public ObjArray traits = ObjArray.ofVector(true);
+    public FlashListLong traits = FlashListLong.ofVector();
 
     public int id;
     public boolean removed;
@@ -59,8 +57,8 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
 
     public boolean isInvalid(long mapAddress) {
         if (address == 0) return true;
-        int  id        = API.readMemoryInt(address + 56);
-        long container = API.readMemoryLong(address + 96);
+        int  id        = API.readInt(address + 56);
+        long container = API.readLong(address + 96);
 
         return container != mapAddress || this.id != id;
     }
@@ -74,20 +72,18 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
     public void update(long address) {
         super.update(address);
 
-        this.locationInfo.update(API.readMemoryLong(address + 64));
-        this.traits.update(API.readMemoryLong(address + 48));
+        this.locationInfo.update(API.readLong(address + 64));
+        this.traits.update(API.readLong(address + 48));
 
         this.clickable.update(findInTraits(TraitPattern::ofClickable));
     }
 
     protected long findInTraits(Predicate<Long> filter) {
-        ObjArray traits = this.traits;
-
-        for (int i = 0; i < traits.getSize(); i++) {
-            long ptr = traits.getPtr(i);
-            if (filter.test(ptr)) return ptr;
+        for (int i = 0; i < traits.size(); i++) {
+            long ptr = traits.getLong(i);
+            if (filter.test(ptr))
+                return ptr;
         }
-
         return ByteUtils.NULL;
     }
 
@@ -143,6 +139,6 @@ public class Entity extends Updatable implements eu.darkbot.api.game.entities.En
 
     @Override
     public Collection<Integer> getEffects() {
-        return main == null ? Collections.emptyList() : main.effectManager.getEffects(this);
+        return main == null ? Collections.emptySet() : main.effectManager.getEffects(this);
     }
 }

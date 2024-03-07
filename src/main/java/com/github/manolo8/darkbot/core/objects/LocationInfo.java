@@ -30,8 +30,8 @@ public class LocationInfo extends Updatable implements eu.darkbot.api.game.other
     @Override
     public void update() {
         if (address == 0) return;
-        double newX = API.readMemoryDouble(address + 32);
-        double newY = API.readMemoryDouble(address + 40);
+        double newX = API.readDouble(address + 32);
+        double newY = API.readDouble(address + 40);
         updatePosition(newX, newY);
     }
 

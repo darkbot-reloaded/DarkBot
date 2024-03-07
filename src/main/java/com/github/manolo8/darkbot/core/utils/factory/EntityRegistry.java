@@ -39,7 +39,7 @@ public class EntityRegistry {
     }
 
     public void sendEntity(int id, long address) {
-        EntityBuilder type = cachedTypes.computeIfAbsent(API.readMemoryLong(address + 0x10),
+        EntityBuilder type = cachedTypes.computeIfAbsent(API.readLong(address + 0x10),
                 l -> EntityFactory.find(address)).get(address);
         if (address == main.hero.address || address == main.hero.pet.address) return;
 

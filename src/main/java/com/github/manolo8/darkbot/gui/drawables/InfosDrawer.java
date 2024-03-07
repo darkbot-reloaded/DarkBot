@@ -33,7 +33,6 @@ import java.text.NumberFormat;
 public class InfosDrawer implements Drawable {
 
     private static final NumberFormat HEALTH_FORMAT;
-    private static final NumberFormat TWO_PLACES_FORMAT = new DecimalFormat("0.00");
 
     static {
         DecimalFormatSymbols sym = new DecimalFormatSymbols();
@@ -78,16 +77,16 @@ public class InfosDrawer implements Drawable {
         drawHealth(mg);
     }
 
-    private String getSysInfo() {
-        return (Runtime.getRuntime().totalMemory() >> 20) + "MB heap, " +
-                main.facadeManager.stats.getMemory() + '|' +
-                Main.API.getMemoryUsage() + "MB ram, " +
-                TWO_PLACES_FORMAT.format(Main.API.getCpuUsage()) + " cpu";
-    }
-
-    private String getTickInfo() {
-        return TWO_PLACES_FORMAT.format(main.getTickTime()) + "tick " + stats.getPing() + "ms ping";
-    }
+//    private String getSysInfo() {
+//        return (Runtime.getRuntime().totalMemory() >> 20) + "MB heap, " +
+//                main.facadeManager.stats.getMemory() + '|' +
+//                Main.API.getMemoryUsage() + "MB ram, " +
+//                TWO_PLACES_FORMAT.format(Main.API.getCpuUsage()) + " cpu";
+//    }
+//
+//    private String getTickInfo() {
+//        return TWO_PLACES_FORMAT.format(main.getTickTime()) + "tick " + stats.getPing() + "ms ping";
+//    }
 
     private void drawInfos(MapGraphics mg) {
         mg.setColor("text_dark");

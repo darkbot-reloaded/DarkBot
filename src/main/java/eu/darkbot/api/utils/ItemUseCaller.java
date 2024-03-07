@@ -67,9 +67,4 @@ public class ItemUseCaller {
         nextCommandCheck.activate();
         return ByteUtils.isValidPtr(useItemCommand);
     }
-
-    public void tick() {
-        if (!ByteUtils.isValidPtr(useItemCommand) && nextCommandCheck.isInactive())
-            checkItemCommand();
-    }
 }

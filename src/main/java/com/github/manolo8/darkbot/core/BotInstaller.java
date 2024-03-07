@@ -48,11 +48,11 @@ public class BotInstaller implements API.Singleton {
             return true;
         }
 
-        if (API.isValid() && API.readMemoryLong(mainApplicationAddress.get() + 1344) == mainAddress.get()) {
+        if (API.isValid() && API.readLong(mainApplicationAddress.get() + 1344) == mainAddress.get()) {
             if (heroInfoAddress.get() == 0) checkUserData();
 
             if (connectionManagerAddress.get() == 0) {
-                long connMgr = API.readMemoryLong(mainAddress.get() + 560);
+                long connMgr = API.readLong(mainAddress.get() + 560);
                 if (connMgr != 0) connectionManagerAddress.send(connMgr);
             }
             return false;
@@ -63,20 +63,22 @@ public class BotInstaller implements API.Singleton {
     }
 
     private void checkUserData() {
-        int heroId = API.readMemoryInt(API.readMemoryLong(screenManagerAddress.get() + 240) + 56);
+        int heroId = API.readInt(API.readLong(screenManagerAddress.get() + 240) + 56);
         if (heroId == 0) return;
 
         long address = API.searchClassClosure(closure -> {
-            int level = API.readMemoryInt(closure + 52);
-            int speed = API.readMemoryInt(closure + 56);
-            int bool = API.readMemoryInt(closure + 60);
-            int val = API.readMemoryInt(closure + 64);
-            int cargo = API.readMemoryInt(API.readMemoryLong(closure + 0x138) + 40);
-            int maxCargo = API.readMemoryInt(API.readMemoryLong(closure + 0x140) + 40);
+            if (heroId != API.readInt(closure + 0x30)) return false;
 
-            return heroId == API.readMemoryInt(closure + 0x30)
-                   && level >= 0 && level <= 100
-                   && speed > 50 && speed < 2000
+            int level = API.readInt(closure + 0x34);
+            // speed is updated few seconds later, basically heroId alone is enough
+            // int speed = API.readMemoryInt(closure + 56);
+            int bool = API.readInt(closure + 0x3c);
+            int val = API.readInt(closure + 0x40);
+            int cargo = API.readInt(API.readLong(closure + 0x138) + 0x28);
+            int maxCargo = API.readInt(API.readLong(closure + 0x140) + 0x28);
+
+            return level >= 0 && level <= 100
+                   //&& speed > 50 && speed < 2000
                    && (bool == 1 || bool == 2)
                    && val == 0
                    && cargo >= 0
@@ -93,20 +95,20 @@ public class BotInstaller implements API.Singleton {
         if (!API.isValid()) return true;
         long temp;
 
-        if ((temp = API.queryMemory(bytesToMainApplication)) == 0) return true;
+        if ((temp = API.searchPattern(bytesToMainApplication)) == 0) return true;
         this.mainApplicationAddress.send(temp - 228);
-        BotInstaller.SEP = API.readMemoryInt(mainApplicationAddress.get() + 4);
+        BotInstaller.SEP = API.readInt(mainApplicationAddress.get() + 4);
 
         if ((temp = API.searchClassClosure(this::settingsPattern)) == 0) return true;
         this.settingsAddress.send(temp);
 
-        if ((temp = API.readMemoryLong(mainApplicationAddress.get() + 1344)) == 0) return true;
+        if ((temp = API.readLong(mainApplicationAddress.get() + 1344)) == 0) return true;
         this.mainAddress.send(temp);
 
-        if ((temp = API.readMemoryLong(mainAddress.get() + 504)) == 0) return true;
+        if ((temp = API.readLong(mainAddress.get() + 504)) == 0) return true;
         this.screenManagerAddress.send(temp);
 
-        if ((temp = API.readMemoryLong(mainAddress.get() + 512)) == 0) return true;
+        if ((temp = API.readLong(mainAddress.get() + 512)) == 0) return true;
         this.guiManagerAddress.send(temp);
 
         SCRIPT_OBJECT_VTABLE = API.readLong(screenManagerAddress.get());
@@ -120,10 +122,10 @@ public class BotInstaller implements API.Singleton {
     }
 
     private boolean settingsPattern(long address) {
-        return API.readMemoryInt(address + 48) == -1
-               && API.readMemoryInt(address + 52) == 0
-               && API.readMemoryInt(address + 56) == 2
-               && API.readMemoryInt(address + 60) == 1;
+        return API.readInt(address + 48) == -1
+               && API.readInt(address + 52) == 0
+               && API.readInt(address + 56) == 2
+               && API.readInt(address + 60) == 1;
         // address + 280 - starts old pattern here
     }
 

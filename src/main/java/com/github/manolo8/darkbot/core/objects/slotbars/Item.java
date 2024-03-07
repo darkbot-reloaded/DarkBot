@@ -29,14 +29,16 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
     private long lastUsed;
 
     private final ItemCategory itemCategory;
+    private final Map<SelectableItem, Item> itemsMap;
     public SelectableItem selectableItem;
 
     public Item() {
-        this(null);
+        this(null, null);
     }
 
-    public Item(ItemCategory itemCategory) {
+    public Item(ItemCategory itemCategory, Map<SelectableItem, Item> itemsMap) {
         this.itemCategory = itemCategory;
+        this.itemsMap = itemsMap;
     }
 
     void removeSlot(SlotBarsProxy.Type slotType, int slotNumber) {
@@ -58,7 +60,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
         // Doing 5 boolean-read calls is way more expensive than a single mem-read to the buffer
         // This IS very ugly, but improves performance.
         // We also avoid updating timer if no other flags change for the extra 3 long-read calls
-        API.readMemory(address + START, BUFFER);
+        API.readBytes(address + START, BUFFER);
 
         buyable = BUFFER[0] == 1;
         activatable = BUFFER[4] == 1;
@@ -67,7 +69,7 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
         visible = BUFFER[16] == 1;
         quantity = ByteUtils.getDouble(BUFFER, 92);
 
-        long timerAdr = API.readMemoryLong(ByteUtils.getLong(BUFFER, 52), 40);
+        long timerAdr = API.readLong(ByteUtils.getLong(BUFFER, 52), 40);
         if (itemTimer.address != timerAdr) this.itemTimer.update(timerAdr);
         this.itemTimer.update();
     }
@@ -75,16 +77,20 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
     @Override
     public void update(long address) {
         if (this.address != address) {
-            this.id = API.readMemoryString(address, 64);
-            this.counterType = API.readMemoryString(address, 72);
-            this.actionStyle = API.readMemoryString(address, 80);
-            this.iconLootId = API.readMemoryString(address, 96);
+            this.id = API.readString(address, 64);
+            this.counterType = API.readString(address, 72);
+            this.actionStyle = API.readString(address, 80);
+            this.iconLootId = API.readString(address, 96);
 
-            if (itemCategory != null)
+            if (itemCategory != null) {
                 this.selectableItem = SelectableItem.ALL_ITEMS.get(itemCategory).stream()
                         .filter(i -> i.getId().equals(id))
                         .findFirst()
                         .orElse(null);
+
+                if (selectableItem != null && itemsMap != null)
+                    itemsMap.put(selectableItem, this);
+            }
         }
         super.update(address);
     }
@@ -217,22 +223,20 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
                 return; // reset was done on update(long), don't need to reset here
             }
 
-            this.elapsed = API.readMemoryDouble(address + 72);
-            this.availableIn = API.readMemoryDouble(address + 96);
+            this.elapsed = API.readDouble(address + 72);
+            this.availableIn = API.readDouble(address + 96);
         }
 
         @Override
         public void update(long address) {
+            if (this.address != address) reset();
             this.address = address;
-            if (address == 0) {
-                reset();
-                return;
-            }
+            if (address == 0) return;
 
             this.isActivated = API.readString(Item.this.address, 88, 32).equals(ACTIVE_ITEM_STATE);
 
-            this.startTime = API.readMemoryDouble(address + 80);
-            this.itemDelay = API.readMemoryDouble(address + 88);
+            this.startTime = API.readDouble(address + 80);
+            this.itemDelay = API.readDouble(address + 88);
         }
 
         public void reset() {
