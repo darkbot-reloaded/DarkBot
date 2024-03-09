@@ -106,7 +106,7 @@ public class StarManager implements API.Singleton {
                 .addGG(77, "GG Cold Wave Easy", "GG Cold E").accessBy(73, "1-4", "2-4", "3-4")
                 .addGG(78, "GG Cold Wave Hard", "GG Cold H").accessBy(73, "1-4", "2-4", "3-4")
                 .addGG(203, "GG Hades", "Hades").accessBy(74, HOME_MAPS).exitBy(1)
-                .addGG(223, "Devolarium Attack", "DA") // (No access), missing type ID (HOME_MAPS)
+                .addGG(223, "Devolarium Attack", "DA").accessOnlyBy(34, HOME_MAPS)
                 .addGG(225, "GG PET Attack Easy", "GG PET E") // (No access)
                 .addGG(226, "GG PET Attack Hard", "GG PET H") // (No access)
                 .addGG(228, "Permafrost Fissure", "GG PF")   // (No access), missing type ID (HOME_MAPS)
