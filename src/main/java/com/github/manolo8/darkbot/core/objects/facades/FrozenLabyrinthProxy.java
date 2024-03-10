@@ -17,14 +17,14 @@ public class FrozenLabyrinthProxy extends Updatable implements FrozenLabyrinthAP
     public int synkZone;
 
     public void update() {
-        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
-        long labVoAddr = API.readMemoryLong(data + 0x70) & ByteUtils.ATOM_MASK;
+        long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;
+        long labVoAddr = API.readLong(data + 0x70) & ByteUtils.ATOM_MASK;
 
-        this.keys = API.readMemoryInt(API.readMemoryLong(data + 0x68) + 0x28);
-        this.time = API.readMemoryDouble(API.readMemoryLong(data + 0x58) + 0x38);
-        this.labStatus = API.readMemoryString(API.readMemoryLong(data+0x60));
-        this.synkMap = API.readMemoryString(API.readMemoryLong(labVoAddr + 0x28));
-        this.synkZone = API.readMemoryInt(labVoAddr + 0x20);
+        this.keys = API.readInt(API.readLong(data + 0x68) + 0x28);
+        this.time = API.readDouble(API.readLong(data + 0x58) + 0x38);
+        this.labStatus = API.readString(API.readLong(data+0x60));
+        this.synkMap = API.readString(API.readLong(labVoAddr + 0x28));
+        this.synkZone = API.readInt(labVoAddr + 0x20);
     }
 
     @Override

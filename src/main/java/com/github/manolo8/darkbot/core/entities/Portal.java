@@ -45,8 +45,8 @@ public class Portal extends Entity implements eu.darkbot.api.game.entities.Porta
         super.update();
         clickable.update();
 
-        isJumping = API.readMemoryBoolean(address + 112) || API.readMemoryBoolean(address + 116);
-        type = API.readMemoryInt(address + TYPE_OFFSET);
+        isJumping = API.readBoolean(address + 112) || API.readBoolean(address + 116);
+        type = API.readInt(address + TYPE_OFFSET);
         if (locationInfo.isMoving()) {
             ConfigEntity.INSTANCE.updateSafetyFor(this);
         }

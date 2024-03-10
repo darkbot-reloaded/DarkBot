@@ -11,8 +11,8 @@ public class Point extends Updatable.Auto implements eu.darkbot.api.game.other.P
 
     public void update() {
         if (address == 0) return;
-        this.x = API.readMemoryDouble(address + 32);
-        this.y = API.readMemoryDouble(address + 40);
+        this.x = API.readDouble(address + 32);
+        this.y = API.readDouble(address + 40);
     }
 
     @Override

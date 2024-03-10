@@ -1,20 +1,16 @@
 package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.utils.pathfinder.PolygonImpl;
 import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.game.other.Locatable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Zone extends Entity implements eu.darkbot.api.game.entities.Zone {
 
-    private final ObjArray pointsArr = ObjArray.ofVector(true);
-    private final List<Position> points = new ArrayList<>();
+    private final FlashList<Position> points = FlashList.ofVector(Position::new);
     private final PolygonImpl zoneArea = new PolygonImpl(points);
     private boolean useBounds;
 
@@ -27,10 +23,7 @@ public class Zone extends Entity implements eu.darkbot.api.game.entities.Zone {
     public void update() {
         super.update();
 
-        pointsArr.update(API.readMemoryLong(address + 216));
-        if (pointsArr.getSize() < 3) return;
-
-        if (pointsArr.syncAndReport(points, Position::new)) {
+        if (points.updateAndReport(API.readLong(address + 216)) && points.size() >= 3) {
             zoneArea.invalidateBounds();
             useBounds = isRectangle(zoneArea);
         }
@@ -67,8 +60,8 @@ public class Zone extends Entity implements eu.darkbot.api.game.entities.Zone {
         @Override
         public boolean updateAndReport() {
             if (address == 0) return false;
-            double newX = API.readMemoryDouble(address + 32),
-                    newY = API.readMemoryDouble(address + 40);
+            double newX = API.readDouble(address + 32),
+                    newY = API.readDouble(address + 40);
 
             if (this.x == newX && this.y == newY) return false;
             this.x = newX;

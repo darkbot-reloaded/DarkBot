@@ -2,7 +2,8 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.LogUtils;
 import eu.darkbot.api.events.EventHandler;
@@ -13,17 +14,14 @@ import eu.darkbot.api.managers.EventBrokerAPI;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class ChatProxy extends Updatable implements ChatAPI, Listener {
 
-    private final ObjArray chatsArr = ObjArray.ofVector(true);
-    private final List<ChatRoom> chats = new ArrayList<>();
+    private final FlashList<ChatRoom> chats = FlashList.ofVector(ChatRoom::new);
 
     private final Map<String, OutputStream> fileWriters = new HashMap<>();
 
@@ -36,14 +34,11 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
 
     @Override
     public void update() {
-        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
-
-        this.chatsArr.update(API.readMemoryLong(data + 64));
-        if (chatsArr.getSize() > 20) return;
-        this.chatsArr.sync(chats, ChatRoom::new);
+        long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;
+        this.chats.update(API.readLong(data + 64));
 
         for (ChatRoom chat : chats) {
-            if (chat.messagesArr.getSize() > 150) continue;
+            if (chat.messagesArr.size() > 150) continue;
             chat.messagesArr.forEachIncremental(ptr ->
                     eventBroker.sendEvent(new MessageSentEvent(chat.chatName, new Message(ptr))));
         }
@@ -51,12 +46,12 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
 
     public static class ChatRoom extends Auto {
         private String chatName;
-        private final ObjArray messagesArr = ObjArray.ofVector(true);
+        private final FlashListLong messagesArr = FlashListLong.ofVector();
 
         @Override
         public void update() {
-            this.chatName = API.readMemoryString(address, 56);
-            this.messagesArr.update(API.readMemoryLong(address + 80));
+            this.chatName = API.readString(address, 56);
+            this.messagesArr.update(API.readLong(address + 80));
         }
     }
 
@@ -69,12 +64,14 @@ public class ChatProxy extends Updatable implements ChatAPI, Listener {
 
         @Override
         public void update() {
-            this.message  = API.readMemoryString(address, 40);
-            this.username = API.readMemoryString(address, 56, 32);
-            this.role     = API.readMemoryString(address, 56, 40);
-            this.clanTag  = API.readMemoryString(address, 56, 48);
-            this.globalId = API.readMemoryString(address, 56, 56);
-            this.userId   = API.readMemoryString(address, 56, 64);
+            this.message = readString(40);
+
+            long userAddress = readLong(56);
+            this.username = API.readString(userAddress, 32);
+            this.role     = API.readString(userAddress, 40);
+            this.clanTag  = API.readString(userAddress, "", 48);
+            this.globalId = API.readString(userAddress, 56);
+            this.userId   = API.readString(userAddress, 64);
         }
 
         @Override

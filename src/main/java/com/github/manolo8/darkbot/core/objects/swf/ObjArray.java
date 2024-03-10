@@ -8,7 +8,9 @@ import static com.github.manolo8.darkbot.Main.API;
 /**
  * Reads arrays in flash.
  * Instead of ArrayObj, VectorPtr & SpriteArray
+ * Used for SpriteArray
  */
+@Deprecated
 public class ObjArray extends SwfPtrCollection {
     private static final int MAX_SIZE = 8192;
     private static final byte[] BUFFER = new byte[8192 * 8]; //64kb
@@ -88,14 +90,14 @@ public class ObjArray extends SwfPtrCollection {
 
     @Override
     public void update() {
-        size = API.readMemoryInt(address + sizeOffset);
+        size = API.readInt(address + sizeOffset);
 
         if (size < 0 || size > MAX_SIZE || address == 0) return;
         if (elements.length < size) elements = new long[Math.min((int) (size * 1.25), MAX_SIZE)];
 
-        long table = API.readMemoryLong(address + tableOffset) + bytesOffset;
+        long table = API.readLong(address + tableOffset) + bytesOffset;
         int length = size * 8;
-        API.readMemory(table, BUFFER, length);
+        API.readBytes(table, BUFFER, length);
 
         for (int i = 0, offset = 0; offset < length && i < size; offset += 8) {
             long value = ByteUtils.getLong(BUFFER, offset);
@@ -105,7 +107,7 @@ public class ObjArray extends SwfPtrCollection {
 
     @Override
     public void update(long address) {
-        super.update(isSprite() ? API.readMemoryLong(address, 0x48, 0x40) : address);
+        super.update(isSprite() ? API.readLong(address, 0x48, 0x40) : address);
         if (autoUpdatable) update();
     }
 

@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.gui.tree.editors;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
@@ -18,12 +19,15 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +47,16 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
 
     private final Consumer<Map<String, Object>> update = v -> tableModel.setConfig(v);
 
-    public TableEditor(PluginAPI api) {
+    public TableEditor(PluginAPI api, Main main) {
         this.api = api;
+
+        main.getGui().getConfigGui().addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+                if (setting != null)
+                    stopCellEditing();
+            }
+        });
     }
 
     @Override
@@ -104,6 +116,13 @@ public class TableEditor implements OptionEditor<Map<String, Object>> {
 
         table.setDefaultEditor(Double.class, new TableDoubleEditor());
         table.setDefaultEditor(Character.class, new TableCharEditor());
+
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            TableCellEditor defaultEditor = table.getDefaultEditor(table.getColumnClass(i));
+            if (defaultEditor instanceof DefaultCellEditor) {
+                ((DefaultCellEditor) defaultEditor).setClickCountToStart(1);
+            }
+        }
 
         // Default to first column having 200 width.
         // Implementers may override by using a custom decorator

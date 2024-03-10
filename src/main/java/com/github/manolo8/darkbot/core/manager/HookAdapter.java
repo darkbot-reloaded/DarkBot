@@ -112,13 +112,13 @@ public class HookAdapter implements GameAPI.DirectInteraction, API.Singleton {
     @Override
     public void moveShip(Locatable dest) {
         checkEnabled("move ship");
-        callMethodAsync(10, Main.API.readMemoryLong(staticEventAddress), (long) dest.getX(), (long) dest.getY());
+        callMethodAsync(10, Main.API.readLong(staticEventAddress), (long) dest.getX(), (long) dest.getY());
     }
 
     @Override
     public void collectBox(Box box) {
         checkEnabled("collect box");
-        callMethod(10, Main.API.readMemoryLong(staticEventAddress), (long) box.getX(), (long) box.getY(), box.address);
+        callMethod(10, Main.API.readLong(staticEventAddress), (long) box.getX(), (long) box.getY(), box.address);
     }
 
     @Override

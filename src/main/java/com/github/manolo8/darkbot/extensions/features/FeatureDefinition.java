@@ -9,6 +9,8 @@ import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.FeatureInfo;
 import eu.darkbot.api.extensions.PluginInfo;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,6 +18,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Getter
 public class FeatureDefinition<T> implements FeatureInfo<T> {
 
     private final @Nullable Plugin plugin;
@@ -26,7 +29,9 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
     private final String name;
     private final String description;
 
+    @Getter(AccessLevel.NONE)
     private final Lazy<FeatureDefinition<T>> listener = new Lazy.NoCache<>();
+    @Getter(AccessLevel.NONE)
     private final Lazy.Swing<FeatureDefinition<T>> uiListener = new Lazy.Swing<>();
 
     private final @Nullable ConfigSetting.Parent<?> config;
@@ -68,38 +73,6 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
         this.config = configBuilder.apply(this);
     }
 
-    public @Nullable Plugin getPlugin() {
-        return plugin;
-    }
-
-    public Class<T> getClazz() {
-        return clazz;
-    }
-
-    public IssueHandler getIssues() {
-        return issues;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public @Nullable ConfigSetting.Parent<?> getConfig() {
-        return config;
-    }
-
-    public @Nullable T getInstance() {
-        return instance;
-    }
-
     public void setInstance(T instance) {
         this.instance = instance;
         sendUpdate();
@@ -131,10 +104,12 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
         this.uiListener.add(listener);
     }
 
+    @Override
     public boolean isEnabled() {
         return plugin == null || plugin.getInfo().ENABLED_FEATURES.contains(id);
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         this.setStatus(enabled);
     }
@@ -149,6 +124,7 @@ public class FeatureDefinition<T> implements FeatureInfo<T> {
         return plugin;
     }
 
+    @Override
     public boolean canLoad() {
         return issues.canLoad() && isEnabled();
     }

@@ -32,7 +32,4 @@ public abstract class TableDelegateEditor<T extends JComponent> extends Abstract
     public Object getCellEditorValue() {
         return getValue();
     }
-
-
-
 }

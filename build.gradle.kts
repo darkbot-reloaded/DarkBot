@@ -43,8 +43,8 @@ publishing {
 }
 
 dependencies {
-    val apiVersion = "0.9.1"
-    val flatLafVersion = "3.1.1"
+    val apiVersion = "0.9.4"
+    val flatLafVersion = "3.3"
 
     // use this if you want to use local(mavenLocal) darkbot API
 //    api("eu.darkbot", "darkbot-impl", apiVersion)
@@ -55,6 +55,7 @@ dependencies {
     api("com.formdev", "flatlaf", flatLafVersion)
     api("com.formdev", "flatlaf-extras", flatLafVersion)
     api("org.jgrapht", "jgrapht-core", "1.3.0")
+    api("it.unimi.dsi:fastutil-core:8.5.12")
 
     // Testing stat time-series requires this
     //api("org.knowm.xchart", "xchart", "3.8.5")
@@ -82,7 +83,6 @@ tasks.jar {
 }
 
 tasks.register<proguard.gradle.ProGuardTask>("proguard") {
-    allowaccessmodification()
     dontoptimize()
     dontobfuscate()
     dontnote()
@@ -92,15 +92,13 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     keep("class com.github.manolo8.** { *; }")
     keep("class eu.darkbot.** { *; }")
     keep("class com.formdev.** { *; }")
+    keep("class com.github.weisj.jsvg.** { *; }")
 
     injars(tasks["shadowJar"].outputs.files.singleFile)
     outjars("build/DarkBot.jar")
 
-    if (JavaVersion.current().isJava9Compatible) {
-        libraryjars("${System.getProperty("java.home")}/jmods")
-    } else {
-        libraryjars("${System.getProperty("java.home")}/lib/rt.jar")
-    }
+    libraryjars("${System.getProperty("java.home")}/jmods")
+    libraryjars(configurations.compileClasspath.get().files)
 
     dependsOn(tasks.build)
 }

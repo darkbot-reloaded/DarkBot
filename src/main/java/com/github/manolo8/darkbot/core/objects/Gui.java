@@ -1,11 +1,11 @@
 package com.github.manolo8.darkbot.core.objects;
 
 import com.github.manolo8.darkbot.core.api.Capability;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.utils.Offsets;
 import eu.darkbot.api.API;
 
-import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -27,20 +27,20 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
     protected long time;
     protected long update;
 
-    private ObjArray tempArray;
-    private ObjArray tempChildArray;
+    private FlashListLong tempArray;
+    private FlashListLong tempChildArray;
     private boolean minimizable, closable;
 
     public void update() {
         if (address == 0) return;
         super.update();
 
-        pos.update(API.readMemoryLong(addressInfo + 9 * 8));
-        size.update(API.readMemoryLong(addressInfo + 10 * 8));
+        pos.update(API.readLong(addressInfo + 9 * 8));
+        size.update(API.readLong(addressInfo + 10 * 8));
         // 11 * 8 = FeatureDefinitionVo
         // 12 * 8 = help text
         // 13 * 8 = tool tip
-        minimized.update(API.readMemoryLong(addressInfo + 14 * 8));
+        minimized.update(API.readLong(addressInfo + 14 * 8));
 
         width = (int) Math.round(size.x);
         height = (int) Math.round(size.y);
@@ -50,13 +50,13 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
         x = super.x;
         y = super.y;
 
-        visible = API.readMemoryBoolean(addressInfo + 32); // Maximized
+        visible = API.readBoolean(addressInfo + 32); // Maximized
         // API.readMemoryBoolean(addressInfo + 36); // Toggle maximize (set to true/false when pressing H to show/hide)
         // API.readMemoryBoolean(addressInfo + 40); // Maximized changed (set to true when toggling maximized)
         // API.readMemoryBoolean(addressInfo + 44); // Settings on server
         // API.readMemoryBoolean(addressInfo + 48); // show on top
 
-        isTweening = API.readMemoryBoolean(address + 0xC4);
+        isTweening = API.readBoolean(address + 0xC4);
         minimizable = API.readBoolean(featureWindowDefinition + 40);
         closable = API.readBoolean(featureWindowDefinition + 32);
     }
@@ -67,7 +67,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
             reset();
         } else {
             super.update(address);
-            this.addressInfo = API.readMemoryLong(address + 496);
+            this.addressInfo = API.readLong(address + 496);
             this.featureWindowDefinition = API.readLong(addressInfo + 88);
             this.update = System.currentTimeMillis();
         }
@@ -175,11 +175,11 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
      * @param spriteAddress address of Sprite or object which extends Sprite
      * @param consumer to be executed every child.
      */
-    public void forEachSpriteChild(long spriteAddress, Consumer<Long> consumer) {
-        if (tempChildArray == null) tempChildArray = ObjArray.ofSprite();
+    public void forEachSpriteChild(long spriteAddress, LongConsumer consumer) {
+        if (tempChildArray == null) tempChildArray = FlashListLong.ofSprite();
 
         tempChildArray.update(spriteAddress);
-        tempChildArray.forEach(l -> consumer.accept(API.readMemoryLong(l, 216)));
+        tempChildArray.forEach(l -> consumer.accept(API.readLong(l, 216)));
     }
 
     /**
@@ -189,7 +189,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
      * @param childIndex set -1 to get last.
      */
     public long getSpriteChild(long spriteAddress, int childIndex) {
-        return API.readMemoryLong(getSpriteChildWrapper(spriteAddress, childIndex), 0xD8 + Offsets.SPRITE_OFFSET);
+        return API.readLong(getSpriteChildWrapper(spriteAddress, childIndex), 0xD8 + Offsets.SPRITE_OFFSET);
     }
 
     /**
@@ -199,10 +199,10 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
      * @param childIndex set -1 to get last.
      */
     public long getSpriteChildWrapper(long spriteAddress, int childIndex) {
-        if (tempChildArray == null) tempChildArray = ObjArray.ofSprite();
+        if (tempChildArray == null) tempChildArray = FlashListLong.ofSprite();
 
         tempChildArray.update(spriteAddress);
-        return childIndex != -1 ? tempChildArray.getPtr(childIndex) : tempChildArray.getLast();
+        return childIndex != -1 ? tempChildArray.getOrDefault(childIndex, 0) : tempChildArray.getLastElement();
     }
 
     /**
@@ -215,11 +215,14 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
     public long getSpriteElement(long elementsListAddress, int elementId) {
         if (elementsListAddress == 0) return 0;
+        if (tempArray == null) tempArray = FlashListLong.ofArray();
 
-        tempArray.update(API.readMemoryLong(elementsListAddress, 184));
-        for (int i = 0; i < tempArray.getSize(); i++)
-            if (API.readMemoryInt(tempArray.getPtr(i), 168) == elementId)
-                return tempArray.get(i);
+        tempArray.update(API.readLong(elementsListAddress, 184));
+        for (int i = 0; i < tempArray.size(); i++) {
+            long addr = tempArray.getLong(i);
+            if (API.readInt(addr, 168) == elementId)
+                return addr;
+        }
 
         return 0;
     }
@@ -228,13 +231,14 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
      * An Array of Sprites Array with ids.
      */
     public long getElementsList(int elementsListId) {
-        if (tempArray == null) tempArray = ObjArray.ofArrObj();
+        if (tempArray == null) tempArray = FlashListLong.ofArray();
 
-        tempArray.update(API.readMemoryLong(address, 400));
-        for (int i = 0; i < tempArray.getSize(); i++)
-            if (API.readMemoryInt(tempArray.getPtr(i), 172) == elementsListId)
-                return tempArray.get(i);
-
+        tempArray.update(API.readLong(address, 400));
+        for (int i = 0; i < tempArray.size(); i++) {
+            long addr = tempArray.getLong(i);
+            if (API.readInt(addr, 172) == elementsListId)
+                return addr;
+        }
         return 0;
     }
 

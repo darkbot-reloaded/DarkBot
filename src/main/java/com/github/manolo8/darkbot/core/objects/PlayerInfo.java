@@ -39,11 +39,11 @@ public class PlayerInfo extends Updatable implements EntityInfo {
     }
 
     private int readIntFromIntHolder(int holderOffset) {
-        return API.readMemoryInt(API.readMemoryLong(address + holderOffset) + 40);
+        return API.readInt(API.readLong(address + holderOffset) + 40);
     }
 
     private String readStringFromStringHolder(int holderOffset) {
-        return API.readMemoryStringFallback(API.readMemoryLong(API.readMemoryLong(address + holderOffset) + 40), "");
+        return API.readString(API.readLong(API.readLong(address + holderOffset) + 40), "");
     }
 
     @Override

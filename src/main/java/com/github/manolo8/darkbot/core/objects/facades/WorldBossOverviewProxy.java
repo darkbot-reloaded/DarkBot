@@ -13,12 +13,12 @@ public class WorldBossOverviewProxy extends Updatable implements WorldBossOvervi
     @Override
     public void update() {
         if (address == 0) return;
-        long data = API.readMemoryLong(address + 0x30) & ByteUtils.ATOM_MASK;
+        long data = API.readLong(address + 0x30) & ByteUtils.ATOM_MASK;
 
-        long currentTierData = API.readMemoryLong(data + 0x50) & ByteUtils.ATOM_MASK;
+        long currentTierData = API.readLong(data + 0x50) & ByteUtils.ATOM_MASK;
         this.currentTier = API.readInt(currentTierData + 0x28);
 
-        long attemptsData = API.readMemoryLong(data + 0x60) & ByteUtils.ATOM_MASK;
+        long attemptsData = API.readLong(data + 0x60) & ByteUtils.ATOM_MASK;
         this.attempts = API.readInt(attemptsData + 0x28);
 
         this.bossName = API.readString(data, 0x68);

@@ -2,8 +2,8 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.objects.Gui;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.EternalBlacklightGateAPI;
 import eu.darkbot.util.Timer;
@@ -11,23 +11,19 @@ import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 @ApiStatus.Internal
 public class EternalBlacklightProxy extends Updatable implements EternalBlacklightGateAPI {
-    private final ObjArray activeBoostersArr = ObjArray.ofVector(true);
-    private final ObjArray boostersOptionsArr = ObjArray.ofVector(true);
-    private final ObjArray topRankersArr = ObjArray.ofVector(true);
     private final Timer boosterClickTimer = Timer.get(500);
 
     private final Main main;
 
-    public List<EternalBlacklightProxy.Booster> activeBoosters  = new ArrayList<>();
-    public List<EternalBlacklightProxy.Booster> boostersOptions = new ArrayList<>();
-    public List<EternalBlacklightProxy.Leaderboard> topRankers  = new ArrayList<>();
+    public FlashList<EternalBlacklightProxy.Booster> activeBoosters  = FlashList.ofVector(Booster::new);
+    public FlashList<EternalBlacklightProxy.Booster> boostersOptions = FlashList.ofVector(Booster::new);
+    public FlashList<EternalBlacklightProxy.Leaderboard> topRankers  = FlashList.ofVector(Leaderboard::new);
 
     public Leaderboard myRank = new Leaderboard();
 
@@ -45,22 +41,18 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
     public void update() {
         if (address == 0) return;
 
-        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
+        long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;
 
-        this.furthestWave    = API.readMemoryInt(data + 0x40);
-        this.boosterPoints   = API.readMemoryInt(data + 0x44);
-        this.isEventEnabled  = API.readMemoryBoolean(data + 0x48);
-        this.cpuCount        = API.readMemoryInt(API.readMemoryLong(data + 0x68) + 0x28);
-        this.currentWave     = API.readMemoryInt(API.readMemoryLong(data + 0x70) + 0x28);
+        this.furthestWave    = API.readInt(data + 0x40);
+        this.boosterPoints   = API.readInt(data + 0x44);
+        this.isEventEnabled  = API.readBoolean(data + 0x48);
+        this.cpuCount        = API.readInt(API.readLong(data + 0x68) + 0x28);
+        this.currentWave     = API.readInt(API.readLong(data + 0x70) + 0x28);
 
-        this.activeBoostersArr.update(API.readMemoryLong(data + 0x78));
-        this.boostersOptionsArr.update(API.readMemoryLong(data + 0x80));
-        this.topRankersArr.update(API.readMemoryLong(data + 0x90));
-        this.myRank.update(API.readMemoryLong(data + 0x98));
-
-        this.activeBoostersArr.sync(activeBoosters, EternalBlacklightProxy.Booster::new);
-        this.boostersOptionsArr.sync(boostersOptions, EternalBlacklightProxy.Booster::new);
-        this.topRankersArr.sync(topRankers, EternalBlacklightProxy.Leaderboard::new);
+        this.activeBoosters.update(API.readLong( data + 0x78));
+        this.boostersOptions.update(API.readLong(data + 0x80));
+        this.topRankers.update(API.readLong(data + 0x90));
+        this.myRank.update(API.readLong(data + 0x98));
     }
 
     @Override
@@ -123,9 +115,9 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
 
         @Override
         public void update() {
-            this.percentage = API.readMemoryInt(address + 0x20);
+            this.percentage = API.readInt(address + 0x20);
 
-            String category = API.readMemoryString(API.readMemoryLong(address + 0x28));
+            String category = API.readString(API.readLong(address + 0x28));
             if (!category.equals(this.category)) {
                 categoryType = Category.of(category);
             }
@@ -142,10 +134,10 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
 
         @Override
         public void update() {
-            this.waves = API.readMemoryInt(address + 0x20);
-            this.rank = API.readMemoryInt(address + 0x24);
-            this.lastUpdateTime = API.readMemoryString(address, 0x28);
-            this.name = API.readMemoryString(address, 0x30);
+            this.waves = API.readInt(address + 0x20);
+            this.rank = API.readInt(address + 0x24);
+            this.lastUpdateTime = API.readString(address, 0x28);
+            this.name = API.readString(address, 0x30);
         }
 
         @Override

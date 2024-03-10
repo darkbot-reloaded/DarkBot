@@ -108,7 +108,7 @@ public class ObjectInspector {
     }
 
     private static List<Trait> parseTraitsInternal(long address) {
-        long base = API.readMemoryLong(address + 0x10);
+        long base = API.readLong(address + 0x10);
 
         List<Trait> traits = new ArrayList<>();
 

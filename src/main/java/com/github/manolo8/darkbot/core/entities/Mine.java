@@ -23,7 +23,7 @@ public class Mine extends Entity implements Obstacle, eu.darkbot.api.game.entiti
     public void update(long address) {
         super.update(address);
 
-        this.typeId = API.readMemoryInt(address + 112);
+        this.typeId = API.readInt(address + 112);
     }
 
     @Override

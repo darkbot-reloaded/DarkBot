@@ -20,7 +20,7 @@ import com.github.manolo8.darkbot.core.entities.SpaceBall;
 import com.github.manolo8.darkbot.core.entities.StaticEntity;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.core.utils.factory.EntityFactory;
 import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
 import eu.darkbot.api.game.entities.Mist;
@@ -28,18 +28,17 @@ import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.util.Timer;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
 
 import static com.github.manolo8.darkbot.Main.API;
 import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.*;
@@ -73,8 +72,9 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
     private final Main main;
     private final EventBrokerAPI eventBroker;
-    private final Set<Integer> ids = new HashSet<>();
-    private final ObjArray entitiesArr = ObjArray.ofVector();
+
+    private final IntSet ids = new IntOpenHashSet();
+    private final FlashListLong entitiesArr = FlashListLong.ofVector().noAuto();
 
     private final Timer lastLocatorMatch = Timer.get(5_000);
     private Location lastLocatorLocation = new Location();
@@ -117,7 +117,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
     public void update(long address) {
         super.update(address);
         this.clear();
-        this.entitiesArr.update(API.readMemoryLong(address + 40));
+        this.entitiesArr.update(API.readLong(address + 40));
     }
 
     private void onEntityCreate(Entity entity) {
@@ -141,10 +141,9 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
     private void refreshEntities() {
         entitiesArr.update();
-        for (int i = 0; i < entitiesArr.getSize(); i++) {
-            long entityPtr = entitiesArr.get(i);
-
-            int id = API.readMemoryInt(entityPtr + 56);
+        for (int i = 0; i < entitiesArr.size(); i++) {
+            long entityPtr = entitiesArr.getLong(i);
+            int id = API.readInt(entityPtr + 56);
             if (ids.add(id))
                 entityRegistry.sendEntity(id, entityPtr);
         }
@@ -166,7 +165,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
 
         this.obstacles.removeIf(Obstacle::isRemoved);
         for (List<? extends Entity> entities : allEntities)
-            entities.removeIf(Predicate.not(Entity::isValid));
+            entities.removeIf(e -> !e.isValid());
     }
 
     public void clear() {
