@@ -58,7 +58,7 @@ dependencies {
     api("com.miglayout", "miglayout-swing", "11.3")
     api("com.formdev", "flatlaf", flatLafVersion)
     api("com.formdev", "flatlaf-extras", flatLafVersion)
-    api("org.jgrapht", "jgrapht-core", "1.3.0")
+    api("org.jgrapht", "jgrapht-core", "1.5.2")
     api("it.unimi.dsi", "fastutil-core", "8.5.13")
 
     // Testing stat time-series requires this
