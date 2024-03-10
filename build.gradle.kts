@@ -53,6 +53,7 @@ dependencies {
     //api("eu.darkbot", "darkbot-impl", apiVersion)
     api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
 
+    // have to keep version 2.8.9, in newer versions GSON calls `toString` of config enums upon creation
     api("com.google.code.gson", "gson", "2.8.9")
     api("com.miglayout", "miglayout-swing", "11.3")
     api("com.formdev", "flatlaf", flatLafVersion)
@@ -90,10 +91,19 @@ tasks.jar {
 }
 
 tasks.register<proguard.gradle.ProGuardTask>("proguard") {
+    val toExclude = createExcludes(
+        "it.unimi.dsi.fastutil.bytes.**",
+        "it.unimi.dsi.fastutil.chars.**",
+        "it.unimi.dsi.fastutil.floats.**",
+        "it.unimi.dsi.fastutil.shorts.**",
+        "it.unimi.dsi.fastutil.booleans.**"
+    )
+
     dontoptimize()
     dontobfuscate()
-    dontnote()
-    dontwarn()
+
+    dontwarn("java.lang.invoke.**")
+    dontwarn("com.google.errorprone.annotations.**")
 
     keepattributes("Signature")
     keep("class com.github.manolo8.** { *; }")
@@ -102,7 +112,7 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     keep("class com.github.weisj.jsvg.** { *; }")
 
     injars(tasks.jar.get())
-    outjars("build/DarkBot.jar")
+    outjars(toExclude, "build/DarkBot.jar")
 
     libraryjars(configurations.compileOnly.get().files)
     libraryjars(
@@ -113,4 +123,8 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     )
 
     dependsOn(tasks.build)
+}
+
+fun createExcludes(vararg excludes: String): Map<String, String> {
+    return mapOf("filter" to excludes.joinToString(separator = ",", transform = { "!${it.replace(".", "/")}" }))
 }
