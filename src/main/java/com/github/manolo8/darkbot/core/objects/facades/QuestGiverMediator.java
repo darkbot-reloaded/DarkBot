@@ -14,6 +14,9 @@ public class QuestGiverMediator extends Updatable {
     @Getter
     private double positionY;
 
+    @Getter
+    private boolean active;
+
     @Override
     public void update() {
         if (address == 0) {
@@ -24,6 +27,8 @@ public class QuestGiverMediator extends Updatable {
 
         this.positionX = API.readDouble(data + 0x2F8);
         this.positionY = API.readDouble(data + 0x300);
+
+        this.active = API.readBoolean(data + 0x49C);
     }
 
 }
