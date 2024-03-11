@@ -94,6 +94,7 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     val toExclude = createExcludes(
         "it.unimi.dsi.fastutil.bytes.**",
         "it.unimi.dsi.fastutil.chars.**",
+        "it.unimi.dsi.fastutil.doubles.**",
         "it.unimi.dsi.fastutil.floats.**",
         "it.unimi.dsi.fastutil.shorts.**",
         "it.unimi.dsi.fastutil.booleans.**"
