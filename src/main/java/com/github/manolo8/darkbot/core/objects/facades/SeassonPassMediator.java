@@ -36,24 +36,24 @@ public class SeassonPassMediator extends Updatable {
             return;
         }
 
-        long data = API.readMemoryPtr(address + 0x60);
+        long data = API.readAtom(address + 0x60);
 
-        this.seassonPassAvailable = API.readBoolean(API.readMemoryPtr(data + 0x70) + 0x20);
+        this.seassonPassAvailable = API.readBoolean(API.readAtom(data + 0x70) + 0x20);
 
         if (!seassonPassAvailable) {
             return;
         }
 
-        this.currentLevelProgress.update(API.readMemoryPtr(data + 0x58));
-        this.currentLevelInfo.update(API.readMemoryPtr(data + 0x68));
+        this.currentLevelProgress.update(API.readAtom(data + 0x58));
+        this.currentLevelInfo.update(API.readAtom(data + 0x68));
 
-        long questDataAddr = API.readMemoryPtr(address + 0x78);
+        long questDataAddr = API.readAtom(address + 0x78);
 
         // allQuests.update(API.readMemoryPtr(questDataAddr + 0x58));
 
-        dailyQuests.update(API.readMemoryPtr(questDataAddr + 0x60));
-        weeklyQuests.update(API.readMemoryPtr(questDataAddr + 0x68));
-        seassonQuests.update(API.readMemoryPtr(questDataAddr + 0x70));
+        dailyQuests.update(API.readAtom(questDataAddr + 0x60));
+        weeklyQuests.update(API.readAtom(questDataAddr + 0x68));
+        seassonQuests.update(API.readAtom(questDataAddr + 0x70));
     }
 
     public List<? extends SeassonPassQuest> getDailyQuests() {
@@ -80,8 +80,8 @@ public class SeassonPassMediator extends Updatable {
                 return;
             }
 
-            this.max = API.readMemoryInt(address + 0x24);
-            this.current = API.readMemoryInt(address + 0x28);
+            this.max = API.readInt(address + 0x24);
+            this.current = API.readInt(address + 0x28);
         }
 
         public double getProgressPercentage() {
@@ -107,16 +107,14 @@ public class SeassonPassMediator extends Updatable {
             this.goldLocked = readBoolean(24);
             this.oncePreMission = readBoolean(28);
 
-            long questStatus = API.readMemoryPtr(address + 0x48);
-
             /**
              * 0 = Not completed
              * 2 = Gold locked
              * 3 = Completed
              */
-            this.status = API.readInt(questStatus + 0x20);
+            this.status = API.readInt(API.readAtom(address + 0x48) + 0x20);
 
-            this.quest.update(API.readMemoryPtr(address, 0x40));
+            this.quest.update(API.readAtom(address, 0x40));
         }
 
         public @Nullable QuestAPI.Quest getQuest() {

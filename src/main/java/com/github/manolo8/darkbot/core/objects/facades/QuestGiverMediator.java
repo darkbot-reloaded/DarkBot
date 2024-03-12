@@ -23,7 +23,7 @@ public class QuestGiverMediator extends Updatable {
             return;
         }
 
-        long data = API.readMemoryPtr(address + 0x30);
+        long data = API.readAtom(address + 0x30);
 
         this.positionX = API.readDouble(data + 0x2F8);
         this.positionY = API.readDouble(data + 0x300);
