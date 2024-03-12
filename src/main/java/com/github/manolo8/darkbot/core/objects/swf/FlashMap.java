@@ -72,7 +72,7 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
         @Override
         public V get(int index) {
             Objects.checkIndex(index, size);
-            return entries[index].value;
+            return entries[index].getValue();
         }
 
         @Override
@@ -317,6 +317,16 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
     public V getOrDefault(Object key, V defaultValue) {
         int i = indexOf(key);
         return i == -1 ? defaultValue : entries[i].getValue();
+    }
+
+    public V getOrWrapper(K key) {
+        if (updatables != null) {
+            UpdatableWrapper updatableWrapper = updatables.get(key);
+            if (updatableWrapper != null)
+                //noinspection unchecked
+                return (V) updatableWrapper.value;
+        }
+        return get(key);
     }
 
     @Override
