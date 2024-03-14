@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
 import com.github.manolo8.darkbot.core.objects.gui.ChatGui;
+import com.github.manolo8.darkbot.core.objects.gui.DiminishQuestGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconOkGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchPopupRewardGui;
@@ -155,6 +156,8 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.assembly = register("assembly");
 
         register("ggBuilder", GateSpinnerGui.class);
+        register("diminish_quests", DiminishQuestGui.class);
+        register("refinement_count");
 
         this.commandCenter = register("command_center");
 
@@ -166,7 +169,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     }
 
     private <T extends Gui> T register(String key, Class<T> gui) {
-        return (T) guis.putUpdatable(key, pluginAPI.requireInstance(gui));
+        return guis.putUpdatable(key, pluginAPI.requireInstance(gui));
     }
 
     @Override
@@ -342,7 +345,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     @Override
     public @Nullable Gui getGui(String key) {
-        return guis.get(key);
+        return guis.getOrWrapper(key);
     }
 
     @Override

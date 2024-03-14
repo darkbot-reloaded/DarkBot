@@ -1,5 +1,7 @@
 package com.github.manolo8.darkbot.gui.utils;
 
+import com.formdev.flatlaf.FlatClientProperties;
+import com.github.manolo8.darkbot.utils.I18n;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,6 +31,7 @@ public class SearchField extends JTextField implements GeneralDocumentListener {
 
     public SearchField(BiConsumer<SearchField, String> onChange) {
         this.onChange = onChange;
+        putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, I18n.get("gui.search"));
     }
 
     public static SearchField forTable(@NotNull TableRowSorter<?> sorter) {
