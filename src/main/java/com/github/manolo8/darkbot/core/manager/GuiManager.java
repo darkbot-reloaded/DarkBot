@@ -343,7 +343,7 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     @Override
     public @Nullable Gui getGui(String key) {
-        return guis.get(key);
+        return guis.getOrWrapper(key);
     }
 
     @Override
