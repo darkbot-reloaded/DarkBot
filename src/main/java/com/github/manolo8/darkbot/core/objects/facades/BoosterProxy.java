@@ -58,9 +58,10 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
 
                 for (int i = 0; i < subBoostersArr.size(); i++) {
                     long sub = subBoostersArr.getLong(i);
-                    attributesArr.update(API.readLong(sub, 0x28, 0x40, 0x20, 0x88));
-                    attributesArr2.update(API.readLong(sub, 0x28, 0x40, 0x20, 0x90));
-                    categoriesArr.update(API.readLong(sub, 0x28, 0x40, 0x20, 0x98));
+                    long attributesAddr = API.readAtom(sub, 0x28, 0x40, 0x20);
+                    attributesArr.update(API.readLong(attributesAddr, 0x88));
+                    attributesArr2.update(API.readLong(attributesAddr, 0x90));
+                    categoriesArr.update(API.readLong(attributesAddr, 0x98));
                     for (int j = 0; j < attributesArr.size(); j++) {
                         long attribute = attributesArr.getLong(j);
                         if (API.readLong(attribute + 0x20) == readLong(0x20)) {
