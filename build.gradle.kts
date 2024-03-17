@@ -3,15 +3,12 @@ plugins {
     id("org.gradle.maven-publish")
     id("org.gradle.application")
 
-    id("io.freefair.lombok") version "6.6.1"
-    id("org.beryx.runtime") version "1.12.7"
-    id("edu.sc.seis.launch4j") version "2.5.3"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("io.freefair.lombok") version "8.6"
 }
 
 buildscript {
     dependencies {
-        classpath("com.guardsquare", "proguard-gradle", "7.2.2")
+        classpath("com.guardsquare", "proguard-gradle", "7.4.2")
     }
 }
 
@@ -42,28 +39,34 @@ publishing {
     }
 }
 
+configurations {
+    compileOnly {
+        isCanBeResolved = true
+    }
+}
+
 dependencies {
     val apiVersion = "0.9.4"
-    val flatLafVersion = "3.3"
+    val flatLafVersion = "3.4"
 
     // use this if you want to use local(mavenLocal) darkbot API
-//    api("eu.darkbot", "darkbot-impl", apiVersion)
+    //api("eu.darkbot", "darkbot-impl", apiVersion)
     api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
 
+    // have to keep version 2.8.9, in newer versions GSON calls `toString` of config enums upon creation
     api("com.google.code.gson", "gson", "2.8.9")
-    api("com.miglayout", "miglayout", "3.7.4")
+    api("com.miglayout", "miglayout-swing", "11.3")
     api("com.formdev", "flatlaf", flatLafVersion)
     api("com.formdev", "flatlaf-extras", flatLafVersion)
-    api("org.jgrapht", "jgrapht-core", "1.3.0")
-    api("it.unimi.dsi", "fastutil-core", "8.5.12")
+    api("org.jgrapht", "jgrapht-core", "1.5.2")
+    api("it.unimi.dsi", "fastutil-core", "8.5.13")
     api("org.jsoup","jsoup", "1.17.2")
     api("us.codecraft", "xsoup", "0.3.7")
-    
 
     // Testing stat time-series requires this
     //api("org.knowm.xchart", "xchart", "3.8.5")
 
-    compileOnly("org.jetbrains", "annotations", "23.0.0")
+    compileOnly("org.jetbrains", "annotations", "24.1.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
     testImplementation("org.mockito:mockito-core:4.10.0")
@@ -73,23 +76,37 @@ tasks.withType<JavaCompile> { options.encoding = "UTF-8" }
 tasks.withType<JavaExec> { systemProperty("file.encoding", "UTF-8") }
 
 tasks.wrapper {
-    gradleVersion = "7.5.1"
+    gradleVersion = "8.6"
 
-    // without gradle javadocs and sources
-    distributionType = Wrapper.DistributionType.BIN
+    // with gradle javadocs and sources
+    distributionType = Wrapper.DistributionType.ALL
 }
 
 tasks.jar {
     manifest {
         attributes["SplashScreen-Image"] = "icon.png"
+        attributes["Main-Class"] = application.mainClass
     }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(configurations.runtimeClasspath.get().map(::zipTree))
 }
 
 tasks.register<proguard.gradle.ProGuardTask>("proguard") {
+    val toExclude = createExcludes(
+        "it.unimi.dsi.fastutil.bytes.**",
+        "it.unimi.dsi.fastutil.chars.**",
+        "it.unimi.dsi.fastutil.doubles.**",
+        "it.unimi.dsi.fastutil.floats.**",
+        "it.unimi.dsi.fastutil.shorts.**",
+        "it.unimi.dsi.fastutil.booleans.**"
+    )
+
     dontoptimize()
     dontobfuscate()
-    dontnote()
-    dontwarn()
+
+    dontwarn("java.lang.invoke.**")
+    dontwarn("com.google.errorprone.annotations.**")
 
     keepattributes("Signature")
     keep("class com.github.manolo8.** { *; }")
@@ -97,57 +114,20 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     keep("class com.formdev.** { *; }")
     keep("class com.github.weisj.jsvg.** { *; }")
 
-    injars(tasks["shadowJar"].outputs.files.singleFile)
-    outjars("build/DarkBot.jar")
+    injars(tasks.jar.get())
+    outjars(toExclude, "build/DarkBot.jar")
 
-    libraryjars("${System.getProperty("java.home")}/jmods")
-    libraryjars(configurations.compileClasspath.get().files)
+    libraryjars(configurations.compileOnly.get().files)
+    libraryjars(
+        mapOf(
+            "jarfilter" to "!**.jar",
+            "filter" to "!module-info.class",
+        ), "${System.getProperty("java.home")}/jmods"
+    )
 
     dependsOn(tasks.build)
 }
 
-launch4j {
-    productName = "DarkBot"
-    jarTask = project.tasks["proguard"]
-    icon = "$projectDir/icon.ico"
-
-    maxHeapSize = 512
-    version = project.version.toString()
-
-    jreRuntimeBits = "64/32" // will prioritize 64bit jre/jdk
-
-    copyConfigurable = listOf<Any>()
-    supportUrl = "https://darkbot.eu"
-}
-
-//will execute proguard task after build
-//tasks.build {
-//    finalizedBy(":proguard")
-//}
-
-// need to download WiX tools!
-runtime {
-    options.addAll("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
-    modules.addAll(
-        "java.desktop",
-        "java.scripting",
-        "java.logging",
-        "java.xml",
-        "java.datatransfer",
-        "jdk.crypto.cryptoki"
-    )
-    jpackage {
-        if (org.gradle.internal.os.OperatingSystem.current().isWindows) {
-            installerType = "msi"
-            installerOptions.addAll(
-                listOf(
-                    "--win-per-user-install",
-                    "--win-shortcut",
-                    "--win-menu"
-                )
-            )
-        } else installerOptions.addAll(listOf("--icon", "icon.ico")) //not possible with .msi type
-
-        imageOptions.addAll(listOf("--icon", "icon.ico"))
-    }
+fun createExcludes(vararg excludes: String): Map<String, String> {
+    return mapOf("filter" to excludes.joinToString(separator = ",", transform = { "!${it.replace(".", "/")}" }))
 }
