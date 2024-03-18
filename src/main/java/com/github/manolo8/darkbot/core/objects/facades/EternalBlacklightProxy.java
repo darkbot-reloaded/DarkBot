@@ -2,8 +2,8 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
-import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.objects.Gui;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.EternalBlacklightGateAPI;
 import eu.darkbot.util.Timer;
@@ -21,9 +21,16 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
 
     private final Main main;
 
-    public FlashList<EternalBlacklightProxy.Booster> activeBoosters  = FlashList.ofVector(Booster::new);
-    public FlashList<EternalBlacklightProxy.Booster> boostersOptions = FlashList.ofVector(Booster::new);
-    public FlashList<EternalBlacklightProxy.Leaderboard> topRankers  = FlashList.ofVector(Leaderboard::new);
+    public FlashList<EternalBlacklightProxy.Booster> activeBoostersArr  = FlashList.ofVector(Booster::new);
+    public FlashList<EternalBlacklightProxy.Booster> boostersOptionsArr = FlashList.ofVector(Booster::new);
+    public FlashList<EternalBlacklightProxy.Leaderboard> topRankersArr  = FlashList.ofVector(Leaderboard::new);
+
+    @Deprecated(forRemoval = true)
+    public List<EternalBlacklightProxy.Booster> activeBoosters = activeBoostersArr;
+    @Deprecated(forRemoval = true)
+    public List<EternalBlacklightProxy.Booster> boostersOptions = boostersOptionsArr;
+    @Deprecated(forRemoval = true)
+    public List<EternalBlacklightProxy.Leaderboard> topRankers = topRankersArr;
 
     public Leaderboard myRank = new Leaderboard();
 
@@ -49,9 +56,9 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
         this.cpuCount        = API.readInt(API.readLong(data + 0x68) + 0x28);
         this.currentWave     = API.readInt(API.readLong(data + 0x70) + 0x28);
 
-        this.activeBoosters.update(API.readLong( data + 0x78));
-        this.boostersOptions.update(API.readLong(data + 0x80));
-        this.topRankers.update(API.readLong(data + 0x90));
+        this.activeBoostersArr.update(API.readLong( data + 0x78));
+        this.boostersOptionsArr.update(API.readLong(data + 0x80));
+        this.topRankersArr.update(API.readLong(data + 0x90));
         this.myRank.update(API.readLong(data + 0x98));
     }
 
