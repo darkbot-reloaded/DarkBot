@@ -20,11 +20,10 @@ public class Group extends Updatable.Auto {
     public boolean isLeader;
 
     private final HeroManager hero;
-    private final FlashList<GroupMember> allMembers;
+    private final FlashList<GroupMember> allMembers = FlashList.ofVector(GroupMember::new);
 
     public Group(HeroManager hero) {
         this.hero = hero;
-        this.allMembers = FlashList.ofVector(GroupMember::new);
         this.members = allMembers.asFiltered(m -> m.id != hero.id);
     }
 
