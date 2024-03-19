@@ -18,7 +18,7 @@ public class NpcEventProxy extends Updatable implements NpcEventAPI.NpcEvent {
     private String npcLeftDescription;
     @Accessors(fluent = true)
     private int npcLeft, bossNpcLeft;
-    private Status status;
+    private Status status = Status.INACTIVE;
 
     public void update() {
         long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;

@@ -56,14 +56,22 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         private final List<String> rewards = new ArrayList<>();
         private final FlashList<ResourceRequired> resourcesRequired = FlashList.ofVector(ResourceRequired::new);
         private boolean isCraftable, isInProgress, isCollectable = false;
+        private int craftTimeLeft, craftTimeRequired;
+        private final FlashListLong craftTimeData = FlashListLong.ofVector();
 
         @Override
         public void update() {
             isCraftable = readBoolean(0x20);
+            craftTimeLeft = (int) readDouble(0x40, 0x28, 0x38);
             recipeId = readString(0x58, 0x48);
             visibility = readString(0x58, 0x40, 0x20, 0x90);
-            isInProgress = visibility != null && visibility.equalsIgnoreCase("ON_SCHEDULE");
-            isCollectable = !isCraftable && !isInProgress && readDouble(0x40, 0x20, 0x28) == 1.0;
+            craftTimeData.update(readAtom(0x58, 0x40, 0x20, 0x98));
+            for(long i : craftTimeData){
+                craftTimeRequired = API.readInt(i, 0x24);
+                break;
+            }
+            isInProgress = craftTimeLeft > 0 && craftTimeLeft <= craftTimeRequired;
+            isCollectable = !isInProgress && readDouble(0x40, 0x20, 0x28) == 1.0;
         }
 
         @Override
