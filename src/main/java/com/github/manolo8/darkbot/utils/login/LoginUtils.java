@@ -132,11 +132,7 @@ public class LoginUtils {
         } catch (CaptchaException ex) {
             throw ex;
         } catch (Exception e) {
-            try {
-                usernameLogin(loginData, "lp");
-            } catch (IOException ex) {
-                throw LoginException.translated("gui.login.error.frontpage_fail", ex);
-            }
+            throw LoginException.translated("gui.login.error.frontpage_fail", e);
         }
     }
 

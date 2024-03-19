@@ -8,6 +8,7 @@ import com.github.manolo8.darkbot.core.objects.facades.AstralGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.BoosterProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ChatProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ChrominProxy;
+import com.github.manolo8.darkbot.core.objects.facades.DiminishQuestMediator;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchGateProxy;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchProxy;
 import com.github.manolo8.darkbot.core.objects.facades.DispatchRetrieverProxy;
@@ -96,7 +97,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
         registerProxy("InventoryProxy", InventoryProxy.class);
         registerProxy("QuestProxy", QuestProxy.class);
         registerMediator("QuestGiverWindowMediator", QuestGiverMediator.class);
-
+        registerMediator("diminish_quests", DiminishQuestMediator.class);
 
         npcEvents.put(EventType.GENERIC, this.npcEventProxy = registerProxy("npc_event", NpcEventProxy.class));
         npcEvents.put(EventType.AGATUS, registerProxy("agatus_event", NpcEventProxy.class));

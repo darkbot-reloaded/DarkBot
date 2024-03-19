@@ -197,7 +197,7 @@ public abstract class FlashList<E> extends AbstractList<E> implements NativeUpda
     @Override
     public int indexOf(Object value) {
         for (int i = 0; i < size(); i++) {
-            if (value.equals(get(i))) return i;
+            if (Objects.equals(value, get(i))) return i;
         }
         return -1;
     }
@@ -205,7 +205,7 @@ public abstract class FlashList<E> extends AbstractList<E> implements NativeUpda
     @Override
     public int lastIndexOf(Object value) {
         for (int i = size() - 1; i >= 0; i--)
-            if (value.equals(get(i))) return i;
+            if (Objects.equals(value, get(i))) return i;
         return -1;
     }
 

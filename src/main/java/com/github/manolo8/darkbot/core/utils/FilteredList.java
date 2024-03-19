@@ -45,7 +45,7 @@ public class FilteredList<E> extends AbstractList<E> {
     @Override
     public boolean isEmpty() {
         for (E e : unfiltered) {
-            if (!filter.test(e)) return false;
+            if (filter.test(e)) return false;
         }
         return true;
     }
