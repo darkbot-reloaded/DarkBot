@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.titlebar.BackpageTask;
+import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.managers.NativeBrowserAPI;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +40,8 @@ public class NativeBrowserImpl implements NativeBrowserAPI {
             try {
                 return BackpageTask.createBrowser("--sid " + backpageManager.getSid(),
                         "--url " + backpageManager.getInstanceURI().toString(), // for sid
-                        "--fullurl " + backpageManager.getInstanceURI().toString() + path);
+                        "--fullurl " + backpageManager.getInstanceURI().toString() + path,
+                        "--lang " + I18n.getLocale().getLanguage());
             } catch (IOException e) {
                 e.printStackTrace();
             }

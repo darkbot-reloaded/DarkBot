@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.BackpageManager;
+import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.LibUtils;
 
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class FlashRunnerTask extends Thread {
 
         if (backpageManager.isInstanceValid() && Files.exists(RUNNER_PATH)) {
             try {
-                String content = backpageManager.getHttp("indexInternal.es?action=internal" + name).getContent();
+                String content = backpageManager.getHttp("indexInternal.es?action=internal" + name + "&lang=" + I18n.getLocale().getLanguage()).getContent();
                 Matcher matcher = PARAMS_PATTERN.matcher(content);
 
                 if (matcher.find()) {
