@@ -21,9 +21,9 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
 
     private final Main main;
 
-    public FlashList<EternalBlacklightProxy.Booster> activeBoostersArr  = FlashList.ofVector(Booster::new);
-    public FlashList<EternalBlacklightProxy.Booster> boostersOptionsArr = FlashList.ofVector(Booster::new);
-    public FlashList<EternalBlacklightProxy.Leaderboard> topRankersArr  = FlashList.ofVector(Leaderboard::new);
+    private final FlashList<EternalBlacklightProxy.Booster> activeBoostersArr  = FlashList.ofVector(Booster::new);
+    private final FlashList<EternalBlacklightProxy.Booster> boostersOptionsArr = FlashList.ofVector(Booster::new);
+    private final FlashList<EternalBlacklightProxy.Leaderboard> topRankersArr  = FlashList.ofVector(Leaderboard::new);
 
     @Deprecated(forRemoval = true)
     public List<EternalBlacklightProxy.Booster> activeBoosters = activeBoostersArr;
@@ -32,7 +32,7 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
     @Deprecated(forRemoval = true)
     public List<EternalBlacklightProxy.Leaderboard> topRankers = topRankersArr;
 
-    public Leaderboard myRank = new Leaderboard();
+    public final Leaderboard myRank = new Leaderboard();
 
     @Getter
     public int cpuCount, currentWave, furthestWave, boosterPoints;
