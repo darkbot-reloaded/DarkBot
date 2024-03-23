@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -15,7 +16,9 @@ public class SlotBar extends MenuBar {
     private final SlotBarsProxy.Type slotType;
     public boolean isVisible;
     public Point stickOffset = new Point();
-    public FlashList<Slot> slots = FlashList.ofVector(Slot::new);
+    private final FlashList<Slot> slotsArr = FlashList.ofVector(Slot::new);
+    @Deprecated(forRemoval = true)
+    public List<Slot> slots = slotsArr;
 
     public SlotBar(CategoryBar categoryBar, SlotBarsProxy.Type type) {
         this.categoryBar = categoryBar;
@@ -30,7 +33,7 @@ public class SlotBar extends MenuBar {
         this.isVisible = API.readBoolean(address + 56);
         this.stickOffset.update(API.readLong(address + 72));
 
-        this.slots.update(API.readLong(address + 64));
+        this.slotsArr.update(API.readLong(address + 64));
     }
 
     public class Slot extends Auto {
