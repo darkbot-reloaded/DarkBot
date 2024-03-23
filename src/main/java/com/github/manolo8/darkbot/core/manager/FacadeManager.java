@@ -22,7 +22,6 @@ import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.InventoryProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
 import com.github.manolo8.darkbot.core.objects.facades.NpcEventProxy;
-import com.github.manolo8.darkbot.core.objects.facades.QuestGiverMediator;
 import com.github.manolo8.darkbot.core.objects.facades.SeassonPassMediator;
 import com.github.manolo8.darkbot.core.objects.facades.QuestProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
@@ -65,7 +64,6 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
     public final WorldBossOverviewProxy worldBossOverview;
     public final Updatable group;
     public final Updatable groupMediator;
-    public final SeassonPassMediator seassonPassMediator;
 
     private final Map<EventType, NpcEventProxy> npcEvents = new HashMap<>();
 
@@ -90,7 +88,6 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
         this.groupMediator  = registerMediator("GroupSystemMediator", Updatable.NoOp.class);
-        this.seassonPassMediator = registerMediator("seasonPass", SeassonPassMediator.class);
 
         registerProxy("dispatch", DispatchProxy.class);
         registerProxy("dispatch_retriever", DispatchRetrieverProxy.class);
@@ -99,8 +96,8 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
         registerMediator("AssemblyWindowMediator", AssemblyMediator.class);
         registerProxy("InventoryProxy", InventoryProxy.class);
         registerProxy("QuestProxy", QuestProxy.class);
-        registerMediator("QuestGiverWindowMediator", QuestGiverMediator.class);
         registerMediator("diminish_quests", DiminishQuestMediator.class);
+        registerMediator("seasonPass", SeassonPassMediator.class);
 
         npcEvents.put(EventType.GENERIC, this.npcEventProxy = registerProxy("npc_event", NpcEventProxy.class));
         npcEvents.put(EventType.AGATUS, registerProxy("agatus_event", NpcEventProxy.class));
