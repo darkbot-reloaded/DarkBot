@@ -122,12 +122,6 @@ public class SeassonPassMediator extends Updatable {
             this.isGoldMission = readBoolean(20);
             this.goldLocked = readBoolean(24);
             this.oncePreMission = readBoolean(28);
-
-            /**
-             * 0 = Not completed
-             * 2 = Gold locked
-             * 3 = Completed
-             */
             this.status = API.readInt(API.readAtom(address + 0x48) + 0x20);
 
             this.quest.update(API.readAtom(address, 0x40));
