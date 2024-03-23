@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.objects.facades.QuestProxy.Quest;
 import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 
 import eu.darkbot.api.managers.QuestAPI;
+import eu.darkbot.api.managers.SeassonPassAPI;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
@@ -15,7 +16,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
-public class SeassonPassMediator extends Updatable {
+public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
 
     @Getter
     private CurrentLevelProgress currentLevelProgress = new CurrentLevelProgress();
@@ -86,7 +87,7 @@ public class SeassonPassMediator extends Updatable {
 
     @Getter
     @ToString
-    public static class CurrentLevelProgress extends Auto {
+    public static class CurrentLevelProgress extends Auto implements SeassonPassAPI.CurrentLevelProgress {
         private int maxProgress;
         private int currentProgress;
 
@@ -107,7 +108,7 @@ public class SeassonPassMediator extends Updatable {
 
     @Getter
     @ToString
-    public class SeassonPassQuest extends Updatable {
+    public class SeassonPassQuest extends Updatable implements SeassonPassAPI.SeassonPassQuest {
         private boolean isGoldMission;
         private boolean goldLocked;
         private boolean oncePreMission;
@@ -128,7 +129,7 @@ public class SeassonPassMediator extends Updatable {
         }
 
         public @Nullable QuestAPI.Quest getQuest() {
-            return quest.address == 0 ? null : quest;
+            return this.quest.address == 0 ? null : quest;
         }
     }
 
