@@ -21,7 +21,7 @@ public class SeassonPassMediator extends Updatable {
     private CurrentLevelProgress currentLevelProgress = new CurrentLevelProgress();
 
     @Getter
-    private CurrentLevelProgress currentLevelInfo = new CurrentLevelProgress();
+    private CurrentLevelProgress currentSeassonLevelInfo = new CurrentLevelProgress();
 
     @Getter
     private boolean seassonPassAvailable = false;
@@ -53,7 +53,7 @@ public class SeassonPassMediator extends Updatable {
         }
 
         this.currentLevelProgress.update(API.readAtom(data + 0x58));
-        this.currentLevelInfo.update(API.readAtom(data + 0x68));
+        this.currentSeassonLevelInfo.update(API.readAtom(data + 0x68));
         this.questDataAddr = API.readAtom(address + 0x78);
     }
 
@@ -87,8 +87,8 @@ public class SeassonPassMediator extends Updatable {
     @Getter
     @ToString
     public static class CurrentLevelProgress extends Auto {
-        private int max;
-        private int current;
+        private int maxProgress;
+        private int currentProgress;
 
         @Override
         public void update() {
@@ -96,12 +96,12 @@ public class SeassonPassMediator extends Updatable {
                 return;
             }
 
-            this.max = API.readInt(address + 0x24);
-            this.current = API.readInt(address + 0x28);
+            this.maxProgress = API.readInt(address + 0x24);
+            this.currentProgress = API.readInt(address + 0x28);
         }
 
         public double getProgressPercentage() {
-            return this.current / this.max;
+            return this.currentProgress / this.maxProgress;
         }
     }
 
