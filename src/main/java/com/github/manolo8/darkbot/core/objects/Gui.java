@@ -27,6 +27,8 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
     protected long time;
     protected long update;
 
+    private long lastReset;
+
     private FlashListLong tempArray;
     private FlashListLong tempChildArray;
     private boolean minimizable, closable;
@@ -65,11 +67,14 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
     public void update(long address) {
         if (address == 0) {
             reset();
+            // assign here so reset() can be used outside
+            lastReset = System.currentTimeMillis();
         } else {
             super.update(address);
             this.addressInfo = API.readLong(address + 496);
             this.featureWindowDefinition = API.readLong(addressInfo + 88);
             this.update = System.currentTimeMillis();
+            this.lastReset = 0;
         }
     }
 
@@ -80,6 +85,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
         this.height = 0;
         this.width = 0;
         this.update = 0;
+        this.lastReset = 0;
     }
 
     @Deprecated
@@ -89,6 +95,10 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
     public boolean lastUpdatedOver(long time) {
         return update != 0 && System.currentTimeMillis() - update > time;
+    }
+
+    public boolean lastResetOver(long time) {
+        return lastReset != 0 && System.currentTimeMillis() - lastReset > time;
     }
 
     @Override
@@ -264,7 +274,7 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
     @Override
     public String toString() {
-        return "Gui{" +
+        return "Gui{" + address +
                 "visible=" + visible +
                 ", x=" + x +
                 ", y=" + y +

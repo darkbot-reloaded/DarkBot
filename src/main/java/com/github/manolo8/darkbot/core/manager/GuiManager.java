@@ -178,6 +178,7 @@ public class GuiManager implements Manager, GameScreenAPI {
                 checks = LoadStatus.WAITING;
                 guiCloser.reset();
             }
+            connecting.reset();
             API.resetCache();
         });
 
@@ -185,7 +186,6 @@ public class GuiManager implements Manager, GameScreenAPI {
             guiAddress = value;
             guis.update(API.readLong(guiAddress + 112));
 
-            guis.values().forEach(Gui::reset);
             checks = LoadStatus.WAITING;
             guiCloser.reset();
         });
