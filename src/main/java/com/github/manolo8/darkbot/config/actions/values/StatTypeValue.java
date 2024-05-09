@@ -14,31 +14,50 @@ import java.util.Locale;
 
 @ValueData(name = "stat-type", description = "Gets a certain Stat type from a bot", example = "stat-type(experience, earned)")
 public class StatTypeValue implements Value<Number>, Parser {
-    private Stats.General key;
+    private StatsAPI.Key key;
     private StatsAPI.Stat stat;
     private StatData dataType;
 
     @Override
     public @Nullable Number get(Main main) {
-        if (stat == null && key != null) stat = main.statsManager.getStat(key);
+        if (stat == null && key != null)
+            stat = main.statsManager.getStat(key);
         if (dataType == null || key == null || stat == null) {
             return null;
         }
 
         switch (dataType) {
-            case INITIAL: return stat.getInitial();
-            case CURRENT: return stat.getCurrent();
-            case EARNED: return stat.getEarned();
-            case SPENT: return stat.getSpent();
-            case DIFFERENCE: return stat.getEarned() - stat.getSpent();
-            default: throw new IllegalStateException("Undefined operation " + dataType);
+            case INITIAL:
+                return stat.getInitial();
+            case CURRENT:
+                return stat.getCurrent();
+            case EARNED:
+                return stat.getEarned();
+            case SPENT:
+                return stat.getSpent();
+            case DIFFERENCE:
+                return stat.getEarned() - stat.getSpent();
+            default:
+                throw new IllegalStateException("Undefined operation " + dataType);
         }
     }
 
-    private Stats.General getKeyFromString(String key) {
-        for (Stats.General stat : Stats.General.values()) {
-            if (stat.name().equalsIgnoreCase(key)) return stat;
+    private StatsAPI.Key getKeyFromString(String key) {
+        for (Stats.General statGeneral : Stats.General.values()) {
+            if (statGeneral.name().equalsIgnoreCase(key))
+                return statGeneral;
         }
+
+        for (Stats.Bot statBot : Stats.Bot.values()) {
+            if (statBot.name().equalsIgnoreCase(key))
+                return statBot;
+        }
+
+        for (Stats.BootyKey statKey : Stats.BootyKey.values()) {
+            if (statKey.name().equalsIgnoreCase(key))
+                return statKey;
+        }
+
         return null;
     }
 
@@ -56,7 +75,8 @@ public class StatTypeValue implements Value<Number>, Parser {
 
         public static StatData of(String sd) {
             for (StatData statData : StatData.values()) {
-                if (statData.toString().equalsIgnoreCase(sd)) return statData;
+                if (statData.toString().equalsIgnoreCase(sd))
+                    return statData;
             }
             return null;
         }
