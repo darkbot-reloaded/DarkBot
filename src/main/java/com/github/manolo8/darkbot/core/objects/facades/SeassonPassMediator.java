@@ -18,6 +18,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
 
+    private final FlashList<SeassonPassQuest> dailyQuests = FlashList.ofVector(SeassonPassQuest.class);
+    private final FlashList<SeassonPassQuest> weeklyQuests = FlashList.ofVector(SeassonPassQuest.class);
+    private final FlashList<SeassonPassQuest> seassonQuests = FlashList.ofVector(SeassonPassQuest.class);
+    private final FlashList<SeassonPassQuest> allQuests = FlashList.ofVector(SeassonPassQuest.class);
+
     @Getter
     private CurrentLevelProgress currentLevelProgress = new CurrentLevelProgress();
 
@@ -27,11 +32,7 @@ public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
     @Getter
     private boolean seassonPassAvailable = false;
 
-    private final FlashList<SeassonPassQuest> dailyQuests = FlashList.ofVector(SeassonPassQuest.class);
-    private final FlashList<SeassonPassQuest> weeklyQuests = FlashList.ofVector(SeassonPassQuest.class);
-    private final FlashList<SeassonPassQuest> seassonQuests = FlashList.ofVector(SeassonPassQuest.class);
     private boolean allQuestsUpdated = false;
-    private final FlashList<SeassonPassQuest> allQuests = FlashList.ofVector(SeassonPassQuest.class);
 
     private long questDataAddr = 0;
 
