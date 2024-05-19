@@ -274,8 +274,9 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
 
     @Override
     public String toString() {
-        return "Gui{" + address +
-                "visible=" + visible +
+        return "Gui{" +
+                "address=" + address +
+                ", visible=" + visible +
                 ", x=" + x +
                 ", y=" + y +
                 ", width=" + width +

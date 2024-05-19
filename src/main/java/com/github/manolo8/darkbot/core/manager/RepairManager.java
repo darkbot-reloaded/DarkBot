@@ -180,7 +180,6 @@ public class RepairManager implements Manager, RepairAPI {
     private boolean isAlive() {
         if (repairAddress == 0 && main.guiManager.connecting.lastResetOver(1000)) {
             long repairClosure = API.searchClassClosure(this::repairClosurePattern);
-            System.out.println(repairClosure);
             if (repairClosure == 0) return true;
 
             repairAddress = API.readLong(repairClosure + 72); // check on next tick
