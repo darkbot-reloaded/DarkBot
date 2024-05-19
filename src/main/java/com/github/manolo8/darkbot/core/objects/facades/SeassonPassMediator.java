@@ -102,7 +102,7 @@ public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
         }
 
         public double getProgressPercentage() {
-            return this.currentProgress / this.maxProgress;
+            return maxProgress == 0 ? 1d : (double) this.currentProgress / this.maxProgress;
         }
     }
 
