@@ -24,10 +24,10 @@ public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
     private final FlashList<SeassonPassQuest> allQuests = FlashList.ofVector(SeassonPassQuest.class);
 
     @Getter
-    private CurrentLevelProgress currentLevelProgress = new CurrentLevelProgress();
+    private final CurrentLevelProgress currentLevelProgress = new CurrentLevelProgress();
 
     @Getter
-    private CurrentLevelProgress currentSeassonLevelInfo = new CurrentLevelProgress();
+    private final CurrentLevelProgress currentSeassonLevelInfo = new CurrentLevelProgress();
 
     @Getter
     private boolean seassonPassAvailable = false;
@@ -108,7 +108,7 @@ public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
 
     @Getter
     @ToString
-    public class SeassonPassQuest extends Updatable implements SeassonPassAPI.SeassonPassQuest {
+    public static class SeassonPassQuest extends Updatable implements SeassonPassAPI.SeassonPassQuest {
         private boolean isGoldMission;
         private boolean goldLocked;
         private boolean oncePreMission;
