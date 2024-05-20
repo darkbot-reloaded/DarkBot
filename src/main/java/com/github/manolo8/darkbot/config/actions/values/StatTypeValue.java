@@ -6,8 +6,12 @@ import com.github.manolo8.darkbot.config.actions.SyntaxException;
 import com.github.manolo8.darkbot.config.actions.Value;
 import com.github.manolo8.darkbot.config.actions.ValueData;
 import com.github.manolo8.darkbot.config.actions.parser.ParseUtil;
-import eu.darkbot.api.game.stats.Stats;
+import com.github.manolo8.darkbot.config.actions.parser.Values;
+import com.github.manolo8.darkbot.core.manager.StatsManager;
+
 import eu.darkbot.api.managers.StatsAPI;
+import eu.darkbot.api.managers.StatsAPI.Key;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -20,38 +24,30 @@ public class StatTypeValue implements Value<Number>, Parser {
 
     @Override
     public @Nullable Number get(Main main) {
-        if (stat == null && key != null) stat = main.statsManager.getStat(key);
+        if (stat == null && key != null)
+            stat = main.statsManager.getStat(key);
         if (dataType == null || key == null || stat == null) {
             return null;
         }
 
         switch (dataType) {
-            case INITIAL: return stat.getInitial();
-            case CURRENT: return stat.getCurrent();
-            case EARNED: return stat.getEarned();
-            case SPENT: return stat.getSpent();
-            case DIFFERENCE: return stat.getEarned() - stat.getSpent();
-            default: throw new IllegalStateException("Undefined operation " + dataType);
+            case INITIAL:
+                return stat.getInitial();
+            case CURRENT:
+                return stat.getCurrent();
+            case EARNED:
+                return stat.getEarned();
+            case SPENT:
+                return stat.getSpent();
+            case DIFFERENCE:
+                return stat.getEarned() - stat.getSpent();
+            default:
+                throw new IllegalStateException("Undefined operation " + dataType);
         }
     }
 
     private StatsAPI.Key getKeyFromString(String key) {
-        for (Stats.General statGeneral : Stats.General.values()) {
-            if (statGeneral.name().equalsIgnoreCase(key))
-                return statGeneral;
-        }
-
-        for (Stats.Bot statBot : Stats.Bot.values()) {
-            if (statBot.name().equalsIgnoreCase(key))
-                return statBot;
-        }
-
-        for (Stats.BootyKey statKey : Stats.BootyKey.values()) {
-            if (statKey.name().equalsIgnoreCase(key))
-                return statKey;
-        }
-
-        return null;
+        return StatsManager.getStatKeys().stream().filter(s -> s.name().equals(key)).findFirst().orElse(null);
     }
 
     public enum StatData {
@@ -68,7 +64,9 @@ public class StatTypeValue implements Value<Number>, Parser {
 
         public static StatData of(String sd) {
             for (StatData statData : StatData.values()) {
-                if (statData.toString().equalsIgnoreCase(sd)) return statData;
+                if (statData.toString().equalsIgnoreCase(sd)) {
+                    return statData;
+                }
             }
             return null;
         }
@@ -87,7 +85,9 @@ public class StatTypeValue implements Value<Number>, Parser {
         stat = null;
 
         if (key == null) {
-            throw new SyntaxException("Unknown stat-type: '" + params[0] + "'", str, Stats.General.class);
+            throw new SyntaxException("Unknown stat-type: '" + params[0] + "'", str, Values.getMeta(getClass()),
+                    StatsManager.getStatKeys().stream().map(Key::name)
+                            .toArray(String[]::new));
         }
 
         params = ParseUtil.separate(params, getClass(), ",").split("\\)", 2);
