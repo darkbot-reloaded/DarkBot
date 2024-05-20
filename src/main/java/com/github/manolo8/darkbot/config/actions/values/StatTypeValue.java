@@ -24,25 +24,18 @@ public class StatTypeValue implements Value<Number>, Parser {
 
     @Override
     public @Nullable Number get(Main main) {
-        if (stat == null && key != null)
-            stat = main.statsManager.getStat(key);
+        if (stat == null && key != null) stat = main.statsManager.getStat(key);
         if (dataType == null || key == null || stat == null) {
             return null;
         }
 
         switch (dataType) {
-            case INITIAL:
-                return stat.getInitial();
-            case CURRENT:
-                return stat.getCurrent();
-            case EARNED:
-                return stat.getEarned();
-            case SPENT:
-                return stat.getSpent();
-            case DIFFERENCE:
-                return stat.getEarned() - stat.getSpent();
-            default:
-                throw new IllegalStateException("Undefined operation " + dataType);
+            case INITIAL: return stat.getInitial();
+            case CURRENT: return stat.getCurrent();
+            case EARNED: return stat.getEarned();
+            case SPENT: return stat.getSpent();
+            case DIFFERENCE: return stat.getEarned() - stat.getSpent();
+            default: throw new IllegalStateException("Undefined operation " + dataType);
         }
     }
 
