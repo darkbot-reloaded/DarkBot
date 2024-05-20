@@ -41,14 +41,15 @@ public class StatTypeValue implements Value<Number>, Parser {
 
     private StatsAPI.Key getKeyFromString(String token) {
         String[] tokenParts = token.split(":");
+
+        String statNamespace = tokenParts.length == 3 ? tokenParts[0] : null;
+        String statCategory = tokenParts.length >= 2 ? tokenParts[tokenParts.length - 2] : null;
         String statKey = tokenParts[tokenParts.length - 1];
-        String statCategory = tokenParts[tokenParts.length - 2];
-        String statNamespace = tokenParts.length >= 3 ? tokenParts[0] : null;
 
         return StatsManager.getStatKeys().stream()
                 .filter(s -> statNamespace == null || s.namespace().equals(statNamespace))
-                .filter(s -> s.category().equals(statCategory))
-                .filter(s -> s.name().equals(statKey))
+                .filter(s -> statCategory == null || s.category().equals(statCategory))
+                .filter(s -> statKey == null || s.name().equals(statKey))
                 .findFirst().orElse(null);
     }
 
@@ -79,8 +80,9 @@ public class StatTypeValue implements Value<Number>, Parser {
         return "stat-type(" + key.name().toLowerCase(Locale.ROOT) + "," + dataType + ")";
     }
 
-    private String getKeyFormatted(Key key) {
-        return key.namespace() != null ? key.namespace() + ":" : "" + key.category() + ":" + key.name();
+    private String getKeyFormatted(Key keyToFormat) {
+        return (keyToFormat.namespace() != null ? keyToFormat.namespace() + ":" : "") + keyToFormat.category() + ":"
+                + keyToFormat.name();
     }
 
     @Override
@@ -92,7 +94,8 @@ public class StatTypeValue implements Value<Number>, Parser {
 
         if (key == null) {
             throw new SyntaxException("Unknown stat-type: '" + params[0] + "'", str, Values.getMeta(getClass()),
-                    StatsManager.getStatKeys().stream().map(this::getKeyFormatted)
+                    StatsManager.getStatKeys().stream()
+                            .map(this::getKeyFormatted)
                             .toArray(String[]::new));
         }
 
