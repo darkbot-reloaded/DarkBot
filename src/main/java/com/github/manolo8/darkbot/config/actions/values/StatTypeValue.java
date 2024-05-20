@@ -46,8 +46,17 @@ public class StatTypeValue implements Value<Number>, Parser {
         }
     }
 
-    private StatsAPI.Key getKeyFromString(String key) {
-        return StatsManager.getStatKeys().stream().filter(s -> s.name().equals(key)).findFirst().orElse(null);
+    private StatsAPI.Key getKeyFromString(String token) {
+        String[] tokenParts = token.split(":");
+        String statKey = tokenParts[tokenParts.length - 1];
+        String statCategory = tokenParts[tokenParts.length - 2];
+        String statNamespace = tokenParts.length >= 3 ? tokenParts[0] : null;
+
+        return StatsManager.getStatKeys().stream()
+                .filter(s -> statNamespace == null || s.namespace().equals(statNamespace))
+                .filter(s -> s.category().equals(statCategory))
+                .filter(s -> s.name().equals(statKey))
+                .findFirst().orElse(null);
     }
 
     public enum StatData {
@@ -77,6 +86,10 @@ public class StatTypeValue implements Value<Number>, Parser {
         return "stat-type(" + key.name().toLowerCase(Locale.ROOT) + "," + dataType + ")";
     }
 
+    private String getKeyFormatted(Key key) {
+        return key.namespace() != null ? key.namespace() + ":" : "" + key.category() + ":" + key.name();
+    }
+
     @Override
     public String parse(String str) throws SyntaxException {
         String[] params = str.split(" *, *", 2);
@@ -86,7 +99,7 @@ public class StatTypeValue implements Value<Number>, Parser {
 
         if (key == null) {
             throw new SyntaxException("Unknown stat-type: '" + params[0] + "'", str, Values.getMeta(getClass()),
-                    StatsManager.getStatKeys().stream().map(Key::name)
+                    StatsManager.getStatKeys().stream().map(this::getKeyFormatted)
                             .toArray(String[]::new));
         }
 
