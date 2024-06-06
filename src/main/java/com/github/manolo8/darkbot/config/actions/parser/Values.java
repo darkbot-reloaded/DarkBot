@@ -17,6 +17,7 @@ import com.github.manolo8.darkbot.config.actions.conditions.TargetTypeCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.UntilCondition;
 import com.github.manolo8.darkbot.config.actions.values.BooleanConstant;
 import com.github.manolo8.darkbot.config.actions.values.DistanceValue;
+import com.github.manolo8.darkbot.config.actions.values.HasQuest;
 import com.github.manolo8.darkbot.config.actions.values.HealthTypeValue;
 import com.github.manolo8.darkbot.config.actions.values.HealthValue;
 import com.github.manolo8.darkbot.config.actions.values.HeroMap;
@@ -68,6 +69,8 @@ public class Values {
                     HealthValue.class,
                     HeroValue.class,
                     TargetValue.class,
+                    // Special conditions
+                    HasQuest.class,
                     // Constants
                     NumberConstant.class,
                     PercentConstant.class,
