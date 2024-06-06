@@ -65,12 +65,13 @@ public class RepairManager implements Manager, RepairAPI {
 
     public String getStatus() {
         ReviveLocation location = reviveHandler.getBest();
-        int availableIn = optionAvailableIn(getRepairOptionFromType(location));
+        int repairOption = getRepairOptionFromType(location);
+        int availableIn = optionAvailableIn(repairOption);
 
         int beforeRevive = (int) (((beforeReviveTime + (main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L))
                 - System.currentTimeMillis()) / 1000);
 
-        return "Reviving at: " + location + ", in " + Math.max(beforeRevive, availableIn) + "s";
+        return "Reviving at: " + (repairOption == -1 ? "DEFAULT" : location) + ", in " + Math.max(beforeRevive, availableIn) + "s";
     }
 
     public boolean setBeforeReviveTime() {
@@ -176,26 +177,15 @@ public class RepairManager implements Manager, RepairAPI {
         return true;
     }
 
-    // basically hero shouldn't move if this sprite has childrens
-    private final FlashListLong blocker = FlashListLong.ofSprite();
     private boolean isAlive() {
-        if (repairAddress != 0) return !API.readBoolean(repairAddress + 0x28);
-
-        if (main.mapManager.mapAddress == 0 || main.guiManager.lostConnection.isVisible()
-                || main.guiManager.connecting.isVisible() || (main.hero.address != 0 && main.hero.id != 0))
-            return true;
-
-        if (userDataAddress == 0 || API.readBoolean(userDataAddress + 0x4C)) {
-            blocker.update(API.readLong(screenManager, 0x58));
-            if (blocker.isEmpty()) return true;
-
+        if (repairAddress == 0 && main.guiManager.connecting.lastResetOver(1000)) {
             long repairClosure = API.searchClassClosure(this::repairClosurePattern);
             if (repairClosure == 0) return true;
 
             repairAddress = API.readLong(repairClosure + 72); // check on next tick
         }
 
-        return true;
+        return !API.readBoolean(repairAddress + 0x28);
     }
 
     @Deprecated
