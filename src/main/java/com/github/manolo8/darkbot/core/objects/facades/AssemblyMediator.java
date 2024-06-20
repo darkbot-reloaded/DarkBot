@@ -19,6 +19,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
     private int selectedRecipeIndex;
     private final Recipe selectedRecipe = new Recipe();
 
+    private boolean listUpdated = false;
     private final FlashList<Recipe> recipes = FlashList.ofVector(Recipe::new);
     private final List<Filter> filters = new ArrayList<>();
     private final FlashList<RowFilter> rowSettings = FlashList.ofVector(RowFilter::new);
@@ -30,7 +31,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         if (address == 0) return;
         selectedRecipeIndex = readInt(0x48);
 
-        recipes.update(readAtom(0x60, 0x20));
+        listUpdated = false;
         selectedRecipe.updateIfChanged(readAtom(0x70));
         selectedRecipe.update();
 
@@ -44,6 +45,15 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         }
 
         isFilterDropDownOpen = readBoolean(0x78, 0x60, 0x1D0);
+    }
+
+    @Override
+    public List<? extends AssemblyAPI.Recipe> getRecipes() {
+        if (!listUpdated) {
+            recipes.update(readAtom(0x60, 0x20));
+            listUpdated = true;
+        }
+        return recipes;
     }
 
     @Getter
@@ -64,6 +74,8 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         public void update(long address) {
             super.update(address);
 
+            recipeId = readString(0x58, 0x48);
+
             rewardsArr.update(API.readAtom(address + 0x60));
             rewards.clear();
             rewardsArr.forEach(ptr -> rewards.add(API.readString(ptr, 0x48)));
@@ -76,10 +88,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             isCraftable = readBoolean(0x20);
             craftTimeLeft = (int) readDouble(0x40, 0x28, 0x38);
 
-            long recipe = readAtom(0x58);
-            recipeId = API.readString(recipe, 0x48);
-
-            long data = API.readAtom(recipe, 0x40, 0x20);
+            long data = readAtom(0x58, 0x40, 0x20);
             visibility = API.readString(data, 0x90);
             craftTimeData.update(API.readAtom(data, 0x98));
             for (long i : craftTimeData) {

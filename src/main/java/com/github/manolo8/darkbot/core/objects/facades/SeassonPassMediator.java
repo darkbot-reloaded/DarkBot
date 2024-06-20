@@ -56,7 +56,6 @@ public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
         if (questDataAddr == 0) {
             return;
         }
-
         dailyQuests.update(API.readAtom(questDataAddr + 0x60));
         weeklyQuests.update(API.readAtom(questDataAddr + 0x68));
         seassonQuests.update(API.readAtom(questDataAddr + 0x70));
