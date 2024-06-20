@@ -132,7 +132,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         if (petAddress != pet.address) pet.update(petAddress);
         pet.update();
 
-        long targetPtr = API.readLong(main.mapManager.mapAddress, 120, 40);
+        long targetPtr = API.readLong(main.mapManager.mapAddress, 128, 40);
 
         if (targetPtr == 0) inGameTarget = null;
         else if (targetPtr == petAddress) inGameTarget = pet;
