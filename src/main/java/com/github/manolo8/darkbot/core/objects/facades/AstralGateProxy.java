@@ -8,7 +8,6 @@ import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-
 public class AstralGateProxy extends Updatable implements AstralGateAPI {
     private int highScore, currentRift, currentScore, cpuCount;
     private boolean canEquip;
@@ -68,7 +67,7 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
         return cpuCount;
     }
 
-    public static class AstralItem extends Auto implements AstralGateAPI.AstralItem {
+    public static class AstralItem extends Updatable implements AstralGateAPI.AstralItem {
         private boolean equipped;
         private int upgradeLevel;
         private String lootId;
@@ -81,12 +80,22 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
             }
 
             this.equipped = API.readBoolean(address + 0x24);
-            long itemData = API.readAtom(address + 0x30);
-            this.upgradeLevel = API.readInt(itemData + 0x2C);
-
-            this.lootId = API.readString(itemData, 0x48);
 
             itemStats.update(API.readLong(address + 0x38));
+        }
+
+        @Override
+        public void update(long address) {
+            boolean addrChanged = this.address != address;
+            super.update(address);
+
+            if (!addrChanged) {
+                return;
+            }
+
+            long itemData = API.readAtom(address + 0x30);
+            this.upgradeLevel = API.readInt(itemData + 0x2C);
+            this.lootId = API.readString(itemData, 0x48);
         }
 
         @Override
@@ -110,13 +119,23 @@ public class AstralGateProxy extends Updatable implements AstralGateAPI {
         }
     }
 
-    public static class ItemStat extends Auto implements AstralGateAPI.ItemStat {
+    public static class ItemStat extends Updatable implements AstralGateAPI.ItemStat {
         private String attribute;
         private double value;
 
         @Override
         public void update() {
             if (address == 0) {
+                return;
+            }
+        }
+
+        @Override
+        public void update(long address) {
+            boolean addrChanged = this.address != address;
+            super.update(address);
+
+            if (!addrChanged) {
                 return;
             }
 
