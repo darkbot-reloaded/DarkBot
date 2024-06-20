@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.config.actions.conditions.AnyCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.EqualCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.HasEffectCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.HasFormationCondition;
+import com.github.manolo8.darkbot.config.actions.conditions.HasQuestCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NoneCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.NumericalCondition;
 import com.github.manolo8.darkbot.config.actions.conditions.OneCondition;
@@ -58,6 +59,8 @@ public class Values {
                     // Stateful conditions
                     AfterCondition.class,
                     UntilCondition.class,
+                    // Special conditions
+                    HasQuestCondition.class,
                     // Values
                     DistanceValue.class,
                     ShipLocationValue.class,
