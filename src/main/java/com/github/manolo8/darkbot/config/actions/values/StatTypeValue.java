@@ -40,7 +40,7 @@ public class StatTypeValue implements Value<Number>, Parser {
     }
 
     private StatsAPI.Key getKeyFromString(String token) {
-        String[] tokenParts = token.split(":");
+        String[] tokenParts = token.split(":", 3);
 
         String statNamespace = tokenParts.length == 3 ? tokenParts[0] : null;
         String statCategory = tokenParts.length >= 2 ? tokenParts[tokenParts.length - 2] : null;
