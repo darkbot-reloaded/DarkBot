@@ -3,18 +3,16 @@ package com.github.manolo8.darkbot.core.objects.facades;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.facades.QuestProxy.Quest;
 import com.github.manolo8.darkbot.core.objects.swf.FlashList;
-
 import eu.darkbot.api.managers.QuestAPI;
 import eu.darkbot.api.managers.SeassonPassAPI;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
-
-import static com.github.manolo8.darkbot.Main.API;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
+import static com.github.manolo8.darkbot.Main.API;
 
 public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
 
@@ -119,13 +117,19 @@ public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
         private final QuestProxy.Quest quest = new Quest();
 
         @Override
+        public void update(long address) {
+            super.update(address);
+            this.quest.update(readAtom(0x40));
+        }
+
+        @Override
         public void update() {
             this.isGoldMission = readBoolean(20);
             this.goldLocked = readBoolean(24);
             this.oncePreMission = readBoolean(28);
-            this.status = API.readInt(API.readAtom(address + 0x48) + 0x20);
+            this.status = readInt(0x48, 0x20);
 
-            this.quest.update(API.readAtom(address, 0x40));
+            this.quest.update();
         }
 
         public @Nullable QuestAPI.Quest getQuest() {

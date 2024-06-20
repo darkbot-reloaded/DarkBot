@@ -36,16 +36,18 @@ public class QuestProxy extends Updatable implements QuestAPI {
         this.questsUpdated = false;
 
         this.selectedTab = readInt(0x50);
-        this.currentQuest.update(readAtom(0x98, 0x28));
+        this.currentQuest.updateIfChanged(readAtom(0x98, 0x28));
+        this.currentQuest.update();
 
         this.questGiverOpen = readBoolean(0x40);
         if (!questGiverOpen) return;
 
-        long questInfoGiverSelectedAddr = readAtom(0xA8);
-        this.questGiverSelectedInfo.update(questInfoGiverSelectedAddr);
+        this.questGiverSelectedInfo.updateIfChanged(readAtom(0xA8));
+        this.questGiverSelectedInfo.update();
 
         long questGiverSelectedAddr = readAtom(0xB0);
-        this.questGiverSelected.update(questGiverSelectedAddr);
+        this.questGiverSelected.updateIfChanged(questGiverSelectedAddr);
+        this.questGiverSelected.update();
     }
 
     @Override
@@ -74,7 +76,7 @@ public class QuestProxy extends Updatable implements QuestAPI {
 
     @Getter
     @ToString
-    public static class QuestListItem extends Auto implements QuestAPI.QuestListItem {
+    public static class QuestListItem extends Updatable implements QuestAPI.QuestListItem {
         private int id;
         private int levelRequired;
         private boolean selected;
@@ -84,21 +86,28 @@ public class QuestProxy extends Updatable implements QuestAPI {
         private String type;
 
         @Override
-        public void update() {
-            if (address == 0) return;
+        public void update(long address) {
+            super.update(address);
 
             this.id = readInt(0x24);
             this.levelRequired = readInt(0x28);
+            this.title = readString(0x58);
+            this.type = readString(0x70);
+
+        }
+
+        @Override
+        public void update() {
+            if (address == 0) return;
+
             this.selected = readBoolean(0x34);
             this.completed = readBoolean(0x38);
             this.activable = readBoolean(0x3C);
-            this.title = readString(0x58);
-            this.type = readString(0x70);
         }
     }
 
     @Getter
-    public static class Quest extends Auto implements QuestAPI.Quest {
+    public static class Quest extends Updatable implements QuestAPI.Quest {
         private int id;
         private boolean active;
         private boolean completed;
@@ -108,68 +117,77 @@ public class QuestProxy extends Updatable implements QuestAPI {
         private final FlashList<QuestProxy.Reward> rewards = FlashList.ofArray(Reward::new);
 
         @Override
-        public void update() {
-            if (address == 0) return;
+        public void update(long address) {
+            super.update(address);
 
             this.id = readInt(0x20);
-            this.active = readBoolean(0x24);
-            this.completed = readBoolean(0x38, 0x38);
             this.title = readString(0x68);
             this.description = readString(0x70);
             this.requirements.update(readAtom(0x40));
-
-            if (!this.rewards.isEmpty()) {
-                return;
-            }
-
-            rewards.update(readAtom(0x50));
+            this.rewards.update(readAtom(0x50));
         }
-    }
-
-    @Getter
-    @ToString
-    public static class Reward extends Auto implements QuestAPI.Reward {
-        private int amount;
-        private String type;
 
         @Override
         public void update() {
             if (address == 0) return;
 
-            this.amount = readInt(0x20);
-            this.type = readString(0x28);
+            this.active = readBoolean(0x24);
+            this.completed = readBoolean(0x38, 0x38);
+            this.requirements.update();
         }
     }
 
     @Getter
     @ToString
-    public static class Requirement extends Auto implements QuestAPI.Requirement {
+    public static class Reward extends Updatable implements QuestAPI.Reward {
+        private int amount;
+        private String type;
+
+        @Override
+        public void update(long address) {
+            super.update(address);
+
+            this.amount = readInt(0x20);
+            this.type = readString(0x28);
+        }
+
+        @Override
+        public void update() {
+            // no-op, rewards are immutable
+        }
+    }
+
+    @Getter
+    @ToString
+    public static class Requirement extends Updatable implements QuestAPI.Requirement {
+        private final FlashList<QuestProxy.Requirement> requirements = FlashList.ofArray(Requirement::new);
+
+        private String type;
         private String description;
         private double progress;
         private double goal;
         private boolean completed;
         private boolean enabled;
 
-        private final FlashList<QuestProxy.Requirement> requirements = FlashList.ofArray(Requirement::new);
+        @Override
+        public void update(long address) {
+            super.update(address);
 
-        private String type;
+            this.requirements.update(readAtom(0x48));
+            this.type = API.readString(0x58, 0x28);
+            this.description = readString(0x60);
+        }
 
         @Override
         public void update() {
-            if (address == 0) {
-                return;
-            }
+            if (address == 0) return;
+
+            this.requirements.update();
 
             this.enabled = readBoolean(0x24);
             this.completed = readBoolean(0x34);
-            this.description = readString(0x60);
             this.progress = readDouble(0x78);
             this.goal = readDouble(0x80);
-
-            long definitionAddr = readAtom(0x58);
-            this.type = API.readString(definitionAddr, 0x28);
-
-            requirements.update(readAtom(0x48));
         }
     }
 }

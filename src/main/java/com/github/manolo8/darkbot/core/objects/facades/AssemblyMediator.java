@@ -31,7 +31,8 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         selectedRecipeIndex = readInt(0x48);
 
         recipes.update(readAtom(0x60, 0x20));
-        selectedRecipe.update(readAtom(0x70));
+        selectedRecipe.updateIfChanged(readAtom(0x70));
+        selectedRecipe.update();
 
         if (rowSettings.updateAndReport(readAtom(0x78, 0xb0))) {
             filters.clear();
@@ -47,7 +48,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
     @Getter
     @ToString
-    private static class Recipe extends Auto implements AssemblyAPI.Recipe {
+    private static class Recipe extends Updatable implements AssemblyAPI.Recipe {
         @Getter(AccessLevel.NONE)
         @ToString.Exclude
         private final FlashListLong rewardsArr = FlashListLong.ofVector();
@@ -60,31 +61,33 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         private final FlashListLong craftTimeData = FlashListLong.ofVector();
 
         @Override
-        public void update() {
-            isCraftable = readBoolean(0x20);
-            craftTimeLeft = (int) readDouble(0x40, 0x28, 0x38);
-            recipeId = readString(0x58, 0x48);
-            visibility = readString(0x58, 0x40, 0x20, 0x90);
-            craftTimeData.update(readAtom(0x58, 0x40, 0x20, 0x98));
-            for(long i : craftTimeData){
-                craftTimeRequired = API.readInt(i, 0x24);
-                break;
-            }
-            isInProgress = craftTimeLeft > 0 && craftTimeLeft <= craftTimeRequired;
-            isCollectable = !isInProgress && readDouble(0x40, 0x20, 0x28) == 1.0;
-        }
-
-        @Override
         public void update(long address) {
-            boolean addrChanged = this.address != address;
             super.update(address);
 
-            if (!addrChanged) return;
             rewardsArr.update(API.readAtom(address + 0x60));
             rewards.clear();
             rewardsArr.forEach(ptr -> rewards.add(API.readString(ptr, 0x48)));
 
             resourcesRequired.update(API.readAtom(address + 0x50));
+        }
+
+        @Override
+        public void update() {
+            isCraftable = readBoolean(0x20);
+            craftTimeLeft = (int) readDouble(0x40, 0x28, 0x38);
+
+            long recipe = readAtom(0x58);
+            recipeId = API.readString(recipe, 0x48);
+
+            long data = API.readAtom(recipe, 0x40, 0x20);
+            visibility = API.readString(data, 0x90);
+            craftTimeData.update(API.readAtom(data, 0x98));
+            for (long i : craftTimeData) {
+                craftTimeRequired = API.readInt(i, 0x24);
+                break;
+            }
+            isInProgress = craftTimeLeft > 0 && craftTimeLeft <= craftTimeRequired;
+            isCollectable = !isInProgress && API.readDouble(data, 0x28) == 1.0;
         }
 
     }

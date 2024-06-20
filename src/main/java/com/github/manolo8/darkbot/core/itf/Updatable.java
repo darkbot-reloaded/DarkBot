@@ -9,6 +9,12 @@ public abstract class Updatable implements NativeUpdatable {
 
     public abstract void update();
 
+    public final void updateIfChanged(long address) {
+        if (this.address != address) {
+            update(address);
+        }
+    }
+
     public void update(long address) {
         this.address = address;
     }

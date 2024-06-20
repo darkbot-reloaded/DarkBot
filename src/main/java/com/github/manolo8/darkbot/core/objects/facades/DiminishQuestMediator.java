@@ -23,7 +23,8 @@ public class DiminishQuestMediator extends Updatable implements API.Singleton {
         int stateIndex = API.readInt(address, 0x50, 0x40) + 1;
         if (stateIndex >= 0 && stateIndex < STATES.length) {
             state = STATES[stateIndex];
-            diminishQuest.update(API.readAtom(address, 0x50, 0x60));
+            diminishQuest.updateIfChanged(API.readAtom(address, 0x50, 0x60));
+            diminishQuest.update();
         } else {
             state = State.NOT_EXIST;
         }
