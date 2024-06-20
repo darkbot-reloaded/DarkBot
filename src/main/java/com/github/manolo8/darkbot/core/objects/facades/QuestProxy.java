@@ -87,11 +87,20 @@ public class QuestProxy extends Updatable implements QuestAPI {
         public void update() {
             if (address == 0) return;
 
-            this.id = readInt(0x24);
-            this.levelRequired = readInt(0x28);
             this.selected = readBoolean(0x34);
             this.completed = readBoolean(0x38);
             this.activable = readBoolean(0x3C);
+        }
+
+        @Override
+        public void update(long address) {
+            boolean addrChanged = this.address != address;
+            super.update(address);
+
+            if (!addrChanged) return;
+
+            this.id = readInt(0x24);
+            this.levelRequired = readInt(0x28);
             this.title = readString(0x58);
             this.type = readString(0x70);
         }
@@ -111,11 +120,8 @@ public class QuestProxy extends Updatable implements QuestAPI {
         public void update() {
             if (address == 0) return;
 
-            this.id = readInt(0x20);
             this.active = readBoolean(0x24);
             this.completed = readBoolean(0x38, 0x38);
-            this.title = readString(0x68);
-            this.description = readString(0x70);
             this.requirements.update(readAtom(0x40));
 
             if (!this.rewards.isEmpty()) {
@@ -124,6 +130,18 @@ public class QuestProxy extends Updatable implements QuestAPI {
 
             rewards.update(readAtom(0x50));
         }
+
+        @Override
+        public void update(long address) {
+            boolean addrChanged = this.address != address;
+            super.update(address);
+
+            if (!addrChanged) return;
+
+            this.id = readInt(0x20);
+            this.title = readString(0x68);
+            this.description = readString(0x70);
+        }
     }
 
     @Getter
@@ -131,15 +149,20 @@ public class QuestProxy extends Updatable implements QuestAPI {
     public static class Reward extends Auto implements QuestAPI.Reward {
         private int amount;
         private String type;
-        private boolean readed;
 
         @Override
         public void update() {
-            if (address == 0 || readed) return;
+            if (address == 0) return;
+        }
 
+        @Override
+        public void update(long address) {
+            boolean addrChanged = this.address != address;
+            super.update(address);
+
+            if (!addrChanged) return;
             this.amount = readInt(0x20);
             this.type = readString(0x28);
-            this.readed = true;
         }
     }
 
@@ -164,14 +187,23 @@ public class QuestProxy extends Updatable implements QuestAPI {
 
             this.enabled = readBoolean(0x24);
             this.completed = readBoolean(0x34);
-            this.description = readString(0x60);
             this.progress = readDouble(0x78);
+
+            requirements.update(readAtom(0x48));
+        }
+
+        @Override
+        public void update(long address) {
+            boolean addrChanged = this.address != address;
+            super.update(address);
+
+            if (!addrChanged) return;
+
+            this.description = readString(0x60);
             this.goal = readDouble(0x80);
 
             long definitionAddr = readAtom(0x58);
             this.type = API.readString(definitionAddr, 0x28);
-
-            requirements.update(readAtom(0x48));
         }
     }
 }
