@@ -10,8 +10,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static com.github.manolo8.darkbot.Main.API;
-
 public class QuestProxy extends Updatable implements QuestAPI {
     private boolean questsUpdated = false;
 
@@ -174,7 +172,7 @@ public class QuestProxy extends Updatable implements QuestAPI {
             super.update(address);
 
             this.requirements.update(readAtom(0x48));
-            this.type = API.readString(0x58, 0x28);
+            this.type = readString(0x58, 0x28);
             this.description = readString(0x60);
         }
 
