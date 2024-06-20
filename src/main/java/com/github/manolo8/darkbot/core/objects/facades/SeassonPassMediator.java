@@ -32,6 +32,9 @@ public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
     @Getter
     private boolean seassonPassAvailable = false;
 
+    private boolean dailyQuestUpdated = false;
+    private boolean weeklyQuestUpdated = false;
+    private boolean seassonQuestUpdated = false;
     private boolean allQuestsUpdated = false;
 
     private long questDataAddr = 0;
@@ -54,25 +57,32 @@ public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
         this.currentLevelProgress.update(API.readAtom(data + 0x58));
         this.currentSeassonLevelInfo.update(API.readAtom(data + 0x68));
         this.questDataAddr = API.readAtom(address + 0x78);
-
-        if (questDataAddr == 0) {
-            return;
-        }
-
-        dailyQuests.update(API.readAtom(questDataAddr + 0x60));
-        weeklyQuests.update(API.readAtom(questDataAddr + 0x68));
-        seassonQuests.update(API.readAtom(questDataAddr + 0x70));
     }
 
     public @Nullable List<? extends SeassonPassQuest> getDailyQuests() {
+        if (!dailyQuestUpdated && questDataAddr != 0) {
+            dailyQuestUpdated = true;
+            dailyQuests.update(API.readAtom(questDataAddr + 0x60));
+        }
+
         return this.dailyQuests;
     }
 
     public @Nullable List<? extends SeassonPassQuest> getWeeklyQuests() {
+        if (!weeklyQuestUpdated && questDataAddr != 0) {
+            weeklyQuestUpdated = true;
+            weeklyQuests.update(API.readAtom(questDataAddr + 0x68));
+        }
+
         return this.weeklyQuests;
     }
 
     public @Nullable List<? extends SeassonPassQuest> getSeassonQuests() {
+        if (!seassonQuestUpdated && questDataAddr != 0) {
+            seassonQuestUpdated = true;
+            seassonQuests.update(API.readAtom(questDataAddr + 0x70));
+        }
+
         return this.seassonQuests;
     }
 
