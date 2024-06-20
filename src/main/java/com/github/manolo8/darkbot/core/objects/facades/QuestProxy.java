@@ -131,13 +131,15 @@ public class QuestProxy extends Updatable implements QuestAPI {
     public static class Reward extends Auto implements QuestAPI.Reward {
         private int amount;
         private String type;
+        private boolean readed;
 
         @Override
         public void update() {
-            if (address == 0) return;
+            if (address == 0 || readed) return;
 
             this.amount = readInt(0x20);
             this.type = readString(0x28);
+            this.readed = true;
         }
     }
 
