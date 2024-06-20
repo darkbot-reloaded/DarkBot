@@ -42,8 +42,8 @@ public class StatTypeValue implements Value<Number>, Parser {
     private StatsAPI.Key getKeyFromString(String token) {
         String[] tokenParts = token.split(":", 3);
 
-        String statNamespace = tokenParts.length == 3 ? tokenParts[0] : null;
-        String statCategory = tokenParts.length >= 2 ? tokenParts[tokenParts.length - 2] : null;
+        String statNamespace = tokenParts.length >= 2 ? tokenParts[0] : null;
+        String statCategory = tokenParts.length == 3 ? tokenParts[1] : null;
         String statKey = tokenParts[tokenParts.length - 1];
 
         return StatsManager.getStatKeys().stream()
