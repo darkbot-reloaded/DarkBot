@@ -46,6 +46,9 @@ public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
         }
 
         this.allQuestsUpdated = false;
+        this.dailyQuestUpdated = false;
+        this.weeklyQuestUpdated = false;
+        this.seassonQuestUpdated = false;
 
         long data = API.readAtom(address + 0x60);
         this.seassonPassAvailable = API.readBoolean(API.readAtom(data + 0x70) + 0x20);
