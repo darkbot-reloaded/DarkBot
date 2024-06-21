@@ -47,10 +47,13 @@ public abstract class Updatable implements NativeUpdatable {
      */
     public abstract static class Reporting extends Updatable {
 
-        public boolean updateAndReport(long address) {
-            boolean addressChanged = this.address != address;
-            super.update(address);
-            return updateAndReport() || addressChanged;
+        public final boolean updateAndReport(long address) {
+            if (this.address != address) {
+                update(address);
+                updateAndReport();
+                return true;
+            }
+            return updateAndReport();
         }
 
         @Override

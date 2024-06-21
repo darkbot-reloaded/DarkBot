@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
-import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
@@ -91,10 +90,8 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             long data = readAtom(0x58, 0x40, 0x20);
             visibility = API.readString(data, 0x90);
             craftTimeData.update(API.readAtom(data, 0x98));
-            for (long i : craftTimeData) {
-                craftTimeRequired = API.readInt(i, 0x24);
-                break;
-            }
+            if (!craftTimeData.isEmpty())
+                craftTimeRequired = API.readInt(craftTimeData.getLong(0), 0x24);
             isInProgress = craftTimeLeft > 0 && craftTimeLeft <= craftTimeRequired;
             isCollectable = !isInProgress && API.readDouble(data, 0x28) == 1.0;
         }
@@ -123,10 +120,9 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
 
         @Override
         public boolean updateAndReport() {
-            if (address <= 0) return false;
+            if (address == 0) return false;
 
-            return first.updateAndReport(Main.API.readAtom(address + 0x20))
-                    || second.updateAndReport(Main.API.readAtom(address + 0x28));
+            return first.updateAndReport(readAtom(0x20)) | second.updateAndReport(readAtom(0x28));
         }
     }
 
@@ -139,12 +135,18 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         private double x, y;
 
         @Override
-        public boolean updateAndReport() {
-            if (address <= 0) return false;
+        public void update(long address) {
+            super.update(address);
             filterName = API.readString(address, 0x20);
-            isChecked = API.readBoolean(address, 0x28, 0x1D0);
-            x = API.readDouble(address, 0x28, 0x158);
-            y = API.readDouble(address, 0x28, 0x160);
+        }
+
+        @Override
+        public boolean updateAndReport() {
+            if (address == 0) return false;
+            var data = readAtom(0x28);
+            isChecked = API.readBoolean(data, 0x1D0);
+            x = API.readDouble(data, 0x158);
+            y = API.readDouble(data, 0x160);
             // Always false, we only care about address itself changing, which reports true regardless
             return false;
         }
