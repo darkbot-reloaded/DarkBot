@@ -15,7 +15,7 @@ import java.util.Set;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.Item {
+public class Item extends Updatable implements eu.darkbot.api.game.items.Item {
     private static final int START = 36, END = 128 + 8;
     private static final byte[] BUFFER = new byte[END - START];
 
@@ -53,6 +53,25 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
         return this.associatedSlots.computeIfAbsent(type, l -> new HashSet<>());
     }
 
+    @Override
+    public void update(long address) {
+        super.update(address);
+        this.id = API.readString(address, 64);
+        this.counterType = API.readString(address, 72);
+        this.actionStyle = API.readString(address, 80);
+        this.iconLootId = API.readString(address, 96);
+
+        if (itemCategory != null) {
+            this.selectableItem = SelectableItem.ALL_ITEMS.get(itemCategory).stream()
+                    .filter(i -> i.getId().equals(id))
+                    .findFirst()
+                    .orElse(null);
+
+            if (selectableItem != null && itemsMap != null)
+                itemsMap.put(selectableItem, this);
+        }
+    }
+
     // TODO: 28.08.2022 Sometimes, after reload *some* items are probably invalid? Why?
     @Override
     public void update() {
@@ -72,27 +91,6 @@ public class Item extends Updatable.Auto implements eu.darkbot.api.game.items.It
         long timerAdr = API.readLong(ByteUtils.getLong(BUFFER, 52), 40);
         if (itemTimer.address != timerAdr) this.itemTimer.update(timerAdr);
         this.itemTimer.update();
-    }
-
-    @Override
-    public void update(long address) {
-        if (this.address != address) {
-            this.id = API.readString(address, 64);
-            this.counterType = API.readString(address, 72);
-            this.actionStyle = API.readString(address, 80);
-            this.iconLootId = API.readString(address, 96);
-
-            if (itemCategory != null) {
-                this.selectableItem = SelectableItem.ALL_ITEMS.get(itemCategory).stream()
-                        .filter(i -> i.getId().equals(id))
-                        .findFirst()
-                        .orElse(null);
-
-                if (selectableItem != null && itemsMap != null)
-                    itemsMap.put(selectableItem, this);
-            }
-        }
-        super.update(address);
     }
 
     public boolean hasShortcut() {

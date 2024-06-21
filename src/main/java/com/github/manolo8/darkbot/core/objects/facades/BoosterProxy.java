@@ -24,7 +24,7 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
         }
     }
 
-    public static class Booster extends Auto implements BoosterAPI.Booster {
+    public static class Booster extends Updatable implements BoosterAPI.Booster {
         public double amount, cd;
         public String category, name;
 
@@ -37,12 +37,17 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
         private final FlashListLong categoriesArr = FlashListLong.ofVector();
 
         @Override
-        public void update() {
+        public void update(long address) {
+            super.update(address);
             String oldCat = this.category;
             this.category = readString(0x20);
             if (!Objects.equals(this.category, oldCat))
                 this.cat = BoosterAPI.Type.of(category);
             this.name = readString(0x40); //0x48 description;
+        }
+
+        @Override
+        public void update() {
             this.amount = readDouble(0x50);
             this.subBoostersArr.update(readLong(0x30));
 
