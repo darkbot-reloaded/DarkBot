@@ -36,6 +36,10 @@ public class SlotBar extends MenuBar {
         this.slotsArr.update(API.readLong(address + 64));
     }
 
+    public Slot getSlot(int idx) {
+        return slotsArr.size() < 10 ? null : slotsArr.get(idx);
+    }
+
     public class Slot extends Auto {
         public int slotNumber;
         public boolean premium; //not sure
