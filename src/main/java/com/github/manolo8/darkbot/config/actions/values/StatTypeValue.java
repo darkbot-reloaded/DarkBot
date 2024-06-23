@@ -40,16 +40,16 @@ public class StatTypeValue implements Value<Number>, Parser {
     }
 
     private StatsAPI.Key getKeyFromString(String token) {
-        String[] tokenParts = token.split(":", 3);
+        String[] tokenParts = token.split(":");
 
-        String statNamespace = tokenParts.length >= 2 ? tokenParts[0] : null;
-        String statCategory = tokenParts.length == 3 ? tokenParts[1] : null;
+        String statNamespace = tokenParts.length == 3 ? tokenParts[0] : null;
+        String statCategory = tokenParts.length >= 2 ? tokenParts[tokenParts.length - 2] : null;
         String statKey = tokenParts[tokenParts.length - 1];
 
         return StatsManager.getStatKeys().stream()
-                .filter(s -> statNamespace == null || s.namespace().equals(statNamespace))
-                .filter(s -> statCategory == null || s.category().equals(statCategory))
-                .filter(s -> statKey == null || s.name().equals(statKey))
+                .filter(s -> statNamespace == null || s.namespace().equalsIgnoreCase(statNamespace))
+                .filter(s -> statCategory == null || s.category().equalsIgnoreCase(statCategory))
+                .filter(s -> s.name().equalsIgnoreCase(statKey))
                 .findFirst().orElse(null);
     }
 
@@ -77,12 +77,12 @@ public class StatTypeValue implements Value<Number>, Parser {
 
     @Override
     public String toString() {
-        return "stat-type(" + key.name().toLowerCase(Locale.ROOT) + "," + dataType + ")";
+        return "stat-type(" + getKeyFormatted(key) + "," + dataType + ")";
     }
 
     private String getKeyFormatted(Key keyToFormat) {
-        return (keyToFormat.namespace() != null ? keyToFormat.namespace() + ":" : "") + keyToFormat.category() + ":"
-                + keyToFormat.name();
+        return ((keyToFormat.namespace() != null ? keyToFormat.namespace() + ":" : "") + keyToFormat.category() + ":"
+                + keyToFormat.name()).toLowerCase(Locale.ROOT);
     }
 
     @Override
