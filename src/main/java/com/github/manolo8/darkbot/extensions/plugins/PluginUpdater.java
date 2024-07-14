@@ -27,7 +27,6 @@ public class PluginUpdater implements API.Singleton {
 
     private final PluginHandler pluginHandler;
     private PluginDisplay pluginDisplay;
-
     private JProgressBar mainProgressBar;
 
     public PluginUpdater(PluginHandler pluginHandler) {
@@ -45,8 +44,8 @@ public class PluginUpdater implements API.Singleton {
     }
 
     public void setup(PluginDisplay display) {
-        pluginDisplay = display;
-        mainProgressBar = display.getMainProgressBar();
+        this.pluginDisplay = display;
+        this.mainProgressBar = display.getMainProgressBar();
     }
 
     public boolean hasAnyUpdates() {
@@ -70,7 +69,7 @@ public class PluginUpdater implements API.Singleton {
 
             @Override
             protected Void doInBackground() {
-                for (Plugin plugin : pluginHandler.LOADED_PLUGINS) {
+                pluginHandler.LOADED_PLUGINS.forEach(plugin -> {
                     plugin.getUpdateIssues().getIssues()
                             .removeIf(pl -> pl.getMessageKey().equals(DOWNLOAD_FAILED));
                     try {
@@ -78,7 +77,7 @@ public class PluginUpdater implements API.Singleton {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
+                });
                 lastChecked = System.currentTimeMillis();
                 return null;
             }
@@ -91,8 +90,8 @@ public class PluginUpdater implements API.Singleton {
             return;
         }
 
-        plugin.setUpdateDefinition(findUpdate(plugin.getDefinition()));
-        PluginDefinition updateDef = plugin.getUpdateDefinition();
+        PluginDefinition updateDef = findUpdate(plugin.getDefinition());
+        plugin.setUpdateDefinition(updateDef);
 
         IssueHandler updateIssues = plugin.getUpdateIssues();
         pluginHandler.testCompatibility(updateIssues, updateDef, true);
@@ -159,7 +158,6 @@ public class PluginUpdater implements API.Singleton {
             updateTasks.forEach(UpdateTask::waitUntilDone);
 
             pluginHandler.updatePlugins();
-
             return null;
         }
     }
@@ -193,7 +191,7 @@ public class PluginUpdater implements API.Singleton {
             }
         }
 
-        private void publish(PluginCard.UpdateStatus status) {
+        private void publishStatus(PluginCard.UpdateStatus status) {
             super.publish(status);
             if (isUpdatingAll) updateAllTask.tickUpdate();
         }
@@ -211,38 +209,55 @@ public class PluginUpdater implements API.Singleton {
         }
 
         @Override
-        protected Void doInBackground() throws Exception {
-            publish(PluginCard.UpdateStatus.STARTING);
+        protected Void doInBackground() {
+            publishStatus(PluginCard.UpdateStatus.STARTING);
 
-            if (plugin.getUpdateDefinition() == null)
-                plugin.setUpdateDefinition(findUpdate(plugin.getDefinition()));
+            try {
+                if (plugin.getUpdateDefinition() == null) {
+                    plugin.setUpdateDefinition(findUpdate(plugin.getDefinition()));
+                }
 
-            try (InputStream is = plugin.getUpdateDefinition().download.openConnection().getInputStream()) {
-                publish(PluginCard.UpdateStatus.SAVING_OLD);
+                try (InputStream is = plugin.getUpdateDefinition().download.openConnection().getInputStream()) {
+                    publishStatus(PluginCard.UpdateStatus.SAVING_OLD);
 
-                FileUtils.ensureDirectoryExists(PluginHandler.PLUGIN_OLD_PATH);
-                Files.copy(plugin.getFile().toPath(), PluginHandler.PLUGIN_OLD_PATH.resolve(plugin.getFile().getName()), StandardCopyOption.REPLACE_EXISTING);
-                publish(PluginCard.UpdateStatus.DOWNLOADING);
+                    FileUtils.ensureDirectoryExists(PluginHandler.PLUGIN_OLD_PATH);
+                    Files.copy(plugin.getFile().toPath(), PluginHandler.PLUGIN_OLD_PATH.resolve(plugin.getFile().getName()), StandardCopyOption.REPLACE_EXISTING);
+                    publishStatus(PluginCard.UpdateStatus.DOWNLOADING);
 
-                FileUtils.ensureDirectoryExists(PluginHandler.PLUGIN_UPDATE_PATH);
-                Files.copy(is, PluginHandler.PLUGIN_UPDATE_PATH.resolve(plugin.getFile().getName()), StandardCopyOption.REPLACE_EXISTING);
+                    FileUtils.ensureDirectoryExists(PluginHandler.PLUGIN_UPDATE_PATH);
+                    Files.copy(is, PluginHandler.PLUGIN_UPDATE_PATH.resolve(plugin.getFile().getName()), StandardCopyOption.REPLACE_EXISTING);
 
-                plugin.setUpdateStatus(Plugin.UpdateStatus.UP_TO_DATE);
-                if (isUpdatingAll) return null;
+                    plugin.setUpdateStatus(Plugin.UpdateStatus.UP_TO_DATE);
+                    if (isUpdatingAll) return null;
 
-                publish(PluginCard.UpdateStatus.RELOADING);
-                pluginHandler.updatePlugins();
+                    publishStatus(PluginCard.UpdateStatus.RELOADING);
+                    pluginHandler.updatePlugins();
 
+                } catch (IOException e) {
+                    handleDownloadException(e, plugin);
+                }
             } catch (IOException e) {
-                System.err.println("Failed to download update");
-                failed = true;
-                UPDATING_EXCEPTIONS.add(new PluginException("Failed to download update", e, plugin));
-                plugin.getUpdateIssues().addFailure(DOWNLOAD_FAILED, IssueHandler.createDescription(e));
-                plugin.setUpdateStatus(Plugin.UpdateStatus.FAILED);
-                e.printStackTrace();
+                handleUpdateDefinitionException(e, plugin);
             }
             return null;
         }
-    }
 
+        private void handleDownloadException(IOException e, Plugin plugin) {
+            System.err.println("Failed to download update");
+            failed = true;
+            UPDATING_EXCEPTIONS.add(new PluginException("Failed to download update", e, plugin));
+            plugin.getUpdateIssues().addFailure(DOWNLOAD_FAILED, IssueHandler.createDescription(e));
+            plugin.setUpdateStatus(Plugin.UpdateStatus.FAILED);
+            e.printStackTrace();
+        }
+
+        private void handleUpdateDefinitionException(IOException e, Plugin plugin) {
+            System.err.println("Failed to find update definition");
+            failed = true;
+            UPDATING_EXCEPTIONS.add(new PluginException("Failed to find update definition", e, plugin));
+            plugin.getUpdateIssues().addFailure(DOWNLOAD_FAILED, IssueHandler.createDescription(e));
+            plugin.setUpdateStatus(Plugin.UpdateStatus.FAILED);
+            e.printStackTrace();
+        }
+    }
 }
