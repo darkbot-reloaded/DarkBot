@@ -6,21 +6,18 @@ public class NativeAction {
         return toActionLong(message, wParam, (short) lParam, (short) (lParam >> 16), after);
     }
 
-    //message only 15bits
     private static long toActionLong(short message, short wParam, short lParamLow, short lParamHigh, boolean after) {
-        long val = lParamLow;
-        val |= (long) lParamHigh << 16;
-        val |= (long) (wParam & 0xffff) << 32;
-        val |= (long) (message & 0xffff) << 48;
-
-        if (after) val |= (long) 1 << 63;
-        else val &= ~((long) 1 << 63);
-
+        long val = ((long) lParamHigh << 16) | (lParamLow & 0xFFFF);
+        val |= ((long) wParam & 0xFFFF) << 32;
+        val |= ((long) message & 0xFFFF) << 48;
+        if (after) {
+            val |= 1L << 63;
+        }
         return val;
     }
 
     public enum Mouse {
-        CLICK(0x1FF), // KekkaPlayer only
+        CLICK(0x1FF),
         MOVE(0x200),
         DOWN(0x201),
         UP(0x202);
@@ -32,17 +29,16 @@ public class NativeAction {
         }
 
         public long of(int x, int y) {
-            return toActionLong(message, (short) 1, (short) x, (short) y, false);
+            return toActionLong(message, (short) 1, x, false);
         }
 
-        // can be used after text paste action
         public long after(int x, int y) {
-            return toActionLong(message, (short) 1, (short) x, (short) y, true);
+            return toActionLong(message, (short) 1, x, true);
         }
     }
 
     public enum Key {
-        CLICK(0x1FE), // KekkaPlayer only
+        CLICK(0x1FE),
         DOWN(0x100),
         UP(0x101),
         CHAR(0x102);
@@ -67,11 +63,11 @@ public class NativeAction {
         private static final short MESSAGE = 0x20A;
 
         public static long up(int x, int y) {
-            return toActionLong(MESSAGE, DELTA, (short) x, (short) y, false);
+            return toActionLong(MESSAGE, DELTA, x, false);
         }
 
         public static long down(int x, int y) {
-            return toActionLong(MESSAGE, (short) -DELTA, (short) x, (short) y, false);
+            return toActionLong(MESSAGE, (short) -DELTA, x, false);
         }
     }
 }

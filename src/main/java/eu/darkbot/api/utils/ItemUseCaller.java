@@ -23,48 +23,56 @@ public class ItemUseCaller {
         this.kekkaPlayer = kekkaPlayer;
         this.heroItems = heroItems;
         this.hero = hero;
-        botInstaller.connectionManagerAddress.add(l -> {
-            connectionManager = l;
-            useItemCommand = 0;
-        });
 
-        botInstaller.screenManagerAddress.add(l -> screenManager = l);
+        botInstaller.connectionManagerAddress.add(this::updateConnectionManager);
+        botInstaller.screenManagerAddress.add(this::updateScreenManager);
+    }
+
+    private void updateConnectionManager(long address) {
+        connectionManager = address;
+        useItemCommand = 0;
+    }
+
+    private void updateScreenManager(long address) {
+        screenManager = address;
     }
 
     public boolean useItem(Item item) {
-        if (checkUsable()) {
+        if (isItemUsable()) {
             kekkaPlayer.useItem(screenManager, item.getId(), 19, connectionManager, useItemCommand);
             return true;
         }
-
         return false;
     }
 
-    public boolean checkUsable() {
-        return ByteUtils.isValidPtr(connectionManager) && ByteUtils.isValidPtr(screenManager) && checkItemCommand();
+    public boolean isItemUsable() {
+        return ByteUtils.isValidPtr(connectionManager) && ByteUtils.isValidPtr(screenManager) && ensureItemCommandAvailable();
     }
 
-    private boolean checkItemCommand() {
-        if (ByteUtils.isValidPtr(useItemCommand)) return true;
+    private boolean ensureItemCommandAvailable() {
+        if (ByteUtils.isValidPtr(useItemCommand)) {
+            return true;
+        }
 
-        long useItemCommandClosure = API.searchClassClosure(v ->
-                API.readInt(v + 48) == 0
-                        && API.readInt(v + 52) == 1
-                        && API.readInt(v + 56) == 2
-                        && API.readInt(v + 60) == 0
-                        && API.readInt(v + 64) == 1
-                        && API.readInt(v + 68) == 2
-                        && (API.readLong(v + 72) == 0 || API.readInt(v + 72) != 3));
-
+        long useItemCommandClosure = findUseItemCommandClosure();
         if (useItemCommandClosure != 0) {
-            useItemCommand = API.callMethod(5, useItemCommandClosure); // getInstance();
-
+            useItemCommand = API.callMethod(5, useItemCommandClosure);
         } else if (nextKeyClick.tryActivate()) {
-            // item use command not found, try to click current formation to create instance
             API.keyClick(heroItems.getKeyBind(hero.getFormation()));
         }
 
         nextCommandCheck.activate();
         return ByteUtils.isValidPtr(useItemCommand);
+    }
+
+    private long findUseItemCommandClosure() {
+        return API.searchClassClosure(v ->
+                API.readInt(v + 48) == 0 &&
+                        API.readInt(v + 52) == 1 &&
+                        API.readInt(v + 56) == 2 &&
+                        API.readInt(v + 60) == 0 &&
+                        API.readInt(v + 64) == 1 &&
+                        API.readInt(v + 68) == 2 &&
+                        (API.readLong(v + 72) == 0 || API.readInt(v + 72) != 3));
     }
 }

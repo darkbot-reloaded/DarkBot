@@ -72,7 +72,6 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
                 Capability.DIRECT_USE_ITEM);
         this.itemUseCaller = itemUseCaller;
 
-        // 10 seconds after each reload
         botInstaller.invalid.add(v -> clearRamTimer.activate(10_000));
 
         ConfigSetting<Map<String, Config.BotSettings.APIConfig.PatternInfo>> c = config.requireConfig("bot_settings.api_config.block_patterns");
@@ -91,7 +90,7 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
 
     @Override
     public boolean isUseItemSupported() {
-        return itemUseCaller.checkUsable();
+        return itemUseCaller.isItemUsable();
     }
 
     @Override
@@ -140,8 +139,8 @@ public class KekkaPlayerAdapter extends GameAPIImpl<
 
         private final Set<String> methodSignatureCache = new HashSet<>();
 
-        public KekkaPlayerDirectInteraction(KekkaPlayer KekkaPlayer, BotInstaller botInstaller) {
-            this.kekkaPlayer = KekkaPlayer;
+        public KekkaPlayerDirectInteraction(KekkaPlayer kekkaPlayer, BotInstaller botInstaller) {
+            this.kekkaPlayer = kekkaPlayer;
             this.botInstaller = botInstaller;
 
             botInstaller.invalid.add(v -> methodSignatureCache.clear());

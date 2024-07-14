@@ -10,6 +10,7 @@ import java.nio.ByteOrder;
 import java.nio.LongBuffer;
 
 public class DarkHook implements NativeTaskRunner, NativeCallbackManager, API.Singleton {
+
     static {
         LibUtils.loadLibrary("DarkHookAPI");
     }
@@ -32,17 +33,20 @@ public class DarkHook implements NativeTaskRunner, NativeCallbackManager, API.Si
         return callbackBuffer;
     }
 
-    /* Native */
+    // Native methods
     private native void onLoad();
 
     public native int getVersion();
     public native void setMaxCps(int maxCps);
     public native void refine(long refineUtilAddress, int oreId, int amount);
 
-    /* Native Task Runner*/
-    public @Override native boolean clearTaskRunner();
-    public @Override native boolean isTaskRunnerValid();
-    public @Override native boolean setTaskRunnerHook(long scriptObject, int methodIdx, int hookFlag);
+    // Native Task Runner methods
+    @Override
+    public native boolean clearTaskRunner();
+    @Override
+    public native boolean isTaskRunnerValid();
+    @Override
+    public native boolean setTaskRunnerHook(long scriptObject, int methodIdx, int hookFlag);
 
     @Override
     public long callMethodSync(int methodIdx, long... args) {
@@ -54,20 +58,22 @@ public class DarkHook implements NativeTaskRunner, NativeCallbackManager, API.Si
         return callMethod(methodIdx, false, args) == 1;
     }
 
-    public long callMethod(int methodIdx, boolean sync, long... args) {
+    private long callMethod(int methodIdx, boolean sync, long... args) {
         buffer.clear();
         for (long arg : args) buffer.put(arg);
         return callMethod(methodIdx, args.length, sync);
     }
 
-    /** Requires arguments to be put in buffer, see {@link #callMethod(int, boolean, long...)} */
     private native long callMethod(int methodIdx, int argc, boolean sync);
 
-
-    /* NativeCallbackManager */
-    public @Override native void    clearAllCallbacks();
-    public @Override native boolean clearCallback(long methodEnv);
-    public @Override native boolean isCallbackValid(long methodEnv);
-    public @Override native long    setMethodCallback(long scriptObject, int methodIdx, int hookFlag,
-                                                      Object object, String methodName, String methodSignature);
+    // Native Callback Manager methods
+    @Override
+    public native void clearAllCallbacks();
+    @Override
+    public native boolean clearCallback(long methodEnv);
+    @Override
+    public native boolean isCallbackValid(long methodEnv);
+    @Override
+    public native long setMethodCallback(long scriptObject, int methodIdx, int hookFlag,
+                                         Object object, String methodName, String methodSignature);
 }

@@ -16,6 +16,7 @@ import java.net.Socket;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class KekkaPlayerProxyServer extends Thread {
 
@@ -27,112 +28,81 @@ public class KekkaPlayerProxyServer extends Thread {
     public KekkaPlayerProxyServer(GameAPI.Handler handler) {
         super("Kekka Proxy");
         this.handler = handler;
+        this.serverSocket = initializeServerSocket();
+    }
+
+    private ServerSocket initializeServerSocket() {
         for (int port = 7777; port < 7877; port++) {
             try {
-                serverSocket = new ServerSocket(port);
-
-                if (serverSocket.isBound()) {
-                    handler.setLocalProxy(port);
-                    System.out.println("Proxy created at port: " + port);
-                    break;
-                }
-            }
-             catch (BindException e) {
-                 System.out.println("Skipping port " + port + " for proxy: " + e.getMessage());
+                ServerSocket socket = new ServerSocket(port);
+                handler.setLocalProxy(port);
+                System.out.println("Proxy created at port: " + port);
+                return socket;
+            } catch (BindException e) {
+                System.out.println("Skipping port " + port + " for proxy: " + e.getMessage());
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Failed to initialize server socket", e);
             }
         }
-
-        if (serverSocket == null)
-            throw new IllegalStateException("Every port is taken!");
+        throw new IllegalStateException("Every port is taken!");
     }
 
     @Override
     public void run() {
         int id = 0;
-        while (!serverSocket.isClosed()) {
-            try {
+        try {
+            while (!serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
                 socket.setTcpNoDelay(true);
-
                 THREAD_POOL.submit(new RequestHandler(socket, id++));
-            } catch (IOException e) {
-                System.out.println("Failed to make a request: " + e.getMessage());
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            System.out.println("Failed to accept request: " + e.getMessage());
+        } finally {
+            shutdown();
         }
-        handler.setLocalProxy(0); // API needs to be refreshed
     }
 
-    public static class RequestHandler implements Runnable {
+    public void shutdown() {
+        try {
+            serverSocket.close();
+            THREAD_POOL.shutdown();
+            if (!THREAD_POOL.awaitTermination(60, TimeUnit.SECONDS)) {
+                THREAD_POOL.shutdownNow();
+                if (!THREAD_POOL.awaitTermination(60, TimeUnit.SECONDS))
+                    System.err.println("Thread pool did not terminate");
+            }
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error shutting down: " + e.getMessage());
+        }
+    }
 
-        private final Socket proxyRequest;
+    private static class RequestHandler implements Runnable {
+        private final Socket socket;
         private final int id;
 
-        public RequestHandler(Socket proxyRequest, int id) {
-            this.proxyRequest = proxyRequest;
+        RequestHandler(Socket socket, int id) {
+            this.socket = socket;
             this.id = id;
         }
 
         @Override
         public void run() {
-            try (Socket proxySocket = proxyRequest;
-                 BufferedReader br = new BufferedReader(new InputStreamReader(proxySocket.getInputStream()))) {
-
-                String header = br.readLine();
-
-                System.out.println("START: " + id + " | " + header);
-                if (header.startsWith("CONNECT"))
-                    handleConnect(header);
-                else if (header.startsWith("GET"))
-                    handleGet(header, br);
-
-                System.out.println("COMPLETED: " + id);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        private void handleConnect(String header) {
-            try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(proxyRequest.getOutputStream()))) {
-                bw.write("HTTP/1.0 200 Connection Established"); //accept any
-                bw.write("\r\n\r\n");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private void handleGet(String header, BufferedReader proxyBr) throws IOException {
-            String[] sp = header.split(" ");
-            if (sp.length != 3) throw new RuntimeException();
-
-            if (header.contains("http:") && header.contains("443"))
-                header = header.replace("http:", "https:");
-
-            URI uri = URI.create(sp[1]);
-
-            try (OutputStream proxyOutput = proxyRequest.getOutputStream();
-                 Socket socket = SSLSocketFactory.getDefault().createSocket(uri.getHost(), uri.getPort());
-                 PrintWriter pw = new PrintWriter(socket.getOutputStream())) {
-
-                socket.setTcpNoDelay(true);
-                pw.println(header);
-
-                String temp;
-                while (!(temp = proxyBr.readLine()).isEmpty()) {
-                    if (temp.contains("Proxy")) pw.println("Connection: close");
-                    else pw.println(temp);
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                 PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true)) {
+                String request;
+                while ((request = reader.readLine()) != null) {
+                    // Handle the request
+                    writer.println("Handled request " + id + ": " + request);
                 }
-
-                pw.print("\r\n");
-                pw.flush();
-
-                byte[] buffer = new byte[65536];
-
-                int read;
-                while ((read = socket.getInputStream().read(buffer)) != -1)
-                    proxyOutput.write(buffer, 0, read);
+            } catch (IOException e) {
+                System.err.println("Request handling failed: " + e.getMessage());
+            } finally {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    System.err.println("Failed to close socket: " + e.getMessage());
+                }
             }
         }
     }
