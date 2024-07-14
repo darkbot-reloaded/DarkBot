@@ -2,14 +2,15 @@ package eu.darkbot.api.utils;
 
 public class NativeAction {
 
-    private static long toActionLong(short message, short wParam, int lParam, boolean after) {
-        return toActionLong(message, wParam, (short) lParam, (short) (lParam >> 16), after);
+    private static long toActionLong(short message, short wParam, int x, int y, boolean after) {
+        return toActionLong(message, wParam, (short) x, (short) (x >> 16), (short) y, (short) (y >> 16), after);
     }
 
-    private static long toActionLong(short message, short wParam, short lParamLow, short lParamHigh, boolean after) {
+    private static long toActionLong(short message, short wParam, short lParamLow, short lParamHigh, short yParamLow, short yParamHigh, boolean after) {
         long val = ((long) lParamHigh << 16) | (lParamLow & 0xFFFF);
-        val |= ((long) wParam & 0xFFFF) << 32;
-        val |= ((long) message & 0xFFFF) << 48;
+        val |= ((long) yParamHigh << 32) | ((long) yParamLow & 0xFFFF) << 16;
+        val |= ((long) wParam & 0xFFFF) << 48;
+        val |= ((long) message & 0xFFFF) << 56;
         if (after) {
             val |= 1L << 63;
         }
@@ -29,11 +30,11 @@ public class NativeAction {
         }
 
         public long of(int x, int y) {
-            return toActionLong(message, (short) 1, x, false);
+            return toActionLong(message, (short) 1, x, y, false);
         }
 
         public long after(int x, int y) {
-            return toActionLong(message, (short) 1, x, true);
+            return toActionLong(message, (short) 1, x, y, true);
         }
     }
 
@@ -50,11 +51,11 @@ public class NativeAction {
         }
 
         public long of(int keyCode) {
-            return toActionLong(message, (short) keyCode, 1, false);
+            return toActionLong(message, (short) keyCode, 1, 0, false); // y=0 for key actions
         }
 
         public long after(int keyCode) {
-            return toActionLong(message, (short) keyCode, 1, true);
+            return toActionLong(message, (short) keyCode, 1, 0, true); // y=0 for key actions
         }
     }
 
@@ -63,11 +64,11 @@ public class NativeAction {
         private static final short MESSAGE = 0x20A;
 
         public static long up(int x, int y) {
-            return toActionLong(MESSAGE, DELTA, x, false);
+            return toActionLong(MESSAGE, DELTA, x, y, false);
         }
 
         public static long down(int x, int y) {
-            return toActionLong(MESSAGE, (short) -DELTA, x, false);
+            return toActionLong(MESSAGE, (short) -DELTA, x, y, false);
         }
     }
 }
