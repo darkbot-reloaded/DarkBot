@@ -212,7 +212,7 @@ public class BattleStation
         @Override
         public boolean use() {
             boolean allowEnemy = main.hero.invisible && main.config.GENERAL.ROAMING.ENEMY_CBS_INVISIBLE;
-            return !allowEnemy && info.isEnemy() && isDangerousModule();
+            return !allowEnemy && info.isEnemy() && isDangerousModule() && main.config.MISCELLANEOUS.AVOID_CBS;
         }
 
         private boolean isDangerousModule() {

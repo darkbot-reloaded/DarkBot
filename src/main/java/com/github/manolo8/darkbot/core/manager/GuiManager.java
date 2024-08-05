@@ -62,6 +62,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     public final Gui blacklightGate;
     public final Gui astralGate;
     public final Gui astralSelection;
+    public final Gui seasonPass;
     public final RefinementGui refinement;
     public final PetManager pet;
     public final OreTradeGui oreTrade;
@@ -143,6 +144,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.blacklightGate = register("eternal_blacklight");
         this.astralGate = register("rogue_lite");
         this.astralSelection = register("rogue_lite_selection");
+        this.seasonPass = register("seasonPass");
         this.refinement = register("refinement", RefinementGui.class);
         this.chat = register("chat", ChatGui.class);
         this.settingsGui = register("settings", SettingsGui.class);
@@ -178,6 +180,7 @@ public class GuiManager implements Manager, GameScreenAPI {
                 checks = LoadStatus.WAITING;
                 guiCloser.reset();
             }
+            connecting.reset();
             API.resetCache();
         });
 
@@ -185,7 +188,6 @@ public class GuiManager implements Manager, GameScreenAPI {
             guiAddress = value;
             guis.update(API.readLong(guiAddress + 112));
 
-            guis.values().forEach(Gui::reset);
             checks = LoadStatus.WAITING;
             guiCloser.reset();
         });
@@ -216,8 +218,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         if (System.currentTimeMillis() - reconnectTime > 5000) {
             reconnectTime = System.currentTimeMillis();
             if (logout.visible) {
-                System.out.println("Triggering refresh: reconnect while logout is visible");
-                API.handleRefresh();
+                triggerRefresh("Triggering refresh: reconnect while logout is visible", true);
             } else {
                 gui.click(46, 180);
             }
@@ -243,13 +244,18 @@ public class GuiManager implements Manager, GameScreenAPI {
 
     private void checkInvalid() {
         if (System.currentTimeMillis() - validTime > 90_000 + (main.hero.map.id == -1 ? 180_000 : 0)) {
-            System.out.println("Triggering refresh: gui manger was invalid for too long. " +
-                    "(Make sure your hp fills up, equip an auto-repair CPU if you're missing one)");
-
-            clearCache();
-            API.handleRefresh();
-            validTime = System.currentTimeMillis();
+            triggerRefresh("Triggering refresh: gui manger was invalid for too long. " +
+                    "(Make sure your hp fills up, equip an auto-repair CPU if you're missing one)", true);
         }
+    }
+
+    private void triggerRefresh(String reason, boolean clearCache) {
+        System.out.println(reason);
+        if (clearCache)
+            clearCache();
+
+        API.handleRefresh();
+        validTime = System.currentTimeMillis();
     }
 
     public boolean canTickModule() {
@@ -264,9 +270,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         } else if (connecting.visible) {
 
             if (connecting.lastUpdatedOver(30000)) {
-                System.out.println("Triggering refresh: connection window stuck for too long");
-                clearCache();
-                API.handleRefresh();
+                triggerRefresh("Triggering refresh: connection window stuck for too long", true);
                 connecting.reset();
             }
 
@@ -287,10 +291,16 @@ public class GuiManager implements Manager, GameScreenAPI {
 
             if (lastDeath == -1) {
                 lastDeath = System.currentTimeMillis();
-                //deaths++;
             }
 
-            if (!tryRevive()) return false;
+            if (!tryRevive()) {
+                // Refresh if stuck on revive for 90 seconds, revive locations may have different cooldowns
+                if ((System.currentTimeMillis() - lastDeath - main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L) > 90_000) {
+                    triggerRefresh("Triggering refresh: stuck on revive for too long!", false);
+                }
+
+                return false;
+            }
 
             if (main.config.GENERAL.SAFETY.MAX_DEATHS != -1 &&
                     repairManager.getDeathAmount() >= main.config.GENERAL.SAFETY.MAX_DEATHS) main.setRunning(false);
@@ -305,8 +315,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         if (this.needRefresh && System.currentTimeMillis() - lastRepairAttempt > 5_000) {
             this.needRefresh = false;
             if (main.config.MISCELLANEOUS.REFRESH_AFTER_REVIVE) {
-                System.out.println("Triggering refresh: refreshing after death");
-                API.handleRefresh();
+                triggerRefresh("Triggering refresh: refreshing after death", false);
                 return false;
             }
         }

@@ -24,7 +24,7 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
         }
     }
 
-    public static class Booster extends Auto implements BoosterAPI.Booster {
+    public static class Booster extends Updatable implements BoosterAPI.Booster {
         public double amount, cd;
         public String category, name;
 
@@ -33,15 +33,22 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
 
         private final FlashListLong subBoostersArr = FlashListLong.ofVector();
         private final FlashListLong attributesArr = FlashListLong.ofVector();
+        private final FlashListLong attributesArr2 = FlashListLong.ofVector();
+        private final FlashListLong categoriesArr = FlashListLong.ofVector();
 
         @Override
-        public void update() {
+        public void update(long address) {
+            super.update(address);
             String oldCat = this.category;
             this.category = readString(0x20);
             if (!Objects.equals(this.category, oldCat))
                 this.cat = BoosterAPI.Type.of(category);
-            this.name     = readString(0x40); //0x48 description;
-            this.amount   = readDouble(0x50);
+            this.name = readString(0x40); //0x48 description;
+        }
+
+        @Override
+        public void update() {
+            this.amount = readDouble(0x50);
             this.subBoostersArr.update(readLong(0x30));
 
             double min = Double.POSITIVE_INFINITY, curr;
@@ -56,12 +63,22 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
 
                 for (int i = 0; i < subBoostersArr.size(); i++) {
                     long sub = subBoostersArr.getLong(i);
-                    attributesArr.update(API.readLong(sub, 0x28, 0x40, 0x20, 0x88));
-
+                    long attributesAddr = API.readAtom(sub, 0x28, 0x40, 0x20);
+                    attributesArr.update(API.readLong(attributesAddr, 0x88));
+                    attributesArr2.update(API.readLong(attributesAddr, 0x90));
+                    categoriesArr.update(API.readLong(attributesAddr, 0x98));
                     for (int j = 0; j < attributesArr.size(); j++) {
                         long attribute = attributesArr.getLong(j);
                         if (API.readLong(attribute + 0x20) == readLong(0x20)) {
                             amount += API.readDouble(attribute + 0x28);
+                            break;
+                        }
+                    }
+                    for (int j = 0; j < attributesArr2.size(); j++) {
+                        long attribute = attributesArr2.getLong(j);
+                        long category = categoriesArr.getLong(j);
+                        if (category == readLong(0x20)) {
+                            amount += API.readInt(attribute + 0x20);
                             break;
                         }
                     }

@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.Set;
@@ -484,6 +485,8 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
 
         @Override
         public Map.Entry<K, V> next() {
+            if (!hasNext())
+                throw new NoSuchElementException("No more elements in the iterator");
             return FlashMap.this.entries[nextIdx++];
         }
     }

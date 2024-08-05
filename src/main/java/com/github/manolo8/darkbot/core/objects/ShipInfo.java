@@ -38,15 +38,15 @@ public class ShipInfo extends Updatable {
 
     @Override
     public void update() {
-        long newTarget = API.readLong(address + 112);
+        long newTarget = API.readLong(address + 120);
         if (newTarget != 0 || keepTargetTime > System.currentTimeMillis()) {
             target = newTarget;
             if (target != 0) keepTargetTime = System.currentTimeMillis() + 1000;
         }
-        angle = Math.toRadians(API.readInt(API.readLong(address + 48) + 32));
-        speed = API.readInt(API.readLong(address + 72) + 40);
+        angle = Math.toRadians(API.readInt(API.readLong(address + 56) + 32));
+        speed = API.readInt(API.readLong(address + 80) + 40);
 
-        destination.update(API.readLong(address + 96));
+        destination.update(API.readLong(address + 104));
         destination.update();
 
         updateSpeedAndAngle();
@@ -62,7 +62,7 @@ public class ShipInfo extends Updatable {
 
         if (speed != 1) return; // Entities with a valid real speed do not need to have this speed prediction done
 
-        long tweenLiteAddress = API.readLong(address, 104);
+        long tweenLiteAddress = API.readLong(address, 112);
 
         double timeNeeded = API.readDouble(tweenLiteAddress, 152);
         if (pastTimeNeeded == timeNeeded) return;

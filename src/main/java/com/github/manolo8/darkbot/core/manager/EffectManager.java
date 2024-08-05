@@ -30,7 +30,7 @@ public class EffectManager implements Manager, API.Singleton {
     }
 
     public void tick() {
-        effectsPtr.update(API.readLong(API.readLong(mapAddressStatic), 128, 48));
+        effectsPtr.update(API.readLong(API.readLong(mapAddressStatic), 136, 48));
         effects.values().removeIf(EffectIntSet::clearOrExpire);
 
         for (int i = 0; i < effectsPtr.size(); i++) {
