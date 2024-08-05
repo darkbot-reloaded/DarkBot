@@ -4,7 +4,9 @@ import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
 import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.config.util.ValueHandler;
 import eu.darkbot.api.extensions.PluginInfo;
+import eu.darkbot.impl.config.DefaultHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
@@ -25,12 +27,19 @@ public class PluginListConfigSetting extends DummyConfigSetting<Void> {
 
     private final Map<String, ConfigSetting<?>> children = new LinkedHashMap<>();
 
-    public PluginListConfigSetting(ConfigSetting.Parent<?> parent, FeatureRegistry featureRegistry) {
+    public PluginListConfigSetting(ConfigSetting.Parent<?> parent) {
         super("Plugins", parent);
+    }
 
-        for (PluginInfo plugin : featureRegistry.getPluginInfos())
-            children.put(plugin.getName().toLowerCase(Locale.ROOT),
-                    new PluginConfigSetting(plugin, this, featureRegistry));
+    public void update(FeatureRegistry featureRegistry) {
+        featureRegistry.getPluginInfos().forEach(pluginInfo ->
+            children.put(pluginInfo.getName().toLowerCase(Locale.ROOT), new PluginConfigSetting(pluginInfo, this, featureRegistry))
+        );
+    }
+
+    @Override
+    public ValueHandler<Void> getHandler() {
+        return new DefaultHandler<>();
     }
 
     @Override
@@ -47,12 +56,8 @@ public class PluginListConfigSetting extends DummyConfigSetting<Void> {
 
         public PluginConfigSetting(PluginInfo plugin, ConfigSetting.Parent<?> parent, FeatureRegistry extensions) {
             super(plugin.getName(), parent);
-
-            for (String featureId : ((Plugin) plugin).getFeatureIds()) {
-                FeatureDefinition<?> feature = extensions.getFeatureDefinition(featureId);
-                if (feature != null && feature.getConfig() != null)
-                    children.put(feature.getId(), new FeatureSettingParent<>(feature.getConfig(), this, feature));
-            }
+            extensions.getFeatures((Plugin) plugin).filter(feature -> feature != null && feature.getConfig() != null)
+                    .forEach(feature -> children.put(feature.getId(), new FeatureSettingParent<>(feature.getConfig(), this, feature)));
         }
 
         @Override

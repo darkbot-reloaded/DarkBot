@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.config.tree;
 
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.tree.handlers.SettingHandlerFactory;
+import com.github.manolo8.darkbot.gui.utils.tree.PluginListConfigSetting;
 import eu.darkbot.api.API;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.annotations.Configuration;
@@ -79,13 +81,17 @@ public class ConfigBuilder implements API.Singleton {
             Configuration cfg = type.getAnnotation(Configuration.class);
             String parentKey = cfg != null ? cfg.value() : p.getKey();
 
-            return Arrays.stream(type.getDeclaredFields())
+            Map<String, ConfigSetting<?>> children = Arrays.stream(type.getDeclaredFields())
                     .filter(this::participates)
                     .collect(Collectors.toMap(
                             f -> f.getName().toLowerCase(Locale.ROOT),
                             f -> createConfig(p, parentKey, f),
                             (a, b) -> a,
                             LinkedHashMap::new));
+
+            if (type == Config.class) children.put("plugins", new PluginListConfigSetting(p));
+
+            return children;
         }
 
         private ConfigSetting<?> createConfig(ConfigSetting.Parent<?> parent, String parentKey, Field field) {

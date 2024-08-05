@@ -46,7 +46,6 @@ public class AdvancedConfig extends JPanel implements PluginListener {
 
     private ConfigSetting.Parent<?> baseConfig, lastSelection;
     private @Nullable CompoundConfigSetting<?> extendedConfig;
-    private PluginListConfigSetting pluginNode;
 
     private final TreeTabsModel tabsModel = new TreeTabsModel();
     private final ConfigSettingTreeModel treeModel = new ConfigSettingTreeModel();
@@ -91,8 +90,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
         this.extendedConfig = null;
         this.lastSelection = config;
         if (!packed) {
-            this.pluginNode = new PluginListConfigSetting(baseConfig, api.requireInstance(FeatureRegistry.class));
-            this.extendedConfig = new CompoundConfigSetting<>(baseConfig, pluginNode);
+            this.extendedConfig = new CompoundConfigSetting<>(baseConfig);
 
             Iterator<ConfigSetting<?>> children = config.getChildren().values().iterator();
             if (children.hasNext()) {
@@ -186,7 +184,6 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     @Override
     public void beforeLoad() {
         removeAll();
-        this.pluginNode = null;
         this.extendedConfig = null;
         this.lastSelection = null;
     }
@@ -198,7 +195,7 @@ public class AdvancedConfig extends JPanel implements PluginListener {
     }
 
     public void setCustomConfig(@Nullable ConfigSetting.Parent<?> config) {
-        if (extendedConfig != null) this.extendedConfig.setAppended(config, pluginNode);
+        if (extendedConfig != null) this.extendedConfig.setAppended(config);
         setCorrectRoot();
     }
 
