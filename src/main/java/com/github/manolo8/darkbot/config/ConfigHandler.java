@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.config.tree.ConfigBuilder;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.features.FeatureRegistry;
+import com.github.manolo8.darkbot.gui.utils.tree.PluginListConfigSetting;
 import com.github.manolo8.darkbot.utils.ReflectionUtils;
 import com.google.gson.JsonElement;
 import eu.darkbot.api.PluginAPI;
@@ -107,6 +108,11 @@ public class ConfigHandler implements ConfigAPI, Listener {
         ConfigSetting.Parent<T> config = (ConfigSetting.Parent<T>) fd.getConfig();
         if (config == null) return;
         config.setValue(getFeatureConfigValue(fd, config.getType()));
+    }
+
+    public void updateFeatureConfig(FeatureRegistry featureRegistry) {
+        PluginListConfigSetting pluginConfList = (PluginListConfigSetting) this.<Void>getConfig("plugins");
+        if (pluginConfList != null) pluginConfList.update(featureRegistry);
     }
 
     private JsonElement toJsonElement(Object config) {

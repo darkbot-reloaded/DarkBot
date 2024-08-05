@@ -69,6 +69,7 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
                         .forEach(feature -> registerPluginFeature(pl, feature)));
         pluginHandler.LOADED_PLUGINS.sort((p1, p2) -> Boolean.compare(isDisabled(p1), isDisabled(p2)));
         registryHandler.update();
+        configHandler.updateFeatureConfig(this);
     }
 
     private boolean isDisabled(Plugin plugin) {
@@ -84,6 +85,7 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
             configHandler.updateFeatureConfig(fd); // Update the value available in the feature definition
             featureLoader.updateConfig(fd);        // Update the value in the instance (eg: call feature.setConfig)
         }
+        configHandler.updateFeatureConfig(this);
     }
 
     private void registerNativeFeature(Class<?> clazz) {
