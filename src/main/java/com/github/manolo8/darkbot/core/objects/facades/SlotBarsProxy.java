@@ -60,7 +60,7 @@ public class SlotBarsProxy extends Updatable implements HeroItemsAPI {
         SlotBar sb = keybind.getType() == Type.DEFAULT_BAR ? standardBar :
                 keybind.getType() == Type.PREMIUM_BAR ? premiumBar : null;
 
-        return sb == null || sb.slots.size() < 10 ? null : sb.slots.get(keybind.getSlotIdx());
+        return sb == null ? null : sb.getSlot(keybind.getSlotIdx());
     }
 
     @Override

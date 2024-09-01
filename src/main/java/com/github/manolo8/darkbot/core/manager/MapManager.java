@@ -135,14 +135,14 @@ public class MapManager implements Manager, StarSystemAPI {
     private void update(long address) {
         mapAddress = address;
 
-        internalWidth = API.readInt(address + 68);
-        internalHeight = API.readInt(address + 72);
+        internalWidth = API.readInt(address + 76);
+        internalHeight = API.readInt(address + 80);
         if (internalHeight == 13100) internalHeight = 13500;
         if (internalHeight == 26200) internalHeight = 27000;
 
         mapBound.set(0, 0, internalWidth, internalHeight);
 
-        int currMap = API.readInt(address + 76);
+        int currMap = API.readInt(address + 84);
         boolean switched = currMap != id;
 
         if (switched)
@@ -428,11 +428,11 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     public boolean isTarget(Entity entity) {
-        return API.readLong(API.readLong(mapAddress + 120) + 40) == entity.address;
+        return API.readLong(API.readLong(mapAddress + 128) + 40) == entity.address;
     }
 
     public boolean setTarget(long entity) {
-        long targetWrapper = API.readLong(mapAddress + 120);
+        long targetWrapper = API.readLong(mapAddress + 128);
         if (ByteUtils.isValidPtr(targetWrapper)) {
             return API.callMethodChecked(true, "23(set target)(2626)1016221500", 4, targetWrapper, entity);
         }
