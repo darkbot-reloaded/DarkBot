@@ -14,6 +14,7 @@ import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 
 public class HangarManager implements Tickable {
@@ -140,8 +141,10 @@ public class HangarManager implements Tickable {
     }
 
     private HangarResponse deserializeHangar(InputStream in) throws Exception {
-        HangarResponse hangar = gson.fromJson(Base64Utils.decode(in), HangarResponse.class);
-        in.close();
+        HangarResponse hangar;
+        try (var reader = new InputStreamReader(Base64Utils.decodeStream(in))) {
+            hangar = gson.fromJson(reader, HangarResponse.class);
+        }
 
         if (hangar.getData().map != null) {
             String[] lootIds = hangar.getData().map.get("lootIds");

@@ -40,4 +40,8 @@ public class PercentEditor extends JSpinner implements OptionEditor<Double> {
         return AdvancedConfig.forcePreferredHeight(super.getPreferredSize());
     }
 
+    @Override
+    public Insets getInsets() {
+        return new Insets(0, 0, 0, 0);
+    }
 }

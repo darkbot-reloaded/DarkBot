@@ -9,6 +9,12 @@ public abstract class Updatable implements NativeUpdatable {
 
     public abstract void update();
 
+    public final void updateIfChanged(long address) {
+        if (this.address != address) {
+            update(address);
+        }
+    }
+
     public void update(long address) {
         this.address = address;
     }
@@ -16,6 +22,10 @@ public abstract class Updatable implements NativeUpdatable {
     @Override
     public long getAddress() {
         return address;
+    }
+
+    public boolean isValid() {
+        return address != 0;
     }
 
     /**
@@ -37,10 +47,13 @@ public abstract class Updatable implements NativeUpdatable {
      */
     public abstract static class Reporting extends Updatable {
 
-        public boolean updateAndReport(long address) {
-            boolean addressChanged = this.address != address;
-            super.update(address);
-            return updateAndReport() || addressChanged;
+        public final boolean updateAndReport(long address) {
+            if (this.address != address) {
+                update(address);
+                updateAndReport();
+                return true;
+            }
+            return updateAndReport();
         }
 
         @Override

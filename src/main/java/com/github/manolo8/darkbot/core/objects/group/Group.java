@@ -3,17 +3,14 @@ package com.github.manolo8.darkbot.core.objects.group;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class Group extends Updatable.Auto {
-    private final HeroManager hero;
-
-    public List<GroupMember> members = new ArrayList<>();
+    public final List<GroupMember> members;
     public GroupMember selectedMember = new GroupMember();
     public GroupMember heroMember = new GroupMember();
 
@@ -22,10 +19,12 @@ public class Group extends Updatable.Auto {
     public boolean isOpen; // if the group is open to allowing anyone to invite
     public boolean isLeader;
 
-    private ObjArray membersPtr = ObjArray.ofVector(true);
+    private final HeroManager hero;
+    private final FlashList<GroupMember> allMembers = FlashList.ofVector(GroupMember::new);
 
     public Group(HeroManager hero) {
         this.hero = hero;
+        this.members = allMembers.asFiltered(m -> m.id != hero.id);
     }
 
     public boolean isValid() {
@@ -34,31 +33,31 @@ public class Group extends Updatable.Auto {
 
     @Override
     public void update() {
-        id = API.readMemoryInt(address + 0x1F);
+        id = API.readInt(address + 0x1F);
 //        size = API.readMemoryInt(address + 0x23);
-        maxSize = API.readMemoryInt(address + 0x27);
-        isOpen = API.readMemoryBoolean(address + 0x2B);
+        maxSize = API.readInt(address + 0x27);
+        isOpen = API.readBoolean(address + 0x2B);
 
         if (!isValid()) {
-            if (!members.isEmpty()) reset();
+            if (!allMembers.isEmpty()) reset();
             return;
         }
 
-        long selectedAddr = API.readMemoryLong(address + 0x3F);
-
-        membersPtr.update(API.readMemoryLong(address + 0x37));
-
-        List<GroupMember> filtered;
+        long selectedAddr = API.readLong(address + 0x3F);
         synchronized (Main.UPDATE_LOCKER) {
-            filtered = membersPtr.sync(members, GroupMember::new, m -> m.id != hero.id);
+            allMembers.update(API.readLong(address + 0x37));
         }
-        heroMember = filtered.stream().findFirst().orElse(null);
+
+        heroMember = allMembers.stream().filter(m -> m.id == hero.id).findAny().orElse(null);
+        selectedMember = allMembers.stream().filter(m -> selectedAddr == m.address).findFirst().orElse(null);
+
         isLeader = heroMember != null && heroMember.isLeader;
-        selectedMember = members.stream().filter(m -> selectedAddr == m.address).findFirst().orElse(null);
     }
 
     private void reset() {
-        members.clear();
+        synchronized (Main.UPDATE_LOCKER) {
+            allMembers.update(0);
+        }
         isLeader = false;
         heroMember = null;
         selectedMember = null;

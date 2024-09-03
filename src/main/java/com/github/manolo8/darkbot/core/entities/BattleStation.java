@@ -45,7 +45,7 @@ public class BattleStation
 
     @Override
     public Lock getLockType() {
-        return Lock.of(API.readMemoryInt(lockPtr, 48, 40));
+        return Lock.of(API.readInt(lockPtr, 48, 40));
     }
 
     @Override
@@ -94,8 +94,8 @@ public class BattleStation
         public void update() {
             super.update();
 
-            if (info.username.isEmpty()) {
-                info.username = Main.API.readString(traits.getLast(), "", 56, 40);
+            if (info.username.isEmpty() && !traits.isEmpty()) {
+                info.username = Main.API.readString(traits.getLastElement(), "", 56, 40);
             }
         }
     }
@@ -125,8 +125,8 @@ public class BattleStation
             super.update(address);
 
             deflectorId = API.readInt(address + 112);
-            hullId = API.readMemoryInt(address + 116);
-            info.update(API.readMemoryLong(address + 120));
+            hullId = API.readInt(address + 116);
+            info.update(API.readLong(address + 120));
 
             deflectorExpansion = API.readDouble(address + 136);
             hullExpansion = API.readDouble(address + 144);
@@ -167,14 +167,14 @@ public class BattleStation
         public void update(long address) {
             super.update(address);
             this.moduleIdTemp = API.readLong(address + 112);
-            this.moduleId = API.readMemoryString(moduleIdTemp);
+            this.moduleId = API.readString(moduleIdTemp);
             this.moduleType = Type.of(moduleId);
 
-            info.update(API.readMemoryLong(address + 120));
+            info.update(API.readLong(address + 120));
             health.update(findInTraits(TraitPattern::ofHealth));
             lockPtr = findInTraits(TraitPattern::ofLockType);
 
-            target.update(findInTraits(ptr -> API.readMemoryString(ptr, 48, 32).startsWith("attack")));
+            target.update(findInTraits(ptr -> API.readString(ptr, 48, 32).startsWith("attack")));
         }
 
         @Override
@@ -212,7 +212,7 @@ public class BattleStation
         @Override
         public boolean use() {
             boolean allowEnemy = main.hero.invisible && main.config.GENERAL.ROAMING.ENEMY_CBS_INVISIBLE;
-            return !allowEnemy && info.isEnemy() && isDangerousModule();
+            return !allowEnemy && info.isEnemy() && isDangerousModule() && main.config.MISCELLANEOUS.AVOID_CBS;
         }
 
         private boolean isDangerousModule() {

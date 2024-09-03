@@ -80,7 +80,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
     }
 
     private static ObjectTreeNode createNode(LongSupplier address, ObjectInspector.Slot slot, boolean staticAddress) {
-        long object = staticAddress ? API.readMemoryPtr(address.getAsLong()) : address.getAsLong();
+        long object = staticAddress ? API.readAtom(address.getAsLong()) : address.getAsLong();
         if (object == 0) new ObjectTreeNode(slot, address, staticAddress);
 
         boolean hasHashMap = FlashMap.hasHashMap(object);
@@ -112,10 +112,9 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
                 return new CollectionNode(slot, address, staticAddress, true, false);
             case VECTOR:
                 return new CollectionNode(slot, address, staticAddress, false, true);
-            case PLAIN_OBJECT:
+            default:
                 if (hasHashMap)
                     return new CollectionNode(slot, address, staticAddress, true, false);
-            default:
                 return new ObjectTreeNode(slot, address, staticAddress);
         }
     }
@@ -189,9 +188,9 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         long oldValue = value;
         if (staticAddress) {
             if (slot.size == 8) {
-                value = API.readMemoryPtr(address);
+                value = API.readAtom(address);
             } else if (slot.size == 4) {
-                value = API.readMemoryInt(address);
+                value = API.readInt(address);
             } else if (slot.size == 1) {
                 value = API.readInt(address);
             }

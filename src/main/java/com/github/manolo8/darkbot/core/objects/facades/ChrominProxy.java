@@ -14,10 +14,10 @@ public class ChrominProxy extends Updatable implements ChrominAPI {
     public void update() {
         if (address == 0) return;
 
-        long data = API.readMemoryLong(address + 48) & ByteUtils.ATOM_MASK;
+        long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;
 
-        this.maxAmt = API.readMemoryDouble(data + 48);
-        this.currAmt = API.readMemoryDouble(data + 40);
+        this.maxAmt = API.readDouble(data + 48);
+        this.currAmt = API.readDouble(data + 40);
     }
 
     @Override

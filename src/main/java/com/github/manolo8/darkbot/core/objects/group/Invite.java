@@ -21,8 +21,8 @@ public class Invite extends Updatable.Auto implements GroupMember.Invite {
     @Override
     public void update() {
         if (address == 0) return;
-        inviter.update(API.readMemoryLong(address + 0x20));
-        invited.update(API.readMemoryLong(address + 0x28));
+        inviter.update(API.readLong(address + 0x20));
+        invited.update(API.readLong(address + 0x28));
         valid = inviter.username != null && invited.username != null;
         incomming = inviter.id != hero.id && invited.id == hero.id;
     }

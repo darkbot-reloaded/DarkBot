@@ -1,14 +1,15 @@
 package com.github.manolo8.darkbot.core.objects.slotbars;
 
-import com.github.manolo8.darkbot.core.objects.swf.ObjArray;
+import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -16,15 +17,28 @@ import java.util.stream.Stream;
 import static com.github.manolo8.darkbot.Main.API;
 
 public class CategoryBar extends MenuBar {
-    public final List<Category> categories = new ArrayList<>();
+    public final FlashList<Category> categories = FlashList.ofVector(Category::new);
 
-    private final ObjArray categoriesArr = ObjArray.ofVector(true);
+    private final Map<SelectableItem, Item> itemsMap = new HashMap<>(
+            (int) SelectableItem.ALL_ITEMS.values().stream()
+                    .mapToLong(List::size).sum());
 
     @Override
     public void update() {
         super.update();
-        this.categoriesArr.update(API.readMemoryLong(address + 56));
-        this.categoriesArr.sync(this.categories, Category::new);
+        long categoriesAddress = readLong(56);
+        if (categories.getAddress() != categoriesAddress) {
+            itemsMap.clear();
+        }
+        this.categories.update(categoriesAddress);
+    }
+
+    // assume the parameter is enum from SelectableItems itf
+    public Item getItem(SelectableItem selectableItem) {
+        Item item = itemsMap.get(selectableItem);
+        if (item != null) return item;
+
+        return findItem(selectableItem).orElse(null);
     }
 
     @Deprecated
@@ -84,13 +98,11 @@ public class CategoryBar extends MenuBar {
         return Optional.ofNullable(category.findItem(item));
     }
 
-    public static class Category extends Auto {
-        public String categoryId;
-        public List<Item> items = new ArrayList<>();
-
-        private final ObjArray itemsArr = ObjArray.ofVector(true);
-
+    public class Category extends Auto {
         private ItemCategory itemCategory;
+
+        public String categoryId;
+        public FlashList<Item> items = FlashList.ofVector(() -> new Item(itemCategory, itemsMap));
 
         public @Nullable Item findItem(SelectableItem item) {
             return items.stream()
@@ -101,14 +113,13 @@ public class CategoryBar extends MenuBar {
 
         @Override
         public void update() {
-            this.itemsArr.update(API.readMemoryLong(address + 40));
-            this.itemsArr.sync(this.items, () -> new Item(itemCategory));
+            this.items.update(API.readLong(address + 40));
         }
 
         @Override
         public void update(long address) {
             if (this.address != address || categoryId == null || categoryId.isEmpty()) {
-                this.categoryId = API.readMemoryString(address, 32);
+                this.categoryId = API.readString(address, 32);
                 this.itemCategory = ItemCategory.of(categoryId);
             }
             super.update(address);

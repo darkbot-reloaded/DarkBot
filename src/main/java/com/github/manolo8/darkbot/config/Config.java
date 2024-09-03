@@ -9,7 +9,6 @@ import com.github.manolo8.darkbot.config.types.suppliers.PetGears;
 import com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation;
 import com.github.manolo8.darkbot.config.utils.ItemUtils;
 import com.github.manolo8.darkbot.core.api.GameAPI;
-import com.github.manolo8.darkbot.core.manager.HookAdapter;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
@@ -201,6 +200,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public @Option @Visibility(Level.INTERMEDIATE) boolean LOG_CHAT = false;
         public @Option @Visibility(Level.INTERMEDIATE) boolean LOG_DEATHS = false;
         public @Option @Visibility(Level.INTERMEDIATE) boolean AVOID_MINES = true;
+        public @Option @Visibility(Level.INTERMEDIATE) boolean AVOID_CBS = true;
         public @Option @Visibility(Level.INTERMEDIATE) boolean AVOID_RADIATION = true;
         public @Option @Visibility(Level.INTERMEDIATE) boolean USERNAME_ON_TITLE = false;
         public @Option @Visibility(Level.ADVANCED) boolean AUTO_REFINE = false;
@@ -240,15 +240,12 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean USE_PROXY = false;
             public @Option boolean CLEAR_CACHE_ON_STUCK = true;
 
-            @Option @Dropdown(multi = true)
-            public Set<HookAdapter.Flag> DARK_HOOK_FLAGS = EnumSet.allOf(HookAdapter.Flag.class);
-
             public int width = 1280;
             public int height = 800;
 
             public boolean attachToBot = false;
             public GameAPI.Handler.GameQuality gameQuality = GameAPI.Handler.GameQuality.LOW;
-            public transient int transparency = 100, volume = 100, clientWidth = width, clientHeight = height;
+            public transient int transparency = 100, volume = 100;
 
             public @Option @Table @Visibility(Level.DEVELOPER) Map<String, PatternInfo> BLOCK_PATTERNS = new HashMap<>();
 

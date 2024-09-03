@@ -19,9 +19,12 @@ public class Base64Utils {
         return new String(Base64.getDecoder().decode(text), StandardCharsets.UTF_8);
     }
 
-
     public static String decode(InputStream input) throws IOException {
         return decode(IOUtils.read(input));
+    }
+
+    public static InputStream decodeStream(InputStream input) {
+        return Base64.getDecoder().wrap(input);
     }
 
     public static String decode(String text) {

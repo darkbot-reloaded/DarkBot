@@ -96,6 +96,12 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
             FeatureDefinition<?> fd = new FeatureDefinition<>(plugin, feature, configHandler::getFeatureConfig);
             fd.addStatusListener(def -> {
                 registryHandler.update();
+                Object instance = def.getInstance();
+                if (instance != null && !def.canLoad()) {
+                    featureLoader.unloadFeature(instance);
+                    def.setInstance(null);
+                }
+
                 if (main.getGui() != null)
                     main.getGui().updateConfigTreeListeners();
             });
@@ -183,7 +189,8 @@ public class FeatureRegistry implements PluginListener, ExtensionsAPI {
         return getFeatureDefinition(feature);
     }
 
-    public <T> FeatureInfo<T> getFeatureInfo(@NotNull String featureId) {
+    @Override
+    public FeatureInfo<?> getFeatureInfo(@NotNull String featureId) {
         return getFeatureDefinition(featureId);
     }
 
