@@ -16,6 +16,7 @@ import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.handlers.PetGearSelectorHandler;
 import com.github.manolo8.darkbot.gui.utils.Strings;
+import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.selectors.GearSelector;
 import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.enums.PetGear;
@@ -25,6 +26,7 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.game.other.LocationInfo;
 import eu.darkbot.api.game.other.Point;
+import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.utils.Inject;
@@ -33,6 +35,7 @@ import eu.darkbot.util.TimeUtils;
 import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +46,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -150,41 +154,19 @@ public class PetManager extends Gui implements PetAPI {
             return;
         }
 
-        int submoduleId = -1, submoduleIdx = -1;
+        Gear submodule = null;
         if (petGear == PetGear.ENEMY_LOCATOR) {
-            NpcPick submodule = main.config.LOOT.NPC_INFOS.entrySet()
-                    .stream()
-                    .filter(e -> e.getValue().extra.has(NpcExtra.PET_LOCATOR))
-                    .sorted(Comparator.comparingInt(e -> e.getValue().priority))
-                    .map(entry -> new NpcPick(entry.getKey(), entry.getValue()))
-                    .filter(p -> p.gear != null)
-                    .findFirst()
-                    .orElse(null);
-            if (submodule != null) {
-                selectedNpc = submodule.npc;
-                submoduleId = submodule.gear.id;
-                submoduleIdx = locatorList.indexOf(submodule.gear);
-            }
+            submodule = (Gear) gearSupplier.getNpcLocatorPick(locatorList);
         }
-        if (submoduleId == -1) selectedNpc = null;
 
         if (selection != ModuleStatus.SELECTED
                 || (currentModule != null && currentModule.id != petGear.getId())
-                || (currentSubmodules.isEmpty() && submoduleIdx != -1)
-                || (!currentSubmodules.isEmpty() && !currentSubmodules.contains(submoduleId))) {
-            if (show(true)) this.selectModule(petGear, submoduleIdx);
+                || (currentSubmodules.isEmpty() && submodule != null)
+                || (!currentSubmodules.isEmpty() && (submodule != null && !currentSubmodules.contains(submodule.id)))) {
+            if (show(true)) this.selectModule(petGear, submodule);
         } else if (System.currentTimeMillis() > this.selectModuleTime) hide();
     }
 
-    private class NpcPick {
-        private final NpcInfo npc;
-        private final Gear gear;
-        public NpcPick(String npcName, NpcInfo npc) {
-            this.npc = npc;
-            String fuzzyName = npc.fuzzyName != null ? npc.fuzzyName : (npc.fuzzyName = Strings.fuzzyMatcher(npcName));
-            this.gear = locatorList.stream().filter(l -> fuzzyName.equals(l.fuzzyName)).findFirst().orElse(null);
-        }
-    }
     public NpcInfo getTrackedNpc() {
         return selectedNpc;
     }
@@ -257,15 +239,13 @@ public class PetManager extends Gui implements PetAPI {
         }
     }
 
-    private void selectModule(PetGear petGear, int submoduleIdx) {
+    private void selectModule(PetGear petGear, Gear submodule) {
         if (System.currentTimeMillis() < this.selectModuleTime) return;
 
-        Gear gear = null;
-        if (submoduleIdx == -1) {
+        Gear gear = submodule;
+        if (gear == null) {
             int moduleIdx = moduleIdToIndex(petGear.getId());
             if (moduleIdx < gearList.size()) gear = gearList.get(moduleIdx);
-        } else {
-            gear = locatorList.get(submoduleIdx);
         }
 
         if (gear != null) {
@@ -307,6 +287,7 @@ public class PetManager extends Gui implements PetAPI {
 
         long elementsListAddress = getElementsList(54);
         updateCurrentModule(elementsListAddress);
+        updateSelectedLocatorNpc();
 
         updatePetBuffs(elementsListAddress);
 
@@ -318,6 +299,26 @@ public class PetManager extends Gui implements PetAPI {
         if (!wasRepaired && repaired) repairCount++;
 
         updatePetStats(elementsListAddress);
+    }
+
+    private void updateSelectedLocatorNpc() {
+        Gear subModule = getCurrentSubModule();
+        FakeNpc petPing = main.mapManager.entities.fakeNpc;
+
+        if (subModule == null) {
+            selectedNpc = null;
+
+            petPing.playerInfo.username = "Unknown";
+            petPing.npcId = -1;
+        } else {
+            selectedNpc = main.config.LOOT.NPC_INFOS.entrySet().stream()
+                    .filter(e -> e.getValue().getFuzzyName(e.getKey()).equals(subModule.fuzzyName))
+                    .map(Map.Entry::getValue)
+                    .findFirst().orElse(null);
+
+            petPing.playerInfo.username = subModule.name;
+            petPing.npcId = subModule.id;
+        }
     }
 
     private boolean modulesChanged() {
@@ -450,11 +451,10 @@ public class PetManager extends Gui implements PetAPI {
     public @NotNull Collection<? extends NpcInfo> getLocatorNpcs() {
         if (locatorList.isEmpty()) return Collections.emptyList();
 
-        return main.config.LOOT.NPC_INFOS.entrySet()
-                .stream()
-                .map(entry -> new NpcPick(entry.getKey(), entry.getValue()))
-                .filter(p -> p.gear != null)
-                .map(p -> p.npc)
+        return main.config.LOOT.NPC_INFOS.entrySet().stream()
+                .filter(entry -> locatorList.stream()
+                        .anyMatch(gear -> entry.getValue().getFuzzyName(entry.getKey()).equals(gear.fuzzyName)))
+                .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
     }
 
@@ -692,7 +692,7 @@ public class PetManager extends Gui implements PetAPI {
         return Optional.empty();
     }
 
-    public static class Gear extends Reporting implements Point {
+    public static class Gear extends Reporting implements Point, LocatorPick {
         public int id, parentId;
         public long check;
         public String name, fuzzyName;
@@ -736,6 +736,21 @@ public class PetManager extends Gui implements PetAPI {
             Main.API.callMethodChecked(true, "23(hide)(26)008211400",
                     152, Main.API.readLong(gearsSprite, 176));
         }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getFuzzyName() {
+            return fuzzyName;
+        }
+
+        @Override
+        public int getId() {
+            return id;
+        }
     }
 
     @Override
@@ -746,7 +761,12 @@ public class PetManager extends Gui implements PetAPI {
     @Feature(name = "Default Gear Supplier", description = "Sets the fallback pet gear")
     public static class DefaultGearSupplier implements GearSelector, eu.darkbot.api.extensions.selectors.PetGearSupplier {
 
+        private final ConfigSetting<Map<String, NpcInfo>> npcInfos;
         private PetManager pet;
+
+        public DefaultGearSupplier(ConfigAPI config) {
+            npcInfos = config.requireConfig("loot.npc_infos");
+        }
 
         @Inject
         public void setPetManager(PetManager pet) {
@@ -766,6 +786,20 @@ public class PetManager extends Gui implements PetAPI {
         @Override
         public @Nullable Boolean enablePet() {
             return pet.isEnabled();
+        }
+
+        @Override
+        public @Nullable LocatorPick getNpcLocatorPick(@UnmodifiableView Collection<? extends LocatorPick> picks) {
+            return npcInfos.getValue().entrySet()
+                    .stream() // should filter kill-only npcs?
+                    .filter(e -> e.getValue().extra.has(NpcExtra.PET_LOCATOR))
+                    .sorted(Comparator.comparingInt(e -> e.getValue().priority))
+                    .map(entry -> picks.stream()
+                            .filter(gear -> entry.getValue().getFuzzyName(entry.getKey()).equals(gear.getFuzzyName()))
+                            .findAny().orElse(null))
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
         }
     }
 }

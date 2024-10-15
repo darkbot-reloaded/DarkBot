@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.gui.utils.Strings;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Option;
 import eu.darkbot.api.config.types.NpcFlag;
@@ -151,6 +152,10 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
             return lastId;
 
         return lastSearchedId = className.concat(name);
+    }
+
+    public String getFuzzyName(String originalName) {
+        return fuzzyName == null ? fuzzyName = Strings.fuzzyMatcher(originalName) : fuzzyName;
     }
 
     public static class ExtraNpcInfo {
