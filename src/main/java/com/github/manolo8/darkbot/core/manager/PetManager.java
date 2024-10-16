@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
 import com.github.manolo8.darkbot.core.api.Capability;
@@ -16,7 +15,6 @@ import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.extensions.features.Feature;
 import com.github.manolo8.darkbot.extensions.features.handlers.PetGearSelectorHandler;
 import com.github.manolo8.darkbot.gui.utils.Strings;
-import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.selectors.GearSelector;
 import eu.darkbot.api.game.entities.Entity;
 import eu.darkbot.api.game.enums.PetGear;
@@ -26,7 +24,6 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.game.other.LocationInfo;
 import eu.darkbot.api.game.other.Point;
-import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
 import eu.darkbot.api.managers.PetAPI;
 import eu.darkbot.api.utils.Inject;
@@ -35,18 +32,15 @@ import eu.darkbot.util.TimeUtils;
 import eu.darkbot.util.Timer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -73,11 +67,11 @@ public class PetManager extends Gui implements PetAPI {
     private Ship target;
     private boolean enabled = false;
 
-    private final FlashList<Gear> gearList = FlashList.ofArray(Gear::new);
+    private final FlashList<Gear> gearList = FlashList.ofArray(() -> new Gear(false));
     private final List<PetGear> newGears = new ArrayList<>();
 
     private final FlashListLong locatorWrapper = FlashListLong.ofArray();
-    private final FlashList<Gear> locatorList = FlashList.ofArray(Gear::new).noAuto();
+    private final FlashList<Gear> locatorList = FlashList.ofArray(() -> new Gear(true)).noAuto();
 
     private final List<Integer> petBuffsIds = new ArrayList<>();
 
@@ -311,11 +305,7 @@ public class PetManager extends Gui implements PetAPI {
             petPing.playerInfo.username = "Unknown";
             petPing.npcId = -1;
         } else {
-            selectedNpc = main.config.LOOT.NPC_INFOS.entrySet().stream()
-                    .filter(e -> e.getValue().getFuzzyName(e.getKey()).equals(subModule.fuzzyName))
-                    .map(Map.Entry::getValue)
-                    .findFirst().orElse(null);
-
+            selectedNpc = subModule.npcInfo;
             petPing.playerInfo.username = subModule.name;
             petPing.npcId = subModule.id;
         }
@@ -451,10 +441,8 @@ public class PetManager extends Gui implements PetAPI {
     public @NotNull Collection<? extends NpcInfo> getLocatorNpcs() {
         if (locatorList.isEmpty()) return Collections.emptyList();
 
-        return main.config.LOOT.NPC_INFOS.entrySet().stream()
-                .filter(entry -> locatorList.stream()
-                        .anyMatch(gear -> entry.getValue().getFuzzyName(entry.getKey()).equals(gear.fuzzyName)))
-                .map(Map.Entry::getValue)
+        return locatorList.stream()
+                .map(gear -> gear.npcInfo)
                 .collect(Collectors.toList());
     }
 
@@ -692,12 +680,19 @@ public class PetManager extends Gui implements PetAPI {
         return Optional.empty();
     }
 
-    public static class Gear extends Reporting implements Point, LocatorPick {
+    public class Gear extends Reporting implements Point, LocatorPick {
         public int id, parentId;
         public long check;
         public String name, fuzzyName;
 
+        private NpcInfo npcInfo;
+
         private final SpriteObject sprite = new SpriteObject();
+        private final boolean submodule;
+
+        public Gear(boolean submodule) {
+            this.submodule = submodule;
+        }
 
         @Override
         public boolean updateAndReport() {
@@ -715,6 +710,13 @@ public class PetManager extends Gui implements PetAPI {
             this.name = name;
             this.fuzzyName = Strings.fuzzyMatcher(name);
             this.check = readLong(208, 152, 16);
+
+            if (submodule) {
+                this.npcInfo = main.config.LOOT.NPC_INFOS.values().stream()
+                        .filter(npcInfo -> npcInfo.getFuzzyName().equals(fuzzyName))
+                        .findAny().orElse(null);
+            }
+
             return true;
         }
 
@@ -735,6 +737,11 @@ public class PetManager extends Gui implements PetAPI {
             // hide gears list again
             Main.API.callMethodChecked(true, "23(hide)(26)008211400",
                     152, Main.API.readLong(gearsSprite, 176));
+        }
+
+        @Override
+        public eu.darkbot.api.config.types.@Nullable NpcInfo getNpcInfo() {
+            return npcInfo;
         }
 
         @Override
@@ -760,13 +767,7 @@ public class PetManager extends Gui implements PetAPI {
 
     @Feature(name = "Default Gear Supplier", description = "Sets the fallback pet gear")
     public static class DefaultGearSupplier implements GearSelector, eu.darkbot.api.extensions.selectors.PetGearSupplier {
-
-        private final ConfigSetting<Map<String, NpcInfo>> npcInfos;
         private PetManager pet;
-
-        public DefaultGearSupplier(ConfigAPI config) {
-            npcInfos = config.requireConfig("loot.npc_infos");
-        }
 
         @Inject
         public void setPetManager(PetManager pet) {
@@ -788,18 +789,5 @@ public class PetManager extends Gui implements PetAPI {
             return pet.isEnabled();
         }
 
-        @Override
-        public @Nullable LocatorPick getNpcLocatorPick(@UnmodifiableView Collection<? extends LocatorPick> picks) {
-            return npcInfos.getValue().entrySet()
-                    .stream() // should filter kill-only npcs?
-                    .filter(e -> e.getValue().extra.has(NpcExtra.PET_LOCATOR))
-                    .sorted(Comparator.comparingInt(e -> e.getValue().priority))
-                    .map(entry -> picks.stream()
-                            .filter(gear -> entry.getValue().getFuzzyName(entry.getKey()).equals(gear.getFuzzyName()))
-                            .findAny().orElse(null))
-                    .filter(Objects::nonNull)
-                    .findFirst()
-                    .orElse(null);
-        }
     }
 }

@@ -1,13 +1,13 @@
 package com.github.manolo8.darkbot.config;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.gui.utils.Strings;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Option;
 import eu.darkbot.api.config.types.NpcFlag;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroItemsAPI;
+import eu.darkbot.util.StringUtils;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,6 +30,7 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     public Character attackFormation;
     public ExtraNpcInfo extra = new ExtraNpcInfo();
 
+    public transient String name;
     public transient String fuzzyName;
     public transient int npcId;
     public @Option.Ignore Set<Integer> mapList = new HashSet<>();
@@ -135,6 +136,16 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
         mapList.add(mapId);
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getFuzzyName() {
+        return fuzzyName == null ? fuzzyName = StringUtils.fuzzyNpcName(getName()) : fuzzyName;
+    }
+
     // Keep a cache of the last searched id.
     // If called repeatedly in a loop for the same flag, it avoids allocations for the string concat of class + name.
     private static String lastSearchedId = "";
@@ -152,10 +163,6 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
             return lastId;
 
         return lastSearchedId = className.concat(name);
-    }
-
-    public String getFuzzyName(String originalName) {
-        return fuzzyName == null ? fuzzyName = Strings.fuzzyMatcher(originalName) : fuzzyName;
     }
 
     public static class ExtraNpcInfo {
