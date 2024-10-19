@@ -48,6 +48,7 @@ public class ConfigEntity {
         if (info == null) {
             info = new NpcInfo();
 
+            info.name = name;
             info.radius = 560;
             info.mapList.add(mapId);
 
@@ -69,6 +70,8 @@ public class ConfigEntity {
         BoxInfo info = boxes.get(name);
         if (info == null) {
             info = new BoxInfo();
+            info.name = name;
+
             if (!name.isEmpty()) {
                 boxes.put(name, info);
 

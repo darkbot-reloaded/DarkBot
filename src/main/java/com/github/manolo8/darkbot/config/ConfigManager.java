@@ -192,6 +192,9 @@ public class ConfigManager implements API.Singleton {
             // Didn't have any previous config, save this new one:
             if (!failedConfig) saveConfig(config, configFile, backupFile);
         }
+        // set name of npc on each config load
+        config.LOOT.NPC_INFOS.forEach((k, v) -> v.name = k);
+        config.COLLECT.BOX_INFOS.forEach((k, v) -> v.name = k);
 
         return config;
     }

@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.config.types.suppliers.PetGearSupplier;
 import com.github.manolo8.darkbot.core.api.Capability;
@@ -37,12 +36,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -73,7 +72,7 @@ public class PetManager extends Gui implements PetAPI {
     private final List<PetGear> newGears = new ArrayList<>();
 
     private final FlashListLong locatorWrapper = FlashListLong.ofArray();
-    private final FlashList<Gear> locatorList = FlashList.ofArray(Gear::new).noAuto();
+    private final FlashList<SubGear> locatorList = FlashList.ofArray(SubGear::new).noAuto();
 
     private final List<Integer> petBuffsIds = new ArrayList<>();
 
@@ -83,7 +82,7 @@ public class PetManager extends Gui implements PetAPI {
 
     private ModuleStatus selection = ModuleStatus.NOTHING;
     private Gear currentModule;   // The Module used, like Passive mode, kamikaze, or enemy locator
-    private Gear currentSubModule;// The submodule used, like an npc inside enemy locator.
+    private SubGear currentSubModule;// The submodule used, like an npc inside enemy locator.
     private long validUntil;
     private NpcInfo selectedNpc;
 
@@ -150,41 +149,19 @@ public class PetManager extends Gui implements PetAPI {
             return;
         }
 
-        int submoduleId = -1, submoduleIdx = -1;
+        Gear submodule = null;
         if (petGear == PetGear.ENEMY_LOCATOR) {
-            NpcPick submodule = main.config.LOOT.NPC_INFOS.entrySet()
-                    .stream()
-                    .filter(e -> e.getValue().extra.has(NpcExtra.PET_LOCATOR))
-                    .sorted(Comparator.comparingInt(e -> e.getValue().priority))
-                    .map(entry -> new NpcPick(entry.getKey(), entry.getValue()))
-                    .filter(p -> p.gear != null)
-                    .findFirst()
-                    .orElse(null);
-            if (submodule != null) {
-                selectedNpc = submodule.npc;
-                submoduleId = submodule.gear.id;
-                submoduleIdx = locatorList.indexOf(submodule.gear);
-            }
+            submodule = (Gear) gearSupplier.getNpcLocatorPick(locatorList);
         }
-        if (submoduleId == -1) selectedNpc = null;
 
         if (selection != ModuleStatus.SELECTED
                 || (currentModule != null && currentModule.id != petGear.getId())
-                || (currentSubmodules.isEmpty() && submoduleIdx != -1)
-                || (!currentSubmodules.isEmpty() && !currentSubmodules.contains(submoduleId))) {
-            if (show(true)) this.selectModule(petGear, submoduleIdx);
+                || (currentSubmodules.isEmpty() && submodule != null)
+                || (!currentSubmodules.isEmpty() && (submodule != null && !currentSubmodules.contains(submodule.id)))) {
+            if (show(true)) this.selectModule(petGear, submodule);
         } else if (System.currentTimeMillis() > this.selectModuleTime) hide();
     }
 
-    private class NpcPick {
-        private final NpcInfo npc;
-        private final Gear gear;
-        public NpcPick(String npcName, NpcInfo npc) {
-            this.npc = npc;
-            String fuzzyName = npc.fuzzyName != null ? npc.fuzzyName : (npc.fuzzyName = Strings.fuzzyMatcher(npcName));
-            this.gear = locatorList.stream().filter(l -> fuzzyName.equals(l.fuzzyName)).findFirst().orElse(null);
-        }
-    }
     public NpcInfo getTrackedNpc() {
         return selectedNpc;
     }
@@ -257,15 +234,13 @@ public class PetManager extends Gui implements PetAPI {
         }
     }
 
-    private void selectModule(PetGear petGear, int submoduleIdx) {
+    private void selectModule(PetGear petGear, Gear submodule) {
         if (System.currentTimeMillis() < this.selectModuleTime) return;
 
-        Gear gear = null;
-        if (submoduleIdx == -1) {
+        Gear gear = submodule;
+        if (gear == null) {
             int moduleIdx = moduleIdToIndex(petGear.getId());
             if (moduleIdx < gearList.size()) gear = gearList.get(moduleIdx);
-        } else {
-            gear = locatorList.get(submoduleIdx);
         }
 
         if (gear != null) {
@@ -307,6 +282,7 @@ public class PetManager extends Gui implements PetAPI {
 
         long elementsListAddress = getElementsList(54);
         updateCurrentModule(elementsListAddress);
+        updateSelectedLocatorNpc();
 
         updatePetBuffs(elementsListAddress);
 
@@ -318,6 +294,22 @@ public class PetManager extends Gui implements PetAPI {
         if (!wasRepaired && repaired) repairCount++;
 
         updatePetStats(elementsListAddress);
+    }
+
+    private void updateSelectedLocatorNpc() {
+        SubGear subModule = currentSubModule;
+        FakeNpc petPing = main.mapManager.entities.fakeNpc;
+
+        if (subModule == null) {
+            selectedNpc = null;
+
+            petPing.playerInfo.username = "Unknown";
+            petPing.npcId = -1;
+        } else {
+            selectedNpc = subModule.npcInfo;
+            petPing.playerInfo.username = subModule.name;
+            petPing.npcId = subModule.id;
+        }
     }
 
     private boolean modulesChanged() {
@@ -368,8 +360,8 @@ public class PetManager extends Gui implements PetAPI {
         currentSubmodules.clear();
         currentModule = findGear(gearList, currGearCheck);
         if (currentModule == null) {
-            Gear current = null;
-            for (Gear gear : locatorList) {
+            SubGear current = null;
+            for (SubGear gear : locatorList) {
                 if (gear.check == currGearCheck) {
                     current = gear;
                     currentSubmodules.add(gear.id);
@@ -450,11 +442,9 @@ public class PetManager extends Gui implements PetAPI {
     public @NotNull Collection<? extends NpcInfo> getLocatorNpcs() {
         if (locatorList.isEmpty()) return Collections.emptyList();
 
-        return main.config.LOOT.NPC_INFOS.entrySet()
-                .stream()
-                .map(entry -> new NpcPick(entry.getKey(), entry.getValue()))
-                .filter(p -> p.gear != null)
-                .map(p -> p.npc)
+        return locatorList.stream()
+                .map(gear -> gear.npcInfo)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -692,10 +682,48 @@ public class PetManager extends Gui implements PetAPI {
         return Optional.empty();
     }
 
+    public class SubGear extends Gear implements LocatorPick {
+        private NpcInfo npcInfo;
+        private String fuzzyName;
+
+        @Override
+        public boolean updateAndReport() {
+            boolean updated = super.updateAndReport();
+            if (updated) {
+                this.fuzzyName = Strings.fuzzyMatcher(name);
+                this.npcInfo = main.config.LOOT.NPC_INFOS.values().stream()
+                        .filter(npcInfo -> npcInfo.getFuzzyName().equals(fuzzyName))
+                        .findAny().orElse(null);
+            }
+
+            return updated;
+        }
+
+        @Override
+        public eu.darkbot.api.config.types.@Nullable NpcInfo getNpcInfo() {
+            return npcInfo;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getFuzzyName() {
+            return fuzzyName;
+        }
+
+        @Override
+        public int getId() {
+            return id;
+        }
+    }
+
     public static class Gear extends Reporting implements Point {
         public int id, parentId;
         public long check;
-        public String name, fuzzyName;
+        public String name;
 
         private final SpriteObject sprite = new SpriteObject();
 
@@ -713,8 +741,8 @@ public class PetManager extends Gui implements PetAPI {
             this.id = id;
             this.parentId = parentId;
             this.name = name;
-            this.fuzzyName = Strings.fuzzyMatcher(name);
             this.check = readLong(208, 152, 16);
+
             return true;
         }
 
@@ -745,7 +773,6 @@ public class PetManager extends Gui implements PetAPI {
 
     @Feature(name = "Default Gear Supplier", description = "Sets the fallback pet gear")
     public static class DefaultGearSupplier implements GearSelector, eu.darkbot.api.extensions.selectors.PetGearSupplier {
-
         private PetManager pet;
 
         @Inject
@@ -767,5 +794,6 @@ public class PetManager extends Gui implements PetAPI {
         public @Nullable Boolean enablePet() {
             return pet.isEnabled();
         }
+
     }
 }
