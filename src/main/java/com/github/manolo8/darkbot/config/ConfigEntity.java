@@ -70,6 +70,8 @@ public class ConfigEntity {
         BoxInfo info = boxes.get(name);
         if (info == null) {
             info = new BoxInfo();
+            info.name = name;
+
             if (!name.isEmpty()) {
                 boxes.put(name, info);
 

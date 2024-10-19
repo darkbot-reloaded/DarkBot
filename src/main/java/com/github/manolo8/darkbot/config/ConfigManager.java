@@ -194,6 +194,7 @@ public class ConfigManager implements API.Singleton {
         }
         // set name of npc on each config load
         config.LOOT.NPC_INFOS.forEach((k, v) -> v.name = k);
+        config.COLLECT.BOX_INFOS.forEach((k, v) -> v.name = k);
 
         return config;
     }
