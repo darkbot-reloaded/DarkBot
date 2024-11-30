@@ -8,6 +8,7 @@ import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.GameResourcesAPI;
+import eu.darkbot.impl.utils.TranslationMatcherImpl;
 import eu.darkbot.util.XmlUtils;
 import eu.darkbot.util.http.Http;
 import org.jetbrains.annotations.NotNull;
@@ -83,6 +84,12 @@ public class FlashResManager implements Task, GameResourcesAPI {
     @Override
     public Optional<String> findTranslation(@NotNull String key) {
         return Optional.ofNullable(getTranslation(key));
+    }
+
+    @Override
+    public Optional<TranslationMatcher> getTranslationMatcher(@NotNull String key, String... replacements) {
+        return Optional.ofNullable(getLanguage())
+                .flatMap(lang -> findTranslation(key).map(t -> (TranslationMatcher) new TranslationMatcherImpl(lang, t, replacements)));
     }
 
     public CompletableFuture<Image> getBackgroundImage(GameMap gameMap) {
