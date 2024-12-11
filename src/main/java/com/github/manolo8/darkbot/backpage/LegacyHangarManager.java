@@ -74,7 +74,8 @@ public class LegacyHangarManager {
                     .setRawHeader("Content-Type", "application/x-www-form-urlencoded")
                     .setRawParam("action", "activateShip")
                     .setParam("params", Base64Utils.encode(paramObj.toString()))
-                    .getContent().contains("\"isError\":0");
+                    .consumeInputStream(Base64Utils::decode)
+                    .contains("\"isError\":0");
         } catch (IOException e) {
             e.printStackTrace();
             this.lastHangarChange = System.currentTimeMillis() + 5_000;
