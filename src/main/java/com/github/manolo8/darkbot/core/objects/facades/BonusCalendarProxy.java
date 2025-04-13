@@ -21,7 +21,7 @@ public class BonusCalendarProxy extends Updatable implements BonusCalendarAPI {
 
     @Getter
     @ToString
-    private static class RewardLoot extends Auto implements BonusCalendarAPI.RewardList {
+    private static class RewardLoot extends Updatable implements BonusCalendarAPI.RewardList {
         private String lootId;
         private int amount;
 
