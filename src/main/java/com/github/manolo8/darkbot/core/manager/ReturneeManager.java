@@ -63,7 +63,7 @@ public class ReturneeManager extends Gui implements ReturneeAPI {
     }
 
     @Override
-    public List<? extends LoginRewardList> getLoginRewardList() {
+    public List<? extends LoginReward> getLoginRewardList() {
         return returneeLoginProxy.getRewardList();
     }
 
