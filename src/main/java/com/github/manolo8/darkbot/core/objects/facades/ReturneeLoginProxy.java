@@ -11,7 +11,7 @@ import lombok.ToString;
 public class ReturneeLoginProxy extends Updatable implements API.Singleton{
 
     private boolean claimable = false;
-    private final FlashList<Reward> rewardList = FlashList.ofVector(Reward::new);
+    private final FlashList<LoginReward> loginRewardList = FlashList.ofVector(LoginReward::new);
 
     @Override
     public void update() {
@@ -21,7 +21,7 @@ public class ReturneeLoginProxy extends Updatable implements API.Singleton{
 
     @Getter
     @ToString
-    private static class Reward extends Auto implements ReturneeAPI.LoginReward {
+    private static class LoginReward extends Auto implements ReturneeAPI.LoginReward {
         private String lootId;
         private double amount;
 
