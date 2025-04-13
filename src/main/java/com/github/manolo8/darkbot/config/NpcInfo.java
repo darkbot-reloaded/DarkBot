@@ -26,8 +26,11 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     public boolean kill;
     @Option("config.loot.npc_table.attack_key")
     public Character attackKey;
+    //    @Option("config.loot.npc_table.attack_formation")
+    @Option.Ignore
+    private Character attackFormation;
     @Option("config.loot.npc_table.attack_formation")
-    public Character attackFormation;
+    public SelectableItem.Formation attackFormationNew;
     public ExtraNpcInfo extra = new ExtraNpcInfo();
 
     public transient String name;
@@ -54,12 +57,12 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
         set(radius, priority, kill, attackKey, null, extra);
     }
 
-    public void set(Double radius, Integer priority, Boolean kill, Character attackKey, Character attackFormation, ExtraNpcInfo extra) {
+    public void set(Double radius, Integer priority, Boolean kill, Character attackKey, SelectableItem.Formation attackFormation, ExtraNpcInfo extra) {
         if (radius != null) this.radius = radius;
         if (priority != null) this.priority = priority;
         if (kill != null) this.kill = kill;
         if (attackKey != null) this.attackKey = attackKey;
-        if (attackFormation != null) this.attackFormation = attackFormation;
+        if (attackFormation != null) this.attackFormationNew = attackFormation;
         if (extra != null) this.extra = extra;
     }
 
@@ -68,7 +71,7 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
         this.priority = other.priority;
         this.kill = other.kill;
         this.attackKey = other.attackKey;
-        this.attackFormation = other.attackFormation;
+        this.attackFormationNew = other.attackFormationNew;
         this.extra.flags = new HashSet<>(other.extra.flags);
     }
 
@@ -109,7 +112,23 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
 
     @Override
     public Optional<SelectableItem.Formation> getFormation() {
-        return getHeroItems().getItem(attackFormation, ItemCategory.DRONE_FORMATIONS, SelectableItem.Formation.class);
+        if (attackFormation != null) {
+            // Try to find associated formation and update state if found
+            Optional<SelectableItem.Formation> associatedFormation = getHeroItems()
+                    .getItem(attackFormation, ItemCategory.DRONE_FORMATIONS, SelectableItem.Formation.class)
+                    .map(formation -> {
+                        attackFormation = null;
+                        attackFormationNew = formation;
+                        return formation;
+                    });
+        }
+
+        // If we have a new formation, use it and clear the old one
+        return Optional.of(attackFormationNew);
+    }
+
+    public void setAttackFormation(SelectableItem.Formation formation) {
+        this.attackFormationNew = formation;
     }
 
     private static HeroItemsAPI getHeroItems() {
@@ -168,7 +187,8 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     public static class ExtraNpcInfo {
         private Set<String> flags = new HashSet<>();
 
-        public ExtraNpcInfo() {}
+        public ExtraNpcInfo() {
+        }
 
         public ExtraNpcInfo(NpcExtraFlag... flags) {
             for (NpcExtraFlag flag : flags) set(flag, true);

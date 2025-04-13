@@ -12,7 +12,6 @@ import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.manager.StarManager;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
-import com.github.manolo8.darkbot.gui.tree.editors.CharacterEditor;
 import com.github.manolo8.darkbot.gui.tree.utils.NpcTableModel;
 import com.github.manolo8.darkbot.gui.tree.utils.TableHelpers;
 import com.github.manolo8.darkbot.utils.OSUtil;
@@ -41,6 +40,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 
@@ -80,16 +80,16 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         @Option @Dropdown(options = ModuleSupplier.class)
         public String CURRENT_MODULE = LootCollectorModule.class.getCanonicalName();
         public @Option @Dropdown(options = StarManager.MapOptions.class) int WORKING_MAP = 26;
-        public @Option ShipConfig OFFENSIVE = new ShipConfig(1, '8');
-        public @Option ShipConfig ROAM = new ShipConfig(1, '9');
-        public @Option ShipConfig RUN = new ShipConfig(2, '9');
+        public @Option ShipConfig OFFENSIVE = new ShipConfig(HeroAPI.Configuration.FIRST, SelectableItem.Formation.STANDARD);
+        public @Option ShipConfig ROAM = new ShipConfig(HeroAPI.Configuration.SECOND, SelectableItem.Formation.STANDARD);
+        public @Option ShipConfig RUN = new ShipConfig(HeroAPI.Configuration.SECOND, SelectableItem.Formation.STANDARD);
 
         public @Option Safety SAFETY = new Safety();
         public static class Safety {
             public @Option PercentRange REPAIR_HP_RANGE = new PercentRange(0.4, 0.95);
             public @Option @Percentage double REPAIR_HP_NO_NPC = 0.5;
             public @Option @Percentage double REPAIR_TO_SHIELD = 1;
-            public @Option ShipConfig REPAIR = new ShipConfig(1, '9');
+            public @Option ShipConfig REPAIR = new ShipConfig(HeroAPI.Configuration.FIRST, SelectableItem.Formation.STANDARD);
             public @Option @Number(min = 1, max = 9999) @Number.Disabled(value = -1, def = 10) int MAX_DEATHS = 10;
             @Deprecated
             public long REVIVE_LOCATION = 1L;
@@ -312,7 +312,16 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         public int CONFIG = 1;
         public Character FORMATION;
 
+        private HeroAPI.Configuration newConfiguration;
+        private SelectableItem.Formation newFormation;
+
         public ShipConfig() {}
+
+        public ShipConfig(HeroAPI.Configuration configuration, SelectableItem.Formation formation) {
+            this.newConfiguration = configuration;
+            this.newFormation = formation;
+        }
+
         public ShipConfig(int CONFIG, Character FORMATION) {
             this.CONFIG = CONFIG;
             this.FORMATION = FORMATION;
@@ -320,24 +329,43 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         @Override
         public HeroAPI.Configuration getConfiguration() {
-            return HeroAPI.Configuration.of(CONFIG);
+            if (CONFIG != -1) {
+                newConfiguration = HeroAPI.Configuration.of(CONFIG);
+                CONFIG = -1;
+            }
+            return newConfiguration != null ? newConfiguration : HeroAPI.Configuration.FIRST;
         }
 
         @Override
         public SelectableItem.Formation getFormation() {
-            return ItemUtils.findAssociatedItem(ItemCategory.DRONE_FORMATIONS, FORMATION)
-                    .map(it -> SelectableItem.Formation.of(it.id))
+            // find original keybind to drone formation
+            if (FORMATION != null) {
+                ItemUtils.findAssociatedItem(ItemCategory.DRONE_FORMATIONS, FORMATION)
+                        .map(it -> SelectableItem.Formation.of(it.id))
+                        .map(formation -> {
+                            FORMATION = null;
+                            newFormation = formation;
+                            return formation;
+                        });
+            }
+            // Return new formation if available
+            return Optional.ofNullable(newFormation)
                     .orElse(SelectableItem.Formation.STANDARD);
         }
 
         @Override
         public String toString() {
-            return "Config: " + CONFIG + "   Formation: " + CharacterEditor.getDisplay(FORMATION);
+            return "Config: " + newConfiguration + " " + newFormation.name();
         }
 
         @Override
         public @Nullable Character getLegacyFormation() {
             return FORMATION;
+        }
+
+        @Override
+        public boolean isLegacyFormation() {
+            return FORMATION != null;
         }
     }
 

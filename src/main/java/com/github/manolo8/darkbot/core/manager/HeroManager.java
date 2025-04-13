@@ -199,10 +199,16 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         Config.ShipConfig config = this.main.config.GENERAL.OFFENSIVE;
 
         boolean otherConfig = target.npcInfo.extra.has(NpcExtra.OPPOSITE_CONFIG);
-        return setMode(
-                otherConfig ? ((config.CONFIG % 2) + 1) : config.CONFIG,
-                target.npcInfo.attackFormation != null ?
-                        target.npcInfo.attackFormation : config.FORMATION);
+
+        HeroAPI.Configuration newConfig = HeroAPI.Configuration.of(
+                otherConfig ? (config.getConfiguration().ordinal() % 2) + 1 : config.getConfiguration().ordinal()
+        );
+
+        SelectableItem.Formation formation = target.npcInfo.attackFormationNew != null ?
+                target.npcInfo.attackFormationNew :
+                config.getFormation();
+
+        return setMode(new ShipMode.ShipModeImpl(newConfig, formation));
     }
 
     public boolean runMode() {

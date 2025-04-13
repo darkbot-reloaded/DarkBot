@@ -1,15 +1,16 @@
 package com.github.manolo8.darkbot.gui.tree.editors;
 
-import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.tree.utils.SizedLabel;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.config.util.OptionEditor;
+import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,41 +23,31 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
             .filter(c -> c != HeroAPI.Configuration.UNKNOWN)
             .map(ConfigButton::new).collect(Collectors.toList());
 
-    private final CharacterEditor formationField = new CharacterEditor();
+    private SelectableItem.Formation formation;
+
+    private final JComboBox<SelectableItem.Formation> comboBox = new JComboBox<>(SelectableItem.Formation.values());
 
     public ShipModeEditor() {
         super(new FlowLayout(FlowLayout.LEFT, 0, 0));
         setOpaque(false);
 
-        for (ConfigButton configButton : configButtons) {
-            add(configButton);
-            configButton.addKeyListener(formationField); // Relay key presses to formation
+        for (ConfigButton configButton : this.configButtons) {
+            this.add(configButton);
         }
-        add(new SizedLabel("      Formation  "));
-        add(formationField);
+        this.comboBox.addItemListener(item -> {
+            if (item.getStateChange() == ItemEvent.SELECTED) {
+                setFormation((SelectableItem.Formation) item.getItem());
+            }
+        });
+        this.add(new SizedLabel("  "));
+        this.add(this.comboBox);
     }
 
 
-    @Override
-    public JComponent getEditorComponent(ConfigSetting<ShipMode> mode) {
-        ShipMode value = mode.getValue();
-
+    public JComponent getEditorComponent(ConfigSetting<ShipMode> shipConfig) {
+        ShipMode value = shipConfig.getValue();
         setConfig(value.getConfiguration());
-
-        if (value instanceof Config.ShipConfig) {
-            formationField.setValue(((Config.ShipConfig) value).FORMATION);
-        } else {
-            // TODO: show a formation selection dropdown?
-            //  we cannot use old & new formats interchangeably here, because
-            //  converting key to formation or formation to key can only be done while the
-            //  bot is running. If running in no-op mode it's impossible to convert.
-            //  Old format must stay old format not to break plugins, and new format can't be
-            //  expressed with old format because it is unknown before runtime.
-            //  The only real solution is to have different editors for old & new format,
-            //  one that is key based, and one that is formation based.
-            formationField.setValue(null);
-        }
-
+        setFormation(value.getFormation());
         return this;
     }
 
@@ -65,9 +56,14 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
         configButtons.forEach(ConfigButton::repaint);
     }
 
+    private void setFormation(SelectableItem.Formation formation) {
+        this.formation = formation;
+        this.comboBox.setSelectedItem(formation);
+    }
+
     @Override
     public ShipMode getEditorValue() {
-        return new Config.ShipConfig(config.ordinal(), formationField.getEditorValue());
+        return ShipMode.of(config, formation);
     }
 
     @Override
@@ -97,5 +93,4 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
             return ShipModeEditor.this.config == config;
         }
     }
-
 }
