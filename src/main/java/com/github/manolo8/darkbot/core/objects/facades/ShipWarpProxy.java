@@ -16,7 +16,7 @@ public class ShipWarpProxy extends Updatable implements API.Singleton {
     @Override
     public void update() {
         isNearSpaceStation = readBoolean(0x30, 0x20);
-        changed = readLong(0x28);
+        changed = readLong(0x30, 0x28);
         shipsList.update(readAtom(0x30, 0x30));
     }
 
@@ -27,6 +27,7 @@ public class ShipWarpProxy extends Updatable implements API.Singleton {
         private int warpCost;
         private boolean freeWarp;
         private int favouriteIndex;
+        private int mapId;
         private String shipTypeId;
         private String shipName;
 
@@ -36,8 +37,9 @@ public class ShipWarpProxy extends Updatable implements API.Singleton {
             this.warpCost = readInt(0x24);
             this.freeWarp = readInt(0x28) == 0;
             this.favouriteIndex = readInt(0x2C);
-            this.shipTypeId = readString(0x30);
-            this.shipName = readString(0x38);
+            this.mapId = readInt(0x30);
+            this.shipTypeId = readString(0x38);
+            this.shipName = readString(0x40);
         }
     }
 }
