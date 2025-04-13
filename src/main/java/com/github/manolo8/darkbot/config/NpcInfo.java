@@ -114,8 +114,7 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     public Optional<SelectableItem.Formation> getFormation() {
         if (attackFormation != null) {
             // Try to find associated formation and update state if found
-            Optional<SelectableItem.Formation> associatedFormation = getHeroItems()
-                    .getItem(attackFormation, ItemCategory.DRONE_FORMATIONS, SelectableItem.Formation.class)
+            getHeroItems().getItem(attackFormation, ItemCategory.DRONE_FORMATIONS, SelectableItem.Formation.class)
                     .map(formation -> {
                         attackFormation = null;
                         attackFormationNew = formation;
