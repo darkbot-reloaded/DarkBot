@@ -11,7 +11,7 @@ import lombok.ToString;
 public class ReturneeCalendarProxy extends Updatable implements API.Singleton {
     private int daysClaimed = -1;
     private boolean claimable = false;
-    private final FlashList<CalendarList> calendarList = FlashList.ofVector(CalendarList::new);
+    private final FlashList<CalendarItem> calendarList = FlashList.ofVector(CalendarItem::new);
 
     @Override
     public void update() {
