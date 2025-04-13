@@ -73,7 +73,7 @@ public class ReturneeManager extends Gui implements ReturneeAPI {
     }
 
     @Override
-    public List<? extends CalendarRewardList> getCalendarRewardList() {
+    public List<? extends CalendarReward> getCalendarRewardList() {
         return returneeCalendarProxy.getCalendarList();
     }
 }
