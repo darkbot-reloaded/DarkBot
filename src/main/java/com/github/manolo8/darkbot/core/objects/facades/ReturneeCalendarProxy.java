@@ -22,7 +22,7 @@ public class ReturneeCalendarProxy extends Updatable implements API.Singleton {
 
     @Getter
     @ToString
-    private static class CalendarList extends Auto implements ReturneeAPI.CalendarRewardList {
+    private static class CalendarItem extends Auto implements ReturneeAPI.CalendarRewardList {
         private String lootId;
         private int amount;
         private boolean claimed;
