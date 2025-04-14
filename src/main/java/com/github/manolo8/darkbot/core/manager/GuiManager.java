@@ -8,7 +8,7 @@ import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.StatsProxy;
-import com.github.manolo8.darkbot.core.objects.gui.AssemblyGui;
+import com.github.manolo8.darkbot.core.objects.gui.AssemblyManager;
 import com.github.manolo8.darkbot.core.objects.gui.ChatGui;
 import com.github.manolo8.darkbot.core.objects.gui.DiminishQuestGui;
 import com.github.manolo8.darkbot.core.objects.gui.DispatchIconGui;
@@ -154,7 +154,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         register("dispatch_popup_reward_list", DispatchPopupRewardGui.class);
         register("popup_generic_icon", DispatchIconGui.class);
         register("popup_generic_icon_ok", DispatchIconOkGui.class);
-        this.assembly = register("assembly", AssemblyGui.class);
+        this.assembly = register("assembly", AssemblyManager.class);
 
         register("ggBuilder", GateSpinnerGui.class);
         register("diminish_quests", DiminishQuestGui.class);
