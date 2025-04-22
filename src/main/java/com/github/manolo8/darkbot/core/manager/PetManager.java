@@ -89,6 +89,7 @@ public class PetManager extends Gui implements PetAPI {
     private Integer gearOverride = null;
     private long gearOverrideTime = 0;
     private boolean repaired = true;
+    private long portalJumpingUntil = 0;
 
     private final Map<PetStatsType, PetStats> petStats = new EnumMap<>(PetStatsType.class);
 
@@ -123,7 +124,7 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     public void tick() {
-        if (!main.isRunning() || !main.config.PET.ENABLED) return;
+        if (!main.isRunning() || !main.config.PET.ENABLED || isIgnoreWhileJumping()) return;
 
         eu.darkbot.api.extensions.selectors.PetGearSupplier gearSupplier = gearSelectorHandler.getBestSupplier();
 
@@ -219,6 +220,21 @@ public class PetManager extends Gui implements PetAPI {
     @Override
     public boolean isRepaired() {
         return repaired;
+    }
+
+    private boolean isIgnoreWhileJumping() {
+        if (main.config.PET.IGNORE_WHILE_JUMPING) {
+            // Determine if the hero is currently jumping through a portal
+            if (main.mapManager.entities.portals.stream().anyMatch(portal -> portal.isJumping())) {
+                portalJumpingUntil = System.currentTimeMillis() + 3000; // Add 3 seconds to the jumping time
+                return true;
+            }
+            // Waiting for map loading
+            if (System.currentTimeMillis() < portalJumpingUntil) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean active() {
