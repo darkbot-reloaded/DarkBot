@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation;
 import com.github.manolo8.darkbot.config.utils.ItemUtils;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.manager.StarManager;
+import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.tree.utils.NpcTableModel;
@@ -429,6 +430,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         @Override
         public HeroAPI.Configuration getConfiguration() {
             if (newConfiguration != null) {
+                CONFIG = newConfiguration.ordinal();
                 return newConfiguration;
             }
 
