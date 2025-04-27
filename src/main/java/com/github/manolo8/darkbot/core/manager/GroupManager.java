@@ -99,8 +99,12 @@ public class GroupManager extends Gui implements GroupAPI {
         }
     }
 
+    public boolean isPendingAction(){
+        return pending != null;
+    }
+
     public void tryQueueAcceptInvite() {
-        if (pending != null || !config.ACCEPT_INVITES || invites.isEmpty() || group.isValid()) return;
+        if (isPendingAction() || !config.ACCEPT_INVITES || invites.isEmpty() || group.isValid()) return;
 
         invites.stream()
                 .filter(in -> in.valid && in.incomming && (config.WHITELIST_TAG == null ||
@@ -110,13 +114,13 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void tryOpenInvites() {
-        if (pending != null || !group.isValid() || !group.isLeader) return;
+        if (isPendingAction() || !group.isValid() || !group.isLeader) return;
 
         if (group.isOpen != config.OPEN_INVITES) pending = () -> runClicks(getPoint(GroupAction.CAN_INVITE));
     }
 
     public void tryQueueKick() {
-        if (pending != null || !canKick() || config.INVITE_TAG == null || !config.KICK_NO_INVITED) return;
+        if (isPendingAction() || !canKick() || config.INVITE_TAG == null || !config.KICK_NO_INVITED) return;
         for (GroupMember member : group.members) {
             if (config.INVITE_TAG.has(main.config.PLAYER_INFOS.get(member.id))) continue;
 
@@ -129,7 +133,7 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void tryQueueSendInvite() {
-        if (pending != null || !canInvite() || config.INVITE_TAG == null) return;
+        if (isPendingAction() || !canInvite() || config.INVITE_TAG == null) return;
 
         for (PlayerInfo player : main.config.PLAYER_INFOS.values()) {
             if (!config.INVITE_TAG.has(player) || group.getMember(player.userId) != null) continue;
@@ -143,7 +147,7 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void tryBlockInvites() {
-        if (pending != null) return;
+        if (isPendingAction()) return;
         if (group.isValid()) return;
 
         if (config.BLOCK_INVITES != isBlockingInvites) {
@@ -152,7 +156,7 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void tryQueueLeave() {
-        if (pending != null) return;
+        if (isPendingAction()) return;
 
         if (shouldLeave()) shouldLeave = Math.min(20, shouldLeave + 1);
         else shouldLeave = 0;
@@ -181,13 +185,13 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void sendInvite(String username) {
-        if (pending != null || !canInvite()) return;
+        if (isPendingAction() || !canInvite()) return;
 
         sendInvite(username, 60_000);
     }
 
     public void sendInvite(String username, long wait) {
-        if (pending != null || !canInvite()) return;
+        if (isPendingAction() || !canInvite()) return;
 
         pending = () -> {
             if (API.hasCapability(Capability.DIRECT_POST_ACTIONS)) {
@@ -208,12 +212,12 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void kick(int id) {
-        if (pending != null || !canKick()) return;
+        if (isPendingAction() || !canKick()) return;
         kick(group.getMember(id));
     }
 
     public void kick(GroupMember member) {
-        if (member == null || pending != null || !canKick()) return;
+        if (member == null || isPendingAction() || !canKick()) return;
 
         pending = () -> {
             int idx = group.indexOf(member.id);
@@ -224,13 +228,13 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void transferLeader(int id) {
-        if (pending != null || !canKick()) return;
+        if (isPendingAction() || !canKick()) return;
 
         transferLeader(group.getMember(id));
     }
 
     public void transferLeader(GroupMember member) {
-        if (member == null || pending != null || !canKick()) return;
+        if (member == null || isPendingAction() || !canKick()) return;
 
         pending = () -> {
             // Click crown and transfer to leader
