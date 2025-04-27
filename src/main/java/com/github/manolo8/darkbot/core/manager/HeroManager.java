@@ -200,9 +200,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
         boolean otherConfig = target.npcInfo.extra.has(NpcExtra.OPPOSITE_CONFIG);
 
-        HeroAPI.Configuration newConfig = HeroAPI.Configuration.of(
-                otherConfig ? (config.getConfiguration().ordinal() % 2) + 1 : config.getConfiguration().ordinal()
-        );
+        HeroAPI.Configuration newConfig = otherConfig ? config.getOppositeConfiguration() : config.getConfiguration();
 
         SelectableItem.Formation formation = target.npcInfo.getFormation().orElse(config.getFormation());
 
