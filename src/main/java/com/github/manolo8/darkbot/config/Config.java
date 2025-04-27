@@ -447,6 +447,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         @Override
         public SelectableItem.Formation getFormation() {
             if (newFormation != null) {
+                FORMATION = ItemUtils.findAssociatedItem(ItemCategory.DRONE_FORMATIONS, newFormation);
                 return newFormation;
             }
             // find original keybind to drone formation

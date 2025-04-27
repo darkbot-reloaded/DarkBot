@@ -5,6 +5,7 @@ import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.slotbars.CategoryBar;
 import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import eu.darkbot.api.game.items.ItemCategory;
+import eu.darkbot.api.game.items.SelectableItem;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -32,6 +33,12 @@ public class ItemUtils {
                 .filter(item -> item.getSlotBarType() == k.getType())
                 .filter(item -> item.containsSlotNumber(slotNumber))
                 .findAny();
+    }
+
+    public static Character findAssociatedItem(@Nullable ItemCategory category, SelectableItem selectableItem) {
+        Main main = Main.INSTANCE;
+
+        return main.facadeManager.slotBars.getKeyBind(selectableItem);
     }
 
 }
