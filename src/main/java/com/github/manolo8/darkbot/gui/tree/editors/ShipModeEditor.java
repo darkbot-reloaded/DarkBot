@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 
 public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
 
-    private HeroAPI.Configuration config;
+    private HeroAPI.Configuration newConfig;
 
     private final List<ConfigButton> configButtons = Arrays.stream(HeroAPI.Configuration.values())
             .filter(c -> c != HeroAPI.Configuration.UNKNOWN)
             .map(ConfigButton::new).collect(Collectors.toList());
 
-    private SelectableItem.Formation formation;
+    private SelectableItem.Formation newFormation;
 
     private final JComboBox<SelectableItem.Formation> comboBox = new JComboBox<>(SelectableItem.Formation.values());
 
@@ -52,18 +52,18 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
     }
 
     private void setConfig(HeroAPI.Configuration config) {
-        this.config = config;
+        this.newConfig = config;
         configButtons.forEach(ConfigButton::repaint);
     }
 
     private void setFormation(SelectableItem.Formation formation) {
-        this.formation = formation;
+        this.newFormation = formation;
         this.comboBox.setSelectedItem(formation);
     }
 
     @Override
     public ShipMode getEditorValue() {
-        return ShipMode.of(config, formation);
+        return ShipMode.of(newConfig, newFormation);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
 
         @Override
         public boolean isDefaultButton() {
-            return ShipModeEditor.this.config == config;
+            return ShipModeEditor.this.newConfig == config;
         }
     }
 }

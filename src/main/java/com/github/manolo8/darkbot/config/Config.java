@@ -428,10 +428,11 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         @Override
         public HeroAPI.Configuration getConfiguration() {
-            if (CONFIG != -1) {
-                newConfiguration = HeroAPI.Configuration.of(CONFIG);
-                CONFIG = -1;
+            if (newConfiguration != null) {
+                return newConfiguration;
             }
+
+            newConfiguration = HeroAPI.Configuration.of(CONFIG);
             return newConfiguration != null ? newConfiguration : HeroAPI.Configuration.FIRST;
         }
 
@@ -443,15 +444,13 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         @Override
         public SelectableItem.Formation getFormation() {
+            if (newFormation != null) {
+                return newFormation;
+            }
             // find original keybind to drone formation
             if (FORMATION != null) {
-                ItemUtils.findAssociatedItem(ItemCategory.DRONE_FORMATIONS, FORMATION)
-                        .map(it -> SelectableItem.Formation.of(it.id))
-                        .map(formation -> {
-                            FORMATION = null;
-                            newFormation = formation;
-                            return formation;
-                        });
+                newFormation = ItemUtils.findAssociatedItem(ItemCategory.DRONE_FORMATIONS, FORMATION)
+                        .map(item -> SelectableItem.Formation.of(item.id)).orElse(null);
             }
             // Return new formation if available
             return Optional.ofNullable(newFormation)
