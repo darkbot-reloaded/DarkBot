@@ -99,7 +99,7 @@ public class GroupManager extends Gui implements GroupAPI {
         }
     }
 
-    public boolean isPendingAction(){
+    public boolean isPendingAction() {
         return pending != null;
     }
 
@@ -156,13 +156,24 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void tryQueueLeave() {
+        tryQueueLeave(false);
+    }
+
+    public void tryQueueLeave(boolean force) {
         if (isPendingAction()) return;
 
-        if (shouldLeave()) shouldLeave = Math.min(20, shouldLeave + 1);
-        else shouldLeave = 0;
-
-        if (shouldLeave >= 20)
+        if (force) {
             pending = () -> runClicks(getPoint(GroupAction.LEAVE));
+            return;
+        }
+
+        if (shouldLeave()) {
+            shouldLeave = Math.min(20, shouldLeave + 1);
+            if (shouldLeave >= 20)
+                pending = () -> runClicks(getPoint(GroupAction.LEAVE));
+        } else {
+            shouldLeave = 0;
+        }
     }
 
     public boolean shouldKick() {
