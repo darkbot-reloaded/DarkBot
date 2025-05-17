@@ -164,7 +164,7 @@ public class GuiManager implements Manager, GameScreenAPI {
         this.guiCloser = new GuiCloser(quests, monthlyDeluxe, returnLogin);
     }
 
-    private Gui register(String key) {
+    public Gui register(String key) {
         return register(key, Gui.class);
     }
 
