@@ -93,7 +93,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             if (!craftTimeData.isEmpty())
                 craftTimeRequired = API.readInt(craftTimeData.getLong(0), 0x24);
             isInProgress = craftTimeLeft > 0 && craftTimeLeft <= craftTimeRequired;
-            isCollectable = !isInProgress && API.readDouble(data, 0x28) == 1.0;
+            isCollectable = !isInProgress && readDouble(0x40, 0x20, 0x28) == 1.0;
         }
 
     }
