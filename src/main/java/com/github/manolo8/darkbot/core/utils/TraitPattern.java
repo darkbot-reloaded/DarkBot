@@ -9,11 +9,11 @@ public class TraitPattern {
      */
     public static boolean ofLockType(long address) {
         long temp = API.readLong(address + 48);
-        int lockType = API.readInt(temp + 40);
+        int lockType = (int) API.readDouble(temp + 56);
 
         return (lockType == 1 || lockType == 2 || lockType == 3 || lockType == 4) &&
-                API.readInt(temp + 32) == Integer.MIN_VALUE &&
-                API.readInt(temp + 36) == Integer.MAX_VALUE;
+                API.readDouble(temp + 40) == -100000000000000.000 &&
+                API.readDouble(temp + 48) == 100000000000000.000;
     }
 
     /**

@@ -3,8 +3,6 @@ package com.github.manolo8.darkbot.core.objects;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.itf.HealthHolder;
 
-import static com.github.manolo8.darkbot.Main.API;
-
 public class Health extends Updatable implements HealthHolder, eu.darkbot.api.game.other.Health {
 
     public int hp;
@@ -24,12 +22,12 @@ public class Health extends Updatable implements HealthHolder, eu.darkbot.api.ga
                 hullLast = hp, maxHullLast = maxHp,
                 shieldLast = shield, maxShieldLast = maxShield;
 
-        hp = readIntFromIntHolder(48);
-        maxHp = readIntFromIntHolder(56);
-        hull = readIntFromIntHolder(64);
-        maxHull  = readIntFromIntHolder(72);
-        shield = readIntFromIntHolder(80);
-        maxShield = readIntFromIntHolder(88);
+        hp = readBindableInt(48); //fixme - they changed packet hp type to `long` so it may overflow integer
+        maxHp = readBindableInt(56); // same here
+        hull = readBindableInt(64);
+        maxHull  = readBindableInt(72);
+        shield = readBindableInt(80);
+        maxShield = readBindableInt(88);
 
         checkHealth(hpLast, maxHpLast,
                 hullLast, maxHullLast,
@@ -49,10 +47,6 @@ public class Health extends Updatable implements HealthHolder, eu.darkbot.api.ga
             if (shield > this.shield) shieldLastDecreased = System.currentTimeMillis();
             else shieldLastIncreased = System.currentTimeMillis();
         }
-    }
-
-    private int readIntFromIntHolder(int holderOffset) {
-        return API.readInt(API.readLong(address + holderOffset) + 40);
     }
 
     public double hpPercent() {

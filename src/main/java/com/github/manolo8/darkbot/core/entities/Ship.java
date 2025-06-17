@@ -77,11 +77,11 @@ public class Ship extends Entity implements eu.darkbot.api.game.entities.Ship {
         playerInfo.update();
         attackTarget.update();
 
-        formationId = API.readInt(address, 280, 40, 40);
+        formationId = API.readInt(address, 280, 40, 56);
         invisible = API.readBoolean(API.readLong(address + 160) + 32);
 
         shipId = API.readInt(address, 192, 76);
-        lockType = Lock.of(API.readInt(lockPtr, 48, 40));
+        lockType = Lock.of((int) API.readDouble(lockPtr, 48, 56));
     }
 
     @Override
