@@ -90,8 +90,8 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         updateNonZero(experience, readDouble(0x190));
         checkHonor(updateNonZero(honor, readDouble(0x198)));
 
-        cargo.track(readIntHolder(0x148));
-        maxCargo.track(readIntHolder(0x150));
+        cargo.track(readBindableInt(0x148));
+        maxCargo.track(readBindableInt(0x150));
 
         sid = readString(0xE0);
         userId = readInt(0x30);

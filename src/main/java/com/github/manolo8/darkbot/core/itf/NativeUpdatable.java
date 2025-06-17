@@ -30,9 +30,14 @@ public interface NativeUpdatable {
         return Main.API.readInt(getAddress(), modifyOffset(o1), o2, o3, o4);
     }
 
-    // it is a native class which holds min[32], max[36] & value[40] members
-    default int readIntHolder(int offset) {
-        return readInt(offset, 40);
+    // Reads 'BindableInt' holder value
+    default int readBindableInt(int offset) {
+        return (int) readDouble(offset, 56);
+    }
+
+    // Reads 'BindableString' holder value
+    default String readBindableString(String fallback, int offset) {
+        return readString(fallback, offset, 40);
     }
 
     default long readLong(int o1) {
