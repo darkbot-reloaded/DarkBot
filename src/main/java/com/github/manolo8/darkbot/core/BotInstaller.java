@@ -74,8 +74,8 @@ public class BotInstaller implements API.Singleton {
             // int speed = API.readMemoryInt(closure + 56);
             int bool = API.readInt(closure + 0x3c);
             int val = API.readInt(closure + 0x40);
-            int cargo = (int) API.readDouble(API.readLong(closure + 0x148) + 0x38);
-            int maxCargo = (int) API.readDouble(API.readLong(closure + 0x150) + 0x38);
+            int cargo = API.readBindableInt(closure, 0x148);
+            int maxCargo = API.readBindableInt(closure, 0x150);
 
             return level >= 0 && level <= 100
                    //&& speed > 50 && speed < 2000

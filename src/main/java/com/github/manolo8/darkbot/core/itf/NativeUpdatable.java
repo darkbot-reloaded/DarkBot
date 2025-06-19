@@ -31,8 +31,16 @@ public interface NativeUpdatable {
     }
 
     // Reads 'BindableInt' holder value
-    default int readBindableInt(int offset) {
-        return (int) readDouble(offset, 56);
+    default int readBindableInt(int o1) {
+        return Main.API.readBindableInt(getAddress(), modifyOffset(o1));
+    }
+
+    default int readBindableInt(int o1, int o2) {
+        return Main.API.readBindableInt(getAddress(), modifyOffset(o1), o2);
+    }
+
+    default int readBindableInt(int o1, int o2, int o3) {
+        return Main.API.readBindableInt(getAddress(), modifyOffset(o1), o2, o3);
     }
 
     // Reads 'BindableString' holder value

@@ -43,7 +43,7 @@ public class ShipInfo extends Updatable {
             target = newTarget;
             if (target != 0) keepTargetTime = System.currentTimeMillis() + 1000;
         }
-        angle = Math.toRadians(readInt(52, 40)); // read BindableRotation
+        angle = Math.toRadians(readInt(56, 32)); // read BindableRotation
         speed = readBindableInt(80);
 
         destination.update(API.readLong(address + 104));
