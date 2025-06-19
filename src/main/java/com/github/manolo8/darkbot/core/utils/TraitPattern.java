@@ -5,11 +5,11 @@ import static com.github.manolo8.darkbot.Main.API;
 public class TraitPattern {
 
     /**
-     * Filters if given address is instance of IntHolder which holds LockType.
+     * Filters if given address is instance of BindableInt, which holds LockType.
      */
     public static boolean ofLockType(long address) {
         long temp = API.readLong(address + 48);
-        int lockType = (int) API.readDouble(temp + 56);
+        int lockType = API.readBindableInt(temp);
 
         return (lockType == 1 || lockType == 2 || lockType == 3 || lockType == 4) &&
                 API.readDouble(temp + 40) == -100000000000000.000 &&
