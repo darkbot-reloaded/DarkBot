@@ -27,23 +27,15 @@ public class PlayerInfo extends Updatable implements EntityInfo {
 
     @Override
     public void update() {
-        clanId = readIntFromIntHolder(40);
-        clanDiplomacy = readIntFromIntHolder(48);
-        factionId = readIntFromIntHolder(72);
-        rank = readIntFromIntHolder(80);
-        gg = readIntFromIntHolder(88);
+        clanId = readBindableInt(40);
+        clanDiplomacy = readBindableInt(48);
+        factionId = readBindableInt(72);
+        rank = readBindableInt(80);
+        gg = readBindableInt(88);
         if (username.isEmpty()) {
-            clanTag = readStringFromStringHolder(56);
-            username = readStringFromStringHolder(64);
+            clanTag = readBindableString("", 56);
+            username = readBindableString("", 64);
         }
-    }
-
-    private int readIntFromIntHolder(int holderOffset) {
-        return API.readInt(API.readLong(address + holderOffset) + 40);
-    }
-
-    private String readStringFromStringHolder(int holderOffset) {
-        return API.readString(API.readLong(API.readLong(address + holderOffset) + 40), "");
     }
 
     @Override

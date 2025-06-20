@@ -43,7 +43,7 @@ public class SettingsManager implements Manager, Tickable, API.Singleton, Native
         this.config = readInt(0x5c);
 
         // x-1 & x-2 maps enemy counter
-        this.enemyCount = readInt(0x258, 40);
+        this.enemyCount = readBindableInt(0x258);
         this.attackViaSlotbar = readBoolean(0xa4);
 
         this.nextMap = readInt(0xf4);

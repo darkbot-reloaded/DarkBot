@@ -11,7 +11,7 @@ import java.util.function.LongPredicate;
  * every access violation error is handled by native code
  */
 public interface MemoryAPI extends API.Singleton {
-    int BOOL_FALSE = 0, BOOL_TRUE = 1;
+    int BOOL_FALSE = 0, BOOL_TRUE = 1, BINDABLE_INT_VALUE_OFFSET = 0x38;
 
     long NULL = 0;
     long ATOM_KIND = 0b111L;
@@ -44,6 +44,29 @@ public interface MemoryAPI extends API.Singleton {
 
     default int readInt(long address, int o1, int o2, int o3, int o4) {
         return readInt(readAtom(address, o1, o2, o3) + o4);
+    }
+
+    default int readBindableInt(long address) {
+        return clampDoubleToInt(readDouble(address, BINDABLE_INT_VALUE_OFFSET));
+    }
+
+    // Reads 'BindableInt' holder value
+    default int readBindableInt(long address, int o1) {
+        return clampDoubleToInt(readDouble(address, o1, BINDABLE_INT_VALUE_OFFSET));
+    }
+
+    default int readBindableInt(long address, int o1, int o2) {
+        return clampDoubleToInt(readDouble(address, o1, o2, BINDABLE_INT_VALUE_OFFSET));
+    }
+
+    default int readBindableInt(long address, int o1, int o2, int o3) {
+        return clampDoubleToInt(readDouble(address, o1, o2, o3, BINDABLE_INT_VALUE_OFFSET));
+    }
+
+    private int clampDoubleToInt(double value) {
+        if (value > Integer.MAX_VALUE) return Integer.MAX_VALUE;
+        if (value < Integer.MIN_VALUE) return Integer.MIN_VALUE;
+        return (int) value;
     }
 
     /**
