@@ -1,6 +1,5 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
-import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import eu.darkbot.api.managers.AstralGateAPI;
 
@@ -8,29 +7,24 @@ import java.util.List;
 
 import static com.github.manolo8.darkbot.Main.API;
 
-
-public class AstralGateProxy extends Updatable implements AstralGateAPI {
+public class AstralGateProxy extends AbstractProxy implements AstralGateAPI {
     private int highScore, currentRift, currentScore, cpuCount;
     private boolean canEquip;
     public final FlashList<AstralItem> rewardItems = FlashList.ofVector(AstralItem::new);
     public final FlashList<AstralItem> inventoryItems = FlashList.ofVector(AstralItem::new);
 
     @Override
-    public void update() {
-        if (address == 0) {
-            return;
-        }
+    public void updateProxy() {
+        if (address == 0) return;
 
-        long data = API.readAtom(address + 48);
+        this.highScore = readInt(0x40);
+        this.currentRift = readBindableInt(0x50);
+        this.currentScore = readBindableInt(0x58);
+        this.cpuCount = readBindableInt(0x60);
+        this.canEquip = readBoolean(0xb0, 0x20);
 
-        this.highScore = API.readInt(data + 64);
-        this.currentRift = API.readInt(data, 80, 40);
-        this.currentScore = API.readInt(data, 88, 40);
-        this.cpuCount = API.readInt(data, 96, 40);
-        this.canEquip = API.readBoolean(data, 0x0B0, 0x20);
-
-        rewardItems.update(API.readAtom(data + 0x88));
-        inventoryItems.update(API.readAtom(data + 0x0A0));
+        rewardItems.update(readAtom(0x88));
+        inventoryItems.update(readAtom(0xa0));
     }
 
     @Override
