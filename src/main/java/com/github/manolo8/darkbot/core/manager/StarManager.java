@@ -142,8 +142,7 @@ public class StarManager implements API.Singleton {
                 .addGG(454, "GoP Easy 5", "GoP E").accessOnlyBy(235, "GoP Easy 4")
                 .addGG(455, "GoP Easy Final", "GoP E").accessOnlyBy(235, "GoP Easy 5").exitBy(1)
                 .addGG(470, "Plutus' Trove of Riches Easy", "PToR E").accessOnlyBy(235, "GoP Easy Final").exitBy(1)
-                .addGG(471, "Treacherous Domain Easy", "TD E").accessOnlyBy(238, HOME_MAPS)
-                .addGG(472, "Treacherous Domain Normal", "TD N").accessOnlyBy(238, OUTPOST_HOME_MAPS);
+                .addGG(482, "Treacherous Domain", "TD").accessOnlyBy(239, BASE_MAPS).exitBy(240);
                 // Special (No direct access)
         mapBuild.addMap(42, "???")
                 .addMap(61, "MMO Invasion", "MMO Inv").addMap(62, "EIC Invasion", "EIC Inv").addMap(63, "VRU Invasion", "VRU Inv")
@@ -229,12 +228,12 @@ public class StarManager implements API.Singleton {
         }
 
         // Eternal BL maps
-        mapBuild.addGG(460, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(461, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(462, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(463, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(464, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(465, "Eternal Blacklight", "GG ∞ BL");
+        mapBuild.addGG(460, "Eternal Blacklight", "GG ∞ BL").exitBy(1)
+                .addGG(461, "Eternal Blacklight", "GG ∞ BL").exitBy(1)
+                .addGG(462, "Eternal Blacklight", "GG ∞ BL").exitBy(1)
+                .addGG(463, "Eternal Blacklight", "GG ∞ BL").exitBy(1)
+                .addGG(464, "Eternal Blacklight", "GG ∞ BL").exitBy(1)
+                .addGG(465, "Eternal Blacklight", "GG ∞ BL").exitBy(1);
 
         mapBuild.addGG(466, "Astral Ascension", "GG Astral")
                 .addGG(467, "Astral Ascension", "GG Astral")
