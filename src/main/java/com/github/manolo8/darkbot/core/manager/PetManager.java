@@ -123,7 +123,16 @@ public class PetManager extends Gui implements PetAPI {
     }
 
     public void tick() {
-        if (!main.isRunning() || !main.config.PET.ENABLED) return;
+        if (!main.isRunning()) return;
+
+        if (!main.config.PET.ENABLED) {
+            if (active()) {
+                if (show(true)) clickToggleStatus();
+                hide();
+                return;
+            }
+            return;
+        }
 
         eu.darkbot.api.extensions.selectors.PetGearSupplier gearSupplier = gearSelectorHandler.getBestSupplier();
 
