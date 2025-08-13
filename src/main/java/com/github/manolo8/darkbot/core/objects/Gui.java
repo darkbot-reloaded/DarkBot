@@ -155,8 +155,13 @@ public class Gui extends SpriteObject implements API, eu.darkbot.api.game.other.
     }
 
     private boolean toggleVisibility() {
-        return API.hasCapability(Capability.DIRECT_CALL_METHOD)
-                && API.callMethodChecked(true, "23(toggleVisibility)(2626?)1116321600", 183, address);
+        if (!API.hasCapability(Capability.DIRECT_CALL_METHOD)) return false;
+        try {
+            return API.callMethodChecked(true, "23(26)008431800", 183, address);
+        } catch (Exception e) {
+            // fallback to legacy method
+            return false;
+        }
     }
 
     /**
