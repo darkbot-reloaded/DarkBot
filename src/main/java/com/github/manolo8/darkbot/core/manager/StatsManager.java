@@ -99,7 +99,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
             instance = main.settingsManager.readString(0x298);
         }
 
-        novaEnergy.track(readInt(0x118, 0x28));
+        novaEnergy.track(readBindableInt(0x118));
         teleportBonus.track(readInt(0x50));
         premium = readBoolean(0x108, 0x20);
 
