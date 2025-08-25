@@ -66,6 +66,7 @@ public class GameAPIImpl<
     protected long lastFailedLogin;
 
     protected Timer clearRamTimer = Timer.get(5 * Time.MINUTE);
+    private final Timer becomeValidTimer = Timer.get(5 * Time.SECOND);
 
     private final MapManager mapManager;
 
@@ -204,6 +205,7 @@ public class GameAPIImpl<
 
     @Override
     public void createWindow() {
+        becomeValidTimer.disarm();
         if (hasCapability(Capability.LOGIN)) setData();
 
         if (hasCapability(Capability.BACKGROUND_ONLY)) return;
@@ -250,6 +252,14 @@ public class GameAPIImpl<
     @Override
     public boolean isValid() {
         boolean isValid = handler.isValid();
+        // Delay valid by a bit after refresh
+        if (isValid) {
+            if (!becomeValidTimer.isArmed()) becomeValidTimer.activate();
+            isValid = becomeValidTimer.isInactive();
+        } else {
+            becomeValidTimer.disarm();
+        }
+
         if (!autoHidden && isValid && params.getAutoHide()) {
             setVisible(false, Main.INSTANCE.config.BOT_SETTINGS.API_CONFIG.FULLY_HIDE_API);
             autoHidden = true;
@@ -437,6 +447,7 @@ public class GameAPIImpl<
 
     @Override
     public void handleRefresh(boolean useFakeDailyLogin) {
+        becomeValidTimer.disarm();
         // No login has happened? Make a first attempt
         if (hasCapability(Capability.LOGIN) && loginData.getUrl() == null) {
             handleRelogin();

@@ -65,7 +65,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     /** Do not use in plugins! Only for bot internal usage */
     @ApiStatus.Internal public static Main INSTANCE;
 
-    public static final Version VERSION      = new Version("1.131.3");
+    public static final Version VERSION      = new Version("1.131.7");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
