@@ -1,8 +1,10 @@
 package com.github.manolo8.darkbot.gui.utils.table;
 
 import com.github.manolo8.darkbot.gui.utils.PopupMenuListenerAdapter;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.game.items.SelectableItem;
 
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -10,13 +12,11 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.event.PopupMenuEvent;
-
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class FormationNpcInfoEditor extends TableDelegateEditor<JLabel> {
-
     private static final ToolTipManager TOOLTIPS = ToolTipManager.sharedInstance();
     private final JPopupMenu popupMenu = new JPopupMenu();
     private SelectableItem.Formation selectedFormation;
@@ -44,10 +44,15 @@ public class FormationNpcInfoEditor extends TableDelegateEditor<JLabel> {
         popupMenu.add(noneItem);
         popupMenu.addSeparator();
 
-        // Add all formations as selectable menu items
+        // Add all formations as selectable menu items with icons
         for (SelectableItem.Formation formation : SelectableItem.Formation.values()) {
             JMenuItem menuItem = new JMenuItem(formation.toString());
-            menuItem.setToolTipText("Select formation: " + formation); // Set tooltip
+
+            // Add icon to menu item
+            Icon icon = UIUtils.getFormationIcon(formation.name().toLowerCase());
+            menuItem.setIcon(icon);
+
+            menuItem.setToolTipText("Select formation: " + formation);
             menuItem.addActionListener(new FormationSelectionHandler(formation));
             popupMenu.add(menuItem);
         }
@@ -96,4 +101,3 @@ public class FormationNpcInfoEditor extends TableDelegateEditor<JLabel> {
         }
     }
 }
-

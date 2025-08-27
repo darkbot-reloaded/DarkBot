@@ -10,8 +10,15 @@ import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
 import net.miginfocom.swing.MigLayout;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.util.Arrays;
 import java.util.List;
@@ -110,7 +117,7 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
                 SelectableItem.Formation newFormation = (SelectableItem.Formation) value;
 
                 String iconName = newFormation.name().toLowerCase();
-                Icon icon = UIUtils.getIcon("formations/" + iconName);
+                Icon icon = UIUtils.getFormationIcon(iconName);
 
                 setIcon(icon);
                 setText(newFormation.toString());
