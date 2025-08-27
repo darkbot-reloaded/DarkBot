@@ -10,7 +10,6 @@ import com.github.manolo8.darkbot.config.types.suppliers.ReviveLocation;
 import com.github.manolo8.darkbot.config.utils.ItemUtils;
 import com.github.manolo8.darkbot.core.api.GameAPI;
 import com.github.manolo8.darkbot.core.manager.StarManager;
-import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.gui.tree.utils.NpcTableModel;
@@ -25,6 +24,7 @@ import eu.darkbot.api.config.annotations.Table;
 import eu.darkbot.api.config.annotations.Tag;
 import eu.darkbot.api.config.annotations.Visibility;
 import eu.darkbot.api.config.annotations.Visibility.Level;
+import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.game.enums.PetGear;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
@@ -458,6 +458,10 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             // Return new formation if available
             return Optional.ofNullable(newFormation)
                     .orElse(SelectableItem.Formation.STANDARD);
+        }
+
+        public ShipMode getShipMode(){
+            return ShipMode.of(newConfiguration, newFormation);
         }
 
         @Override

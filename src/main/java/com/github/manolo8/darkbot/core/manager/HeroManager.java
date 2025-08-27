@@ -217,7 +217,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
     @Deprecated
     public boolean setMode(Config.ShipConfig config) {
-        return setMode(config.CONFIG, config.FORMATION);
+        return setMode(config.getShipMode());
     }
 
     @Deprecated

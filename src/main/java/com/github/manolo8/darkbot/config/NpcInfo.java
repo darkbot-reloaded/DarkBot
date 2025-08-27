@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -121,9 +122,9 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
                         return formation;
                     });
         }
+        return Optional.of(Objects.requireNonNullElse(attackFormationNew, SelectableItem.Formation.STANDARD));
 
         // If we have a new formation, use it and clear the old one
-        return Optional.of(attackFormationNew);
     }
 
     public void setAttackFormation(SelectableItem.Formation formation) {

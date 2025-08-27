@@ -1,12 +1,14 @@
 package com.github.manolo8.darkbot.gui.tree.editors;
 
+import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
-import com.github.manolo8.darkbot.gui.tree.utils.SizedLabel;
+import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.config.types.ShipMode;
 import eu.darkbot.api.config.util.OptionEditor;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroAPI;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,29 +23,33 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
 
     private final List<ConfigButton> configButtons = Arrays.stream(HeroAPI.Configuration.values())
             .filter(c -> c != HeroAPI.Configuration.UNKNOWN)
-            .map(ConfigButton::new).collect(Collectors.toList());
+            .map(ConfigButton::new)
+            .collect(Collectors.toList());
 
     private SelectableItem.Formation newFormation;
 
     private final JComboBox<SelectableItem.Formation> comboBox = new JComboBox<>(SelectableItem.Formation.values());
 
     public ShipModeEditor() {
-        super(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        super(new MigLayout("gap 0, ins 0", "[][]5px[]", "[17px]"));
+
+        this.newConfig = HeroAPI.Configuration.FIRST;
+        this.newFormation = SelectableItem.Formation.STANDARD;
+
         setOpaque(false);
 
-        for (ConfigButton configButton : this.configButtons) {
-            this.add(configButton);
-        }
-        this.comboBox.addItemListener(item -> {
+        configButtons.forEach(button -> add(button, "wmax 17, hmax 17"));
+
+        comboBox.setRenderer(new FormationRenderer());
+        comboBox.addItemListener(item -> {
             if (item.getStateChange() == ItemEvent.SELECTED) {
                 setFormation((SelectableItem.Formation) item.getItem());
             }
         });
-        this.add(new SizedLabel("  "));
-        this.add(this.comboBox);
+        add(comboBox, "hmax 17");
     }
 
-
+    @Override
     public JComponent getEditorComponent(ConfigSetting<ShipMode> shipConfig) {
         ShipMode value = shipConfig.getValue();
         setConfig(value.getConfiguration());
@@ -56,14 +62,14 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
         configButtons.forEach(ConfigButton::repaint);
     }
 
-    private void setFormation(SelectableItem.Formation formation) {
-        this.newFormation = formation;
-        this.comboBox.setSelectedItem(formation);
+    private void setFormation(SelectableItem.Formation newFormation) {
+        this.newFormation = newFormation;
+        this.comboBox.setSelectedItem(newFormation);
     }
 
     @Override
     public ShipMode getEditorValue() {
-        return ShipMode.of(newConfig, newFormation);
+        return new Config.ShipConfig(newConfig, newFormation);
     }
 
     @Override
@@ -91,6 +97,27 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
         @Override
         public boolean isDefaultButton() {
             return ShipModeEditor.this.newConfig == config;
+        }
+    }
+
+    private static class FormationRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                      boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+            if (value instanceof SelectableItem.Formation) {
+                SelectableItem.Formation newFormation = (SelectableItem.Formation) value;
+
+                String iconName = newFormation.name().toLowerCase();
+                Icon icon = UIUtils.getIcon("formations/" + iconName);
+
+                setIcon(icon);
+                setText(newFormation.toString());
+                setIconTextGap(3);
+            }
+
+            return this;
         }
     }
 }
