@@ -5,15 +5,15 @@ import static com.github.manolo8.darkbot.Main.API;
 public class TraitPattern {
 
     /**
-     * Filters if given address is instance of IntHolder which holds LockType.
+     * Filters if given address is instance of BindableInt, which holds LockType.
      */
     public static boolean ofLockType(long address) {
         long temp = API.readLong(address + 48);
-        int lockType = API.readInt(temp + 40);
+        int lockType = API.readBindableInt(temp);
 
         return (lockType == 1 || lockType == 2 || lockType == 3 || lockType == 4) &&
-                API.readInt(temp + 32) == Integer.MIN_VALUE &&
-                API.readInt(temp + 36) == Integer.MAX_VALUE;
+                API.readDouble(temp + 40) == -100000000000000.000 &&
+                API.readDouble(temp + 48) == 100000000000000.000;
     }
 
     /**
