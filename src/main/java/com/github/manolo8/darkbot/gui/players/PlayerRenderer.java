@@ -48,7 +48,7 @@ public class PlayerRenderer extends JPanel implements ListCellRenderer<PlayerInf
         setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
 
         if (value.clanTag != null && !value.clanTag.isBlank()) {
-            this.playername.setText("[" + value.clanTag + "]" + value.username);
+            this.playername.setText("[" + value.clanTag + "] " + value.username);
         } else {
             this.playername.setText(value.username);
         }
