@@ -132,6 +132,7 @@ public class Plugin implements PluginInfo {
         return definition.download;
     }
 
+    @Override
     public String[] getFeatureIds() {
         return definition.features;
     }

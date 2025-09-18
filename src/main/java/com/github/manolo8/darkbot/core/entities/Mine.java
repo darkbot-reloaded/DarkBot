@@ -1,8 +1,12 @@
 package com.github.manolo8.darkbot.core.entities;
 
+import com.github.manolo8.darkbot.core.entities.fake.FakeEntities;
+import com.github.manolo8.darkbot.core.entities.fake.FakeExtension;
 import com.github.manolo8.darkbot.core.itf.Obstacle;
 import com.github.manolo8.darkbot.core.utils.pathfinder.AreaImpl;
 import com.github.manolo8.darkbot.core.utils.pathfinder.CircleImpl;
+import eu.darkbot.api.game.entities.FakeEntity;
+import lombok.Getter;
 
 import static com.github.manolo8.darkbot.Main.API;
 
@@ -12,7 +16,11 @@ public class Mine extends Entity implements Obstacle, eu.darkbot.api.game.entiti
 
     public int typeId;
 
-    private final CircleImpl area = new CircleImpl(0, 0, 200);
+    protected final CircleImpl area = new CircleImpl(0, 0, 200);
+
+    private Mine(int id) {
+        super(id);
+    }
 
     public Mine(int id, long address) {
         super(id);
@@ -57,5 +65,35 @@ public class Mine extends Entity implements Obstacle, eu.darkbot.api.game.entiti
     @Override
     public int getTypeId() {
         return typeId;
+    }
+
+    @Getter
+    public static class Fake extends Mine implements FakeEntity.FakeMine, FakeExtension {
+        private final FakeExtension.Data fakeData = new FakeExtension.Data(this);
+
+        public Fake(int typeId) {
+            super(FakeEntities.allocateFakeId());
+            super.typeId = typeId;
+        }
+
+        @Override
+        public boolean isInvalid(long mapAddress) {
+            return fakeData.isInvalid();
+        }
+
+        @Override
+        public boolean trySelect(boolean tryAttack) {
+            return fakeData.trySelect(tryAttack);
+        }
+
+        @Override
+        public void update() {
+            if (locationInfo.isMoving())
+                area.set(locationInfo.now, typeId == FROZEN_LAB_MINE ? 500 : 200);
+        }
+
+        @Override
+        public void update(long address) {
+        }
     }
 }

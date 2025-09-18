@@ -29,19 +29,19 @@ public class DevStuffDrawer implements Drawable {
     private static final Color PATH_COLOR = new Color(0, 128, 255, 64);
 
     private final Drive drive;
-    private final EntitiesAPI entities;
 
     private final Collection<? extends Entity> unknown;
+    private final Collection<? extends Entity> allEntities;
 
     private final ConfigSetting<Boolean> showDevStuff;
     private final HeroAPI hero;
 
     public DevStuffDrawer(EntitiesAPI entities, ConfigAPI config, Drive drive, HeroAPI hero) {
         this.drive = drive;
-        this.entities = entities;
         this.hero = hero;
 
         this.unknown = entities.getUnknown();
+        this.allEntities = entities.getAll();
 
         this.showDevStuff = config.requireConfig("bot_settings.other.dev_stuff");
     }
@@ -75,7 +75,7 @@ public class DevStuffDrawer implements Drawable {
 
         mg.setFont("tiny");
         mg.setColor("text");
-        entities.getAll().stream()
+        allEntities.stream()
                 .filter(e -> e.getId() > 150_000_000 && e.getId() < 160_000_000 || e instanceof Mine || e instanceof Ship)
                 .filter(e -> e.getLocationInfo().isInitialized())
                 .forEach(e -> mg.drawBackgroundedText(e, e.toString(), -4, MapGraphics.StringAlign.MID));

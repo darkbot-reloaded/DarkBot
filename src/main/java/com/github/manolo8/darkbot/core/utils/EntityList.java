@@ -1,6 +1,8 @@
 package com.github.manolo8.darkbot.core.utils;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.config.BoxInfo;
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.NpcInfo;
 import com.github.manolo8.darkbot.core.entities.Barrier;
 import com.github.manolo8.darkbot.core.entities.BasePoint;
@@ -23,6 +25,7 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
 import com.github.manolo8.darkbot.core.utils.factory.EntityFactory;
 import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
+import eu.darkbot.api.game.entities.FakeEntity;
 import eu.darkbot.api.game.entities.Mist;
 import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.managers.EntitiesAPI;
@@ -41,7 +44,37 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.github.manolo8.darkbot.Main.API;
-import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.*;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.BARRIER;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.BASE_HANGAR;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.BASE_STATION;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.BASE_TURRET;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.BOX;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.BUFF_CAPSULE;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.BURNING_TRAIL;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.BURNING_TRAIL_ENEMY;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.CBS_ASTEROID;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.CBS_CONSTRUCTION;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.CBS_MODULE;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.CBS_MODULE_CON;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.CBS_STATION;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.HEADQUARTER;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.LOW_RELAY;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.MINE;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.MIST_ZONE;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.NPC;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.ORE;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.PET;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.PET_BEACON;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.PLAYER;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.PLUTUS_GENERATOR;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.PLUTUS_GENERATOR_GREEN;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.PLUTUS_GENERATOR_RED;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.POD_HEAL;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.PORTAL;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.QUEST_GIVER;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.REFINERY;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.REPAIR_STATION;
+import static com.github.manolo8.darkbot.core.utils.factory.EntityFactory.SPACE_BALL;
 
 public class EntityList extends Updatable implements EntitiesAPI {
 
@@ -304,4 +337,42 @@ public class EntityList extends Updatable implements EntitiesAPI {
     public @UnmodifiableView Collection<? extends eu.darkbot.api.game.entities.Barrier> getBarriers() {
         return Collections.unmodifiableList(barriers);
     }
+
+    @Override
+    public FakeEntity.Builder fakeEntityBuilder() {
+        return new FakeEntity.Builder.Impl() {
+            private <T extends Entity & FakeEntity> T addEntity(T entity, Collection<? super T> collection) {
+                apply(entity);
+                collection.add(entity);
+                onEntityCreate(entity);
+                return entity;
+            }
+
+            @Override
+            public FakeEntity.FakeMine mine(int typeId) {
+                return addEntity(apply(new Mine.Fake(typeId)), mines);
+            }
+
+            @Override
+            public FakeEntity.FakeNpc npc(eu.darkbot.api.config.types.NpcInfo npcInfo) {
+                return addEntity(apply(new Npc.Fake((NpcInfo) npcInfo)), npcs);
+            }
+
+            @Override
+            public FakeEntity.FakeNpc npc(String npcName) {
+                return npc(ConfigEntity.INSTANCE.getOrCreateNpcInfo(npcName));
+            }
+
+            @Override
+            public FakeEntity.FakeBox box(eu.darkbot.api.config.types.BoxInfo box) {
+                return addEntity(apply(new Box.Fake((BoxInfo) box)), boxes);
+            }
+
+            @Override
+            public FakeEntity.FakeBox box(String boxName) {
+                return box(ConfigEntity.INSTANCE.getOrCreateBoxInfo(boxName));
+            }
+        };
+    }
+
 }
