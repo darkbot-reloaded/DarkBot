@@ -31,13 +31,19 @@ public class StarBuilder {
     private static class TempPort {
         private final int x, y, type, factionId;
         private final String targetMap;
+        private final double weight;
 
         TempPort(int x, int y, int type, int factionId, String targetMap) {
+            this(x, y, type, factionId, targetMap, 1.0);
+        }
+
+        TempPort(int x, int y, int type, int factionId, String targetMap, double weight) {
             this.x = x;
             this.y = y;
             this.type = type;
             this.factionId = factionId;
             this.targetMap = targetMap;
+            this.weight = weight;
         }
     }
 
@@ -98,6 +104,11 @@ public class StarBuilder {
         return this;
     }
 
+    protected StarBuilder addPortal(int x, int y, String targetMap, double weight) {
+        current.ports.add(new TempPort(x, y, -1, -1, targetMap, weight));
+        return this;
+    }
+
     @SuppressWarnings("SameParameterValue")
     protected StarBuilder addPortal(int x, int y, String targetMap, int factionId) {
         current.ports.add(new TempPort(x, y, -1, factionId, targetMap));
@@ -155,16 +166,24 @@ public class StarBuilder {
         for (TempMap map : maps) {
             for (TempPort port : map.ports) {
                 Map target = mapsByName.get(port.targetMap);
-                graph.addEdge(mapsByName.get(map.name), target, new Portal(port.type, port.x, port.y, target, port.factionId));
+                Portal portal = new Portal(port.type, port.x, port.y, target, port.factionId, port.weight);
+                graph.addEdge(mapsByName.get(map.name), target, portal);
+                graph.setEdgeWeight(portal, portal.weight);
             }
         }
 
         for (GGPort ggPort : ggPorts) {
             Map gg = mapsByName.get(ggPort.targetMap);
-            if (ggPort.looped) graph.addEdge(gg, gg, new Portal(ggPort.type, -1, -1, gg, -1));
+            if (ggPort.looped) {
+                Portal portal = new Portal(ggPort.type, -1, -1, gg, -1);
+                graph.addEdge(gg, gg, portal);
+                graph.setEdgeWeight(portal, portal.weight);
+            }
             for (String mapName : ggPort.maps) {
                 Map from = mapsByName.get(mapName);
-                graph.addEdge(from, gg, new Portal(ggPort.type, ggPort.x, ggPort.y, gg, -1));
+                Portal portal = new Portal(ggPort.type, ggPort.x, ggPort.y, gg, -1);
+                graph.addEdge(from, gg, portal);
+                graph.setEdgeWeight(portal, portal.weight);
             }
         }
         return graph;

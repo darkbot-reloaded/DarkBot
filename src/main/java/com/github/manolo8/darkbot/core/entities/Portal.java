@@ -15,25 +15,35 @@ public class Portal extends Entity implements eu.darkbot.api.game.entities.Porta
 
     public final Map target;
     public final int factionId;
+    public final double weight;
     private final PortalMatcher matcher;
     public boolean isJumping;
     public int type;
 
     public Portal(int id, int type, int x, int y) {
-        this(id, type, x, y, null, -1);
+        this(id, type, x, y, null, -1, 1.0);
     }
 
     public Portal(int searchType, int searchX, int searchY, Map target, int factionId) {
-        this(-1, searchType, searchX, searchY, target, factionId);
+        this(searchType, searchX, searchY, target, factionId, 1.0);
+    }
+
+    public Portal(int searchType, int searchX, int searchY, Map target, int factionId, double weight) {
+        this(-1, searchType, searchX, searchY, target, factionId, weight);
     }
 
     public Portal(int id, int searchType, int searchX, int searchY, Map target, int factionId) {
+        this(id, searchType, searchX, searchY, target, factionId, 1.0);
+    }
+
+    public Portal(int id, int searchType, int searchX, int searchY, Map target, int factionId, double weight) {
         super(id);
         this.matcher = new PortalMatcher(searchType, searchX, searchY, target != null && target.id == 71);
 
-        super.removed  = true;
-        this.target    = target;
+        super.removed = true;
+        this.target = target;
         this.factionId = factionId;
+        this.weight = weight;
     }
 
     public boolean matches(int x, int y, int type) {
