@@ -28,11 +28,11 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
         public double amount, cd;
         public String category, name;
 
-        private BoosterAPI.Type cat;
+        private BoosterAPI.Type categoryType;
         private final CachedFormatter simpleStringFmt = CachedFormatter.ofPattern("%3s %2.0f%% %s");
 
-        private final FlashListLong subBoostersArr = FlashListLong.ofVector();
-        private final FlashListLong attributesArr = FlashListLong.ofVector();
+        private final FlashListLong activeSubBoosters = FlashListLong.ofVector();
+        private final FlashListLong boostList = FlashListLong.ofVector();
         private final FlashListLong attributesArr2 = FlashListLong.ofVector();
         private final FlashListLong categoriesArr = FlashListLong.ofVector();
 
@@ -42,18 +42,18 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
             String oldCat = this.category;
             this.category = readString(0x20);
             if (!Objects.equals(this.category, oldCat))
-                this.cat = BoosterAPI.Type.of(category);
+                this.categoryType = BoosterAPI.Type.of(category);
             this.name = readString(0x40); //0x48 description;
         }
 
         @Override
         public void update() {
             this.amount = readDouble(0x50);
-            this.subBoostersArr.update(readLong(0x30));
+            this.activeSubBoosters.update(readLong(0x30));
 
             double min = Double.POSITIVE_INFINITY, curr;
-            for (int i = 0; i < subBoostersArr.size(); i++) {
-                long addr = subBoostersArr.getLong(i);
+            for (int i = 0; i < activeSubBoosters.size(); i++) {
+                long addr = activeSubBoosters.getLong(i);
                 if ((curr = API.readDouble(addr, 0x30, 0x38)) > 0 && curr < min) min = curr;
             }
             this.cd = min;
@@ -61,14 +61,14 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
             if (cd != Double.POSITIVE_INFINITY && amount <= 0) {
                 double amount = 0;
 
-                for (int i = 0; i < subBoostersArr.size(); i++) {
-                    long sub = subBoostersArr.getLong(i);
+                for (int i = 0; i < activeSubBoosters.size(); i++) {
+                    long sub = activeSubBoosters.getLong(i);
                     long attributesAddr = API.readAtom(sub, 0x28, 0x40, 0x20);
-                    attributesArr.update(API.readLong(attributesAddr, 0x88));
-                    attributesArr2.update(API.readLong(attributesAddr, 0x90));
-                    categoriesArr.update(API.readLong(attributesAddr, 0x98));
-                    for (int j = 0; j < attributesArr.size(); j++) {
-                        long attribute = attributesArr.getLong(j);
+                    boostList.update(API.readLong(attributesAddr, 0xa0));
+                    attributesArr2.update(API.readLong(attributesAddr, 0xa8));
+                    categoriesArr.update(API.readLong(attributesAddr, 0xb0));
+                    for (int j = 0; j < boostList.size(); j++) {
+                        long attribute = boostList.getLong(j);
                         if (API.readLong(attribute + 0x20) == readLong(0x20)) {
                             amount += API.readDouble(attribute + 0x28);
                             break;
@@ -89,11 +89,11 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
         }
 
         public String toSimpleString() {
-            return simpleStringFmt.format(Time.secondsToShort(cd), amount, cat.getSmall(category));
+            return simpleStringFmt.format(Time.secondsToShort(cd), amount, categoryType.getSmall(category));
         }
 
         public Color getColor() {
-            return cat.getColor();
+            return categoryType.getColor();
         }
 
         @Override
