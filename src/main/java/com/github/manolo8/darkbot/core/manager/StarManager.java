@@ -230,12 +230,12 @@ public class StarManager implements API.Singleton {
         }
 
         // Eternal BL maps
-        mapBuild.addGG(460, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(461, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(462, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(463, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(464, "Eternal Blacklight", "GG ∞ BL")
-                .addGG(465, "Eternal Blacklight", "GG ∞ BL");
+        mapBuild.addGG(460, "Eternal Blacklight", "GG ∞ BL").exitBy(1)
+                .addGG(461, "Eternal Blacklight", "GG ∞ BL").exitBy(1)
+                .addGG(462, "Eternal Blacklight", "GG ∞ BL").exitBy(1)
+                .addGG(463, "Eternal Blacklight", "GG ∞ BL").exitBy(1)
+                .addGG(464, "Eternal Blacklight", "GG ∞ BL").exitBy(1)
+                .addGG(465, "Eternal Blacklight", "GG ∞ BL").exitBy(1);
 
         mapBuild.addGG(466, "Astral Ascension", "GG Astral")
                 .addGG(467, "Astral Ascension", "GG Astral")
