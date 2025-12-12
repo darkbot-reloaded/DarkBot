@@ -1,17 +1,15 @@
 package com.github.manolo8.darkbot.gui.utils;
 
+import eu.darkbot.util.StringUtils;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class Strings {
     public static final DecimalFormat ONE_PLACE_FORMAT = new DecimalFormat("0.0");
-
-    private static final Pattern NON_CHARACTER_REPLACEMENT = Pattern.compile("[^A-Za-z0-9]");
-    private static final Pattern MIMESIS_REPLACEMENT = Pattern.compile("m[i1]m[e3][s5][i1][s5]");
 
     private static final Pattern SIMPLIFY_NAME_MATCHES = Pattern.compile("^[^\\d]+\\d{1,3}$");
     private static final Pattern SIMPLIFY_NAME_REPLACEMENT = Pattern.compile("\\d{1,3}$");
@@ -37,22 +35,7 @@ public class Strings {
     }
 
     public static String fuzzyMatcher(String string) {
-        // xX[ Chaos Protegit ]Xx or -x-[ Synk ]-x-, make sure to remove the "x"
-        if ((string.startsWith("xX[") && string.endsWith("]Xx"))
-                || (string.startsWith("-x-") && string.endsWith("-x-"))) {
-            string = string.substring(3, string.length() - 3);
-        }
-        // Special case, keep upper & lower case
-        if (!string.contains("StreuneR")) {
-            string = string.toLowerCase(Locale.ROOT);
-        }
-        // Fix up referee bot
-        string = string.replace("referee binary bot", "referee bot");
-        // Fix up mimesis
-        string = MIMESIS_REPLACEMENT.matcher(string).replaceAll("mimesis");
-
-        // Keep only alphanumerical chars
-        return NON_CHARACTER_REPLACEMENT.matcher(string).replaceAll("");
+        return StringUtils.fuzzyNpcName(string);
     }
 
     public static boolean isEmpty(String s) {

@@ -1,5 +1,6 @@
 package com.github.manolo8.darkbot.extensions.features.decorators;
 
+import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.I18n;
@@ -13,7 +14,10 @@ public class InstructionProviderDecorator extends FeatureDecorator<InstructionPr
 
     @Override
     protected void load(FeatureDefinition<InstructionProvider> fd, InstructionProvider obj) {
-        if (obj instanceof Module && !(obj instanceof TemporalModule)) showInstructions(obj, fd.getName());
+        if (obj instanceof Module
+                && !(obj instanceof TemporalModule)
+                && ConfigEntity.INSTANCE.getConfig().BOT_SETTINGS.OTHER.SHOW_INSTRUCTIONS)
+            showInstructions(obj, fd.getName());
     }
 
     @Override

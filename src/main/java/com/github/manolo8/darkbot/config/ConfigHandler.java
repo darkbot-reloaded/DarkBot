@@ -59,6 +59,11 @@ public class ConfigHandler implements ConfigAPI, Listener {
     }
 
     @Override
+    public String getCurrentProfile() {
+        return loader.getConfigName();
+    }
+
+    @Override
     public List<String> getConfigProfiles() {
         return loader.getAvailableConfigs();
     }

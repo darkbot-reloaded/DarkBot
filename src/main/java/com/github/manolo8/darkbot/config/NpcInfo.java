@@ -7,6 +7,7 @@ import eu.darkbot.api.config.types.NpcFlag;
 import eu.darkbot.api.game.items.ItemCategory;
 import eu.darkbot.api.game.items.SelectableItem;
 import eu.darkbot.api.managers.HeroItemsAPI;
+import eu.darkbot.util.StringUtils;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     public Character attackFormation;
     public ExtraNpcInfo extra = new ExtraNpcInfo();
 
+    public transient String name;
     public transient String fuzzyName;
     public transient int npcId;
     public @Option.Ignore Set<Integer> mapList = new HashSet<>();
@@ -132,6 +134,16 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
     @Override
     public void addMapId(int mapId) {
         mapList.add(mapId);
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getFuzzyName() {
+        return fuzzyName == null ? fuzzyName = StringUtils.fuzzyNpcName(getName()) : fuzzyName;
     }
 
     // Keep a cache of the last searched id.

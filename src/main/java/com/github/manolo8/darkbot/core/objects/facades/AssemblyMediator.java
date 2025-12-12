@@ -3,6 +3,7 @@ package com.github.manolo8.darkbot.core.objects.facades;
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.FlashList;
 import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
+import eu.darkbot.api.API;
 import eu.darkbot.api.managers.AssemblyAPI;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,13 +15,13 @@ import java.util.List;
 import static com.github.manolo8.darkbot.Main.API;
 
 @Getter
-public class AssemblyMediator extends Updatable implements AssemblyAPI {
+public class AssemblyMediator extends Updatable implements API.Singleton {
     private int selectedRecipeIndex;
     private final Recipe selectedRecipe = new Recipe();
 
     private boolean listUpdated = false;
     private final FlashList<Recipe> recipes = FlashList.ofVector(Recipe::new);
-    private final List<Filter> filters = new ArrayList<>();
+    private final List<AssemblyAPI.Filter> filters = new ArrayList<>();
     private final FlashList<RowFilter> rowSettings = FlashList.ofVector(RowFilter::new);
 
     private boolean isFilterDropDownOpen;
@@ -46,7 +47,6 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
         isFilterDropDownOpen = readBoolean(0x78, 0x60, 0x1D0);
     }
 
-    @Override
     public List<? extends AssemblyAPI.Recipe> getRecipes() {
         if (!listUpdated) {
             recipes.update(readAtom(0x60, 0x20));
@@ -93,7 +93,7 @@ public class AssemblyMediator extends Updatable implements AssemblyAPI {
             if (!craftTimeData.isEmpty())
                 craftTimeRequired = API.readInt(craftTimeData.getLong(0), 0x24);
             isInProgress = craftTimeLeft > 0 && craftTimeLeft <= craftTimeRequired;
-            isCollectable = !isInProgress && API.readDouble(data, 0x28) == 1.0;
+            isCollectable = !isInProgress && readDouble(0x40, 0x20, 0x28) == 1.0;
         }
 
     }

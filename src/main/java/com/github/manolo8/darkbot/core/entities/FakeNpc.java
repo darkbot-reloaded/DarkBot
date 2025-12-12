@@ -2,14 +2,17 @@ package com.github.manolo8.darkbot.core.entities;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.NpcInfo;
+import com.github.manolo8.darkbot.core.entities.fake.FakeEntities;
 import com.github.manolo8.darkbot.core.utils.Location;
 
+/**
+ * Represents a Pet ping FakeNpc, this is a singleton and any other fake npc should use {@link Npc.Fake} instead
+ */
 public class FakeNpc extends Npc {
-
     private long pingAlive = 0;
 
     public FakeNpc(Main main) {
-        super(Integer.MIN_VALUE);
+        super(FakeEntities.allocateFakeId());
         super.removed = true;
         super.address = -1;
         super.main = main;

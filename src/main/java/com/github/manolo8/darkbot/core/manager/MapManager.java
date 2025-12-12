@@ -444,21 +444,9 @@ public class MapManager implements Manager, StarSystemAPI {
     }
 
     public boolean isCurrentTargetOwned() {
-        if (is3DView)
-            return Optional.ofNullable(main.hero.getTargetAs(Lockable.class))
-                    .map(Lockable::isOwned)
-                    .orElse(false);
-
-        long temp = API.readLong(viewAddressStatic);
-        temp = API.readLong(temp + 216); //
-        temp = API.readLong(temp + 200); //
-        temp = API.readLong(temp + 48); // get _target
-        int lockStatus = API.readInt(temp + 40); // IntHolder.value
-        // 1 = selected & owned
-        // 2 = selected & someone else owns it
-        // 3 = ?
-        // 4 = ?
-        return lockStatus == 1 || lockStatus < 1 || lockStatus > 4;
+        return Optional.ofNullable(main.hero.getTargetAs(Lockable.class))
+                .map(Lockable::isOwned)
+                .orElse(false);
     }
 
 

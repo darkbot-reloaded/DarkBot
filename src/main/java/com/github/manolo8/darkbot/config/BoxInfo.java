@@ -11,6 +11,8 @@ public class BoxInfo implements eu.darkbot.api.config.types.BoxInfo {
     @Option(key = "config.collect.box_table.priority")
     public int priority;
 
+    public transient String name;
+
     @Override
     public boolean shouldCollect() {
         return collect;
