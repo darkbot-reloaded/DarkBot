@@ -33,7 +33,7 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
 
         private final FlashListLong activeSubBoosters = FlashListLong.ofVector();
         private final FlashListLong boostList = FlashListLong.ofVector();
-        private final FlashListLong attributesArr2 = FlashListLong.ofVector();
+        private final FlashListLong attributesArr = FlashListLong.ofVector();
         private final FlashListLong categoriesArr = FlashListLong.ofVector();
 
         @Override
@@ -64,9 +64,9 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
                 for (int i = 0; i < activeSubBoosters.size(); i++) {
                     long sub = activeSubBoosters.getLong(i);
                     long attributesAddr = API.readAtom(sub, 0x28, 0x40, 0x20);
-                    boostList.update(API.readLong(attributesAddr, 0xa0));
-                    attributesArr2.update(API.readLong(attributesAddr, 0xa8));
-                    categoriesArr.update(API.readLong(attributesAddr, 0xb0));
+                    boostList.update(API.readLong(attributesAddr, 0xA0));
+                    attributesArr.update(API.readLong(attributesAddr, 0xA8));
+                    categoriesArr.update(API.readLong(attributesAddr, 0xB0));
                     for (int j = 0; j < boostList.size(); j++) {
                         long attribute = boostList.getLong(j);
                         if (API.readLong(attribute + 0x20) == readLong(0x20)) {
@@ -74,8 +74,8 @@ public class BoosterProxy extends Updatable implements BoosterAPI {
                             break;
                         }
                     }
-                    for (int j = 0; j < attributesArr2.size(); j++) {
-                        long attribute = attributesArr2.getLong(j);
+                    for (int j = 0; j < Math.min(categoriesArr.size(), attributesArr.size()); j++) {
+                        long attribute = attributesArr.getLong(j);
                         long category = categoriesArr.getLong(j);
                         if (category == readLong(0x20)) {
                             amount += API.readInt(attribute + 0x20);
