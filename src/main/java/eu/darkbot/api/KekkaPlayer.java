@@ -21,6 +21,7 @@ public class KekkaPlayer implements GameAPI.Window, GameAPI.Handler, GameAPI.Mem
     public native void refine(long refineUtilAddress, int oreId, int amount);
     public native boolean useItem(long screenManager, String check, int methodIdx, long... args);
 
+    public native void printScriptObject(long obj);
     public native int checkMethodSignature(long obj, int methodIdx, boolean includeMethodName, String signature);
     //sync, also is called from window message loop instead from flash method like async version
     public native long callMethodSync(int methodIdx, long... args);

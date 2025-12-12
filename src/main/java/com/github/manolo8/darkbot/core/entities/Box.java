@@ -3,8 +3,12 @@ package com.github.manolo8.darkbot.core.entities;
 import com.github.manolo8.darkbot.config.BoxInfo;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.core.api.Capability;
+import com.github.manolo8.darkbot.core.entities.fake.FakeEntities;
+import com.github.manolo8.darkbot.core.entities.fake.FakeExtension;
 import com.github.manolo8.darkbot.utils.Offsets;
+import eu.darkbot.api.game.entities.FakeEntity;
 import eu.darkbot.util.Timer;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -25,6 +29,9 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
 
     public BoxInfo boxInfo;
 
+    private Box(int id) {
+        super(id);
+    }
 
     public Box(int id, long address) {
         super(id);
@@ -133,6 +140,44 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
 
         public Beacon(int id, long address) {
             super(id, address);
+        }
+    }
+
+    @Getter
+    public static class Fake extends Box implements FakeEntity.FakeBox, FakeExtension {
+        private final FakeExtension.Data fakeData = new FakeExtension.Data(this);
+
+        public Fake(BoxInfo box) {
+            super(FakeEntities.allocateFakeId());
+            super.type = box.name;
+            super.boxInfo = box;
+        }
+
+        @Override
+        public boolean isInvalid(long mapAddress) {
+            return fakeData.isInvalid();
+        }
+
+        @Override
+        public boolean tryCollect() {
+            return fakeData.trySelect(false);
+        }
+
+        @Override
+        public boolean trySelect(boolean tryAttack) {
+            return fakeData.trySelect(tryAttack);
+        }
+
+        public String getHash() {
+            return type + locationInfo.getCurrent();
+        }
+
+        @Override
+        public void update() {
+        }
+
+        @Override
+        public void update(long address) {
         }
     }
 }
