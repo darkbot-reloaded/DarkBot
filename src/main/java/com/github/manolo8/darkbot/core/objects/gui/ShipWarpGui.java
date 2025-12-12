@@ -26,10 +26,8 @@ public class ShipWarpGui extends Gui implements ShipWarpAPI {
     }
 
     @Override
-    public void updateShipList() {
-        if (this.show(true)) {
-            this.shipWarpProxy.update();
-        }
+    public boolean updateShipList() {
+        return this.show(true);
     }
 
     @Override
@@ -42,23 +40,31 @@ public class ShipWarpGui extends Gui implements ShipWarpAPI {
         return shipWarpProxy.getShipsList();
     }
 
-    public void clickShip(ShipWarpProxy.Ship ship) {
-        if (this.show(true)) {
+    @Override
+    public boolean clickShip(Ship ship) {
+        if (ship instanceof ShipWarpProxy.Ship && this.show(true)) {
             this.clickShip(shipWarpProxy.getShipsList().indexOf(ship));
+            return true;
         }
+        return false;
     }
 
-    public void clickShip(int index) {
-        if (index < 0) return;
-        if (index >= shipWarpProxy.getShipsList().size()) return;
+    @Override
+    public boolean clickShip(int index) {
+        if (index < 0 || index >= shipWarpProxy.getShipsList().size()) return false;
         if (this.show(true)) {
             this.click(104 + (index * 100), 97);
+            return true;
         }
+        return false;
     }
 
-    public void clickWarp() {
+    @Override
+    public boolean clickWarp() {
         if (this.show(true)) {
             this.click(330, 210);
+            return true;
         }
+        return false;
     }
 }
