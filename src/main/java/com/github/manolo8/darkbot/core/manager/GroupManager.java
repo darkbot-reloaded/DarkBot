@@ -127,7 +127,7 @@ public class GroupManager extends Gui implements GroupAPI {
             Long inviteTime = inviteTimeout.get(member.username);
             if (inviteTime != null && System.currentTimeMillis() < inviteTime) continue;
 
-            kick(member);
+            kick(member.id);
             break;
         }
     }
@@ -224,22 +224,32 @@ public class GroupManager extends Gui implements GroupAPI {
 
     public void kick(int id) {
         if (isPendingAction() || !canKick()) return;
-        kick(group.getMember(id));
-    }
-
-    public void kick(GroupMember member) {
-        if (member == null || isPendingAction() || !canKick()) return;
 
         pending = () -> {
-            int idx = group.indexOf(member.id);
+            GroupMember member = group.getMember(id);
+            int idx = group.indexOf(id);
             if (idx < 0) return;
             inviteTimeout.put(member.username, System.currentTimeMillis() + 30_000);
             runClicks(getPoint(GroupAction.REMOVE), getMemberPoint(idx));
         };
     }
 
+    public void kick(GroupMember member) {
+        if (member == null || isPendingAction() || !canKick()) return;
+
+        kick(member.id);
+    }
+
     public void transferLeader(int id) {
         if (isPendingAction() || !canKick()) return;
+
+        pending = () -> {
+            // Click crown and transfer to leader
+            int idx = group.indexOf(id);
+            if (idx < 0) return;
+            ClickPoint memberPoint = getMemberPoint(idx);
+            runClicks(getPoint(GroupAction.CROWN), memberPoint);
+        };
 
         transferLeader(group.getMember(id));
     }
@@ -247,13 +257,7 @@ public class GroupManager extends Gui implements GroupAPI {
     public void transferLeader(GroupMember member) {
         if (member == null || isPendingAction() || !canKick()) return;
 
-        pending = () -> {
-            // Click crown and transfer to leader
-            int idx = group.indexOf(member.id);
-            if (idx < 0) return;
-            ClickPoint memberPoint = getMemberPoint(idx);
-            runClicks(getPoint(GroupAction.CROWN), memberPoint);
-        };
+        transferLeader(member.id);
     }
 
     private void runClicks(ClickPoint... points) {
