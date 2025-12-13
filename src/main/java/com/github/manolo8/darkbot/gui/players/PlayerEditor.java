@@ -89,8 +89,8 @@ public class PlayerEditor extends JPanel implements Listener {
                 .values()
                 .stream()
                 .filter(pi -> pi.filter(query))
-                .sorted(Comparator.comparing((PlayerInfo pi) -> pi.clanTag)
-                        .thenComparing(pi -> pi.username))
+                .sorted(Comparator.comparing((PlayerInfo pi) -> pi.clanTag, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(pi -> pi.username, Comparator.nullsLast(Comparator.naturalOrder())))
                 .forEach(playersModel::addElement);
         renderer.setAddedPlayerCount(playersModel.getSize());
         for (PlayerInfo p : nearbyPlayers) {
