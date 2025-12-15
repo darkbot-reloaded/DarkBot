@@ -250,8 +250,6 @@ public class GroupManager extends Gui implements GroupAPI {
             ClickPoint memberPoint = getMemberPoint(idx);
             runClicks(getPoint(GroupAction.CROWN), memberPoint);
         };
-
-        transferLeader(group.getMember(id));
     }
 
     public void transferLeader(GroupMember member) {
