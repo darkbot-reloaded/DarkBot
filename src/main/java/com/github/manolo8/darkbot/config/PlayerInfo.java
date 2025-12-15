@@ -14,6 +14,7 @@ import java.util.Objects;
 public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
     public String username;
     public int userId;
+    public String clanTag;
 
     public long lastUpdate = System.currentTimeMillis();
 
@@ -23,13 +24,14 @@ public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
 
     public PlayerInfo() {}
 
-    public PlayerInfo(String username, int userId) {
+    public PlayerInfo(String username, int userId, String clanTag) {
         this.username = username;
         this.userId = userId;
+        this.clanTag = clanTag;
     }
 
     public PlayerInfo(Player player) {
-        this(player.getEntityInfo().getUsername(), player.getId());
+        this(player.getEntityInfo().getUsername(), player.getId(), player.getEntityInfo().getClanTag());
     }
 
     public void setTag(PlayerTag tag, Long until) {
