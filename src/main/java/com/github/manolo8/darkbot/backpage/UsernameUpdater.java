@@ -85,7 +85,7 @@ public class UsernameUpdater implements Task {
                 pl.username = user.username;
                 pl.lastUpdate = System.currentTimeMillis();
             } else {
-                config.PLAYER_INFOS.put(user.userId, new PlayerInfo(user.username, user.userId));
+                config.PLAYER_INFOS.put(user.userId, new PlayerInfo(user.username, user.userId, user.clanTag));
             }
 
             config.PLAYER_UPDATED.send(user.userId);

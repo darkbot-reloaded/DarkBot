@@ -398,7 +398,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
     @Override
     public eu.darkbot.api.config.types.PlayerInfo getPlayerInfo(int id) {
-        return PLAYER_INFOS.computeIfAbsent(id, i -> new PlayerInfo(null, i));
+        return PLAYER_INFOS.computeIfAbsent(id, i -> new PlayerInfo(null, i, null));
     }
 
     @Override

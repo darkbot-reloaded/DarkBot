@@ -1,10 +1,8 @@
 package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.Gui;
 import com.github.manolo8.darkbot.core.objects.swf.FlashList;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.api.managers.EternalBlacklightGateAPI;
 import eu.darkbot.util.Timer;
 import lombok.Getter;
@@ -16,7 +14,7 @@ import java.util.List;
 import static com.github.manolo8.darkbot.Main.API;
 
 @ApiStatus.Internal
-public class EternalBlacklightProxy extends Updatable implements EternalBlacklightGateAPI {
+public class EternalBlacklightProxy extends AbstractProxy implements EternalBlacklightGateAPI {
     private final Timer boosterClickTimer = Timer.get(500);
 
     private final Main main;
@@ -45,21 +43,19 @@ public class EternalBlacklightProxy extends Updatable implements EternalBlacklig
     }
 
     @Override
-    public void update() {
+    protected void updateProxy() {
         if (address == 0) return;
 
-        long data = API.readLong(address + 48) & ByteUtils.ATOM_MASK;
+        this.furthestWave    = readInt(0x40);
+        this.boosterPoints   = readInt(0x44);
+        this.isEventEnabled  = readBoolean(0x48);
+        this.cpuCount        = readBindableInt(0x68);
+        this.currentWave     = readBindableInt(0x70);
 
-        this.furthestWave    = API.readInt(data + 0x40);
-        this.boosterPoints   = API.readInt(data + 0x44);
-        this.isEventEnabled  = API.readBoolean(data + 0x48);
-        this.cpuCount        = API.readInt(API.readLong(data + 0x68) + 0x28);
-        this.currentWave     = API.readInt(API.readLong(data + 0x70) + 0x28);
-
-        this.activeBoostersArr.update(API.readLong( data + 0x78));
-        this.boostersOptionsArr.update(API.readLong(data + 0x80));
-        this.topRankersArr.update(API.readLong(data + 0x90));
-        this.myRank.update(API.readLong(data + 0x98));
+        this.activeBoostersArr.update(readLong(0x78));
+        this.boostersOptionsArr.update(readLong(0x80));
+        this.topRankersArr.update(readLong(0x90));
+        this.myRank.update(readLong(0x98));
     }
 
     @Override
