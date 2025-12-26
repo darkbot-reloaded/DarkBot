@@ -40,15 +40,29 @@ public class StatTypeValue implements Value<Number>, Parser {
     }
 
     private StatsAPI.Key getKeyFromString(String token) {
-        String[] tokenParts = token.split(":");
+        String[] tokenParts = token.split(":", 3);
 
-        String statNamespace = tokenParts.length == 3 ? tokenParts[0] : null;
-        String statCategory = tokenParts.length >= 2 ? tokenParts[tokenParts.length - 2] : null;
-        String statKey = tokenParts[tokenParts.length - 1];
+        String statNamespace;
+        String statCategory;
+        String statKey;
+
+        if (tokenParts.length == 3) {
+            statNamespace = tokenParts[0];
+            statCategory = tokenParts[1];
+            statKey = tokenParts[2];
+        } else if (tokenParts.length == 2) {
+            statNamespace = null;
+            statCategory = tokenParts[0];
+            statKey = tokenParts[1];
+        } else {
+            statNamespace = null;
+            statCategory = null;
+            statKey = tokenParts[0];
+        }
 
         return StatsManager.getStatKeys().stream()
-                .filter(s -> statNamespace == null || s.namespace().equalsIgnoreCase(statNamespace))
-                .filter(s -> statCategory == null || s.category().equalsIgnoreCase(statCategory))
+                .filter(s -> statNamespace == null || (s.namespace() != null && s.namespace().equalsIgnoreCase(statNamespace)))
+                .filter(s -> statCategory == null || (s.category() != null && s.category().equalsIgnoreCase(statCategory)))
                 .filter(s -> s.name().equalsIgnoreCase(statKey))
                 .findFirst().orElse(null);
     }
