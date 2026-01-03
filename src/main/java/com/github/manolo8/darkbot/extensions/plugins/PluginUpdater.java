@@ -112,11 +112,12 @@ public class PluginUpdater implements API.Singleton {
     }
 
     private PluginDefinition findUpdate(PluginDefinition current) throws IOException {
-        if (current.update == null) return current;
-        PluginDefinition next = pluginHandler.readPluginDefinition(current.update.openStream());
-        if (current.version.compareTo(next.version) >= 0) return current;
-        if (next.update == null || current.update.equals(next.update)) return next;
-        return findUpdate(next);
+        return current;
+        // if (current.update == null) return current;
+        // PluginDefinition next = pluginHandler.readPluginDefinition(current.update.openStream());
+        // if (current.version.compareTo(next.version) >= 0) return current;
+        // if (next.update == null || current.update.equals(next.update)) return next;
+        // return findUpdate(next);
     }
 
     public void update(Plugin plugin) {

@@ -268,13 +268,13 @@ public class PluginHandler implements API.Singleton {
     }
 
     private void testSignature(Plugin plugin, JarFile jar) throws IOException {
-        try {
-            Boolean signatureValid = AuthAPI.getInstance().checkPluginJarSignature(jar);
-            if (signatureValid == null) plugin.getIssues().add(PLUGIN_NOT_SIGNED);
-            else if (!signatureValid) plugin.getIssues().add(UNKNOWN_SIGNATURE);
-        } catch (SecurityException e) {
-            plugin.getIssues().add(INVALID_SIGNATURE);
-        }
+        // try {
+        //     Boolean signatureValid = AuthAPI.getInstance().checkPluginJarSignature(jar);
+        //     if (signatureValid == null) plugin.getIssues().add(PLUGIN_NOT_SIGNED);
+        //     else if (!signatureValid) plugin.getIssues().add(UNKNOWN_SIGNATURE);
+        // } catch (SecurityException e) {
+        //     plugin.getIssues().add(INVALID_SIGNATURE);
+        // }
     }
 
     private boolean isFeature(String path) {

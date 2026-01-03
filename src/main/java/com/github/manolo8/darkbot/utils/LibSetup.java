@@ -36,6 +36,7 @@ public class LibSetup {
         try {
             libraries = Http.create(BASE_URL + "/libs.json")
                     .fromJson(LIB_LIST_TYPE, false);
+            libraries.remove("DefaultPlugin.jar");
         } catch (Exception e) {
             System.out.println("Failed to download libraries file, this is safe to ignore if your libs are up-to-date");
             e.printStackTrace();
