@@ -31,7 +31,12 @@ public class TargetedOfferGui extends Gui {
 
     public boolean show(boolean value) {
         if (value) throw new UnsupportedOperationException("Can't set showing a targeted offer!");
-        return super.show(false);
+        if (trySetShowing(value)) {
+            // The Offer GUI is always on top, so simply clicking the close button is enough
+            legacyToggle(value);
+            return false;
+        }
+        return value == visible && isAnimationDone();
     }
 
     @Override
