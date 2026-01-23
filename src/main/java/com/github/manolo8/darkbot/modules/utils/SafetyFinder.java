@@ -40,6 +40,9 @@ public class SafetyFinder {
         ENEMY, SIGHT, REPAIR, REFRESH, WAITING, NONE;
         boolean canUse(SafetyInfo safety) {
             if (safety.type == SafetyInfo.Type.CBS) {
+                if (safety.runMode == SafetyInfo.RunMode.NEVER) {
+                    return false;
+                }
                 BattleStation cbs = ((BattleStation) safety.entity);
                 // Ignore enemy CBS, and if set to ALLY only, ignore empty meteorites (hull = 0)
                 if (cbs.info.isEnemy() || (cbs.hullId == 0 && safety.cbsMode == SafetyInfo.CbsMode.ALLY)) return false;
