@@ -33,14 +33,16 @@ public class AssemblyMediator extends Updatable implements API.Singleton {
 
         listUpdated = false;
         selectedRecipe.updateIfChanged(readAtom(0x70));
-        selectedRecipe.update();
 
         if (rowSettings.updateAndReport(readAtom(0x78, 0xb0))) {
             filters.clear();
-            for (int i = 0; i < rowSettings.size(); i++) {
-                RowFilter currRow = rowSettings.get(i);
-                filters.add(currRow.first.withPos(i, 0));
-                filters.add(currRow.second.withPos(i, 1));
+            for (int i = 0; i < this.rowSettings.size(); i++) {
+                RowFilter currRow = this.rowSettings.get(i);
+                ItemFilter first = currRow.getFirst().withPos(i, 0);
+                if(first.isValid()) this.filters.add(first);
+
+                ItemFilter second = currRow.getSecond().withPos(i, 1);
+                if(second.isValid()) this.filters.add(second);
             }
         }
 
@@ -85,14 +87,14 @@ public class AssemblyMediator extends Updatable implements API.Singleton {
         @Override
         public void update() {
             isCraftable = readBoolean(0x20);
-            craftTimeLeft = (int) readDouble(0x40, 0x28, 0x38);
+            craftTimeLeft = (int) readDouble(0x40, 0x20, 0x28);
 
             long data = readAtom(0x58, 0x40, 0x20);
             visibility = API.readString(data, 0x90);
-            craftTimeData.update(API.readAtom(data, 0x98));
+            craftTimeData.update(API.readAtom(data, 0xb0));
             if (!craftTimeData.isEmpty())
-                craftTimeRequired = API.readInt(craftTimeData.getLong(0), 0x24);
-            isInProgress = craftTimeLeft > 0 && craftTimeLeft <= craftTimeRequired;
+                craftTimeRequired = API.readInt(craftTimeData.getLong(0), 0x24) * 1000;
+            isInProgress = craftTimeLeft > 1 && craftTimeLeft <= craftTimeRequired;
             isCollectable = !isInProgress && readDouble(0x40, 0x20, 0x28) == 1.0;
         }
 
@@ -113,6 +115,7 @@ public class AssemblyMediator extends Updatable implements API.Singleton {
         }
     }
 
+    @Getter
     @ToString
     private static class RowFilter extends Reporting {
         private final ItemFilter first = new ItemFilter();
@@ -155,6 +158,10 @@ public class AssemblyMediator extends Updatable implements API.Singleton {
             this.row = row;
             this.col = col;
             return this;
+        }
+
+        public boolean isValid() {
+            return !filterName.isBlank();
         }
     }
 }
