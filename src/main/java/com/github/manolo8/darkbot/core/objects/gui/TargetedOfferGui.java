@@ -31,19 +31,14 @@ public class TargetedOfferGui extends Gui {
 
     public boolean show(boolean value) {
         if (value) throw new UnsupportedOperationException("Can't set showing a targeted offer!");
-        if (trySetShowing(value)) {
-            // The Offer GUI is always on top, so simply clicking the close button is enough
-            legacyToggle(value);
-            return false;
-        }
-        return value == visible && isAnimationDone();
+        return super.show(false);
     }
 
     @Override
     protected boolean close() {
-        // default "cleanup", doesn't free-up targeted offer mediator
-        return Main.API.hasCapability(Capability.DIRECT_CALL_METHOD)
-                && Main.API.callMethodChecked(false, "23(2626)1016321600", 279, address);
+        // The Offer GUI is always on top, so simply clicking the close button is enough
+        legacyToggle(false);
+        return true;
     }
 
     @Override
