@@ -211,11 +211,11 @@ public class CollectorModule implements Module {
     private boolean isContested(Box box){
         if (!config.COLLECT.IGNORE_CONTESTED_BOXES) return false;
 
-        // FIXME: properly get own speed and other's speed. For now, assume others twice as fast.
-        double heroDistance = hero.locationInfo.distance(box) * 2;
+        // Pessimistic estimate: assume hero takes twice as long as others, cause speed is unstable.
+        long heroTimeTo = hero.timeTo(hero.locationInfo.distance(box)) * 2;
         return ships.stream()
-                .filter(ship -> ship.shipInfo.destination.distance(box) == 0)
-                .anyMatch(ship -> heroDistance > ship.locationInfo.distance(box));
+            .filter(ship -> ship.shipInfo.destination.distance(box) == 0)
+            .anyMatch(ship -> heroTimeTo > ship.timeTo(ship.locationInfo.distance(box)));
     }
 
     private Location findClosestEnemyAndAddToDangerousList() {
