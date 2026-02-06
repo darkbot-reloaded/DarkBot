@@ -68,7 +68,7 @@ public class AssemblyMediator extends Updatable implements API.Singleton {
         private final List<String> rewards = new ArrayList<>();
         private final FlashList<ResourceRequired> resourcesRequired = FlashList.ofVector(ResourceRequired::new);
         private boolean isCraftable, isInProgress, isCollectable = false;
-        private int craftTimeLeft, craftTimeRequired;
+        private int craftTimeLeft, craftTimeRequired, buildAmount;
         private final FlashListLong craftTimeData = FlashListLong.ofVector();
 
         @Override
@@ -88,14 +88,15 @@ public class AssemblyMediator extends Updatable implements API.Singleton {
         public void update() {
             isCraftable = readBoolean(0x20);
             craftTimeLeft = (int) readDouble(0x40, 0x20, 0x28);
+            buildAmount = (int) readDouble(0x40, 0x20, 0x30);
 
             long data = readAtom(0x58, 0x40, 0x20);
             visibility = API.readString(data, 0x90);
             craftTimeData.update(API.readAtom(data, 0xb0));
             if (!craftTimeData.isEmpty())
                 craftTimeRequired = API.readInt(craftTimeData.getLong(0), 0x24) * 1000;
-            isInProgress = craftTimeLeft > 1 && craftTimeLeft <= craftTimeRequired;
-            isCollectable = !isInProgress && readDouble(0x40, 0x20, 0x28) == 1.0;
+            isInProgress = !isCraftable && buildAmount > 0 && craftTimeLeft > 1;
+            isCollectable = !isCraftable && buildAmount == 0 && craftTimeLeft == 1;
         }
 
     }
