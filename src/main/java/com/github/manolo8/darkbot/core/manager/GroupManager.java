@@ -154,26 +154,17 @@ public class GroupManager extends Gui implements GroupAPI {
             pending = () -> click(MARGIN_WIDTH + INVITE_WIDTH + BUTTON_WIDTH + (BUTTON_WIDTH / 2), HEADER_HEIGHT + (BUTTON_HEIGHT / 2));
         }
     }
-
     public void tryQueueLeave() {
-        tryQueueLeave(false);
+        if (isPendingAction()) return;
+        if (shouldLeave()) shouldLeave = Math.min(20, shouldLeave + 1);
+        else shouldLeave = 0;
+
+        if (shouldLeave >= 20) leave();
     }
 
-    public void tryQueueLeave(boolean force) {
+    public void leave() {        
         if (isPendingAction()) return;
-
-        if (force) {
-            pending = () -> runClicks(getPoint(GroupAction.LEAVE));
-            return;
-        }
-
-        if (shouldLeave()) {
-            shouldLeave = Math.min(20, shouldLeave + 1);
-            if (shouldLeave >= 20)
-                pending = () -> runClicks(getPoint(GroupAction.LEAVE));
-        } else {
-            shouldLeave = 0;
-        }
+        pending = () -> runClicks(getPoint(GroupAction.LEAVE));
     }
 
     public boolean shouldKick() {
