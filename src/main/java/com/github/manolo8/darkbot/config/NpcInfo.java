@@ -122,8 +122,7 @@ public class NpcInfo implements eu.darkbot.api.config.types.NpcInfo {
                         return formation;
                     });
         }
-        return Optional.of(Objects.requireNonNullElse(attackFormationNew, SelectableItem.Formation.STANDARD));
-
+        return Optional.ofNullable(attackFormationNew);
         // If we have a new formation, use it and clear the old one
     }
 

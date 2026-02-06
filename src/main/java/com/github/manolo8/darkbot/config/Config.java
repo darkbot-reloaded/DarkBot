@@ -414,14 +414,14 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
         private HeroAPI.Configuration newConfiguration;
         private SelectableItem.Formation newFormation;
 
-        public ShipConfig() {
-        }
+        public ShipConfig() {}
 
         public ShipConfig(HeroAPI.Configuration configuration, SelectableItem.Formation formation) {
             this.newConfiguration = configuration;
             this.newFormation = formation;
         }
 
+        @Deprecated
         public ShipConfig(int CONFIG, Character FORMATION) {
             this.CONFIG = CONFIG;
             this.FORMATION = FORMATION;
@@ -455,9 +455,8 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
                 newFormation = ItemUtils.findAssociatedItem(ItemCategory.DRONE_FORMATIONS, FORMATION)
                         .map(item -> SelectableItem.Formation.of(item.id)).orElse(null);
             }
-            // Return new formation if available
-            return Optional.ofNullable(newFormation)
-                    .orElse(SelectableItem.Formation.STANDARD);
+            // Return new formation if available, or null for "None"
+            return newFormation;
         }
 
         public ShipMode getShipMode(){
@@ -466,7 +465,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         @Override
         public String toString() {
-            return "Config: " + newConfiguration + " " + newFormation.name();
+            return "Config: " + newConfiguration + " " + (newFormation != null ? newFormation.name() : "None");
         }
 
         @Override
@@ -476,7 +475,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
 
         @Override
         public boolean isLegacyFormation() {
-            return FORMATION != null;
+            return FORMATION != null && newFormation == null;
         }
     }
 

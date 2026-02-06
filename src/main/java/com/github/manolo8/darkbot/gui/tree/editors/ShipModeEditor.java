@@ -11,7 +11,6 @@ import eu.darkbot.api.managers.HeroAPI;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -19,6 +18,8 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +36,7 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
 
     private SelectableItem.Formation newFormation;
 
-    private final JComboBox<SelectableItem.Formation> comboBox = new JComboBox<>(SelectableItem.Formation.values());
+    private final JComboBox<Object> comboBox;
 
     public ShipModeEditor() {
         super(new MigLayout("gap 0, ins 0", "[][]5px[]", "[17px]"));
@@ -47,10 +48,30 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
 
         configButtons.forEach(button -> add(button, "wmax 17, hmax 17"));
 
+        // Build combo box items: "None" + all formations
+        Object[] items = new Object[SelectableItem.Formation.values().length + 1];
+        items[0] = "None";
+        System.arraycopy(SelectableItem.Formation.values(), 0, items, 1, SelectableItem.Formation.values().length);
+
+        comboBox = new JComboBox<>(items);
         comboBox.setRenderer(new FormationRenderer());
+
+        // FIX: Add focus listener to show popup immediately
+        comboBox.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                comboBox.showPopup();
+            }
+        });
+
         comboBox.addItemListener(item -> {
             if (item.getStateChange() == ItemEvent.SELECTED) {
-                setFormation((SelectableItem.Formation) item.getItem());
+                Object selected = item.getItem();
+                if (selected instanceof SelectableItem.Formation) {
+                    setFormation((SelectableItem.Formation) selected);
+                } else {
+                    setFormation(null); // "None" selected
+                }
             }
         });
         add(comboBox, "hmax 17");
@@ -71,7 +92,7 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
 
     private void setFormation(SelectableItem.Formation newFormation) {
         this.newFormation = newFormation;
-        this.comboBox.setSelectedItem(newFormation);
+        this.comboBox.setSelectedItem(newFormation == null ? "None" : newFormation);
     }
 
     @Override
@@ -114,16 +135,16 @@ public class ShipModeEditor extends JPanel implements OptionEditor<ShipMode> {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
             if (value instanceof SelectableItem.Formation) {
-                SelectableItem.Formation newFormation = (SelectableItem.Formation) value;
-
-                String iconName = newFormation.name().toLowerCase();
-                Icon icon = UIUtils.getFormationIcon(iconName);
-
-                setIcon(icon);
-                setText(newFormation.toString());
-                setIconTextGap(3);
+                SelectableItem.Formation formation = (SelectableItem.Formation) value;
+                setIcon(UIUtils.getFormationIcon(formation.name().toLowerCase()));
+                setText(formation.toString());
+            } else {
+                // "None" or any other value
+                setIcon(UIUtils.getFormationIcon("default"));
+                setText(String.valueOf(value));
             }
 
+            setIconTextGap(3);
             return this;
         }
     }
