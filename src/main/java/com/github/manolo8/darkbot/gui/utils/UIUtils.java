@@ -44,6 +44,10 @@ public class UIUtils {
         return getSvgIcon(url, 16, 16);
     }
 
+    public static Icon getFormationIcon(String name){
+        return getIcon("formations/" + name);
+    }
+
     private static FlatSVGIcon getSvgIcon(URL url, int width, int height) {
         return new FlatSVGIcon(url).derive(width, height);
     }

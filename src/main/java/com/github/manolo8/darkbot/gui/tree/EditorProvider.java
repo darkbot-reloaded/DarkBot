@@ -77,6 +77,7 @@ public class EditorProvider {
 
         defaultEditors.put(ShipMode.class, ShipModeEditor.class);
         defaultEditors.put(Config.ShipConfig.class, ShipModeEditor.class);
+        defaultEditors.put(ShipMode.ShipModeImpl.class, ShipModeEditor.class);
 
         defaultEditors.put(ImageWrapper.class, ImagePicker.class);
 
