@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.core.utils.pathfinder.RectangleImpl;
 import com.github.manolo8.darkbot.utils.MathUtils;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public class Utils {
     public static final String SELECT_MAP_ASSET = "MapAssetNotificationTRY_TO_SELECT_MAPASSET";
@@ -97,6 +98,31 @@ public class Utils {
             }
 
             return true;
+        }
+
+        default CompletableFuture<Void> scanMethodSignature(boolean checkName, String signature, int index, long object) {
+            return CompletableFuture.runAsync(() -> {
+                if (!ByteUtils.isValidPtr(object)) {
+                    System.out.println("[SignatureScan] invalid object for signature: " + signature);
+                    return;
+                }
+
+                int scanWindow = 20;
+                int fromIndex = Math.max(0, index - scanWindow);
+                int toIndex = index + scanWindow;
+
+                boolean found = false;
+                for (int idx = fromIndex; idx <= toIndex; idx++) {
+                    int result = checkMethodSignature(object, idx, checkName, signature);
+                    if (result == 1) {
+                        found = true;
+                        System.out.println("[SignatureScan] match at index " + idx + ": " + signature);
+                    }
+                }
+                if (!found) {
+                    System.out.println("[SignatureScan] no match in range " + fromIndex + ".." + toIndex + ": " + signature);
+                }
+            });
         }
     }
 

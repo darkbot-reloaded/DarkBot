@@ -4,6 +4,7 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.GameAPIImpl;
+import com.github.manolo8.darkbot.core.api.InvalidNativeSignature;
 import com.github.manolo8.darkbot.core.api.Utils;
 import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.entities.Entity;
@@ -79,9 +80,14 @@ public class TanosAdapter extends GameAPIImpl<
 
         @Override
         public boolean callMethodChecked(boolean checkName, String signature, int index, long... arguments) {
-            if (checkSignature(checkName, signature, index, arguments[0])) {
-                callMethod(index, arguments);
-                return true;
+            try {
+                if (checkSignature(checkName, signature, index, arguments[0])) {
+                    callMethod(index, arguments);
+                    return true;
+                }
+            } catch (InvalidNativeSignature e) {
+                scanMethodSignature(checkName, signature, index, arguments[0]);
+                throw e;
             }
             return false;
         }
