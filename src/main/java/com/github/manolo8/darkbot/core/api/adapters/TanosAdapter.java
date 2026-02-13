@@ -15,6 +15,7 @@ import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class TanosAdapter extends GameAPIImpl<
@@ -121,7 +122,18 @@ public class TanosAdapter extends GameAPIImpl<
 
         @Override
         public int checkMethodSignature(long obj, int methodIdx, boolean includeMethodName, String signature) {
-            return tanos.checkMethodSignature(obj, methodIdx, includeMethodName, signature);
+            return tanos.checkMethodSignature(obj, methodIdx, includeMethodName, resolveSignature(signature));
+        }
+
+        /**
+         * Resolves known signature changes to maintain compatibility with the Tanos API
+         */
+        private String resolveSignature(String signature) {
+            // format: oldSignature -> newSignature
+            Map<String, String> signatureOverrides = Map.of(
+                "23(set target)(2626)1016221500", "23(target)(2626)1016221500"
+            );
+            return signatureOverrides.getOrDefault(signature, signature);
         }
 
     }
