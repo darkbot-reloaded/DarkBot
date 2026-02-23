@@ -58,6 +58,11 @@ public class TanosAdapter extends GameAPIImpl<
     }
 
     @Override
+    public String getVersion() {
+        return "Tanos-" + window.getVersion();
+    }
+
+    @Override
     public void setCursorMarker(boolean enable) {
         handler.setCursorMarker(enable);
     }
