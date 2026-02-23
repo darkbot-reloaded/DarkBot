@@ -36,6 +36,7 @@ public class TanosAdapter extends GameAPIImpl<
                 Capability.DIRECT_ENTITY_SELECT,
                 Capability.DIRECT_MOVE_SHIP,
                 Capability.DIRECT_COLLECT_BOX,
+                Capability.DIRECT_POST_ACTIONS,
                 Capability.DIRECT_REFINE,
                 Capability.DIRECT_USE_ITEM,
                 Capability.DIRECT_CALL_METHOD);
@@ -54,6 +55,16 @@ public class TanosAdapter extends GameAPIImpl<
         }
 
         return false;
+    }
+
+    @Override
+    public void setCursorMarker(boolean enable) {
+        handler.setCursorMarker(enable);
+    }
+
+    @Override
+    public void postActions(long... actions) {
+        window.postActions(actions);
     }
 
     public static class DirectInteractionManager extends NoopAPIAdapter.NoOpDirectInteraction

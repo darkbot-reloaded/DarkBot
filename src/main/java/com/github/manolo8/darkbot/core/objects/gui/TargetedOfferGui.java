@@ -38,7 +38,7 @@ public class TargetedOfferGui extends Gui {
     protected boolean close() {
         // default "cleanup", doesn't free-up targeted offer mediator
         return Main.API.hasCapability(Capability.DIRECT_CALL_METHOD)
-                && Main.API.callMethodChecked(false, "23(2626)1016321600", 279, address);
+                && Main.API.callMethodChecked(false, "23(2626)1016321600", 283, address);
     }
 
     @Override
