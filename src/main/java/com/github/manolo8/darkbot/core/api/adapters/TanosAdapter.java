@@ -72,6 +72,11 @@ public class TanosAdapter extends GameAPIImpl<
         window.postActions(actions);
     }
 
+    @Override
+    public void pasteText(String text, long... actions) {
+        window.pasteText(text, actions);
+    }
+
     public static class DirectInteractionManager extends NoopAPIAdapter.NoOpDirectInteraction
             implements Utils.SignatureChecker {
 
