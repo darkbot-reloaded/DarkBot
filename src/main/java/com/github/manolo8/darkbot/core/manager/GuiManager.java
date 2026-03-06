@@ -118,6 +118,7 @@ public class GuiManager implements Manager, GameScreenAPI {
     public int deaths;
 
     private boolean needRefresh;
+    private long lastDebugPrint;
 
     public GuiManager(Main main, PluginAPI pluginAPI, RepairManager repairManager) {
         this.main = main;
@@ -216,6 +217,34 @@ public class GuiManager implements Manager, GameScreenAPI {
         }
 
         this.deaths = repairManager.getDeathAmount();
+
+        // DEBUG: Print all guis every 10 seconds when dev stuff is enabled
+        if (main.config.BOT_SETTINGS.OTHER.DEV_STUFF && System.currentTimeMillis() - lastDebugPrint > 10_000) {
+            lastDebugPrint = System.currentTimeMillis();
+            System.out.println("\n ---- Debug all guis ---- ");
+            System.out.println("Total guis: " + guis.size());
+
+            // header row for readability
+            System.out.printf("%-32s %-8s %-7s %-7s %-7s %-7s%n",
+                    "Name", "Visible", "W", "H", "X", "Y");
+            System.out.println("--------------------------------------------------------------------------------");
+
+            for (var entry : guis.entrySet()) {
+                String name = entry.getKey();
+                Gui gui = entry.getValue();
+                String displayName = (name == null || name.isEmpty()) ? "unknown" : name;
+
+                System.out.printf("%-32s %-8s %-7.0f %-7.0f %-7.0f %-7.0f%n",
+                        displayName,
+                        gui.visible,
+                        gui.getWidth(),
+                        gui.getHeight(),
+                        gui.getX(),
+                        gui.getY());
+            }
+
+            System.out.println(" ---- End debug ---- \n");
+        }
     }
 
     private void tryReconnect(Gui gui) {
