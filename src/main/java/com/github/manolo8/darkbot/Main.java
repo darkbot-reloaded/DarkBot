@@ -143,8 +143,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
         StartupChecks.checkJavaVersion(params);
         StartupChecks.checkUniqueInstance(params); //method require min java 9
 
-        VerifierChecker.getAuthApi().setupAuth();
-        this.pluginAPI.addInstance(VerifierChecker.getAuthApi());
+        // VerifierChecker.getAuthApi().setupAuth();
+        // this.pluginAPI.addInstance(VerifierChecker.getAuthApi());
 
         this.starManager     = pluginAPI.requireInstance(StarManager.class);
         this.mapManager      = pluginAPI.requireInstance(MapManager.class);
