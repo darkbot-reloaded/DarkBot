@@ -330,6 +330,7 @@ public class GuiManager implements Manager, GameScreenAPI {
                 // Refresh if stuck on revive for 90 seconds, revive locations may have different cooldowns
                 if ((System.currentTimeMillis() - lastDeath - main.config.GENERAL.SAFETY.WAIT_BEFORE_REVIVE * 1000L) > 90_000) {
                     triggerRefresh("Triggering refresh: stuck on revive for too long!", false);
+                    lastDeath = -1; // Reset so consecutive refreshes don't fire immediately after reconnect
                 }
 
                 return false;
