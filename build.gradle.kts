@@ -27,7 +27,7 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 java.targetCompatibility = JavaVersion.VERSION_11
 
 application {
-    applicationName = "DarkBot"
+    applicationName = "DarkBotMarco"
     mainClass.set("com.github.manolo8.darkbot.Bot")
 }
 

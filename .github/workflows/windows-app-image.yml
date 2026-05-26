@@ -1,0 +1,47 @@
+name: Build Windows App Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (for jpackage)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build shaded jar (proguard task)
+        shell: pwsh
+        run: .\gradlew.bat --no-daemon proguard
+
+      - name: Create Windows app image
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          jpackage `
+            --type app-image `
+            --name DarkBotMarco `
+            --input build `
+            --main-jar DarkBot.jar `
+            --main-class com.github.manolo8.darkbot.Bot `
+            --dest dist
+
+      - name: Archive app image
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\DarkBotMarco -DestinationPath dist\DarkBotMarco-windows-app-image.zip -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DarkBotMarco-windows-app-image
+          path: dist/DarkBotMarco-windows-app-image.zip
