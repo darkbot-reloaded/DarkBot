@@ -99,8 +99,12 @@ public class GroupManager extends Gui implements GroupAPI {
         }
     }
 
+    public boolean isPendingAction() {
+        return pending != null;
+    }
+
     public void tryQueueAcceptInvite() {
-        if (pending != null || !config.ACCEPT_INVITES || invites.isEmpty() || group.isValid()) return;
+        if (isPendingAction() || !config.ACCEPT_INVITES || invites.isEmpty() || group.isValid()) return;
 
         invites.stream()
                 .filter(in -> in.valid && in.incomming && (config.WHITELIST_TAG == null ||
@@ -110,13 +114,13 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void tryOpenInvites() {
-        if (pending != null || !group.isValid() || !group.isLeader) return;
+        if (isPendingAction() || !group.isValid() || !group.isLeader) return;
 
         if (group.isOpen != config.OPEN_INVITES) pending = () -> runClicks(getPoint(GroupAction.CAN_INVITE));
     }
 
     public void tryQueueKick() {
-        if (pending != null || !canKick() || config.INVITE_TAG == null || !config.KICK_NO_INVITED) return;
+        if (isPendingAction() || !canKick() || config.INVITE_TAG == null || !config.KICK_NO_INVITED) return;
         for (GroupMember member : group.members) {
             if (config.INVITE_TAG.has(main.config.PLAYER_INFOS.get(member.id))) continue;
 
@@ -129,7 +133,7 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void tryQueueSendInvite() {
-        if (pending != null || !canInvite() || config.INVITE_TAG == null) return;
+        if (isPendingAction() || !canInvite() || config.INVITE_TAG == null) return;
 
         for (PlayerInfo player : main.config.PLAYER_INFOS.values()) {
             if (!config.INVITE_TAG.has(player) || group.getMember(player.userId) != null) continue;
@@ -137,28 +141,30 @@ public class GroupManager extends Gui implements GroupAPI {
             Long inviteTime = inviteTimeout.get(player.username);
             if (inviteTime != null && System.currentTimeMillis() < inviteTime) continue;
 
-            pending = () -> sendInvite(player.username, inviteTime == null ? 60_000 : 120_000);
+            sendInvite(player.username, inviteTime == null ? 60_000 : 120_000);
             break;
         }
     }
 
     public void tryBlockInvites() {
-        if (pending != null) return;
+        if (isPendingAction()) return;
         if (group.isValid()) return;
 
-        if(config.BLOCK_INVITES != isBlockingInvites) {
+        if (config.BLOCK_INVITES != isBlockingInvites) {
             pending = () -> click(MARGIN_WIDTH + INVITE_WIDTH + BUTTON_WIDTH + (BUTTON_WIDTH / 2), HEADER_HEIGHT + (BUTTON_HEIGHT / 2));
         }
     }
-
     public void tryQueueLeave() {
-        if (pending != null) return;
-
+        if (isPendingAction()) return;
         if (shouldLeave()) shouldLeave = Math.min(20, shouldLeave + 1);
         else shouldLeave = 0;
 
-        if (shouldLeave >= 20)
-            pending = () -> runClicks(getPoint(GroupAction.LEAVE));
+        if (shouldLeave >= 20) leave();
+    }
+
+    public void leave() {        
+        if (isPendingAction()) return;
+        pending = () -> runClicks(getPoint(GroupAction.LEAVE));
     }
 
     public boolean shouldKick() {
@@ -181,28 +187,34 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void sendInvite(String username) {
+        if (isPendingAction() || !canInvite()) return;
+
         sendInvite(username, 60_000);
     }
 
     public void sendInvite(String username, long wait) {
-        if (API.hasCapability(Capability.DIRECT_POST_ACTIONS)) {
-            API.pasteText(username,
-                    NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
-                    NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
-                    NativeAction.Mouse.CLICK.after(x + MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), y + getInvitingHeight()));
-        } else {
-            click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
-            click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
-            //        Time.sleep(100); // This should not be here, but will stay for now
-            API.sendText(username);
-            //        Time.sleep(500); // This should not be here, but will stay for now
-            click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
-        }
-        inviteTimeout.put(username, System.currentTimeMillis() + wait);
+        if (isPendingAction() || !canInvite()) return;
+
+        pending = () -> {
+            if (API.hasCapability(Capability.DIRECT_POST_ACTIONS)) {
+                API.pasteText(username,
+                        NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
+                        NativeAction.Mouse.CLICK.of(x + MARGIN_WIDTH + (INVITE_WIDTH / 2), y + getInvitingHeight()),
+                        NativeAction.Mouse.CLICK.after(x + MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), y + getInvitingHeight()));
+            } else {
+                click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
+                click(MARGIN_WIDTH + (INVITE_WIDTH / 2), getInvitingHeight());
+                //        Time.sleep(100); // This should not be here, but will stay for now
+                API.sendText(username);
+                //        Time.sleep(500); // This should not be here, but will stay for now
+                click(MARGIN_WIDTH + INVITE_WIDTH + (BUTTON_WIDTH / 2), getInvitingHeight());
+            }
+            inviteTimeout.put(username, System.currentTimeMillis() + wait);
+        };
     }
 
     public void kick(int id) {
-        if (pending != null || !canKick()) return;
+        if (isPendingAction() || !canKick()) return;
 
         pending = () -> {
             GroupMember member = group.getMember(id);
@@ -214,8 +226,27 @@ public class GroupManager extends Gui implements GroupAPI {
     }
 
     public void kick(GroupMember member) {
-        if (member == null) return;
+        if (member == null || isPendingAction() || !canKick()) return;
+
         kick(member.id);
+    }
+
+    public void transferLeader(int id) {
+        if (isPendingAction() || !canKick()) return;
+
+        pending = () -> {
+            // Click crown and transfer to leader
+            int idx = group.indexOf(id);
+            if (idx < 0) return;
+            ClickPoint memberPoint = getMemberPoint(idx);
+            runClicks(getPoint(GroupAction.CROWN), memberPoint);
+        };
+    }
+
+    public void transferLeader(GroupMember member) {
+        if (member == null || isPendingAction() || !canKick()) return;
+
+        transferLeader(member.id);
     }
 
     private void runClicks(ClickPoint... points) {

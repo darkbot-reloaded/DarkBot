@@ -1,5 +1,5 @@
 plugins {
-    id("org.gradle.java-library")
+    `java-library`
     id("org.gradle.maven-publish")
     id("org.gradle.application")
 
@@ -16,16 +16,22 @@ repositories {
     mavenLocal()
     mavenCentral()
 
-    maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://oss.jfrog.org/artifactory/oss-snapshot-local/com/formdev/") }
+    maven("https://jitpack.io")
+    maven("https://oss.jfrog.org/artifactory/oss-snapshot-local/com/formdev/")
 }
 
 group = "eu.darkbot"
 // version = "1.131"
 version = "dc48506"
 description = "DarkBot"
-java.sourceCompatibility = JavaVersion.VERSION_11
-java.targetCompatibility = JavaVersion.VERSION_11
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+}
 
 application {
     applicationName = "DarkBot"
@@ -40,14 +46,12 @@ publishing {
     }
 }
 
-configurations {
-    compileOnly {
-        isCanBeResolved = true
-    }
+configurations.compileOnly {
+    isCanBeResolved = true
 }
 
 dependencies {
-    val apiVersion = "0.9.9"
+    val apiVersion = "0.9.10"
     val flatLafVersion = "3.4"
 
     // use this if you want to use local(mavenLocal) darkbot API

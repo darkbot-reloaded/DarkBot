@@ -18,6 +18,8 @@ import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -85,10 +87,10 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
         if (address == 0) return;
 
-        updateNonZero(credits, readDouble(0x178));
-        updateNonZero(uridium, readDouble(0x180));
-        updateNonZero(experience, readDouble(0x190));
-        checkHonor(updateNonZero(honor, readDouble(0x198)));
+        updateNonZero(credits, readDouble(0x180));
+        updateNonZero(uridium, readDouble(0x188));
+        updateNonZero(experience, readDouble(0x198));
+        checkHonor(updateNonZero(honor, readDouble(0x1A0)));
 
         cargo.track(readBindableInt(0x148));
         maxCargo.track(readBindableInt(0x150));
@@ -121,6 +123,10 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
     private void registerImpl(Key key, StatImpl stat) {
         statistics.put(StatKey.of(key), stat);
+    }
+
+    public static Collection<? extends StatsAPI.Key> getStatKeys() {
+        return new ArrayList<>(Main.INSTANCE.statsManager.statistics.keySet());
     }
 
     @Override
