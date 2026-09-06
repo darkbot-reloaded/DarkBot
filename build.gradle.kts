@@ -21,8 +21,7 @@ repositories {
 }
 
 group = "eu.darkbot"
-// version = "1.131"
-version = "dc48506"
+version = "1.131"
 description = "DarkBot"
 
 java {
@@ -55,7 +54,7 @@ dependencies {
     val flatLafVersion = "3.4"
 
     // use this if you want to use local(mavenLocal) darkbot API
-    val useLocalMaven = true
+    val useLocalMaven = false
     if (useLocalMaven) api("eu.darkbot", "darkbot-impl", apiVersion)
     else api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
 
