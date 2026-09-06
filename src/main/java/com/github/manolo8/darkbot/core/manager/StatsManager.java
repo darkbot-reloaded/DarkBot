@@ -87,10 +87,10 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
         if (address == 0) return;
 
-        updateNonZero(credits, readDouble(0x178));
-        updateNonZero(uridium, readDouble(0x180));
-        updateNonZero(experience, readDouble(0x190));
-        checkHonor(updateNonZero(honor, readDouble(0x198)));
+        updateNonZero(credits, readDouble(0x180));
+        updateNonZero(uridium, readDouble(0x188));
+        updateNonZero(experience, readDouble(0x198));
+        checkHonor(updateNonZero(honor, readDouble(0x1A0)));
 
         cargo.track(readBindableInt(0x148));
         maxCargo.track(readBindableInt(0x150));
