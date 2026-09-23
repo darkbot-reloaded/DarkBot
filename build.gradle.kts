@@ -50,7 +50,7 @@ configurations.compileOnly {
 }
 
 dependencies {
-    val apiVersion = "0.9.10"
+    val apiVersion = "0.9.11"
     val flatLafVersion = "3.4"
 
     // use this if you want to use local(mavenLocal) darkbot API
