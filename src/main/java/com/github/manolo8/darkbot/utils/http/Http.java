@@ -238,7 +238,7 @@ public class Http {
      * @throws IOException of {@link Http#getConnection()}
      */
     public InputStream getInputStream() throws IOException {
-        return getConnection().getInputStream();
+        return IOUtils.unwrapGzip(getConnection().getInputStream());
     }
 
     /**
