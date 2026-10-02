@@ -12,17 +12,7 @@ import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.IDarkBotAPI;
 import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.api.InvalidNativeSignature;
-import com.github.manolo8.darkbot.core.manager.EffectManager;
-import com.github.manolo8.darkbot.core.manager.FacadeManager;
-import com.github.manolo8.darkbot.core.manager.GuiManager;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
-import com.github.manolo8.darkbot.core.manager.MapManager;
-import com.github.manolo8.darkbot.core.manager.PerformanceManager;
-import com.github.manolo8.darkbot.core.manager.PingManager;
-import com.github.manolo8.darkbot.core.manager.RepairManager;
-import com.github.manolo8.darkbot.core.manager.SettingsManager;
-import com.github.manolo8.darkbot.core.manager.StarManager;
-import com.github.manolo8.darkbot.core.manager.StatsManager;
+import com.github.manolo8.darkbot.core.manager.*;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import com.github.manolo8.darkbot.extensions.DarkBotPluginApiImpl;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
@@ -44,11 +34,8 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import eu.darkbot.api.extensions.Behavior;
-import eu.darkbot.api.extensions.Configurable;
-import eu.darkbot.api.extensions.Installable;
+import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.extensions.Module;
-import eu.darkbot.api.extensions.TemporalModule;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
@@ -65,7 +52,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
     /** Do not use in plugins! Only for bot internal usage */
     @ApiStatus.Internal public static Main INSTANCE;
 
-    public static final Version VERSION      = new Version("1.132");
+    public static final Version VERSION      = new Version("1.132.2");
     public static final Object UPDATE_LOCKER = new Object();
     public static final Gson GSON            = new GsonBuilder()
             .setPrettyPrinting()
