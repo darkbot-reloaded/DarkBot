@@ -29,6 +29,7 @@ import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyExceptionModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
 import com.github.manolo8.darkbot.utils.I18n;
+import com.github.manolo8.darkbot.utils.NetworkUtils;
 import com.github.manolo8.darkbot.utils.StartupChecks;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
@@ -119,6 +120,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
         // defined in the config
         // 1: Load the config without generating the config tree
         config = configManager.loadConfig(params.getStartConfig());
+        // Apply proxy settings before any network request (login, updates, etc.)
+        NetworkUtils.applyConfig(config);
         // 2: Create the plugin API (uses the config manager internally)
         this.pluginAPI = new DarkBotPluginApiImpl(this);
         // 3: Initialize i18n with the locale from the config
@@ -223,6 +226,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
         this.form.tick();
         this.configManager.saveChangedConfig();
         this.configChange.tick();
+        NetworkUtils.applyConfig(config); // cheap no-op unless proxy settings changed
 
         processTasks();
     }
@@ -425,6 +429,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
             configManager.saveConfig();
             SwingUtilities.invokeAndWait(() -> {
                 this.config = configHandler.loadConfig(config);
+                NetworkUtils.applyConfig(this.config);
                 mapManager.updateAreas(true);
                 mapManager.updateEntityConfigs(); // Update NpcInfo and BoxInfos
                 pluginHandler.updateConfig(); // Get plugins to update what features are enabled
