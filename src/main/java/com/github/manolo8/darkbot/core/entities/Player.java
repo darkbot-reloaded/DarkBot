@@ -25,12 +25,12 @@ public class Player extends Ship implements eu.darkbot.api.game.entities.Player 
         super.update();
 
         if (oldShipId != getShipId()) {
-            shipTypeId = API.readString(address, 192, 128);
+            shipTypeId = API.readString(address, 200, 128);
         }
 
         if (this instanceof HeroManager) return;
 
-        long petAddress = API.readLong(address + 176);
+        long petAddress = API.readLong(address + 184);
 
         if (petAddress == 0) pet = null;
         else if (pet == null || petAddress != pet.address)
