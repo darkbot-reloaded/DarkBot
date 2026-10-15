@@ -614,6 +614,11 @@ public class GameAPIImpl<
     }
 
     @Override
+    public void setCursorMarker(boolean enable) {
+        throw new UnsupportedOperationException("setCursorMarker not implemented!");
+    }
+
+    @Override
     public long lastInternetReadTime() {
         return handler.lastInternetReadTime();
     }
