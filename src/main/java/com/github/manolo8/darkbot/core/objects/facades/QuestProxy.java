@@ -22,14 +22,16 @@ public class QuestProxy extends Updatable implements QuestAPI {
     private final QuestProxy.Quest questGiverSelected = new Quest();
     private final QuestProxy.QuestListItem questGiverSelectedInfo = new QuestListItem();
 
-    private final FlashMap<Integer, QuestProxy.QuestListItem> questGiverItemsMap = FlashMap.of(Integer.class, QuestProxy.QuestListItem.class);
+    private final FlashMap<Integer, QuestProxy.QuestListItem> questGiverItemsMap =
+            FlashMap.of(Integer.class, QuestProxy.QuestListItem.class);
 
     @Getter
     private boolean questGiverOpen;
 
     @Override
     public void update() {
-        if (address == 0) return;
+        if (address == 0)
+            return;
 
         this.questsUpdated = false;
 
@@ -38,7 +40,8 @@ public class QuestProxy extends Updatable implements QuestAPI {
         this.currentQuest.update();
 
         this.questGiverOpen = readBoolean(0x40);
-        if (!questGiverOpen) return;
+        if (!questGiverOpen)
+            return;
 
         this.questGiverSelectedInfo.updateIfChanged(readAtom(0xA8));
         this.questGiverSelectedInfo.update();
@@ -60,7 +63,8 @@ public class QuestProxy extends Updatable implements QuestAPI {
 
     @Override
     public @Nullable QuestAPI.QuestListItem getSelectedQuestInfo() {
-        return !this.questGiverOpen || questGiverSelectedInfo.address == 0 ? null : questGiverSelectedInfo;
+        return !this.questGiverOpen || questGiverSelectedInfo.address == 0 ? null
+                : questGiverSelectedInfo;
     }
 
     @Override
@@ -96,7 +100,8 @@ public class QuestProxy extends Updatable implements QuestAPI {
 
         @Override
         public void update() {
-            if (address == 0) return;
+            if (address == 0)
+                return;
 
             this.selected = readBoolean(0x34);
             this.completed = readBoolean(0x38);
@@ -111,7 +116,8 @@ public class QuestProxy extends Updatable implements QuestAPI {
         private boolean completed;
         private String title;
         private String description;
-        private final FlashList<QuestProxy.Requirement> requirements = FlashList.ofArray(Requirement::new);
+        private final FlashList<QuestProxy.Requirement> requirements =
+                FlashList.ofArray(Requirement::new);
         private final FlashList<QuestProxy.Reward> rewards = FlashList.ofArray(Reward::new);
 
         @Override
@@ -127,7 +133,8 @@ public class QuestProxy extends Updatable implements QuestAPI {
 
         @Override
         public void update() {
-            if (address == 0) return;
+            if (address == 0)
+                return;
 
             this.active = readBoolean(0x24);
             this.completed = readBoolean(0x38, 0x38);
@@ -158,27 +165,33 @@ public class QuestProxy extends Updatable implements QuestAPI {
     @Getter
     @ToString
     public static class Requirement extends Updatable implements QuestAPI.Requirement {
-        private final FlashList<QuestProxy.Requirement> requirements = FlashList.ofArray(Requirement::new);
+        private final FlashList<QuestProxy.Requirement> requirements =
+                FlashList.ofArray(Requirement::new);
 
+        private int id;
         private String type;
         private String description;
         private double progress;
         private double goal;
         private boolean completed;
         private boolean enabled;
+        private boolean subCondition;
 
         @Override
         public void update(long address) {
             super.update(address);
 
             this.requirements.update(readAtom(0x48));
+            this.id = readInt(0x20);
             this.type = readString(0x58, 0x28);
             this.description = readString(0x60);
+            this.subCondition = readBoolean(0x38);
         }
 
         @Override
         public void update() {
-            if (address == 0) return;
+            if (address == 0)
+                return;
 
             this.requirements.update();
 
