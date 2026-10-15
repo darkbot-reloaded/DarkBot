@@ -56,6 +56,11 @@ public class TanosAdapter extends GameAPIImpl<
         return false;
     }
 
+    @Override
+    public String getVersion() {
+        return "Tanos-" + window.getVersion();
+    }
+
     public static class DirectInteractionManager extends NoopAPIAdapter.NoOpDirectInteraction
             implements Utils.SignatureChecker {
 
