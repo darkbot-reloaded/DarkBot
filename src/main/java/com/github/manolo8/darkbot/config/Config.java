@@ -238,6 +238,18 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
             public @Option boolean ENFORCE_HW_ACCEL = true;
             public @Option boolean USE_3D = false;
             public @Option boolean USE_PROXY = false;
+            public @Option @Visibility(Level.ADVANCED) Proxy PROXY = new Proxy();
+            public static class Proxy {
+                public @Option boolean ENABLED = false;
+                public @Option @Dropdown ProxyType TYPE = ProxyType.HTTP;
+                public @Option String HOST = "";
+                public @Option @Number(min = 1, max = 65535) int PORT = 8080;
+                public @Option String USERNAME = "";
+                public @Option String PASSWORD = "";
+
+                @Configuration("config.bot_settings.api_config.proxy.type")
+                public enum ProxyType { HTTP, SOCKS }
+            }
             public @Option boolean CLEAR_CACHE_ON_STUCK = true;
 
             public int width = 1280;

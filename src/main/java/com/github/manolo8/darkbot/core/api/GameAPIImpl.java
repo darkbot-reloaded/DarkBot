@@ -11,6 +11,7 @@ import com.github.manolo8.darkbot.core.objects.slotbars.Item;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.gui.utils.PidSelector;
 import com.github.manolo8.darkbot.utils.LibUtils;
+import com.github.manolo8.darkbot.utils.NetworkUtils;
 import com.github.manolo8.darkbot.utils.OSUtil;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import com.github.manolo8.darkbot.utils.Time;
@@ -103,7 +104,7 @@ public class GameAPIImpl<
 
         if (hasCapability(Capability.PROXY)) {
             ConfigSetting<Boolean> useProxy = config.requireConfig("bot_settings.api_config.use_proxy");
-            if (useProxy.getValue() || OSUtil.isWindows7OrLess())
+            if (useProxy.getValue() || OSUtil.isWindows7OrLess() || NetworkUtils.isProxyEnabled())
                 new KekkaPlayerProxyServer(handler).start();
         }
 
