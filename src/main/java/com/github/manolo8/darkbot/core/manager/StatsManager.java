@@ -42,7 +42,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     private final Map<StatKey, StatImpl> statistics = new HashMap<>();
 
     private final StatImpl runtime;
-    private final StatImpl credits, uridium, experience, honor, cargo, maxCargo, novaEnergy, teleportBonus;
+    private final StatImpl credits, uridium, experience, honor, cargo, maxCargo, novaEnergy, teleportBonus, jackpot;
     private final AverageStats cpuStat, pingStat, tickStat, memoryStat;
 
     @Getter
@@ -62,6 +62,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         registerImpl(Stats.General.MAX_CARGO, maxCargo = createStat());
         registerImpl(Stats.General.NOVA_ENERGY, novaEnergy = createStat());
         registerImpl(Stats.General.TELEPORT_BONUS_AMOUNT, teleportBonus = createStat());
+        registerImpl(Stats.General.JACKPOT, jackpot = createStat());
 
         registerImpl(Stats.Bot.PING, pingStat = new AverageStats());
         registerImpl(Stats.Bot.TICK_TIME, tickStat = new AverageStats());
@@ -85,10 +86,12 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     public void tick() {
         updateNonZero(runtime, System.currentTimeMillis());
 
-        if (address == 0) return;
+        if (address == 0)
+            return;
 
         updateNonZero(credits, readDouble(0x188));
         updateNonZero(uridium, readDouble(0x190));
+        updateNonZero(jackpot, readDouble(0x198));
         updateNonZero(experience, readDouble(0x1A0));
         checkHonor(updateNonZero(honor, readDouble(0x1A8)));
 
@@ -334,7 +337,13 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
         ASTRAL_SUPREME(0x80, Stats.BootyKey.ASTRAL_SUPREME),
         EMPYRIAN(0x84, Stats.BootyKey.EMPYRIAN),
         LUCENT(0x88, Stats.BootyKey.LUCENT),
-        PERSEUS(0x8c, Stats.BootyKey.PERSEUS);
+        PERSEUS(0x8c, Stats.BootyKey.PERSEUS),
+        LAUREL(0x90, Stats.BootyKey.LAUREL),
+        ECHO_BLUE(0x94, Stats.BootyKey.ECHO_BLUE),
+        ECHO_GREEN(0x98, Stats.BootyKey.ECHO_GREEN),
+        ECHO_PURPLE(0x9c, Stats.BootyKey.ECHO_PURPLE),
+        ECHO_RED(0xa0, Stats.BootyKey.ECHO_RED),
+        BKAPO(0xa4, Stats.BootyKey.BKAPO);
 
         private static final BootyKeyType[] VALUES = values();
 
