@@ -87,25 +87,25 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
 
         if (address == 0) return;
 
-        updateNonZero(credits, readDouble(0x180));
-        updateNonZero(uridium, readDouble(0x188));
-        updateNonZero(experience, readDouble(0x198));
-        checkHonor(updateNonZero(honor, readDouble(0x1A0)));
+        updateNonZero(credits, readDouble(0x188));
+        updateNonZero(uridium, readDouble(0x190));
+        updateNonZero(experience, readDouble(0x1A0));
+        checkHonor(updateNonZero(honor, readDouble(0x1A8)));
 
-        cargo.track(readBindableInt(0x148));
-        maxCargo.track(readBindableInt(0x150));
+        cargo.track(readBindableInt(0x150));
+        maxCargo.track(readBindableInt(0x158));
 
-        sid = readString(0xE0);
+        sid = readString(0xE8);
         userId = readInt(0x30);
         if (main.settingsManager.getAddress() != 0) {
             instance = main.settingsManager.readString(0x298);
         }
 
-        novaEnergy.track(readBindableInt(0x118));
+        novaEnergy.track(readBindableInt(0x120));
         teleportBonus.track(readInt(0x50));
-        premium = readBoolean(0x108, 0x20);
+        premium = readBoolean(0x110, 0x20);
 
-        for (BootyKeyType key: BootyKeyType.VALUES)
+        for (BootyKeyType key : BootyKeyType.VALUES)
             track(key.getStatKey(), readInt(key.getOffset()));
     }
 
