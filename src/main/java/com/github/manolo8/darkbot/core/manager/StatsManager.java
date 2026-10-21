@@ -86,8 +86,7 @@ public class StatsManager implements Manager, StatsAPI, NativeUpdatable {
     public void tick() {
         updateNonZero(runtime, System.currentTimeMillis());
 
-        if (address == 0)
-            return;
+        if (address == 0) return;
 
         updateNonZero(credits, readDouble(0x188));
         updateNonZero(uridium, readDouble(0x190));
