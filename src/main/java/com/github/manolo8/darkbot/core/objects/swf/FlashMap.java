@@ -248,8 +248,13 @@ public class FlashMap<K, V> extends AbstractMap<K, V> implements NativeUpdatable
 
     private void clearMap() {
         setSize(0);
-        //noinspection unchecked
-        this.entries = (Entry[]) Array.newInstance(Entry.class, 0);
+        // Initialize null, trim large, keep and clear others
+        if (this.entries == null || this.entries.length > 256) {
+            //noinspection unchecked
+            this.entries = (Entry[]) Array.newInstance(Entry.class, 0);
+        } else {
+            Arrays.fill(this.entries, null);
+        }
         if (updatables != null)
             updatables.forEach((k, wrapper) -> wrapper.resetReferences());
     }
