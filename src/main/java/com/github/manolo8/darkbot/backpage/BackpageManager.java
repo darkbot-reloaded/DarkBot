@@ -296,10 +296,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     @Override
     public boolean isInstanceValid() {
-        // Only check against local sid & instance variables, since stats manager ones
-        // are
-        // updated in the main thread, while the variables here are updated on the
-        // background
+        // Only check against local sid & instance variables, since stats manager ones are
+        // updated in the main thread, while the variables here are updated on the background
         // thread every tick
         return sid != null && instance != null && !sid.isEmpty() && !instance.isEmpty() && userId != 0;
     }
