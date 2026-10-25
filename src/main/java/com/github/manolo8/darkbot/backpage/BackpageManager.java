@@ -34,14 +34,14 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings({ "OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull" })
+@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
 public class BackpageManager extends Thread implements BackpageAPI {
     public static final Gson GSON = new Gson();
 
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
 
     private static final String SHOP_PATH = "ajax/shop.php";
-    private static final String[] ACTIONS = new String[] {
+    private static final String[] ACTIONS = new String[]{
             "internalDock", "internalDock&tpl=internalDockAmmo", "internalSkylab" };
 
     public final LegacyHangarManager legacyHangarManager;
@@ -88,8 +88,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
             if (checkSidValid()) {
                 hangarManager.tick();
 
-                // is it even useful now?
-                // checkDrones();
                 tickTasks(Task::onTickTask);
             }
         }
@@ -135,8 +133,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
                                 .setParam("itemId", "ammunition_laser_lcb-10")
                                 .setParam("amount", 1)
                                 .setParam("selectedName", "")
-                                .setHeader("Referer",
-                                        instance + "indexInternal.es?action=internalDock&tpl=internalDockAmmo")
+                                .setHeader("Referer", instance + "indexInternal.es?action=internalDock&tpl=internalDockAmmo")
                                 .getConnection();
 
                         status = Status.of(conn.getResponseCode());
@@ -156,8 +153,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
             sidNextUpdate = sidLastUpdate + (int) (waitTime + waitTime * Math.random());
         }
 
-        // only try to relogin on `302` response code or `redirectToLogin` message while
-        // buying ammo
+        // only try to relogin on `302` response code or `redirectToLogin` message while buying ammo
         if (Main.API.hasCapability(Capability.LOGIN) && status.shouldRelogin() && refreshTimer.tryActivate()) {
             Main.API.handleRelogin(true);
             sidNextUpdate = System.currentTimeMillis();
@@ -205,8 +201,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     private URI tryParse(String uri) {
-        if (uri == null || uri.isEmpty())
-            return null;
+        if (uri == null || uri.isEmpty()) return null;
         try {
             return new URI(uri);
         } catch (URISyntaxException e) {
@@ -220,8 +215,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public HttpURLConnection getConnection(String params) throws Exception {
-        if (!isInstanceValid())
-            throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         if (params.toLowerCase(Locale.ROOT).contains(SHOP_PATH))
             shopTimer.activate();
 
@@ -253,8 +247,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
      */
     @Deprecated
     public Http getConnection(String params, Method method) {
-        if (!isInstanceValid())
-            throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         if (params.toLowerCase(Locale.ROOT).contains(SHOP_PATH))
             shopTimer.activate();
 
@@ -294,8 +287,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public synchronized String sidStatus() {
-        return status + (status.displayTime() ? " " + Time.toString(System.currentTimeMillis() - sidLastUpdate) + "/" +
-                Time.toString(sidNextUpdate - sidLastUpdate) : "");
+        return status + (status.displayTime() ? " " + Time.toString(System.currentTimeMillis() - sidLastUpdate) + "/" + Time.toString(sidNextUpdate - sidLastUpdate) : "");
     }
 
     public Gson getGson() {
