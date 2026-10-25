@@ -1,11 +1,11 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.managers.ConfigAPI;
 import eu.darkbot.api.managers.I18nAPI;
 
+import eu.darkbot.util.Popups;
 import javax.swing.*;
 import java.util.Comparator;
 import java.util.List;

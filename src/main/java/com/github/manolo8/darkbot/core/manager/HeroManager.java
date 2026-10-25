@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.Config;
-import com.github.manolo8.darkbot.config.LegacyShipMode;
 import com.github.manolo8.darkbot.config.NpcExtra;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.entities.Entity;
@@ -260,9 +259,24 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         if (mode.getConfiguration() != null &&
                 mode.getConfiguration() != getConfiguration()) toggleConfiguration();
 
-        if (mode instanceof LegacyShipMode && ((LegacyShipMode) mode).isLegacyFormation())
-            setFormationLegacy(((LegacyShipMode) mode).getLegacyFormation());
+        if (usesLegacyFormation(mode)) setFormationLegacy(getSelectChar(mode));
         else setFormation(mode.getFormation());
+    }
+
+    /**
+     * Ship modes coming from {@link Config.ShipConfig} store the formation as the keybind char of the item,
+     * so they can be clicked even when the formation is unknown to the API. The same applies to the
+     * {@link MutableShipMode} while the char could not be mapped to a {@link SelectableItem.Formation}.
+     */
+    private static boolean usesLegacyFormation(ShipMode mode) {
+        return mode instanceof Config.ShipConfig
+                || (mode instanceof MutableShipMode && ((MutableShipMode) mode).isLegacyFormation());
+    }
+
+    private static @Nullable Character getSelectChar(ShipMode mode) {
+        if (mode instanceof Config.ShipConfig) return ((Config.ShipConfig) mode).FORMATION;
+        if (mode instanceof MutableShipMode) return ((MutableShipMode) mode).toSelectChar;
+        return null;
     }
 
     private void toggleConfiguration() {
@@ -325,12 +339,10 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
     @Override
     public boolean isInMode(@NotNull ShipMode mode) {
-        if (mode instanceof LegacyShipMode && ((LegacyShipMode) mode).isLegacyFormation()) {
-            return mode.getConfiguration() == getConfiguration() &&
-                    (mode.getFormation() == getFormation() || formationChar == ((LegacyShipMode) mode).getLegacyFormation());
-        } else {
-            return mode.getConfiguration() == getConfiguration() && mode.getFormation() == getFormation();
-        }
+        if (mode.getConfiguration() != getConfiguration()) return false;
+
+        return mode.getFormation() == getFormation()
+                || (usesLegacyFormation(mode) && formationChar == getSelectChar(mode));
     }
 
     @Override
@@ -392,7 +404,7 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         return hasPet() ? Optional.of(pet) : Optional.empty();
     }
 
-    private static class MutableShipMode implements LegacyShipMode {
+    private static class MutableShipMode implements ShipMode {
         private final HeroItemsAPI items;
         private Configuration configuration;
         private SelectableItem.Formation formation;
@@ -416,8 +428,8 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
         public void set(ShipMode other) {
             this.configuration = other.getConfiguration();
-            if (other instanceof LegacyShipMode) {
-                this.toSelectChar = ((LegacyShipMode) other).getLegacyFormation();
+            if (usesLegacyFormation(other)) {
+                this.toSelectChar = getSelectChar(other);
 
                 setLegacy();
             } else {
@@ -442,12 +454,6 @@ public class HeroManager extends Player implements Manager, HeroAPI {
             this.isLegacyFormation = formation == null;
         }
 
-        @Override
-        public @Nullable Character getLegacyFormation() {
-            return toSelectChar;
-        }
-
-        @Override
         public boolean isLegacyFormation() {
             return isLegacyFormation;
         }

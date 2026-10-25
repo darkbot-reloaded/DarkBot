@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.data.Pair;
+import eu.darkbot.util.Popups;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

@@ -4,9 +4,9 @@ import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.UnresolvedPlayer;
 import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.utils.PopupButton;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.util.Popups;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
