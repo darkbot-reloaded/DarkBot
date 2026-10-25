@@ -4,7 +4,6 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.PlayerTag;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.events.EventHandler;
@@ -12,6 +11,7 @@ import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.game.entities.Player;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
+import eu.darkbot.util.Popups;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;

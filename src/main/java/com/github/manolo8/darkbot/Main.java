@@ -34,7 +34,6 @@ import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
 import com.github.manolo8.darkbot.extensions.util.VerifierChecker;
 import com.github.manolo8.darkbot.extensions.util.Version;
 import com.github.manolo8.darkbot.gui.MainGui;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.modules.DisconnectModule;
 import com.github.manolo8.darkbot.modules.DummyExceptionModule;
 import com.github.manolo8.darkbot.modules.DummyModule;
@@ -52,6 +51,7 @@ import eu.darkbot.api.extensions.TemporalModule;
 import eu.darkbot.api.game.other.Lockable;
 import eu.darkbot.api.managers.BotAPI;
 import eu.darkbot.api.managers.EventBrokerAPI;
+import eu.darkbot.util.Popups;
 import org.jetbrains.annotations.ApiStatus;
 
 import javax.swing.*;
