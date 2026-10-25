@@ -16,17 +16,42 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class StartupChecks {
 
     private static final Path PID_FILE = Paths.get("curr.pid");
+    private static final int MIN_JAVA_VERSION = 11;
 
     public static void checkJavaVersion(StartupParams params) {
         if (params.has(StartupParams.LaunchArg.NO_WARN)) return;
         String java = System.getProperty("java.version");
 
-        if (!java.startsWith("11.") && !java.startsWith("17.") && !java.equals("17") && !java.startsWith("21.")) {
+        int majorVersion = getMajorVersion(java);
+
+        // Only warn about versions below the minimum. Newer java versions are expected to work,
+        // as the bot is built for java 11 and java keeps backwards compatibility.
+        // If the version can't be parsed, assume it's fine to avoid false warnings.
+        if (majorVersion != -1 && majorVersion < MIN_JAVA_VERSION) {
             Popups.of(I18n.get("start.old_java_warn_title"),
                             I18n.get("start.old_java_warn_content", java),
                             JOptionPane.WARNING_MESSAGE)
                     .optionType(JOptionPane.DEFAULT_OPTION)
                     .showSync();
+        }
+    }
+
+    /**
+     * Extracts the major version from a {@code java.version} property, eg: {@code 1.8.0_352} returns 8,
+     * {@code 17.0.9} returns 17 and {@code 25-ea} returns 25.
+     *
+     * @return the major version, or -1 if it can't be parsed
+     */
+    static int getMajorVersion(String version) {
+        if (version == null || version.isEmpty()) return -1;
+
+        String[] parts = version.split("[._+\\-]");
+        try {
+            // Old scheme: 1.<major>.<minor>, new scheme: <major>.<minor>
+            int index = parts[0].equals("1") && parts.length > 1 ? 1 : 0;
+            return Integer.parseInt(parts[index]);
+        } catch (NumberFormatException e) {
+            return -1;
         }
     }
 
