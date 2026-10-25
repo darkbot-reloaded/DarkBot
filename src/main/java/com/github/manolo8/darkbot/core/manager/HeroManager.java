@@ -260,21 +260,9 @@ public class HeroManager extends Player implements Manager, HeroAPI {
         if (mode.getConfiguration() != null &&
                 mode.getConfiguration() != getConfiguration()) toggleConfiguration();
 
-        if (usesLegacyFormation(mode)) setFormationLegacy(getLegacyFormation(mode));
+        if (mode instanceof LegacyShipMode && ((LegacyShipMode) mode).isLegacyFormation())
+            setFormationLegacy(((LegacyShipMode) mode).getLegacyFormation());
         else setFormation(mode.getFormation());
-    }
-
-    /**
-     * Ship modes coming from {@link Config.ShipConfig} store the formation as the keybind char of the item,
-     * so they can be clicked even when the formation is unknown to the API. The same applies to the
-     * {@link MutableShipMode} while the char could not be mapped to a {@link SelectableItem.Formation}.
-     */
-    private static boolean usesLegacyFormation(ShipMode mode) {
-        return mode instanceof LegacyShipMode && ((LegacyShipMode) mode).isLegacyFormation();
-    }
-
-    private static @Nullable Character getLegacyFormation(ShipMode mode) {
-        return mode instanceof LegacyShipMode ? ((LegacyShipMode) mode).getLegacyFormation() : null;
     }
 
     private void toggleConfiguration() {
@@ -337,10 +325,12 @@ public class HeroManager extends Player implements Manager, HeroAPI {
 
     @Override
     public boolean isInMode(@NotNull ShipMode mode) {
-        if (mode.getConfiguration() != getConfiguration()) return false;
-
-        return mode.getFormation() == getFormation()
-                || (usesLegacyFormation(mode) && formationChar == getLegacyFormation(mode));
+        if (mode instanceof LegacyShipMode && ((LegacyShipMode) mode).isLegacyFormation()) {
+            return mode.getConfiguration() == getConfiguration() &&
+                    (mode.getFormation() == getFormation() || formationChar == ((LegacyShipMode) mode).getLegacyFormation());
+        } else {
+            return mode.getConfiguration() == getConfiguration() && mode.getFormation() == getFormation();
+        }
     }
 
     @Override
@@ -424,18 +414,15 @@ public class HeroManager extends Player implements Manager, HeroAPI {
             return formation;
         }
 
-        @Override
-        public @Nullable Character getLegacyFormation() {
-            return toSelectChar;
-        }
-
         public void set(ShipMode other) {
             this.configuration = other.getConfiguration();
-            this.toSelectChar = HeroManager.getLegacyFormation(other);
-            if (usesLegacyFormation(other)) {
+            if (other instanceof LegacyShipMode) {
+                this.toSelectChar = ((LegacyShipMode) other).getLegacyFormation();
+
                 setLegacy();
             } else {
                 this.formation = other.getFormation();
+                this.toSelectChar = null;
                 this.isLegacyFormation = false;
             }
         }
@@ -453,6 +440,11 @@ public class HeroManager extends Player implements Manager, HeroAPI {
             this.formation = item == null ? null : item.getAs(SelectableItem.Formation.class);
 
             this.isLegacyFormation = formation == null;
+        }
+
+        @Override
+        public @Nullable Character getLegacyFormation() {
+            return toSelectChar;
         }
 
         @Override
