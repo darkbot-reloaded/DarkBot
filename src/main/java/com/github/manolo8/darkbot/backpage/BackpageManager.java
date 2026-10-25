@@ -34,15 +34,15 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
+@SuppressWarnings({ "OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull" })
 public class BackpageManager extends Thread implements BackpageAPI {
     public static final Gson GSON = new Gson();
 
     public static final Pattern RELOAD_TOKEN_PATTERN = Pattern.compile("reloadToken=([^\"]+)");
 
     private static final String SHOP_PATH = "ajax/shop.php";
-    private static final String[] ACTIONS = new String[]{
-            "internalDock", "internalDock&tpl=internalDockAmmo", "internalSkylab"};
+    private static final String[] ACTIONS = new String[] {
+            "internalDock", "internalDock&tpl=internalDockAmmo", "internalSkylab" };
 
     public final LegacyHangarManager legacyHangarManager;
     public final HangarManager hangarManager;
@@ -69,14 +69,11 @@ public class BackpageManager extends Thread implements BackpageAPI {
     public BackpageManager(Main main, ConfigAPI configAPI) {
         super("BackpageManager");
         this.main = main;
-        this.legacyHangarManager = createLegacyHangarManager(main, this);
+        this.legacyHangarManager = new LegacyHangarManager(main, this);
         this.hangarManager = new HangarManager(this);
         this.auctionManager = new AuctionManager(this, configAPI);
         this.novaManager = new NovaManager(this);
         setDaemon(true);
-    }
-    private static LegacyHangarManager createLegacyHangarManager(Main main, BackpageManager backpage) {
-        return new LegacyHangarManager(main, backpage);
     }
 
     @Override
@@ -92,7 +89,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
                 hangarManager.tick();
 
                 // is it even useful now?
-                //checkDrones();
+                // checkDrones();
                 tickTasks(Task::onTickTask);
             }
         }
@@ -138,7 +135,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
                                 .setParam("itemId", "ammunition_laser_lcb-10")
                                 .setParam("amount", 1)
                                 .setParam("selectedName", "")
-                                .setHeader("Referer", instance + "indexInternal.es?action=internalDock&tpl=internalDockAmmo")
+                                .setHeader("Referer",
+                                        instance + "indexInternal.es?action=internalDock&tpl=internalDockAmmo")
                                 .getConnection();
 
                         status = Status.of(conn.getResponseCode());
@@ -158,7 +156,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
             sidNextUpdate = sidLastUpdate + (int) (waitTime + waitTime * Math.random());
         }
 
-        // only try to relogin on `302` response code or `redirectToLogin` message while buying ammo
+        // only try to relogin on `302` response code or `redirectToLogin` message while
+        // buying ammo
         if (Main.API.hasCapability(Capability.LOGIN) && status.shouldRelogin() && refreshTimer.tryActivate()) {
             Main.API.handleRelogin(true);
             sidNextUpdate = System.currentTimeMillis();
@@ -206,7 +205,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     private URI tryParse(String uri) {
-        if (uri == null || uri.isEmpty()) return null;
+        if (uri == null || uri.isEmpty())
+            return null;
         try {
             return new URI(uri);
         } catch (URISyntaxException e) {
@@ -220,7 +220,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public HttpURLConnection getConnection(String params) throws Exception {
-        if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        if (!isInstanceValid())
+            throw new UnsupportedOperationException("Can't connect when sid is invalid");
         if (params.toLowerCase(Locale.ROOT).contains(SHOP_PATH))
             shopTimer.activate();
 
@@ -236,7 +237,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     /**
-     * @deprecated use {@link BackpageAPI#http(String, eu.darkbot.util.http.Method, int)} instead
+     * @deprecated use
+     *             {@link BackpageAPI#http(String, eu.darkbot.util.http.Method, int)}
+     *             instead
      */
     @Deprecated
     public Http getConnection(String params, Method method, int minWait) {
@@ -245,11 +248,13 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     /**
-     * @deprecated use {@link BackpageAPI#http(String, eu.darkbot.util.http.Method)} instead
+     * @deprecated use {@link BackpageAPI#http(String, eu.darkbot.util.http.Method)}
+     *             instead
      */
     @Deprecated
     public Http getConnection(String params, Method method) {
-        if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
+        if (!isInstanceValid())
+            throw new UnsupportedOperationException("Can't connect when sid is invalid");
         if (params.toLowerCase(Locale.ROOT).contains(SHOP_PATH))
             shopTimer.activate();
 
@@ -289,9 +294,8 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public synchronized String sidStatus() {
-        return status + (status.displayTime() ?
-                " " + Time.toString(System.currentTimeMillis() - sidLastUpdate) + "/" +
-                        Time.toString(sidNextUpdate - sidLastUpdate) : "");
+        return status + (status.displayTime() ? " " + Time.toString(System.currentTimeMillis() - sidLastUpdate) + "/" +
+                Time.toString(sidNextUpdate - sidLastUpdate) : "");
     }
 
     public Gson getGson() {
@@ -300,8 +304,10 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     @Override
     public boolean isInstanceValid() {
-        // Only check against local sid & instance variables, since stats manager ones are
-        // updated in the main thread, while the variables here are updated on the background
+        // Only check against local sid & instance variables, since stats manager ones
+        // are
+        // updated in the main thread, while the variables here are updated on the
+        // background
         // thread every tick
         return sid != null && instance != null && !sid.isEmpty() && !instance.isEmpty() && userId != 0;
     }
