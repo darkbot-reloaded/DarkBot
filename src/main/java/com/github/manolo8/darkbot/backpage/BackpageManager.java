@@ -42,7 +42,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
 
     private static final String SHOP_PATH = "ajax/shop.php";
     private static final String[] ACTIONS = new String[]{
-            "internalDock", "internalDock&tpl=internalDockAmmo", "internalSkylab" };
+            "internalDock", "internalDock&tpl=internalDockAmmo", "internalSkylab"};
 
     public final LegacyHangarManager legacyHangarManager;
     public final HangarManager hangarManager;
@@ -287,7 +287,9 @@ public class BackpageManager extends Thread implements BackpageAPI {
     }
 
     public synchronized String sidStatus() {
-        return status + (status.displayTime() ? " " + Time.toString(System.currentTimeMillis() - sidLastUpdate) + "/" + Time.toString(sidNextUpdate - sidLastUpdate) : "");
+        return status + (status.displayTime() ?
+                " " + Time.toString(System.currentTimeMillis() - sidLastUpdate) + "/" +
+                        Time.toString(sidNextUpdate - sidLastUpdate) : "");
     }
 
     public Gson getGson() {
