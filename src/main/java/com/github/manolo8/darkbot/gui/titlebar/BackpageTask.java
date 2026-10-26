@@ -2,13 +2,13 @@ package com.github.manolo8.darkbot.gui.titlebar;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.extensions.util.Version;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.FileUtils;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.OSUtil;
 import com.github.manolo8.darkbot.utils.Time;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
+import eu.darkbot.util.Popups;
 import eu.darkbot.util.Timer;
 import eu.darkbot.util.http.Http;
 import org.jetbrains.annotations.Nullable;

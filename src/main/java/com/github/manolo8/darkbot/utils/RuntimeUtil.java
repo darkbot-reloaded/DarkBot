@@ -1,7 +1,7 @@
 package com.github.manolo8.darkbot.utils;
 
-import com.github.manolo8.darkbot.gui.utils.Popups;
 
+import eu.darkbot.util.Popups;
 import javax.swing.*;
 import java.io.IOException;
 import java.util.HashSet;

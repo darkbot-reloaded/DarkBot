@@ -3,9 +3,9 @@ package com.github.manolo8.darkbot.backpage;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.backpage.entities.*;
 import com.github.manolo8.darkbot.utils.Base64Utils;
-import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import eu.darkbot.util.http.Method;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -49,7 +49,7 @@ public class LegacyHangarManager {
 
     public String getDataInventory(String params) {
         try {
-            return backpageManager.getConnection(params, Method.GET, 2500)
+            return backpageManager.http(params, Method.GET, 2500)
                     .setRawHeader("Content-Type", "application/x-www-form-urlencoded")
                     .consumeInputStream(Base64Utils::decode);
         } catch (IOException e) {
@@ -69,7 +69,7 @@ public class LegacyHangarManager {
 
             paramObj.add("params", hangarObj);
             
-            return backpageManager.getConnection("flashAPI/inventory.php", Method.POST, 2000)
+            return backpageManager.http("flashAPI/inventory.php", Method.POST, 2000)
                     .addSupplier(() -> this.lastHangarChange = System.currentTimeMillis() + 12_000)
                     .setRawHeader("Content-Type", "application/x-www-form-urlencoded")
                     .setRawParam("action", "activateShip")

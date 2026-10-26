@@ -2,12 +2,12 @@ package com.github.manolo8.darkbot.extensions.features.decorators;
 
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.extensions.InstructionProvider;
 import eu.darkbot.api.extensions.Module;
 import eu.darkbot.api.extensions.TemporalModule;
 
+import eu.darkbot.util.Popups;
 import javax.swing.*;
 
 public class InstructionProviderDecorator extends FeatureDecorator<InstructionProvider> {
