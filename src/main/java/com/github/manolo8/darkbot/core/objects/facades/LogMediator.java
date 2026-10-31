@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core.objects.facades;
 
 import com.github.manolo8.darkbot.core.itf.Updatable;
 import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
+import com.github.manolo8.darkbot.core.objects.swf.FlashMap;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
@@ -16,6 +17,7 @@ public class LogMediator extends Updatable implements GameLogAPI, Listener {
 
     private final EventBrokerAPI eventBroker;
     private final FlashListLong messageBuffer = FlashListLong.ofArray();
+    private final FlashMap<String, Object> lastMessage = FlashMap.of(String.class, null);
 
     public LogMediator(EventBrokerAPI eventBroker) {
         this.eventBroker = eventBroker;
@@ -24,16 +26,17 @@ public class LogMediator extends Updatable implements GameLogAPI, Listener {
 
     @Override
     public void update() {
-        messageBuffer.update(API.readLong(address + 0x60));
+        messageBuffer.update(API.readLong(address + 0x70));
         if (messageBuffer.isEmpty() || messageBuffer.size() > 50) return;
 
         messageBuffer.forEachIncremental(this::handleLogMessage);
     }
 
     private void handleLogMessage(long pointer) {
-        String val = API.readString(API.readLong(pointer + 0x28));
-        if (val != null && !val.trim().isEmpty())
-            eventBroker.sendEvent(new LogMessageEvent(val));
+        lastMessage.update(pointer);
+        Object raw = lastMessage.get("raw");
+        if (raw instanceof String && !((String) raw).trim().isEmpty())
+            eventBroker.sendEvent(new LogMessageEvent((String) raw));
     }
 
     @EventHandler

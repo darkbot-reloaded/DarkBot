@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.utils;
 
 import com.github.manolo8.darkbot.config.types.suppliers.BrowserApi;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 
+import eu.darkbot.util.Popups;
 import javax.swing.*;
 import java.nio.file.Paths;
 

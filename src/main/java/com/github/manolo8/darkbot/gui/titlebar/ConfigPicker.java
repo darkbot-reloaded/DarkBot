@@ -3,9 +3,9 @@ package com.github.manolo8.darkbot.gui.titlebar;
 import com.formdev.flatlaf.ui.FlatComboBoxUI;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.gui.utils.ButtonListRenderer;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.utils.I18n;
+import eu.darkbot.util.Popups;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;

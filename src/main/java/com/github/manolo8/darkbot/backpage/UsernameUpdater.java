@@ -5,12 +5,12 @@ import com.github.manolo8.darkbot.config.Config;
 import com.github.manolo8.darkbot.config.ConfigEntity;
 import com.github.manolo8.darkbot.config.PlayerInfo;
 import com.github.manolo8.darkbot.config.UnresolvedPlayer;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.Base62;
 import com.github.manolo8.darkbot.utils.I18n;
 import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.Task;
 
+import eu.darkbot.util.Popups;
 import javax.swing.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

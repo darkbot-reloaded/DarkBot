@@ -4,11 +4,11 @@ import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.gui.AdvancedConfig;
 import com.github.manolo8.darkbot.gui.components.MainButton;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import eu.darkbot.api.extensions.Configurable;
 import eu.darkbot.api.extensions.InstructionProvider;
 
+import eu.darkbot.util.Popups;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 

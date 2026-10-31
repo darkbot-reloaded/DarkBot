@@ -1,8 +1,8 @@
 package com.github.manolo8.darkbot.core.itf;
 
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.utils.I18n;
 
+import eu.darkbot.util.Popups;
 import javax.swing.*;
 
 public interface InstructionProvider extends eu.darkbot.api.extensions.InstructionProvider {

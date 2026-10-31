@@ -22,8 +22,8 @@ import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.InventoryProxy;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
 import com.github.manolo8.darkbot.core.objects.facades.NpcEventProxy;
-import com.github.manolo8.darkbot.core.objects.facades.SeassonPassMediator;
 import com.github.manolo8.darkbot.core.objects.facades.QuestProxy;
+import com.github.manolo8.darkbot.core.objects.facades.SeassonPassMediator;
 import com.github.manolo8.darkbot.core.objects.facades.SettingsProxy;
 import com.github.manolo8.darkbot.core.objects.facades.ShipWarpProxy;
 import com.github.manolo8.darkbot.core.objects.facades.SlotBarsProxy;
@@ -125,9 +125,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
 
     @Override
     public void install(BotInstaller botInstaller) {
-        botInstaller.mainAddress.add(mainAddr -> {
-            long facade = API.readLong(mainAddr + 544);
-
+        botInstaller.facadeAddress.add(facade -> {
             commands.update(API.readLong(facade, 0x28, 0x20));
             proxies.update(API.readLong(facade, 0x38, 0x30));
             mediators.update(API.readLong(facade, 0x40, 0x38));

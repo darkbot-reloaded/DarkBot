@@ -23,6 +23,7 @@ public class BotInstaller implements API.Singleton {
     public final Lazy<Long> mainAddress = new Lazy<>();
     public final Lazy<Long> screenManagerAddress = new Lazy<>();
     public final Lazy<Long> guiManagerAddress = new Lazy<>();
+    public final Lazy<Long> facadeAddress = new Lazy<>();
     public final Lazy<Long> heroInfoAddress = new Lazy<>();
     public final Lazy<Long> settingsAddress = new Lazy<>();
     public final Lazy<Long> connectionManagerAddress = new Lazy<>();
@@ -74,8 +75,8 @@ public class BotInstaller implements API.Singleton {
             // int speed = API.readMemoryInt(closure + 56);
             int bool = API.readInt(closure + 0x3c);
             int val = API.readInt(closure + 0x40);
-            int cargo = API.readBindableInt(closure, 0x148);
-            int maxCargo = API.readBindableInt(closure, 0x150);
+            int cargo = API.readBindableInt(closure, 0x150);
+            int maxCargo = API.readBindableInt(closure, 0x158);
 
             return level >= 0 && level <= 100
                    //&& speed > 50 && speed < 2000
@@ -102,14 +103,17 @@ public class BotInstaller implements API.Singleton {
         if ((temp = API.searchClassClosure(this::settingsPattern)) == 0) return true;
         this.settingsAddress.send(temp);
 
-        if ((temp = API.readLong(mainApplicationAddress.get() + 1344)) == 0) return true;
+        if ((temp = API.readLong(mainApplicationAddress.get() + 0x540)) == 0) return true;
         this.mainAddress.send(temp);
 
-        if ((temp = API.readLong(mainAddress.get() + 504)) == 0) return true;
+        if ((temp = API.readLong(mainAddress.get() + 0x1f8)) == 0) return true;
         this.screenManagerAddress.send(temp);
 
-        if ((temp = API.readLong(mainAddress.get() + 512)) == 0) return true;
+        if ((temp = API.readLong(mainAddress.get() + 0x200)) == 0) return true;
         this.guiManagerAddress.send(temp);
+
+        if ((temp = API.readLong(mainAddress.get() + 0x220)) == 0) return true;
+        this.facadeAddress.send(temp);
 
         SCRIPT_OBJECT_VTABLE = API.readLong(screenManagerAddress.get());
         // vtable -> traits -> core -> string cache -> cpp_vtable
