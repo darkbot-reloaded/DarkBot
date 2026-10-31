@@ -1,12 +1,12 @@
 package com.github.manolo8.darkbot.utils.login;
 
 import com.github.manolo8.darkbot.gui.login.LoginForm;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.Strings;
 import com.github.manolo8.darkbot.utils.CaptchaAPI;
 import com.github.manolo8.darkbot.utils.I18n;
 import com.github.manolo8.darkbot.utils.IOUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
+import eu.darkbot.util.Popups;
 import eu.darkbot.util.http.Http;
 import eu.darkbot.util.http.Method;
 

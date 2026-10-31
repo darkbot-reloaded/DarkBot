@@ -7,10 +7,10 @@ import com.github.manolo8.darkbot.core.entities.BattleStation;
 import com.github.manolo8.darkbot.core.entities.Portal;
 import com.github.manolo8.darkbot.core.entities.Ship;
 import com.github.manolo8.darkbot.core.manager.HeroManager;
-import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.objects.Map;
 import com.github.manolo8.darkbot.core.utils.Drive;
 import com.github.manolo8.darkbot.core.utils.Location;
+import eu.darkbot.api.config.types.ShipMode;
 
 import java.util.Comparator;
 import java.util.List;
@@ -236,11 +236,12 @@ public class SafetyFinder {
     }
 
     private boolean doneRepairing() {
-        if (!hero.isInMode(SAFETY.REPAIR)
+        if (!hero.isInMode((ShipMode) SAFETY.REPAIR)
                 && (hero.health.hpIncreasedIn(1000) || hero.health.hpPercent() == 1)
-                && (hero.health.shDecreasedIn(1000) || hero.health.shieldPercent() == 0)) hero.setMode(SAFETY.REPAIR);
+                && (hero.health.shDecreasedIn(1000) || hero.health.shieldPercent() == 0))
+            hero.setMode((ShipMode) SAFETY.REPAIR);
         return this.hero.health.shieldPercent() >= SAFETY.REPAIR_TO_SHIELD &&
-                hero.setMode(SAFETY.REPAIR) && this.hero.health.hpPercent() >= SAFETY.REPAIR_HP_RANGE.max;
+                hero.setMode((ShipMode) SAFETY.REPAIR) && this.hero.health.hpPercent() >= SAFETY.REPAIR_HP_RANGE.max;
     }
 
     private boolean isUnderAttack() {

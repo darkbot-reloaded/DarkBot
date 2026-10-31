@@ -89,6 +89,7 @@ public class ObjectInspectorUI extends JFrame {
             addItem(new AddressEntry("Hero Address", () -> Main.INSTANCE.hero.address));
             addItem(new AddressEntry("HeroInfo Address", b.heroInfoAddress::get));
             addItem(new AddressEntry("Settings Address", b.settingsAddress::get));
+            addItem(new AddressEntry("Facades", b.facadeAddress::get));
         }
 
         private LongSupplier getSelectedAddr() {

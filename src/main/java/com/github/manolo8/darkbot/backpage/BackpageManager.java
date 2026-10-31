@@ -88,8 +88,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
             if (checkSidValid()) {
                 hangarManager.tick();
 
-                // is it even useful now?
-                //checkDrones();
                 tickTasks(Task::onTickTask);
             }
         }
@@ -168,22 +166,6 @@ public class BackpageManager extends Thread implements BackpageAPI {
         return getConnection("indexInternal.es?action=" + action).getResponseCode();
     }
 
-    private void checkDrones() {
-        if (System.currentTimeMillis() > checkDrones) {
-            try {
-                boolean checked = hangarManager.checkDrones();
-
-                System.out.println("Checked/repaired drones, all successful: " + checked);
-
-                checkDrones = !checked ? System.currentTimeMillis() + 30_000 : Long.MAX_VALUE;
-            } catch (Exception e) {
-                System.err.println("Failed to check & repair drones, retry in 5m");
-                checkDrones = System.currentTimeMillis() + 300_000;
-                e.printStackTrace();
-            }
-        }
-    }
-
     public void setLoginData(LoginData loginData) {
         if (this.loginData != null)
             throw new IllegalStateException("LoginData can be assigned only once!");
@@ -248,11 +230,22 @@ public class BackpageManager extends Thread implements BackpageAPI {
         return conn;
     }
 
+    /**
+     * @deprecated use
+     *             {@link BackpageAPI#http(String, eu.darkbot.util.http.Method, int)}
+     *             instead
+     */
+    @Deprecated
     public Http getConnection(String params, Method method, int minWait) {
         Time.sleep(lastRequest + minWait - System.currentTimeMillis());
         return getConnection(params, method);
     }
 
+    /**
+     * @deprecated use {@link BackpageAPI#http(String, eu.darkbot.util.http.Method)}
+     *             instead
+     */
+    @Deprecated
     public Http getConnection(String params, Method method) {
         if (!isInstanceValid()) throw new UnsupportedOperationException("Can't connect when sid is invalid");
         if (params.toLowerCase(Locale.ROOT).contains(SHOP_PATH))

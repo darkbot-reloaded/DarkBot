@@ -6,7 +6,6 @@ import com.github.manolo8.darkbot.gui.components.MainButton;
 import com.github.manolo8.darkbot.gui.tree.OptionEditor;
 import com.github.manolo8.darkbot.gui.utils.GenericTableModel;
 import com.github.manolo8.darkbot.gui.utils.MultiTableRowSorter;
-import com.github.manolo8.darkbot.gui.utils.Popups;
 import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.utils.ToolTipHeader;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
@@ -14,6 +13,7 @@ import com.github.manolo8.darkbot.gui.utils.table.TableCharEditor;
 import com.github.manolo8.darkbot.gui.utils.table.TableCharRenderer;
 import com.github.manolo8.darkbot.gui.utils.table.TableDoubleEditor;
 import com.github.manolo8.darkbot.gui.utils.table.TableDoubleRenderer;
+import eu.darkbot.util.Popups;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
