@@ -50,7 +50,7 @@ public class ConfigEntity {
 
             info.name = name;
             info.radius = 560;
-            info.mapList.add(mapId);
+            if (mapId > 0) info.mapList.add(mapId);
 
             if (!name.isEmpty()) {
                 npcs.put(name, info);
@@ -58,7 +58,7 @@ public class ConfigEntity {
                 npcInfos.setValue(npcs);
                 changed();
             }
-        } else if (info.mapList.add(mapId)) {
+        } else if (mapId > 0 && info.mapList.add(mapId)) {
             npcInfos.setValue(npcs);
             changed();
         }
