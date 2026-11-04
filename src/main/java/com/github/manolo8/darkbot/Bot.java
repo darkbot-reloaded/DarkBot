@@ -7,6 +7,7 @@ import com.github.manolo8.darkbot.extensions.plugins.PluginClassLoader;
 import com.github.manolo8.darkbot.gui.MainGui;
 import com.github.manolo8.darkbot.utils.LibSetup;
 import com.github.manolo8.darkbot.utils.LogUtils;
+import com.github.manolo8.darkbot.utils.ScaleSetup;
 import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.util.Popups;
 
@@ -32,6 +33,8 @@ public class Bot {
         }
 
         LogUtils.setupLogOutput();
+        // Must run before anything touches AWT
+        ScaleSetup.setupLinuxScale();
 
         try {
             UIManager.put("MenuItem.selectionType", "underline");
