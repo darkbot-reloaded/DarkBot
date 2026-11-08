@@ -20,6 +20,7 @@ public class DarkTanos implements GameAPI.Window, GameAPI.Handler, GameAPI.Memor
     public native void    reload();
     public native boolean isValid();
     public native long    getMemoryUsage();
+    public native double  getCpuUsage();
     public native int     getVersion();
 
     public native void keyClick  (int keyCode);
