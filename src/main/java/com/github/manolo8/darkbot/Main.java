@@ -263,8 +263,8 @@ public class Main extends Thread implements PluginListener, BotAPI {
 
     private void validTick() {
         settingsManager.tick();
-        hero.tick();
         mapManager.tick();
+        hero.tick();
         facadeManager.tick();
         effectManager.tick();
         guiManager.tick();
