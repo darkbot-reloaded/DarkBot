@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.util.Popups;
 import eu.darkbot.util.http.Http;
 import eu.darkbot.util.http.Method;
+import lombok.SneakyThrows;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -135,7 +136,7 @@ public class LoginUtils {
 
     public static void usernameLogin(LoginData loginData) {
         try {
-            usernameLogin(loginData, "www");
+            attemptUsernameLogin(loginData);
         } catch (LoginException ex) {
             throw ex;
         } catch (Exception e) {
@@ -143,9 +144,9 @@ public class LoginUtils {
         }
     }
 
-    private static void usernameLogin(LoginData loginData, String domain) throws IOException {
-        URL url = new URL("https://" + domain + ".darkorbit.com/");
-        String frontPage = IOUtils.read(Http.create(url.toString()).getInputStream());
+    private static void attemptUsernameLogin(LoginData loginData) throws IOException {
+        URL url = new URL("https://www.darkorbit.com/");
+        String frontPage = Http.create(url.toString()).consumeInputStream(IOUtils::read);
 
         Map<String, String> extraPostParams = Collections.emptyMap();
         CaptchaAPI solver = CaptchaAPI.getInstance();
@@ -174,7 +175,7 @@ public class LoginUtils {
                         .setParam("password", loginData.getPassword());
             extraPostParams.forEach(http::setParam);
             HttpURLConnection conn = http.getConnection();
-            conn.getInputStream().close(); // follows redirects, getURL() is the final one afterwards
+            conn.getInputStream().close(); // follows redirects, getURL() is the final one
 
             // Server redirects to index.es?action=externalHome&loginError=N when it rejects the login
             String query = conn.getURL().getQuery();
@@ -197,43 +198,36 @@ public class LoginUtils {
     }
 
     /**
-     * On Java before 21, HttpURLConnection hands repeated response headers to the CookieHandler in reverse order.
-     * When a response sets the same cookie twice (eg: dosid replaced by the logged-in session during login),
-     * the stale value is kept, and the game server rejects that session (loginError=95).
+     * Fixes a JDK bug present in 17 and older, where http headers are retrieved in reverse order,
+     * causing repeated cookies to keep the first instead of the last one sent. Bug fixed in JDK 21.
      */
     private static class OrderedCookieManager extends CookieManager {
-        // Request properties use the same header storage as responses, so they show the order this JVM returns
-        private static final boolean REVERSED_HEADERS = areHeadersReversed();
+        private static final boolean REVERSED_HEADERS = areJdkHeadersReversed();
 
         @Override
         public void put(URI uri, Map<String, List<String>> responseHeaders) throws IOException {
             if (REVERSED_HEADERS && responseHeaders != null) {
-                Map<String, List<String>> headers = new HashMap<>(responseHeaders);
-                headers.replaceAll((key, values) -> isSetCookie(key) ? reversed(values) : values);
-                responseHeaders = headers;
+                responseHeaders = new HashMap<>(responseHeaders);
+                responseHeaders.replaceAll(OrderedCookieManager::reverseIfRequired);
             }
             super.put(uri, responseHeaders);
         }
 
-        private static boolean isSetCookie(String key) {
-            return key != null && (key.equalsIgnoreCase("Set-Cookie") || key.equalsIgnoreCase("Set-Cookie2"));
-        }
-
-        private static List<String> reversed(List<String> values) {
-            List<String> copy = new ArrayList<>(values);
-            Collections.reverse(copy);
-            return copy;
-        }
-
-        private static boolean areHeadersReversed() {
-            try {
-                URLConnection conn = new URL("http://localhost").openConnection();
-                conn.addRequestProperty("order", "first");
-                conn.addRequestProperty("order", "second");
-                return "second".equals(conn.getRequestProperties().get("order").get(0));
-            } catch (IOException e) {
-                return false;
+        private static List<String> reverseIfRequired(String key, List<String> values) {
+            if (key != null && (key.equalsIgnoreCase("Set-Cookie") || key.equalsIgnoreCase("Set-Cookie2"))) {
+                values = new ArrayList<>(values);
+                Collections.reverse(values);
             }
+            return values;
+        }
+
+        @SneakyThrows
+        private static boolean areJdkHeadersReversed() {
+            // Request headers behave the same as response ones, allowing us to test if the bug is present.
+            URLConnection conn = new URL("http://localhost").openConnection();
+            conn.addRequestProperty("order", "first");
+            conn.addRequestProperty("order", "second");
+            return "second".equals(conn.getRequestProperties().get("order").get(0));
         }
     }
 
