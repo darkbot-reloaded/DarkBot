@@ -9,6 +9,7 @@ import com.github.manolo8.darkbot.utils.StartupParams;
 import eu.darkbot.util.Popups;
 import eu.darkbot.util.http.Http;
 import eu.darkbot.util.http.Method;
+import lombok.SneakyThrows;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -18,12 +19,18 @@ import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpCookie;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +38,7 @@ import java.util.regex.Pattern;
 public class LoginUtils {
     private static final Pattern LOGIN_PATTERN = Pattern.compile("\"bgcdw_login_form\" action=\"(.*)\"");
     private static final Pattern DATA_PATTERN = Pattern.compile("\"src\": \"([^\"]*)\".*}, (\\{.*})");
+    private static final Pattern LOGIN_ERROR_PATTERN = Pattern.compile("(?:^|&)loginError=([^&]*)");
 
     public static LoginData performUserLogin(StartupParams params) {
         if (params.getAutoLogin()) {
@@ -92,7 +100,7 @@ public class LoginUtils {
                 params.setSID("");
                 return performAutoLogin(params);
             }
-            System.err.println("Wrong credentials, check your username and password");
+            System.err.println("Login failed: " + e.getTitle() + " - " + e.getMessage());
         }
 
         if (loginData.isNotInitialized()) {
@@ -128,17 +136,17 @@ public class LoginUtils {
 
     public static void usernameLogin(LoginData loginData) {
         try {
-            usernameLogin(loginData, "www");
-        } catch (CaptchaException ex) {
+            attemptUsernameLogin(loginData);
+        } catch (LoginException ex) {
             throw ex;
         } catch (Exception e) {
             throw LoginException.translated("gui.login.error.frontpage_fail", e);
         }
     }
 
-    private static void usernameLogin(LoginData loginData, String domain) throws IOException {
-        URL url = new URL("https://" + domain + ".darkorbit.com/");
-        String frontPage = IOUtils.read(Http.create(url.toString()).getInputStream());
+    private static void attemptUsernameLogin(LoginData loginData) throws IOException {
+        URL url = new URL("https://www.darkorbit.com/");
+        String frontPage = Http.create(url.toString()).consumeInputStream(IOUtils::read);
 
         Map<String, String> extraPostParams = Collections.emptyMap();
         CaptchaAPI solver = CaptchaAPI.getInstance();
@@ -158,7 +166,7 @@ public class LoginUtils {
 
         String loginUrl = getLoginUrl(frontPage);
 
-        CookieManager cookieManager = new CookieManager();
+        CookieManager cookieManager = new OrderedCookieManager();
         CookieHandler.setDefault(cookieManager);
 
         try {
@@ -166,13 +174,19 @@ public class LoginUtils {
                         .setParam("username", loginData.getUsername())
                         .setParam("password", loginData.getPassword());
             extraPostParams.forEach(http::setParam);
-            http.closeInputStream();
+            HttpURLConnection conn = http.getConnection();
+            conn.getInputStream().close(); // follows redirects, getURL() is the final one
 
+            // Server redirects to index.es?action=externalHome&loginError=N when it rejects the login
+            String query = conn.getURL().getQuery();
+            Matcher loginError = LOGIN_ERROR_PATTERN.matcher(query == null ? "" : query);
+            if (loginError.find())
+                throw WrongCredentialsException.translated("gui.login.error.login_rejected", loginError.group(1));
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            CookieHandler.setDefault(null);
         }
-
-        CookieHandler.setDefault(null);
 
         HttpCookie cookie = cookieManager.getCookieStore().getCookies().stream()
                 .filter(c -> c.getName().equalsIgnoreCase("dosid"))
@@ -181,6 +195,40 @@ public class LoginUtils {
                 .orElseThrow(() -> WrongCredentialsException.translated("gui.login.error.wrong_credentials"));
 
         loginData.setSid(cookie.getValue(), cookie.getDomain());
+    }
+
+    /**
+     * Fixes a JDK bug present in 17 and older, where http headers are retrieved in reverse order,
+     * causing repeated cookies to keep the first instead of the last one sent. Bug fixed in JDK 21.
+     */
+    private static class OrderedCookieManager extends CookieManager {
+        private static final boolean REVERSED_HEADERS = areJdkHeadersReversed();
+
+        @Override
+        public void put(URI uri, Map<String, List<String>> responseHeaders) throws IOException {
+            if (REVERSED_HEADERS && responseHeaders != null) {
+                responseHeaders = new HashMap<>(responseHeaders);
+                responseHeaders.replaceAll(OrderedCookieManager::reverseIfRequired);
+            }
+            super.put(uri, responseHeaders);
+        }
+
+        private static List<String> reverseIfRequired(String key, List<String> values) {
+            if (key != null && (key.equalsIgnoreCase("Set-Cookie") || key.equalsIgnoreCase("Set-Cookie2"))) {
+                values = new ArrayList<>(values);
+                Collections.reverse(values);
+            }
+            return values;
+        }
+
+        @SneakyThrows
+        private static boolean areJdkHeadersReversed() {
+            // Request headers behave the same as response ones, allowing us to test if the bug is present.
+            URLConnection conn = new URL("http://localhost").openConnection();
+            conn.addRequestProperty("order", "first");
+            conn.addRequestProperty("order", "second");
+            return "second".equals(conn.getRequestProperties().get("order").get(0));
+        }
     }
 
     public static void findPreloader(LoginData loginData) throws IOException {
@@ -264,6 +312,10 @@ public class LoginUtils {
 
         public static WrongCredentialsException translated(String key) {
             return new WrongCredentialsException(I18n.get(key), I18n.get(key + ".desc"));
+        }
+
+        public static WrongCredentialsException translated(String key, Object... descArgs) {
+            return new WrongCredentialsException(I18n.get(key), I18n.get(key + ".desc", descArgs));
         }
     }
 
