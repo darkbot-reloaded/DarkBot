@@ -201,7 +201,12 @@ public class LoginUtils {
     private static class LoginCookies {
         private final CookieManager manager = new CookieManager(new NetscapeCookieStore(), null);
 
-        /** Sends the request & follows redirects, storing cookies of every response in the order they were set */
+        /**
+         * Sends the request & follows redirects, storing cookies of every response in the order they were set.
+         * Redirects are followed manually on purpose: with automatic redirects, cookies set by intermediate
+         * responses only reach a global CookieHandler, with repeated Set-Cookie headers in reverse order (Java < 21),
+         * so a duplicated dosid on the login chain would be sent stale to the next hop before we can see it.
+         */
         HttpURLConnection request(Http http, URL url) throws IOException {
             HttpURLConnection conn = connect(http, url);
             for (int hop = 0; hop < 10 && conn.getResponseCode() / 100 == 3; hop++) {
