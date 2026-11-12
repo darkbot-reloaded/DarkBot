@@ -216,13 +216,13 @@ public class MapManager implements Manager, StarSystemAPI {
 
     public double getZoom() {
         if (is3DView) {
-            long zoomHolderInCam = Main.API.readLong(viewAddress, 216, 264, 104, 40);
+            long zoomHolderInCam = Main.API.readLong(viewAddress, 224, 288, 104, 40);
             if (zoomHolderInCam != 0)
                 return API.readDouble(zoomHolderInCam + 56);
         } else {
-            long map = API.readLong(viewAddress + 208);
+            long map = API.readLong(viewAddress + 216);
             if (map != 0) {
-                return API.readDouble(map + 320);
+                return API.readDouble(map + 352);
             }
         }
 
@@ -231,17 +231,17 @@ public class MapManager implements Manager, StarSystemAPI {
 
     public void setZoom(double zoom) {
         if (is3DView) {
-            long zoomHolderInCam = Main.API.readLong(viewAddress, 216, 264, 104, 40);
+            long zoomHolderInCam = Main.API.readLong(viewAddress, 224, 288, 104, 40);
 
             if (zoomHolderInCam != 0) {
                 if (API.readDouble(zoomHolderInCam + 56) != zoom)
                     Main.API.callMethodAsync(4, zoomHolderInCam, Double.doubleToLongBits(zoom));
             }
         } else {
-            long map = API.readLong(viewAddress + 208);
+            long map = API.readLong(viewAddress + 216);
             if (map != 0) {
-                API.writeDouble(map + 336, 0.1);
-                Main.API.callMethodAsync(153, map, Double.doubleToLongBits(zoom), Double.doubleToLongBits(1));
+                API.writeDouble(map + 368, 0.1);
+                Main.API.callMethodAsync(155, map, Double.doubleToLongBits(zoom), Double.doubleToLongBits(1));
             }
         }
     }
@@ -310,8 +310,8 @@ public class MapManager implements Manager, StarSystemAPI {
         if (viewAddress != temp) {
             viewAddress = temp;
             is3DView = !main.settingsManager.is2DForced()
-                       && ByteUtils.readObjectName(API.readLong(viewAddress + 208)).contains("HUD");
-            boundsAddress = API.readLong(viewAddress + (is3DView ? 216 : 208));
+                       && ByteUtils.readObjectName(API.readLong(viewAddress + 216)).contains("HUD");
+            boundsAddress = API.readLong(viewAddress + (is3DView ? 224 : 216));
         }
 
         clientWidth = API.readInt(boundsAddress + 0xA8);
