@@ -15,18 +15,20 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.CookieHandler;
 import java.net.CookieManager;
-import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -143,10 +145,7 @@ public class LoginUtils {
 
     private static void usernameLogin(LoginData loginData, String domain) throws IOException {
         URL url = new URL("https://" + domain + ".darkorbit.com/");
-        LoginCookies cookies = new LoginCookies();
-
-        HttpURLConnection frontConn = cookies.request(Http.create(url.toString(), false), url);
-        String frontPage = IOUtils.read(IOUtils.unwrapGzip(frontConn.getInputStream()), true);
+        String frontPage = IOUtils.read(Http.create(url.toString()).getInputStream());
 
         Map<String, String> extraPostParams = Collections.emptyMap();
         CaptchaAPI solver = CaptchaAPI.getInstance();
@@ -166,13 +165,16 @@ public class LoginUtils {
 
         String loginUrl = getLoginUrl(frontPage);
 
+        CookieManager cookieManager = new OrderedCookieManager();
+        CookieHandler.setDefault(cookieManager);
+
         try {
-            Http http = Http.create(loginUrl, Method.POST, false)
+            Http http = Http.create(loginUrl, Method.POST)
                         .setParam("username", loginData.getUsername())
                         .setParam("password", loginData.getPassword());
             extraPostParams.forEach(http::setParam);
-            HttpURLConnection conn = cookies.request(http, new URL(loginUrl));
-            conn.disconnect();
+            HttpURLConnection conn = http.getConnection();
+            conn.getInputStream().close(); // follows redirects, getURL() is the final one afterwards
 
             // Server redirects to index.es?action=externalHome&loginError=N when it rejects the login
             String query = conn.getURL().getQuery();
@@ -181,9 +183,11 @@ public class LoginUtils {
                 throw WrongCredentialsException.translated("gui.login.error.login_rejected", loginError.group(1));
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            CookieHandler.setDefault(null);
         }
 
-        HttpCookie cookie = cookies.manager.getCookieStore().getCookies().stream()
+        HttpCookie cookie = cookieManager.getCookieStore().getCookies().stream()
                 .filter(c -> c.getName().equalsIgnoreCase("dosid"))
                 .filter(c -> c.getDomain().matches(".*\\d+.*"))
                 .findFirst()
@@ -193,92 +197,43 @@ public class LoginUtils {
     }
 
     /**
-     * Cookies for the login requests, sent & stored manually instead of with a global {@link java.net.CookieHandler}:
-     * on Java before 21, HttpURLConnection hands repeated Set-Cookie headers to the CookieHandler in reverse order.
-     * When a response sets a cookie twice (eg: dosid replaced by the logged-in session), the stale value is kept,
-     * and the game server rejects that session (loginError=95).
+     * On Java before 21, HttpURLConnection hands repeated response headers to the CookieHandler in reverse order.
+     * When a response sets the same cookie twice (eg: dosid replaced by the logged-in session during login),
+     * the stale value is kept, and the game server rejects that session (loginError=95).
      */
-    private static class LoginCookies {
-        private final CookieManager manager = new CookieManager(new NetscapeCookieStore(), null);
+    private static class OrderedCookieManager extends CookieManager {
+        // Request properties use the same header storage as responses, so they show the order this JVM returns
+        private static final boolean REVERSED_HEADERS = areHeadersReversed();
 
-        /**
-         * Sends the request & follows redirects, storing cookies of every response in the order they were set.
-         * Redirects are followed manually on purpose: with automatic redirects, cookies set by intermediate
-         * responses only reach a global CookieHandler, with repeated Set-Cookie headers in reverse order (Java < 21),
-         * so a duplicated dosid on the login chain would be sent stale to the next hop before we can see it.
-         */
-        HttpURLConnection request(Http http, URL url) throws IOException {
-            HttpURLConnection conn = connect(http, url);
-            for (int hop = 0; hop < 10 && conn.getResponseCode() / 100 == 3; hop++) {
-                URL next = new URL(conn.getURL(), conn.getHeaderField("Location"));
-                conn.disconnect();
-                conn = connect(Http.create(next.toString(), false), next);
+        @Override
+        public void put(URI uri, Map<String, List<String>> responseHeaders) throws IOException {
+            if (REVERSED_HEADERS && responseHeaders != null) {
+                Map<String, List<String>> headers = new HashMap<>(responseHeaders);
+                headers.replaceAll((key, values) -> isSetCookie(key) ? reversed(values) : values);
+                responseHeaders = headers;
             }
-            return conn;
+            super.put(uri, responseHeaders);
         }
 
-        private HttpURLConnection connect(Http http, URL url) throws IOException {
-            URI uri = toUri(url);
-            List<String> sent = manager.get(uri, Collections.emptyMap()).get("Cookie");
-            if (sent != null && !sent.isEmpty()) http.setRawHeader("Cookie", String.join("; ", sent));
-
-            HttpURLConnection conn = http.getConnection();
-            conn.getResponseCode();
-
-            // Store one by one, in the order they were received
-            for (int i = 0; conn.getHeaderField(i) != null; i++) {
-                if ("Set-Cookie".equalsIgnoreCase(conn.getHeaderFieldKey(i)))
-                    manager.put(uri, Collections.singletonMap("Set-Cookie", Collections.singletonList(conn.getHeaderField(i))));
-            }
-            return conn;
+        private static boolean isSetCookie(String key) {
+            return key != null && (key.equalsIgnoreCase("Set-Cookie") || key.equalsIgnoreCase("Set-Cookie2"));
         }
 
-        private static URI toUri(URL url) throws IOException {
+        private static List<String> reversed(List<String> values) {
+            List<String> copy = new ArrayList<>(values);
+            Collections.reverse(copy);
+            return copy;
+        }
+
+        private static boolean areHeadersReversed() {
             try {
-                return url.toURI();
-            } catch (URISyntaxException e) {
-                throw new IOException(e);
+                URLConnection conn = new URL("http://localhost").openConnection();
+                conn.addRequestProperty("order", "first");
+                conn.addRequestProperty("order", "second");
+                return "second".equals(conn.getRequestProperties().get("order").get(0));
+            } catch (IOException e) {
+                return false;
             }
-        }
-    }
-
-    /**
-     * Java treats cookies with Max-Age but no Expires (eg: acw_tc from Alibaba Cloud WAF) as RFC 2965 cookies,
-     * formatting them as {@code name="value";$Path="/";$Domain="host"} in the Cookie header.
-     * Store every cookie as a netscape cookie, so they are sent back as plain {@code name=value} like browsers do.
-     */
-    private static class NetscapeCookieStore implements CookieStore {
-        private final CookieStore store = new CookieManager().getCookieStore();
-
-        @Override
-        public void add(URI uri, HttpCookie cookie) {
-            cookie.setVersion(0);
-            store.add(uri, cookie);
-        }
-
-        @Override
-        public List<HttpCookie> get(URI uri) {
-            return store.get(uri);
-        }
-
-        @Override
-        public List<HttpCookie> getCookies() {
-            return store.getCookies();
-        }
-
-        @Override
-        public List<URI> getURIs() {
-            return store.getURIs();
-        }
-
-        @Override
-        public boolean remove(URI uri, HttpCookie cookie) {
-            return store.remove(uri, cookie);
-        }
-
-        @Override
-        public boolean removeAll() {
-            return store.removeAll();
         }
     }
 
