@@ -15,15 +15,19 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.CookieStore;
 import java.net.HttpCookie;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +35,7 @@ import java.util.regex.Pattern;
 public class LoginUtils {
     private static final Pattern LOGIN_PATTERN = Pattern.compile("\"bgcdw_login_form\" action=\"(.*)\"");
     private static final Pattern DATA_PATTERN = Pattern.compile("\"src\": \"([^\"]*)\".*}, (\\{.*})");
+    private static final Pattern LOGIN_ERROR_PATTERN = Pattern.compile("(?:^|&)loginError=([^&]*)");
 
     public static LoginData performUserLogin(StartupParams params) {
         if (params.getAutoLogin()) {
@@ -92,7 +97,7 @@ public class LoginUtils {
                 params.setSID("");
                 return performAutoLogin(params);
             }
-            System.err.println("Wrong credentials, check your username and password");
+            System.err.println("Login failed: " + e.getTitle() + " - " + e.getMessage());
         }
 
         if (loginData.isNotInitialized()) {
@@ -129,7 +134,7 @@ public class LoginUtils {
     public static void usernameLogin(LoginData loginData) {
         try {
             usernameLogin(loginData, "www");
-        } catch (CaptchaException ex) {
+        } catch (LoginException ex) {
             throw ex;
         } catch (Exception e) {
             throw LoginException.translated("gui.login.error.frontpage_fail", e);
@@ -138,7 +143,10 @@ public class LoginUtils {
 
     private static void usernameLogin(LoginData loginData, String domain) throws IOException {
         URL url = new URL("https://" + domain + ".darkorbit.com/");
-        String frontPage = IOUtils.read(Http.create(url.toString()).getInputStream());
+        LoginCookies cookies = new LoginCookies();
+
+        HttpURLConnection frontConn = cookies.request(Http.create(url.toString(), false), url);
+        String frontPage = IOUtils.read(IOUtils.unwrapGzip(frontConn.getInputStream()), true);
 
         Map<String, String> extraPostParams = Collections.emptyMap();
         CaptchaAPI solver = CaptchaAPI.getInstance();
@@ -158,29 +166,115 @@ public class LoginUtils {
 
         String loginUrl = getLoginUrl(frontPage);
 
-        CookieManager cookieManager = new CookieManager();
-        CookieHandler.setDefault(cookieManager);
-
         try {
-            Http http = Http.create(loginUrl, Method.POST)
+            Http http = Http.create(loginUrl, Method.POST, false)
                         .setParam("username", loginData.getUsername())
                         .setParam("password", loginData.getPassword());
             extraPostParams.forEach(http::setParam);
-            http.closeInputStream();
+            HttpURLConnection conn = cookies.request(http, new URL(loginUrl));
+            conn.disconnect();
 
+            // Server redirects to index.es?action=externalHome&loginError=N when it rejects the login
+            String query = conn.getURL().getQuery();
+            Matcher loginError = LOGIN_ERROR_PATTERN.matcher(query == null ? "" : query);
+            if (loginError.find())
+                throw WrongCredentialsException.translated("gui.login.error.login_rejected", loginError.group(1));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        CookieHandler.setDefault(null);
-
-        HttpCookie cookie = cookieManager.getCookieStore().getCookies().stream()
+        HttpCookie cookie = cookies.manager.getCookieStore().getCookies().stream()
                 .filter(c -> c.getName().equalsIgnoreCase("dosid"))
                 .filter(c -> c.getDomain().matches(".*\\d+.*"))
                 .findFirst()
                 .orElseThrow(() -> WrongCredentialsException.translated("gui.login.error.wrong_credentials"));
 
         loginData.setSid(cookie.getValue(), cookie.getDomain());
+    }
+
+    /**
+     * Cookies for the login requests, sent & stored manually instead of with a global {@link java.net.CookieHandler}:
+     * on Java before 21, HttpURLConnection hands repeated Set-Cookie headers to the CookieHandler in reverse order.
+     * When a response sets a cookie twice (eg: dosid replaced by the logged-in session), the stale value is kept,
+     * and the game server rejects that session (loginError=95).
+     */
+    private static class LoginCookies {
+        private final CookieManager manager = new CookieManager(new NetscapeCookieStore(), null);
+
+        /** Sends the request & follows redirects, storing cookies of every response in the order they were set */
+        HttpURLConnection request(Http http, URL url) throws IOException {
+            HttpURLConnection conn = connect(http, url);
+            for (int hop = 0; hop < 10 && conn.getResponseCode() / 100 == 3; hop++) {
+                URL next = new URL(conn.getURL(), conn.getHeaderField("Location"));
+                conn.disconnect();
+                conn = connect(Http.create(next.toString(), false), next);
+            }
+            return conn;
+        }
+
+        private HttpURLConnection connect(Http http, URL url) throws IOException {
+            URI uri = toUri(url);
+            List<String> sent = manager.get(uri, Collections.emptyMap()).get("Cookie");
+            if (sent != null && !sent.isEmpty()) http.setRawHeader("Cookie", String.join("; ", sent));
+
+            HttpURLConnection conn = http.getConnection();
+            conn.getResponseCode();
+
+            // Store one by one, in the order they were received
+            for (int i = 0; conn.getHeaderField(i) != null; i++) {
+                if ("Set-Cookie".equalsIgnoreCase(conn.getHeaderFieldKey(i)))
+                    manager.put(uri, Collections.singletonMap("Set-Cookie", Collections.singletonList(conn.getHeaderField(i))));
+            }
+            return conn;
+        }
+
+        private static URI toUri(URL url) throws IOException {
+            try {
+                return url.toURI();
+            } catch (URISyntaxException e) {
+                throw new IOException(e);
+            }
+        }
+    }
+
+    /**
+     * Java treats cookies with Max-Age but no Expires (eg: acw_tc from Alibaba Cloud WAF) as RFC 2965 cookies,
+     * formatting them as {@code name="value";$Path="/";$Domain="host"} in the Cookie header.
+     * Store every cookie as a netscape cookie, so they are sent back as plain {@code name=value} like browsers do.
+     */
+    private static class NetscapeCookieStore implements CookieStore {
+        private final CookieStore store = new CookieManager().getCookieStore();
+
+        @Override
+        public void add(URI uri, HttpCookie cookie) {
+            cookie.setVersion(0);
+            store.add(uri, cookie);
+        }
+
+        @Override
+        public List<HttpCookie> get(URI uri) {
+            return store.get(uri);
+        }
+
+        @Override
+        public List<HttpCookie> getCookies() {
+            return store.getCookies();
+        }
+
+        @Override
+        public List<URI> getURIs() {
+            return store.getURIs();
+        }
+
+        @Override
+        public boolean remove(URI uri, HttpCookie cookie) {
+            return store.remove(uri, cookie);
+        }
+
+        @Override
+        public boolean removeAll() {
+            return store.removeAll();
+        }
     }
 
     public static void findPreloader(LoginData loginData) throws IOException {
@@ -264,6 +358,10 @@ public class LoginUtils {
 
         public static WrongCredentialsException translated(String key) {
             return new WrongCredentialsException(I18n.get(key), I18n.get(key + ".desc"));
+        }
+
+        public static WrongCredentialsException translated(String key, Object... descArgs) {
+            return new WrongCredentialsException(I18n.get(key), I18n.get(key + ".desc", descArgs));
         }
     }
 
