@@ -5,10 +5,12 @@ import com.github.manolo8.darkbot.extensions.plugins.Plugin;
 import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
 import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
 import com.github.manolo8.darkbot.extensions.plugins.PluginUpdater;
+import com.github.manolo8.darkbot.gui.utils.SearchField;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -21,6 +23,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
     private AbstractButton pluginTab;
     private JPanel pluginPanel;
     private PluginUpdateHeader header;
+    private String searchQuery = "";
 
     public PluginDisplay() {
         super(new MigLayout("ins 0, gap 0, wrap 1, fillx", "[fill]", ""));
@@ -40,7 +43,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
 
     private void setupUI() {
         if (pluginPanel != null) return;
-        pluginPanel = new JPanel(new MigLayout("wrap 1, fillx", "[fill]", ""));
+        pluginPanel = new JPanel(new MigLayout("wrap 1, fillx, hidemode 3", "[fill]", ""));
         header = new PluginUpdateHeader(main);
 
         JScrollPane scrollPane = new JScrollPane(pluginPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -48,6 +51,7 @@ public class PluginDisplay extends JPanel implements PluginListener {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getVerticalScrollBar().setUnitIncrement(25);
 
+        add(new SearchField(this::setSearch), "gapbottom 5px");
         add(header);
         add(scrollPane);
     }
@@ -66,6 +70,8 @@ public class PluginDisplay extends JPanel implements PluginListener {
                 .map(pl -> new PluginCard(main, pl, main.featureRegistry))
                 .forEach(pluginPanel::add);
 
+        applySearch();
+
         if (!pluginHandler.LOADING_EXCEPTIONS.isEmpty() || !pluginHandler.FAILED_PLUGINS.isEmpty())
             pluginTab.setIcon(UIUtils.getIcon("plugins_warn"));
         else if (pluginUpdater.hasAnyUpdates()) pluginTab.setIcon(UIUtils.getIcon("plugins_update"));
@@ -73,6 +79,22 @@ public class PluginDisplay extends JPanel implements PluginListener {
 
         validate();
         repaint();
+    }
+
+    private void setSearch(String text) {
+        searchQuery = GenericFeaturesCard.normalizeSearch(text);
+        if (pluginPanel == null) return;
+
+        applySearch();
+        pluginPanel.revalidate();
+        pluginPanel.repaint();
+    }
+
+    private void applySearch() {
+        for (Component component : pluginPanel.getComponents()) {
+            if (component instanceof PluginCard)
+                component.setVisible(((PluginCard) component).applySearch(searchQuery));
+        }
     }
 
     public PluginCard getPluginCard(Plugin plugin) {
