@@ -51,9 +51,8 @@ public class PluginCard extends GenericFeaturesCard {
         return plugin;
     }
 
-    @Override
-    protected String getSearchName() {
-        return plugin.getDefinition().name;
+    boolean applySearch(String query) {
+        return filterFeatures(plugin.getDefinition().name, query);
     }
 
     public void setProgressBarMaximum(int max) {

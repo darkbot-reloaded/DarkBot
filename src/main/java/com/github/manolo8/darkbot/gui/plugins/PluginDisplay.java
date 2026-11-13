@@ -92,8 +92,8 @@ public class PluginDisplay extends JPanel implements PluginListener {
 
     private void applySearch() {
         for (Component component : pluginPanel.getComponents()) {
-            if (component instanceof GenericFeaturesCard)
-                component.setVisible(((GenericFeaturesCard) component).applySearch(searchQuery));
+            if (component instanceof PluginCard)
+                component.setVisible(((PluginCard) component).applySearch(searchQuery));
         }
     }
 

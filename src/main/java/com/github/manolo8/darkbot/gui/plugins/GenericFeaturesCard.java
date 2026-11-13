@@ -32,16 +32,10 @@ public abstract class GenericFeaturesCard extends JPanel {
             Collections.singletonMap(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
 
     private final List<FeatureRow> featureRows = new ArrayList<>();
-    private String searchQuery = "";
 
     GenericFeaturesCard() {
         super(new MigLayout("fillx, gapy 0, ins 0 0 5px 0", "5px[]0px[]10px[]10px[grow]", "[]"));
     }
-
-    /**
-     * @return the name shown as title of the card, used for searching
-     */
-    protected abstract String getSearchName();
 
     protected void addFeature(Main main, FeatureDefinition<?> feature) {
         FeatureTypeButton typeButton = new FeatureTypeButton(feature);
@@ -70,13 +64,12 @@ public abstract class GenericFeaturesCard extends JPanel {
      * Filters the features of this card by name. If the card name matches, every feature is shown as normal,
      * otherwise features that don't match the query are dimmed.
      *
-     * @param query normalized query, as returned by {@link #normalizeSearch(String)}
+     * @param cardName name of the card, matched against the query
+     * @param query    normalized query, as returned by {@link #normalizeSearch(String)}
      * @return true if the card name or any of its features matches the query
      */
-    boolean applySearch(String query) {
-        this.searchQuery = query;
-
-        boolean cardMatches = query.isEmpty() || normalizeSearch(getSearchName()).contains(query);
+    protected boolean filterFeatures(String cardName, String query) {
+        boolean cardMatches = query.isEmpty() || normalizeSearch(cardName).contains(query);
         boolean anyFeatureMatches = false;
         for (FeatureRow row : featureRows) {
             boolean featureMatches = row.matches(query);
@@ -84,13 +77,6 @@ public abstract class GenericFeaturesCard extends JPanel {
             row.setDimmed(!cardMatches && !featureMatches);
         }
         return cardMatches || anyFeatureMatches;
-    }
-
-    /**
-     * Re-applies the last search, used after the features of the card have been rebuilt.
-     */
-    protected void reapplySearch() {
-        applySearch(searchQuery);
     }
 
     /**
