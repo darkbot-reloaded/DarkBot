@@ -15,6 +15,7 @@ public class NativeCard extends GenericFeaturesCard {
     // This is static so that reloading plugins keeps it hidden.
     // It shouldn't be static but it's the easiest way for now.
     private static boolean hidden = true;
+    private static final String NAME = "Builtin features";
 
     private final Main main;
     private final FeatureRegistry featureRegistry;
@@ -37,13 +38,20 @@ public class NativeCard extends GenericFeaturesCard {
         if (!hidden)
             featureRegistry.getFeatures((Plugin) null)
                     .forEach(fd -> this.addFeature(main, fd));
+
+        reapplySearch();
+    }
+
+    @Override
+    protected String getSearchName() {
+        return NAME;
     }
 
     private class NativeName extends JPanel {
         NativeName(ToggleVisibilityButton btn) {
             super(new MigLayout("", "[][]push[]"));
 
-            JLabel name = new JLabel("Builtin features");
+            JLabel name = new JLabel(NAME);
             Font baseFont = name.getFont();
             name.setFont(baseFont.deriveFont(baseFont.getStyle() | Font.BOLD));
 
