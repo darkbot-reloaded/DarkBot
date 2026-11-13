@@ -12,15 +12,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Class responsible for building a {@link ConfigSetting} tree from a class
- * This class does NOT fill in any details about the data present in the configuration,
+ * This class does NOT fill in any details about the data present in the
+ * configuration,
  * only creates the containers for it.
  */
 public class ConfigBuilder implements API.Singleton {
@@ -29,7 +28,7 @@ public class ConfigBuilder implements API.Singleton {
     private final SettingHandlerFactory settingHandlerFactory;
 
     public ConfigBuilder(I18nAPI i18n,
-                         SettingHandlerFactory settingHandlerFactory) {
+            SettingHandlerFactory settingHandlerFactory) {
         this.i18n = i18n;
         this.settingHandlerFactory = settingHandlerFactory;
     }
@@ -43,8 +42,8 @@ public class ConfigBuilder implements API.Singleton {
             baseKey = cfg.value();
             allOptions = cfg.allOptions();
         } else {
-            com.github.manolo8.darkbot.config.types.Option legacyOption =
-                    type.getAnnotation(com.github.manolo8.darkbot.config.types.Option.class);
+            com.github.manolo8.darkbot.config.types.Option legacyOption = type
+                    .getAnnotation(com.github.manolo8.darkbot.config.types.Option.class);
             if (legacyOption != null && !legacyOption.key().isEmpty())
                 baseKey = legacyOption.key();
         }
@@ -58,8 +57,8 @@ public class ConfigBuilder implements API.Singleton {
         private final boolean allConfig;
 
         public Builder(PluginInfo namespace,
-                       String baseKey,
-                       boolean allConfig) {
+                String baseKey,
+                boolean allConfig) {
             this.namespace = namespace;
             this.baseKey = baseKey;
             this.allConfig = allConfig;
@@ -76,16 +75,23 @@ public class ConfigBuilder implements API.Singleton {
         }
 
         private Map<String, ConfigSetting<?>> getChildren(ConfigSetting.Parent<?> p, Class<?> type) {
-            Configuration cfg = type.getAnnotation(Configuration.class);
-            String parentKey = cfg != null ? cfg.value() : p.getKey();
-
-            return Arrays.stream(type.getDeclaredFields())
-                    .filter(this::participates)
-                    .collect(Collectors.toMap(
-                            f -> f.getName().toLowerCase(Locale.ROOT),
-                            f -> createConfig(p, parentKey, f),
-                            (a, b) -> a,
-                            LinkedHashMap::new));
+            Map<String, ConfigSetting<?>> children = new LinkedHashMap<>();
+            // Walk up the class hierarchy so fields inherited from parent classes
+            // are also included. Each class may have its own @Configuration that
+            // determines its parentKey and allOptions.
+            for (Class<?> current = type; current != null
+                    && current != Object.class; current = current.getSuperclass()) {
+                Configuration cfg = current.getAnnotation(Configuration.class);
+                String parentKey = cfg != null ? cfg.value() : p.getKey();
+                boolean allOptions = cfg != null ? cfg.allOptions() : allConfig;
+                for (Field field : current.getDeclaredFields()) {
+                    if (!participates(field, allOptions))
+                        continue;
+                    children.putIfAbsent(field.getName().toLowerCase(Locale.ROOT),
+                            createConfig(p, parentKey, field));
+                }
+            }
+            return children;
         }
 
         private ConfigSetting<?> createConfig(ConfigSetting.Parent<?> parent, String parentKey, Field field) {
@@ -94,23 +100,24 @@ public class ConfigBuilder implements API.Singleton {
             String key = parentKey + "." + field.getName().toLowerCase(Locale.ROOT);
             String name, description;
 
-            com.github.manolo8.darkbot.config.types.Option legacyOption
-                    = field.getAnnotation(com.github.manolo8.darkbot.config.types.Option.class);
+            com.github.manolo8.darkbot.config.types.Option legacyOption = field
+                    .getAnnotation(com.github.manolo8.darkbot.config.types.Option.class);
 
             if (legacyOption != null) {
-                if (!legacyOption.key().isEmpty()) key = legacyOption.key();
+                if (!legacyOption.key().isEmpty())
+                    key = legacyOption.key();
 
                 name = i18n.getOrDefault(namespace, key, legacyOption.value());
                 description = i18n.getOrDefault(namespace, key + ".desc",
                         legacyOption.description().isEmpty() ? null : legacyOption.description());
             } else {
                 Option option = field.getAnnotation(Option.class);
-                if (option != null && !option.value().isEmpty()) key = option.value();
+                if (option != null && !option.value().isEmpty())
+                    key = option.value();
 
                 name = i18n.getOrDefault(namespace, key, "");
                 description = i18n.getOrDefault(namespace, key + ".desc", null);
             }
-
 
             // If we know for sure it is a leaf, we ignore trying to make an intermediate
             // If the intermediate turns out not to have any children, discard it
@@ -129,21 +136,29 @@ public class ConfigBuilder implements API.Singleton {
         }
 
         /**
-         * @param field the field to check
-         * @return true if this field participates in the configuration tree, false otherwise
+         * @param field      the field to check
+         * @param allOptions true if all non-static public fields should be options
+         * @return true if this field participates in the configuration tree, false
+         *         otherwise
          */
-        private boolean participates(Field field) {
-            if (!Modifier.isPublic(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) return false;
-            if (field.isAnnotationPresent(com.github.manolo8.darkbot.config.types.Option.class)) return true;
-            if (field.isAnnotationPresent(Option.Ignore.class)) return false;
-            if (field.isAnnotationPresent(Option.class)) return true;
-            if (Modifier.isTransient(field.getModifiers())) return false;
-            return allConfig;
+        private boolean participates(Field field, boolean allOptions) {
+            if (!Modifier.isPublic(field.getModifiers()) || Modifier.isStatic(field.getModifiers()))
+                return false;
+            if (field.isAnnotationPresent(com.github.manolo8.darkbot.config.types.Option.class))
+                return true;
+            if (field.isAnnotationPresent(Option.Ignore.class))
+                return false;
+            if (field.isAnnotationPresent(Option.class))
+                return true;
+            if (Modifier.isTransient(field.getModifiers()))
+                return false;
+            return allOptions;
         }
 
         /**
          * @param field the field to check
-         * @return true if this is a leaf node, no more children under this, false otherwise
+         * @return true if this is a leaf node, no more children under this, false
+         *         otherwise
          */
         private boolean isLeaf(Field field) {
             Class<?> type = field.getType();
