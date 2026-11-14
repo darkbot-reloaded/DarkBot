@@ -67,6 +67,8 @@ public interface GameAPI {
         default void setVolume(int volume) {} // 0 - 100
         // LOW = 0, MEDIUM = 1, HIGH = 2, BEST = 3, AUTO_LOW = 4, AUTO_HIGH = 5
         default void setQuality(int quality) {}
+        // Show red marker on the screen where the mouse cursor is, when enabled
+        default void setCursorMarker(boolean enable) {}
 
         default long lastInternetReadTime() {
             return 0;
