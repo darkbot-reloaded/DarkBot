@@ -10,6 +10,7 @@ import com.github.manolo8.darkbot.gui.components.ExitConfirmation;
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar;
 import com.github.manolo8.darkbot.gui.utils.UIUtils;
 import com.github.manolo8.darkbot.gui.utils.window.WindowUtils;
+import com.github.manolo8.darkbot.utils.ScaleSetup;
 import eu.darkbot.api.config.ConfigSetting;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +33,7 @@ public class MainGui extends JFrame {
     private ExitConfirmation exitConfirmation;
     @Getter private MapDrawer mapDrawer;
 
-    public static final Image ICON = UIUtils.getImage("icon");
+    public static final Image ICON = ScaleSetup.getWindowIcon(UIUtils.getImage("icon"));
     public static final int DEFAULT_WIDTH = 640, DEFAULT_HEIGHT = 480;
     private int lastTick;
 
