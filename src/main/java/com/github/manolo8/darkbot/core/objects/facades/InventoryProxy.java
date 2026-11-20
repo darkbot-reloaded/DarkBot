@@ -25,7 +25,7 @@ public class InventoryProxy extends Updatable implements InventoryAPI {
     public List<? extends InventoryAPI.Item> getItems(int minWaitMs) {
         if (!updatedCurrTick && lastUpdate + minWaitMs <= System.currentTimeMillis()) {
             updatedCurrTick = true;
-            items.update(Main.API.readAtom(address, 0x30, 0x58));
+            items.update(Main.API.readAtom(address, 0x30, 0x70)); // InventoryModel._inventoryItemList
             lastUpdate = System.currentTimeMillis();
         }
         return items;
@@ -42,7 +42,7 @@ public class InventoryProxy extends Updatable implements InventoryAPI {
             if (address <= 0) return;
             lootId = API.readString(address, 0x48);
             name = API.readString(address, 0x40, 0x20, 0x40);
-            amount = API.readDouble(address + 0x70);
+            amount = API.readDouble(address + 0x78); // ItemVO._amount (0x70 is ItemVO.id)
         }
     }
 }

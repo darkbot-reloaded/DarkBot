@@ -33,6 +33,7 @@ public class AssemblyMediator extends Updatable implements API.Singleton {
 
         listUpdated = false;
         selectedRecipe.updateIfChanged(readAtom(0x70));
+        if (selectedRecipe.address != 0) selectedRecipe.update(); // state fields are only read in update()
 
         if (rowSettings.updateAndReport(readAtom(0x78, 0xb0))) {
             filters.clear();
@@ -91,8 +92,8 @@ public class AssemblyMediator extends Updatable implements API.Singleton {
             buildAmount = (int) readDouble(0x40, 0x20, 0x30);
 
             long data = readAtom(0x58, 0x40, 0x20);
-            visibility = API.readString(data, 0x90);
-            craftTimeData.update(API.readAtom(data, 0xb0));
+            visibility = API.readString(data, 0xA0); // RecipeAttributes.visibility (0x90 is result)
+            craftTimeData.update(API.readAtom(data, 0xA8)); // RecipeAttributes.costs -> RecipeCosts.buildTimeSec @0x24
             if (!craftTimeData.isEmpty())
                 craftTimeRequired = API.readInt(craftTimeData.getLong(0), 0x24) * 1000;
             isInProgress = !isCraftable && buildAmount > 0 && craftTimeLeft > 1;

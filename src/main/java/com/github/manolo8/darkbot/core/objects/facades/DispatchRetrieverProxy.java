@@ -64,7 +64,8 @@ public class DispatchRetrieverProxy extends Updatable implements API.Singleton {
             this.isAvailable = API.readBoolean(address + 0x20);
 
             long dispatchModule = API.readAtom(address + 0x30);
-            this.slotId = API.readInt(dispatchModule + 0x20); // 0 for available, 1 to 5 for in-progress
+            // DispatchModule: 0x20 id, 0x24 slotId, 0x28 duration
+            this.slotId = API.readInt(dispatchModule + 0x24); // 0 for available, 1 to 5 for in-progress
             this.duration = API.readDouble(dispatchModule + 0x28); // time left in seconds, or total time
         }
 
