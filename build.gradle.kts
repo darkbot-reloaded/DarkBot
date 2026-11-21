@@ -3,12 +3,12 @@ plugins {
     id("org.gradle.maven-publish")
     id("org.gradle.application")
 
-    id("io.freefair.lombok") version "8.6"
+    id("io.freefair.lombok") version "9.8.3"
 }
 
 buildscript {
     dependencies {
-        classpath("com.guardsquare", "proguard-gradle", "7.4.2")
+        classpath("com.guardsquare:proguard-gradle:7.10.0")
     }
 }
 
@@ -16,8 +16,11 @@ repositories {
     mavenLocal()
     mavenCentral()
 
-    maven("https://jitpack.io")
-    maven("https://oss.jfrog.org/artifactory/oss-snapshot-local/com/formdev/")
+    maven("https://jitpack.io") {
+        content {
+            includeGroup("eu.darkbot.DarkBotAPI")
+        }
+    }
 }
 
 group = "eu.darkbot"
@@ -45,8 +48,10 @@ publishing {
     }
 }
 
-configurations.compileOnly {
+val proguardLibraries = configurations.create("proguardLibraries") {
+    isCanBeConsumed = false
     isCanBeResolved = true
+    extendsFrom(configurations.compileOnly.get())
 }
 
 dependencies {
@@ -55,31 +60,34 @@ dependencies {
 
     // use this if you want to use local(mavenLocal) darkbot API
     val useLocalMaven = false
-    if (useLocalMaven) api("eu.darkbot", "darkbot-impl", apiVersion)
-    else api("eu.darkbot.DarkBotAPI", "darkbot-impl", apiVersion)
+    if (useLocalMaven) api("eu.darkbot:darkbot-impl:$apiVersion")
+    else api("eu.darkbot.DarkBotAPI:darkbot-impl:$apiVersion")
 
     // have to keep version 2.8.9, in newer versions GSON calls `toString` of config enums upon creation
-    api("com.google.code.gson", "gson", "2.8.9")
-    api("com.miglayout", "miglayout-swing", "11.3")
-    api("com.formdev", "flatlaf", flatLafVersion)
-    api("com.formdev", "flatlaf-extras", flatLafVersion)
-    api("org.jgrapht", "jgrapht-core", "1.5.2")
-    api("it.unimi.dsi", "fastutil-core", "8.5.13")
+    api("com.google.code.gson:gson:2.8.9")
+    api("com.miglayout:miglayout-swing:11.3")
+    api("com.formdev:flatlaf:$flatLafVersion")
+    api("com.formdev:flatlaf-extras:$flatLafVersion")
+    api("org.jgrapht:jgrapht-core:1.5.3")
+    api("it.unimi.dsi:fastutil-core:8.5.19")
 
     // Testing stat time-series requires this
     //api("org.knowm.xchart", "xchart", "3.8.5")
 
-    compileOnly("org.jetbrains", "annotations", "24.1.0")
+    compileOnly("org.jetbrains:annotations:26.1.0")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
-    testImplementation("org.mockito:mockito-core:4.10.0")
+    testImplementation(platform("org.junit:junit-bom:5.14.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    //testImplementation("org.mockito:mockito-core:4.11.0")
 }
 
+tasks.test { useJUnitPlatform() }
 tasks.withType<JavaCompile> { options.encoding = "UTF-8" }
 tasks.withType<JavaExec> { systemProperty("file.encoding", "UTF-8") }
 
 tasks.wrapper {
-    gradleVersion = "8.6"
+    gradleVersion = "9.9.2"
 
     // with gradle javadocs and sources
     distributionType = Wrapper.DistributionType.ALL
@@ -120,12 +128,12 @@ tasks.register<proguard.gradle.ProGuardTask>("proguard") {
     injars(tasks.jar.get())
     outjars(toExclude, "build/DarkBot.jar")
 
-    libraryjars(configurations.compileOnly.get().files)
+    libraryjars(proguardLibraries.files)
     libraryjars(
         mapOf(
             "jarfilter" to "!**.jar",
             "filter" to "!module-info.class",
-        ), "${System.getProperty("java.home")}/jmods"
+        ), javaToolchains.launcherFor(java.toolchain).get().metadata.installationPath.dir("jmods").asFile
     )
 
     dependsOn(tasks.build)
