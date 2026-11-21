@@ -94,7 +94,6 @@ public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
                 return;
             }
 
-            // address is a BindableInt: 0x30 maxValue (Number), 0x38 _value (Number)
             this.maxProgress = (int) API.readDouble(address + 0x30);
             this.currentProgress = API.readBindableInt(address);
         }
@@ -124,7 +123,6 @@ public class SeassonPassMediator extends Updatable implements SeassonPassAPI {
 
         @Override
         public void update() {
-            // SeasonPassMissionVO: 0x20 _isGoldMission, 0x24 _goldLocked, 0x28 oncePreMission
             this.isGoldMission = readBoolean(0x20);
             this.goldLocked = readBoolean(0x24);
             this.oncePreMission = readBoolean(0x28);
