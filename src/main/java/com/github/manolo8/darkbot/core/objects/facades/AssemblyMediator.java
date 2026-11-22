@@ -85,14 +85,20 @@ public class AssemblyMediator extends Updatable implements API.Singleton {
         }
 
         @Override
+        public void updateIfChanged(long address) {
+            super.updateIfChanged(address);
+            if (address != 0) update();
+        }
+
+        @Override
         public void update() {
             isCraftable = readBoolean(0x20);
             craftTimeLeft = (int) readDouble(0x40, 0x20, 0x28);
             buildAmount = (int) readDouble(0x40, 0x20, 0x30);
 
             long data = readAtom(0x58, 0x40, 0x20);
-            visibility = API.readString(data, 0x90);
-            craftTimeData.update(API.readAtom(data, 0xb0));
+            visibility = API.readString(data, 0xA0);
+            craftTimeData.update(API.readAtom(data, 0xA8));
             if (!craftTimeData.isEmpty())
                 craftTimeRequired = API.readInt(craftTimeData.getLong(0), 0x24) * 1000;
             isInProgress = !isCraftable && buildAmount > 0 && craftTimeLeft > 1;
