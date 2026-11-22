@@ -33,7 +33,6 @@ public class AssemblyMediator extends Updatable implements API.Singleton {
 
         listUpdated = false;
         selectedRecipe.updateIfChanged(readAtom(0x70));
-        if (selectedRecipe.address != 0) selectedRecipe.update();
 
         if (rowSettings.updateAndReport(readAtom(0x78, 0xb0))) {
             filters.clear();
@@ -83,6 +82,12 @@ public class AssemblyMediator extends Updatable implements API.Singleton {
             rewardsArr.forEach(ptr -> rewards.add(API.readString(ptr, 0x48)));
 
             resourcesRequired.update(API.readAtom(address + 0x50));
+        }
+
+        @Override
+        public void updateIfChanged(long address) {
+            super.updateIfChanged(address);
+            if (address != 0) update();
         }
 
         @Override
