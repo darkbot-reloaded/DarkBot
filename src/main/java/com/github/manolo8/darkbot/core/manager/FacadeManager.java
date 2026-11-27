@@ -65,6 +65,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
     public final WorldBossOverviewProxy worldBossOverview;
     public final Updatable group;
     public final Updatable groupMediator;
+    public final Updatable itemsControlMediator;
     public final ShipWarpProxy shipWarpProxy;
 
     private final Map<EventType, NpcEventProxy> npcEvents = new HashMap<>();
@@ -90,6 +91,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
         this.groupMediator  = registerMediator("GroupSystemMediator", Updatable.NoOp.class);
+        this.itemsControlMediator = registerMediator("ItemsControlMenuMediator", Updatable.NoOp.class);
         this.shipWarpProxy  = registerProxy("ship_warp",              ShipWarpProxy.class);
 
         registerProxy("dispatch", DispatchProxy.class);

@@ -1,0 +1,135 @@
+package com.github.manolo8.darkbot.behaviours.memory;
+
+import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.BotInstaller;
+import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
+import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
+import eu.darkbot.api.extensions.Behavior;
+import eu.darkbot.api.extensions.Feature;
+import eu.darkbot.util.Timer;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Releases objects that the game client leaks, so its memory doesn't grow until a refresh.
+ * <p>
+ * Each leak is handled by one {@link LeakCleaner}, run at its own interval. This class only applies the setting,
+ * resets the cleaners when the client reloads, and keeps a failing cleaner from affecting the others.
+ * Only client memory of objects that are already gone is touched, nothing is sent to the server.
+ */
+@Feature(name = "Memory cleaner",
+        description = "Releases objects the game client leaks, so memory doesn't grow until a refresh")
+public class MemoryCleaner implements Behavior {
+
+    private final Main main;
+    private final BotInstaller botInstaller;
+    private final SlotResolver slots = new SlotResolver();
+    private final List<ScheduledCleaner> cleaners = new ArrayList<>();
+
+    private boolean enabled;
+    private long screenManager;
+
+    public MemoryCleaner(Main main, BotInstaller botInstaller) {
+        this.main = main;
+        this.botInstaller = botInstaller;
+        cleaners.add(new ScheduledCleaner(new ShipReferenceCleaner(main, botInstaller, slots)));
+        cleaners.add(new ScheduledCleaner(new TooltipCleaner(slots, main.facadeManager)));
+    }
+
+    @Override
+    public void onTickBehavior() {
+        tick();
+    }
+
+    @Override
+    public void onStoppedBehavior() {
+        tick();
+    }
+
+    private void tick() {
+        boolean wanted = main.config.MISCELLANEOUS.MEMORY_CLEANER;
+        if (wanted != enabled) {
+            enabled = wanted;
+            resetCleaners();
+        }
+        if (!enabled || !isAnyCleanerDue() || !detectClient()) return;
+
+        for (ScheduledCleaner cleaner : cleaners) cleaner.tick();
+    }
+
+    /** Whether a cleaner runs now. The client is only checked then, not on every bot tick. */
+    private boolean isAnyCleanerDue() {
+        for (ScheduledCleaner cleaner : cleaners) if (cleaner.isDue()) return true;
+        return false;
+    }
+
+    /**
+     * Follows the running client, recognized by its screen manager and VM core. When either changes the client
+     * reloaded: classes may now live at other vtables, and found objects are gone. False while there is no client.
+     */
+    private boolean detectClient() {
+        Long address = botInstaller.screenManagerAddress.get();
+        if (address == null || address == 0) return false;
+        long core = AvmMemory.coreOf(address);
+        if (core == 0) return false;
+        if (address == screenManager && core == slots.getCore()) return true;
+
+        if (screenManager != 0) resetCleaners();
+        slots.attach(core);
+        screenManager = address;
+        return true;
+    }
+
+    private void resetCleaners() {
+        for (ScheduledCleaner cleaner : cleaners) cleaner.reset();
+    }
+
+    /**
+     * Reports a failed run as a warning of this feature, the way the bot reports errors of other features: the
+     * feature keeps running and an identical error is counted instead of printed again.
+     */
+    private void onFailure(RuntimeException e) {
+        FeatureDefinition<MemoryCleaner> feature = main.featureRegistry.getFeatureDefinition(this);
+        if (feature != null) feature.getIssues().handleTickFeatureException(PluginIssue.Level.WARNING, e);
+        else e.printStackTrace();
+    }
+
+    /**
+     * Runs one cleaner at its interval. A failed run may have left the cleaner's state half updated, so the cleaner
+     * forgets it and starts over at its next interval, while the other cleaners keep running. Only the first failure
+     * of a row is reported: errors whose message changes every run would otherwise each be a new issue.
+     */
+    private final class ScheduledCleaner {
+        private final LeakCleaner cleaner;
+        private final Timer interval;
+        private boolean failing;
+
+        private ScheduledCleaner(LeakCleaner cleaner) {
+            this.cleaner = cleaner;
+            this.interval = Timer.get(cleaner.getIntervalMs());
+        }
+
+        private boolean isDue() {
+            return interval.isInactive();
+        }
+
+        private void tick() {
+            if (!interval.tryActivate()) return;
+            try {
+                cleaner.clean();
+                failing = false;
+            } catch (RuntimeException e) {
+                cleaner.reset();
+                if (!failing) onFailure(e);
+                failing = true;
+            }
+        }
+
+        private void reset() {
+            cleaner.reset();
+            interval.disarm();
+            failing = false;
+        }
+    }
+}
