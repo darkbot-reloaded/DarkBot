@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core;
 
 import com.github.manolo8.darkbot.core.api.Capability;
 import com.github.manolo8.darkbot.core.itf.Manager;
+import com.github.manolo8.darkbot.core.utils.AvmUtils;
 import com.github.manolo8.darkbot.core.utils.Lazy;
 import eu.darkbot.api.API;
 import eu.darkbot.util.Timer;
@@ -116,8 +117,8 @@ public class BotInstaller implements API.Singleton {
         this.facadeAddress.send(temp);
 
         SCRIPT_OBJECT_VTABLE = API.readLong(screenManagerAddress.get());
-        // vtable -> traits -> core -> string cache -> cpp_vtable
-        STRING_OBJECT_VTABLE = API.readLong(screenManagerAddress.get(), 0x10, 0x28, 0x8, 0x3e8, 0x0);
+        // VM core -> string cache -> cpp_vtable
+        STRING_OBJECT_VTABLE = API.readLong(AvmUtils.vmCore(screenManagerAddress.get()), 0x3e8, 0x0);
 
         //reset address
         this.heroInfoAddress.send(0L);

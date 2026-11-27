@@ -2,6 +2,7 @@ package com.github.manolo8.darkbot.core.objects.swf;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
+import com.github.manolo8.darkbot.core.utils.AvmUtils;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.Offsets;
 import it.unimi.dsi.fastutil.longs.AbstractLongList;
@@ -22,6 +23,7 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
     private int size;
 
     private boolean autoUpdate = true;
+    private boolean readable;
 
     public static FlashListLong ofArray() {
         return new FlashArray();
@@ -55,9 +57,21 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
 
     @Override
     public void update(long address) {
-        if (this.address != address) setSize(0);
+        if (this.address != address) {
+            setSize(0);
+            readable = false;
+        }
         this.address = address;
         if (autoUpdate) update();
+    }
+
+    /**
+     * Whether the last update could read the list. If it couldn't (no address, more elements than the limit,
+     * a table that can't be read), the list is empty even though the one in memory may not be: callers for which
+     * an empty list matters can tell the two apart.
+     */
+    public boolean isReadable() {
+        return readable;
     }
 
     @Override
@@ -109,6 +123,10 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
         this.size = size;
     }
 
+    protected void setReadable(boolean readable) {
+        this.readable = readable;
+    }
+
     protected boolean insufficientCapacity(int size, int maxSize) {
         if (size <= 0 || size > maxSize) return true;
         // don't need a copy, just create new
@@ -118,9 +136,11 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
     }
 
     protected void update(int sizeOffset, int tableOffset, int tableSkip, boolean skipHoles) {
+        readable = false;
         if (getAddress() == 0) return;
 
         int size = readInt(sizeOffset);
+        readable = size >= 0 && size <= FlashList.MAX_SIZE;
         if (insufficientCapacity(size, FlashList.MAX_SIZE)) {
             setSize(0);
         } else {
@@ -142,14 +162,14 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
     private static class FlashArray extends FlashListLong {
         @Override
         public void update() {
-            update(40, 32, 16, true);
+            update(AvmUtils.ARRAY_LENGTH, AvmUtils.ARRAY_ATOMS, AvmUtils.ATOMS_FIRST, true);
         }
     }
 
     private static class FlashVector extends FlashListLong {
         @Override
         public void update() {
-            update(56, 48, 16, false);
+            update(AvmUtils.VECTOR_LENGTH, AvmUtils.VECTOR_ATOMS, AvmUtils.ATOMS_FIRST, false);
         }
     }
 
@@ -175,6 +195,7 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
 
         @Override
         public void update() {
+            setReadable(false);
             if (getAddress() == 0) return;
             long traits = readLong(16, 40);
 
@@ -197,7 +218,10 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
         private void readHashTable(long table) {
             int size = API.readInt(table, 8); // includes deleted items
             int capacity = getCapacity(API.readInt(table, 12));
-            if (capacity <= 0 || capacity > FlashMap.MAX_CAPACITY || insufficientCapacity(size, FlashMap.MAX_SIZE)) {
+            if (size == 0) {
+                setSize(0);
+                setReadable(true);
+            } else if (capacity <= 0 || capacity > FlashMap.MAX_CAPACITY || insufficientCapacity(size, FlashMap.MAX_SIZE)) {
                 setSize(0);
             } else {
                 long atomsAndFlags = API.readLong(table);
@@ -224,6 +248,7 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
                     currentSize++;
                 }
                 setSize(realSize);
+                setReadable(true);
             }
         }
     }

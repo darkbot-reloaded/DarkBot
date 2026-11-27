@@ -2,15 +2,17 @@ package com.github.manolo8.darkbot.behaviours.memory;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
-import com.github.manolo8.darkbot.core.utils.ByteUtils;
+import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
+import com.github.manolo8.darkbot.core.utils.AvmUtils;
+import eu.darkbot.util.Timer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 
 import static com.github.manolo8.darkbot.Main.API;
-import static com.github.manolo8.darkbot.behaviours.memory.AvmMemory.OBJECT_VTABLE;
 
 /**
  * Releases ships that left the map.
@@ -19,59 +21,61 @@ import static com.github.manolo8.darkbot.behaviours.memory.AvmMemory.OBJECT_VTAB
  * keep pointing to the ship, and the ship's traits point back to it as their owner. Each of these references alone
  * keeps the ship reachable.
  * <p>
- * Ships are followed through the HUD layer of ship views: its trait list holds the info trait of every ship the HUD
- * shows, and its view dictionary maps each trait to the ship's view. A followed ship counts as removed when the HUD
- * and the ship itself agree: its trait left the layer's list, and its container has been null for
- * {@link #REMOVED_CHECKS} checks in a row. Then those references are set to null.
+ * Ships are followed through the HUD layer of ship views, the one holding the hero's view. Its trait list holds the
+ * info trait of every ship the HUD shows. A followed ship counts as removed when the HUD and the ship itself agree:
+ * its trait left that list, and its container has been null for {@link #REMOVED_CHECKS} checks in a row. Then those
+ * references are set to null, each only if it still points to the ship.
+ * <p>
+ * Views whose ship already left the HUD's list but still holds it are followed too: ships removed while the cleaner
+ * was off, and the previous hero and pet, replaced after a death.
  */
 class ShipReferenceCleaner implements LeakCleaner {
 
-    private static final String SHIP_VIEW_CLASS = "ShipHUD$";
-    private static final String SCREEN_MANAGER_MAP_VIEW = "_mapView";
-    private static final String MAP_VIEW_HUD = "_hud";
-    private static final String HUD_LAYERS = "_traitClass2internalList";
-    private static final String LAYER_CONTAINER = "_container";
-    private static final String LAYER_VIEW_CLASS = "_viewClass";
-    private static final String LAYER_TRAIT_LIST = "_list";
-    private static final String LAYER_VIEWS = "_viewByData";
-    private static final String TRAIT_LIST_TRAITS = "_traits";
-    private static final String SHIP_HUD_ENTITY = "_entity";
-    private static final String SHIP_HUD_INFO = "_shipInfoDisplay";
-    private static final String SHIP_HUD_TOP = "_topDisplay";
-    private static final String DISPLAY_OWNER = "_owner";
-    private static final String INFO_TRAIT = "_trait";
-    private static final String ENTITY_ID = "_id";
-    private static final String ENTITY_CONTAINER = "_container";
-    private static final String ENTITY_TRAITS = "_traits";
-    private static final String TRAIT_OWNER = "_owner";
+    /** Screen manager -> map view -> HUD -> its display layers (Vector). */
+    private static final int SCREEN_MANAGER_MAP_VIEW = 0xD8, MAP_VIEW_HUD = 0xD8, HUD_LAYERS = 0xB8;
+    /** HUD display layer: its views by trait (Dictionary), its HUD, the class of its views, its trait container. */
+    private static final int LAYER_VIEWS = 0x20, LAYER_HUD = 0x28, LAYER_VIEW_CLASS = 0x38, LAYER_TRAITS = 0x40;
+    /** Trait container: its traits (Vector). */
+    private static final int TRAIT_CONTAINER_TRAITS = 0x30;
+    /** Ship HUD view: its ship, info display and top display. */
+    private static final int VIEW_SHIP = 0xD8, VIEW_INFO = 0xE8, VIEW_TOP = 0xF0;
+    /** Info display: its ship and the ship's info trait. Top display: its ship. */
+    private static final int INFO_SHIP = 0xE8, INFO_TRAIT = 0xF0, TOP_SHIP = 0xB0;
+    /** Map entity: its traits (Vector), id and container. Entity trait: its owner. */
+    private static final int ENTITY_TRAITS = 0x30, ENTITY_ID = 0x38, ENTITY_CONTAINER = 0x60, TRAIT_OWNER = 0x20;
 
     private static final long INTERVAL_MS = 1_000;
+    /** The views are read when a ship appears, and at least this often for those whose ship already left. */
+    private static final long VIEWS_CHECK_INTERVAL_MS = 60_000;
     private static final int REMOVED_CHECKS = 2;
-    /** Checks in a row without the ship layer while the bot sees ships, before it is reported as not found. */
-    private static final int LAYER_MISSES_REPORTED = 60;
-    /** Far above the layers of a HUD, the traits of a ship and the ships of a map. */
-    private static final int MAX_LAYERS = 64, MAX_TRAITS = 4096;
+    /** Checks in a row without the ship layer while the hero is on a map, before it is reported as not found. */
+    private static final int LAYER_MISSES_REPORTED = 300;
 
     private final Main main;
     private final BotInstaller botInstaller;
-    private final SlotResolver slots;
 
-    private final ListReader layers = new ListReader(ListReader.Layout.VECTOR, MAX_LAYERS);
-    private final ListReader layerTraits = new ListReader(ListReader.Layout.VECTOR, MAX_TRAITS);
-    private final ListReader shipTraits = new ListReader(ListReader.Layout.VECTOR, MAX_TRAITS);
-    private final DictionaryReader views = new DictionaryReader();
+    private final FlashListLong layers = FlashListLong.ofVector();
+    private final FlashListLong views = FlashListLong.ofMapValues();
+    private final FlashListLong layerTraits = FlashListLong.ofVector();
+    private final FlashListLong shipTraits = FlashListLong.ofVector();
+    private final Timer viewsCheck = Timer.get(VIEWS_CHECK_INTERVAL_MS);
     private final LongSet liveTraits = new LongOpenHashSet();
+    /**
+     * Live traits already dealt with: those of followed ships and of the hero's and pet's views. The views are read
+     * when a live trait is not among them, i.e. when a ship appeared.
+     */
+    private final LongSet knownTraits = new LongOpenHashSet();
     private final Long2ObjectMap<TrackedShip> tracked = new Long2ObjectOpenHashMap<>();
 
     private long hud, shipLayer, shipViewClass;
     private int mapId = Integer.MIN_VALUE;
     private int layerMisses;
+    private long released;
     private boolean layerMissReported;
 
-    ShipReferenceCleaner(Main main, BotInstaller botInstaller, SlotResolver slots) {
+    ShipReferenceCleaner(Main main, BotInstaller botInstaller) {
         this.main = main;
         this.botInstaller = botInstaller;
-        this.slots = slots;
     }
 
     @Override
@@ -79,25 +83,33 @@ class ShipReferenceCleaner implements LeakCleaner {
         return INTERVAL_MS;
     }
 
+    @Override
+    public long getReleased() {
+        return released;
+    }
+
+    @Override
+    public String getReleasedName() {
+        return "ships";
+    }
+
     /** Follows the ships the HUD shows and releases the removed ones. Does nothing while the HUD can't be read. */
     @Override
     public void clean() {
         if (!followShipLayer() || !readLiveTraits()) return;
-        trackNewShips();
+        knownTraits.retainAll(liveTraits);
+        if (hasUnknownTrait() || viewsCheck.tryActivate()) trackShips();
         releaseRemovedShips();
     }
 
     @Override
     public void reset() {
-        tracked.clear();
+        forgetShips();
         liveTraits.clear();
         hud = shipLayer = shipViewClass = 0;
         mapId = Integer.MIN_VALUE;
         layerMisses = 0;
-        layers.release();
-        layerTraits.release();
-        shipTraits.release();
-        views.release();
+        viewsCheck.disarm();
     }
 
     /**
@@ -107,14 +119,14 @@ class ShipReferenceCleaner implements LeakCleaner {
     private boolean followShipLayer() {
         int currentMap = main.hero.map != null ? main.hero.map.id : Integer.MIN_VALUE;
         if (currentMap != mapId) {
-            tracked.clear();
+            forgetShips();
             mapId = currentMap;
         }
 
         long currentHud = findHud();
         if (currentHud == 0) return false;
         if (currentHud != hud) {
-            tracked.clear();
+            forgetShips();
             hud = currentHud;
             shipLayer = 0;
         }
@@ -127,28 +139,37 @@ class ShipReferenceCleaner implements LeakCleaner {
         return true;
     }
 
+    private void forgetShips() {
+        tracked.clear();
+        knownTraits.clear();
+    }
+
     private long findHud() {
         Long screenManager = botInstaller.screenManagerAddress.get();
         if (screenManager == null || screenManager == 0) return 0;
-        return slots.readRequired(slots.readRequired(screenManager, SCREEN_MANAGER_MAP_VIEW), MAP_VIEW_HUD);
+        return API.readLong(screenManager, SCREEN_MANAGER_MAP_VIEW, MAP_VIEW_HUD);
     }
 
     /** Whether the layer is still the ship layer found in the current HUD. */
     private boolean isShipLayer(long layer) {
-        return layer != 0 && slots.readPointer(layer, LAYER_CONTAINER) == hud
-                && slots.readPointer(layer, LAYER_VIEW_CLASS) == shipViewClass;
+        return layer != 0 && API.readLong(layer + LAYER_HUD) == hud
+                && API.readLong(layer + LAYER_VIEW_CLASS) == shipViewClass;
     }
 
-    /** The layer of the current HUD that shows ship views, recognized by its view class rather than by index. */
+    /** The layer of the current HUD that holds the hero's view, so the ship views: 0 if none (yet). */
     private long findShipLayer() {
-        if (!layers.read(slots.readRequired(hud, HUD_LAYERS))) return 0;
-        for (int i = 0; i < layers.count(); i++) {
-            long layer = layers.get(i);
-            long viewClass = slots.readRequired(layer, LAYER_VIEW_CLASS);
-            if (viewClass == 0 || !SHIP_VIEW_CLASS.equals(ByteUtils.readObjectName(viewClass))) continue;
-            if (slots.readRequired(layer, LAYER_CONTAINER) != hud) continue;
-            shipViewClass = viewClass;
-            return layer;
+        long hero = main.hero.address;
+        if (hero == 0) return 0;
+        layers.update(API.readLong(hud + HUD_LAYERS));
+        for (int i = 0; i < layers.size(); i++) {
+            long layer = layers.getLong(i);
+            if (API.readLong(layer + LAYER_HUD) != hud) continue;
+            views.update(API.readLong(layer + LAYER_VIEWS));
+            for (int v = 0; v < views.size(); v++) {
+                if (API.readLong(views.getLong(v) + VIEW_SHIP) != hero) continue;
+                shipViewClass = API.readLong(layer + LAYER_VIEW_CLASS);
+                return layer;
+            }
         }
         return 0;
     }
@@ -156,56 +177,76 @@ class ShipReferenceCleaner implements LeakCleaner {
     /** Reads the traits of the ships the HUD shows. False if they can't be read: then no ship is released. */
     private boolean readLiveTraits() {
         liveTraits.clear();
-        long traitList = slots.readRequired(shipLayer, LAYER_TRAIT_LIST);
-        if (!layerTraits.read(slots.readRequired(traitList, TRAIT_LIST_TRAITS))) return false;
-        for (int i = 0; i < layerTraits.count(); i++) {
-            long trait = layerTraits.get(i);
+        layerTraits.update(API.readLong(shipLayer, LAYER_TRAITS, TRAIT_CONTAINER_TRAITS));
+        if (!layerTraits.isReadable()) return false;
+        for (int i = 0; i < layerTraits.size(); i++) {
+            long trait = layerTraits.getLong(i);
             if (trait != 0) liveTraits.add(trait);
         }
         return true;
     }
 
-    /** Starts following the ships shown by the HUD that are not followed yet. */
-    private void trackNewShips() {
-        if (!views.read(slots.readRequired(shipLayer, LAYER_VIEWS))) return;
-        for (int i = 0; i < views.size(); i++) {
-            long trait = views.key(i), view = views.value(i);
-            // Views of traits no longer listed belong to ships already removed: only listed ones are followed
-            if (!liveTraits.contains(trait)) continue;
-            long ship = slots.readPointer(view, SHIP_HUD_ENTITY);
-            if (ship == 0 || tracked.containsKey(ship) || isHero(ship)) continue;
+    private boolean hasUnknownTrait() {
+        for (LongIterator it = liveTraits.iterator(); it.hasNext(); )
+            if (!knownTraits.contains(it.nextLong())) return true;
+        return false;
+    }
 
-            TrackedShip t = track(ship, trait, view);
-            if (t != null) tracked.put(ship, t);
+    /**
+     * Starts following the ships of the views not followed yet: those the HUD shows, and those whose ship left it but
+     * is still held. A ship that can't be followed now is tried again the next time the views are read.
+     */
+    private void trackShips() {
+        views.update(API.readLong(shipLayer + LAYER_VIEWS));
+        if (!views.isReadable()) return;
+        for (int i = 0; i < views.size(); i++) {
+            long view = views.getLong(i);
+            long trait = API.readLong(view, VIEW_INFO, INFO_TRAIT);
+            if (knownTraits.contains(trait)) continue;
+            long ship = API.readLong(view + VIEW_SHIP);
+            if (ship == 0 || tracked.containsKey(ship)) continue;
+            boolean listed = liveTraits.contains(trait);
+            if (isHero(ship)) {
+                if (listed) knownTraits.add(trait);
+                continue;
+            }
+            TrackedShip t = track(ship, trait, view, listed);
+            if (t == null) continue;
+            tracked.put(ship, t);
+            if (listed) knownTraits.add(trait);
         }
     }
 
-    private TrackedShip track(long ship, long trait, long view) {
-        if (!slots.require(ship, ENTITY_ID, ENTITY_CONTAINER, ENTITY_TRAITS)) return null;
-        long idOffset = slots.offset(ship, ENTITY_ID);
-        long containerOffset = slots.offset(ship, ENTITY_CONTAINER);
-        long traitsOffset = slots.offset(ship, ENTITY_TRAITS);
-        // A listed ship is on the map and owns its trait. Otherwise an offset is wrong, which could make live
-        // ships look removed: such ships are never followed.
-        if (API.readAtom(ship + containerOffset) == 0 || slots.readPointer(trait, TRAIT_OWNER) != ship) return null;
-
-        return new TrackedShip(trait, view, API.readLong(view + OBJECT_VTABLE), API.readLong(ship + OBJECT_VTABLE),
-                API.readInt(ship + idOffset), idOffset, containerOffset, traitsOffset);
+    /**
+     * A ship must own the trait of its view, and be on the map while the HUD lists it or off it once it doesn't.
+     * Otherwise an offset no longer matches the client, which could make live ships look removed: such ships are
+     * never followed.
+     */
+    private TrackedShip track(long ship, long trait, long view, boolean listed) {
+        boolean onMap = API.readLong(ship + ENTITY_CONTAINER) != 0;
+        if (API.readLong(trait + TRAIT_OWNER) != ship || onMap != listed) return null;
+        return new TrackedShip(trait, view, AvmUtils.vtableOf(view), AvmUtils.vtableOf(ship),
+                API.readInt(ship + ENTITY_ID));
     }
 
+    /** Releases the followed ships the HUD no longer lists and that stayed off the map. */
     private void releaseRemovedShips() {
         ObjectIterator<Long2ObjectMap.Entry<TrackedShip>> it = tracked.long2ObjectEntrySet().iterator();
         while (it.hasNext()) {
             Long2ObjectMap.Entry<TrackedShip> entry = it.next();
-            long ship = entry.getLongKey();
             TrackedShip t = entry.getValue();
-
+            // Still listed: on the map, nothing to read
+            if (liveTraits.contains(t.trait)) {
+                t.removedChecks = 0;
+                continue;
+            }
+            long ship = entry.getLongKey();
             // Memory reused by another object
-            if (API.readLong(ship + OBJECT_VTABLE) != t.vtable || API.readInt(ship + t.idOffset) != t.id) {
+            if (AvmUtils.vtableOf(ship) != t.vtable || API.readInt(ship + ENTITY_ID) != t.id) {
                 it.remove();
                 continue;
             }
-            if (liveTraits.contains(t.trait) || API.readAtom(ship + t.containerOffset) != 0) {
+            if (API.readLong(ship + ENTITY_CONTAINER) != 0) {
                 t.removedChecks = 0;
                 continue;
             }
@@ -213,46 +254,42 @@ class ShipReferenceCleaner implements LeakCleaner {
 
             release(ship, t);
             it.remove();
+            released++;
         }
     }
 
     private void release(long ship, TrackedShip t) {
         // The view is only touched while it is still the same object that was followed
-        boolean sameView = API.readLong(t.view + OBJECT_VTABLE) == t.viewVtable;
-        if (sameView && slots.requireReference(t.view, SHIP_HUD_ENTITY)
-                && slots.readPointer(t.view, SHIP_HUD_ENTITY) == ship) {
-            long info = slots.readPointer(t.view, SHIP_HUD_INFO);
-            if (slots.requireReference(info, DISPLAY_OWNER, INFO_TRAIT)
-                    && slots.readPointer(info, DISPLAY_OWNER) == ship) {
-                long trait = slots.readPointer(info, INFO_TRAIT);
-                if (trait != 0 && slots.readPointer(trait, TRAIT_OWNER) == ship) clear(info, INFO_TRAIT, trait);
-                clear(info, DISPLAY_OWNER, ship);
+        if (AvmUtils.vtableOf(t.view) == t.viewVtable && API.readLong(t.view + VIEW_SHIP) == ship) {
+            long info = API.readLong(t.view + VIEW_INFO);
+            if (info != 0 && API.readLong(info + INFO_SHIP) == ship) {
+                long trait = API.readLong(info + INFO_TRAIT);
+                if (trait != 0 && API.readLong(trait + TRAIT_OWNER) == ship) clear(info, INFO_TRAIT, trait);
+                clear(info, INFO_SHIP, ship);
             }
-            long top = slots.readPointer(t.view, SHIP_HUD_TOP);
-            if (slots.requireReference(top, DISPLAY_OWNER)) clear(top, DISPLAY_OWNER, ship);
-            clear(t.view, SHIP_HUD_ENTITY, ship);
+            clear(API.readLong(t.view + VIEW_TOP), TOP_SHIP, ship);
+            clear(t.view, VIEW_SHIP, ship);
         }
 
-        if (!shipTraits.read(API.readAtom(ship + t.traitsOffset))) return;
-        for (int i = 0; i < shipTraits.count(); i++) clear(shipTraits.get(i), TRAIT_OWNER, ship);
+        shipTraits.update(API.readLong(ship + ENTITY_TRAITS));
+        for (int i = 0; i < shipTraits.size(); i++) clear(shipTraits.getLong(i), TRAIT_OWNER, ship);
     }
 
-    /** Sets object.field to null if it still points to the expected object. */
-    private void clear(long object, String field, long expected) {
-        long offset = slots.referenceOffset(object, field);
-        if (offset >= 0 && API.readAtom(object + offset) == expected) API.writeLong(object + offset, 0);
+    /** Sets the field of the object to null if it still holds the expected object. */
+    private static void clear(long object, int field, long expected) {
+        if (object != 0) API.replaceLong(object + field, expected, 0);
     }
 
     /**
-     * The hero and every ship the bot sees have a HUD view, so a ship layer that stays missing while there are ships
-     * means the HUD changed. Reported once.
+     * The hero always has a view in the ship layer, so a layer that stays missing while the hero is on a map means
+     * the offsets no longer match the client. Reported once.
      */
     private void reportMissingShipLayer() {
-        if (main.mapManager.entities.ships.isEmpty() && main.mapManager.entities.npcs.isEmpty()) return;
+        if (main.hero.address == 0 || main.hero.map == null) return;
         if (layerMissReported || ++layerMisses < LAYER_MISSES_REPORTED) return;
         layerMissReported = true;
-        System.out.println("Memory cleaner: no HUD layer shows " + SHIP_VIEW_CLASS +
-                " views, the client changed: ships are not released");
+        System.out.println("Memory cleaner: the HUD layer of ship views was not found, the offsets may be outdated: " +
+                "ships are not released");
     }
 
     private boolean isHero(long address) {
@@ -260,20 +297,16 @@ class ShipReferenceCleaner implements LeakCleaner {
     }
 
     private static final class TrackedShip {
-        private final long trait, view, viewVtable, vtable, idOffset, containerOffset, traitsOffset;
+        private final long trait, view, viewVtable, vtable;
         private final int id;
         private int removedChecks;
 
-        private TrackedShip(long trait, long view, long viewVtable, long vtable, int id, long idOffset,
-                            long containerOffset, long traitsOffset) {
+        private TrackedShip(long trait, long view, long viewVtable, long vtable, int id) {
             this.trait = trait;
             this.view = view;
             this.viewVtable = viewVtable;
             this.vtable = vtable;
             this.id = id;
-            this.idOffset = idOffset;
-            this.containerOffset = containerOffset;
-            this.traitsOffset = traitsOffset;
         }
     }
 }
