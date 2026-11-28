@@ -2,7 +2,6 @@ package com.github.manolo8.darkbot.core.objects.swf;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.itf.NativeUpdatable;
-import com.github.manolo8.darkbot.core.utils.AvmUtils;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.Offsets;
 import it.unimi.dsi.fastutil.longs.AbstractLongList;
@@ -162,14 +161,14 @@ public abstract class FlashListLong extends AbstractLongList implements NativeUp
     private static class FlashArray extends FlashListLong {
         @Override
         public void update() {
-            update(AvmUtils.ARRAY_LENGTH, AvmUtils.ARRAY_ATOMS, AvmUtils.ATOMS_FIRST, true);
+            update(ByteUtils.ARRAY_LENGTH, ByteUtils.ARRAY_ATOMS, ByteUtils.ATOMS_FIRST, true);
         }
     }
 
     private static class FlashVector extends FlashListLong {
         @Override
         public void update() {
-            update(AvmUtils.VECTOR_LENGTH, AvmUtils.VECTOR_ATOMS, AvmUtils.ATOMS_FIRST, false);
+            update(ByteUtils.VECTOR_LENGTH, ByteUtils.VECTOR_ATOMS, ByteUtils.ATOMS_FIRST, false);
         }
     }
 

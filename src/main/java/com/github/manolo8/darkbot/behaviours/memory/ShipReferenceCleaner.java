@@ -3,7 +3,7 @@ package com.github.manolo8.darkbot.behaviours.memory;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
-import com.github.manolo8.darkbot.core.utils.AvmUtils;
+import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.util.Timer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -225,7 +225,7 @@ class ShipReferenceCleaner implements LeakCleaner {
     private TrackedShip track(long ship, long trait, long view, boolean listed) {
         boolean onMap = API.readLong(ship + ENTITY_CONTAINER) != 0;
         if (API.readLong(trait + TRAIT_OWNER) != ship || onMap != listed) return null;
-        return new TrackedShip(trait, view, AvmUtils.vtableOf(view), AvmUtils.vtableOf(ship),
+        return new TrackedShip(trait, view, ByteUtils.readVtable(view), ByteUtils.readVtable(ship),
                 API.readInt(ship + ENTITY_ID));
     }
 
@@ -242,7 +242,7 @@ class ShipReferenceCleaner implements LeakCleaner {
             }
             long ship = entry.getLongKey();
             // Memory reused by another object
-            if (AvmUtils.vtableOf(ship) != t.vtable || API.readInt(ship + ENTITY_ID) != t.id) {
+            if (ByteUtils.readVtable(ship) != t.vtable || API.readInt(ship + ENTITY_ID) != t.id) {
                 it.remove();
                 continue;
             }
@@ -260,7 +260,7 @@ class ShipReferenceCleaner implements LeakCleaner {
 
     private void release(long ship, TrackedShip t) {
         // The view is only touched while it is still the same object that was followed
-        if (AvmUtils.vtableOf(t.view) == t.viewVtable && API.readLong(t.view + VIEW_SHIP) == ship) {
+        if (ByteUtils.readVtable(t.view) == t.viewVtable && API.readLong(t.view + VIEW_SHIP) == ship) {
             long info = API.readLong(t.view + VIEW_INFO);
             if (info != 0 && API.readLong(info + INFO_SHIP) == ship) {
                 long trait = API.readLong(info + INFO_TRAIT);

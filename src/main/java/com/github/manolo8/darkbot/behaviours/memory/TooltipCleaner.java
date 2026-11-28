@@ -1,7 +1,6 @@
 package com.github.manolo8.darkbot.behaviours.memory;
 
 import com.github.manolo8.darkbot.core.objects.facades.ItemsControlMenuMediator;
-import com.github.manolo8.darkbot.core.utils.AvmUtils;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import eu.darkbot.util.Timer;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
@@ -171,9 +170,9 @@ class TooltipCleaner implements LeakCleaner {
     }
 
     private void learnClasses(long element) {
-        elementClasses.add(AvmUtils.vtableOf(element));
+        elementClasses.add(ByteUtils.readVtable(element));
         long hook = API.readLong(element + ELEMENT_HOOK);
-        if (hook != 0 && API.readLong(hook + HOOK_TARGET) == element) hookClasses.add(AvmUtils.vtableOf(hook));
+        if (hook != 0 && API.readLong(hook + HOOK_TARGET) == element) hookClasses.add(ByteUtils.readVtable(hook));
     }
 
     /** Elements that were on the bar on the previous pass and left it: stale, found through their own hook. */
@@ -191,8 +190,8 @@ class TooltipCleaner implements LeakCleaner {
     private void readHookList(long now) {
         long list = hookList();
         if (list == 0) return;
-        long atoms = AvmUtils.arrayAtoms(list);
-        int length = AvmUtils.arrayLength(list);
+        long atoms = ByteUtils.readArrayAtoms(list);
+        int length = ByteUtils.readArrayLength(list);
         if (atoms == 0 || length <= 0) return;
         if (list != hookList) {
             hookList = list;
@@ -201,14 +200,14 @@ class TooltipCleaner implements LeakCleaner {
 
         newHooksIndex = Math.min(newHooksIndex, length);
         int end = Math.min(length, newHooksIndex + NEW_HOOKS_PER_PASS);
-        for (int i = newHooksIndex; i < end; i++) checkHook(AvmUtils.atomAt(atoms, i), now);
+        for (int i = newHooksIndex; i < end; i++) checkHook(ByteUtils.readAtom(atoms, i), now);
         int added = end - newHooksIndex;
         newHooksIndex = end;
 
         int share = Math.min(MAX_ROUND_HOOKS_PER_PASS, Math.max(ROUND_HOOKS_PER_PASS, length / ROUND_PASSES));
         for (int checked = Math.min(added + share, length); checked > 0; checked--) {
             if (roundIndex >= length) roundIndex = 0;
-            checkHook(AvmUtils.atomAt(atoms, roundIndex++), now);
+            checkHook(ByteUtils.readAtom(atoms, roundIndex++), now);
         }
     }
 
@@ -218,13 +217,13 @@ class TooltipCleaner implements LeakCleaner {
         long target = API.readLong(hook + HOOK_TARGET);
         // Released hooks have no target, and the other hooks are of objects other than bar elements
         if (target == 0 || liveElements.contains(target) || staleSince.containsKey(target)) return;
-        if (elementClasses.contains(AvmUtils.vtableOf(target))) addStale(target, hook, now);
+        if (elementClasses.contains(ByteUtils.readVtable(target))) addStale(target, hook, now);
     }
 
     /** Remembers a stale element and its hook, checked to be a tooltip hook of that element. */
     private void addStale(long element, long hook, long now) {
         if (hook == 0 || staleSince.containsKey(element)) return;
-        if (!hookClasses.contains(AvmUtils.vtableOf(hook)) || API.readLong(hook + HOOK_TARGET) != element) return;
+        if (!hookClasses.contains(ByteUtils.readVtable(hook)) || API.readLong(hook + HOOK_TARGET) != element) return;
         if (staleSince.size() >= MAX_STALE) {
             reportTooManyStale();
             return;
@@ -296,11 +295,11 @@ class TooltipCleaner implements LeakCleaner {
         if (!ByteUtils.isScriptableObjectValid(control)) return false;
         long list = API.readAtom(control + CONTROL_HOOKS);
         if (!ByteUtils.isScriptableObjectValid(list)) return false;
-        int length = AvmUtils.arrayLength(list);
-        long atoms = AvmUtils.arrayAtoms(list);
+        int length = ByteUtils.readArrayLength(list);
+        long atoms = ByteUtils.readArrayAtoms(list);
         if (length <= 0 || atoms == 0) return false;
         for (int i = Math.max(0, length - RECENT_HOOKS); i < length; i++)
-            if (AvmUtils.atomAt(atoms, i) == hook) return true;
+            if (ByteUtils.readAtom(atoms, i) == hook) return true;
         return false;
     }
 
