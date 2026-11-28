@@ -20,6 +20,7 @@ import com.github.manolo8.darkbot.core.objects.facades.GalaxyBuilderProxy;
 import com.github.manolo8.darkbot.core.objects.facades.GauntletPlutusProxy;
 import com.github.manolo8.darkbot.core.objects.facades.HighlightProxy;
 import com.github.manolo8.darkbot.core.objects.facades.InventoryProxy;
+import com.github.manolo8.darkbot.core.objects.facades.ItemsControlMenuMediator;
 import com.github.manolo8.darkbot.core.objects.facades.LogMediator;
 import com.github.manolo8.darkbot.core.objects.facades.NpcEventProxy;
 import com.github.manolo8.darkbot.core.objects.facades.QuestProxy;
@@ -65,6 +66,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
     public final WorldBossOverviewProxy worldBossOverview;
     public final Updatable group;
     public final Updatable groupMediator;
+    public final ItemsControlMenuMediator itemsControlMediator;
     public final ShipWarpProxy shipWarpProxy;
 
     private final Map<EventType, NpcEventProxy> npcEvents = new HashMap<>();
@@ -90,6 +92,7 @@ public class FacadeManager implements Manager, eu.darkbot.api.API.Singleton, Npc
         this.worldBossOverview = registerProxy("worldBoss_overview",  WorldBossOverviewProxy.class);
         this.group          = registerProxy("GroupProxy",             Updatable.NoOp.class);
         this.groupMediator  = registerMediator("GroupSystemMediator", Updatable.NoOp.class);
+        this.itemsControlMediator = registerMediator("ItemsControlMenuMediator", ItemsControlMenuMediator.class);
         this.shipWarpProxy  = registerProxy("ship_warp",              ShipWarpProxy.class);
 
         registerProxy("dispatch", DispatchProxy.class);
